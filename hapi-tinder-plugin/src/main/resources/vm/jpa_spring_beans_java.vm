@@ -71,15 +71,20 @@ public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jp
 #else
 		IFhirResourceDao<${resourcePackage}.${res.declaringClassNameComplete}>
 #end
-		 dao${res.declaringClassNameComplete}${versionCapitalized}() {
+		dao${res.declaringClassNameComplete}${versionCapitalized}() {
+
 #if ( ${versionCapitalized} == 'Dstu3' && ${res.name} == 'ConceptMap' )
-		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
+		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal;
+		retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
 #elseif ( ${versionCapitalized.startsWith('R')} && ${res.name} == 'ConceptMap' )
-		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
+		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal;
+		retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
 #elseif ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'SearchParameter' || ${res.name} == 'CodeSystem'  || ${res.name} == 'MessageHeader' || ${res.name} == 'Composition' || ${res.name} == 'StructureDefinition')
-		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
+    	ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal;
+		retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
 #else
-		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${versionCapitalized}<${resourcePackage}.${res.declaringClassNameComplete}> retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${versionCapitalized}<${resourcePackage}.${res.declaringClassNameComplete}>();
+		ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao<${resourcePackage}.${res.declaringClassNameComplete}> retVal;
+		retVal = new ca.uhn.fhir.jpa.dao.JpaResourceDao<${resourcePackage}.${res.declaringClassNameComplete}>();
 #end
 		retVal.setResourceType(${resourcePackage}.${res.declaringClassNameComplete}.class);
 		retVal.setContext(fhirContext${versionCapitalized}());

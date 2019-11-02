@@ -36,7 +36,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
 
-public class FhirResourceDaoEncounterDstu2 extends FhirResourceDaoDstu2<Encounter>implements IFhirResourceDaoEncounter<Encounter> {
+public class FhirResourceDaoEncounterDstu2 extends BaseHapiFhirResourceDao<Encounter>implements IFhirResourceDaoEncounter<Encounter> {
 
 	@Override
 	public IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort) {

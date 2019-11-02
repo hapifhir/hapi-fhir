@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -39,7 +40,7 @@ import org.hl7.fhir.r5.model.Patient;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 
-public class FhirResourceDaoPatientR5 extends FhirResourceDaoR5<Patient> implements IFhirResourceDaoPatient<Patient> {
+public class FhirResourceDaoPatientR5 extends BaseHapiFhirResourceDao<Patient> implements IFhirResourceDaoPatient<Patient> {
 
 	private IBundleProvider doEverythingOperation(IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequest) {
 		SearchParameterMap paramMap = new SearchParameterMap();

@@ -26,22 +26,21 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchingStrategy;
+import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.codesystems.SubscriptionStatus;
-import org.hl7.fhir.r5.model.Subscription;
+import org.hl7.fhir.r5.model.Coding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +50,7 @@ import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
 @Service
-public class SubscriptionCanonicalizer<S extends IBaseResource> {
+public class SubscriptionCanonicalizer {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionCanonicalizer.class);
 
 	final FhirContext myFhirContext;
@@ -61,7 +60,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		myFhirContext = theFhirContext;
 	}
 
-	public CanonicalSubscription canonicalize(S theSubscription) {
+	public CanonicalSubscription canonicalize(IBaseResource theSubscription) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU2:
 				return canonicalizeDstu2(theSubscription);
@@ -84,7 +83,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		try {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus()));
-			retVal.setChannelType(CanonicalSubscriptionChannelType.fromCode(subscription.getChannel().getType()));
+			retVal.setChannelType(getChannelType(theSubscription));
 			retVal.setCriteriaString(subscription.getCriteria());
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
 			retVal.setHeaders(subscription.getChannel().getHeader());
@@ -102,8 +101,11 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		try {
-			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus().toCode()));
-			retVal.setChannelType(CanonicalSubscriptionChannelType.fromCode(subscription.getChannel().getType().toCode()));
+			org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus status = subscription.getStatus();
+			if (status != null) {
+				retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(status.toCode()));
+			}
+			retVal.setChannelType(getChannelType(theSubscription));
 			retVal.setCriteriaString(subscription.getCriteria());
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
 			retVal.setHeaders(subscription.getChannel().getHeader());
@@ -199,7 +201,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		retVal.setStatus(subscription.getStatus());
-		retVal.setChannelType(CanonicalSubscriptionChannelType.fromCode(subscription.getChannel().getType().toCode()));
+		retVal.setChannelType(getChannelType(theSubscription));
 		retVal.setCriteriaString(subscription.getCriteria());
 		retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
 		retVal.setHeaders(subscription.getChannel().getHeader());
@@ -248,14 +250,17 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
-		retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus().toCode()));
-		retVal.setChannelType(CanonicalSubscriptionChannelType.fromCode(subscription.getChannel().getType().toCode()));
-		retVal.setCriteriaString(subscription.getCriteria());
+		org.hl7.fhir.r5.model.Subscription.SubscriptionStatus status = subscription.getStatus();
+		if (status != null) {
+			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(status.toCode()));
+		}
+		retVal.setChannelType(getChannelType(subscription));
+		retVal.setCriteriaString(getCriteria(theSubscription));
 		retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
 		retVal.setHeaders(subscription.getChannel().getHeader());
 		retVal.setChannelExtensions(extractExtension(subscription));
 		retVal.setIdElement(subscription.getIdElement());
-		retVal.setPayloadString(subscription.getChannel().getPayload());
+		retVal.setPayloadString(subscription.getChannel().getPayload().getContentType());
 
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			String from;
@@ -294,26 +299,89 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		return retVal;
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
+	public CanonicalSubscriptionChannelType getChannelType(IBaseResource theSubscription) {
+		CanonicalSubscriptionChannelType retVal = null;
+
+		switch (myFhirContext.getVersion().getVersion()) {
+			case DSTU2: {
+				String channelTypeCode = ((ca.uhn.fhir.model.dstu2.resource.Subscription) theSubscription).getChannel().getType();
+				retVal = CanonicalSubscriptionChannelType.fromCode(null, channelTypeCode);
+				break;
+			}
+			case DSTU3: {
+				org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType type = ((org.hl7.fhir.dstu3.model.Subscription) theSubscription).getChannel().getType();
+				if (type != null) {
+					String channelTypeCode = type.toCode();
+					retVal = CanonicalSubscriptionChannelType.fromCode(null, channelTypeCode);
+				}
+				break;
+			}
+			case R4: {
+				org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType type = ((org.hl7.fhir.r4.model.Subscription) theSubscription).getChannel().getType();
+				if (type != null) {
+					String channelTypeCode = type.toCode();
+					retVal = CanonicalSubscriptionChannelType.fromCode(null, channelTypeCode);
+				}
+				break;
+			}
+			case R5: {
+				for (Coding nextTypeCode : ((org.hl7.fhir.r5.model.Subscription) theSubscription).getChannel().getType().getCoding()) {
+					CanonicalSubscriptionChannelType code = CanonicalSubscriptionChannelType.fromCode(nextTypeCode.getSystem(), nextTypeCode.getCode());
+					if (code != null) {
+						retVal = code;
+					}
+				}
+				break;
+			}
+		}
+
+		return retVal;
+	}
+
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	public String getCriteria(IBaseResource theSubscription) {
+		String retVal = null;
+
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU2:
-				return ((ca.uhn.fhir.model.dstu2.resource.Subscription) theSubscription).getCriteria();
+				retVal = ((Subscription) theSubscription).getCriteria();
+				break;
 			case DSTU3:
-				return ((org.hl7.fhir.dstu3.model.Subscription) theSubscription).getCriteria();
+				retVal = ((org.hl7.fhir.dstu3.model.Subscription) theSubscription).getCriteria();
+				break;
 			case R4:
-				return ((org.hl7.fhir.r4.model.Subscription) theSubscription).getCriteria();
+				retVal = ((org.hl7.fhir.r4.model.Subscription) theSubscription).getCriteria();
+				break;
 			case R5:
-				return ((org.hl7.fhir.r5.model.Subscription) theSubscription).getCriteria();
-			case DSTU2_1:
-			case DSTU2_HL7ORG:
-			default:
-				throw new ConfigurationException("Subscription not supported for version: " + myFhirContext.getVersion().getVersion());
+				org.hl7.fhir.r5.model.Topic topic = (org.hl7.fhir.r5.model.Topic) ((org.hl7.fhir.r5.model.Subscription) theSubscription).getTopic().getResource();
+				Validate.notNull(topic);
+				retVal = topic.getResourceTrigger().getQueryCriteria().getCurrent();
+				break;
 		}
+
+		return retVal;
 	}
 
 
-	public void setMatchingStrategyTag(IBaseResource theSubscription, SubscriptionMatchingStrategy theStrategy) {
+	public void setMatchingStrategyTag(@Nonnull IBaseResource theSubscription, @Nullable SubscriptionMatchingStrategy theStrategy) {
 		IBaseMetaType meta = theSubscription.getMeta();
+
+		// Remove any existing strategy tag
+		meta
+			.getTag()
+			.stream()
+			.filter(t->JpaConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY.equals(t.getSystem()))
+			.forEach(t->{
+				t.setCode(null);
+				t.setSystem(null);
+				t.setDisplay(null);
+			});
+
+		if (theStrategy == null) {
+			return;
+		}
+
 		String value = theStrategy.toString();
 		String display;
 

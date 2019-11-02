@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoEncounter;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -35,7 +36,7 @@ import org.hl7.fhir.r5.model.Encounter;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 
-public class FhirResourceDaoEncounterR5 extends FhirResourceDaoR5<Encounter> implements IFhirResourceDaoEncounter<Encounter> {
+public class FhirResourceDaoEncounterR5 extends BaseHapiFhirResourceDao<Encounter> implements IFhirResourceDaoEncounter<Encounter> {
 
 	@Override
 	public IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort) {

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  */
 
 import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -53,7 +54,7 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
+public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
 
 	@Autowired
 	private ITermReadSvc myHapiTerminologySvc;
@@ -61,12 +62,16 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 	@Autowired
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 
-	@Autowired
-	@Qualifier("myJpaValidationSupportChainR5")
 	private IValidationSupport myValidationSupport;
 
 	@Autowired
 	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+
+	@Override
+	public void start() {
+		super.start();
+		myValidationSupport = getApplicationContext().getBean(org.hl7.fhir.r5.hapi.ctx.IValidationSupport.class,"myJpaValidationSupportChainR5" );
+	}
 
 	@Override
 	public ValueSet expand(IIdType theId, String theFilter, RequestDetails theRequestDetails) {

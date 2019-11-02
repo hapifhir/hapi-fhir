@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.dstu2;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.FhirResourceDaoDstu2;
+import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3Test;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -357,23 +357,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals(org.hl7.fhir.dstu2.model.OperationOutcome.IssueSeverity.WARNING.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_WARN);
 		assertEquals(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.WARNING.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_WARN);
 		assertEquals(ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum.WARNING.getCode(), BaseHapiFhirResourceDao.OO_SEVERITY_WARN);
-	}
-
-	@Test
-	public void testCreateOperationOutcomeError() {
-		FhirResourceDaoDstu2<Bundle> dao = new FhirResourceDaoDstu2<Bundle>();
-		OperationOutcome oo = (OperationOutcome) dao.createErrorOperationOutcome("my message", "incomplete");
-		assertEquals(IssueSeverityEnum.ERROR.getCode(), oo.getIssue().get(0).getSeverity());
-		assertEquals("my message", oo.getIssue().get(0).getDiagnostics());
-		assertEquals(IssueTypeEnum.INCOMPLETE_RESULTS, oo.getIssue().get(0).getCodeElement().getValueAsEnum());
-	}
-
-	@Test
-	public void testCreateOperationOutcomeInfo() {
-		FhirResourceDaoDstu2<Bundle> dao = new FhirResourceDaoDstu2<Bundle>();
-		OperationOutcome oo = (OperationOutcome) dao.createInfoOperationOutcome("my message");
-		assertEquals(IssueSeverityEnum.INFORMATION.getCode(), oo.getIssue().get(0).getSeverity());
-		assertEquals("my message", oo.getIssue().get(0).getDiagnostics());
 	}
 
 	@Test

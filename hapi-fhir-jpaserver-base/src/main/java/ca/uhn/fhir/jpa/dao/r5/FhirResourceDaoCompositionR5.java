@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoComposition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -35,7 +36,7 @@ import org.hl7.fhir.r5.model.Composition;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 
-public class FhirResourceDaoCompositionR5 extends FhirResourceDaoR5<Composition> implements IFhirResourceDaoComposition<Composition> {
+public class FhirResourceDaoCompositionR5 extends BaseHapiFhirResourceDao<Composition> implements IFhirResourceDaoComposition<Composition> {
 
 	@Override
 	public IBundleProvider getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {

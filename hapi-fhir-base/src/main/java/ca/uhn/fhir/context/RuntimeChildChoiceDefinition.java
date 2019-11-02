@@ -93,8 +93,6 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			boolean nonPreferred = false;
 			if (IBaseResource.class.isAssignableFrom(next)) {
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
-				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
-				types.add((Class<? extends IBaseResource>) next);
 				nextDef = findResourceReferenceDefinition(theClassToElementDefinitions);
 
 				myNameToChildDefinition.put(getElementName() + "Reference", nextDef);

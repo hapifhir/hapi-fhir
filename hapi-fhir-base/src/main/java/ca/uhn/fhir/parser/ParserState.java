@@ -79,19 +79,19 @@ class ParserState<T> {
 		}
 	}
 
-	public boolean elementIsRepeating(String theChildName) {
+	boolean elementIsRepeating(String theChildName) {
 		return myState.elementIsRepeating(theChildName);
 	}
 
-	public void endingElement() throws DataFormatException {
+	void endingElement() throws DataFormatException {
 		myState.endingElement();
 	}
 
-	public void enteringNewElement(String theNamespaceUri, String theName) throws DataFormatException {
+	void enteringNewElement(String theNamespaceUri, String theName) throws DataFormatException {
 		myState.enteringNewElement(theNamespaceUri, theName);
 	}
 
-	public void enteringNewElementExtension(StartElement theElem, String theUrlAttr, boolean theIsModifier, final String baseServerUrl) {
+	void enteringNewElementExtension(StartElement theElem, String theUrlAttr, boolean theIsModifier, final String baseServerUrl) {
 		myState.enteringNewElementExtension(theElem, theUrlAttr, theIsModifier, baseServerUrl);
 	}
 
@@ -99,7 +99,7 @@ class ParserState<T> {
 		return myObject;
 	}
 
-	public boolean isPreResource() {
+	boolean isPreResource() {
 		return myState.isPreResource();
 	}
 
@@ -135,18 +135,11 @@ class ParserState<T> {
 		myState.string(theData);
 	}
 
-	public boolean verifyNamespace(String theExpect, String theActual) {
-		if (myJsonMode) {
-			return true;
-		}
-		return StringUtils.equals(theExpect, theActual);
-	}
-
 	/**
 	 * Invoked after any new XML event is individually processed, containing a copy of the XML event. This is basically
 	 * intended for embedded XHTML content
 	 */
-	public void xmlEvent(XMLEvent theNextEvent) {
+	void xmlEvent(XMLEvent theNextEvent) {
 		if (myState != null) {
 			myState.xmlEvent(theNextEvent);
 		}
@@ -157,7 +150,7 @@ class ParserState<T> {
 		private PreResourceState myPreResourceState;
 		private BaseState myStack;
 
-		public BaseState(PreResourceState thePreResourceState) {
+		BaseState(PreResourceState thePreResourceState) {
 			super();
 			myPreResourceState = thePreResourceState;
 		}
@@ -223,7 +216,7 @@ class ParserState<T> {
 			return null;
 		}
 
-		public PreResourceState getPreResourceState() {
+		PreResourceState getPreResourceState() {
 			return myPreResourceState;
 		}
 
@@ -231,7 +224,7 @@ class ParserState<T> {
 			return false;
 		}
 
-		protected void logAndSwallowUnexpectedElement(String theLocalPart) {
+		void logAndSwallowUnexpectedElement(String theLocalPart) {
 			myErrorHandler.unknownElement(null, theLocalPart);
 			push(new SwallowChildrenWholeState(getPreResourceState()));
 		}
@@ -340,6 +333,7 @@ class ParserState<T> {
 
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private class DeclaredExtensionState extends BaseState {
 
 		private IBase myChildInstance;
@@ -431,10 +425,10 @@ class ParserState<T> {
 
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
 		private IBase myInstance;
-		private Set<String> myParsedNonRepeatableNames = new HashSet<String>();
+		private Set<String> myParsedNonRepeatableNames = new HashSet<>();
 		private String myElementName;
 
-		public ElementCompositeState(PreResourceState thePreResourceState, String theElementName, BaseRuntimeElementCompositeDefinition<?> theDef, IBase theInstance) {
+		ElementCompositeState(PreResourceState thePreResourceState, String theElementName, BaseRuntimeElementCompositeDefinition<?> theDef, IBase theInstance) {
 			super(thePreResourceState);
 			myDefinition = theDef;
 			myInstance = theInstance;
@@ -448,11 +442,7 @@ class ParserState<T> {
 					((IIdentifiableElement) myInstance).setElementSpecificId((theValue));
 				} else if (myInstance instanceof IBaseElement) {
 					((IBaseElement) myInstance).setId(theValue);
-				} else if (myInstance instanceof IBaseResource) {
-					new IdDt(theValue).applyTo((IBaseResource) myInstance);
 				}
-			} else if ("url".equals(theName) && myInstance instanceof ExtensionDt) {
-				((ExtensionDt) myInstance).setUrl(theValue);
 			} else {
 				if (myJsonMode) {
 					myErrorHandler.incorrectJsonType(null, myElementName, ValueType.OBJECT, null, ValueType.SCALAR, ScalarType.STRING);
@@ -553,12 +543,9 @@ class ParserState<T> {
 				}
 				case CONTAINED_RESOURCES: {
 					List<? extends IBase> values = child.getAccessor().getValues(myInstance);
-					Object newDt;
 					if (values == null || values.isEmpty() || values.get(0) == null) {
-						newDt = newContainedDt((IResource) getPreResourceState().myInstance);
+						Object newDt = newContainedDt((IResource) getPreResourceState().myInstance);
 						child.getMutator().addValue(myInstance, (IBase) newDt);
-					} else {
-						newDt = values.get(0);
 					}
 					ContainedResourcesStateHapi state = new ContainedResourcesStateHapi(getPreResourceState());
 					push(state);
@@ -611,7 +598,7 @@ class ParserState<T> {
 
 		private IBaseElement myElement;
 
-		public ElementIdState(ParserState<T>.PreResourceState thePreResourceState, IBaseElement theElement) {
+		ElementIdState(ParserState<T>.PreResourceState thePreResourceState, IBaseElement theElement) {
 			super(thePreResourceState);
 			myElement = theElement;
 		}
@@ -632,7 +619,7 @@ class ParserState<T> {
 
 		private IBaseExtension<?, ?> myExtension;
 
-		public ExtensionState(PreResourceState thePreResourceState, IBaseExtension<?, ?> theExtension) {
+		ExtensionState(PreResourceState thePreResourceState, IBaseExtension<?, ?> theExtension) {
 			super(thePreResourceState);
 			myExtension = theExtension;
 		}
@@ -712,7 +699,6 @@ class ParserState<T> {
 			// We hit an invalid type for the extension
 			myErrorHandler.unknownElement(null, theLocalPart);
 			push(new SwallowChildrenWholeState(getPreResourceState()));
-			return;
 		}
 
 		@Override
@@ -758,50 +744,55 @@ class ParserState<T> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
-			if (theLocalPart.equals("versionId")) {
-				push(new MetaVersionElementState(getPreResourceState(), myMap));
-				// } else if (theLocalPart.equals("profile")) {
-				//
-			} else if (theLocalPart.equals("lastUpdated")) {
-				InstantDt updated = new InstantDt();
-				push(new PrimitiveState(getPreResourceState(), updated));
-				myMap.put(ResourceMetadataKeyEnum.UPDATED, updated);
-			} else if (theLocalPart.equals("security")) {
-				@SuppressWarnings("unchecked")
-				List<IBase> securityLabels = (List<IBase>) myMap.get(ResourceMetadataKeyEnum.SECURITY_LABELS);
-				if (securityLabels == null) {
-					securityLabels = new ArrayList<>();
-					myMap.put(ResourceMetadataKeyEnum.SECURITY_LABELS, securityLabels);
-				}
-				IBase securityLabel = myContext.getVersion().newCodingDt();
-				BaseRuntimeElementCompositeDefinition<?> codinfDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(securityLabel.getClass());
-				push(new SecurityLabelElementStateHapi(getPreResourceState(), codinfDef, securityLabel));
-				securityLabels.add(securityLabel);
-			} else if (theLocalPart.equals("profile")) {
-				@SuppressWarnings("unchecked")
-				List<IdDt> profiles = (List<IdDt>) myMap.get(ResourceMetadataKeyEnum.PROFILES);
-				List<IdDt> newProfiles;
-				if (profiles != null) {
-					newProfiles = new ArrayList<IdDt>(profiles.size() + 1);
-					newProfiles.addAll(profiles);
-				} else {
-					newProfiles = new ArrayList<IdDt>(1);
-				}
-				IdDt profile = new IdDt();
-				push(new PrimitiveState(getPreResourceState(), profile));
-				newProfiles.add(profile);
-				myMap.put(ResourceMetadataKeyEnum.PROFILES, Collections.unmodifiableList(newProfiles));
-			} else if (theLocalPart.equals("tag")) {
-				TagList tagList = (TagList) myMap.get(ResourceMetadataKeyEnum.TAG_LIST);
-				if (tagList == null) {
-					tagList = new TagList();
-					myMap.put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
-				}
-				push(new TagState(tagList));
-			} else {
-				myErrorHandler.unknownElement(null, theLocalPart);
-				push(new SwallowChildrenWholeState(getPreResourceState()));
-				return;
+			switch (theLocalPart) {
+				case "versionId":
+					push(new MetaVersionElementState(getPreResourceState(), myMap));
+					// } else if (theLocalPart.equals("profile")) {
+					//
+					break;
+				case "lastUpdated":
+					InstantDt updated = new InstantDt();
+					push(new PrimitiveState(getPreResourceState(), updated));
+					myMap.put(ResourceMetadataKeyEnum.UPDATED, updated);
+					break;
+				case "security":
+					@SuppressWarnings("unchecked")
+					List<IBase> securityLabels = (List<IBase>) myMap.get(ResourceMetadataKeyEnum.SECURITY_LABELS);
+					if (securityLabels == null) {
+						securityLabels = new ArrayList<>();
+						myMap.put(ResourceMetadataKeyEnum.SECURITY_LABELS, securityLabels);
+					}
+					IBase securityLabel = myContext.getVersion().newCodingDt();
+					BaseRuntimeElementCompositeDefinition<?> codinfDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(securityLabel.getClass());
+					push(new SecurityLabelElementStateHapi(getPreResourceState(), codinfDef, securityLabel));
+					securityLabels.add(securityLabel);
+					break;
+				case "profile":
+					@SuppressWarnings("unchecked")
+					List<IdDt> profiles = (List<IdDt>) myMap.get(ResourceMetadataKeyEnum.PROFILES);
+					List<IdDt> newProfiles;
+					if (profiles != null) {
+						newProfiles = new ArrayList<>(profiles.size() + 1);
+						newProfiles.addAll(profiles);
+					} else {
+						newProfiles = new ArrayList<>(1);
+					}
+					IdDt profile = new IdDt();
+					push(new PrimitiveState(getPreResourceState(), profile));
+					newProfiles.add(profile);
+					myMap.put(ResourceMetadataKeyEnum.PROFILES, Collections.unmodifiableList(newProfiles));
+					break;
+				case "tag":
+					TagList tagList = (TagList) myMap.get(ResourceMetadataKeyEnum.TAG_LIST);
+					if (tagList == null) {
+						tagList = new TagList();
+						myMap.put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
+					}
+					push(new TagState(tagList));
+					break;
+				default:
+					myErrorHandler.unknownElement(null, theLocalPart);
+					push(new SwallowChildrenWholeState(getPreResourceState()));
 			}
 		}
 
@@ -830,7 +821,7 @@ class ParserState<T> {
 
 		private ResourceMetadataMap myMap;
 
-		public MetaVersionElementState(ParserState<T>.PreResourceState thePreResourceState, ResourceMetadataMap theMap) {
+		MetaVersionElementState(ParserState<T>.PreResourceState thePreResourceState, ResourceMetadataMap theMap) {
 			super(thePreResourceState);
 			myMap = theMap;
 		}
@@ -849,7 +840,6 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
 			myErrorHandler.unknownElement(null, theLocalPart);
 			push(new SwallowChildrenWholeState(getPreResourceState()));
-			return;
 		}
 
 	}
@@ -859,13 +849,12 @@ class ParserState<T> {
 		private Map<String, IBaseResource> myContainedResources;
 		private IBaseResource myInstance;
 		private FhirVersionEnum myParentVersion;
-		private boolean myRequireResourceType = true;
 		private Class<? extends IBaseResource> myResourceType;
 
-		public PreResourceState(Class<? extends IBaseResource> theResourceType) {
+		PreResourceState(Class<? extends IBaseResource> theResourceType) {
 			super(null);
 			myResourceType = theResourceType;
-			myContainedResources = new HashMap<String, IBaseResource>();
+			myContainedResources = new HashMap<>();
 			if (theResourceType != null) {
 				myParentVersion = myContext.getResourceDefinition(theResourceType).getStructureVersion();
 			} else {
@@ -873,7 +862,7 @@ class ParserState<T> {
 			}
 		}
 
-		public PreResourceState(PreResourceState thePreResourcesState, FhirVersionEnum theParentVersion) {
+		PreResourceState(PreResourceState thePreResourcesState, FhirVersionEnum theParentVersion) {
 			super(thePreResourcesState);
 			Validate.notNull(theParentVersion);
 			myParentVersion = theParentVersion;
@@ -888,7 +877,7 @@ class ParserState<T> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
-			BaseRuntimeElementDefinition<?> definition;
+			RuntimeResourceDefinition definition;
 			if (myResourceType == null) {
 				definition = null;
 				if (myParser.getPreferTypes() != null) {
@@ -908,17 +897,11 @@ class ParserState<T> {
 			} else {
 				definition = myContext.getResourceDefinition(myResourceType);
 				if (!StringUtils.equals(theLocalPart, definition.getName())) {
-					if (myRequireResourceType) {
-						throw new DataFormatException(myContext.getLocalizer().getMessage(ParserState.class, "wrongResourceTypeFound", definition.getName(), theLocalPart));
-					}
-					definition = myContext.getResourceDefinition(theLocalPart);
-					if (!(definition instanceof RuntimeResourceDefinition)) {
-						throw new DataFormatException("Element '" + theLocalPart + "' is not a resource, expected a resource at this position");
-					}
+					throw new DataFormatException(myContext.getLocalizer().getMessage(ParserState.class, "wrongResourceTypeFound", definition.getName(), theLocalPart));
 				}
 			}
 
-			RuntimeResourceDefinition def = (RuntimeResourceDefinition) definition;
+			RuntimeResourceDefinition def = definition;
 			if (!definition.getName().equals(theLocalPart) && definition.getName().equalsIgnoreCase(theLocalPart)) {
 				throw new DataFormatException("Unknown resource type '" + theLocalPart + "': Resource names are case sensitive, found similar name: '" + definition.getName() + "'");
 			}
@@ -971,7 +954,7 @@ class ParserState<T> {
 
 				if (wantedProfileType != null && !wantedProfileType.equals(myInstance.getClass())) {
 					if (myResourceType == null || myResourceType.isAssignableFrom(wantedProfileType)) {
-						ourLog.debug("Converting resource of type {} to type defined for profile \"{}\": {}", new Object[]{myInstance.getClass().getName(), usedProfile, wantedProfileType});
+						ourLog.debug("Converting resource of type {} to type defined for profile \"{}\": {}", myInstance.getClass().getName(), usedProfile, wantedProfileType);
 
 						/*
 						 * This isn't the most efficient thing really.. If we want a specific
@@ -998,7 +981,7 @@ class ParserState<T> {
 
 				FhirTerser t = myContext.newTerser();
 
-				Map<String, IBaseResource> idToResource = new HashMap<String, IBaseResource>();
+				Map<String, IBaseResource> idToResource = new HashMap<>();
 				List<IBase> entries = t.getValues(myInstance, "Bundle.entry", IBase.class);
 				for (IBase nextEntry : entries) {
 					IPrimitiveType<?> fullUrl = t.getSingleValueOrNull(nextEntry, "fullUrl", IPrimitiveType.class);
@@ -1051,7 +1034,7 @@ class ParserState<T> {
 			}
 		}
 
-		protected void weaveContainedResources() {
+		void weaveContainedResources() {
 			FhirTerser terser = myContext.newTerser();
 			terser.visit(myInstance, new IModelVisitor() {
 
@@ -1103,12 +1086,12 @@ class ParserState<T> {
 		private IBase myTarget;
 
 
-		public PreResourceStateHapi(Class<? extends IBaseResource> theResourceType) {
+		PreResourceStateHapi(Class<? extends IBaseResource> theResourceType) {
 			super(theResourceType);
 			assert theResourceType == null || IResource.class.isAssignableFrom(theResourceType);
 		}
 
-		public PreResourceStateHapi(IBase theTarget, IMutator theMutator, Class<? extends IBaseResource> theResourceType) {
+		PreResourceStateHapi(IBase theTarget, IMutator theMutator, Class<? extends IBaseResource> theResourceType) {
 			super(theResourceType);
 			myTarget = theTarget;
 			myMutator = theMutator;
@@ -1160,11 +1143,11 @@ class ParserState<T> {
 		private IMutator myMutator;
 		private IBase myTarget;
 
-		public PreResourceStateHl7Org(Class<? extends IBaseResource> theResourceType) {
+		PreResourceStateHl7Org(Class<? extends IBaseResource> theResourceType) {
 			super(theResourceType);
 		}
 
-		public PreResourceStateHl7Org(IBase theTarget, IMutator theMutator, Class<? extends IBaseResource> theResourceType) {
+		PreResourceStateHl7Org(IBase theTarget, IMutator theMutator, Class<? extends IBaseResource> theResourceType) {
 			super(theResourceType);
 			myMutator = theMutator;
 			myTarget = theTarget;
@@ -1202,7 +1185,7 @@ class ParserState<T> {
 
 		private TagList myTagList;
 
-		public PreTagListState() {
+		PreTagListState() {
 			super(null);
 			myTagList = new TagList();
 		}
@@ -1236,7 +1219,7 @@ class ParserState<T> {
 	private class PrimitiveState extends BaseState {
 		private IPrimitiveType<?> myInstance;
 
-		public PrimitiveState(PreResourceState thePreResourceState, IPrimitiveType<?> theInstance) {
+		PrimitiveState(PreResourceState thePreResourceState, IPrimitiveType<?> theInstance) {
 			super(thePreResourceState);
 			myInstance = theInstance;
 		}
@@ -1264,7 +1247,7 @@ class ParserState<T> {
 					myErrorHandler.unknownAttribute(null, theName);
 				}
 			} else {
-				myErrorHandler.unknownAttribute(null, theName);
+				super.attributeValue(theName, theValue);
 			}
 		}
 
@@ -1286,9 +1269,8 @@ class ParserState<T> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
-			myErrorHandler.unknownElement(null, theLocalPart);
+			super.enteringNewElement(theNamespaceUri, theLocalPart);
 			push(new SwallowChildrenWholeState(getPreResourceState()));
-			return;
 		}
 
 		@Override
@@ -1321,7 +1303,7 @@ class ParserState<T> {
 
 	private class ResourceStateHl7Org extends ElementCompositeState {
 
-		public ResourceStateHl7Org(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBaseResource theInstance) {
+		ResourceStateHl7Org(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBaseResource theInstance) {
 			super(thePreResourceState, theDef.getName(), theDef, theInstance);
 		}
 
@@ -1329,7 +1311,7 @@ class ParserState<T> {
 
 	private class SecurityLabelElementStateHapi extends ElementCompositeState {
 
-		public SecurityLabelElementStateHapi(ParserState<T>.PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBase codingDt) {
+		SecurityLabelElementStateHapi(ParserState<T>.PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBase codingDt) {
 			super(thePreResourceState, theDef.getName(), theDef, codingDt);
 		}
 
@@ -1344,7 +1326,7 @@ class ParserState<T> {
 
 		private int myDepth;
 
-		public SwallowChildrenWholeState(PreResourceState thePreResourceState) {
+		SwallowChildrenWholeState(PreResourceState thePreResourceState) {
 			super(thePreResourceState);
 		}
 

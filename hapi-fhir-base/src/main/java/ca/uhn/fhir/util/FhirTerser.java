@@ -475,11 +475,10 @@ public class FhirTerser {
 	 * @param thePath     The path for the element to be accessed.
 	 * @return A list of values of type {@link Object}.
 	 */
-	public List<Object> getValues(IBaseResource theResource, String thePath) {
+	public List<IBase> getValues(IBaseResource theResource, String thePath) {
 		Class<IBase> wantedClass = IBase.class;
 
-		List values = getValues(theResource, thePath, wantedClass);
-		return values;
+		return getValues(theResource, thePath, wantedClass);
 	}
 
 	/**
@@ -491,11 +490,10 @@ public class FhirTerser {
 	 * @param theCreate   When set to <code>true</code>, the terser will create a null-valued element where none exists.
 	 * @return A list of values of type {@link Object}.
 	 */
-	public List<Object> getValues(IBaseResource theResource, String thePath, boolean theCreate) {
+	public List<IBase> getValues(IBaseResource theResource, String thePath, boolean theCreate) {
 		Class<IBase> wantedClass = IBase.class;
 
-		List retVal = getValues(theResource, thePath, wantedClass, theCreate);
-		return retVal;
+		return getValues(theResource, thePath, wantedClass, theCreate);
 	}
 
 	/**
@@ -508,11 +506,10 @@ public class FhirTerser {
 	 * @param theAddExtension When set to <code>true</code>, the terser will add a null-valued extension where one or more such extensions already exist.
 	 * @return A list of values of type {@link Object}.
 	 */
-	public List<Object> getValues(IBaseResource theResource, String thePath, boolean theCreate, boolean theAddExtension) {
+	public List<IBase> getValues(IBaseResource theResource, String thePath, boolean theCreate, boolean theAddExtension) {
 		Class<IBase> wantedClass = IBase.class;
 
-		List retVal = getValues(theResource, thePath, wantedClass, theCreate, theAddExtension);
-		return retVal;
+		return getValues(theResource, thePath, wantedClass, theCreate, theAddExtension);
 	}
 
 	/**

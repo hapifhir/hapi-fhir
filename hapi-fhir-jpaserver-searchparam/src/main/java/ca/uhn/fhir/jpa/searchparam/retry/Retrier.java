@@ -76,10 +76,10 @@ public class Retrier<T> {
 			@Override
 			public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
 				super.onError(context, callback, throwable);
-				if (throwable instanceof NullPointerException) {
+				if (throwable instanceof NullPointerException || throwable instanceof UnsupportedOperationException) {
 					ourLog.error("Retry failure {}/{}: {}", context.getRetryCount(), theMaxRetries, throwable.getMessage(), throwable);
 				} else {
-					ourLog.error("Retry failure {}/{}: {}", context.getRetryCount(), theMaxRetries, throwable.getMessage());
+					ourLog.error("Retry failure {}/{}: {}", context.getRetryCount(), theMaxRetries, throwable.toString());
 				}
 			}
 		};

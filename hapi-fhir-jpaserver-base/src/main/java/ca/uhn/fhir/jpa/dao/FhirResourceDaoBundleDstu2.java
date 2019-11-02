@@ -28,7 +28,7 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-public class FhirResourceDaoBundleDstu2 extends FhirResourceDaoDstu2<Bundle> {
+public class FhirResourceDaoBundleDstu2 extends BaseHapiFhirResourceDao<Bundle> {
 
 	@Override
 	protected void preProcessResourceForStorage(Bundle theResource) {

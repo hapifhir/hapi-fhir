@@ -823,7 +823,6 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	@Test
 	public void testValidateRawXmlResourceWithPrimitiveContainingOnlyAnExtension() {
-		// @formatter:off
 		String input = "<ActivityDefinition xmlns=\"http://hl7.org/fhir\">\n" +
 			"                        <id value=\"referralToMentalHealthCare\"/>\n" +
 			"  <text>\n" +
@@ -849,7 +848,6 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			"                                </event>\n" +
 			"                        </timingTiming>\n" +
 			"                </ActivityDefinition>";
-		// @formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
@@ -858,7 +856,6 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	@Test
 	public void testValidateRawXmlWithMissingRootNamespace() {
-		//@formatter:off
 		String input = ""
 			+ "<Patient>"
 			+ "    <text>"
@@ -873,7 +870,6 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			+ "    <gender value=\"male\"/>"
 			+ "    <birthDate value=\"1974-12-25\"/>"
 			+ "</Patient>";
-		//@formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.toString(), 1, output.getMessages().size());
@@ -1048,6 +1044,36 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		logResultsAndReturnAll(output);
 		assertEquals(
 			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.0.0 (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code[notvalidcode] in system[null])",
+			output.getMessages().get(0).getMessage());
+	}
+
+	@Test
+	@Ignore
+	public void testValidateDecimalWithTrailingDot() {
+		String input = "{" +
+				" \"resourceType\": \"Observation\"," +
+			" \"status\": \"final\"," +
+			" \"subject\": {\"reference\":\"Patient/123\"}," +
+			" \"code\": { \"coding\": [{ \"system\":\"http://foo\", \"code\":\"123\" }] }," +
+			"        \"referenceRange\": [\n" +
+			"          {\n" +
+			"            \"low\": {\n" +
+			"              \"value\": 210.0,\n" +
+			"              \"unit\": \"pg/mL\"\n" +
+			"            },\n" +
+			"            \"high\": {\n" +
+			"              \"value\": 925.,\n" +
+			"              \"unit\": \"pg/mL\"\n" +
+			"            },\n" +
+			"            \"text\": \"210.0-925.\"\n" +
+			"          }\n" +
+			"        ]"+
+				"}";
+		ourLog.info(input);
+		ValidationResult output = myVal.validateWithResult(input);
+		logResultsAndReturnAll(output);
+		assertEquals(
+			"",
 			output.getMessages().get(0).getMessage());
 	}
 
