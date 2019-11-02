@@ -57,7 +57,7 @@ import java.util.Set;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
+public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueSet>
 		implements IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt>, IFhirResourceDaoCodeSystem<ValueSet, CodingDt, CodeableConceptDt> {
 
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;

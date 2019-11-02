@@ -3,7 +3,7 @@
   <Author>Grahame</Author>
   <LastAuthor>John Moehrke</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2019-04-10T21:29:53Z</LastSaved>
+  <LastSaved>2019-10-03T20:31:06Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
@@ -14,7 +14,8 @@
   
   
   
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>7</ActiveSheet>
+  <FirstVisibleSheet>2</FirstVisibleSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -897,9 +898,9 @@
  </Worksheet>
  <Worksheet ss:Name="Data Elements">
   <Names>
-   <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="='Data Elements'!R1C1:R106C28"/>
+   <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="='Data Elements'!R1C1:R107C28"/>
   </Names>
-  <Table ss:ExpandedColumnCount="28" ss:ExpandedRowCount="106" ss:StyleID="s70" x:FullColumns="1" x:FullRows="1">
+  <Table ss:ExpandedColumnCount="28" ss:ExpandedRowCount="107" ss:StyleID="s70" x:FullColumns="1" x:FullRows="1">
    <Column ss:StyleID="s71" ss:Width="227.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s70" ss:Width="90.0"/>
    <Column ss:StyleID="s70" ss:Width="29.0"/>
@@ -1104,6 +1105,36 @@
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="60">
+    <Cell ss:StyleID="s89"><Data ss:Type="String">AuditEvent.severity</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">code</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">AuditEventSeverity</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Emergency | Alert | Critical | Error | Warning | Notice | Informational | Debug</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">Indicates and enables segmentation of various severity including debugging from critical.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">ATNA will map this to the SYSLOG PRI element</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">N/A</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">PRI </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
    <Row ss:AutoFitHeight="0" ss:Height="90">
     <Cell ss:StyleID="s89"><Data ss:Type="String">AuditEvent.period</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1125,8 +1156,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">./effectiveTime[type=IVL_TS]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell><Data ss:Type="String">EventDateTime</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">Activity.startTime &amp; Activity.endTime</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="22" ss:StyleID="s93"><Data ss:Type="String">Activity.startTime &amp; Activity.endTime</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">Provenance.occurred[x]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">Event.occurred[x]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1154,7 +1184,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">.effectiveTime</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">EventDateTime</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">Activity.when</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">Provenance.recorded</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2122,7 +2152,7 @@
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s89"><Data ss:Type="String">AuditEvent.entity.description</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">!AuditEvent.entity.description</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -4113,19 +4143,18 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>24</TopRowBottomPane>
+   <TopRowBottomPane>2</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>8</LeftColumnRightPane>
+   <LeftColumnRightPane>13</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
-  <AutoFilter xmlns="urn:schemas-microsoft-com:office:excel" x:Range="R1C1:R106C28">
+  <AutoFilter xmlns="urn:schemas-microsoft-com:office:excel" x:Range="R1C1:R107C28">
   </AutoFilter>
  </Worksheet>
  <Worksheet ss:Name="Invariants">
@@ -6050,13 +6079,13 @@
     <Cell ss:StyleID="s147"><Data ss:Type="String">y</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">BreakGlass Start</Data></Cell>
     <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">Record that a Break-Glass event has started</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">example-breakglass-start</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">auditevent-example-breakglass-start.xml</Data></Cell>
     <Cell ss:StyleID="s136"/>
-    <Cell ss:StyleID="s147"/>
+    <Cell ss:StyleID="s147"><Data ss:Type="String">Y</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s146"/>
@@ -6327,12 +6356,13 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>3</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
@@ -6374,12 +6404,12 @@
     <Cell ss:StyleID="s108"><Data ss:Type="String">Committee Notes</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Unpublished notes</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"><Data ss:Type="String">!AuditEventSeverity</Data></Cell>
+    <Cell ss:StyleID="s152"><Data ss:Type="String">AuditEventSeverity</Data></Cell>
     <Cell ss:StyleID="s153"><Data ss:Type="String">The severity of the audit entry</Data></Cell>
     <Cell ss:StyleID="s154"><Data ss:Type="String">code list</Data></Cell>
     <Cell ss:StyleID="s155"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s154"><Data ss:Type="String">#audit-event-severity</Data></Cell>
-    <Cell ss:StyleID="s154"><Data ss:Type="String">This is in the SysLog header. Not missed?</Data></Cell>
+    <Cell ss:StyleID="s154"><Data ss:Type="String">This is in the SysLog header, PRI. http://tools.ietf.org/html/rfc5424#appendix-A.3</Data></Cell>
     <Cell ss:StyleID="s154"/>
     <Cell ss:StyleID="s154"/>
     <Cell ss:StyleID="s154"/>
@@ -6811,7 +6841,7 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>5</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
@@ -6827,7 +6857,7 @@
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" ss:StyleID="s142" x:FullColumns="1" x:FullRows="1">
    <Column ss:StyleID="s142" ss:Width="80.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s142" ss:Width="35.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s142" ss:Width="155.0"/>
+   <Column ss:AutoFitWidth="0" ss:StyleID="s142" ss:Width="247.0"/>
    <Column ss:AutoFitWidth="0" ss:Span="1" ss:StyleID="s142" ss:Width="80.0"/>
    <Column ss:AutoFitWidth="0" ss:Index="6" ss:StyleID="s142" ss:Width="245.0"/>
    <Column ss:AutoFitWidth="0" ss:Span="1" ss:StyleID="s142" ss:Width="84.0"/>
@@ -6845,8 +6875,8 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"><Data ss:Type="String">Emergency</Data></Cell>
-    <Cell ss:StyleID="s133"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s119"/>
+    <Cell ss:StyleID="s133"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s168"/>
     <Cell ss:StyleID="s144"><Data ss:Type="String">Emergency</Data></Cell>
     <Cell ss:StyleID="s168"><Data ss:Type="String">System is unusable.</Data></Cell>
@@ -6856,8 +6886,8 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s146"><Data ss:Type="String">Alert</Data></Cell>
-    <Cell ss:StyleID="s136"><Data ss:Type="Number">2</Data></Cell>
-    <Cell ss:StyleID="s122"/>
+    <Cell ss:StyleID="s136"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s169"/>
     <Cell ss:StyleID="s146"><Data ss:Type="String">Alert</Data></Cell>
     <Cell ss:StyleID="s169"><Data ss:Type="String">Action must be taken immediately.</Data></Cell>
@@ -6867,8 +6897,8 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s146"><Data ss:Type="String">Critical</Data></Cell>
-    <Cell ss:StyleID="s136"><Data ss:Type="Number">3</Data></Cell>
-    <Cell ss:StyleID="s122"/>
+    <Cell ss:StyleID="s136"><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s169"/>
     <Cell ss:StyleID="s146"><Data ss:Type="String">Critical</Data></Cell>
     <Cell ss:StyleID="s169"><Data ss:Type="String">Critical conditions.</Data></Cell>
@@ -6878,8 +6908,8 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s146"><Data ss:Type="String">Error</Data></Cell>
-    <Cell ss:StyleID="s136"><Data ss:Type="Number">4</Data></Cell>
-    <Cell ss:StyleID="s122"/>
+    <Cell ss:StyleID="s136"><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s169"/>
     <Cell ss:StyleID="s146"><Data ss:Type="String">Error</Data></Cell>
     <Cell ss:StyleID="s169"><Data ss:Type="String">Error conditions.</Data></Cell>
@@ -6889,8 +6919,8 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s146"><Data ss:Type="String">Warning</Data></Cell>
-    <Cell ss:StyleID="s136"><Data ss:Type="Number">5</Data></Cell>
-    <Cell ss:StyleID="s122"/>
+    <Cell ss:StyleID="s136"><Data ss:Type="Number">4</Data></Cell>
+    <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s169"/>
     <Cell ss:StyleID="s146"><Data ss:Type="String">Warning</Data></Cell>
     <Cell ss:StyleID="s169"><Data ss:Type="String">Warning conditions.</Data></Cell>
@@ -6900,8 +6930,8 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s146"><Data ss:Type="String">Notice</Data></Cell>
-    <Cell ss:StyleID="s136"><Data ss:Type="Number">6</Data></Cell>
-    <Cell ss:StyleID="s122"/>
+    <Cell ss:StyleID="s136"><Data ss:Type="Number">5</Data></Cell>
+    <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s169"/>
     <Cell ss:StyleID="s146"><Data ss:Type="String">Notice</Data></Cell>
     <Cell ss:StyleID="s169"><Data ss:Type="String">Normal but significant condition.</Data></Cell>
@@ -6911,8 +6941,8 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s146"><Data ss:Type="String">Informational</Data></Cell>
-    <Cell ss:StyleID="s136"><Data ss:Type="Number">7</Data></Cell>
-    <Cell ss:StyleID="s122"/>
+    <Cell ss:StyleID="s136"><Data ss:Type="Number">6</Data></Cell>
+    <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s169"/>
     <Cell ss:StyleID="s146"><Data ss:Type="String">Informational</Data></Cell>
     <Cell ss:StyleID="s169"><Data ss:Type="String">Informational messages.</Data></Cell>
@@ -6922,8 +6952,8 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s146"><Data ss:Type="String">Debug</Data></Cell>
-    <Cell ss:StyleID="s136"><Data ss:Type="Number">8</Data></Cell>
-    <Cell ss:StyleID="s122"/>
+    <Cell ss:StyleID="s136"><Data ss:Type="Number">7</Data></Cell>
+    <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s169"/>
     <Cell ss:StyleID="s146"><Data ss:Type="String">Debug</Data></Cell>
     <Cell ss:StyleID="s169"><Data ss:Type="String">Debug-level messages.</Data></Cell>
@@ -7390,6 +7420,11 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
+   <Print>
+    <ValidPrinterInfo/>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>

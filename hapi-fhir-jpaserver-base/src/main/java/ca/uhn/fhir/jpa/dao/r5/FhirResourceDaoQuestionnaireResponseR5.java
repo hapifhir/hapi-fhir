@@ -20,9 +20,10 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import org.hl7.fhir.r5.model.QuestionnaireResponse;
 
-public class FhirResourceDaoQuestionnaireResponseR5 extends FhirResourceDaoR5<QuestionnaireResponse> {
+public class FhirResourceDaoQuestionnaireResponseR5 extends BaseHapiFhirResourceDao<QuestionnaireResponse> {
 
 	
 //	@Override

@@ -186,9 +186,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	@Qualifier("myLocationDaoR5")
 	protected IFhirResourceDao<Location> myLocationDao;
 	@Autowired
-	@Qualifier("myMediaDaoR5")
-	protected IFhirResourceDao<Media> myMediaDao;
-	@Autowired
 	@Qualifier("myMedicationAdministrationDaoR5")
 	protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationDao;
 	@Autowired

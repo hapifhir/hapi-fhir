@@ -22,6 +22,7 @@ package ca.uhn.fhir.context;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -68,8 +69,8 @@ public abstract class BaseRuntimeChildDefinition {
 	public interface IAccessor {
 		List<IBase> getValues(IBase theTarget);
 
-		default IBase getFirstValueOrNull(IBase theTarget) {
-			return getValues(theTarget).stream().findFirst().orElse(null);
+		default <T extends IBase> Optional<T> getFirstValueOrNull(IBase theTarget) {
+			return (Optional<T>) getValues(theTarget).stream().findFirst();
 		}
 	}
 

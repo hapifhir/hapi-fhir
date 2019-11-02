@@ -328,12 +328,12 @@ public class FhirInstanceValidatorR5Test {
 	@Test
 	public void testBase64Invalid() {
 		Base64BinaryType value = new Base64BinaryType(new byte[]{2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1});
-		Media med = new Media();
+		DocumentReference med = new DocumentReference();
 		med.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-		med.getContent().setContentType(Constants.CT_OCTET_STREAM);
-		med.getContent().setDataElement(value);
-		med.getContent().setTitle("bbbb syst");
-		med.setStatus(Media.MediaStatus.NOTDONE);
+		med.getContentFirstRep().getAttachment().setContentType(Constants.CT_OCTET_STREAM);
+		med.getContentFirstRep().getAttachment().setDataElement(value);
+		med.getContentFirstRep().getAttachment().setTitle("bbbb syst");
+		med.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(med);
 
 		encoded = encoded.replace(value.getValueAsString(), "%%%2@()()");
@@ -350,12 +350,12 @@ public class FhirInstanceValidatorR5Test {
 	@Test
 	public void testBase64Valid() {
 		Base64BinaryType value = new Base64BinaryType(new byte[]{2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1});
-		Media med = new Media();
+		DocumentReference med = new DocumentReference();
 		med.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-		med.getContent().setContentType(Constants.CT_OCTET_STREAM);
-		med.getContent().setDataElement(value);
-		med.getContent().setTitle("bbbb syst");
-		med.setStatus(Media.MediaStatus.NOTDONE);
+		med.getContentFirstRep().getAttachment().setContentType(Constants.CT_OCTET_STREAM);
+		med.getContentFirstRep().getAttachment().setDataElement(value);
+		med.getContentFirstRep().getAttachment().setTitle("bbbb syst");
+		med.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(med);
 
 		ourLog.info("Encoded: {}", encoded);
@@ -379,7 +379,7 @@ public class FhirInstanceValidatorR5Test {
 		period.setStartElement(new DateTimeType("2000-01-01T00:00:01+05:00"));
 		period.setEndElement(new DateTimeType("2000-01-01T00:00:00+04:00"));
 		assertThat(period.getStart().getTime(), lessThan(period.getEnd().getTime()));
-		procedure.setPerformed(period);
+		procedure.setOccurrence(period);
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));

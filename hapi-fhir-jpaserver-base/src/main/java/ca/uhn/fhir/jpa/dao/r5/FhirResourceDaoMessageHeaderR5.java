@@ -20,9 +20,10 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoMessageHeader;
 import org.hl7.fhir.r5.model.MessageHeader;
 
-public class FhirResourceDaoMessageHeaderR5 extends FhirResourceDaoR5<MessageHeader> implements IFhirResourceDaoMessageHeader<MessageHeader> {
+public class FhirResourceDaoMessageHeaderR5 extends BaseHapiFhirResourceDao<MessageHeader> implements IFhirResourceDaoMessageHeader<MessageHeader> {
 	// nothing right now
 }

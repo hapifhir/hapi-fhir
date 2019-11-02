@@ -146,13 +146,15 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	private Long myHashExact;
 	@Transient
 	private transient ModelConfig myModelConfig;
+
 	public ResourceIndexedSearchParamString() {
 		super();
 	}
 
-	public ResourceIndexedSearchParamString(ModelConfig theModelConfig, String theName, String theValueNormalized, String theValueExact) {
+	public ResourceIndexedSearchParamString(ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized, String theValueExact) {
 		setModelConfig(theModelConfig);
-		setParamName(theName);
+		setResourceType(theResourceType);
+		setParamName(theParamName);
 		setValueNormalized(theValueNormalized);
 		setValueExact(theValueExact);
 	}
@@ -195,8 +197,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		}
 		ResourceIndexedSearchParamString obj = (ResourceIndexedSearchParamString) theObj;
 		EqualsBuilder b = new EqualsBuilder();
+		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-		b.append(getResource(), obj.getResource());
 		b.append(getValueExact(), obj.getValueExact());
 		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getHashExact(), obj.getHashExact());
@@ -265,8 +267,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getResourceType());
 		b.append(getParamName());
-		b.append(getResource());
 		b.append(getValueExact());
 		return b.toHashCode();
 	}

@@ -10,7 +10,7 @@ public class ResourceIndexedSearchParamStringTest {
 
 	@Test
 	public void testHashFunctions() {
-		ResourceIndexedSearchParamString token = new ResourceIndexedSearchParamString(new ModelConfig(), "NAME", "value", "VALUE");
+		ResourceIndexedSearchParamString token = new ResourceIndexedSearchParamString(new ModelConfig(), "Patient", "NAME", "value", "VALUE");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
 
 		// Make sure our hashing function gives consistent results
@@ -20,7 +20,7 @@ public class ResourceIndexedSearchParamStringTest {
 
 	@Test
 	public void testHashFunctionsPrefixOnly() {
-		ResourceIndexedSearchParamString token = new ResourceIndexedSearchParamString(new ModelConfig(), "NAME", "vZZZZZZZZZZZZZZZZ", "VZZZZZZzzzZzzzZ");
+		ResourceIndexedSearchParamString token = new ResourceIndexedSearchParamString(new ModelConfig(), "Patient", "NAME", "vZZZZZZZZZZZZZZZZ", "VZZZZZZzzzZzzzZ");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
 
 		// Should be the same as in testHashFunctions()
