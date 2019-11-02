@@ -2,6 +2,9 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.jpa.migrate.tasks.SchemaInitializationProvider;
+import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.Test;
 
 import java.sql.SQLException;
@@ -15,16 +18,44 @@ public class InitializeSchemaTaskTest extends BaseTest {
 
 	@Test
 	public void testInitializeTwice() throws SQLException {
-		InitializeSchemaTask task = new InitializeSchemaTask("1", "1", t -> getSql());
+		InitializeSchemaTask task = new InitializeSchemaTask("1", "1", new TestProvider());
 		getMigrator().addTask(task);
 		getMigrator().migrate();
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), containsInAnyOrder("SOMETABLE"));
 
 		// Second migrate runs without issue
+		getMigrator().removeAllTasksForUnitTest();
+		InitializeSchemaTask identicalTask = new InitializeSchemaTask("1", "1", new TestProvider());
+		getMigrator().addTask(identicalTask);
 		getMigrator().migrate();
 	}
 
-	private List<String> getSql() {
-		return Collections.singletonList("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+	private class TestProvider implements ISchemaInitializationProvider {
+		@Override
+		public List<String> getSqlStatements(DriverTypeEnum theDriverType) {
+			return Collections.singletonList("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) return true;
+
+			if (theO == null || getClass() != theO.getClass()) return false;
+
+			TestProvider that = (TestProvider) theO;
+
+			return size() == that.size();
+		}
+
+		private int size() {
+			return getSqlStatements(DriverTypeEnum.H2_EMBEDDED).size();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37)
+				.append(size())
+				.toHashCode();
+		}
 	}
 }

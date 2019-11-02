@@ -5,6 +5,8 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,5 +42,27 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 			throw new ConfigurationException("Error reading schema initialization script " + initScript, e);
 		}
 		return retval;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		SchemaInitializationProvider that = (SchemaInitializationProvider) theO;
+
+		return size() == that.size();
+	}
+
+	private int size() {
+		return getSqlStatements(DriverTypeEnum.H2_EMBEDDED).size();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(size())
+			.toHashCode();
 	}
 }

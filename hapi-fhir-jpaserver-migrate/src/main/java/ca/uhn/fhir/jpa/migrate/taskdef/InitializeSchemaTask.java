@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,5 +36,25 @@ public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
 		for (String nextSql : sqlStatements) {
 			executeSql(null, nextSql);
 		}
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		InitializeSchemaTask that = (InitializeSchemaTask) theO;
+
+		return new EqualsBuilder()
+			.append(mySchemaInitializationProvider, that.mySchemaInitializationProvider)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(mySchemaInitializationProvider)
+			.toHashCode();
 	}
 }

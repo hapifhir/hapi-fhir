@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.MigrationInfoService;
@@ -160,5 +161,10 @@ public class FlywayMigrator {
 			Flyway flyway = initFlyway(connectionProperties);
 			return flyway.info();
 		}
+	}
+
+	@VisibleForTesting
+	public void removeAllTasksForUnitTest() {
+		myTasks.clear();
 	}
 }
