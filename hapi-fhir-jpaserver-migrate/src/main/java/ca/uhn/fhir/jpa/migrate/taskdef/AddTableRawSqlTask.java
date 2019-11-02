@@ -90,7 +90,6 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 
 		return new EqualsBuilder()
 			.appendSuper(super.equals(theO))
-			.append(myDriverToSqls, that.myDriverToSqls)
 			.append(myDriverNeutralSqls, that.myDriverNeutralSqls)
 			.isEquals();
 	}
@@ -99,7 +98,6 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
 			.appendSuper(super.hashCode())
-			.append(myDriverToSqls)
 			.append(myDriverNeutralSqls)
 			.toHashCode();
 	}
