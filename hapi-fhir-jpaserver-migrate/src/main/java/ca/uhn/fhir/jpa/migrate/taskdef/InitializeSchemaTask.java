@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
 	private static final Logger ourLog = LoggerFactory.getLogger(InitializeSchemaTask.class);
@@ -28,6 +30,12 @@ public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
 	@Override
 	public void execute() throws SQLException {
 		DriverTypeEnum driverType = getDriverType();
+
+		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
+		if (tableNames.contains("HFJ_RESOURCE")) {
+			logInfo(ourLog, "The table HFJ_RESOURCE already exists.  Skipping schema initialization for {}", driverType);
+			return;
+		}
 
 		logInfo(ourLog, "Initializing schema for {}", driverType);
 
