@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
@@ -73,9 +74,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * <p>
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
-@Service
 @Lazy
-@Interceptor()
+@Interceptor
 public class SubscriptionActivatingInterceptor {
 	private static boolean ourWaitForSubscriptionActivationSynchronouslyForUnitTest;
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingInterceptor.class);
@@ -96,6 +96,13 @@ public class SubscriptionActivatingInterceptor {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
+
+	/**
+	 * Constructor
+	 */
+	public SubscriptionActivatingInterceptor() {
+		super();
+	}
 
 	public boolean activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
@@ -155,6 +162,7 @@ public class SubscriptionActivatingInterceptor {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private boolean activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
 		IBaseResource subscription = subscriptionDao.read(theSubscription.getIdElement());
@@ -208,7 +216,14 @@ public class SubscriptionActivatingInterceptor {
 		}
 	}
 
-	private void validateSubmittedSubscription(IBaseResource theSubscription) {
+	@VisibleForTesting
+	@SuppressWarnings("WeakerAccess")
+	public void setSubscriptionStrategyEvaluatorForUnitTest(SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
+	}
+
+	@SuppressWarnings("WeakerAccess")
+	public void validateSubmittedSubscription(IBaseResource theSubscription) {
 
 		CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
 		boolean finished = false;
@@ -271,13 +286,15 @@ public class SubscriptionActivatingInterceptor {
 		}
 	}
 
-	private void validateChannelEndpoint(CanonicalSubscription theResource) {
+	@SuppressWarnings("WeakerAccess")
+	protected void validateChannelEndpoint(CanonicalSubscription theResource) {
 		if (isBlank(theResource.getEndpointUrl())) {
 			throw new UnprocessableEntityException("Rest-hook subscriptions must have Subscription.channel.endpoint defined");
 		}
 	}
 
-	private void validateChannelPayload(CanonicalSubscription theResource) {
+	@SuppressWarnings("WeakerAccess")
+	protected void validateChannelPayload(CanonicalSubscription theResource) {
 		if (!isBlank(theResource.getPayloadString()) && EncodingEnum.forContentType(theResource.getPayloadString()) == null) {
 			throw new UnprocessableEntityException("Invalid value for Subscription.channel.payload: " + theResource.getPayloadString());
 		}
@@ -317,6 +334,18 @@ public class SubscriptionActivatingInterceptor {
 				activateOrRegisterSubscriptionIfRequired(theSubscription);
 			}
 		});
+	}
+
+	@SuppressWarnings("WeakerAccess")
+	@VisibleForTesting
+	public void setSubscriptionCanonicalizerForUnitTest(SubscriptionCanonicalizer theSubscriptionCanonicalizer) {
+		mySubscriptionCanonicalizer = theSubscriptionCanonicalizer;
+	}
+
+	@SuppressWarnings("WeakerAccess")
+	@VisibleForTesting
+	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
 	}
 
 
