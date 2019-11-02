@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
@@ -162,6 +163,7 @@ public class SubscriptionActivatingInterceptor {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private boolean activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
 		IBaseResource subscription = subscriptionDao.read(theSubscription.getIdElement());
@@ -215,7 +217,14 @@ public class SubscriptionActivatingInterceptor {
 		}
 	}
 
-	private void validateSubmittedSubscription(IBaseResource theSubscription) {
+	@VisibleForTesting
+	@SuppressWarnings("WeakerAccess")
+	public void setSubscriptionStrategyEvaluatorForUnitTest(SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
+	}
+
+	@SuppressWarnings("WeakerAccess")
+	public void validateSubmittedSubscription(IBaseResource theSubscription) {
 
 		CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
 		boolean finished = false;
@@ -326,6 +335,18 @@ public class SubscriptionActivatingInterceptor {
 				activateOrRegisterSubscriptionIfRequired(theSubscription);
 			}
 		});
+	}
+
+	@SuppressWarnings("WeakerAccess")
+	@VisibleForTesting
+	public void setSubscriptionCanonicalizerForUnitTest(SubscriptionCanonicalizer theSubscriptionCanonicalizer) {
+		mySubscriptionCanonicalizer = theSubscriptionCanonicalizer;
+	}
+
+	@SuppressWarnings("WeakerAccess")
+	@VisibleForTesting
+	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
 	}
 
 
