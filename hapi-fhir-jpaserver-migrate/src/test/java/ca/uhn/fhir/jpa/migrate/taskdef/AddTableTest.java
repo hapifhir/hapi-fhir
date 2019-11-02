@@ -33,7 +33,6 @@ public class AddTableTest extends BaseTest {
 		task.setTableName("SOMETABLE");
 		task.addSql(DriverTypeEnum.H2_EMBEDDED, "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 		getMigrator().addTask(task);
-
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), containsInAnyOrder("SOMETABLE"));
