@@ -1,6 +1,7 @@
 package org.hl7.fhir.r4.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -16,7 +17,6 @@ import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.formats.IParser;
 import org.hl7.fhir.r4.formats.ParserType;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent;
@@ -28,14 +28,11 @@ import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
-  private static final Logger ourLog = LoggerFactory.getLogger(HapiWorkerContext.class);
   private final FhirContext myCtx;
   private final Cache<String, Resource> myFetchedResourceCache;
   private IValidationSupport myValidationSupport;
@@ -175,11 +172,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay) {
-    CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, null);
+    IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, (String)null);
     if (result == null) {
       return null;
     }
-    return new ValidationResult(result.getSeverity(), result.getMessage(), result.asConceptDefinition());
+    return new ValidationResult((IssueSeverity)result.getSeverity(), result.getMessage(), (ConceptDefinitionComponent)result.asConceptDefinition());
   }
 
   @Override
@@ -212,7 +209,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       return new ValidationResult(definition);
     }
 
-    CodeValidationResult outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
+    IContextValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs);
     if (outcome != null && outcome.isOk()) {
       ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
       definition.setCode(theCode);
@@ -235,7 +232,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public void generateSnapshot(StructureDefinition p) throws DefinitionException, FHIRException {
+  public void generateSnapshot(StructureDefinition p) throws FHIRException {
     throw new UnsupportedOperationException();
   }
 

@@ -87,45 +87,4 @@ public interface IValidationSupport
    */
   StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName);
 
-  /**
-   * Validates that the given code exists and if possible returns a display
-   * name. This method is called to check codes which are found in "example"
-   * binding fields (e.g. <code>Observation.code</code> in the default profile.
-   *
-   * @param theCodeSystem The code system, e.g. "<code>http://loinc.org</code>"
-   * @param theCode       The code, e.g. "<code>1234-5</code>"
-   * @param theDisplay    The display name, if it should also be validated
-	* @param theValueSetUrl When validating that a code exists as a part of a specific ValueSet, the ValueSet URI
-	*                       will be provided in this parameter value. If <code>null</code>, the validation should simply
-	*                       confirm that the code exists.
-   * @return Returns a validation result object
-   */
-  @Override
-  CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl);
-
-  class CodeValidationResult extends IContextValidationSupport.CodeValidationResult<ConceptDefinitionComponent, IssueSeverity> {
-
-    public CodeValidationResult(ConceptDefinitionComponent theNext) {
-      super(theNext);
-    }
-
-    public CodeValidationResult(IssueSeverity theSeverity, String theMessage) {
-      super(theSeverity, theMessage);
-    }
-
-    public CodeValidationResult(IssueSeverity severity, String message, ConceptDefinitionComponent definition) {
-      super(severity, message, definition);
-    }
-
-    @Override
-    protected String getDisplay() {
-      String retVal = null;
-      if (isOk()) {
-        retVal = asConceptDefinition().getDisplay();
-      }
-      return retVal;
-    }
-
-  }
-
 }

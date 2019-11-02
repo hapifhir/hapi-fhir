@@ -14,10 +14,8 @@ import org.hl7.fhir.dstu3.formats.IParser;
 import org.hl7.fhir.dstu3.formats.ParserType;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
-import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple;
@@ -29,9 +27,6 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
   private final FhirContext myCtx;
@@ -257,7 +252,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   public ValidationResult validateCode(CodeableConcept theCode, ValueSet theVs) {
     for (Coding next : theCode.getCoding()) {
       ValidationResult retVal = validateCode(next, theVs);
-      if (retVal != null && retVal.isOk()) {
+      if (retVal.isOk()) {
         return retVal;
       }
     }
@@ -275,11 +270,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, null);
+    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, (String)null);
     if (result == null) {
       return null;
     }
-    return new ValidationResult(result.getSeverity(), result.getMessage(), result.asConceptDefinition());
+    return new ValidationResult((IssueSeverity)result.getSeverity(), result.getMessage(), (ConceptDefinitionComponent)result.asConceptDefinition());
   }
 
   @Override

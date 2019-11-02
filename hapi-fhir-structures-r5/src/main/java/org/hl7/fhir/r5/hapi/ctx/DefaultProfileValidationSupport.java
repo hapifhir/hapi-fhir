@@ -344,8 +344,13 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	}
 
 	@Override
+	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @javax.annotation.Nonnull IBaseResource theValueSet) {
+		return null;
+	}
+
+	@Override
 	public IContextValidationSupport.LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
-		return validateCode(theContext, theSystem, theCode, null, null).asLookupCodeResult(theSystem, theCode);
+		return validateCode(theContext, theSystem, theCode, null, (String)null).asLookupCodeResult(theSystem, theCode);
 	}
 
 }

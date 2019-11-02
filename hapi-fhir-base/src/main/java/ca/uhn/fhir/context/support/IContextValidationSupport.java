@@ -117,7 +117,20 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 	 * @param theDisplay    The display name, if it should also be validated
 	 * @return Returns a validation result object
 	 */
-	CodeValidationResult<CDCT, IST> validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl);
+	CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl);
+
+	/**
+	 * Validates that the given code exists and if possible returns a display
+	 * name. This method is called to check codes which are found in "example"
+	 * binding fields (e.g. <code>Observation.code</code> in the default profile.
+	 *
+	 * @param theCodeSystem The code system, e.g. "<code>http://loinc.org</code>"
+	 * @param theCode       The code, e.g. "<code>1234-5</code>"
+	 * @param theDisplay    The display name, if it should also be validated
+	 * @param theValueSet   The ValueSet to validate against. Must not be null, and must be a ValueSet resource.
+	 * @return Returns a validation result object
+	 */
+	CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet);
 
 	/**
 	 * Look up a code using the system and code value
@@ -244,34 +257,40 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 		}
 	}
 
-	abstract class CodeValidationResult<CDCT, IST> {
-		private CDCT myDefinition;
+	class CodeValidationResult {
+		private IBase myDefinition;
 		private String myMessage;
-		private IST mySeverity;
+		private Enum mySeverity;
 		private String myCodeSystemName;
 		private String myCodeSystemVersion;
 		private List<BaseConceptProperty> myProperties;
+		private String myDisplay;
 
-		public CodeValidationResult(CDCT theNext) {
-			this.myDefinition = theNext;
+		public CodeValidationResult(IBase theDefinition) {
+			this.myDefinition = theDefinition;
 		}
 
-		public CodeValidationResult(IST severity, String message) {
-			this.mySeverity = severity;
+		public CodeValidationResult(Enum theSeverity, String message) {
+			this.mySeverity = theSeverity;
 			this.myMessage = message;
 		}
 
-		public CodeValidationResult(IST severity, String message, CDCT definition) {
-			this.mySeverity = severity;
-			this.myMessage = message;
-			this.myDefinition = definition;
+		public CodeValidationResult(Enum theSeverity, String theS, IBase theDefinition, String theDisplay) {
+			this.mySeverity = theSeverity;
+			this.myMessage = theS;
+			this.myDefinition = theDefinition;
+			this.myDisplay = theDisplay;
 		}
 
-		public CDCT asConceptDefinition() {
+		public String getDisplay() {
+			return myDisplay;
+		}
+
+		public IBase asConceptDefinition() {
 			return myDefinition;
 		}
 
-		public String getCodeSystemName() {
+		String getCodeSystemName() {
 			return myCodeSystemName;
 		}
 
@@ -299,7 +318,7 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 			myProperties = theProperties;
 		}
 
-		public IST getSeverity() {
+		public Enum getSeverity() {
 			return mySeverity;
 		}
 
@@ -313,14 +332,12 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 			retVal.setSearchedForCode(theSearchedForCode);
 			if (isOk()) {
 				retVal.setFound(true);
-				retVal.setCodeDisplay(getDisplay());
+				retVal.setCodeDisplay(myDisplay);
 				retVal.setCodeSystemDisplayName(getCodeSystemName());
 				retVal.setCodeSystemVersion(getCodeSystemVersion());
 			}
 			return retVal;
 		}
-
-		protected abstract String getDisplay();
 
 	}
 

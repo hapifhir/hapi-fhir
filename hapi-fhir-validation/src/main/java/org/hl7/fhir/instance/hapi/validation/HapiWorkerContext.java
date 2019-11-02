@@ -149,7 +149,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	public ValidationResult validateCode(CodeableConcept theCode, ValueSet theVs) {
 		for (Coding next : theCode.getCoding()) {
 			ValidationResult retVal = validateCode(next, theVs);
-			if (retVal != null && retVal.isOk()) {
+			if (retVal.isOk()) {
 				return retVal;
 			}
 		}
