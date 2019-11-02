@@ -51,6 +51,7 @@ public class InitializeSchemaTaskTest extends BaseTest {
 			return getSqlStatements(DriverTypeEnum.H2_EMBEDDED).size();
 		}
 
+		// This could be stricter, but we don't want this to be brittle.
 		@Override
 		public int hashCode() {
 			return new HashCodeBuilder(17, 37)
