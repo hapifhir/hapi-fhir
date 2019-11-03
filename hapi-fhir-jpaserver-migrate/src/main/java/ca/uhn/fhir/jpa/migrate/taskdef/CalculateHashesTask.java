@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.VersionEnum;
 import com.google.common.collect.ForwardingMap;
@@ -33,10 +34,7 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
@@ -62,6 +60,14 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 	@Override
 	public synchronized void execute() throws SQLException {
 		if (isDryRun()) {
+			return;
+		}
+
+		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
+		// This table was added a few days after hash indexes were added, so it is a reasonable indicator for whether this
+		// migration has already been run
+		if (tableNames.contains("TRM_CONCEPT_DESIG")) {
+			logInfo(ourLog, "The table TRM_CONCEPT_DESIG already exists.  Skipping calculate hashes task.");
 			return;
 		}
 
