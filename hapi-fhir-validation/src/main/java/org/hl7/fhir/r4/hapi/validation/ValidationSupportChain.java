@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -157,6 +158,18 @@ public class ValidationSupportChain implements IValidationSupport {
 			}
 		}
 		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+	}
+
+	@Override
+	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+		CodeValidationResult retVal = null;
+		for (IValidationSupport next : myChain) {
+			retVal = next.validateCode(theContext, theCodeSystem, theCode, theDisplay, theValueSet);
+			if (retVal != null) {
+				break;
+			}
+		}
+		return retVal;
 	}
 
 	@Override

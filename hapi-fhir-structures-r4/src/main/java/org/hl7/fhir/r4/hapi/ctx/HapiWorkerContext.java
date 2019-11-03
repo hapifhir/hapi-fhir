@@ -32,6 +32,8 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
   private final FhirContext myCtx;
   private final Cache<String, Resource> myFetchedResourceCache;
@@ -187,7 +189,6 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
-    Validate.notBlank(theVs.getUrl(), "No ValueSet URL provided");
 
     /*
      * The following valueset is a special case, since the BCP codesystem is very difficult to expand
@@ -209,7 +210,13 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       return new ValidationResult(definition);
     }
 
-    IContextValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs);
+    IValidationSupport.CodeValidationResult outcome;
+    if (isNotBlank(theVs.getUrl())) {
+      outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
+    } else {
+      outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs);
+    }
+
     if (outcome != null && outcome.isOk()) {
       ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
       definition.setCode(theCode);

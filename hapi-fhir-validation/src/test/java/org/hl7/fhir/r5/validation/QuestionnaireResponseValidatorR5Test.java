@@ -1,6 +1,7 @@
 package org.hl7.fhir.r5.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -10,7 +11,6 @@ import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r5.hapi.ctx.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r5.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.r5.model.*;
@@ -31,11 +31,15 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -191,10 +195,10 @@ public class QuestionnaireResponseValidatorR5Test {
 
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
-		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code0"), any(), any()))
-			.thenReturn(new CodeValidationResult(new ConceptDefinitionComponent().setCode("code0")));
-		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code1"), any(), any()))
-			.thenReturn(new CodeValidationResult(ValidationMessage.IssueSeverity.ERROR, "Unknown code"));
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code0"), any(), anyString()))
+			.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent().setCode("code0")));
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code1"), any(), anyString()))
+			.thenReturn(new IContextValidationSupport.CodeValidationResult(ValidationMessage.IssueSeverity.ERROR, "Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -345,8 +349,8 @@ public class QuestionnaireResponseValidatorR5Test {
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(valueSetRef)))
 			.thenReturn(options);
-		when(myValSupport.validateCode(any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class), any()))
-			.thenReturn(new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(codeValue))));
+		when(myValSupport.validateCode(any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
+			.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(new CodeType(codeValue))));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String qXml = xmlParser.encodeResourceToString(q);
@@ -402,8 +406,8 @@ public class QuestionnaireResponseValidatorR5Test {
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(valueSetRef)))
 			.thenReturn(options);
-		when(myValSupport.validateCode(any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class), any()))
-			.thenReturn(new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(codeValue))));
+		when(myValSupport.validateCode(any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
+			.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(new CodeType(codeValue))));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String qXml = xmlParser.encodeResourceToString(q);
@@ -522,69 +526,13 @@ public class QuestionnaireResponseValidatorR5Test {
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 
-		when(myValSupport.validateCode(any(FhirContext.class), eq("http://codesystems.com/system"), eq("code0"), any(String.class), any())).thenReturn(new CodeValidationResult(new ConceptDefinitionComponent(new CodeType("code0"))));
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code0"),  any(), nullable(String.class)))
+			.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent().setCode("code0")));
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code1"),  any(), nullable(String.class)))
+			.thenReturn(new IContextValidationSupport.CodeValidationResult(ValidationMessage.IssueSeverity.ERROR, "Unknown code"));
 
 		QuestionnaireResponse qa;
 		ValidationResult errors;
-
-//		// Good code
-//
-//		qa = new QuestionnaireResponse();
-//		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-//		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-//		qa.getQuestionnaireElement().setValue(questionnaireRef);
-//		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
-//		errors = myVal.validateWithResult(qa);
-//		errors = stripBindingHasNoSourceMessage(errors);
-//		assertEquals(errors.getMessages().toString(), 0, errors.getMessages().size());
-//
-//		// Bad code
-//
-//		qa = new QuestionnaireResponse();
-//		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-//		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-//		qa.getQuestionnaireElement().setValue(questionnaireRef);
-//		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code1"));
-//		errors = myVal.validateWithResult(qa);
-//		errors = stripBindingHasNoSourceMessage(errors);
-//		ourLog.info(errors.toString());
-//		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::code1) is not in the options value set in the questionnaire"));
-//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
-//
-//		// Partial code
-//
-//		qa = new QuestionnaireResponse();
-//		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-//		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-//		qa.getQuestionnaireElement().setValue(questionnaireRef);
-//		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem(null).setCode("code1"));
-//		errors = myVal.validateWithResult(qa);
-//		errors = stripBindingHasNoSourceMessage(errors);
-//		ourLog.info(errors.toString());
-//		assertThat(errors.toString(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
-//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
-//
-//		qa = new QuestionnaireResponse();
-//		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-//		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-//		qa.getQuestionnaireElement().setValue(questionnaireRef);
-//		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("").setCode("code1"));
-//		errors = myVal.validateWithResult(qa);
-//		errors = stripBindingHasNoSourceMessage(errors);
-//		ourLog.info(errors.toString());
-//		assertThat(errors.toString(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
-//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
-//
-//		// System only in known codesystem
-//		qa = new QuestionnaireResponse();
-//		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-//		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-//		qa.getQuestionnaireElement().setValue(questionnaireRef);
-//		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode(null));
-//		errors = myVal.validateWithResult(qa);
-//		ourLog.info(errors.toString());
-//		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::null) is not in the options value set in the questionnaire"));
-//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -594,7 +542,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
 		// This is set in InstanceValidator#validateAnswerCode
-		assertThat(errors.toString(), containsString("INFORMATION - Code http://system/null was not validated because the code system is not present"));
+		assertThat(errors.toString(), containsString(" The value provided (http://system::null) is not in the options value set"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		// Wrong type

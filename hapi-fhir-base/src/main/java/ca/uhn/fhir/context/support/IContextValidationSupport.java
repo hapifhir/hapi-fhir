@@ -128,9 +128,9 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 	 * @param theCode       The code, e.g. "<code>1234-5</code>"
 	 * @param theDisplay    The display name, if it should also be validated
 	 * @param theValueSet   The ValueSet to validate against. Must not be null, and must be a ValueSet resource.
-	 * @return Returns a validation result object
+	 * @return Returns a validation result object, or <code>null</code> if this validation support module can not handle this kind of request
 	 */
-	CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet);
+	default CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) { return null; }
 
 	/**
 	 * Look up a code using the system and code value
