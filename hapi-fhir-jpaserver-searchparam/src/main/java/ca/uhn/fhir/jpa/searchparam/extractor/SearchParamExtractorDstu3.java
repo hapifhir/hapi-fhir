@@ -39,7 +39,6 @@ import java.util.List;
 
 public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
-	private org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport myValidationSupport;
 	private FHIRPathEngine myFhirPathEngine;
 
 	/**
@@ -53,7 +52,6 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	@VisibleForTesting
 	public SearchParamExtractorDstu3(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
 		super(theCtx, theSearchParamRegistry);
-		myValidationSupport = theValidationSupport;
 		start(null);
 		start();
 	}
@@ -72,13 +70,16 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		};
 	}
 
+
+
+
+
 	@EventListener
 	public void start(ContextRefreshedEvent theEvent) {
-		if (myValidationSupport == null) {
+		if (myFhirPathEngine == null) {
 			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
 			IWorkerContext worker = new HapiWorkerContext(getContext(), support);
 			myFhirPathEngine = new FHIRPathEngine(worker);
-			myValidationSupport = support;
 		}
 	}
 
