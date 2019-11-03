@@ -2,14 +2,17 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.intellij.lang.annotations.Language;
 import org.junit.After;
 import org.junit.Before;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class BaseTest {
 
@@ -46,8 +49,11 @@ public class BaseTest {
 	}
 
 	@After
-	public void resetMigrationVersion() {
+	public void resetMigrationVersion() throws SQLException {
+		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
+		if (tableNames.contains("flyway_schema_history")) {
 			executeSql("DELETE from \"flyway_schema_history\" where \"installed_rank\" > 0");
+		}
 	}
 
 	protected void executeSql(@Language("SQL") String theSql, Object... theArgs) {

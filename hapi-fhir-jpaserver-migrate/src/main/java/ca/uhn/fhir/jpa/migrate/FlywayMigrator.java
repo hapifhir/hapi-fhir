@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.migrate;
  * #L%
  */
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -30,7 +29,6 @@ import org.flywaydb.core.api.migration.JavaMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Driver;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,7 +91,7 @@ public class FlywayMigrator {
 			Flyway flyway = initFlyway(connectionProperties);
 			flyway.migrate();
 		} catch (Exception e) {
-			throw new ConfigurationException("Failed to migrate schema", e);
+			throw e;
 		}
 	}
 
