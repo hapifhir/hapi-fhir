@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -25,8 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class HapiFlywayMigrateDatabaseCommandTest {
 
@@ -38,7 +38,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 	}
 
 	@Test
-	public void testMigrate() throws IOException {
+	public void testMigrateFrom340() throws IOException, SQLException {
 
 		File location = getLocation("migrator_h2_test_340_current");
 
@@ -61,7 +61,9 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			"-n", "",
 			"-p", ""
 		};
+		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RES_REINDEX_JOB"));
 		App.main(args);
+		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RES_REINDEX_JOB"));
 
 		connectionProperties.getTxTemplate().execute(t -> {
 			JdbcTemplate jdbcTemplate = connectionProperties.newJdbcTemplate();
@@ -73,6 +75,33 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			assertEquals(7001889285610424179L, values.get(0).get("HASH_IDENTITY"));
 			return null;
 		});
+	}
+
+	@Test
+	public void testMigrateFromEmptySchema() throws IOException, SQLException {
+
+		File location = getLocation("migrator_h2_test_empty_current");
+
+		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
+		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
+
+		ourLog.info("**********************************************");
+		ourLog.info("Starting Migration...");
+		ourLog.info("**********************************************");
+
+		String[] args = new String[]{
+			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
+			"-d", "H2_EMBEDDED",
+			"-u", url,
+			"-n", "",
+			"-p", ""
+		};
+
+		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE"));
+		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB"));
+		App.main(args);
+		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE")); // Early table
+		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB")); // Late table
 	}
 
 	@NotNull

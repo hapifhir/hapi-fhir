@@ -63,10 +63,10 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 		}
 
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
-		// This table was added a few days after hash indexes were added, so it is a reasonable indicator for whether this
+		// This table was added shortly after hash indexes were added, so it is a reasonable indicator for whether this
 		// migration has already been run
-		if (tableNames.contains("TRM_CONCEPT_DESIG")) {
-			logInfo(ourLog, "The table TRM_CONCEPT_DESIG already exists.  Skipping calculate hashes task.");
+		if (tableNames.contains("HFJ_RES_REINDEX_JOB")) {
+			logInfo(ourLog, "The table HFJ_RES_REINDEX_JOB already exists.  Skipping calculate hashes task.");
 			return;
 		}
 
