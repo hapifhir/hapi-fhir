@@ -191,6 +191,24 @@ public class XmlParserDstu2Test {
 	}
 
 	@Test
+	public void testIdOnComposite() {
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <name id=\"foo\">\n" +
+			"     <family value=\"hello\"/>" +
+			"   </name>" +
+			"   <active value=\"true\"/>" +
+			"</Patient>";
+
+		IParser p = ourCtx.newXmlParser();
+
+		Patient patient = p.parseResource(Patient.class, input);
+		assertTrue(patient.getActive());
+		assertEquals("foo", patient.getNameFirstRep().getElementSpecificId());
+
+	}
+
+
+	@Test
 	public void testSetDontEncodeResourcesWithMetaSubPath() {
 		Patient p = new Patient();
 		ResourceMetadataKeyEnum.VERSION.put(p, "BBB");

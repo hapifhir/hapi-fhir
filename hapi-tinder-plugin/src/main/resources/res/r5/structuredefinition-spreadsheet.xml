@@ -4143,7 +4143,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">FHIR Specification models only use FHIR defined types</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">url.startsWith('http://hl7.org/fhir/StructureDefinition') implies (differential.element.type.code.all(hasValue() implies matches('^[a-zA-Z0-9]+$')) and snapshot.element.type.code.all(hasValue() implies matches('^[a-zA-Z0-9]+$')))</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">url.startsWith('http://hl7.org/fhir/StructureDefinition') implies (differential | snapshot).element.type.code.all(matches('^[a-zA-Z0-9]+$') or matches('^http:\\/\\/hl7\\.org\\/fhirpath\\/System\\.[A-Z][A-Za-z]+$'))</Data></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">not(starts-with(f:url/@value, 'http://hl7.org/fhir/StructureDefinition')) or count(f:differential/f:element/f:type/f:code[@value and not(matches(string(@value), '^[a-zA-Z0-9]+$'))]|f:snapshot/f:element/f:type/f:code[@value and not(matches(string(@value), '^[a-zA-Z0-9]+$'))]) =0</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="29">

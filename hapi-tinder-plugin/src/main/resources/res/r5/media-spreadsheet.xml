@@ -8117,7 +8117,7 @@
     <Cell ss:StyleID="s127"/>
     <Cell ss:StyleID="s162"/>
     <Cell ss:StyleID="s162"><Data ss:Type="String">Entered in Error</Data></Cell>
-    <Cell ss:StyleID="s162"><Data ss:Type="String">This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)</Data></Cell>
+    <Cell ss:StyleID="s162"><Data ss:Type="String">This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "aborted" rather than "entered-in-error".)</Data></Cell>
     <Cell ss:StyleID="s140"/>
     <Cell ss:StyleID="s140"><Data ss:Type="String">=ActStatus.nullified</Data></Cell>
     <Cell ss:StyleID="s151"/>

@@ -24,6 +24,7 @@ import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -37,7 +38,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
 
-public class FhirResourceDaoEncounterR4 extends FhirResourceDaoR4<Encounter>implements IFhirResourceDaoEncounter<Encounter> {
+public class FhirResourceDaoEncounterR4 extends BaseHapiFhirResourceDao<Encounter> implements IFhirResourceDaoEncounter<Encounter> {
 
 	@Override
 	public IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort) {

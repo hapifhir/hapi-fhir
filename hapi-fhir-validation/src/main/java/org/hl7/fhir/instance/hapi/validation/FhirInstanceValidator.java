@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.XmlUtil;
+import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import com.github.benmanes.caffeine.cache.CacheLoader;
@@ -51,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class FhirInstanceValidator extends BaseValidatorBridge implements IValidatorModule {
+public class FhirInstanceValidator extends BaseValidatorBridge implements IInstanceValidatorModule {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidator.class);
 	private static final FhirContext FHIR_CONTEXT = FhirContext.forDstu2();

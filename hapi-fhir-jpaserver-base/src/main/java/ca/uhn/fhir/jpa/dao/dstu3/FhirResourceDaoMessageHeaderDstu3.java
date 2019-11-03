@@ -20,9 +20,10 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoMessageHeader;
 import org.hl7.fhir.dstu3.model.MessageHeader;
 
-public class FhirResourceDaoMessageHeaderDstu3 extends FhirResourceDaoDstu3<MessageHeader> implements IFhirResourceDaoMessageHeader<MessageHeader> {
+public class FhirResourceDaoMessageHeaderDstu3 extends BaseHapiFhirResourceDao<MessageHeader> implements IFhirResourceDaoMessageHeader<MessageHeader> {
 	// nothing right now
 }

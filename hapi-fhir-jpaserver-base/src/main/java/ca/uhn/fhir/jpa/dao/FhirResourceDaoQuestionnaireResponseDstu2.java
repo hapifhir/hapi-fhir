@@ -22,6 +22,6 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 
-public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDstu2<QuestionnaireResponse> {
+public class FhirResourceDaoQuestionnaireResponseDstu2 extends BaseHapiFhirResourceDao<QuestionnaireResponse> {
 	// nothing
 }
