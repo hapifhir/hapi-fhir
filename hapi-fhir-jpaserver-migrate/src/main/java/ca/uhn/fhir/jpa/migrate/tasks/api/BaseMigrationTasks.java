@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.migrate.taskdef.*;
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.EnumUtils;

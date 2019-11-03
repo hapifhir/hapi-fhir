@@ -1,14 +1,12 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.flywaydb.core.api.FlywayException;
 import org.junit.Test;
 
 import java.sql.SQLException;
 import java.util.Set;
 
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 

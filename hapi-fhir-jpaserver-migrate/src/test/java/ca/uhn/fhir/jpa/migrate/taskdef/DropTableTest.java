@@ -4,11 +4,10 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.junit.Test;
 
 import java.sql.SQLException;
-import java.util.Collections;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 public class DropTableTest extends BaseTest {
 

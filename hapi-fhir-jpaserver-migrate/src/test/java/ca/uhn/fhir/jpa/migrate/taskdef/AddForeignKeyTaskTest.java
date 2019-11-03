@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import java.sql.SQLException;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
 

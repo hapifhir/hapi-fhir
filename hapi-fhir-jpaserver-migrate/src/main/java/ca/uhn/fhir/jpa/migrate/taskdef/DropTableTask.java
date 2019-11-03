@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 public class DropTableTask extends BaseTableTask<DropTableTask> {
