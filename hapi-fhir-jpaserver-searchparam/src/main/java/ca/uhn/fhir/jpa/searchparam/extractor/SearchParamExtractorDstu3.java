@@ -31,9 +31,8 @@ import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,13 +51,11 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	@VisibleForTesting
 	public SearchParamExtractorDstu3(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
 		super(theCtx, theSearchParamRegistry);
-		start(null);
 		start();
 	}
 
 	@Override
 	protected IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
-		start(null);
 		return () -> {
 			List<IBase> values = new ArrayList<>();
 			List<Base> allValues = myFhirPathEngine.evaluate((Base) theResource, theSinglePath);
@@ -71,11 +68,10 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	}
 
 
-
-
-
-	@EventListener
-	public void start(ContextRefreshedEvent theEvent) {
+	@Override
+	@PostConstruct
+	public void start() {
+		super.start();
 		if (myFhirPathEngine == null) {
 			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
 			IWorkerContext worker = new HapiWorkerContext(getContext(), support);
