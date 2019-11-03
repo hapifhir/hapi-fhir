@@ -50,6 +50,48 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
 	}
 
+
+	@Test
+	public void testBundleComposition() {
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.setCode("foo");
+		fooSp.addBase("Bundle");
+		fooSp.setType(Enumerations.SearchParamType.REFERENCE);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("Bundle.entry[0].resource.as(Composition).encounter");
+		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(fooSp));
+
+		mySearchParameterDao.create(fooSp, mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		Encounter enc = new Encounter();
+		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
+		String encId = myEncounterDao.create(enc).getId().toUnqualifiedVersionless().getValue();
+
+		Composition composition = new Composition();
+		composition.getEncounter().setReference(encId);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		bundle.addEntry().setResource(composition);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		String bundleId = myBundleDao.create(bundle).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add("foo", new ReferenceParam(encId));
+		IBundleProvider results = myBundleDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(results), hasItems(bundleId));
+
+	}
+
+
 	@Test
 	public void testCreateInvalidNoBase() {
 		SearchParameter fooSp = new SearchParameter();
