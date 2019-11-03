@@ -83,7 +83,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
 		payload.setSubscription(subscription);
-		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
+		payload.setResource(patient, EncodingEnum.JSON, myCtx);
 		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
 
 		mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
@@ -105,7 +105,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
 		payload.setSubscription(subscription);
-		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
+		payload.setResource(patient, EncodingEnum.JSON, myCtx);
 		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
 
 		when(myGenericClient.update()).thenThrow(new InternalErrorException("FOO"));
@@ -136,7 +136,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
 		payload.setSubscription(subscription);
-		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
+		payload.setResource(patient, EncodingEnum.JSON, myCtx);
 		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
 
 		when(myGenericClient.update()).thenThrow(new InternalErrorException("FOO"));
@@ -162,7 +162,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
 		payload.setSubscription(subscription);
-		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
+		payload.setResource(patient, EncodingEnum.JSON, myCtx);
 		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
 
 		mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
