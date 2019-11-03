@@ -31,21 +31,15 @@ import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.trim;
-
 public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
-	@Autowired
 	private org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport myValidationSupport;
-
-	private HapiWorkerContext myWorkerContext;
 	private FHIRPathEngine myFhirPathEngine;
 
 	/**
@@ -82,7 +76,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	public void start(ContextRefreshedEvent theEvent) {
 		if (myValidationSupport == null) {
 			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
-			IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
+			IWorkerContext worker = new HapiWorkerContext(getContext(), support);
 			myFhirPathEngine = new FHIRPathEngine(worker);
 			myValidationSupport = support;
 		}
