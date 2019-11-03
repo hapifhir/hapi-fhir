@@ -98,7 +98,7 @@ public class FlywayMigrator {
 	}
 
 	private Flyway initFlyway(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
-		// FIXME KHS Try creating from datasource
+		// TODO KHS Is there a way we can use datasource instead of url, username, password here
 			Flyway flyway = Flyway.configure()
 			.dataSource(myConnectionUrl, myUsername, myPassword)
 			.baselineOnMigrate(true)
