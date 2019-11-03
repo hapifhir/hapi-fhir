@@ -72,7 +72,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	public void initFhirPath() {
 		if (myValidationSupport == null) {
 			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
-			IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
+			IWorkerContext worker = new HapiWorkerContext(getContext(), support);
 			myFhirPathEngine = new FHIRPathEngine(worker);
 			myFhirPathEngine.setHostServices(new SearchParamExtractorR4HostServices());
 			myValidationSupport = support;
