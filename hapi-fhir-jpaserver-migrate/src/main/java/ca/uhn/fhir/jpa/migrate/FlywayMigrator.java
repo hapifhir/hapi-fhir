@@ -42,24 +42,17 @@ public class FlywayMigrator {
 	private String myConnectionUrl;
 	private String myUsername;
 	private String myPassword;
-	// FIXME KHS
-//	private String myDefaultSchema;
 	private List<FlywayMigration> myTasks = new ArrayList<>();
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
 
 	public FlywayMigrator() {}
 
-	// FIXME KHS test with nonexistent database
 	public FlywayMigrator(BasicDataSource theDataSource) {
 		myConnectionUrl = theDataSource.getUrl();
 		myUsername = theDataSource.getUsername();
 		myPassword = theDataSource.getPassword();
-//		myDefaultSchema = theDataSource.getDefaultSchema();
-		// FIXME KHS
-//		if (myDefaultSchema == null) {
-//			myDefaultSchema = "kentest";
-//		}
+
 		String driverClassName = theDataSource.getDriverClassName();
 		if (driverClassName == null) {
 			ourLog.error(this.getClass().getSimpleName() + " constructed without a database driver");
@@ -105,12 +98,8 @@ public class FlywayMigrator {
 	}
 
 	private Flyway initFlyway(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
-		// FIXME KHS instantiate from database, not this other stuff
-		// FIXME KHS ensure we have a default schema
-// FIXME KHS succeeds from zero.  But then second time fails with error.  It's as though the flyway db isn't persisting.... or maybe a checksum issue...?
-		Flyway flyway = Flyway.configure()
-			// FIXME KHS required?
-//			.schemas(myDefaultSchema)
+		// FIXME KHS Try creating from datasource
+			Flyway flyway = Flyway.configure()
 			.dataSource(myConnectionUrl, myUsername, myPassword)
 			.baselineOnMigrate(true)
 			.javaMigrations(myTasks.toArray(new JavaMigration[0]))
