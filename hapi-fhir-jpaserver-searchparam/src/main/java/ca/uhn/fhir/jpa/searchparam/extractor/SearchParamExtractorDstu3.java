@@ -51,6 +51,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	@VisibleForTesting
 	public SearchParamExtractorDstu3(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
 		super(theCtx, theSearchParamRegistry);
+		initFhirPathEngine(theValidationSupport);
 		start();
 	}
 
@@ -74,9 +75,13 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		super.start();
 		if (myFhirPathEngine == null) {
 			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
-			IWorkerContext worker = new HapiWorkerContext(getContext(), support);
-			myFhirPathEngine = new FHIRPathEngine(worker);
+			initFhirPathEngine(support);
 		}
+	}
+
+	public void initFhirPathEngine(IValidationSupport theSupport) {
+		IWorkerContext worker = new HapiWorkerContext(getContext(), theSupport);
+		myFhirPathEngine = new FHIRPathEngine(worker);
 	}
 
 }
