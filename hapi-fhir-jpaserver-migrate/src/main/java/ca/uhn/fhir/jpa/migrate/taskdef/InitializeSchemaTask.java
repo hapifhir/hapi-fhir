@@ -31,8 +31,9 @@ public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
 		DriverTypeEnum driverType = getDriverType();
 
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
-		if (tableNames.contains("HFJ_RESOURCE")) {
-			logInfo(ourLog, "The table HFJ_RESOURCE already exists.  Skipping schema initialization for {}", driverType);
+		String schemaExistsIndicatorTable = mySchemaInitializationProvider.getSchemaExistsIndicatorTable();
+		if (tableNames.contains(schemaExistsIndicatorTable)) {
+			logInfo(ourLog, "The table {} already exists.  Skipping schema initialization for {}", schemaExistsIndicatorTable, driverType);
 			return;
 		}
 

@@ -36,6 +36,11 @@ public class InitializeSchemaTaskTest extends BaseTest {
 		}
 
 		@Override
+		public String getSchemaExistsIndicatorTable() {
+			return "DONT_MATCH_ME";
+		}
+
+		@Override
 		public boolean equals(Object theO) {
 			if (this == theO) return true;
 

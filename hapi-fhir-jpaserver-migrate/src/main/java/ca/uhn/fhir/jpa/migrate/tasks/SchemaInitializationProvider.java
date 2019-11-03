@@ -14,9 +14,16 @@ import java.util.List;
 
 public class SchemaInitializationProvider implements ISchemaInitializationProvider {
 	private final String mySchemaFileClassPath;
+	private final String mySchemaExistsIndicatorTable;
 
-	public SchemaInitializationProvider(String theSchemaFileClassPath) {
+	/**
+	 *
+	 * @param theSchemaFileClassPath pathname to script used to initialize schema
+	 * @param theSchemaExistsIndicatorTable a table name we can use to determine if this schema has already been initialized
+	 */
+	public SchemaInitializationProvider(String theSchemaFileClassPath, String theSchemaExistsIndicatorTable) {
 		mySchemaFileClassPath = theSchemaFileClassPath;
+		mySchemaExistsIndicatorTable = theSchemaExistsIndicatorTable;
 	}
 
 	@Override
@@ -63,5 +70,10 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 		return new HashCodeBuilder(17, 37)
 			.append(size())
 			.toHashCode();
+	}
+
+	@Override
+	public String getSchemaExistsIndicatorTable() {
+		return mySchemaExistsIndicatorTable;
 	}
 }

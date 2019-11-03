@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface ISchemaInitializationProvider {
 	List<String> getSqlStatements(DriverTypeEnum theDriverType);
+
+	String getSchemaExistsIndicatorTable();
 }
