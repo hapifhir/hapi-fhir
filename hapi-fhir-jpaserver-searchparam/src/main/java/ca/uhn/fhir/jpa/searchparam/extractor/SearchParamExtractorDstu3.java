@@ -66,6 +66,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 
 	@Override
 	protected IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
+		start(null);
 		return () -> {
 			List<IBase> values = new ArrayList<>();
 			List<Base> allValues = myFhirPathEngine.evaluate((Base) theResource, theSinglePath);
@@ -80,10 +81,11 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	@EventListener
 	public void start(ContextRefreshedEvent theEvent) {
 		if (myValidationSupport == null) {
-			myValidationSupport = myApplicationContext.getBean(IValidationSupport.class);
+			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
+			IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
+			myFhirPathEngine = new FHIRPathEngine(worker);
+			myValidationSupport = support;
 		}
-		IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
-		myFhirPathEngine = new FHIRPathEngine(worker);
 	}
 
 }

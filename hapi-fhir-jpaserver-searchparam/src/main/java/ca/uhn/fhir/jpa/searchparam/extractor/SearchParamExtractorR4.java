@@ -71,11 +71,12 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	@PostConstruct
 	public void initFhirPath() {
 		if (myValidationSupport == null) {
-			myValidationSupport = myApplicationContext.getBean(IValidationSupport.class);
+			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
+			IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
+			myFhirPathEngine = new FHIRPathEngine(worker);
+			myFhirPathEngine.setHostServices(new SearchParamExtractorR4HostServices());
+			myValidationSupport = support;
 		}
-		IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
-		myFhirPathEngine = new FHIRPathEngine(worker);
-		myFhirPathEngine.setHostServices(new SearchParamExtractorR4HostServices());
 	}
 
 
