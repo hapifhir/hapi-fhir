@@ -26,8 +26,8 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.context.IWorkerContext;
-import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
@@ -57,16 +57,18 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 	public SearchParamExtractorR5(FhirContext theCtx, DefaultProfileValidationSupport theDefaultProfileValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
 		super(theCtx, theSearchParamRegistry);
 		myValidationSupport = theDefaultProfileValidationSupport;
+		initFhirPath();
 		start();
 	}
 
-	@Override
 	@PostConstruct
-	public void start() {
-		super.start();
-		IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
-		myFhirPathEngine = new FHIRPathEngine(worker);
-		myFhirPathEngine.setHostServices(new SearchParamExtractorR5HostServices());
+	public void initFhirPath() {
+		if (myFhirPathEngine == null) {
+			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
+			IWorkerContext worker = new HapiWorkerContext(getContext(), support);
+			myFhirPathEngine = new FHIRPathEngine(worker);
+			myFhirPathEngine.setHostServices(new SearchParamExtractorR5HostServices());
+		}
 	}
 
 	@Override
