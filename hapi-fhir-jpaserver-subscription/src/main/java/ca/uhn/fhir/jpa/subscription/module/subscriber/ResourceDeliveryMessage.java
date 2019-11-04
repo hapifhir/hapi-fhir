@@ -122,7 +122,7 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	 */
 	public String getSubscriptionId(FhirContext theFhirContext) {
 		String retVal = null;
-		if (getSubscription() != null) {
+		if (getSubscription() != null && getSubscription().getIdElement(theFhirContext) != null) {
 			retVal = getSubscription().getIdElement(theFhirContext).getValue();
 		}
 		return retVal;
