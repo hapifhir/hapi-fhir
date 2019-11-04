@@ -161,7 +161,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 		}
 
 		String from = processEmailAddressUri(defaultString(subscription.getEmailDetails().getFrom(), myModelConfig.getEmailFromAddress()));
-		String subjectTemplate = defaultString(subscription.getEmailDetails().getSubjectTemplate(), provideDefaultSubjectTemplate());
+		String subjectTemplate = defaultString(subscription.getEmailDetails().getSubjectTemplate(), myModelConfig.getEmailDefaultSubject());
 
 		details.setTo(destinationAddresses);
 		details.setFrom(from);
@@ -191,10 +191,6 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
          next = next.substring("mailto:".length());
       }
 		return next;
-	}
-
-	private String provideDefaultSubjectTemplate() {
-		return "HAPI FHIR Subscriptions";
 	}
 
 	public void setEmailSender(IEmailSender theEmailSender) {
