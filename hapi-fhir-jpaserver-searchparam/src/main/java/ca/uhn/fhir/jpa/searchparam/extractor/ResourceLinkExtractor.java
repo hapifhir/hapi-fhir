@@ -70,13 +70,6 @@ public class ResourceLinkExtractor {
 	public void extractResourceLinks(ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, boolean theFailOnInvalidReference, RequestDetails theRequest) {
 		String resourceType = theEntity.getResourceType();
 
-		/*
-		 * For now we don't try to load any of the links in a bundle if it's the actual bundle we're storing..
-		 */
-		if (theResource instanceof IBaseBundle) {
-			return;
-		}
-
 		Map<String, RuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveSearchParams(toResourceName(theResource.getClass()));
 
 		for (RuntimeSearchParam nextSpDef : searchParams.values()) {

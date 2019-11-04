@@ -43,8 +43,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
-	@Autowired
-	private IValidationSupport myValidationSupport;
 	private FHIRPathEngine myFhirPathEngine;
 
 	public SearchParamExtractorR5() {
@@ -56,19 +54,24 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 	 */
 	public SearchParamExtractorR5(FhirContext theCtx, DefaultProfileValidationSupport theDefaultProfileValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
 		super(theCtx, theSearchParamRegistry);
-		myValidationSupport = theDefaultProfileValidationSupport;
-		initFhirPath();
+		initFhirPath(theDefaultProfileValidationSupport);
 		start();
 	}
 
+	@Override
 	@PostConstruct
-	public void initFhirPath() {
+	public void start() {
+		super.start();
 		if (myFhirPathEngine == null) {
 			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
-			IWorkerContext worker = new HapiWorkerContext(getContext(), support);
-			myFhirPathEngine = new FHIRPathEngine(worker);
-			myFhirPathEngine.setHostServices(new SearchParamExtractorR5HostServices());
+			initFhirPath(support);
 		}
+	}
+
+	public void initFhirPath(IValidationSupport theSupport) {
+		IWorkerContext worker = new HapiWorkerContext(getContext(), theSupport);
+		myFhirPathEngine = new FHIRPathEngine(worker);
+		myFhirPathEngine.setHostServices(new SearchParamExtractorR5HostServices());
 	}
 
 	@Override
