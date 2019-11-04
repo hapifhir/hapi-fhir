@@ -400,6 +400,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			for (String nextPath : nextPathsSplit) {
 				List<? extends IBase> allValues;
 
+				// This path is hard to parse and isn't likely to produce anything useful anyway
+				if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2)) {
+					if (nextPath.equals("Bundle.entry.resource(0)")) {
+						continue;
+					}
+				}
+
 				nextPath = trim(nextPath);
 				IValueExtractor allValuesFunc = getPathValueExtractor(theResource, nextPath);
 				try {

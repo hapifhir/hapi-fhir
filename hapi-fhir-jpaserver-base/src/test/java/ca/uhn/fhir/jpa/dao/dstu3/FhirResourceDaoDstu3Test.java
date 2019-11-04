@@ -756,19 +756,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	}
 
-	@Test
-	public void testCreateWithInvalidReferenceNoId() {
-		Patient p = new Patient();
-		p.addName().setFamily("Hello");
-		p.getManagingOrganization().setReference("Organization/");
-
-		try {
-			myPatientDao.create(p, mySrd);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Does not contain resource ID"));
-		}
-	}
 
 	@Test
 	public void testCreateWithReferenceBadType() {

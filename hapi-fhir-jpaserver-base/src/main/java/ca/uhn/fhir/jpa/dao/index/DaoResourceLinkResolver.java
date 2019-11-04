@@ -100,7 +100,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			throw new InvalidRequestException("Resource " + resName + "/" + theId + " is deleted, specified in path: " + theNextPathsUnsplit);
 		}
 
-		if (theNextSpDef.getTargets() != null && !theNextSpDef.getTargets().contains(theTypeString)) {
+		if (!theNextSpDef.hasTargets() && theNextSpDef.getTargets().contains(theTypeString)) {
 			return null;
 		}
 		return target;
