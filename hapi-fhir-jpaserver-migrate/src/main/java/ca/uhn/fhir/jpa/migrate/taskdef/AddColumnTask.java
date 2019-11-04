@@ -31,14 +31,8 @@ public class AddColumnTask extends BaseTableColumnTypeTask<AddColumnTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddColumnTask.class);
 
-	/**
-	 * Constructor
-	 *
-	 * @param theRelease
-	 * @param theVersion
-	 */
-	public AddColumnTask(String theRelease, String theVersion) {
-		super(theRelease, theVersion);
+	public AddColumnTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
 	}
 
 	@Override

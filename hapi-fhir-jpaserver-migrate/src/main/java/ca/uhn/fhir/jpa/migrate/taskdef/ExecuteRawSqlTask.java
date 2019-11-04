@@ -39,8 +39,8 @@ public class ExecuteRawSqlTask extends BaseTask<ExecuteRawSqlTask> {
 	private Map<DriverTypeEnum, List<String>> myDriverToSqls = new HashMap<>();
 	private List<String> myDriverNeutralSqls = new ArrayList<>();
 
-	public ExecuteRawSqlTask(String theRelease, String theVersion) {
-		super(theRelease, theVersion);
+	public ExecuteRawSqlTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
 		setDescription("Execute raw sql");
 	}
 

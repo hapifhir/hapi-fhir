@@ -45,8 +45,8 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 	 * Constructor
 	 */
 
-	public BaseTableColumnTypeTask(String theRelease, String theVersion) {
-		super(theRelease, theVersion);
+	public BaseTableColumnTypeTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.H2_EMBEDDED, "integer");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.DERBY_EMBEDDED, "integer");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.MARIADB_10_1, "integer");

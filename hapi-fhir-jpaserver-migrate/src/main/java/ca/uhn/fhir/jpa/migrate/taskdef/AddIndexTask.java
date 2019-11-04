@@ -41,8 +41,8 @@ public class AddIndexTask extends BaseTableTask<AddIndexTask> {
 	private List<String> myColumns;
 	private Boolean myUnique;
 
-	public AddIndexTask(String theRelease, String theVersion) {
-		super(theRelease, theVersion);
+	public AddIndexTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
 	}
 
 	public void setIndexName(String theIndexName) {

@@ -40,8 +40,8 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 	private boolean myAllowNeitherColumnToExist;
 	private boolean myDeleteTargetColumnFirstIfBothExist;
 
-	public RenameColumnTask(String theRelease, String theVersion) {
-		super(theRelease, theVersion);
+	public RenameColumnTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
 	}
 
 	public void setDeleteTargetColumnFirstIfBothExist(boolean theDeleteTargetColumnFirstIfBothExist) {

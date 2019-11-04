@@ -32,13 +32,8 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ModifyColumnTask.class);
 
-	/**
-	 * Constructor
-	 *
-	 * @param theVersion
-	 */
-	public ModifyColumnTask(String theRelease, String theVersion) {
-		super(theRelease, theVersion);
+	public ModifyColumnTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
 	}
 
 	@Override

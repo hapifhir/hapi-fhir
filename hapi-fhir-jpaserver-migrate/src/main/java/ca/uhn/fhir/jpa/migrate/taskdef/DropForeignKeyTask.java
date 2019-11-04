@@ -42,8 +42,8 @@ public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
 	private String myConstraintName;
 	private String myParentTableName;
 
-	public DropForeignKeyTask(String theRelease, String theVersion) {
-		super(theRelease, theVersion);
+	public DropForeignKeyTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
 	}
 
 	public void setConstraintName(String theConstraintName) {

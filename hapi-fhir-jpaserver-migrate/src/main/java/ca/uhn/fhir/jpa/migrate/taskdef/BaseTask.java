@@ -47,12 +47,12 @@ public abstract class BaseTask<T extends BaseTask> {
 	private boolean myDryRun;
 	private List<ExecutedStatement> myExecutedStatements = new ArrayList<>();
 	private boolean myNoColumnShrink;
-	private final String myRelease;
-	private final String myVersion;
+	private final String myProductVersion;
+	private final String mySchemaVersion;
 
-	protected BaseTask(String theRelease, String theVersion) {
-		myRelease = theRelease;
-		myVersion = theVersion;
+	protected BaseTask(String theProductVersion, String theSchemaVersion) {
+		myProductVersion = theProductVersion;
+		mySchemaVersion = theSchemaVersion;
 	}
 
 	public boolean isNoColumnShrink() {
@@ -146,11 +146,11 @@ public abstract class BaseTask<T extends BaseTask> {
 
 	public String getFlywayVersion() {
 		String retval = "";
-		String releasePart = myRelease;
+		String releasePart = myProductVersion;
 		if (releasePart.startsWith("V")) {
 			releasePart = releasePart.substring(1);
 		}
-		return releasePart + "." + myVersion;
+		return releasePart + "." + mySchemaVersion;
 	}
 
 	protected void logInfo(Logger theLog, String theFormattedMessage, Object... theArguments) {
@@ -158,9 +158,9 @@ public abstract class BaseTask<T extends BaseTask> {
 	}
 
 	public void validateVersion() {
-		Matcher matcher = versionPattern.matcher(myVersion);
+		Matcher matcher = versionPattern.matcher(mySchemaVersion);
 		if (!matcher.matches()) {
-			throw new IllegalStateException("The version " + myVersion + " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
+			throw new IllegalStateException("The version " + mySchemaVersion + " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
 		}
 	}
 

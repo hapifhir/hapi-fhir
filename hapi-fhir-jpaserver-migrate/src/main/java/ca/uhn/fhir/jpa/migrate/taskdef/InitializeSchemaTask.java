@@ -16,8 +16,8 @@ public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
 	private static final Logger ourLog = LoggerFactory.getLogger(InitializeSchemaTask.class);
 	private final ISchemaInitializationProvider mySchemaInitializationProvider;
 
-	public InitializeSchemaTask(String theRelease, String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
-		super(theRelease, theVersion);
+	public InitializeSchemaTask(String theProductVersion, String theSchemaVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
+		super(theProductVersion, theSchemaVersion);
 		mySchemaInitializationProvider = theSchemaInitializationProvider;
 		setDescription("Initialize schema");
 	}

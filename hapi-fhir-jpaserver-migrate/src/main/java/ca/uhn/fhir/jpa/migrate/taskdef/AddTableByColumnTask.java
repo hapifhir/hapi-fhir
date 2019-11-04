@@ -38,8 +38,8 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 	private List<AddColumnTask> myAddColumnTasks = new ArrayList<>();
 	private String myPkColumn;
 
-	public AddTableByColumnTask(String theRelease, String theVersion) {
-		super(theRelease, theVersion);
+	public AddTableByColumnTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
 	}
 
 	@Override

@@ -40,8 +40,8 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 	private static final Logger ourLog = LoggerFactory.getLogger(DropIndexTask.class);
 	private String myIndexName;
 
-	public DropIndexTask(String theRelease, String theVersion) {
-		super(theRelease, theVersion);
+	public DropIndexTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
 	}
 
 	@Override
