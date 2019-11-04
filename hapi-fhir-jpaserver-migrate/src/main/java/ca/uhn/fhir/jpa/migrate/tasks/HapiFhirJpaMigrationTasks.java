@@ -61,13 +61,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init410() { // 20190815 - present
 		Builder version = forVersion(VersionEnum.V4_1_0);
 
-		version.onTable("HFJ_SPIDX_NUMBER").modifyColumn("RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_TOKEN").modifyColumn("RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_STRING").modifyColumn("RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_DATE").modifyColumn("RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_URI").modifyColumn("RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_NUMBER").modifyColumn("20190920.1", "RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("20190920.2", "RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_TOKEN").modifyColumn("20190920.3", "RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20190920.4", "RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_DATE").modifyColumn("20190920.5", "RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("20190920.6", "RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_URI").modifyColumn("20190920.7", "RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 
 		// HFJ_SEARCH
 		version.onTable("HFJ_SEARCH").addColumn("20190921.1", "EXPIRY_OR_NULL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
