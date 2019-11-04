@@ -54,7 +54,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	@VisibleForTesting
 	public SearchParamExtractorR4(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
 		super(theCtx, theSearchParamRegistry);
-		initFhirPath();
+		initFhirPath(theValidationSupport);
 		start();
 	}
 
@@ -71,14 +71,20 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 
 
+	@Override
 	@PostConstruct
-	public void initFhirPath() {
+	public void start() {
+		super.start();
 		if (myFhirPathEngine == null) {
 			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
-			IWorkerContext worker = new HapiWorkerContext(getContext(), support);
-			myFhirPathEngine = new FHIRPathEngine(worker);
-			myFhirPathEngine.setHostServices(new SearchParamExtractorR4HostServices());
+			initFhirPath(support);
 		}
+	}
+
+	public void initFhirPath(IValidationSupport theSupport) {
+		IWorkerContext worker = new HapiWorkerContext(getContext(), theSupport);
+		myFhirPathEngine = new FHIRPathEngine(worker);
+		myFhirPathEngine.setHostServices(new SearchParamExtractorR4HostServices());
 	}
 
 
