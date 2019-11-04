@@ -146,7 +146,8 @@ public class ResourceLinkExtractor {
 			}
 
 		} else if (nextObject instanceof IBaseResource) {
-			nextId = ((IBaseResource) nextObject).getIdElement().toUnqualified();
+//			nextId = ((IBaseResource) nextObject).getIdElement().toUnqualified();
+			return;
 		} else {
 			@SuppressWarnings("unchecked")
 			Class<? extends IBase> clazz = (Class<? extends IBase>) nextObject.getClass();
@@ -169,7 +170,7 @@ public class ResourceLinkExtractor {
 
 		if (nextId == null ||
 			nextId.isEmpty() ||
-			nextId.hasIdPart() == false ||
+//			nextId.hasIdPart() == false ||
 			nextId.getValue().startsWith("#") ||
 			nextId.getValue().startsWith("urn:")) {
 			return;
@@ -209,7 +210,7 @@ public class ResourceLinkExtractor {
 			}
 		}
 
-		if (!theRuntimeSearchParam.getTargets().isEmpty()) {
+		if (theRuntimeSearchParam.hasTargets()) {
 			if (!theRuntimeSearchParam.getTargets().contains(typeString)) {
 				return;
 			}
@@ -242,14 +243,18 @@ public class ResourceLinkExtractor {
 
 		theResourceLinkResolver.validateTypeOrThrowException(type);
 		ResourceLink resourceLink = createResourceLink(theEntity, theUpdateTime, theResourceLinkResolver, theRuntimeSearchParam, thePath, thePathAndRef, nextId, typeString, type, id, theRequest);
-		if (resourceLink == null) return;
+		if (resourceLink == null) {
+			return;
+		}
 		theParams.myLinks.add(resourceLink);
 	}
 
 	private ResourceLink createResourceLink(ResourceTable theEntity, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, String theId, RequestDetails theRequest) {
 		ResourceTable targetResource = theResourceLinkResolver.findTargetResource(nextSpDef, theNextPathsUnsplit, theNextId, theTypeString, theType, theId, theRequest);
 
-		if (targetResource == null) return null;
+		if (targetResource == null) {
+			return null;
+		}
 		ResourceLink resourceLink = new ResourceLink(nextPathAndRef.getPath(), theEntity, targetResource, theUpdateTime);
 		return resourceLink;
 	}

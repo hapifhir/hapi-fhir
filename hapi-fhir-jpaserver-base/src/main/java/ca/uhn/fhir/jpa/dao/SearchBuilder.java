@@ -579,9 +579,8 @@ public class SearchBuilder implements ISearchBuilder {
 			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 			resourceTypes = new ArrayList<>();
 
-			Set<String> targetTypes = param.getTargets();
-
-			if (targetTypes != null && !targetTypes.isEmpty()) {
+			if (param.hasTargets()) {
+				Set<String> targetTypes = param.getTargets();
 				for (String next : targetTypes) {
 					resourceTypes.add(myContext.getResourceDefinition(next).getImplementingClass());
 				}
@@ -2494,7 +2493,7 @@ public class SearchBuilder implements ISearchBuilder {
 					for (String nextPath : paths) {
 						String sql;
 
-						boolean haveTargetTypesDefinedByParam = param.getTargets() != null && param.getTargets().isEmpty() == false;
+						boolean haveTargetTypesDefinedByParam = param.hasTargets();
 						if (targetResourceType != null) {
 							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
 						} else if (haveTargetTypesDefinedByParam) {
