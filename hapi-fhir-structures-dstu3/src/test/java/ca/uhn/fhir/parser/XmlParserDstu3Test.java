@@ -110,6 +110,23 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
+	public void testEncodeExtensionWithNullUrl() {
+		{
+			Patient p = new Patient();
+			p.addExtension().setValue(new StringType("foo"));
+			String encoded = ourCtx.newXmlParser().encodeResourceToString(p);
+			assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><extension><valueString value=\"foo\"/></extension></Patient>", encoded);
+		}
+		{
+			Patient p = new Patient();
+			p.getActiveElement().addExtension().setValue(new StringType("foo"));
+			String encoded = ourCtx.newXmlParser().encodeResourceToString(p);
+			assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><active><extension><valueString value=\"foo\"/></extension></active></Patient>", encoded);
+		}
+	}
+
+
+	@Test
 	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {
 		String refVal = "http://my.org/FooBar";
 

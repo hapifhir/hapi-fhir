@@ -497,6 +497,10 @@
 				hierarchy of supported resource types, instead of just using the root resource for each type.
 				Thanks to Stig Døssing for the pull request!
 			</action>
+			<action type="fix">
+				A NullPointerException in the XML Parser was fixed when serializing a resource containing an extension
+				on a primitive datatype that was missing a URL declaration.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
