@@ -704,6 +704,7 @@ public enum Pointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
 	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.email.EmailDetails</li>
 	 * </ul>
 	 * <p>
@@ -723,6 +724,7 @@ public enum Pointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
 	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.email.EmailDetails</li>
 	 * </ul>
 	 * <p>

@@ -171,6 +171,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 		// Interceptor call: SUBSCRIPTION_BEFORE_EMAIL_DELIVERY
 		HookParams params = new HookParams()
 			.add(CanonicalSubscription.class, subscription)
+			.add(ResourceDeliveryMessage.class, theMessage)
 			.add(EmailDetails.class, details);
 		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_EMAIL_DELIVERY, params)) {
 			return;
@@ -181,6 +182,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 		// Interceptor call: SUBSCRIPTION_AFTER_EMAIL_DELIVERY
 		params = new HookParams()
 			.add(CanonicalSubscription.class, subscription)
+			.add(ResourceDeliveryMessage.class, theMessage)
 			.add(EmailDetails.class, details);
 		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_EMAIL_DELIVERY, params);
 	}
