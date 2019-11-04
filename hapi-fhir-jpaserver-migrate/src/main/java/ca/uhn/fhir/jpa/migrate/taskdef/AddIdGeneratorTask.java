@@ -46,6 +46,7 @@ public class AddIdGeneratorTask extends BaseTask<AddIdGeneratorTask> {
 	@Override
 	public void validate() {
 		Validate.notBlank(myGeneratorName);
+		setDescription("Add id generator " + myGeneratorName);
 	}
 
 	@Override

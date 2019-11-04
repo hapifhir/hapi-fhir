@@ -42,6 +42,12 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 	}
 
 	@Override
+	public void validate() {
+		super.validate();
+		setDescription("Modify column " + getColumnName() + " on table " + getTableName());
+	}
+
+	@Override
 	public void execute() throws SQLException {
 
 		JdbcUtils.ColumnType existingType;

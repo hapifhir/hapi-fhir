@@ -19,6 +19,7 @@ public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
 	public InitializeSchemaTask(String theRelease, String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
 		super(theRelease, theVersion);
 		mySchemaInitializationProvider = theSchemaInitializationProvider;
+		setDescription("Initialize schema");
 	}
 
 	@Override

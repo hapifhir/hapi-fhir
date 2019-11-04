@@ -49,9 +49,7 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 		super.validate();
 		Validate.notBlank(myIndexName, "The index name must not be blank");
 
-		if (getDescription() == null) {
-			setDescription("Drop index " + myIndexName + " on table " + getTableName());
-		}
+		setDescription("Drop index " + myIndexName + " from table " + getTableName());
 	}
 
 	@Override

@@ -42,6 +42,12 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 		super(theRelease, theVersion);
 	}
 
+	@Override
+	public void validate() {
+		super.validate();
+		setDescription("Add table " + getTableName());
+	}
+
 	public void addAddColumnTask(AddColumnTask theTask) {
 		Validate.notNull(theTask);
 		myAddColumnTasks.add(theTask);

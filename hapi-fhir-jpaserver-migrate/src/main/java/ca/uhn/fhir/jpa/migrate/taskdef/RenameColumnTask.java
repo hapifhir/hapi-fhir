@@ -48,6 +48,12 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 		myDeleteTargetColumnFirstIfBothExist = theDeleteTargetColumnFirstIfBothExist;
 	}
 
+	@Override
+	public void validate() {
+		super.validate();
+		setDescription("Rename column " + myOldName + " to " + myNewName + " on table " + getTableName());
+	}
+
 	public void setOldName(String theOldName) {
 		Validate.notBlank(theOldName);
 		myOldName = theOldName;

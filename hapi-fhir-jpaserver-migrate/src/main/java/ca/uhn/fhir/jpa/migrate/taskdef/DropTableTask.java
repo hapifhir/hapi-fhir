@@ -38,6 +38,12 @@ public class DropTableTask extends BaseTableTask<DropTableTask> {
 	}
 
 	@Override
+	public void validate() {
+		super.validate();
+		setDescription("Drop table " + getTableName());
+	}
+
+	@Override
 	public void execute() throws SQLException {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		if (!tableNames.contains(getTableName())) {

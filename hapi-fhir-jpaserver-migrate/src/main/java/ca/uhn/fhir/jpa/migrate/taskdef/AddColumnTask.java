@@ -42,6 +42,12 @@ public class AddColumnTask extends BaseTableColumnTypeTask<AddColumnTask> {
 	}
 
 	@Override
+	public void validate() {
+		super.validate();
+		setDescription("Add column " + getColumnName() + " on table " + getTableName());
+	}
+
+	@Override
 	public void execute() throws SQLException {
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 		if (columnNames.contains(getColumnName())) {

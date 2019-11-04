@@ -46,6 +46,7 @@ public class DropIdGeneratorTask extends BaseTask<DropIdGeneratorTask> {
 	@Override
 	public void validate() {
 		Validate.notBlank(myGeneratorName);
+		setDescription("Drop id generator " + myGeneratorName);
 	}
 
 	@Override

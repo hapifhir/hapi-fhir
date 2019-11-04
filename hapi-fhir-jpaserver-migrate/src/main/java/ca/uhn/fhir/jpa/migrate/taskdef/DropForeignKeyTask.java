@@ -60,6 +60,8 @@ public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
 
 		Validate.isTrue(isNotBlank(myConstraintName));
 		Validate.isTrue(isNotBlank(myParentTableName));
+		setDescription("Drop foreign key " + myConstraintName + " from table " + getTableName());
+
 	}
 
 	@Override

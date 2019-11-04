@@ -37,6 +37,12 @@ public class DropColumnTask extends BaseTableColumnTask<DropColumnTask> {
 	}
 
 	@Override
+	public void validate() {
+		super.validate();
+		setDescription("Drop column " + getColumnName() + " from table " + getTableName());
+	}
+
+	@Override
 	public void execute() throws SQLException {
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 		if (!columnNames.contains(getColumnName())) {

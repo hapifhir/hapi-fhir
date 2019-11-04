@@ -62,6 +62,7 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 		Validate.isTrue(isNotBlank(myConstraintName));
 		Validate.isTrue(isNotBlank(myForeignTableName));
 		Validate.isTrue(isNotBlank(myForeignColumnName));
+		setDescription("Add foreign key " + myConstraintName + " from column " + getColumnName() + " of table " + getTableName() + " to column " + myForeignColumnName + " of table " + myForeignTableName);
 	}
 
 	@Override

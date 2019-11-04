@@ -120,6 +120,7 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 			mySql = theSql;
 			myMode = theMode;
 			myConsumer = theConsumer;
+			setDescription("Execute raw sql");
 		}
 
 

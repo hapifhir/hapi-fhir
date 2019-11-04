@@ -54,6 +54,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 	 */
 	public CalculateHashesTask(VersionEnum theRelease, String theVersion) {
 		super(theRelease.toString(), theVersion);
+		setDescription("Calculate resource search parameter index hashes");
 	}
 
 	@Override

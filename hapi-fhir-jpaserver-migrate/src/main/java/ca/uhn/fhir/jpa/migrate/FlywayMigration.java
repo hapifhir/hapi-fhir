@@ -31,11 +31,7 @@ public class FlywayMigration implements JavaMigration {
 
 	@Override
 	public String getDescription() {
-		String retval = myTask.getDescription();
-		if (retval == null) {
-			retval = myTask.getClass().getSimpleName() + " " + getVersion();
-		}
-		return retval;
+		return myTask.getDescription();
 	}
 
 	@Override

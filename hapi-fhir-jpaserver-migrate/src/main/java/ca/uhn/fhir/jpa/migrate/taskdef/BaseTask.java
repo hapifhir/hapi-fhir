@@ -72,6 +72,9 @@ public abstract class BaseTask<T extends BaseTask> {
 	}
 
 	public String getDescription() {
+		if (myDescription == null) {
+			return this.getClass().getSimpleName();
+		}
 		return myDescription;
 	}
 

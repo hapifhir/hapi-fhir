@@ -43,6 +43,12 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 		super(theRelease, theVersion);
 	}
 
+	@Override
+	public void validate() {
+		super.validate();
+		setDescription("Add table using raw sql");
+	}
+
 	public void addSql(DriverTypeEnum theDriverType, @Language("SQL") String theSql) {
 		Validate.notNull(theDriverType);
 		Validate.notBlank(theSql);

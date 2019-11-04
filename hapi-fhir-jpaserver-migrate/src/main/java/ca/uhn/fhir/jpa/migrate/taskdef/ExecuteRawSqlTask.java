@@ -41,6 +41,7 @@ public class ExecuteRawSqlTask extends BaseTask<ExecuteRawSqlTask> {
 
 	public ExecuteRawSqlTask(String theRelease, String theVersion) {
 		super(theRelease, theVersion);
+		setDescription("Execute raw sql");
 	}
 
 	public ExecuteRawSqlTask addSql(DriverTypeEnum theDriverType, @Language("SQL") String theSql) {
