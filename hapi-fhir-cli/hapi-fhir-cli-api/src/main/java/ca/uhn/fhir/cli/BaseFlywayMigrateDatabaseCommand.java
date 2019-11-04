@@ -75,6 +75,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		addRequiredOption(retVal, "n", "username", "Username", "The JDBC database username");
 		addRequiredOption(retVal, "p", "password", "Password", "The JDBC database password");
 		addRequiredOption(retVal, "d", "driver", "Driver", "The database driver to use (Options are " + driverOptions() + ")");
+		addOptionalOption(retVal, "x", "flags", "Flags", "A comma-separated list of any specific migration flags (these flags are version specific, see migrator documentation for details)");
 		addOptionalOption(retVal, null, "no-column-shrink", false, "If this flag is set, the system will not attempt to reduce the length of columns. This is useful in environments with a lot of existing data, where shrinking a column can take a very long time.");
 
 		return retVal;
