@@ -58,17 +58,13 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 
 		SchemaInitializationProvider that = (SchemaInitializationProvider) theO;
 
-		return size() == that.size();
-	}
-
-	private int size() {
-		return getSqlStatements(DriverTypeEnum.H2_EMBEDDED).size();
+		return this.getClass().getSimpleName() == that.getClass().getSimpleName();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(size())
+			.append(this.getClass().getSimpleName())
 			.toHashCode();
 	}
 
