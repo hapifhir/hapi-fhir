@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -174,6 +175,10 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 
 	public void setHasTags(boolean theHasTags) {
 		myHasTags = theHasTags;
+	}
+
+	public ResourcePersistentId getIdAsResourcePersistentId() {
+		return new ResourcePersistentId(getId());
 	}
 
 	static Date cloneDate(Date theDate) {

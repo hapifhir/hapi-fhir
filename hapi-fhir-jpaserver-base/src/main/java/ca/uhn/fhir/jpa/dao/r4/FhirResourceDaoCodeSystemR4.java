@@ -20,9 +20,11 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -39,7 +41,6 @@ import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -60,14 +61,17 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 	private ValidationSupportChain myValidationSupport;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTerminologyCodeSystemStorageSvc;
+	@Autowired
+	private FhirContext myFhirContext;
 
 	@Override
 	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest) {
 		List<IIdType> valueSetIds;
-		Set<Long> ids = searchForIds(new SearchParameterMap(CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)), theRequest);
+		Set<ResourcePersistentId> ids = searchForIds(new SearchParameterMap(CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)), theRequest);
 		valueSetIds = new ArrayList<>();
-		for (Long next : ids) {
-			valueSetIds.add(new IdType("CodeSystem", next));
+		for (ResourcePersistentId next : ids) {
+			IIdType id = myIdHelperService.translatePidIdToForcedId(myFhirContext, "CodeSystem", next);
+			valueSetIds.add(id);
 		}
 		return valueSetIds;
 	}

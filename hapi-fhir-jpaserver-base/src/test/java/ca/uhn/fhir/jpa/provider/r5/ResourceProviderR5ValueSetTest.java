@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -1063,7 +1064,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
 		return codeSystem;
 	}
 

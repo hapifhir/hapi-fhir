@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl.SearchTask;
@@ -66,7 +67,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		mySearchTask.awaitInitialSync();
 
 		ourLog.trace("Fetching search resource PIDs from task: {}", mySearchTask.getClass());
-		final List<Long> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
+		final List<ResourcePersistentId> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
 		ourLog.trace("Done fetching search resource PIDs");
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);

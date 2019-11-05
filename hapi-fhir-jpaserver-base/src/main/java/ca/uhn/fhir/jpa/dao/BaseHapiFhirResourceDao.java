@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.delete.DeleteConflictList;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -55,7 +56,6 @@ import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.InstantType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
-import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
@@ -295,7 +295,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public DeleteMethodOutcome deleteByUrl(String theUrl, DeleteConflictList deleteConflicts, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
 
-		Set<Long> resourceIds = myMatchResourceUrlService.processMatchUrl(theUrl, myResourceType, theRequest);
+		Set<ResourcePersistentId> resourceIds = myMatchResourceUrlService.processMatchUrl(theUrl, myResourceType, theRequest);
 		if (resourceIds.size() > 1) {
 			if (myDaoConfig.isAllowMultipleDelete() == false) {
 				throw new PreconditionFailedException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, resourceIds.size()));
@@ -303,7 +303,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		List<ResourceTable> deletedResources = new ArrayList<>();
-		for (Long pid : resourceIds) {
+		for (ResourcePersistentId pid : resourceIds) {
 			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid);
 			deletedResources.add(entity);
 
@@ -399,12 +399,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		entity.setResourceType(toResourceName(theResource));
 
 		if (isNotBlank(theIfNoneExist)) {
-			Set<Long> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType, theRequest);
+			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType, theRequest);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "CREATE", theIfNoneExist, match.size());
 				throw new PreconditionFailedException(msg);
 			} else if (match.size() == 1) {
-				Long pid = match.iterator().next();
+				ResourcePersistentId pid = match.iterator().next();
 				entity = myEntityManager.find(ResourceTable.class, pid);
 				IBaseResource resource = toResource(entity, false);
 				theResource.setId(resource.getIdElement().getValue());
@@ -790,12 +790,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable entityToUpdate;
 		if (isNotBlank(theConditionalUrl)) {
 
-			Set<Long> match = myMatchResourceUrlService.processMatchUrl(theConditionalUrl, myResourceType, theRequest);
+			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theConditionalUrl, myResourceType, theRequest);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "PATCH", theConditionalUrl, match.size());
 				throw new PreconditionFailedException(msg);
 			} else if (match.size() == 1) {
-				Long pid = match.iterator().next();
+				ResourcePersistentId pid = match.iterator().next();
 				entityToUpdate = myEntityManager.find(ResourceTable.class, pid);
 			} else {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", theConditionalUrl);
@@ -885,15 +885,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public Set<Long> processMatchUrl(String theMatchUrl, RequestDetails theRequest) {
-		return myMatchResourceUrlService.processMatchUrl(theMatchUrl, getResourceType(), theRequest);
-	}
-
-	@Override
-	public IBaseResource readByPid(Long thePid) {
+	public IBaseResource readByPid(ResourcePersistentId thePid) {
 		StopWatch w = new StopWatch();
 
-		Optional<ResourceTable> entity = myResourceTableDao.findById(thePid);
+		Optional<ResourceTable> entity = myResourceTableDao.findById(thePid.getIdAsLong());
 		if (!entity.isPresent()) {
 			throw new ResourceNotFoundException("No resource found with PID " + thePid);
 		}
@@ -990,8 +985,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
-		Long pid = myIdHelperService.translateForcedIdToPid(getResourceName(), theId.getIdPart(), theRequest);
-		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid);
+		ResourcePersistentId pid = myIdHelperService.translateForcedIdToPid(getResourceName(), theId.getIdPart(), theRequest);
+		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid.getIdAsLong());
 
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
@@ -1154,14 +1149,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public Set<Long> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
+	public Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
 
 		SearchBuilder builder = newSearchBuilder();
 		builder.setType(getResourceType(), getResourceName());
 
 		// FIXME: fail if too many results
 
-		HashSet<Long> retVal = new HashSet<>();
+		HashSet<ResourcePersistentId> retVal = new HashSet<>();
 
 		String uuid = UUID.randomUUID().toString();
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
@@ -1178,12 +1173,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {
-		MT retVal;
-		try {
-			retVal = theType.newInstance();
-		} catch (Exception e) {
-			throw new InternalErrorException("Failed to instantiate " + theType.getName(), e);
-		}
+		MT retVal = ReflectionUtil.newInstance(theType);
 		for (TagDefinition next : tagDefinitions) {
 			switch (next.getTagType()) {
 				case PROFILE:
@@ -1340,12 +1330,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		IIdType resourceId;
 		if (isNotBlank(theMatchUrl)) {
-			Set<Long> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theRequest);
+			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theRequest);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "UPDATE", theMatchUrl, match.size());
 				throw new PreconditionFailedException(msg);
 			} else if (match.size() == 1) {
-				Long pid = match.iterator().next();
+				ResourcePersistentId pid = match.iterator().next();
 				entity = myEntityManager.find(ResourceTable.class, pid);
 				resourceId = entity.getIdDt();
 			} else {

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.delete.DeleteConflictList;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
@@ -86,6 +87,8 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private MatchResourceUrlService myMatchResourceUrlService;
 
 	private Bundle batch(final RequestDetails theRequestDetails, Bundle theRequest) {
 		ourLog.info("Beginning batch with {} resources", theRequest.getEntry().size());
@@ -508,8 +511,8 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 			if (nextEntry.getRequest().getMethodElement().getValueAsEnum() == HTTPVerbEnum.POST) {
 				String matchUrl = nextEntry.getRequest().getIfNoneExist();
 				if (isNotBlank(matchUrl)) {
-					IFhirResourceDao<?> resourceDao = getDao(nextEntry.getResource().getClass());
-					Set<Long> val = resourceDao.processMatchUrl(matchUrl, theRequestDetails);
+					Class<? extends IBaseResource> resType = nextEntry.getResource().getClass();
+					Set<ResourcePersistentId> val = myMatchResourceUrlService.processMatchUrl(matchUrl, resType, theRequestDetails);
 					if (val.size() > 1) {
 						throw new InvalidRequestException(
 							"Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");

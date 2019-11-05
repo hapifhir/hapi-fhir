@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -323,8 +324,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 		Optional<TermValueSet> optionalTermValueSet;
 		if (theValueSetToExpand.hasId()) {
-			Long valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSetToExpand.getIdElement());
-			optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid);
+			ResourcePersistentId valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSetToExpand.getIdElement());
+			optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong());
 		} else if (theValueSetToExpand.hasUrl()) {
 			optionalTermValueSet = myValueSetDao.findByUrl(theValueSetToExpand.getUrl());
 		} else {
@@ -1087,8 +1088,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 	@Override
 	public boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet) {
-		Long valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSet.getIdElement());
-		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid);
+		ResourcePersistentId valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSet.getIdElement());
+		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong());
 
 		if (!optionalTermValueSet.isPresent()) {
 			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory code validation. {}", getValueSetInfo(theValueSet));
@@ -1110,14 +1111,14 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Coding theCoding, CodeableConcept theCodeableConcept) {
 
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet.hasId(), "ValueSet.id is required");
-		Long valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSet.getIdElement());
+		ResourcePersistentId valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSet.getIdElement());
 
 		List<TermValueSetConcept> concepts = new ArrayList<>();
 		if (isNotBlank(theCode)) {
 			if (isNotBlank(theSystem)) {
 				concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, theSystem, theCode));
 			} else {
-				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(valueSetResourcePid, theCode));
+				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(valueSetResourcePid.getIdAsLong(), theCode));
 			}
 		} else if (theCoding != null) {
 			if (theCoding.hasSystem() && theCoding.hasCode()) {
@@ -1147,9 +1148,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		return null;
 	}
 
-	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(Long theResourcePid, String theSystem, String theCode) {
+	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(ResourcePersistentId theResourcePid, String theSystem, String theCode) {
 		List<TermValueSetConcept> retVal = new ArrayList<>();
-		Optional<TermValueSetConcept> optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCode(theResourcePid, theSystem, theCode);
+		Optional<TermValueSetConcept> optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCode(theResourcePid.getIdAsLong(), theSystem, theCode);
 		optionalTermValueSetConcept.ifPresent(retVal::add);
 		return retVal;
 	}

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -41,7 +42,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testCreateAndUpdateWithoutRequest() throws Exception {
+	public void testCreateAndUpdateWithoutRequest() {
 		String methodName = "testUpdateByUrl";
 
 		Patient p = new Patient();
@@ -447,9 +448,9 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p2.addName().setFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2BBB");
 		myPatientDao.create(p2, mySrd).getId();
 
-		Set<Long> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")), null);
+		Set<ResourcePersistentId> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")), null);
 		assertEquals(1, ids.size());
-		assertThat(ids, contains(p1id.getIdPartAsLong()));
+		assertThat(ResourcePersistentId.toLongList(ids), contains(p1id.getIdPartAsLong()));
 
 		// Update the name
 		p1.getName().get(0).getGiven().get(0).setValue("testUpdateMaintainsSearchParamsDstu2BBB");
@@ -503,7 +504,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		{
 			Patient p1 = myPatientDao.read(p1id, mySrd);
 			List<Coding> tagList = p1.getMeta().getTag();
-			Set<String> secListValues = new HashSet<String>();
+			Set<String> secListValues = new HashSet<>();
 			for (Coding next : tagList) {
 				secListValues.add(next.getSystemElement().getValue() + "|" + next.getCodeElement().getValue());
 			}
@@ -528,7 +529,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			Patient patient = new Patient();
 			patient.addName().setFamily(name);
 
-			List<IdType> tl = new ArrayList<IdType>();
+			List<IdType> tl = new ArrayList<>();
 			tl.add(new IdType("http://foo/bar"));
 			patient.getMeta().getProfile().addAll(tl);
 
@@ -549,7 +550,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			patient.setId(id);
 			patient.addName().setFamily(name);
 
-			List<IdType> tl = new ArrayList<IdType>();
+			List<IdType> tl = new ArrayList<>();
 			tl.add(new IdType("http://foo/baz"));
 			patient.getMeta().getProfile().clear();
 			patient.getMeta().getProfile().addAll(tl);

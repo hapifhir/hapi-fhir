@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.delete.DeleteConflictList;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
@@ -52,7 +53,11 @@ import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
-import ca.uhn.fhir.util.*;
+import ca.uhn.fhir.util.ElementUtil;
+import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ResourceReferenceInfo;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
@@ -60,7 +65,13 @@ import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +86,9 @@ import javax.persistence.PersistenceException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
@@ -98,6 +111,8 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	private DeleteConflictService myDeleteConflictService;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private MatchResourceUrlService myMatchResourceUrlService;
 
 	public BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest) {
 		if (theRequestDetails != null) {
@@ -919,8 +934,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				String matchUrl = nextEntry.getKey();
 				Class<? extends IBaseResource> resType = nextEntry.getValue();
 				if (isNotBlank(matchUrl)) {
-					IFhirResourceDao<?> resourceDao = myDao.getDao(resType);
-					Set<Long> val = resourceDao.processMatchUrl(matchUrl, theRequest);
+					Set<ResourcePersistentId> val = myMatchResourceUrlService.processMatchUrl(matchUrl, resType, theRequest);
 					if (val.size() > 1) {
 						throw new InvalidRequestException(
 							"Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");
@@ -969,7 +983,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		return myDaoRegistry.getResourceDao(theClass);
 	}
 
-	protected void flushJpaSession() {
+	private void flushJpaSession() {
 		SessionImpl session = (SessionImpl) myEntityManager.unwrap(Session.class);
 		int insertionCount = session.getActionQueue().numberOfInsertions();
 		int updateCount = session.getActionQueue().numberOfUpdates();
@@ -979,7 +993,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		ourLog.debug("Session flush took {}ms for {} inserts and {} updates", sw.getMillis(), insertionCount, updateCount);
 	}
 
-	protected String toResourceName(Class<? extends IBaseResource> theResourceType) {
+	private String toResourceName(Class<? extends IBaseResource> theResourceType) {
 		return myContext.getResourceDefinition(theResourceType).getName();
 	}
 
@@ -1018,6 +1032,24 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		// }
 
 		return dao;
+	}
+
+	private String toMatchUrl(BUNDLEENTRY theEntry) {
+		String verb = myVersionAdapter.getEntryRequestVerb(theEntry);
+		if (verb.equals("POST")) {
+			return myVersionAdapter.getEntryIfNoneExist(theEntry);
+		}
+		if (verb.equals("PATCH")) {
+			return myVersionAdapter.getEntryRequestIfMatch(theEntry);
+		}
+		if (verb.equals("PUT") || verb.equals("DELETE")) {
+			String url = extractTransactionUrlOrThrowException(theEntry, verb);
+			UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
+			if (isBlank(parts.getResourceId())) {
+				return parts.getResourceType() + '?' + parts.getParams();
+			}
+		}
+		return null;
 	}
 
 	public interface ITransactionProcessorVersionAdapter<BUNDLE, BUNDLEENTRY> {
@@ -1180,24 +1212,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 	private static String toStatusString(int theStatusCode) {
 		return Integer.toString(theStatusCode) + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
-	}
-
-	private String toMatchUrl(BUNDLEENTRY theEntry) {
-		String verb = myVersionAdapter.getEntryRequestVerb(theEntry);
-		if (verb.equals("POST")) {
-			return myVersionAdapter.getEntryIfNoneExist(theEntry);
-		}
-		if (verb.equals("PATCH")) {
-			return myVersionAdapter.getEntryRequestIfMatch(theEntry);
-		}
-		if (verb.equals("PUT") || verb.equals("DELETE")) {
-			String url = extractTransactionUrlOrThrowException(theEntry, verb);
-			UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
-			if (isBlank(parts.getResourceId())) {
-				return parts.getResourceType() + '?' + parts.getParams();
-			}
-		}
-		return null;
 	}
 
 }
