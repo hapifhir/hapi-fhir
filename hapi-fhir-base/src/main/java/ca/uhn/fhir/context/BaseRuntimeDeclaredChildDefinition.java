@@ -30,6 +30,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChildDefinition {
 	private final IAccessor myAccessor;
@@ -184,8 +185,8 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		}
 
 		@Override
-		public IBase getFirstValueOrNull(IBase theTarget) {
-			return (IBase) getFieldValue(theTarget, myField);
+		public <T extends IBase> Optional<T> getFirstValueOrNull(IBase theTarget) {
+			return Optional.ofNullable(((T)getFieldValue(theTarget, myField)));
 		}
 	}
 

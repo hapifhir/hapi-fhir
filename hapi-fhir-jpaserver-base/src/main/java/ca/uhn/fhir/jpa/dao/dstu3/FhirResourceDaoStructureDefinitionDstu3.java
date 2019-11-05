@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoStructureDefinition;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
@@ -26,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * #L%
  */
 
-public class FhirResourceDaoStructureDefinitionDstu3 extends FhirResourceDaoDstu3<StructureDefinition> implements IFhirResourceDaoStructureDefinition<StructureDefinition> {
+public class FhirResourceDaoStructureDefinitionDstu3 extends BaseHapiFhirResourceDao<StructureDefinition> implements IFhirResourceDaoStructureDefinition<StructureDefinition> {
 
 	@Autowired
 	private IValidationSupport myValidationSupport;

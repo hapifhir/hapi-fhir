@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  */
 
 import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
@@ -49,7 +50,7 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class FhirResourceDaoCodeSystemR5 extends FhirResourceDaoR5<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
+public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoCodeSystemR5.class);
 
@@ -134,11 +135,13 @@ public class FhirResourceDaoCodeSystemR5 extends FhirResourceDaoR5<CodeSystem> i
 	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
+		if (!retVal.isUnchangedInCurrentOperation()) {
 
-		CodeSystem cs = (CodeSystem) theResource;
-		addPidToResource(theEntity, theResource);
+			CodeSystem cs = (CodeSystem) theResource;
+			addPidToResource(theEntity, theResource);
 
-		myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem(cs), theEntity);
+			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem(cs), theEntity);
+		}
 
 		return retVal;
 	}

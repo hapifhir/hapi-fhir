@@ -65,7 +65,11 @@ public class ${className}ResourceProvider extends
   
 			@Description(shortDefinition="Search for resources which have the given profile")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_PROFILE)
-			UriAndListParam theSearchForProfile, 
+			UriAndListParam theSearchForProfile,
+
+			@Description(shortDefinition="Search for resources which have the given source value (Resource.meta.source)")
+			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE)
+			UriAndListParam theSearchForSource,
 
 			@Description(shortDefinition="Return resources linked to by the given target")
 			@OptionalParam(name="_has")
@@ -143,6 +147,7 @@ public class ${className}ResourceProvider extends
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_TAG, theSearchForTag);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_SECURITY, theSearchForSecurity);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_PROFILE, theSearchForProfile);
+			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE, theSearchForSource);
 			paramMap.add("_has", theHas);
 #foreach ( $param in $searchParams ) 
 			paramMap.add("${param.name}", the${param.nameCapitalized});

@@ -25,6 +25,13 @@ import ca.uhn.fhir.rest.api.Constants;
 public class JpaConstants {
 
 	/**
+	 * Non-instantiable
+	 */
+	private JpaConstants() {
+		// nothing
+	}
+
+	/**
 	 * Operation name for the $apply-codesystem-delta-add operation
 	 */
 	public static final String OPERATION_APPLY_CODESYSTEM_DELTA_ADD = "$apply-codesystem-delta-add";
@@ -244,14 +251,10 @@ public class JpaConstants {
 	public static final String EXTENSION_EXT_SYSTEMDEFINED = JpaConstants.class.getName() + "_EXTENSION_EXT_SYSTEMDEFINED";
 
 	/**
-	 * <p>
-	 * This extension represents the equivalent of the
-	 * <code>Resource.meta.source</code> field within R4+ resources, and is for
-	 * use in DSTU3 resources. It should contain a value of type <code>uri</code>
-	 * and will be located on the Resource.meta
-	 * </p>
+	 * Message added to expansion valueset
 	 */
-	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
+	public static final String EXT_VALUESET_EXPANSION_MESSAGE = "http://hapifhir.io/fhir/StructureDefinition/valueset-expansion-message";
+
 
 	/**
 	 * Parameter for the $export operation

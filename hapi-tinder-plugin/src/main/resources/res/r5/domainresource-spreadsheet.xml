@@ -3446,7 +3446,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">DomainResource</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">contained.where((('#'+id in (%resource.descendants().reference | %resource.descendants().as(canonical) | %resource.descendants().as(uri) | %resource.descendants().as(url))) or descendants().where(reference = '#').exists() or descendants().where(as(canonical) = '#').exists() or descendants().where(as(canonical) = '#').exists()).not()).trace('unmatched', id).empty()</Data></Cell>
-    <Cell ss:StyleID="s105"><Data ss:Type="String">not(exists(for $contained in f:contained return $contained[not(parent::*/descendant::f:reference/@value=concat('#', $contained/*/id/@value) or descendant::f:reference[@value='#'])]))</Data></Cell>
+    <Cell ss:StyleID="s105"><Data ss:Type="String">not(exists(for $id in f:contained/*/f:id/@value return $contained[not(parent::*/descendant::f:reference/@value=concat('#', $contained/*/id/@value) or descendant::f:reference[@value='#'])]))</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
     <Cell ss:StyleID="s104"><Data ss:Type="Number">4</Data><NamedCell ss:Name="Invariantids"/></Cell>
@@ -3472,7 +3472,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">best-practice</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">DomainResource</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">A resource should have narrative for robust management</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">text.div.exists()</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">text.`div`.exists()</Data></Cell>
     <Cell ss:StyleID="s105"><Data ss:Type="String">exists(f:text/h:div)</Data></Cell>
     <Cell><Data ss:Type="String">When a resource has no narrative, only systems that fully understand the data can display the resource to a human safely. Including a human readable representation in the resource makes for a much more robust eco-system and cheaper handling of resources by intermediary systems. Some ecosystems restrict distribution of resources to only those systems that do fully understand the resources, and as a consequence implementers may believe that the narrative is superfluous. However experience shows that such eco-systems often open up to new participants over time.</Data></Cell>
    </Row>

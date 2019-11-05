@@ -4,7 +4,7 @@
   <LastAuthor>Rik Smithies</LastAuthor>
   <LastPrinted>2017-01-21T02:43:06Z</LastPrinted>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2018-08-08T12:38:02Z</LastSaved>
+  <LastSaved>2019-07-04T09:52:11Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
@@ -18,7 +18,6 @@
   <TabRatio>837</TabRatio>
   <ActiveSheet>1</ActiveSheet>
   <FirstVisibleSheet>1</FirstVisibleSheet>
-  <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -658,14 +657,14 @@
  </Worksheet>
  <Worksheet ss:Name="Data Elements">
   <Names>
-   <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="='Data Elements'!R1C1:R27C24"/>
+   <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="='Data Elements'!R1C1:R23C24"/>
   </Names>
-  <Table ss:ExpandedColumnCount="24" ss:ExpandedRowCount="27" ss:StyleID="s68" x:FullColumns="1" x:FullRows="1">
-   <Column ss:AutoFitWidth="0" ss:StyleID="s68" ss:Width="412.0"/>
+  <Table ss:ExpandedColumnCount="24" ss:ExpandedRowCount="23" ss:StyleID="s68" x:FullColumns="1" x:FullRows="1">
+   <Column ss:AutoFitWidth="0" ss:StyleID="s68" ss:Width="270.0"/>
    <Column ss:AutoFitWidth="0" ss:Hidden="1" ss:StyleID="s68" ss:Width="47.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s68" ss:Width="28.0"/>
    <Column ss:AutoFitWidth="0" ss:Hidden="1" ss:StyleID="s68" ss:Width="40.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s68" ss:Width="152.0"/>
+   <Column ss:AutoFitWidth="0" ss:StyleID="s68" ss:Width="321.0"/>
    <Column ss:AutoFitWidth="0" ss:Hidden="1" ss:StyleID="s68" ss:Width="37.0"/>
    <Column ss:AutoFitWidth="0" ss:Hidden="1" ss:StyleID="s68" ss:Width="59.0"/>
    <Column ss:AutoFitWidth="0" ss:Hidden="1" ss:StyleID="s68" ss:Width="227.0"/>
@@ -723,7 +722,7 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">Reference(RegulatedMedicinalProduct|RegulatedPackagedProduct)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Reference(MedicinalProductDefinition|PackagedProductDefinition|DeviceDefinition|ResearchStudy|ActivityDefinition|PlanDefinition)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -732,10 +731,42 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The medicinal product that is being authorized</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The product that is being authorized</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.country</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.type</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Type of this authorization, for example drug marketing approval, orphan drug designation</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="Default">
+    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.description</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">string</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">General textual supporting information</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="Default">
+    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.region</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s77"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -748,23 +779,7 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The country in which the marketing authorization has been granted</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.jurisdiction</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">Jurisdiction within a country</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The region (country, jurisdiction etc.) in which the marketing authorization has been granted</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:StyleID="Default">
     <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.status</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -798,22 +813,6 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s77"><Data ss:Type="String">The date at which the given status has become applicable</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.restoreDate</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">dateTime</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The date when a suspended the marketing or the marketing authorization of the product is anticipated to be restored</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
    <Row ss:AutoFitHeight="0" ss:Height="42" ss:StyleID="Default">
     <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.validityPeriod</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -831,57 +830,9 @@
     <Cell ss:StyleID="s77"><Data ss:Type="String">The beginning of the time period in which the marketing authorization is in the specific status shall be specified A complete date consisting of day, month and year shall be specified using the ISO 8601 date format</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.dataExclusivityPeriod</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.basis</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">Period</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">A period of time after authorization before generic product applicatiosn can be submitted</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.dateOfFirstAuthorization</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">dateTime</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The date when the first authorization was granted by a Medicines Regulatory Agency</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="27" ss:StyleID="Default">
-    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.internationalBirthDate</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">dateTime</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">Date of first marketing authorization for a company's new medicinal product in any country in the World</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.legalBasis</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s77"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -892,10 +843,10 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The legal framework against which this authorization is granted</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The legal framework against which this authorization is granted, or other reasons for it</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s76"><Data ss:Type="String">RegulatedAuthorization.jurisdictionalAuthorization</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">RegulatedAuthorization.relatedDate</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s77"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -908,88 +859,56 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Other dates associated with the authorization. It is common for an authorization to have renewal dates, initial time limited phases and so on</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="22"><Data ss:Type="String">650;160</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="Default">
+    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.relatedDate.date[x]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">1..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Period|dateTime</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Another date associated with the authorization</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="Default">
+    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.relatedDate.type</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">1..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Type of this date, for example the data exclusitity period for a medicinal product</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="Default">
+    <Cell ss:StyleID="s76"><Data ss:Type="String">RegulatedAuthorization.jurisdictionalAuthorization</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Reference(RegulatedAuthorization)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s77"><Data ss:Type="String">Authorization in areas within a country</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="22"><Data ss:Type="String">750;160</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.jurisdictionalAuthorization.identifier</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">Identifier</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The assigned number for the marketing authorization</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.jurisdictionalAuthorization.country</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">Country of authorization</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.jurisdictionalAuthorization.jurisdiction</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">Jurisdiction within a country</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="27" ss:StyleID="Default">
-    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.jurisdictionalAuthorization.legalStatusOfSupply</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The legal status of supply in a jurisdiction or region</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.jurisdictionalAuthorization.validityPeriod</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">Period</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The start and expected end date of the authorization</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="27" ss:StyleID="Default">
     <Cell ss:StyleID="s76"><Data ss:Type="String">RegulatedAuthorization.holder</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1024,7 +943,7 @@
     <Cell ss:StyleID="s77"><Data ss:Type="String">Medicines Regulatory Agency</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s76"><Data ss:Type="String">RegulatedAuthorization.procedure</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">RegulatedAuthorization.case</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1037,11 +956,11 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">The regulatory procedure for granting or amending a marketing authorization</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="22"><Data ss:Type="String">750;0</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The case or regulatory procedure for granting or amending a marketing authorization</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="22"><Data ss:Type="String">650;0</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.procedure.identifier</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.case.identifier</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1054,12 +973,12 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">Identifier for this procedure</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Identifier for this case</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.procedure.type</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.case.type</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">1..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s77"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1070,10 +989,26 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">Type of procedure</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Type of case</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.procedure.date[x]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.case.status</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">The status of the case</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="Default">
+    <Cell ss:StyleID="s77"><Data ss:Type="String">RegulatedAuthorization.case.date[x]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s77"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1086,14 +1021,14 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">Date of procedure</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Date of case</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:StyleID="Default">
-    <Cell ss:StyleID="s76"><Data ss:Type="String">RegulatedAuthorization.procedure.application</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">RegulatedAuthorization.case.application</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s77"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String" x:Ticked="1">@RegulatedAuthorization.procedure</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String" x:Ticked="1">@RegulatedAuthorization.case</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1102,8 +1037,7 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">Applcations submitted to obtain a marketing authorization</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="22"><Data ss:Type="String">900;0</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Applcations submitted to obtain a marketing authorization. Steps within the longer running case or procedure</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
@@ -1125,14 +1059,14 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>2</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
    <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
-  <AutoFilter xmlns="urn:schemas-microsoft-com:office:excel" x:Range="R1C1:R27C24">
+  <AutoFilter xmlns="urn:schemas-microsoft-com:office:excel" x:Range="R1C1:R23C24">
   </AutoFilter>
  </Worksheet>
  <Worksheet ss:Name="Invariants">
@@ -1675,10 +1609,10 @@
     <Cell ss:StyleID="s101"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s99"><Data ss:Type="String">country</Data></Cell>
+    <Cell ss:StyleID="s99"><Data ss:Type="String">region</Data></Cell>
     <Cell ss:StyleID="s100"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s100"/>
-    <Cell ss:StyleID="s102"><Data ss:Type="String">RegulatedAuthorization.country</Data></Cell>
+    <Cell ss:StyleID="s102"><Data ss:Type="String">RegulatedAuthorization.region</Data></Cell>
     <Cell ss:StyleID="s103"/>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s101"/>
@@ -1695,11 +1629,11 @@
     <Cell ss:StyleID="s101"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s99"/>
+    <Cell ss:StyleID="s99"><Data ss:Type="String">case</Data></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s100"/>
-    <Cell ss:StyleID="s100"/>
-    <Cell ss:StyleID="s103"/>
-    <Cell ss:StyleID="s103"/>
+    <Cell ss:StyleID="s102"><Data ss:Type="String">RegulatedAuthorization.case.identifier</Data></Cell>
+    <Cell ss:StyleID="s103"><Data ss:Type="String">The case or procedure number</Data></Cell>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s101"/>

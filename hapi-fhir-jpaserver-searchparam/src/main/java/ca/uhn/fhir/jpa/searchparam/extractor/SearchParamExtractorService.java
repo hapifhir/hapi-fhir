@@ -20,13 +20,21 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
+import java.util.Collection;
 
 @Service
 @Lazy
@@ -35,54 +43,107 @@ public class SearchParamExtractorService {
 
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	public void extractFromResource(ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource) {
-		theParams.myStringParams.addAll(extractSearchParamStrings(theEntity, theResource));
-		theParams.myNumberParams.addAll(extractSearchParamNumber(theEntity, theResource));
-		theParams.myQuantityParams.addAll(extractSearchParamQuantity(theEntity, theResource));
-		theParams.myDateParams.addAll(extractSearchParamDates(theEntity, theResource));
-		theParams.myUriParams.addAll(extractSearchParamUri(theEntity, theResource));
-		theParams.myCoordsParams.addAll(extractSearchParamCoords(theEntity, theResource));
+	public void extractFromResource(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource) {
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> strings = extractSearchParamStrings(theResource);
+		handleWarnings(theRequestDetails, strings);
+		theParams.myStringParams.addAll(strings);
+
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamNumber> numbers = extractSearchParamNumber(theResource);
+		handleWarnings(theRequestDetails, numbers);
+		theParams.myNumberParams.addAll(numbers);
+
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantity> quantities = extractSearchParamQuantity(theResource);
+		handleWarnings(theRequestDetails, quantities);
+		theParams.myQuantityParams.addAll(quantities);
+
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractSearchParamDates(theResource);
+		handleWarnings(theRequestDetails, dates);
+		theParams.myDateParams.addAll(dates);
+
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> uris = extractSearchParamUri(theResource);
+		handleWarnings(theRequestDetails, uris);
+		theParams.myUriParams.addAll(uris);
+
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamCoords> coords = extractSearchParamCoords(theResource);
+		handleWarnings(theRequestDetails, coords);
+		theParams.myCoordsParams.addAll(coords);
 
 		ourLog.trace("Storing date indexes: {}", theParams.myDateParams);
 
-		for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theEntity, theResource)) {
+		for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theResource)) {
 			if (next instanceof ResourceIndexedSearchParamToken) {
 				theParams.myTokenParams.add((ResourceIndexedSearchParamToken) next);
 			} else {
 				theParams.myStringParams.add((ResourceIndexedSearchParamString) next);
 			}
 		}
+
+		populateResourceTable(theParams.myStringParams, theEntity);
+		populateResourceTable(theParams.myNumberParams, theEntity);
+		populateResourceTable(theParams.myQuantityParams, theEntity);
+		populateResourceTable(theParams.myDateParams, theEntity);
+		populateResourceTable(theParams.myUriParams, theEntity);
+		populateResourceTable(theParams.myCoordsParams, theEntity);
+		populateResourceTable(theParams.myTokenParams, theEntity);
 	}
 
-	protected Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamCoords(theEntity, theResource);
+	void handleWarnings(RequestDetails theRequestDetails, ISearchParamExtractor.SearchParamSet<?> theSearchParamSet) {
+		if (theSearchParamSet.getWarnings().isEmpty()) {
+			return;
+		}
+
+		// If extraction generated any warnings, broadcast an error
+		for (String next : theSearchParamSet.getWarnings()) {
+			StorageProcessingMessage messageHolder = new StorageProcessingMessage();
+			messageHolder.setMessage(next);
+			HookParams params = new HookParams()
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+				.add(StorageProcessingMessage.class, messageHolder);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
+		}
 	}
 
-	protected Set<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamDates(theEntity, theResource);
+	private void populateResourceTable(Collection<? extends BaseResourceIndexedSearchParam> theParams, ResourceTable theResourceTable) {
+		for (BaseResourceIndexedSearchParam next : theParams) {
+			next.setResource(theResourceTable);
+		}
 	}
 
-	protected Set<ResourceIndexedSearchParamNumber> extractSearchParamNumber(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamNumber(theEntity, theResource);
+	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamCoords(theResource);
 	}
 
-	protected Set<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamQuantity(theEntity, theResource);
+	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamDates(theResource);
 	}
 
-	protected Set<ResourceIndexedSearchParamString> extractSearchParamStrings(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamStrings(theEntity, theResource);
+	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamNumber(theResource);
 	}
 
-	protected Set<BaseResourceIndexedSearchParam> extractSearchParamTokens(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamTokens(theEntity, theResource);
+	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamQuantity(theResource);
 	}
 
-	protected Set<ResourceIndexedSearchParamUri> extractSearchParamUri(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamUri(theEntity, theResource);
+	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamStrings(theResource);
 	}
 
+	private ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamTokens(theResource);
+	}
 
+	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamUri(theResource);
+	}
+
+	@VisibleForTesting
+	void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theJpaInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theJpaInterceptorBroadcaster;
+	}
 }
 

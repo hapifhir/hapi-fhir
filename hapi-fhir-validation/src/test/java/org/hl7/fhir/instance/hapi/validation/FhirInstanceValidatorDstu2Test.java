@@ -17,11 +17,8 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu2.model.DateType;
 import org.hl7.fhir.dstu2.model.Observation;
 import org.hl7.fhir.dstu2.model.Observation.ObservationStatus;
-import org.hl7.fhir.dstu2.model.Questionnaire;
-import org.hl7.fhir.dstu2.model.Questionnaire.AnswerFormat;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse.QuestionnaireResponseStatus;
-import org.hl7.fhir.dstu2.model.Reference;
 import org.hl7.fhir.dstu2.model.StringType;
 import org.junit.AfterClass;
 import org.junit.Ignore;
@@ -29,9 +26,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 public class FhirInstanceValidatorDstu2Test {
@@ -243,31 +238,7 @@ public class FhirInstanceValidatorDstu2Test {
 		assertTrue(result.isSuccessful());
 	}
 	
-	@Test
-	public void testQuestionnaireResponseValidator() {
-		final Questionnaire q = new Questionnaire();
-		q.getGroup().addGroup().setLinkId("group1").addQuestion().setLinkId("foo").setType(AnswerFormat.BOOLEAN);
-		q.getGroup().addQuestion().setLinkId("bar").setType(AnswerFormat.TEXT);
 
-		QuestionnaireResponse qr = new QuestionnaireResponse();
-		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qr.getGroup().addGroup().setLinkId("group1").addQuestion().setLinkId("foo");
-		qr.getGroup().addQuestion().setLinkId("bar");
-		qr.setQuestionnaire(new Reference("#q"));
-		qr.getQuestionnaire().setResource(q);
-
-		FhirValidator val = ourCtxHl7OrgDstu2.newValidator();
-
-		FhirQuestionnaireResponseValidator module = new FhirQuestionnaireResponseValidator();
-		val.registerValidatorModule(module);
-
-		ValidationResult result = val.validateWithResult(qr);
-
-		String encoded = ourCtxHl7OrgDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
-		ourLog.info(encoded);
-
-		assertTrue(result.isSuccessful());
-	}
 
 	@AfterClass
 	public static void afterClassClearContext() {

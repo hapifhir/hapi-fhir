@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,21 +49,24 @@ public class DropTableTask extends BaseTableTask<DropTableTask> {
 
 		for (String next : foreignKeys) {
 			List<String> sql = DropForeignKeyTask.generateSql(getTableName(), next, getDriverType());
-			for (String nextSql : sql) {
+			for (@Language("SQL") String nextSql : sql) {
 				executeSql(getTableName(), nextSql);
 			}
 		}
 
 		for (String nextIndex : indexNames) {
-			Optional<String> sql = DropIndexTask.createDropIndexSql(getConnectionProperties(), getTableName(), nextIndex, getDriverType());
-			if (sql.isPresent()) {
+			List<String> sqls = DropIndexTask.createDropIndexSql(getConnectionProperties(), getTableName(), nextIndex, getDriverType());
+			if (!sqls.isEmpty()) {
 				ourLog.info("Dropping index {} on table {} in preparation for table delete", nextIndex, getTableName());
-				executeSql(getTableName(), sql.get());
+			}
+			for (@Language("SQL") String sql : sqls) {
+				executeSql(getTableName(), sql);
 			}
 		}
 
 		ourLog.info("Dropping table: {}", getTableName());
 
+		@Language("SQL")
 		String sql = "DROP TABLE " + getTableName();
 		executeSql(getTableName(), sql);
 

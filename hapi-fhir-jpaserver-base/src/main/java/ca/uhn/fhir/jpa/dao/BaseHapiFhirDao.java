@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.searchparam.extractor.LogicalReferenceHelper;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -168,6 +167,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	private SearchBuilderFactory mySearchBuilderFactory;
 	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
+
+	protected ApplicationContext getApplicationContext() {
+		return myApplicationContext;
+	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
@@ -900,28 +903,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				+ (isNotBlank(provenanceRequestId) ? "#" : "")
 				+ defaultString(provenanceRequestId);
 
-			if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
-				IBaseExtension<?, ?> sourceExtension = ((IBaseHasExtensions) retVal.getMeta()).addExtension();
-				sourceExtension.setUrl(JpaConstants.EXT_META_SOURCE);
-				IPrimitiveType<String> value = (IPrimitiveType<String>) myContext.getElementDefinition("uri").newInstance();
-				value.setValue(sourceString);
-				sourceExtension.setValue(value);
-			} else if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
-				MetaUtil.setSource(myContext, retVal.getMeta(), sourceString);
-			}
+			MetaUtil.setSource(myContext, retVal, sourceString);
+
 		}
 
 		return retVal;
-	}
-
-	static String cleanProvenanceSourceUri(String theProvenanceSourceUri) {
-		if (isNotBlank(theProvenanceSourceUri)) {
-			int hashIndex = theProvenanceSourceUri.indexOf('#');
-			if (hashIndex != -1) {
-				theProvenanceSourceUri = theProvenanceSourceUri.substring(0, hashIndex);
-			}
-		}
-		return defaultString(theProvenanceSourceUri);
 	}
 
 	public String toResourceName(Class<? extends IBaseResource> theResourceType) {
@@ -941,7 +927,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequest, final IBaseResource theResource, ResourceTable
 		theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-													 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		Validate.notNull(theEntity);
 		Validate.isTrue(theDeletedTimestampOrNull != null || theResource != null, "Must have either a resource[%s] or a deleted timestamp[%s] for resource PID[%s]", theDeletedTimestampOrNull != null, theResource != null, theEntity.getId());
 
@@ -993,7 +979,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			if (thePerformIndexing) {
 
 				newParams = new ResourceIndexedSearchParams();
-				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, this, theUpdateTime, theEntity, theResource, existingParams, theRequest);
+				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, theUpdateTime, theEntity, theResource, existingParams, theRequest);
 
 				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, true);
 				if (changed.isChanged()) {
@@ -1078,7 +1064,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 					source = ((IBaseHasExtensions) theResource.getMeta())
 						.getExtension()
 						.stream()
-						.filter(t -> JpaConstants.EXT_META_SOURCE.equals(t.getUrl()))
+						.filter(t -> Constants.EXT_META_SOURCE.equals(t.getUrl()))
 						.filter(t -> t.getValue() instanceof IPrimitiveType)
 						.map(t -> ((IPrimitiveType) t.getValue()).getValueAsString())
 						.findFirst()
@@ -1391,6 +1377,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@PostConstruct
 	public void start() {
 		// nothing yet
+	}
+
+	static String cleanProvenanceSourceUri(String theProvenanceSourceUri) {
+		if (isNotBlank(theProvenanceSourceUri)) {
+			int hashIndex = theProvenanceSourceUri.indexOf('#');
+			if (hashIndex != -1) {
+				theProvenanceSourceUri = theProvenanceSourceUri.substring(0, hashIndex);
+			}
+		}
+		return defaultString(theProvenanceSourceUri);
 	}
 
 	@SuppressWarnings("unchecked")

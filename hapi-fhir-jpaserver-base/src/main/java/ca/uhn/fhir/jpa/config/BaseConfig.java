@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
+import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingInterceptor;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.CompositeInMemoryDaoSubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.DaoSubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribableChannelFactory;
@@ -132,6 +133,11 @@ public abstract class BaseConfig {
 	@Lazy
 	public SubscriptionTriggeringProvider subscriptionTriggeringProvider() {
 		return new SubscriptionTriggeringProvider();
+	}
+
+	@Bean
+	public SubscriptionActivatingInterceptor subscriptionActivatingInterceptor() {
+		return new SubscriptionActivatingInterceptor();
 	}
 
 	@Bean(name = "myAttachmentBinaryAccessProvider")

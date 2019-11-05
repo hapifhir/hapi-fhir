@@ -23,6 +23,6 @@ package org.hl7.fhir.instance.model.api;
 
 public interface IBaseEnumeration<T extends Enum<?>> extends IPrimitiveType<T> {
 
-	// Marker interface
-	
+	default IBaseEnumFactory<T> getEnumFactory() { return null; }
+
 }

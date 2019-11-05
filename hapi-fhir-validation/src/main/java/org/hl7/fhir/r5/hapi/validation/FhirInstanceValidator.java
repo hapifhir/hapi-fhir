@@ -2,8 +2,8 @@ package org.hl7.fhir.r5.hapi.validation;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
-import ca.uhn.fhir.validation.IValidatorModule;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -40,7 +40,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings({"PackageAccessibility", "Duplicates"})
-public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseValidatorBridge implements IValidatorModule {
+public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseValidatorBridge implements IInstanceValidatorModule {
 
 	private boolean myAnyExtensionsAllowed = true;
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;

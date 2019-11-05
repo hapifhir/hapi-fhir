@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class FhirResourceDaoCompositionDstu2 extends FhirResourceDaoDstu2<Composition>implements IFhirResourceDaoComposition<Composition> {
+public class FhirResourceDaoCompositionDstu2 extends BaseHapiFhirResourceDao<Composition>implements IFhirResourceDaoComposition<Composition> {
 
 	@Override
 	public IBundleProvider getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {

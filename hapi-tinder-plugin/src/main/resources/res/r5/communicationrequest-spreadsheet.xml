@@ -18,8 +18,7 @@
   
   
   
-  <ActiveSheet>3</ActiveSheet>
-  <FirstVisibleSheet>1</FirstVisibleSheet>
+  <ActiveSheet>1</ActiveSheet>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -1016,7 +1015,7 @@
     <Cell ss:Index="15" ss:StyleID="s87"><Data ss:Type="String">Reason for current status</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Captures the reason for the current state of the CommunicationRequest.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">This is generally only used for "exception" statuses such as "suspended" or "cancelled".  The reason why the CommunicationRequest was created at all is captured in reasonCode, not here.  [distinct reason codes for different statuses can be enforced using invariants if they are universal bindings]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">This is generally only used for "exception" statuses such as "on-hold" or "revoked".  The reason why the CommunicationRequest was created at all is captured in reasonCode, not here.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="20" ss:StyleID="s90"><Data ss:Type="String">.inboundRelationship[typeCode=SUBJ].source[classCode=CACT, moodCode=EVN].reasonCOde</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1261,7 +1260,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">Message part content</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">The communicated content (or for multi-part communications, one portion of the communication)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">When using contentCodeableConcept, the CodeableConcept is what is being communicated and is not a categorization of the content.  If no code is available, contentCodeableConcept.text can be used for non-codified content.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The content can be codified or textual.  As an example of codified content, when working with machine generated communications, the payload may be drawn from a finite, terminology defined set of communications, especially for short, status update kinds of communications where more of a natural language approach isn't appropriate.&#10;&#10;If the content isn't codified, contentCodeableConcept.text can be used.  &#10;&#10;When using contentCodeableConcept, the CodeableConcept is what is being communicated and is not a categorization of the content. </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1358,7 +1357,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Reference(Device|Organization|Patient|Practitioner|PractitionerRole|RelatedPerson|Group|CareTeam|HealthcareService)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Reference(Device|Organization|Patient|Practitioner|PractitionerRole|RelatedPerson|Group|CareTeam|HealthcareService|Endpoint)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1379,14 +1378,14 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">Request.performer</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">GF#16433, GF#22626</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">GF#16433, GF#22626, GF#22630</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="75">
     <Cell ss:StyleID="s86"><Data ss:Type="String">CommunicationRequest.informationProvider</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Reference(Device|Organization|Patient|Practitioner|PractitionerRole|RelatedPerson|HealthcareService)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Reference(Device|Organization|Patient|Practitioner|PractitionerRole|RelatedPerson|HealthcareService|Endpoint)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1407,7 +1406,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">Request.performer</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">GF#14064, GF#22626</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">GF#14064, GF#22626, GF#22631, GF#22630</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="29">
     <Cell ss:StyleID="s86"><Data ss:Type="String">CommunicationRequest.reasonCode</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3709,12 +3708,13 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>14</TopRowBottomPane>
+   <TopRowBottomPane>16</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>17</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
@@ -4527,7 +4527,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6060,7 +6059,7 @@
    <Column ss:AutoFitWidth="0" ss:StyleID="s111" ss:Width="314.0"/>
    <Column ss:StyleID="s111" ss:Width="58.0"/>
    <Column ss:StyleID="s111" ss:Width="51.0"/>
-   <Column ss:StyleID="s111" ss:Width="167.0"/>
+   <Column ss:AutoFitWidth="0" ss:StyleID="s111" ss:Width="251.0"/>
    <Column ss:StyleID="s111" ss:Width="197.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s111" ss:Width="111.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s111" ss:Width="101.0"/>
@@ -6161,9 +6160,9 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s148"><Data ss:Type="String">CommunicationRequestStatusReason</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Codes identifying the reason for the current state of a request</Data></Cell>
-    <Cell ss:StyleID="s118"><Data ss:Type="String">unbound</Data></Cell>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">example</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">valueset-communication-request-status-reason</Data></Cell>
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s118"/>

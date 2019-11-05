@@ -43,8 +43,8 @@
 					<ul class="dropdown-menu" role="menu">
 						<li th:each="serverEntry : ${serverEntries}">
 							<a th:href="'javascript:selectServer(\'' + ${serverEntry.key} + '\');'">
-								<span class="fa fa-check-square-o" th:if="${serverEntry.key} == ${serverId}"></span>
-								<span class="fa fa-square-o" style="color: #CCC;" th:unless="${serverEntry.key} == ${serverId}"></span>
+                        <i class="far fa-check-square" th:if="${serverEntry.key} == ${serverId}"></i>
+                        <i class="far fa-square" style="color: #CCC;" th:unless="${serverEntry.key} == ${serverId}"></i>
 								&nbsp;&nbsp;
 								<th:block 	th:text="${serverEntry.value}"/>
 							</a>

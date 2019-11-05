@@ -567,6 +567,10 @@
 			<id>jelmerterwal</id>
 			<name>Jelmer ter Wal</name>
 		</developer>
+		<developer>
+			<id>jiaola</id>
+			<name>Dazhi Jiao</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -578,7 +582,7 @@
 
 	<properties>
 
-		<fhir_core_version>4.0.19-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>4.0.26-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
@@ -632,7 +636,7 @@
 		<servicemix_saxon_version>9.5.1-5_1</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<slf4j_version>1.7.28</slf4j_version>
-		<spring_version>5.2.0.RELEASE</spring_version>
+		<spring_version>5.2.1.RELEASE</spring_version>
 		<!-- FYI: Spring Data JPA 2.1.9 causes test failures due to unexpected cascading deletes -->
 		<spring_data_version>2.2.0.RELEASE</spring_data_version>
 		<spring_boot_version>2.2.0.RELEASE</spring_boot_version>
@@ -742,7 +746,7 @@
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
-				<version>1.4.199</version>
+				<version>1.4.200</version>
 			</dependency>
 			<dependency>
 				<groupId>com.helger</groupId>
@@ -874,8 +878,7 @@
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
-				<!--<version>6.2.2.jre8</version>-->
-				<version>7.0.0.jre8</version>
+				<version>7.4.1.jre8</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.mail</groupId>
@@ -954,7 +957,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-dbcp2</artifactId>
-				<version>2.6.0</version>
+				<version>2.7.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -1081,7 +1084,7 @@
 			<dependency>
 				<groupId>org.awaitility</groupId>
 				<artifactId>awaitility</artifactId>
-				<version>4.0.0-rc1</version>
+				<version>4.0.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.plexus</groupId>
@@ -1291,7 +1294,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.2.6.jre7</version>
+				<version>42.2.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
@@ -1656,6 +1659,7 @@
 						<runOrder>random</runOrder>
 						<argLine>-Dfile.encoding=UTF-8 -Xmx1024m</argLine>
 						<forkCount>1.0C</forkCount>
+                        <trimStackTrace>false</trimStackTrace>
 					</configuration>
 				</plugin>
 				<plugin>

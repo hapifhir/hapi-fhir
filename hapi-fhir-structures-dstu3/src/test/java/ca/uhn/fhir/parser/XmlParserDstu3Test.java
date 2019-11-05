@@ -110,6 +110,23 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
+	public void testEncodeExtensionWithNullUrl() {
+		{
+			Patient p = new Patient();
+			p.addExtension().setValue(new StringType("foo"));
+			String encoded = ourCtx.newXmlParser().encodeResourceToString(p);
+			assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><extension><valueString value=\"foo\"/></extension></Patient>", encoded);
+		}
+		{
+			Patient p = new Patient();
+			p.getActiveElement().addExtension().setValue(new StringType("foo"));
+			String encoded = ourCtx.newXmlParser().encodeResourceToString(p);
+			assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><active><extension><valueString value=\"foo\"/></extension></active></Patient>", encoded);
+		}
+	}
+
+
+	@Test
 	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {
 		String refVal = "http://my.org/FooBar";
 
@@ -187,6 +204,66 @@ public class XmlParserDstu3Test {
 
 	}
 
+	@Test
+	public void testUnknownAttributeInPrimitive() {
+
+		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+
+		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <total value=\"1\" foo=\"bar\"/>\n" +
+			"</Bundle>";
+
+		Bundle b = ourCtx.newXmlParser().setParserErrorHandler(errorHandler).parseResource(Bundle.class, bundle);
+		assertEquals(1, b.getTotal());
+
+		ArgumentCaptor<String> attributeCaptor = ArgumentCaptor.forClass(String.class);
+		verify(errorHandler, times(1)).unknownAttribute(any(), attributeCaptor.capture());
+		assertEquals("foo", attributeCaptor.getValue());
+	}
+
+	@Test
+	public void testUnknownElementInPrimitive() {
+
+		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+
+		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <total value=\"1\">\n" +
+			"      <foo/>" +
+			"   </total>\n" +
+			"</Bundle>";
+
+		Bundle b = ourCtx.newXmlParser().setParserErrorHandler(errorHandler).parseResource(Bundle.class, bundle);
+		assertEquals(1, b.getTotal());
+
+		ArgumentCaptor<String> attributeCaptor = ArgumentCaptor.forClass(String.class);
+		verify(errorHandler, times(1)).unknownElement(any(), attributeCaptor.capture());
+		assertEquals("foo", attributeCaptor.getValue());
+	}
+
+	@Test
+	public void testExtensionInInvalidSpot() {
+
+		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+
+		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <extension url=\"http://foo\">" +
+			"      <valueString value=\"blah\"/>" +
+			"   </extension>" +
+			"   <modifierExtension url=\"http://foo\">" +
+			"      <valueString value=\"blah\"/>" +
+			"   </modifierExtension>" +
+			"   <total value=\"1\"/>\n" +
+			"</Bundle>";
+
+		Bundle b = ourCtx.newXmlParser().setParserErrorHandler(errorHandler).parseResource(Bundle.class, bundle);
+		assertEquals(1, b.getTotal());
+
+		ArgumentCaptor<String> attributeCaptor = ArgumentCaptor.forClass(String.class);
+		verify(errorHandler, times(2)).unknownElement(any(), attributeCaptor.capture());
+		assertEquals("extension", attributeCaptor.getAllValues().get(0));
+		assertEquals("modifierExtension", attributeCaptor.getAllValues().get(1));
+	}
+
 
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {
@@ -218,6 +295,30 @@ public class XmlParserDstu3Test {
 		parser.setParserErrorHandler(new StrictErrorHandler());
 		parser.parseResource(Bundle.class, string);
 	}
+
+	@Test
+	public void testContainedResourceWithNoId2() {
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <contained>\n" +
+			"      <Organization xmlns=\"http://hl7.org/fhir\">\n" +
+			"         <name value=\"Contained Test Organization\"/>\n" +
+			"      </Organization>\n" +
+			"   </contained>" +
+			"   <active value=\"true\"/>" +
+			"</Patient>";
+
+		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+
+		IParser p = ourCtx.newXmlParser();
+		p.setParserErrorHandler(errorHandler);
+
+		Patient patient = p.parseResource(Patient.class, input);
+		assertTrue(patient.getActive());
+
+		verify(errorHandler, times(1)).containedResourceWithNoId(nullable(IParseLocation.class));
+
+	}
+
 
 	@Test()
 	public void testContainedResourceWithNoIdLenient() throws IOException {

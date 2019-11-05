@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
-public class FhirResourceDaoMessageHeaderDstu2 extends FhirResourceDaoDstu2<MessageHeader> implements IFhirResourceDaoMessageHeader<MessageHeader> {
+public class FhirResourceDaoMessageHeaderDstu2 extends BaseHapiFhirResourceDao<MessageHeader> implements IFhirResourceDaoMessageHeader<MessageHeader> {
 
 	public static IBaseBundle throwProcessMessageNotImplemented() {
 		throw new NotImplementedOperationException("This operation is not yet implemented on this server");

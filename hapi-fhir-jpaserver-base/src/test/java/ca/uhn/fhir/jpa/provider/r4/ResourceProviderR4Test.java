@@ -135,6 +135,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(output, containsString("Invalid parameter chain: focalAccess.a ne e"));
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		}
+
 	}
 
 	@Test
@@ -5307,7 +5308,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Patient patient = new Patient();
 		patient.addName().addGiven("James");
 		patient.setBirthDateElement(new DateType("2011-02-02"));
-		patient.addContact().setGender(AdministrativeGender.MALE);
 
 		String inputStr = myFhirCtx.newXmlParser().encodeResourceToString(patient);
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
@@ -5316,9 +5316,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(412, response.getStatusLine().getStatusCode());
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(resp, not(containsString("Resource has no id")));
-			assertThat(resp, containsString("<issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"SHALL at least contain a contact's details or a reference to an organization [name.exists() or telecom.exists() or address.exists() or organization.exists()]\"/><location value=\"Patient.contact[0]\"/><location value=\"Line 0, Col 0\"/></issue>"));
 		}
 	}
 

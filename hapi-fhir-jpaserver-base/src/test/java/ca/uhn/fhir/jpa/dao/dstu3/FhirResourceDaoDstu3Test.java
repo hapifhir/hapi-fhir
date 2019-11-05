@@ -614,24 +614,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testCreateOperationOutcomeError() {
-		FhirResourceDaoDstu3<Bundle> dao = new FhirResourceDaoDstu3<Bundle>();
-		OperationOutcome oo = (OperationOutcome) dao.createErrorOperationOutcome("my message", "incomplete");
-		assertEquals(IssueSeverity.ERROR.toCode(), oo.getIssue().get(0).getSeverity().toCode());
-		assertEquals("my message", oo.getIssue().get(0).getDiagnostics());
-		assertEquals(IssueType.INCOMPLETE, oo.getIssue().get(0).getCode());
-	}
-
-	@Test
-	public void testCreateOperationOutcomeInfo() {
-		FhirResourceDaoDstu3<Bundle> dao = new FhirResourceDaoDstu3<Bundle>();
-		OperationOutcome oo = (OperationOutcome) dao.createInfoOperationOutcome("my message");
-		assertEquals(IssueSeverity.INFORMATION.toCode(), oo.getIssue().get(0).getSeverity().toCode());
-		assertEquals("my message", oo.getIssue().get(0).getDiagnostics());
-		assertEquals(IssueType.INFORMATIONAL, oo.getIssue().get(0).getCode());
-	}
-
-	@Test
 	public void testCreateReferenceToDeletedResource() {
 		Organization org = new Organization();
 		org.setActive(true);
@@ -774,19 +756,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	}
 
-	@Test
-	public void testCreateWithInvalidReferenceNoId() {
-		Patient p = new Patient();
-		p.addName().setFamily("Hello");
-		p.getManagingOrganization().setReference("Organization/");
-
-		try {
-			myPatientDao.create(p, mySrd);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Does not contain resource ID"));
-		}
-	}
 
 	@Test
 	public void testCreateWithReferenceBadType() {

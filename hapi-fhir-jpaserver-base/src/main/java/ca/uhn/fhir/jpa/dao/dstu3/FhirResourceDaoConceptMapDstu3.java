@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.term.TranslationMatch;
 import ca.uhn.fhir.jpa.term.TranslationRequest;
@@ -42,7 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class FhirResourceDaoConceptMapDstu3 extends FhirResourceDaoDstu3<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
+public class FhirResourceDaoConceptMapDstu3 extends BaseHapiFhirResourceDao<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
 	@Autowired
 	private ITermReadSvc myHapiTerminologySvc;
 
@@ -160,16 +161,18 @@ public class FhirResourceDaoConceptMapDstu3 extends FhirResourceDaoDstu3<Concept
 												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
-		if (retVal.getDeleted() == null) {
-			try {
-				ConceptMap conceptMap = (ConceptMap) theResource;
-				org.hl7.fhir.r4.model.ConceptMap converted = VersionConvertor_30_40.convertConceptMap(conceptMap);
-				myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, converted);
-			} catch (FHIRException fe) {
-				throw new InternalErrorException(fe);
+		if (!retVal.isUnchangedInCurrentOperation()) {
+			if (retVal.getDeleted() == null) {
+				try {
+					ConceptMap conceptMap = (ConceptMap) theResource;
+					org.hl7.fhir.r4.model.ConceptMap converted = VersionConvertor_30_40.convertConceptMap(conceptMap);
+					myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, converted);
+				} catch (FHIRException fe) {
+					throw new InternalErrorException(fe);
+				}
+			} else {
+				myHapiTerminologySvc.deleteConceptMapAndChildren(retVal);
 			}
-		} else {
-			myHapiTerminologySvc.deleteConceptMapAndChildren(retVal);
 		}
 
 		return retVal;

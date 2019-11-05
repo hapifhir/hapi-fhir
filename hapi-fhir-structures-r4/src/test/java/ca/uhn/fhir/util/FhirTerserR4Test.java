@@ -256,7 +256,7 @@ public class FhirTerserR4Test {
 
 		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
-		List<Object> values = ourCtx.newTerser().getValues(p, "Patient.active");
+		List<IBase> values = ourCtx.newTerser().getValues(p, "Patient.active");
 		assertEquals(1, values.size());
 		assertTrue(values.get(0) instanceof PrimitiveType);
 		assertTrue(values.get(0) instanceof BooleanType);
@@ -378,7 +378,7 @@ public class FhirTerserR4Test {
 
 		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
-		List<Object> values = ourCtx.newTerser().getValues(p, "Patient.active");
+		List<IBase> values = ourCtx.newTerser().getValues(p, "Patient.active");
 		assertEquals(1, values.size());
 		assertTrue(values.get(0) instanceof PrimitiveType);
 		assertTrue(values.get(0) instanceof BooleanType);
@@ -480,7 +480,7 @@ public class FhirTerserR4Test {
 
 		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
-		List<Object> values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
+		List<IBase> values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
 		assertEquals(2, values.size());
 		assertTrue(values.get(0) instanceof IBaseExtension);
 		assertTrue(values.get(0) instanceof Extension);
@@ -691,7 +691,7 @@ public class FhirTerserR4Test {
 
 		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
-		List<Object> values = ourCtx.newTerser().getValues(p, "Patient.active");
+		List<IBase> values = ourCtx.newTerser().getValues(p, "Patient.active");
 		assertEquals(1, values.size());
 		assertTrue(values.get(0) instanceof PrimitiveType);
 		assertTrue(values.get(0) instanceof BooleanType);
@@ -792,7 +792,7 @@ public class FhirTerserR4Test {
 	public void testGetValuesWithTheCreate() {
 		Patient p = new Patient();
 
-		List<Object> values = ourCtx.newTerser().getValues(p, "Patient.active", true);
+		List<IBase> values = ourCtx.newTerser().getValues(p, "Patient.active", true);
 		assertEquals(1, values.size());
 		assertTrue(values.get(0) instanceof PrimitiveType);
 		assertTrue(values.get(0) instanceof BooleanType);
@@ -841,7 +841,7 @@ public class FhirTerserR4Test {
 
 		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
-		List<Object> values = ourCtx.newTerser().getValues(p, "Patient.active");
+		List<IBase> values = ourCtx.newTerser().getValues(p, "Patient.active");
 		assertEquals(1, values.size());
 		assertTrue(values.get(0) instanceof PrimitiveType);
 		assertTrue(values.get(0) instanceof BooleanType);
@@ -957,7 +957,7 @@ public class FhirTerserR4Test {
 
 		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
-		List<Object> values = ourCtx.newTerser().getValues(p, "Patient.active", true);
+		List<IBase> values = ourCtx.newTerser().getValues(p, "Patient.active", true);
 		assertEquals(1, values.size());
 		assertTrue(values.get(0) instanceof PrimitiveType);
 		assertTrue(values.get(0) instanceof BooleanType);
@@ -1083,13 +1083,13 @@ public class FhirTerserR4Test {
 
 		// As string
 		{
-			List<Object> values = t.getValues(obs, "Observation.valueString");
+			List<IBase> values = t.getValues(obs, "Observation.valueString");
 			assertEquals(0, values.size());
 		}
 
 		// As quantity
 		{
-			List<Object> values = t.getValues(obs, "Observation.valueQuantity");
+			List<IBase> values = t.getValues(obs, "Observation.valueQuantity");
 			assertEquals(1, values.size());
 			Quantity actual = (Quantity) values.get(0);
 			assertEquals("123", actual.getValueElement().getValueAsString());
@@ -1141,7 +1141,7 @@ public class FhirTerserR4Test {
 
 
 	private List<String> toStrings(List<StringType> theStrings) {
-		ArrayList<String> retVal = new ArrayList<String>();
+		ArrayList<String> retVal = new ArrayList<>();
 		for (StringType next : theStrings) {
 			retVal.add(next.getValue());
 		}

@@ -19,12 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
-import java.io.StringBufferInputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -115,7 +111,11 @@ public class ValidatorWrapper {
 				profileSet.getCanonical().add(new ValidationProfileSet.ProfileRegistration(nextProfile, true));
 			}
 
-			v.validate(null, messages, document, profileSet);
+			String resourceAsString = theValidationContext.getResourceAsString();
+			InputStream inputStream = new ReaderInputStream(new StringReader(resourceAsString), Charsets.UTF_8);
+
+			Manager.FhirFormat format = Manager.FhirFormat.XML;
+			v.validate(null, messages, inputStream, format, profileSet);
 
 		} else if (encoding == EncodingEnum.JSON) {
 

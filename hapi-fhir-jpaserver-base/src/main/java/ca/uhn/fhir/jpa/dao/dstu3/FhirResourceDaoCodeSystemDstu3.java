@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  */
 
 import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
@@ -43,6 +44,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -50,7 +52,8 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
+@Transactional
+public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoCodeSystemDstu3.class);
 
@@ -60,6 +63,10 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 	private ValidationSupportChain myValidationSupport;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTerminologyCodeSystemStorageSvc;
+
+	public FhirResourceDaoCodeSystemDstu3() {
+		super();
+	}
 
 	@Override
 	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest) {
@@ -131,13 +138,16 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
+		if (!retVal.isUnchangedInCurrentOperation()) {
 
-		CodeSystem csDstu3 = (CodeSystem) theResource;
+			CodeSystem csDstu3 = (CodeSystem) theResource;
 
-		org.hl7.fhir.r4.model.CodeSystem cs = VersionConvertor_30_40.convertCodeSystem(csDstu3);
-		addPidToResource(theEntity, cs);
+			org.hl7.fhir.r4.model.CodeSystem cs = VersionConvertor_30_40.convertCodeSystem(csDstu3);
+			addPidToResource(theEntity, cs);
 
-		myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(cs, theEntity);
+			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(cs, theEntity);
+
+		}
 
 		return retVal;
 	}

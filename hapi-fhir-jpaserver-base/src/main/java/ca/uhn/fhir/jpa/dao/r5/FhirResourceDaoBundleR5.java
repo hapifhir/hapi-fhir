@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.r5.model.Bundle;
 
@@ -27,7 +28,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * #L%
  */
 
-public class FhirResourceDaoBundleR5 extends FhirResourceDaoR5<Bundle> {
+public class FhirResourceDaoBundleR5 extends BaseHapiFhirResourceDao<Bundle> {
 
 	@Override
 	protected void preProcessResourceForStorage(Bundle theResource) {

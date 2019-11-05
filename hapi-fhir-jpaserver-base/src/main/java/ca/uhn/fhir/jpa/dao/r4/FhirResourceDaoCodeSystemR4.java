@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  */
 
 import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
@@ -49,7 +50,7 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
+public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoCodeSystemR4.class);
 
@@ -135,10 +136,12 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
-		CodeSystem cs = (CodeSystem) theResource;
-		addPidToResource(theEntity, theResource);
+		if (!retVal.isUnchangedInCurrentOperation()) {
+			CodeSystem cs = (CodeSystem) theResource;
+			addPidToResource(theEntity, theResource);
 
-		myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(cs, theEntity);
+			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(cs, theEntity);
+		}
 
 		return retVal;
 	}

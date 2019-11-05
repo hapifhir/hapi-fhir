@@ -43,6 +43,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -354,17 +355,18 @@ public class XmlParser extends BaseParser {
 			}
 
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
-				INarrative narr = (INarrative) nextChild.getAccessor().getFirstValueOrNull(theElement);
-
+				Optional<IBase> narr = nextChild.getAccessor().getFirstValueOrNull(theElement);
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
-				if (gen != null && (narr == null || narr.isEmpty())) {
+				if (gen != null && narr.isPresent() == false) {
 					gen.populateResourceNarrative(myContext, theResource);
 				}
-				if (narr != null && narr.isEmpty() == false) {
+
+				narr = nextChild.getAccessor().getFirstValueOrNull(theElement);
+				if (narr.isPresent()) {
 					RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 					String childName = nextChild.getChildNameByDatatype(child.getDatatype());
 					BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
-					encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, narr, childName, type, null, theContainedResource, nextChildElem, theEncodeContext);
+					encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, narr.get(), childName, type, null, theContainedResource, nextChildElem, theEncodeContext);
 					continue;
 				}
 			}
@@ -444,9 +446,10 @@ public class XmlParser extends BaseParser {
 		if (isBlank(extensionUrl)) {
 			ParseLocation loc = new ParseLocation(theEncodeContext.toString());
 			getErrorHandler().missingRequiredElement(loc, "url");
+		} else {
+			theEventWriter.writeAttribute("url", extensionUrl);
 		}
 
-		theEventWriter.writeAttribute("url", extensionUrl);
 		encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName, childDef, null, theContainedResource, nextChildElem, theEncodeContext);
 		theEventWriter.writeEndElement();
 	}
@@ -608,7 +611,9 @@ public class XmlParser extends BaseParser {
 			}
 
 			String url = getExtensionUrl(next.getUrl());
-			theEventWriter.writeAttribute("url", url);
+			if (isNotBlank(url)) {
+				theEventWriter.writeAttribute("url", url);
+			}
 
 			if (next.getValue() != null) {
 				IBaseDatatype value = next.getValue();

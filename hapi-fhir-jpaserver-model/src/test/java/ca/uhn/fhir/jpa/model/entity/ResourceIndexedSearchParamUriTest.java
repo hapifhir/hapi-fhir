@@ -9,7 +9,7 @@ public class ResourceIndexedSearchParamUriTest {
 
 	@Test
 	public void testHashFunctions() {
-		ResourceIndexedSearchParamUri token = new ResourceIndexedSearchParamUri("NAME", "http://example.com");
+		ResourceIndexedSearchParamUri token = new ResourceIndexedSearchParamUri("Patient", "NAME", "http://example.com");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
 
 		// Make sure our hashing function gives consistent results

@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -29,7 +28,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.delete.DeleteConflictList;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -57,6 +55,7 @@ import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.InstantType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
@@ -74,7 +73,6 @@ import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.*;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.EXT_EXTERNALIZED_BINARY_ID;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Transactional(propagation = Propagation.REQUIRED)
@@ -92,11 +90,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private MatchResourceUrlService myMatchResourceUrlService;
 	@Autowired
 	private IResourceReindexingSvc myResourceReindexingSvc;
-
+	private IInstanceValidatorModule myInstanceValidator;
 	private String myResourceName;
 	private Class<T> myResourceType;
-	private String mySecondaryPrimaryKeyParamName;
-	private Class<? extends IPrimitiveType<byte[]>> myBase64Type;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel, RequestDetails theRequest) {
@@ -180,9 +176,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return createOperationOutcome(OO_SEVERITY_INFO, theMessage, "informational");
 	}
 
-	protected abstract IValidatorModule getInstanceValidator();
+	private IInstanceValidatorModule getInstanceValidator() {
+		return myInstanceValidator;
+	}
 
-	protected abstract IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode);
+	private IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
+		OperationOutcomeUtil.addIssue(getContext(), oo, theSeverity, theMessage, null, theCode);
+		return oo;
+	}
 
 	@Override
 	public DaoMethodOutcome delete(IIdType theId) {
@@ -825,20 +827,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@PostConstruct
+	@Override
+	public void start() {
+		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
+		myInstanceValidator = getApplicationContext().getBean(IInstanceValidatorModule.class);
+		super.start();
+	}
+
+	@PostConstruct
 	public void postConstruct() {
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(myResourceType);
 		myResourceName = def.getName();
-
-		if (mySecondaryPrimaryKeyParamName != null) {
-			RuntimeSearchParam sp = mySearchParamRegistry.getSearchParamByName(def, mySecondaryPrimaryKeyParamName);
-			if (sp == null) {
-				throw new ConfigurationException("Unknown search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "]");
-			}
-			if (sp.getParamType() != RestSearchParameterTypeEnum.TOKEN) {
-				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "] is not a token type, only token is supported");
-			}
-		}
-
 	}
 
 	/**
@@ -882,25 +881,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				}
 			}
 		}
-
-		/*
-		 * Don't allow clients to submit resources with binary storage attachments present.
-		 */
-		List<? extends IPrimitiveType<byte[]>> base64fields = getContext().newTerser().getAllPopulatedChildElementsOfType(theResource, myBase64Type);
-		for (IPrimitiveType<byte[]> nextBase64 : base64fields) {
-			if (nextBase64 instanceof IBaseHasExtensions) {
-				boolean hasExternalizedBinaryReference = ((IBaseHasExtensions) nextBase64)
-					.getExtension()
-					.stream()
-					.filter(t -> t.getUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED) == null)
-					.anyMatch(t -> t.getUrl().equals(EXT_EXTERNALIZED_BINARY_ID));
-				if (hasExternalizedBinaryReference) {
-					String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "externalizedBinaryStorageExtensionFoundInRequestBody", EXT_EXTERNALIZED_BINARY_ID);
-					throw new InvalidRequestException(msg);
-				}
-			}
-		}
-
 
 	}
 
@@ -1195,21 +1175,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		return retVal;
-	}
-
-	/**
-	 * If set, the given param will be treated as a secondary primary key, and multiple resources will not be able to share the same value.
-	 */
-	public void setSecondaryPrimaryKeyParamName(String theSecondaryPrimaryKeyParamName) {
-		mySecondaryPrimaryKeyParamName = theSecondaryPrimaryKeyParamName;
-	}
-
-	@Override
-	@PostConstruct
-	public void start() {
-		super.start();
-		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
-		myBase64Type = (Class<? extends IPrimitiveType<byte[]>>) getContext().getElementDefinition("base64Binary").getImplementingClass();
 	}
 
 	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {
