@@ -37,6 +37,14 @@
 			<artifactId>httpcore</artifactId>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-structures-r4 -->
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- 
 		Spring is added as an optional dependency just so that it
 		can be used for CORS
