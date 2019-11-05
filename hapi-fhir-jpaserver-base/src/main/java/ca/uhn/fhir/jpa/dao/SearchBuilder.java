@@ -834,13 +834,18 @@ public class SearchBuilder implements ISearchBuilder {
 
 			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, SearchFilterParser.CompareOperation.eq);
 			assert operation == SearchFilterParser.CompareOperation.eq || operation == SearchFilterParser.CompareOperation.ne;
+			List<Predicate> codePredicates = new ArrayList<>();
 			switch (operation) {
 				default:
 				case eq:
-					nextPredicate = theRoot.get("myId").as(Long.class).in(allOrPids);
+					codePredicates.add(theRoot.get("myId").as(Long.class).in(allOrPids));
+					codePredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), theResourceName));
+					nextPredicate = myBuilder.and(toArray(codePredicates));
 					break;
 				case ne:
-					nextPredicate = theRoot.get("myId").as(Long.class).in(allOrPids).not();
+					codePredicates.add(theRoot.get("myId").as(Long.class).in(allOrPids).not());
+					codePredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), theResourceName));
+					nextPredicate = myBuilder.and(toArray(codePredicates));
 					break;
 			}
 
@@ -2718,7 +2723,9 @@ public class SearchBuilder implements ISearchBuilder {
 
 		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, theFilter.getParamPath().getName());
 
-		if (searchParam.getName().equals(IAnyResource.SP_RES_ID)) {
+		if (searchParam == null) {
+			throw new InvalidRequestException("Invalid search parameter specified, " + theFilter.getParamPath().getName() + ", for resource type " + theResourceName);
+		} else if (searchParam.getName().equals(IAnyResource.SP_RES_ID)) {
 			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null,
