@@ -2,9 +2,12 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.test.BaseTest;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.NullWriter;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
@@ -14,14 +17,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
-public class JsonParserR4Test {
+public class JsonParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
 
@@ -36,6 +42,26 @@ public class JsonParserR4Test {
 		p.addName().addGiven("GIVEN");
 		b.addEntry().setResource(p);
 		return b;
+	}
+
+	@Test
+	public void testEntitiesNotConverted() throws IOException {
+		Device input = loadResource(ourCtx, Device.class, "/entities-from-cerner.json");
+		String narrative = input.getText().getDivAsString();
+		ourLog.info(narrative);
+	}
+
+
+	@Test
+	public void testEncodeExtensionOnBinaryData() {
+		Binary b = new Binary();
+		b.getDataElement().addExtension("http://foo", new StringType("AAA"));
+
+		String output = ourCtx.newJsonParser().setSummaryMode(true).encodeResourceToString(b);
+		assertEquals("{\"resourceType\":\"Binary\",\"meta\":{\"tag\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/v3-ObservationValue\",\"code\":\"SUBSETTED\",\"display\":\"Resource encoded in summary mode\"}]}}", output);
+
+		output = ourCtx.newJsonParser().setDontEncodeElements(Sets.newHashSet("*.id", "*.meta")).encodeResourceToString(b);
+		assertEquals("{\"resourceType\":\"Binary\",\"_data\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}", output);
 	}
 
 	@Test
@@ -145,7 +171,74 @@ public class JsonParserR4Test {
 		ourLog.info(encoded);
 
 		p = (Patient) ourCtx.newJsonParser().parseResource(encoded);
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">Copy &copy; 1999</div>", p.getText().getDivAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">Copy © 1999</div>", p.getText().getDivAsString());
+	}
+
+	@Test
+	public void testEncodeBinary() {
+		Binary b = new Binary();
+		b.setContent(new byte[]{0,1,2,3,4});
+		b.setContentType("application/octet-stream");
+
+		IParser parser = ourCtx.newJsonParser().setPrettyPrint(false);
+		String output = parser.encodeResourceToString(b);
+		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"application/octet-stream\",\"data\":\"AAECAwQ=\"}", output);
+	}
+
+	@Test
+	public void testEncodeWithInvalidExtensionMissingUrl() {
+
+		Patient p = new Patient();
+		Extension root = p.addExtension();
+		root.setValue(new StringType("ROOT_VALUE"));
+
+		// Lenient error handler
+		IParser parser = ourCtx.newJsonParser();
+		String output = parser.encodeResourceToString(p);
+		ourLog.info("Output: {}", output);
+		assertThat(output, containsString("ROOT_VALUE"));
+
+		// Strict error handler
+		try {
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.encodeResourceToString(p);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Resource is missing required element 'url' in parent element 'Patient(res).extension'", e.getMessage());
+		}
+
+	}
+
+
+	@Test
+	public void testEncodeWithInvalidExtensionContainingValueAndNestedExtensions() {
+
+		Patient p = new Patient();
+		Extension root = p.addExtension();
+		root.setUrl("http://root");
+		root.setValue(new StringType("ROOT_VALUE"));
+		Extension child = root.addExtension();
+		child.setUrl("http://child");
+		child.setValue(new StringType("CHILD_VALUE"));
+
+		// Lenient error handler
+		IParser parser = ourCtx.newJsonParser();
+		String output = parser.encodeResourceToString(p);
+		ourLog.info("Output: {}", output);
+		assertThat(output, containsString("http://root"));
+		assertThat(output, containsString("ROOT_VALUE"));
+		assertThat(output, containsString("http://child"));
+		assertThat(output, containsString("CHILD_VALUE"));
+
+		// Strict error handler
+		try {
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.encodeResourceToString(p);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Extension contains both a value and nested extensions: Patient(res).extension", e.getMessage());
+		}
+
 	}
 
 	@Test
@@ -374,6 +467,174 @@ public class JsonParserR4Test {
 		assertEquals("535", ((StringType) houseNumberExt.getValue()).getValue());
 
 	}
+	
+	private Composition createComposition(String sectionText) {
+		Composition c = new Composition();
+		Narrative compositionText = new Narrative().setStatus(Narrative.NarrativeStatus.GENERATED);
+		compositionText.setDivAsString("Composition");		
+		Narrative compositionSectionText = new Narrative().setStatus(Narrative.NarrativeStatus.GENERATED);
+		compositionSectionText.setDivAsString(sectionText);		
+		c.setText(compositionText);
+		c.addSection().setText(compositionSectionText);
+		return c;
+	}
+
+	/**
+	 * See #402 (however JSON is fine)
+	 */
+	@Test
+	public void testEncodingTextSection() {
+
+		String sectionText = "sectionText";
+		Composition composition = createComposition(sectionText);
+
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(composition);
+		ourLog.info(encoded);
+
+		int idx = encoded.indexOf(sectionText);
+		assertNotEquals(-1, idx);
+	}
+
+
+	/**
+	 * 2019-09-19 - Pre #1489
+	 * 18:24:48.548 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:483] - Encoded 200 passes - 50ms / pass - 19.7 / second
+	 * 18:24:52.472 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:483] - Encoded 300 passes - 47ms / pass - 21.3 / second
+	 * 18:24:56.428 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:483] - Encoded 400 passes - 45ms / pass - 22.2 / second
+	 * 18:25:00.463 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:483] - Encoded 500 passes - 44ms / pass - 22.6 / second
+	 *
+	 * 2019-09-19 - Post #1489
+	 * 20:43:21.434 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:470] - Encoded 2300 passes - 29ms / pass - 33.5 / second
+	 * 20:43:24.228 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:470] - Encoded 2400 passes - 29ms / pass - 33.6 / second
+	 * 20:43:27.029 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:470] - Encoded 2500 passes - 29ms / pass - 33.7 / second
+	 * 20:43:29.825 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:470] - Encoded 2600 passes - 29ms / pass - 33.8 / second
+	 * 20:43:32.779 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:470] - Encoded 2700 passes - 29ms / pass - 33.8 / second
+	 */
+	@Test
+	@Ignore
+	public void testTimingsOutput() throws IOException {
+
+		Bundle b = createBigBundle();
+
+		IParser parser = ourCtx.newJsonParser();
+		StopWatch sw = new StopWatch();
+		for (int i = 0; ; i++) {
+			parser.encodeResourceToWriter(b, new NullWriter());
+			if (i % 100 == 0) {
+				ourLog.info("Encoded {} passes - {} / pass - {} / second", i, sw.formatMillisPerOperation(i), sw.formatThroughput(i, TimeUnit.SECONDS));
+			}
+		}
+
+	}
+
+	/**
+	 * 2019-09-19 - Pre #1489
+	 * 18:33:08.720 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:495] - Encoded 200 passes - 47ms / pass - 21.2 / second
+	 * 18:33:12.453 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:495] - Encoded 300 passes - 43ms / pass - 22.7 / second
+	 * 18:33:16.195 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:495] - Encoded 400 passes - 42ms / pass - 23.6 / second
+	 * 18:33:19.912 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:495] - Encoded 500 passes - 41ms / pass - 24.2 / second
+	 *
+	 * 2019-09-19 - Post #1489
+	 * 20:44:38.557 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:500] - Encoded 200 passes - 37ms / pass - 27.0 / second
+	 * 20:44:41.459 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:500] - Encoded 300 passes - 34ms / pass - 29.1 / second
+	 * 20:44:44.434 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:500] - Encoded 400 passes - 33ms / pass - 30.1 / second
+	 * 20:44:47.372 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:500] - Encoded 500 passes - 32ms / pass - 30.8 / second
+	 */
+	@Test
+	@Ignore
+	public void testTimingsOutputXml() throws IOException {
+
+		Bundle b = createBigBundle();
+
+		IParser parser = ourCtx.newXmlParser();
+		StopWatch sw = new StopWatch();
+		for (int i = 0; ; i++) {
+			parser.encodeResourceToWriter(b, new NullWriter());
+			if (i % 100 == 0) {
+				ourLog.info("Encoded {} passes - {} / pass - {} / second", i, sw.formatMillisPerOperation(i), sw.formatThroughput(i, TimeUnit.SECONDS));
+			}
+		}
+
+	}
+
+	/**
+	 * 2019-09-19
+	 * 18:31:01.513 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:486] - Parsed 600 passes - 37ms / pass - 27.0 / second
+	 * 18:31:04.454 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:486] - Parsed 700 passes - 35ms / pass - 27.8 / second
+	 * 18:31:07.451 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:486] - Parsed 800 passes - 35ms / pass - 28.4 / second
+	 * 18:31:10.457 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:486] - Parsed 900 passes - 34ms / pass - 28.9 / second
+	 */
+	@Test
+	@Ignore
+	public void testTimingsInput() throws IOException {
+		Bundle b = createBigBundle();
+		IParser parser = ourCtx.newJsonParser();
+		String input = parser.encodeResourceToString(b);
+
+		StopWatch sw = new StopWatch();
+		for (int i = 0; ; i++) {
+			parser.parseResource(input);
+			if (i % 100 == 0) {
+				ourLog.info("Parsed {} passes - {} / pass - {} / second", i, sw.formatMillisPerOperation(i), sw.formatThroughput(i, TimeUnit.SECONDS));
+			}
+		}
+
+	}
+
+
+	/**
+	 * 2019-09-19
+	 * 18:32:04.518 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:513] - Parsed 200 passes - 37ms / pass - 26.8 / second
+	 * 18:32:07.829 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:513] - Parsed 300 passes - 35ms / pass - 27.8 / second
+	 * 18:32:11.087 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:513] - Parsed 400 passes - 35ms / pass - 28.5 / second
+	 * 18:32:14.357 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:513] - Parsed 500 passes - 34ms / pass - 28.9 / second
+	 */
+	@Test
+	@Ignore
+	public void testTimingsInputXml() throws IOException {
+		Bundle b = createBigBundle();
+		IParser parser = ourCtx.newXmlParser();
+		String input = parser.encodeResourceToString(b);
+
+		StopWatch sw = new StopWatch();
+		for (int i = 0; ; i++) {
+			parser.parseResource(input);
+			if (i % 100 == 0) {
+				ourLog.info("Parsed {} passes - {} / pass - {} / second", i, sw.formatMillisPerOperation(i), sw.formatThroughput(i, TimeUnit.SECONDS));
+			}
+		}
+
+	}
+
+
+	private Bundle createBigBundle() {
+		Observation obs = new Observation();
+
+		Bundle b = new Bundle();
+
+		for (int i = 0; i < 100; i++) {
+
+			Patient pt = new Patient();
+			pt.addName().setFamily("FAM");
+			obs.getSubject().setResource(pt);
+
+			Encounter enc = new Encounter();
+			enc.setId("#1");
+			enc.setStatus(Encounter.EncounterStatus.ARRIVED);
+			obs.getEncounter().setReference("#1");
+			obs.getContained().add(enc);
+			obs.setEffective(new DateTimeType(new Date()));
+			obs.addIdentifier()
+				.setSystem("http://foo")
+				.setValue("blah");
+			obs.setValue(new Quantity().setSystem("UCUM").setCode("mg/L").setUnit("mg/L").setValue(123.567d));
+
+			b.addEntry().setResource(obs);
+
+		}
+		return b;
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {

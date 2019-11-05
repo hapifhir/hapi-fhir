@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,10 +24,7 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 class ActiveSubscriptionCache {
@@ -47,23 +44,24 @@ class ActiveSubscriptionCache {
 		return myCache.size();
 	}
 
-	public void put(String theSubscriptionId, ActiveSubscription theValue) {
-		myCache.put(theSubscriptionId, theValue);
+	public void put(String theSubscriptionId, ActiveSubscription theActiveSubscription) {
+		myCache.put(theSubscriptionId, theActiveSubscription);
 	}
 
-	public synchronized void remove(String theSubscriptionId) {
+	public synchronized ActiveSubscription remove(String theSubscriptionId) {
 		Validate.notBlank(theSubscriptionId);
 
 		ActiveSubscription activeSubscription = myCache.get(theSubscriptionId);
 		if (activeSubscription == null) {
-			return;
+			return null;
 		}
 
-		activeSubscription.close();
 		myCache.remove(theSubscriptionId);
+		return activeSubscription;
 	}
 
-	public void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
+	List<String> markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(Collection<String> theAllIds) {
+		List<String> retval = new ArrayList<>();
 		for (String next : new ArrayList<>(myCache.keySet())) {
 			ActiveSubscription activeSubscription = myCache.get(next);
 			if (theAllIds.contains(next)) {
@@ -72,11 +70,12 @@ class ActiveSubscriptionCache {
 			} else {
 				if (activeSubscription.isFlagForDeletion()) {
 					ourLog.info("Unregistering Subscription/{}", next);
-					remove(next);
+					retval.add(next);
 				} else {
 					activeSubscription.setFlagForDeletion(true);
 				}
 			}
 		}
+		return retval;
 	}
 }

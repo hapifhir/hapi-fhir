@@ -9,9 +9,9 @@ package ca.uhn.fhir.util;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,7 +30,13 @@ import com.ctc.wstx.stax.WstxOutputFactory;
 import org.apache.commons.text.StringEscapeUtils;
 import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.io.EscapingWriterFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.*;
 import javax.xml.stream.events.XMLEvent;
 import java.io.*;
@@ -40,7 +46,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Utility methods for working with the StAX API.
- * 
+ * <p>
  * This class contains code adapted from the Apache Axiom project.
  */
 public class XmlUtil {
@@ -1503,8 +1509,75 @@ public class XmlUtil {
 		validEntityNames.put("zscr", 0x1D4CF);
 		validEntityNames.put("zwj", 0x0200D);
 		validEntityNames.put("zwnj", 0x0200C);
-		
+
 		VALID_ENTITY_NAMES = Collections.unmodifiableMap(validEntityNames);
+	}
+
+	/** Non-instantiable */
+	private XmlUtil() {}
+
+	private static final class ExtendedEntityReplacingXmlResolver implements XMLResolver {
+		@Override
+		public Object resolveEntity(String thePublicID, String theSystemID, String theBaseURI, String theNamespace) {
+			if (thePublicID == null && theSystemID == null) {
+				if (theNamespace != null && VALID_ENTITY_NAMES.containsKey(theNamespace)) {
+					return new String(Character.toChars(VALID_ENTITY_NAMES.get(theNamespace)));
+				}
+			}
+
+			return null;
+		}
+	}
+
+	public static class MyEscaper implements EscapingWriterFactory {
+
+		@Override
+		public Writer createEscapingWriterFor(OutputStream theOut, String theEnc) throws UnsupportedEncodingException {
+			return createEscapingWriterFor(new OutputStreamWriter(theOut, theEnc), theEnc);
+		}
+
+		@Override
+		public Writer createEscapingWriterFor(final Writer theW, String theEnc) {
+			return new Writer() {
+
+				@Override
+				public void close() throws IOException {
+					theW.close();
+				}
+
+				@Override
+				public void flush() throws IOException {
+					theW.flush();
+				}
+
+				@Override
+				public void write(char[] theCbuf, int theOff, int theLen) throws IOException {
+					boolean hasEscapable = false;
+					for (int i = 0; i < theLen && !hasEscapable; i++) {
+						char nextChar = theCbuf[i + theOff];
+						switch (nextChar) {
+							case '<':
+							case '>':
+							case '"':
+							case '&':
+								hasEscapable = true;
+								break;
+							default:
+								break;
+						}
+					}
+
+					if (!hasEscapable) {
+						theW.write(theCbuf, theOff, theLen);
+						return;
+					}
+
+					String escaped = StringEscapeUtils.escapeXml10(new String(theCbuf, theOff, theLen));
+					theW.write(escaped.toCharArray());
+				}
+			};
+		}
+
 	}
 
 	private static XMLOutputFactory createOutputFactory() throws FactoryConfigurationError {
@@ -1637,15 +1710,11 @@ public class XmlUtil {
 			try {
 				Class.forName("com.ctc.wstx.stax.WstxInputFactory");
 				boolean isWoodstox = inputFactory instanceof com.ctc.wstx.stax.WstxInputFactory;
-				if ( !isWoodstox )
-				{
+				if (!isWoodstox) {
 					// Check if implementation is woodstox by property since instanceof check does not work if running in JBoss
-					try
-					{
-						isWoodstox = inputFactory.getProperty( "org.codehaus.stax2.implVersion" ) != null;
-					}
-					catch ( Exception e )
-					{
+					try {
+						isWoodstox = inputFactory.getProperty("org.codehaus.stax2.implVersion") != null;
+					} catch (Exception e) {
 						// ignore
 					}
 				}
@@ -1673,7 +1742,6 @@ public class XmlUtil {
 		return ourOutputFactory;
 	}
 
-
 	private static void logStaxImplementation(Class<?> theClass) {
 		IDependencyLog logger = DependencyLogFactory.createJarLogger();
 		if (logger != null) {
@@ -1682,7 +1750,6 @@ public class XmlUtil {
 		ourHaveLoggedStaxImplementation = true;
 	}
 
-	
 	static XMLInputFactory newInputFactory() throws FactoryConfigurationError {
 		XMLInputFactory inputFactory;
 		try {
@@ -1761,74 +1828,36 @@ public class XmlUtil {
 	private static void throwUnitTestExceptionIfConfiguredToDoSo() throws FactoryConfigurationError, XMLStreamException {
 		if (ourNextException != null) {
 			if (ourNextException instanceof javax.xml.stream.FactoryConfigurationError) {
-				throw ((javax.xml.stream.FactoryConfigurationError)ourNextException);
+				throw ((javax.xml.stream.FactoryConfigurationError) ourNextException);
 			}
-			throw (XMLStreamException)ourNextException;
+			throw (XMLStreamException) ourNextException;
 		}
 	}
 
-	private static final class ExtendedEntityReplacingXmlResolver implements XMLResolver {
-		@Override
-		public Object resolveEntity(String thePublicID, String theSystemID, String theBaseURI, String theNamespace) {
-			if (thePublicID == null && theSystemID == null) {
-				if (theNamespace != null && VALID_ENTITY_NAMES.containsKey(theNamespace)) {
-					return new String(Character.toChars(VALID_ENTITY_NAMES.get(theNamespace)));
-				}
+	public static Document parseDocument(String theInput) throws IOException, SAXException {
+		DocumentBuilder builder = null;
+		try {
+			DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+			docBuilderFactory.setNamespaceAware(true);
+			docBuilderFactory.setXIncludeAware(false);
+			docBuilderFactory.setExpandEntityReferences(false);
+			try {
+				docBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+				docBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+				docBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+				docBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+				docBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+				throwUnitTestExceptionIfConfiguredToDoSo();
+			} catch (Exception e) {
+				ourLog.warn("Failed to set feature on XML parser: " + e.toString());
 			}
 
-			return null;
+			builder = docBuilderFactory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			throw new ConfigurationException(e);
 		}
+
+		InputSource src = new InputSource(new StringReader(theInput));
+		return builder.parse(src);
 	}
-	
-	public static class MyEscaper implements EscapingWriterFactory {
-
-		@Override
-		public Writer createEscapingWriterFor(OutputStream theOut, String theEnc) throws UnsupportedEncodingException {
-			return createEscapingWriterFor(new OutputStreamWriter(theOut, theEnc), theEnc);
-		}
-
-		@Override
-		public Writer createEscapingWriterFor(final Writer theW, String theEnc) {
-			return new Writer() {
-
-				@Override
-				public void close() throws IOException {
-					theW.close();
-				}
-
-				@Override
-				public void flush() throws IOException {
-					theW.flush();
-				}
-
-				@Override
-				public void write(char[] theCbuf, int theOff, int theLen) throws IOException {
-					boolean hasEscapable = false;
-					for (int i = 0; i < theLen && !hasEscapable; i++) {
-						char nextChar = theCbuf[i + theOff];
-						switch (nextChar) {
-						case '<':
-						case '>':
-						case '"':
-						case '&':
-							hasEscapable = true;
-							break;
-						default:
-							break;
-						}
-					}
-
-					if (!hasEscapable) {
-						theW.write(theCbuf, theOff, theLen);
-						return;
-					}
-
-					String escaped = StringEscapeUtils.escapeXml10(new String(theCbuf, theOff, theLen));
-					theW.write(escaped.toCharArray());
-				}
-			};
-		}
-
-	}
-
 }

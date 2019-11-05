@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -82,13 +82,12 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 
 	@Override
 	public Date getDeleted() {
-		return myDeleted;
+		return cloneDate(myDeleted);
 	}
 
 	public void setDeleted(Date theDate) {
 		myDeleted = theDate;
 	}
-
 
 	@Override
 	public FhirVersionEnum getFhirVersion() {
@@ -125,7 +124,7 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 	@Override
 	public InstantDt getPublished() {
 		if (myPublished != null) {
-			return new InstantDt(myPublished);
+			return new InstantDt(cloneDate(myPublished));
 		} else {
 			return null;
 		}
@@ -149,7 +148,7 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 
 	@Override
 	public InstantDt getUpdated() {
-		return new InstantDt(myUpdated);
+		return new InstantDt(cloneDate(myUpdated));
 	}
 
 	public void setUpdated(Date theUpdated) {
@@ -162,7 +161,7 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 
 	@Override
 	public Date getUpdatedDate() {
-		return myUpdated;
+		return cloneDate(myUpdated);
 	}
 
 	@Override
@@ -175,6 +174,14 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 
 	public void setHasTags(boolean theHasTags) {
 		myHasTags = theHasTags;
+	}
+
+	static Date cloneDate(Date theDate) {
+		Date retVal = theDate;
+		if (retVal != null) {
+			retVal = new Date(retVal.getTime());
+		}
+		return retVal;
 	}
 
 }

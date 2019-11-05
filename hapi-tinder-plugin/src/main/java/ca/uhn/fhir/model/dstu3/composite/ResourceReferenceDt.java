@@ -162,7 +162,8 @@ public class ResourceReferenceDt
      * A reference to a location at which the other resource is found. The reference may a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources
      * </p> 
 	 */
-	public IdDt getReference() {  
+	@Override
+	public IdDt getReference() {
 		if (myReference == null) {
 			myReference = new IdDt();
 		}
@@ -183,6 +184,7 @@ public class ResourceReferenceDt
      * A reference to a location at which the other resource is found. The reference may a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources
      * </p> 
 	 */
+	@Override
 	public ResourceReferenceDt setReference(IdDt theValue) {
 		myReference = theValue;
 		return this;
@@ -196,7 +198,8 @@ public class ResourceReferenceDt
      * A reference to a location at which the other resource is found. The reference may a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources
      * </p> 
 	 */
-	public ResourceReferenceDt setReference( String theId) {
+	@Override
+	public ResourceReferenceDt setReference(String theId) {
 		myReference = new IdDt(theId); 
 		return this; 
 	}
@@ -240,7 +243,8 @@ public class ResourceReferenceDt
      * Plain text narrative that identifies the resource in addition to the resource reference
      * </p> 
 	 */
-	public ResourceReferenceDt setDisplay( String theString) {
+	@Override
+	public ResourceReferenceDt setDisplay(String theString) {
 		myDisplay = new StringDt(theString); 
 		return this; 
 	}

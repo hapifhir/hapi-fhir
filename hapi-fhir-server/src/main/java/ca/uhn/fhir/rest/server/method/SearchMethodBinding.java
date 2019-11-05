@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.method;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,15 +19,6 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.lang.reflect.Method;
-import java.util.*;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -44,26 +35,37 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Method;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethodBinding.class);
 
 	private static final Set<String> SPECIAL_SEARCH_PARAMS;
-	private String myCompartmentName;
-	private String myDescription;
-	private Integer myIdParamIndex;
-	private String myQueryName;
-	private boolean myAllowUnknownParams;
-  private final String myResourceProviderResourceName;
 
 	static {
 		HashSet<String> specialSearchParams = new HashSet<>();
 		specialSearchParams.add(IAnyResource.SP_RES_ID);
 		specialSearchParams.add(IAnyResource.SP_RES_LANGUAGE);
+		specialSearchParams.add(Constants.PARAM_INCLUDE);
+		specialSearchParams.add(Constants.PARAM_REVINCLUDE);
 		SPECIAL_SEARCH_PARAMS = Collections.unmodifiableSet(specialSearchParams);
 	}
+
+	private final String myResourceProviderResourceName;
+	private String myCompartmentName;
+	private String myDescription;
+	private Integer myIdParamIndex;
+	private String myQueryName;
+	private boolean myAllowUnknownParams;
 
 	public SearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Class<? extends IBaseResource> theResourceProviderResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
@@ -90,11 +92,11 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			throw new ConfigurationException(msg);
 		}
 
-    if (theResourceProviderResourceType != null) {
-      this.myResourceProviderResourceName = theContext.getResourceDefinition(theResourceProviderResourceType).getName();
-    } else {
-      this.myResourceProviderResourceName = null;
-    }
+		if (theResourceProviderResourceType != null) {
+			this.myResourceProviderResourceName = theContext.getResourceDefinition(theResourceProviderResourceType).getName();
+		} else {
+			this.myResourceProviderResourceName = null;
+		}
 
 	}
 
@@ -106,8 +108,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		return myQueryName;
 	}
 
-  public String getResourceProviderResourceName() {
-    return myResourceProviderResourceName;
+	public String getResourceProviderResourceName() {
+		return myResourceProviderResourceName;
 	}
 
 	@Nonnull
@@ -123,28 +125,14 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public ReturnTypeEnum getReturnType() {
-			return ReturnTypeEnum.BUNDLE;
+		return ReturnTypeEnum.BUNDLE;
 	}
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		
-		String clientPreference = theRequest.getHeader(Constants.HEADER_PREFER);
-		boolean lenientHandling = false;
-		if(clientPreference != null)
-		{
-			String[] preferences = clientPreference.split(";");
-			for( String p : preferences){
-				if("handling:lenient".equalsIgnoreCase(p))
-				{
-					lenientHandling = true;
-					break;
-				}
-			}
-		}
-		
+
 		if (theRequest.getId() != null && myIdParamIndex == null) {
-			ourLog.trace("Method {} doesn't match because ID is not null: {}", theRequest.getId());
+			ourLog.trace("Method {} doesn't match because ID is not null: {}", getMethod(), theRequest.getId());
 			return false;
 		}
 		if (theRequest.getRequestType() == RequestTypeEnum.GET && theRequest.getOperation() != null && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
@@ -156,40 +144,43 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			return false;
 		}
 		if (theRequest.getRequestType() != RequestTypeEnum.GET && theRequest.getRequestType() != RequestTypeEnum.POST) {
-			ourLog.trace("Method {} doesn't match because request type is {}", getMethod());
+			ourLog.trace("Method {} doesn't match because request type is {}", getMethod(), theRequest.getRequestType());
 			return false;
 		}
 		if (!StringUtils.equals(myCompartmentName, theRequest.getCompartmentName())) {
-			ourLog.trace("Method {} doesn't match because it is for compartment {} but request is compartment {}", new Object[] { getMethod(), myCompartmentName, theRequest.getCompartmentName() });
+			ourLog.trace("Method {} doesn't match because it is for compartment {} but request is compartment {}", getMethod(), myCompartmentName, theRequest.getCompartmentName());
 			return false;
 		}
+		if (theRequest.getParameters().get(Constants.PARAM_PAGINGACTION) != null) {
+			return false;
+		}
+
 		// This is used to track all the parameters so we can reject queries that
 		// have additional params we don't understand
-		Set<String> methodParamsTemp = new HashSet<String>();
+		Set<String> methodParamsTemp = new HashSet<>();
 
 		Set<String> unqualifiedNames = theRequest.getUnqualifiedToQualifiedNames().keySet();
 		Set<String> qualifiedParamNames = theRequest.getParameters().keySet();
-		for (int i = 0; i < this.getParameters().size(); i++) {
-			if (!(getParameters().get(i) instanceof BaseQueryParameter)) {
+		for (IParameter nextParameter : getParameters()) {
+			if (!(nextParameter instanceof BaseQueryParameter)) {
 				continue;
 			}
-			BaseQueryParameter temp = (BaseQueryParameter) getParameters().get(i);
-			String name = temp.getName();
-			if (temp.isRequired()) {
+			BaseQueryParameter nextQueryParameter = (BaseQueryParameter) nextParameter;
+			String name = nextQueryParameter.getName();
+			if (nextQueryParameter.isRequired()) {
 
 				if (qualifiedParamNames.contains(name)) {
 					QualifierDetails qualifiers = extractQualifiersFromParameterName(name);
-					if (qualifiers.passes(temp.getQualifierWhitelist(), temp.getQualifierBlacklist())) {
+					if (qualifiers.passes(nextQueryParameter.getQualifierWhitelist(), nextQueryParameter.getQualifierBlacklist())) {
 						methodParamsTemp.add(name);
 					}
 				}
 				if (unqualifiedNames.contains(name)) {
 					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(name);
-					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
+					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, nextQueryParameter.getQualifierWhitelist(), nextQueryParameter.getQualifierBlacklist());
 					methodParamsTemp.addAll(qualifiedNames);
 				}
-				if (!qualifiedParamNames.contains(name) && !unqualifiedNames.contains(name))
-				{
+				if (!qualifiedParamNames.contains(name) && !unqualifiedNames.contains(name)) {
 					ourLog.trace("Method {} doesn't match param '{}' is not present", getMethod().getName(), name);
 					return false;
 				}
@@ -197,16 +188,16 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			} else {
 				if (qualifiedParamNames.contains(name)) {
 					QualifierDetails qualifiers = extractQualifiersFromParameterName(name);
-					if (qualifiers.passes(temp.getQualifierWhitelist(), temp.getQualifierBlacklist())) {
+					if (qualifiers.passes(nextQueryParameter.getQualifierWhitelist(), nextQueryParameter.getQualifierBlacklist())) {
 						methodParamsTemp.add(name);
 					}
-				} 
+				}
 				if (unqualifiedNames.contains(name)) {
 					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(name);
-					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
+					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, nextQueryParameter.getQualifierWhitelist(), nextQueryParameter.getQualifierBlacklist());
 					methodParamsTemp.addAll(qualifiedNames);
 				}
-				if (!qualifiedParamNames.contains(name)) { 
+				if (!qualifiedParamNames.contains(name)) {
 					methodParamsTemp.add(name);
 				}
 			}
@@ -232,13 +223,11 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 		for (String next : theRequest.getParameters().keySet()) {
-			if (next.startsWith("_") && !SPECIAL_SEARCH_PARAMS.contains(next)) {
+			if (next.startsWith("_") && !SPECIAL_SEARCH_PARAMS.contains(truncModifierPart(next))) {
 				methodParamsTemp.add(next);
 			}
 		}
 		Set<String> keySet = theRequest.getParameters().keySet();
-		if(lenientHandling == true)
-			return true;
 
 		if (myAllowUnknownParams == false) {
 			for (String next : keySet) {
@@ -250,6 +239,13 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		return true;
 	}
 
+	private String truncModifierPart(String param) {
+		int indexOfSeparator = param.indexOf(":");
+		if (indexOfSeparator != -1) {
+			return param.substring(0, indexOfSeparator);
+		}
+		return param;
+	}
 
 	@Override
 	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
@@ -272,7 +268,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		if (theQualifierWhitelist == null && theQualifierBlacklist == null) {
 			return theQualifiedNames;
 		}
-		ArrayList<String> retVal = new ArrayList<String>(theQualifiedNames.size());
+		ArrayList<String> retVal = new ArrayList<>(theQualifiedNames.size());
 		for (String next : theQualifiedNames) {
 			QualifierDetails qualifiers = extractQualifiersFromParameterName(next);
 			if (!qualifiers.passes(theQualifierWhitelist, theQualifierBlacklist)) {
@@ -287,6 +283,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	public String toString() {
 		return getMethod().toString();
 	}
+
 	public static QualifierDetails extractQualifiersFromParameterName(String theParamName) {
 		QualifierDetails retVal = new QualifierDetails();
 		if (theParamName == null || theParamName.length() == 0) {

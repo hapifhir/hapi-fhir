@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -16,7 +17,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Function;
 
 import static org.junit.Assert.*;
@@ -40,7 +43,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDeleteFailCallsHook() throws Exception {
+	public void testDeleteFailCallsHook() {
 		Organization organization = new Organization();
 		organization.setName("FOO");
 		IIdType organizationId = myOrganizationDao.create(organization).getId().toUnqualifiedVersionless();
@@ -49,7 +52,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		patient.setManagingOrganization(new Reference(organizationId));
 		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
-		myDeleteInterceptor.deleteConflictFunction = list -> false;
+		myDeleteInterceptor.deleteConflictFunction = t -> new DeleteConflictOutcome().setShouldRetryCount(0);
 		try {
 			myOrganizationDao.delete(organizationId);
 			fail();
@@ -64,7 +67,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDeleteHookDeletesConflict() throws Exception {
+	public void testDeleteHookDeletesConflict() {
 		Organization organization = new Organization();
 		organization.setName("FOO");
 		IIdType organizationId = myOrganizationDao.create(organization).getId().toUnqualifiedVersionless();
@@ -82,7 +85,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDeleteHookDeletesTwoConflicts() throws Exception {
+	public void testDeleteHookDeletesTwoConflicts() {
 		Organization organization = new Organization();
 		organization.setName("FOO");
 		IIdType organizationId = myOrganizationDao.create(organization).getId().toUnqualifiedVersionless();
@@ -104,7 +107,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDeleteHookDeletesThreeConflicts() throws Exception {
+	public void testDeleteHookDeletesThreeConflicts() {
 		Organization organization = new Organization();
 		organization.setName("FOO");
 		IIdType organizationId = myOrganizationDao.create(organization).getId().toUnqualifiedVersionless();
@@ -130,7 +133,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testBadInterceptorNoInfiniteLoop() throws Exception {
+	public void testBadInterceptorNoInfiniteLoop() {
 		Organization organization = new Organization();
 		organization.setName("FOO");
 		IIdType organizationId = myOrganizationDao.create(organization).getId().toUnqualifiedVersionless();
@@ -140,7 +143,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		// Always returning true is bad behaviour.  Our infinite loop checker should halt it
-		myDeleteInterceptor.deleteConflictFunction = list -> true;
+		myDeleteInterceptor.deleteConflictFunction = t -> new DeleteConflictOutcome().setShouldRetryCount(Integer.MAX_VALUE);
 
 		try {
 			myOrganizationDao.delete(organizationId);
@@ -151,7 +154,36 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		assertEquals(1 + DeleteConflictService.MAX_RETRY_ATTEMPTS, myDeleteInterceptor.myCallCount);
 	}
 
-	private boolean deleteConflicts(DeleteConflictList theList) {
+	@Test
+	public void testNoDuplicateConstraintReferences() {
+		Patient patient = new Patient();
+		patient.setActive(true);
+		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		Condition condition = new Condition();
+		condition.setSubject(new Reference(patientId));
+		condition.setAsserter(new Reference(patientId));
+		myConditionDao.create(condition);
+
+		List<DeleteConflict> conflicts = new ArrayList<>();
+		myDeleteInterceptor.deleteConflictFunction = t -> {
+			for (DeleteConflict next : t) {
+				conflicts.add(next);
+			}
+			return new DeleteConflictOutcome().setShouldRetryCount(0);
+		};
+
+		try {
+			myPatientDao.delete(patientId);
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			// good
+		}
+
+		assertEquals(1, conflicts.size());
+	}
+
+	private DeleteConflictOutcome deleteConflicts(DeleteConflictList theList) {
 		Iterator<DeleteConflict> iterator = theList.iterator();
 		while (iterator.hasNext()) {
 			DeleteConflict next = iterator.next();
@@ -162,16 +194,16 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 				++myInterceptorDeleteCount;
 			}
 		}
-		return myInterceptorDeleteCount > 0;
+		return new DeleteConflictOutcome().setShouldRetryCount(myInterceptorDeleteCount);
 	}
 
 	private static class DeleteConflictInterceptor {
 		int myCallCount;
 		DeleteConflictList myDeleteConflictList;
-		Function<DeleteConflictList, Boolean> deleteConflictFunction;
+		Function<DeleteConflictList, DeleteConflictOutcome> deleteConflictFunction;
 
 		@Hook(Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS)
-		public boolean deleteConflicts(DeleteConflictList theDeleteConflictList) {
+		public DeleteConflictOutcome deleteConflicts(DeleteConflictList theDeleteConflictList) {
 			++myCallCount;
 			myDeleteConflictList = theDeleteConflictList;
 			return deleteConflictFunction.apply(theDeleteConflictList);

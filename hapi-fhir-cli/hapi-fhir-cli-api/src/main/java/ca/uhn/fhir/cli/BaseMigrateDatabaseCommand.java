@@ -9,9 +9,9 @@ package ca.uhn.fhir.cli;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -78,6 +78,7 @@ public abstract class BaseMigrateDatabaseCommand<T extends Enum> extends BaseCom
 		addRequiredOption(retVal, "t", "to", "Version", "The database schema version to migrate TO");
 		addRequiredOption(retVal, "d", "driver", "Driver", "The database driver to use (Options are " + driverOptions() + ")");
 		addOptionalOption(retVal, "x", "flags", "Flags", "A comma-separated list of any specific migration flags (these flags are version specific, see migrator documentation for details)");
+		addOptionalOption(retVal, null, "no-column-shrink", false, "If this flag is set, the system will not attempt to reduce the length of columns. This is useful in environments with a lot of existing data, where shrinking a column can take a very long time.");
 
 		return retVal;
 	}
@@ -106,6 +107,7 @@ public abstract class BaseMigrateDatabaseCommand<T extends Enum> extends BaseCom
 		validateVersionSupported(to);
 
 		boolean dryRun = theCommandLine.hasOption("r");
+		boolean noColumnShrink = theCommandLine.hasOption("no-column-shrink");
 
 		String flags = theCommandLine.getOptionValue("x");
 		myFlags = Arrays.stream(defaultString(flags).split(","))
@@ -119,6 +121,7 @@ public abstract class BaseMigrateDatabaseCommand<T extends Enum> extends BaseCom
 		migrator.setUsername(username);
 		migrator.setPassword(password);
 		migrator.setDryRun(dryRun);
+		migrator.setNoColumnShrink(noColumnShrink);
 		addTasks(migrator, from, to);
 
 		migrator.migrate();

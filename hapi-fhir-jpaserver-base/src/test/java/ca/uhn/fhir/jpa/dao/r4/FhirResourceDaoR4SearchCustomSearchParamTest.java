@@ -1,8 +1,13 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -10,11 +15,13 @@ import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Appointment.AppointmentStatus;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.junit.*;
+import org.mockito.ArgumentCaptor;
 import org.mockito.internal.util.collections.ListUtil;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -23,8 +30,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchCustomSearchParamTest.class);
@@ -39,6 +49,48 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
 	}
+
+
+	@Test
+	public void testBundleComposition() {
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.setCode("foo");
+		fooSp.addBase("Bundle");
+		fooSp.setType(Enumerations.SearchParamType.REFERENCE);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("Bundle.entry[0].resource.as(Composition).encounter");
+		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(fooSp));
+
+		mySearchParameterDao.create(fooSp, mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		Encounter enc = new Encounter();
+		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
+		String encId = myEncounterDao.create(enc).getId().toUnqualifiedVersionless().getValue();
+
+		Composition composition = new Composition();
+		composition.getEncounter().setReference(encId);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		bundle.addEntry().setResource(composition);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		String bundleId = myBundleDao.create(bundle).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add("foo", new ReferenceParam(encId));
+		IBundleProvider results = myBundleDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(results), hasItems(bundleId));
+
+	}
+
 
 	@Test
 	public void testCreateInvalidNoBase() {
@@ -146,7 +198,10 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		mySearchParameterDao.create(fooSp, mySrd);
 
 		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
-		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
 
 	}
@@ -158,7 +213,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		sp.setCode("myDoctor");
 		sp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE);
 		sp.setTitle("My Doctor");
-		sp.setExpression("Patient.extension('http://fmcna.com/myDoctor')");
+		sp.setExpression("Patient.extension('http://fmcna.com/myDoctor').value.as(Reference)");
 		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(sp);
@@ -178,8 +233,43 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		IBundleProvider outcome = myPatientDao.search(params);
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
 		ourLog.info("IDS: " + ids);
-		assertThat(ids, contains(pid.getValue()));
+		assertThat(ids, Matchers.contains(pid.getValue()));
 	}
+
+
+	@Test
+	public void testIndexIntoBundle() {
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("Bundle");
+		sp.setCode("messageid");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setTitle("Message ID");
+		sp.setExpression("Bundle.entry.resource.as(MessageHeader).id");
+		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		mySearchParameterDao.create(sp);
+
+		mySearchParamRegistry.forceRefresh();
+
+		MessageHeader messageHeader = new MessageHeader();
+		messageHeader.setId("123");
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.MESSAGE);
+		bundle.addEntry()
+			.setResource(messageHeader);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		myBundleDao.create(bundle);
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("messageid", new TokenParam("123"));
+		IBundleProvider outcome = myBundleDao.search(params);
+		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
+		ourLog.info("IDS: " + ids);
+		assertThat(ids, not(empty()));
+	}
+
 
 	@Test
 	public void testExtensionWithNoValueIndexesWithoutFailure() {
@@ -453,6 +543,56 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, empty());
+
+	}
+
+	@Test
+	public void testSearchForExtensionReferenceWithTwoPaths() {
+		Practitioner p1 = new Practitioner();
+		p1.addName().setFamily("P1");
+		IIdType p1id = myPractitionerDao.create(p1).getId().toUnqualifiedVersionless();
+
+		Practitioner p2 = new Practitioner();
+		p2.addName().setFamily("P2");
+		IIdType p2id = myPractitionerDao.create(p2).getId().toUnqualifiedVersionless();
+
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("DiagnosticReport");
+		sp.setCode("fooBar");
+		sp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE);
+		sp.setTitle("FOO AND BAR");
+		sp.setExpression("DiagnosticReport.extension('http://foo') | DiagnosticReport.extension('http://bar')");
+		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(sp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+
+		DiagnosticReport dr1 = new DiagnosticReport();
+		dr1.addExtension("http://foo", new Reference(p1id.getValue()));
+		IIdType dr1id = myDiagnosticReportDao.create(dr1).getId().toUnqualifiedVersionless();
+
+		DiagnosticReport dr2 = new DiagnosticReport();
+		dr2.addExtension("http://bar", new Reference(p2id.getValue()));
+		IIdType dr2id = myDiagnosticReportDao.create(dr2).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+
+		// Find one
+		map = new SearchParameterMap();
+		map.add(sp.getCode(), new ReferenceParam(p1id.getValue()));
+		results = myDiagnosticReportDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, containsInAnyOrder(dr1id.getValue()));
+
+		// Find both
+		map = new SearchParameterMap();
+		map.add(sp.getCode(), new ReferenceOrListParam().addOr(new ReferenceParam(p1id.getValue())).addOr(new ReferenceParam(p2id.getValue())));
+		results = myDiagnosticReportDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, containsInAnyOrder(dr1id.getValue(), dr2id.getValue()));
 
 	}
 
@@ -1072,6 +1212,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		sp.setExpression("Observation.specimen.resolve().receivedTime");
 		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 		mySearchParameterDao.create(sp);
 
 		mySearchParamRegistry.forceRefresh();
@@ -1084,6 +1225,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		o.getContained().add(specimen);
 		o.setStatus(Observation.ObservationStatus.FINAL);
 		o.setSpecimen(new Reference("#FOO"));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(o));
 		myObservationDao.update(o);
 
 		specimen = new Specimen();
@@ -1207,6 +1349,67 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		assertThat(foundResources, contains(patId.getValue()));
 
 	}
+
+	@Test
+	public void testCustomCodeableConcept() {
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("ChargeItem");
+		fooSp.setName("Product");
+		fooSp.setCode("product");
+		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
+		fooSp.setTitle("Product within a ChargeItem");
+		fooSp.setExpression("ChargeItem.product.as(CodeableConcept)");
+		fooSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(fooSp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+
+		ChargeItem ci = new ChargeItem();
+		ci.setProduct(new CodeableConcept());
+		ci.getProductCodeableConcept().addCoding().setCode("1");
+		myChargeItemDao.create(ci);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add("product", new TokenParam(null, "1"));
+		IBundleProvider results = myChargeItemDao.search(map);
+		assertEquals(1, results.size().intValue());
+
+
+	}
+
+
+	@Test
+	public void testCompositeWithInvalidTarget() {
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("Patient");
+		sp.setCode("myDoctor");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setTitle("My Doctor");
+		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		sp.addComponent()
+			.setDefinition("http://foo");
+		mySearchParameterDao.create(sp);
+
+		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_WARNING, interceptor);
+
+		try {
+			mySearchParamRegistry.forceRefresh();
+
+			ArgumentCaptor<HookParams> paramsCaptor = ArgumentCaptor.forClass(HookParams.class);
+			verify(interceptor, times(1)).invoke(any(), paramsCaptor.capture());
+
+			StorageProcessingMessage msg = paramsCaptor.getValue().get(StorageProcessingMessage.class);
+			assertThat(msg.getMessage(), containsString("refers to unknown component foo, ignoring this parameter"));
+
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+	}
+
+
+
 
 	@AfterClass
 	public static void afterClassClearContext() {

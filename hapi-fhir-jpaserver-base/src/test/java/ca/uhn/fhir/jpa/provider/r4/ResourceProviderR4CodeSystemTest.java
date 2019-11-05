@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
@@ -14,8 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.*;
 
 public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test {
 
@@ -47,7 +49,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testLookupOnExternalCode() {
-		ResourceProviderR4ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermSvc, mySrd);
+		ResourceProviderR4ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd);
 
 		Parameters respParam = ourClient
 			.operation()
@@ -61,11 +63,13 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals("Parent A", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("SYSTEM NAME", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals("SYSTEM VERSION", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Parent A", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(3).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 		// With HTTP GET
 		respParam = ourClient
@@ -81,11 +85,13 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals("Parent A", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals(("SYSTEM NAME"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals(("SYSTEM VERSION"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Parent A", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(3).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 	}
 
@@ -103,11 +109,13 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals("Accession ID", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("v2.0203", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals("2.9", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Accession ID", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(3).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 	}
 
 	@Test
@@ -140,7 +148,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
 		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
@@ -176,7 +184,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
 		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
@@ -245,11 +253,13 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals("Unknown", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals("Married", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).booleanValue());
+		assertEquals("v3.MaritalStatus", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals("2018-08-12", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Married", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(3).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).booleanValue());
 	}
 
 	@Test

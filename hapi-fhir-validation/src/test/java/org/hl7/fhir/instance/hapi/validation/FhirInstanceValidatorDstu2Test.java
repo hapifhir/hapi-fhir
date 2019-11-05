@@ -14,24 +14,19 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.instance.model.DateType;
-import org.hl7.fhir.instance.model.Observation;
-import org.hl7.fhir.instance.model.Observation.ObservationStatus;
-import org.hl7.fhir.instance.model.Questionnaire;
-import org.hl7.fhir.instance.model.Questionnaire.AnswerFormat;
-import org.hl7.fhir.instance.model.QuestionnaireResponse;
-import org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionnaireResponseStatus;
-import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.StringType;
+import org.hl7.fhir.dstu2.model.DateType;
+import org.hl7.fhir.dstu2.model.Observation;
+import org.hl7.fhir.dstu2.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu2.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu2.model.QuestionnaireResponse.QuestionnaireResponseStatus;
+import org.hl7.fhir.dstu2.model.StringType;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 public class FhirInstanceValidatorDstu2Test {
@@ -123,11 +118,11 @@ public class FhirInstanceValidatorDstu2Test {
 
 	@Test
 	public void testParametersHl7OrgDstu2() {
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addName().addGiven("James");
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
-		org.hl7.fhir.instance.model.Parameters input = new org.hl7.fhir.instance.model.Parameters();
+		org.hl7.fhir.dstu2.model.Parameters input = new org.hl7.fhir.dstu2.model.Parameters();
 		input.addParameter().setName("resource").setResource(patient);
 
 		FhirValidator val = ourCtxHl7OrgDstu2.newValidator();
@@ -203,11 +198,11 @@ public class FhirInstanceValidatorDstu2Test {
 
 	@Test
 	public void testParametersWithTwoParameters() {
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addName().addGiven("James");
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
-		org.hl7.fhir.instance.model.Parameters input = new org.hl7.fhir.instance.model.Parameters();
+		org.hl7.fhir.dstu2.model.Parameters input = new org.hl7.fhir.dstu2.model.Parameters();
 		input.addParameter().setName("mode").setValue(new StringType("create"));
 		input.addParameter().setName("resource").setResource(patient);
 
@@ -243,31 +238,7 @@ public class FhirInstanceValidatorDstu2Test {
 		assertTrue(result.isSuccessful());
 	}
 	
-	@Test
-	public void testQuestionnaireResponseValidator() {
-		final Questionnaire q = new Questionnaire();
-		q.getGroup().addGroup().setLinkId("group1").addQuestion().setLinkId("foo").setType(AnswerFormat.BOOLEAN);
-		q.getGroup().addQuestion().setLinkId("bar").setType(AnswerFormat.TEXT);
 
-		QuestionnaireResponse qr = new QuestionnaireResponse();
-		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qr.getGroup().addGroup().setLinkId("group1").addQuestion().setLinkId("foo");
-		qr.getGroup().addQuestion().setLinkId("bar");
-		qr.setQuestionnaire(new Reference("#q"));
-		qr.getQuestionnaire().setResource(q);
-
-		FhirValidator val = ourCtxHl7OrgDstu2.newValidator();
-
-		FhirQuestionnaireResponseValidator module = new FhirQuestionnaireResponseValidator();
-		val.registerValidatorModule(module);
-
-		ValidationResult result = val.validateWithResult(qr);
-
-		String encoded = ourCtxHl7OrgDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
-		ourLog.info(encoded);
-
-		assertTrue(result.isSuccessful());
-	}
 
 	@AfterClass
 	public static void afterClassClearContext() {

@@ -1,22 +1,29 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
+import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
+import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.hibernate.dialect.H2Dialect;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.fail;
 
@@ -39,6 +46,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		}
 	}
 
+	@Autowired
+	private Environment myEnvironment;
+
 	private Exception myLastStackTrace;
 
 	@Bean
@@ -52,17 +62,14 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 
 			@Override
-			public Connection getConnection() throws SQLException {
+			public Connection getConnection() {
 				ConnectionWrapper retVal;
 				try {
 					retVal = new ConnectionWrapper(super.getConnection());
 				} catch (Exception e) {
 					ourLog.error("Exceeded maximum wait for connection", e);
 					logGetConnectionStackTrace();
-//					if ("true".equals(System.getStringProperty("ci"))) {
 					fail("Exceeded maximum wait for connection: " + e.toString());
-//					}
-//					System.exit(1);
 					retVal = null;
 				}
 
@@ -93,20 +100,23 @@ public class TestR4Config extends BaseJavaConfigR4 {
 			}
 
 		};
-		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
-		retVal.setUrl("jdbc:derby:memory:myUnitTestDBR4;create=true");
+
+		retVal.setDriver(new org.h2.Driver());
+		retVal.setUrl("jdbc:h2:mem:testdb_r4");
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");
 		retVal.setMaxTotal(ourMaxThreads);
 
+		SLF4JLogLevel level = SLF4JLogLevel.INFO;
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
-//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
-//			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
+//			.logQueryBySlf4j(level, "SQL")
+			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
 //			.countQuery(new ThreadQueryCountHolder())
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
 			.afterQuery(captureQueriesListener())
+			.afterQuery(new CurrentThreadCaptureQueriesListener())
 			.countQuery(singleQueryCountHolder())
 			.build();
 
@@ -128,12 +138,13 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		return retVal;
 	}
 
-	private Properties jpaProperties() {
+	@Bean
+	public Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
-		extraProperties.put("hibernate.dialect", "ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect");
+		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
 		extraProperties.put("hibernate.search.model_mapping", ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory.class.getName());
 		extraProperties.put("hibernate.search.default.directory_provider", "local-heap");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
@@ -155,6 +166,11 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		requestValidator.addValidatorModule(instanceValidatorR4());
 
 		return requestValidator;
+	}
+
+	@Bean
+	public IBinaryStorageSvc binaryStorage() {
+		return new MemoryBinaryStorageSvcImpl();
 	}
 
 	public static int getMaxThreads() {

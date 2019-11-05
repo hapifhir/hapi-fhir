@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,21 +27,26 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -61,6 +66,8 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	private ISearchParamProvider mySearchParamProvider;
 	@Autowired
 	private FhirContext myFhirContext;
+	@Autowired
+	private ISchedulerService mySchedulerService;
 
 	private Map<String, Map<String, RuntimeSearchParam>> myBuiltInSearchParams;
 	private volatile Map<String, List<JpaRuntimeSearchParam>> myActiveUniqueSearchParams = Collections.emptyMap();
@@ -86,7 +93,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	@Override
 	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
 		requiresActiveSearchParams();
-		return myActiveSearchParams.get(theResourceName);
+		return getActiveSearchParams().get(theResourceName);
 	}
 
 	private void requiresActiveSearchParams() {
@@ -187,21 +194,21 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 						.collect(Collectors.joining(", "));
 					String message = "Search parameter " + next.getId().toUnqualifiedVersionless().getValue() + " refers to unknown component " + nextRef + ", ignoring this parameter (valid values: " + existingParams + ")";
 					ourLog.warn(message);
-					StorageProcessingMessage msg = new StorageProcessingMessage().setMessage(message);
-					HookParams params = new HookParams(msg);
-					myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PROCESSING_MESSAGE, params);
+
+					// Interceptor broadcast: JPA_PERFTRACE_WARNING
+					HookParams params = new HookParams()
+						.add(RequestDetails.class, null)
+						.add(ServletRequestDetails.class, null)
+						.add(StorageProcessingMessage.class, new StorageProcessingMessage().setMessage(message));
+					myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_WARNING, params);
 				}
 			}
 
 			if (next.getCompositeOf() != null) {
 				next.getCompositeOf().sort((theO1, theO2) -> StringUtils.compare(theO1.getName(), theO2.getName()));
 				for (String nextBase : next.getBase()) {
-					if (!activeParamNamesToUniqueSearchParams.containsKey(nextBase)) {
-						activeParamNamesToUniqueSearchParams.put(nextBase, new HashMap<>());
-					}
-					if (!activeParamNamesToUniqueSearchParams.get(nextBase).containsKey(paramNames)) {
-						activeParamNamesToUniqueSearchParams.get(nextBase).put(paramNames, new ArrayList<>());
-					}
+					activeParamNamesToUniqueSearchParams.computeIfAbsent(nextBase, v -> new HashMap<>());
+					activeParamNamesToUniqueSearchParams.get(nextBase).computeIfAbsent(paramNames, t -> new ArrayList<>());
 					activeParamNamesToUniqueSearchParams.get(nextBase).get(paramNames).add(next);
 				}
 			}
@@ -213,9 +220,19 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		myActiveParamNamesToUniqueSearchParams = activeParamNamesToUniqueSearchParams;
 	}
 
+	@VisibleForTesting
+	void setFhirContextForUnitTest(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
+
 	@PostConstruct
 	public void postConstruct() {
 		myBuiltInSearchParams = createBuiltInSearchParamMap(myFhirContext);
+	}
+
+	@VisibleForTesting
+	public void setSearchParamProviderForUnitTest(ISearchParamProvider theSearchParamProvider) {
+		mySearchParamProvider = theSearchParamProvider;
 	}
 
 	public int doRefresh(long theRefreshInterval) {
@@ -303,8 +320,10 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 
 			myLastRefresh = System.currentTimeMillis();
 			ourLog.info("Refreshed search parameter cache in {}ms", sw.getMillis());
+			return myActiveSearchParams.size();
+		} else {
+			return 0;
 		}
-		return myActiveSearchParams.size();
 	}
 
 	protected abstract RuntimeSearchParam toRuntimeSp(SP theNextSp);
@@ -333,13 +352,8 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		refreshCacheWithRetry();
 	}
 
-	@VisibleForTesting
-	public void setSearchParamProviderForUnitTest(ISearchParamProvider theSearchParamProvider) {
-		mySearchParamProvider = theSearchParamProvider;
-	}
-
 	int refreshCacheWithRetry() {
-		Retrier<Integer> refreshCacheRetrier = new Retrier(() -> {
+		Retrier<Integer> refreshCacheRetrier = new Retrier<>(() -> {
 			synchronized (BaseSearchParamRegistry.this) {
 				return mySearchParamProvider.refreshCache(this, REFRESH_INTERVAL);
 			}
@@ -347,15 +361,21 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		return refreshCacheRetrier.runWithRetry();
 	}
 
-	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
-	public void refreshCacheOnSchedule() {
-		refreshCacheIfNecessary();
+	@PostConstruct
+	public void registerScheduledJob() {
+		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(BaseSearchParamRegistry.class.getName());
+		jobDetail.setJobClass(SubmitJob.class);
+		mySchedulerService.scheduleFixedDelay(10 * DateUtils.MILLIS_PER_SECOND, false, jobDetail);
 	}
 
-	public void refreshCacheIfNecessary() {
-		if (myActiveSearchParams == null ||
-			System.currentTimeMillis() - REFRESH_INTERVAL > myLastRefresh) {
+	@Override
+	public boolean refreshCacheIfNecessary() {
+		if (myActiveSearchParams == null || System.currentTimeMillis() - REFRESH_INTERVAL > myLastRefresh) {
 			refreshCacheWithRetry();
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -363,6 +383,21 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
 		requiresActiveSearchParams();
 		return Collections.unmodifiableMap(myActiveSearchParams);
+	}
+
+	@VisibleForTesting
+	void setSchedulerServiceForUnitTest(ISchedulerService theSchedulerService) {
+		mySchedulerService = theSchedulerService;
+	}
+
+	public static class SubmitJob implements Job {
+		@Autowired
+		private ISearchParamRegistry myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.refreshCacheIfNecessary();
+		}
 	}
 
 	public static Map<String, Map<String, RuntimeSearchParam>> createBuiltInSearchParamMap(FhirContext theFhirContext) {

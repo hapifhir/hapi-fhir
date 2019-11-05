@@ -9,9 +9,9 @@ package ca.uhn.fhir.validation;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,7 +25,6 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.validation.schematron.SchematronProvider;
 
 /**
@@ -46,7 +45,7 @@ public class FhirValidator {
 
 	private static volatile Boolean ourPhPresentOnClasspath;
 	private final FhirContext myContext;
-	private List<IValidatorModule> myValidators = new ArrayList<IValidatorModule>();
+	private List<IValidatorModule> myValidators = new ArrayList<>();
 
 	/**
 	 * Constructor (this should not be called directly, but rather {@link FhirContext#newValidator()} should be called to obtain an instance of {@link FhirValidator})
@@ -173,25 +172,6 @@ public class FhirValidator {
 		}
 	}
 
-	/**
-	 * Validates a resource instance, throwing a {@link ValidationFailureException} if the validation fails
-	 * 
-	 * @param theResource
-	 *           The resource to validate
-	 * @throws ValidationFailureException
-	 *            If the validation fails
-	 * @deprecated use {@link #validateWithResult(IBaseResource)} instead
-	 */
-	@Deprecated
-	public void validate(IResource theResource) throws ValidationFailureException {
-		
-		applyDefaultValidators();
-		
-		ValidationResult validationResult = validateWithResult(theResource);
-		if (!validationResult.isSuccessful()) {
-			throw new ValidationFailureException(myContext, validationResult.toOperationOutcome());
-		}
-	}
 
 
 	/**
@@ -203,11 +183,37 @@ public class FhirValidator {
 	 * @since 0.7
 	 */
 	public ValidationResult validateWithResult(IBaseResource theResource) {
+		return validateWithResult(theResource, null);
+	}
+
+	/**
+	 * Validates a resource instance returning a {@link ca.uhn.fhir.validation.ValidationResult} which contains the results.
+	 *
+	 * @param theResource
+	 *           the resource to validate
+	 * @return the results of validation
+	 * @since 1.1
+	 */
+	public ValidationResult validateWithResult(String theResource) {
+		return validateWithResult(theResource, null);
+	}
+
+	/**
+	 * Validates a resource instance returning a {@link ca.uhn.fhir.validation.ValidationResult} which contains the results.
+	 *
+	 * @param theResource
+	 *           the resource to validate
+	 * @param theOptions
+	 *       Optionally provides options to the validator
+	 * @return the results of validation
+	 * @since 4.0.0
+	 */
+	public ValidationResult validateWithResult(IBaseResource theResource, ValidationOptions theOptions) {
 		Validate.notNull(theResource, "theResource must not be null");
-		
+
 		applyDefaultValidators();
-		
-		IValidationContext<IBaseResource> ctx = ValidationContext.forResource(myContext, theResource);
+
+		IValidationContext<IBaseResource> ctx = ValidationContext.forResource(myContext, theResource, theOptions);
 
 		for (IValidatorModule next : myValidators) {
 			next.validateResource(ctx);
@@ -221,15 +227,17 @@ public class FhirValidator {
 	 *
 	 * @param theResource
 	 *           the resource to validate
+	 * @param theOptions
+	 *       Optionally provides options to the validator
 	 * @return the results of validation
-	 * @since 1.1
+	 * @since 4.0.0
 	 */
-	public ValidationResult validateWithResult(String theResource) {
+	public ValidationResult validateWithResult(String theResource, ValidationOptions theOptions) {
 		Validate.notNull(theResource, "theResource must not be null");
-		
+
 		applyDefaultValidators();
-		
-		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource);
+
+		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource, theOptions);
 
 		for (IValidatorModule next : myValidators) {
 			next.validateResource(ctx);
@@ -237,5 +245,4 @@ public class FhirValidator {
 
 		return ctx.toResult();
 	}
-
 }

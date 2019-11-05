@@ -1,14 +1,14 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -26,11 +26,11 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 	public void testBundlePreservesFullUrl() {
 
 		Bundle bundle = new Bundle();
-		bundle.setType(BundleType.DOCUMENT);
+		bundle.setType(BundleType.COLLECTION);
 
-		Composition composition = new Composition();
-		composition.setTitle("Visit Summary");
-		bundle.addEntry().setFullUrl("http://foo").setResource(composition);
+		Patient composition = new Patient();
+		composition.setActive(true);
+		bundle.addEntry().setFullUrl("http://foo/").setResource(composition);
 
 		IIdType id = ourClient.create().resource(bundle).execute().getId();
 
@@ -38,7 +38,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
     ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
 
-		assertEquals("http://foo", bundle.getEntry().get(0).getFullUrl());
+		assertEquals("http://foo/", bundle.getEntry().get(0).getFullUrl());
 	}
 
 	@Test

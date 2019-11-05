@@ -1,12 +1,13 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
@@ -90,13 +91,36 @@ public class BinaryClientTest {
 
 	}
 
+	@Test
+	public void testCreateWithNoBytes() throws Exception {
+		Binary res = new Binary();
+		res.setContentType("image/png");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ByteArrayInputStream(new byte[] {}));
+
+		IClient client = mtCtx.newRestfulClient(IClient.class, "http://foo");
+		client.create(res);
+
+		assertEquals(HttpPost.class, capt.getValue().getClass());
+		HttpPost post = (HttpPost) capt.getValue();
+		assertEquals("http://foo/Binary", post.getURI().toString());
+
+		assertThat(capt.getValue().getFirstHeader("Content-Type").getValue(), containsString(Constants.CT_FHIR_JSON_NEW));
+		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"image/png\"}", IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8));
+
+	}
+
 	private interface IClient extends IBasicClient {
 
 		@Read(type = Binary.class)
-		public Binary read(@IdParam IdType theBinary);
+		Binary read(@IdParam IdType theBinary);
 
 		@Create(type = Binary.class)
-		public MethodOutcome create(@ResourceParam Binary theBinary);
+		MethodOutcome create(@ResourceParam Binary theBinary);
 
 	}
 

@@ -9,7 +9,10 @@ import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -24,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*-
@@ -35,9 +39,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,6 +62,8 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
@@ -103,6 +109,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		IIdType resourceId = theMsg.getId(myFhirContext);
+		Boolean isText = false;
 
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
 
@@ -115,6 +122,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 			if (isNotBlank(theMsg.getSubscriptionId())) {
 				if (!theMsg.getSubscriptionId().equals(nextSubscriptionId)) {
+					// TODO KHS we should use a hash to look it up instead of this full table scan
 					ourLog.debug("Ignoring subscription {} because it is not {}", nextSubscriptionId, theMsg.getSubscriptionId());
 					continue;
 				}
@@ -129,20 +137,26 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				continue;
 			}
 			ourLog.debug("Subscription {} was matched by resource {} {}",
-				nextActiveSubscription.getSubscription().getIdElement(myFhirContext).getValue(),
+				nextActiveSubscription.getId(),
 				resourceId.toUnqualifiedVersionless().getValue(),
 				matchResult.isInMemory() ? "in-memory" : "by querying the repository");
 
 			IBaseResource payload = theMsg.getNewPayload(myFhirContext);
+			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
+
+			EncodingEnum encoding = null;
+			if (subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
+				encoding = EncodingEnum.forContentType(subscription.getPayloadString());
+				isText = subscription.getPayloadString().equals(Constants.CT_TEXT);
+			}
+			encoding = defaultIfNull(encoding, EncodingEnum.JSON);
 
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
-			deliveryMsg.setPayload(myFhirContext, payload);
-			deliveryMsg.setSubscription(nextActiveSubscription.getSubscription());
+
+			deliveryMsg.setPayload(myFhirContext, payload, encoding);
+			deliveryMsg.setSubscription(subscription);
 			deliveryMsg.setOperationType(theMsg.getOperationType());
 			deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
-			if (payload == null) {
-				deliveryMsg.setPayloadId(theMsg.getId(myFhirContext));
-			}
 
 			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
 			HookParams params = new HookParams()
@@ -153,14 +167,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				return;
 			}
 
-			ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
-			MessageChannel deliveryChannel = nextActiveSubscription.getSubscribableChannel();
-			if (deliveryChannel != null) {
-				resourceMatched = true;
-				deliveryChannel.send(wrappedMsg);
-			} else {
-				ourLog.warn("Do not have delivery channel for subscription {}", nextActiveSubscription.getIdElement(myFhirContext));
-			}
+			resourceMatched |= sendToDeliveryChannel(nextActiveSubscription, deliveryMsg);
 		}
 
 		if (!resourceMatched) {
@@ -171,8 +178,33 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		}
 	}
 
+	private boolean sendToDeliveryChannel(ActiveSubscription nextActiveSubscription, ResourceDeliveryMessage theDeliveryMsg) {
+		boolean retval = false;
+		ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(theDeliveryMsg);
+		MessageChannel deliveryChannel = mySubscriptionChannelRegistry.get(nextActiveSubscription.getChannelName()).getChannel();
+		if (deliveryChannel != null) {
+			retval = true;
+			trySendToDeliveryChannel(wrappedMsg, deliveryChannel);
+		} else {
+			ourLog.warn("Do not have delivery channel for subscription {}", nextActiveSubscription.getId());
+		}
+		return retval;
+	}
+
+	private void trySendToDeliveryChannel(ResourceDeliveryJsonMessage theWrappedMsg, MessageChannel theDeliveryChannel) {
+		try {
+			boolean success = theDeliveryChannel.send(theWrappedMsg);
+			if (!success) {
+				ourLog.warn("Failed to send message to Delivery Channel.");
+			}
+		} catch (RuntimeException e) {
+			ourLog.error("Failed to send message to Delivery Channel", e);
+			throw new RuntimeException("Failed to send message to Delivery Channel", e);
+		}
+	}
+
 	private String getId(ActiveSubscription theActiveSubscription) {
-		return theActiveSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue();
+		return theActiveSubscription.getId();
 	}
 
 	private boolean validCriteria(ActiveSubscription theActiveSubscription, IIdType theResourceId) {

@@ -1,10 +1,10 @@
 package org.hl7.fhir.instance.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.instance.model.StructureDefinition;
-import org.hl7.fhir.instance.model.ValueSet;
-import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.dstu2.model.StructureDefinition;
+import org.hl7.fhir.dstu2.model.ValueSet;
+import org.hl7.fhir.dstu2.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.dstu2.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.ArrayList;
@@ -91,7 +91,7 @@ public class ValidationSupportChain implements IValidationSupport {
   @Override
   public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
     for (IValidationSupport next : myChain) {
-      if (next.isCodeSystemSupported(theCtx, theCodeSystem)) {
+      if (theCodeSystem != null && next.isCodeSystemSupported(theCtx, theCodeSystem)) {
         return next.validateCode(theCtx, theCodeSystem, theCode, theDisplay);
       }
     }

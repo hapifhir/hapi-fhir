@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -13,9 +13,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
-import org.springframework.test.util.AopTestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.util.Date;
 
 import static org.hamcrest.Matchers.*;
@@ -24,9 +23,9 @@ import static org.junit.Assert.*;
 
 public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4CacheTest.class);
-	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
 	private CapturingInterceptor myCapturingInterceptor;
+	@Autowired
+	private ISearchDao mySearchEntityDao;
 
 	@Override
 	@After
@@ -42,14 +41,13 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 	public void before() throws Exception {
 		super.before();
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
-		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 
 		myCapturingInterceptor = new CapturingInterceptor();
 		ourClient.registerInterceptor(myCapturingInterceptor);
 	}
 
 	@Test
-	public void testCacheNoStore() throws IOException {
+	public void testCacheNoStore() {
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("FAM");
@@ -84,7 +82,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testCacheNoStoreMaxResults() throws IOException {
+	public void testCacheNoStoreMaxResults() {
 
 		for (int i = 0; i < 10; i++) {
 			Patient pt1 = new Patient();
@@ -106,7 +104,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testCacheNoStoreMaxResultsWithIllegalValue() throws IOException {
+	public void testCacheNoStoreMaxResultsWithIllegalValue() {
 		myDaoConfig.setCacheControlNoStoreMaxResultsUpperLimit(123);
 		try {
 			ourClient
@@ -123,7 +121,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testCacheSuppressed() throws IOException {
+	public void testCacheSuppressed() {
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("FAM");
@@ -152,7 +150,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testCacheUsedNormally() throws IOException {
+	public void testCacheUsedNormally() {
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("FAM");

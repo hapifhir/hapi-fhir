@@ -2,7 +2,6 @@ package org.hl7.fhir.r4.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -28,7 +27,7 @@ public class ValidationSupportChain implements IValidationSupport {
 	 * Constructor
 	 */
 	public ValidationSupportChain() {
-		myChain = new ArrayList<IValidationSupport>();
+		myChain = new ArrayList<>();
 	}
 
 	/**
@@ -50,7 +49,9 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Override
 	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
 		for (IValidationSupport next : myChain) {
-			if (next.isCodeSystemSupported(theCtx, theInclude.getSystem())) {
+			boolean codeSystemSupported = next.isCodeSystemSupported(theCtx, theInclude.getSystem());
+			ourLog.trace("Support {} supports: {}", next, codeSystemSupported);
+			if (codeSystemSupported) {
 				ValueSetExpander.ValueSetExpansionOutcome expansion = next.expandValueSet(theCtx, theInclude);
 				if (expansion != null) {
 					return expansion;
@@ -58,29 +59,27 @@ public class ValidationSupportChain implements IValidationSupport {
 			}
 		}
 
-		throw new InvalidRequestException("unable to find code system " + theInclude.getSystem());
+		throw new InvalidRequestException("Unable to find code system " + theInclude.getSystem());
 	}
 
-  @Override
-  public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
-    List<IBaseResource> retVal = new ArrayList<>();
-    for (IValidationSupport next : myChain) {
-      List<IBaseResource> candidates = next.fetchAllConformanceResources(theContext);
-      if (candidates != null) {
-        retVal.addAll(candidates);
-      }
-    }
-    return retVal;
-  }
+	@Override
+	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+		List<IBaseResource> retVal = new ArrayList<>();
+		for (IValidationSupport next : myChain) {
+			List<IBaseResource> candidates = next.fetchAllConformanceResources(theContext);
+			if (candidates != null) {
+				retVal.addAll(candidates);
+			}
+		}
+		return retVal;
+	}
 
-  @Override
+	@Override
 	public CodeSystem fetchCodeSystem(FhirContext theCtx, String theSystem) {
 		for (IValidationSupport next : myChain) {
-			if (next.isCodeSystemSupported(theCtx, theSystem)) {
-				CodeSystem retVal = next.fetchCodeSystem(theCtx, theSystem);
-				if (retVal != null) {
-					return retVal;
-				}
+			CodeSystem retVal = next.fetchCodeSystem(theCtx, theSystem);
+			if (retVal != null) {
+				return retVal;
 			}
 		}
 		return null;
@@ -130,13 +129,25 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
-		
-		ourLog.debug("Validating code {} in chain with {} items", theCode, myChain.size());
-		
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
+		StructureDefinition outcome = null;
 		for (IValidationSupport next : myChain) {
-			if (next.isCodeSystemSupported(theCtx, theCodeSystem)) {
-				CodeValidationResult result = next.validateCode(theCtx, theCodeSystem, theCode, theDisplay);
+			outcome = next.generateSnapshot(theInput, theUrl, theWebUrl, theProfileName);
+			if (outcome != null) {
+				break;
+			}
+		}
+		return outcome;
+	}
+
+	@Override
+	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+
+		ourLog.debug("Validating code {} in chain with {} items", theCode, myChain.size());
+
+		for (IValidationSupport next : myChain) {
+			if (theCodeSystem != null && next.isCodeSystemSupported(theCtx, theCodeSystem)) {
+				CodeValidationResult result = next.validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 				if (result != null) {
 					ourLog.debug("Chain item {} returned outcome {}", next, result.isOk());
 					return result;
@@ -145,17 +156,30 @@ public class ValidationSupportChain implements IValidationSupport {
 				ourLog.debug("Chain item {} does not support code system {}", next, theCodeSystem);
 			}
 		}
-		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay);
+		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		for (IValidationSupport next : myChain) {
+			if (next.isCodeSystemSupported(theContext, theSystem)) {
+				return next.lookupCode(theContext, theSystem, theCode);
+			}
+		}
+		return null;
 	}
 
 	@Override
 	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		ArrayList<StructureDefinition> retVal = new ArrayList<StructureDefinition>();
-		Set<String> urls= new HashSet<String>();
+		ArrayList<StructureDefinition> retVal = new ArrayList<>();
+		Set<String> urls = new HashSet<>();
 		for (IValidationSupport nextSupport : myChain) {
-			for (StructureDefinition next : nextSupport.fetchAllStructureDefinitions(theContext)) {
-				if (isBlank(next.getUrl()) || urls.add(next.getUrl())) {
-					retVal.add(next);
+			List<StructureDefinition> list = nextSupport.fetchAllStructureDefinitions(theContext);
+			if (list != null) {
+				for (StructureDefinition next : list) {
+					if (isBlank(next.getUrl()) || urls.add(next.getUrl())) {
+						retVal.add(next);
+					}
 				}
 			}
 		}

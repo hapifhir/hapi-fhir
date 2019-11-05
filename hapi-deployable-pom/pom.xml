@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>4.1.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -143,10 +143,15 @@
 							<groupId>org.checkerframework</groupId>
 							<artifactId>checker-compat-qual</artifactId>
 						</dependency>
+						<dependency>
+							<groupId>org.apache.poi</groupId>
+							<artifactId>ooxml-schemas</artifactId>
+						</dependency>
 					</ignoredDependencies>
 					<ignoredResourcePatterns>
 						<ignoredResourcePattern>.*\.txt$</ignoredResourcePattern>
 						<ignoredResourcePattern>.*\.html$</ignoredResourcePattern>
+						<ignoredResourcePattern>schemaorg_apache_xmlbeans.*</ignoredResourcePattern>
 						<ignoredResource>javac.bat</ignoredResource>
 						<ignoredResource>about.html</ignoredResource>
 						<ignoredResource>changelog.xml</ignoredResource>
@@ -181,6 +186,7 @@
 							</links>
 							<additionalparam>-Xdoclint:none</additionalparam>
 							<additionalJOption>-Xdoclint:none</additionalJOption>
+							<source>8</source>
 						</configuration>
 					</reportSet>
 				</reportSets>
@@ -204,11 +210,13 @@
 							<verbose>false</verbose>
 							<debug>false</debug>
 							<additionalJOption>-Xdoclint:none</additionalJOption>
+							<source>8</source>
 						</configuration>
 						<executions>
 							<execution>
 								<phase>package</phase>
 								<goals>
+									<!--<goal>aggregate-jar</goal>-->
 									<goal>jar</goal>
 								</goals>
 							</execution>
@@ -240,6 +248,7 @@
 									<licenseName>apache_v2</licenseName>
 									<canUpdateDescription>true</canUpdateDescription>
 									<canUpdateCopyright>true</canUpdateCopyright>
+									<trimHeaderLine>true</trimHeaderLine>
 									<roots>
 										<root>src/main/java</root>
 									</roots>

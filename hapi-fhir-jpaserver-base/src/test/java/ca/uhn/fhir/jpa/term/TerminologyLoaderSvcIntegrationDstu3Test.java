@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.After;
@@ -17,13 +17,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
@@ -31,7 +32,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologyLoaderSvcIntegrationDstu3Test.class);
 
 	@Autowired
-	private IHapiTerminologyLoaderSvc myLoader;
+	private ITermLoaderSvc myLoader;
 
 	@After
 	public void after() {
@@ -43,6 +44,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(20000);
 	}
 
+	@SuppressWarnings("unchecked")
 	private <T extends Type> Optional<T> findProperty(Parameters theParameters, String thePropertyName) {
 		return theParameters
 			.getParameter()
@@ -64,7 +66,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		input
 			.getCompose()
 			.addInclude()
-			.setSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
+			.setSystem(ITermLoaderSvc.LOINC_URI)
 			.addFilter()
 			.setProperty("SCALE_TYP")
 			.setOp(ValueSet.FilterOperator.EQUAL)
@@ -80,7 +82,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		input
 			.getCompose()
 			.addInclude()
-			.setSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
+			.setSystem(ITermLoaderSvc.LOINC_URI)
 			.addFilter()
 			.setProperty("SCALE_TYP")
 			.setOp(ValueSet.FilterOperator.EQUAL)
@@ -95,7 +97,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		input
 			.getCompose()
 			.addInclude()
-			.setSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
+			.setSystem(ITermLoaderSvc.LOINC_URI)
 			.addFilter()
 			.setProperty("SCALE_TYP")
 			.setOp(ValueSet.FilterOperator.EQUAL)
@@ -104,6 +106,19 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		codes = toExpandedCodes(expanded);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertThat(codes, empty());
+	}
+
+	@Test
+	public void testStoreAndProcessDeferred() throws IOException {
+		ZipCollectionBuilder files = new ZipCollectionBuilder();
+		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
+		myLoader.loadLoinc(files.getFiles(), mySrd);
+
+		myTerminologyDeferredStorageSvc.saveDeferred();
+
+		runInTransaction(() -> {
+			await().until(() -> myTermConceptMapDao.count(), greaterThan(0L));
+		});
 	}
 
 	@Test
@@ -116,7 +131,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		input
 			.getCompose()
 			.addInclude()
-			.setSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
+			.setSystem(ITermLoaderSvc.LOINC_URI)
 			.addFilter()
 			.setProperty("CLASS")
 			.setOp(ValueSet.FilterOperator.EQUAL)
@@ -134,15 +149,14 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IFhirResourceDaoCodeSystem.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(IHapiTerminologyLoaderSvc.LOINC_URI), null, mySrd);
-		org.hl7.fhir.r4.model.Parameters parametersR4 = result.toParameters(null);
-		Parameters parameters = VersionConvertor_30_40.convertParameters(parametersR4);
+		IContextValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
+		Parameters parameters = (Parameters) result.toParameters(myFhirCtx, null);
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		Optional<Coding> propertyValue = findProperty(parameters, "SCALE_TYP");
 		assertTrue(propertyValue.isPresent());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
 		assertEquals("LP7753-9", propertyValue.get().getCode());
 		assertEquals("Qn", propertyValue.get().getDisplay());
 
@@ -165,15 +179,14 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IFhirResourceDaoCodeSystem.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("17788-1"), new StringType(IHapiTerminologyLoaderSvc.LOINC_URI), null, mySrd);
-		org.hl7.fhir.r4.model.Parameters parametersR4 = result.toParameters(null);
-		Parameters parameters = VersionConvertor_30_40.convertParameters(parametersR4);
+		IContextValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("17788-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
+		Parameters parameters = (Parameters) result.toParameters(myFhirCtx, null);
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		Optional<Coding> propertyValue = findProperty(parameters, "COMPONENT");
 		assertTrue(propertyValue.isPresent());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
 		assertEquals("LP19258-0", propertyValue.get().getCode());
 		assertEquals("Large unstained cells/100 leukocytes", propertyValue.get().getDisplay());
 	}
@@ -184,16 +197,15 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IFhirResourceDaoCodeSystem.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(IHapiTerminologyLoaderSvc.LOINC_URI), null, mySrd);
+		IContextValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
 		List<? extends IPrimitiveType<String>> properties = Lists.newArrayList(new CodeType("SCALE_TYP"));
-		org.hl7.fhir.r4.model.Parameters parametersR4 = result.toParameters(properties);
-		Parameters parameters = VersionConvertor_30_40.convertParameters(parametersR4);
+		Parameters parameters = (Parameters) result.toParameters(myFhirCtx, properties);
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		Optional<Coding> propertyValueCoding = findProperty(parameters, "SCALE_TYP");
 		assertTrue(propertyValueCoding.isPresent());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, propertyValueCoding.get().getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValueCoding.get().getSystem());
 		assertEquals("LP7753-9", propertyValueCoding.get().getCode());
 		assertEquals("Qn", propertyValueCoding.get().getDisplay());
 
@@ -208,7 +220,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(null, null, new StringType("10013-1"), new StringType(IHapiTerminologyLoaderSvc.LOINC_URI), null, null, null, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(null, null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
 		assertTrue(result.isResult());
 		assertEquals("Found code", result.getMessage());
@@ -220,7 +232,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(null, null, new StringType("10013-1-9999999999"), new StringType(IHapiTerminologyLoaderSvc.LOINC_URI), null, null, null, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(null, null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
 		assertFalse(result.isResult());
 		assertEquals("Code not found", result.getMessage());

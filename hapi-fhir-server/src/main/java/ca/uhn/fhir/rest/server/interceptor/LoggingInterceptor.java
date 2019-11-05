@@ -37,9 +37,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -67,6 +67,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * <td>${operationName}</td>
  * <td>If the request is an extended operation (e.g. "$validate") this value will be the operation name, or ""
  * otherwise</td>
+ * </tr>
+ * <tr>
+ * <td>${requestId}</td>
+ * <td>The request ID assigned to this request (either automatically, or via the <code>X-Request-ID</code> header in the request)</td>
  * </tr>
  * <tr>
  * <td>${operationType}</td>
@@ -116,7 +120,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * </tr>
  * <tr>
  * <td>${processingTimeMillis}</td>
- * <td>The number of milliseconds spent processing this request</td>
+ * <td>The number of milliseconds spen processing this request</td>
  * </tr>
  * </table>
  */
@@ -323,6 +327,8 @@ public class LoggingInterceptor {
 					long time = System.currentTimeMillis() - startTime.getTime();
 					return Long.toString(time);
 				}
+			} else if ("requestId".equals(theKey)) {
+				return myRequestDetails.getRequestId();
 			}
 
 			return "!VAL!";

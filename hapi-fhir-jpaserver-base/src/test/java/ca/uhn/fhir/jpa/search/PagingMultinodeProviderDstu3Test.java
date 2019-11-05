@@ -9,7 +9,6 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
-import org.springframework.cglib.proxy.Proxy;
 import org.springframework.test.util.AopTestUtils;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
@@ -41,7 +40,7 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 
 		myDaoConfig.setAllowMultipleDelete(true);
 		
-		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
+		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(ourSearchCoordinatorSvc);
 	}
 
 	@Test

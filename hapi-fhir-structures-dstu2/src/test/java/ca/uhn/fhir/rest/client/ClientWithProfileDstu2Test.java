@@ -79,7 +79,7 @@ public class ClientWithProfileDstu2Test {
 
 		int idx = 0;
 
-		client.create().resource(new MyPatient()).execute();
+		client.create().resource(new MyPatient()).encodedXml().execute();
 
 		HttpPost value = (HttpPost) capt.getAllValues().get(idx);
 		String requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());

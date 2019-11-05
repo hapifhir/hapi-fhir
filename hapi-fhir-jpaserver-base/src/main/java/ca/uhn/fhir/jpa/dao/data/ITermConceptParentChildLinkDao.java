@@ -18,9 +18,9 @@ import java.util.Collection;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,7 +37,6 @@ public interface ITermConceptParentChildLinkDao extends JpaRepository<TermConcep
 	@Query("SELECT t.myParentPid FROM TermConceptParentChildLink t WHERE t.myChildPid = :child_pid")
 	Collection<Long> findAllWithChild(@Param("child_pid") Long theConceptPid);
 
-	@Query("SELECT t FROM TermConceptParentChildLink t WHERE t.myCodeSystem.myId = :cs_pid")
-	Slice<TermConceptParentChildLink> findByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
-
+	@Query("SELECT t.myPid FROM TermConceptParentChildLink t WHERE t.myCodeSystem.myId = :cs_pid")
+	Slice<Long> findIdsByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
 }

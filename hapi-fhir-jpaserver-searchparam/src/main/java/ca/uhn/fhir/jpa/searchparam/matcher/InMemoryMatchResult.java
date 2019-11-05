@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,9 +23,9 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
 public class InMemoryMatchResult {
 	public static final String PARSE_FAIL = "Failed to translate parse query string";
 	public static final String STANDARD_PARAMETER = "Standard parameters not supported";
-	public static final String PREFIX = "Prefixes not supported";
-	public static final String CHAIN = "Chained references are not supported";
-	public static final String PARAM = "Param not supported";
+	public static final String CHAIN = "Chained parameters are not supported";
+	public static final String PARAM = "Parameter not supported";
+	public static final String QUALIFIER = "Qualified parameter not supported";
 
 	private final boolean myMatch;
 	private final boolean mySupported;

@@ -191,6 +191,24 @@ public class XmlParserDstu2Test {
 	}
 
 	@Test
+	public void testIdOnComposite() {
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <name id=\"foo\">\n" +
+			"     <family value=\"hello\"/>" +
+			"   </name>" +
+			"   <active value=\"true\"/>" +
+			"</Patient>";
+
+		IParser p = ourCtx.newXmlParser();
+
+		Patient patient = p.parseResource(Patient.class, input);
+		assertTrue(patient.getActive());
+		assertEquals("foo", patient.getNameFirstRep().getElementSpecificId());
+
+	}
+
+
+	@Test
 	public void testSetDontEncodeResourcesWithMetaSubPath() {
 		Patient p = new Patient();
 		ResourceMetadataKeyEnum.VERSION.put(p, "BBB");
@@ -803,7 +821,6 @@ public class XmlParserDstu2Test {
 		//@formatter:off
 		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">", 
 			"<meta>",
-			"<meta>",
 			"<profile value=\"http://foo/Profile1\"/>",
 			"<profile value=\"http://foo/Profile2\"/>",
 			"<tag>",
@@ -816,7 +833,6 @@ public class XmlParserDstu2Test {
 			"<code value=\"term2\"/>",
 			"<display value=\"label2\"/>",
 			"</tag>",
-			"</meta>",
 			"</meta>",
 			"<name>",
 			"<family value=\"FAMILY\"/>",
@@ -857,7 +873,6 @@ public class XmlParserDstu2Test {
 		//@formatter:off
 		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">", 
 			"<meta>",
-			"<meta>",
 			"<tag>",
 			"<system value=\"scheme1\"/>",
 			"<code value=\"term1\"/>",
@@ -868,7 +883,6 @@ public class XmlParserDstu2Test {
 			"<code value=\"term2\"/>",
 			"<display value=\"label2\"/>",
 			"</tag>",
-			"</meta>",
 			"</meta>",
 			"<name>",
 			"<family value=\"FAMILY\"/>",

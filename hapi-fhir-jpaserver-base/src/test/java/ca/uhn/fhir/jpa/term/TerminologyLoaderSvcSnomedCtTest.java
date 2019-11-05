@@ -3,64 +3,64 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.TreeSet;
 import java.util.zip.ZipOutputStream;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Mockito.mock;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
-public class TerminologyLoaderSvcSnomedCtTest {
+public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcSnomedCtTest.class);
-	private TerminologyLoaderSvcImpl mySvc;
+	private TermLoaderSvcImpl mySvc;
 
 	@Mock
-	private IHapiTerminologySvc myTermSvc;
+	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Captor
 	private ArgumentCaptor<TermCodeSystemVersion> myCsvCaptor;
-	@Mock
-	private IHapiTerminologySvcDstu3 myTermSvcDstu3;
 	private ZipCollectionBuilder myFiles;
+	@Mock
+	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 	@Before
 	public void before() {
-		mySvc = new TerminologyLoaderSvcImpl();
-		mySvc.setTermSvcForUnitTests(myTermSvc);
-		mySvc.setTermSvcDstu3ForUnitTest(myTermSvcDstu3);
+		mySvc = new TermLoaderSvcImpl();
+		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermCodeSystemStorageSvc);
+		mySvc.setTermDeferredStorageSvc(myTermDeferredStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
 	}
 
-	private ArrayList<IHapiTerminologyLoaderSvc.FileDescriptor> list(byte[]... theByteArray) {
-		ArrayList<IHapiTerminologyLoaderSvc.FileDescriptor> retVal = new ArrayList<>();
+	private ArrayList<ITermLoaderSvc.FileDescriptor> list(byte[]... theByteArray) {
+		ArrayList<ITermLoaderSvc.FileDescriptor> retVal = new ArrayList<>();
 		for (byte[] next : theByteArray) {
-			retVal.add(new IHapiTerminologyLoaderSvc.FileDescriptor() {
+			retVal.add(new ITermLoaderSvc.FileDescriptor() {
 				@Override
 				public String getFilename() {
 					return "aaa.zip";				}
@@ -84,17 +84,16 @@ public class TerminologyLoaderSvcSnomedCtTest {
 		myFiles.addFileZip("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
 		myFiles.addFileZip("/sct/", "sct2_TextDefinition_Full-en_INT_20160131.txt");
 
-		RequestDetails details = mock(RequestDetails.class);
-		mySvc.loadSnomedCt(myFiles.getFiles(), details);
+		mySvc.loadSnomedCt(myFiles.getFiles(), mySrd);
 
-		verify(myTermSvcDstu3).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyListOf(ValueSet.class), anyListOf(ConceptMap.class));
+		verify(myTermCodeSystemStorageSvc).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyList(), anyListOf(ConceptMap.class));
 
 		TermCodeSystemVersion csv = myCsvCaptor.getValue();
 		TreeSet<String> allCodes = toCodes(csv, true);
 		ourLog.info(allCodes.toString());
 
-		assertThat(allCodes, containsInRelativeOrder("116680003"));
-		assertThat(allCodes, not(containsInRelativeOrder("207527008")));
+		assertThat(allCodes, hasItem("116680003"));
+		assertThat(allCodes, not(hasItem("207527008")));
 
 		allCodes = toCodes(csv, false);
 		ourLog.info(allCodes.toString());
@@ -110,8 +109,7 @@ public class TerminologyLoaderSvcSnomedCtTest {
 	public void testLoadSnomedCtAgainstRealFile() throws Exception {
 		byte[] bytes = IOUtils.toByteArray(new FileInputStream("/Users/james/Downloads/SnomedCT_Release_INT_20160131_Full.zip"));
 
-		RequestDetails details = mock(RequestDetails.class);
-		mySvc.loadSnomedCt(list(bytes), details);
+		mySvc.loadSnomedCt(list(bytes), mySrd);
 	}
 
 	@Test
@@ -123,9 +121,8 @@ public class TerminologyLoaderSvcSnomedCtTest {
 
 		ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);
 
-		RequestDetails details = mock(RequestDetails.class);
 		try {
-			mySvc.loadSnomedCt(list(bos.toByteArray()), details);
+			mySvc.loadSnomedCt(list(bos.toByteArray()), mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Could not find the following mandatory files in input: "));

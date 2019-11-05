@@ -291,4 +291,15 @@ public class JaxRsPatientProviderTest {
 		System.out.println(patient);
 	}
 
+	@Test
+	public void testInstanceHistory() {
+		final Bundle history = client.history().onInstance(new IdDt("Patient", 1L)).returnBundle(Bundle.class).execute();
+		assertEquals("myTestId", history.getId().getIdPart());
+	}
+
+	@Test
+	public void testTypeHistory() {
+		final Bundle history = client.history().onType(Patient.class).returnBundle(Bundle.class).execute();
+		assertEquals("myTestId", history.getId().getIdPart());
+	}
 }

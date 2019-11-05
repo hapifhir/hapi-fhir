@@ -1,17 +1,19 @@
 package ca.uhn.fhir.context;
 
-import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.List;
+import java.util.*;
 
+import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.*;
 
 public class ModelScannerDstu3Test {
@@ -149,10 +151,149 @@ public class ModelScannerDstu3Test {
 		}
 	}
 
+	@Test
+	public void testScanDuplicate() {
+		FhirContext ctx = FhirContext.forDstu3();
+		FhirVersionEnum version = FhirVersionEnum.DSTU3;
+		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> definitions = new HashMap<>();
+		Collection<Class<? extends IBase>> resourceTypes = new ArrayList<>();
+		resourceTypes.add(Patient.class);
+		ModelScanner scanner = new ModelScanner(ctx, version, definitions, resourceTypes);
+		assertThat(resourceTypes, contains(Patient.class));
+
+		// Extra scans don't do anything
+		scanner.scan(Patient.class);
+		scanner.scan(Patient.class);
+		assertThat(resourceTypes, contains(Patient.class));
+	}
+
+	@Test
+	public void testScanInvalidResource() {
+		FhirContext ctx = FhirContext.forDstu3();
+		FhirVersionEnum version = FhirVersionEnum.DSTU3;
+		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> definitions = new HashMap<>();
+		Collection<Class<? extends IBase>> resourceTypes = new ArrayList<>();
+		ModelScanner scanner = new ModelScanner(ctx, version, definitions, resourceTypes);
+
+		try {
+			scanner.scan(BadPatient.class);
+			fail();
+		} catch (ConfigurationException e) {
+			assertEquals("Resource type contains a @ResourceDef annotation but does not implement ca.uhn.fhir.model.api.IResource: ca.uhn.fhir.context.ModelScannerDstu3Test.BadPatient", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testScanInvalidType() {
+		FhirContext ctx = FhirContext.forDstu3();
+		FhirVersionEnum version = FhirVersionEnum.DSTU3;
+		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> definitions = new HashMap<>();
+		Collection<Class<? extends IBase>> resourceTypes = new ArrayList<>();
+		ModelScanner scanner = new ModelScanner(ctx, version, definitions, resourceTypes);
+
+		Class clazz = String.class;
+		try {
+			scanner.scan(clazz);
+			fail();
+		} catch (ConfigurationException e) {
+			assertEquals("Resource class[java.lang.String] does not contain any valid HAPI-FHIR annotations", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testScanInvalidBlock() {
+
+
+		FhirContext ctx = FhirContext.forDstu3();
+		FhirVersionEnum version = FhirVersionEnum.DSTU3;
+		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> definitions = new HashMap<>();
+		Collection<Class<? extends IBase>> resourceTypes = new ArrayList<>();
+		ModelScanner scanner = new ModelScanner(ctx, version, definitions, resourceTypes);
+
+		try {
+			scanner.scan(BadPatient.BadBlock.class);
+			fail();
+		} catch (ConfigurationException e) {
+			assertEquals("Type contains a @Block annotation but does not implement ca.uhn.fhir.model.api.IResourceBlock: ca.uhn.fhir.context.ModelScannerDstu3Test.BadPatient.BadBlock", e.getMessage());
+		}
+	}
+
 	class NoResourceDef extends Patient {
 		@SearchParamDefinition(name = "foo", path = "Patient.telecom", type = "bar")
 		public static final String SP_TELECOM = "foo";
 		private static final long serialVersionUID = 1L;
+
+	}
+
+	@ResourceDef(name = "Patient")
+	public static class BadPatient implements IBase {
+
+		@Child(name = "badBlock")
+		private BadBlock myChild;
+
+		@Override
+		public boolean isEmpty() {
+			return false;
+		}
+
+		@Override
+		public boolean hasFormatComment() {
+			return false;
+		}
+
+		@Override
+		public List<String> getFormatCommentsPre() {
+			return null;
+		}
+
+		@Override
+		public List<String> getFormatCommentsPost() {
+			return null;
+		}
+
+		@Override
+		public Object getUserData(String theName) {
+			return null;
+		}
+
+		@Override
+		public void setUserData(String theName, Object theValue) {
+
+		}
+
+		@Block
+		public static class BadBlock implements IBase {
+
+			@Override
+			public boolean isEmpty() {
+				return false;
+			}
+
+			@Override
+			public boolean hasFormatComment() {
+				return false;
+			}
+
+			@Override
+			public List<String> getFormatCommentsPre() {
+				return null;
+			}
+
+			@Override
+			public List<String> getFormatCommentsPost() {
+				return null;
+			}
+
+			@Override
+			public Object getUserData(String theName) {
+				return null;
+			}
+
+			@Override
+			public void setUserData(String theName, Object theValue) {
+
+			}
+		}
 
 	}
 

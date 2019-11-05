@@ -9,9 +9,9 @@ package ca.uhn.fhir.interceptor.executor;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -208,11 +208,12 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 	}
 
 	@Override
-	public void unregisterInterceptor(Object theInterceptor) {
+	public boolean unregisterInterceptor(Object theInterceptor) {
 		synchronized (myRegistryMutex) {
-			myInterceptors.removeIf(t -> t == theInterceptor);
-			myGlobalInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
-			myAnonymousInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
+			boolean removed = myInterceptors.removeIf(t -> t == theInterceptor);
+			removed |= myGlobalInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
+			removed |= myAnonymousInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
+			return removed;
 		}
 	}
 
@@ -234,10 +235,21 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 	@Override
 	public Object callHooksAndReturnObject(Pointcut thePointcut, HookParams theParams) {
 		assert haveAppropriateParams(thePointcut, theParams);
-		assert thePointcut.getReturnType() != void.class && thePointcut.getReturnType() != boolean.class;
+		assert thePointcut.getReturnType() != void.class;
 
-		Object retVal = doCallHooks(thePointcut, theParams, null);
-		return retVal;
+		return doCallHooks(thePointcut, theParams, null);
+	}
+
+	@Override
+	public boolean hasHooks(Pointcut thePointcut) {
+		return myGlobalInvokers.containsKey(thePointcut)
+			|| myAnonymousInvokers.containsKey(thePointcut)
+			|| hasThreadLocalHooks(thePointcut);
+	}
+
+	private boolean hasThreadLocalHooks(Pointcut thePointcut) {
+		ListMultimap<Pointcut, BaseInvoker> hooks = myThreadlocalInvokersEnabled ? myThreadlocalInvokers.get() : null;
+		return hooks != null && hooks.containsKey(thePointcut);
 	}
 
 	@Override
@@ -257,14 +269,15 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 		 */
 		for (BaseInvoker nextInvoker : invokers) {
 			Object nextOutcome = nextInvoker.invoke(theParams);
-			if (thePointcut.getReturnType() == boolean.class) {
+			Class<?> pointcutReturnType = thePointcut.getReturnType();
+			if (pointcutReturnType.equals(boolean.class)) {
 				Boolean nextOutcomeAsBoolean = (Boolean) nextOutcome;
 				if (Boolean.FALSE.equals(nextOutcomeAsBoolean)) {
 					ourLog.trace("callHooks({}) for invoker({}) returned false", thePointcut, nextInvoker);
 					theRetVal = false;
 					break;
 				}
-			} else if (thePointcut.getReturnType() != void.class) {
+			} else if (pointcutReturnType.equals(void.class) == false) {
 				if (nextOutcome != null) {
 					theRetVal = nextOutcome;
 					break;
@@ -470,9 +483,13 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 			Object[] args = new Object[myParameterTypes.length];
 			for (int i = 0; i < myParameterTypes.length; i++) {
 				Class<?> nextParamType = myParameterTypes[i];
-				int nextParamIndex = myParameterIndexes[i];
-				Object nextParamValue = theParams.get(nextParamType, nextParamIndex);
-				args[i] = nextParamValue;
+				if (nextParamType.equals(Pointcut.class)) {
+					args[i] = myPointcut;
+				} else {
+					int nextParamIndex = myParameterIndexes[i];
+					Object nextParamValue = theParams.get(nextParamType, nextParamIndex);
+					args[i] = nextParamValue;
+				}
 			}
 
 			// Invoke the method

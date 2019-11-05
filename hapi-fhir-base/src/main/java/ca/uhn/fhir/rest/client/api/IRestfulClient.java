@@ -18,9 +18,9 @@ import javax.annotation.Nonnull;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -92,10 +92,11 @@ public interface IRestfulClient {
 	/**
 	 * Register a new interceptor for this client. An interceptor can be used to add additional
 	 * logging, or add security headers, or pre-process responses, etc.
-	 *
-	 * @deprecated Use {@link #getInterceptorService()} to access the list of inteerceptors, register them, and unregister them
+	 * <p>
+	 * This is a convenience method for performing the following call:
+	 * <code>getInterceptorService().registerInterceptor(theInterceptor)</code>
+	 * </p>
 	 */
-	@Deprecated
 	void registerInterceptor(IClientInterceptor theInterceptor);
 
 	/**
@@ -114,11 +115,12 @@ public interface IRestfulClient {
 	void setSummary(SummaryEnum theSummary);
 
 	/**
-	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}
-	 *
-	 * @deprecated Use {@link #getInterceptorService()} to access the list of inteerceptors, register them, and unregister them
+	 * Remove an interceptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}.
+	 * <p>
+	 * This is a convenience method for performing the following call:
+	 * <code>getInterceptorService().unregisterInterceptor(theInterceptor)</code>
+	 * </p>
 	 */
-	@Deprecated
 	void unregisterInterceptor(IClientInterceptor theInterceptor);
 
 	/**

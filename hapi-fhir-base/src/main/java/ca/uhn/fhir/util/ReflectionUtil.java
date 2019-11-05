@@ -9,9 +9,9 @@ package ca.uhn.fhir.util;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,16 +51,8 @@ public class ReflectionUtil {
 	}
 
 	public static Class<?> getGenericCollectionTypeOfField(Field next) {
-		Class<?> type;
 		ParameterizedType collectionType = (ParameterizedType) next.getGenericType();
-		Type firstArg = collectionType.getActualTypeArguments()[0];
-		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
-			ParameterizedType pt = ((ParameterizedType) firstArg);
-			type = (Class<?>) pt.getRawType();
-		} else {
-			type = (Class<?>) firstArg;
-		}
-		return type;
+		return getGenericCollectionTypeOf(collectionType.getActualTypeArguments()[0]);
 	}
 
 	/**
@@ -84,42 +76,37 @@ public class ReflectionUtil {
 	}
 
 	public static Class<?> getGenericCollectionTypeOfMethodParameter(Method theMethod, int theParamIndex) {
-		Class<?> type;
 		Type genericParameterType = theMethod.getGenericParameterTypes()[theParamIndex];
 		if (Class.class.equals(genericParameterType) || Class.class.equals(genericParameterType.getClass())) {
 			return null;
 		}
 		ParameterizedType collectionType = (ParameterizedType) genericParameterType;
-		Type firstArg = collectionType.getActualTypeArguments()[0];
-		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
-			ParameterizedType pt = ((ParameterizedType) firstArg);
-			type = (Class<?>) pt.getRawType();
-		} else {
-			type = (Class<?>) firstArg;
-		}
-		return type;
+		return getGenericCollectionTypeOf(collectionType.getActualTypeArguments()[0]);
 	}
 
-	@SuppressWarnings({ "rawtypes" })
 	public static Class<?> getGenericCollectionTypeOfMethodReturnType(Method theMethod) {
-		Class<?> type;
 		Type genericReturnType = theMethod.getGenericReturnType();
 		if (!(genericReturnType instanceof ParameterizedType)) {
 			return null;
 		}
 		ParameterizedType collectionType = (ParameterizedType) genericReturnType;
-		Type firstArg = collectionType.getActualTypeArguments()[0];
-		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
-			ParameterizedType pt = ((ParameterizedType) firstArg);
+		return getGenericCollectionTypeOf(collectionType.getActualTypeArguments()[0]);
+	}
+
+	@SuppressWarnings({ "rawtypes" })
+	private static Class<?> getGenericCollectionTypeOf(Type theType) {
+		Class<?> type;
+		if (ParameterizedType.class.isAssignableFrom(theType.getClass())) {
+			ParameterizedType pt = ((ParameterizedType) theType);
 			type = (Class<?>) pt.getRawType();
-		} else if (firstArg instanceof TypeVariable<?>) {
-			Type decl = ((TypeVariable) firstArg).getBounds()[0];
+		} else if (theType instanceof TypeVariable<?>) {
+			Type decl = ((TypeVariable) theType).getBounds()[0];
 			return (Class<?>) decl;
-		} else if (firstArg instanceof WildcardType) {
-			Type decl = ((WildcardType) firstArg).getUpperBounds()[0];
+		} else if (theType instanceof WildcardType) {
+			Type decl = ((WildcardType) theType).getUpperBounds()[0];
 			return (Class<?>) decl;
 		} else {
-			type = (Class<?>) firstArg;
+			type = (Class<?>) theType;
 		}
 		return type;
 	}
@@ -154,8 +141,7 @@ public class ReflectionUtil {
 	public static Object newInstanceOfFhirServerType(String theType) {
 		String errorMessage = "Unable to instantiate server framework. Please make sure that hapi-fhir-server library is on your classpath!";
 		String wantedType = "ca.uhn.fhir.rest.api.server.IFhirVersionServer";
-		Object fhirServerVersion = newInstanceOfType(theType, errorMessage, wantedType);
-		return fhirServerVersion;
+		return newInstanceOfType(theType, errorMessage, wantedType);
 	}
 
 	@SuppressWarnings("unchecked")

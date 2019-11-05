@@ -2,6 +2,7 @@ package org.hl7.fhir.r4.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -13,6 +14,7 @@ import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
+import org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
 import java.io.IOException;
@@ -174,6 +176,11 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     return cs != null && cs.getContent() != CodeSystemContentMode.NOTPRESENT;
   }
 
+  @Override
+  public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
+    return null;
+  }
+
   private void loadCodeSystems(FhirContext theContext, Map<String, CodeSystem> theCodeSystems, Map<String, ValueSet> theValueSets, String theClasspath) {
     ourLog.info("Loading CodeSystem/ValueSet from classpath: {}", theClasspath);
     InputStream inputStream = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
@@ -252,16 +259,16 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     return structureDefinitions;
   }
 
-  private CodeValidationResult testIfConceptIsInList(String theCode, List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive) {
+  private CodeValidationResult testIfConceptIsInList(CodeSystem theCodeSystem, String theCode, List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive) {
     String code = theCode;
     if (theCaseSensitive == false) {
       code = code.toUpperCase();
     }
 
-    return testIfConceptIsInListInner(conceptList, theCaseSensitive, code);
+    return testIfConceptIsInListInner(theCodeSystem, conceptList, theCaseSensitive, code);
   }
 
-  private CodeValidationResult testIfConceptIsInListInner(List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive, String code) {
+  private CodeValidationResult testIfConceptIsInListInner(CodeSystem theCodeSystem, List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive, String code) {
     CodeValidationResult retVal = null;
     for (ConceptDefinitionComponent next : conceptList) {
       String nextCandidate = next.getCode();
@@ -274,32 +281,68 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
       }
 
       // recurse
-      retVal = testIfConceptIsInList(code, next.getConcept(), theCaseSensitive);
+      retVal = testIfConceptIsInList(theCodeSystem, code, next.getConcept(), theCaseSensitive);
       if (retVal != null) {
         break;
       }
+    }
+
+    if (retVal != null) {
+      retVal.setCodeSystemName(theCodeSystem.getName());
+      retVal.setCodeSystemVersion(theCodeSystem.getVersion());
     }
 
     return retVal;
   }
 
   @Override
-  public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-    CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
-    if (cs != null) {
-      boolean caseSensitive = true;
-      if (cs.hasCaseSensitive()) {
-        caseSensitive = cs.getCaseSensitive();
+  public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+    if (isNotBlank(theValueSetUrl)) {
+      ValueSetExpander expander = new ValueSetExpanderSimple(new HapiWorkerContext(theContext, this));
+      try {
+        ValueSet valueSet = fetchValueSet(theContext, theValueSetUrl);
+        if (valueSet != null) {
+          ValueSetExpander.ValueSetExpansionOutcome expanded = expander.expand(valueSet, null);
+          Optional<ValueSet.ValueSetExpansionContainsComponent> haveMatch = expanded
+            .getValueset()
+            .getExpansion()
+            .getContains()
+            .stream()
+            .filter(t -> (theCodeSystem == null || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
+            .findFirst();
+          if (haveMatch.isPresent()) {
+            return new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(theCode)));
+          }
+        }
+      } catch (Exception e) {
+        return new CodeValidationResult(IssueSeverity.WARNING, e.getMessage());
       }
 
-      CodeValidationResult retVal = testIfConceptIsInList(theCode, cs.getConcept(), caseSensitive);
+      return null;
+    }
 
-      if (retVal != null) {
-        return retVal;
+    if (theCodeSystem != null) {
+      CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
+      if (cs != null) {
+        boolean caseSensitive = true;
+        if (cs.hasCaseSensitive()) {
+          caseSensitive = cs.getCaseSensitive();
+        }
+
+        CodeValidationResult retVal = testIfConceptIsInList(cs, theCode, cs.getConcept(), caseSensitive);
+
+        if (retVal != null) {
+          return retVal;
+        }
       }
     }
 
     return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
+  }
+
+  @Override
+  public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+    return validateCode(theContext, theSystem, theCode, null, null).asLookupCodeResult(theSystem, theCode);
   }
 
 }

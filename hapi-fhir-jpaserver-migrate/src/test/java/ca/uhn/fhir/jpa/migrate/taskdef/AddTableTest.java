@@ -16,7 +16,7 @@ public class AddTableTest extends BaseTest {
 
 		AddTableRawSqlTask task = new AddTableRawSqlTask();
 		task.setTableName("SOMETABLE");
-		task.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+		task.addSql(DriverTypeEnum.H2_EMBEDDED, "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 		getMigrator().addTask(task);
 
 		getMigrator().migrate();
@@ -31,7 +31,7 @@ public class AddTableTest extends BaseTest {
 
 		AddTableRawSqlTask task = new AddTableRawSqlTask();
 		task.setTableName("SOMETABLE");
-		task.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+		task.addSql(DriverTypeEnum.H2_EMBEDDED, "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 		getMigrator().addTask(task);
 
 		getMigrator().migrate();

@@ -1,30 +1,41 @@
 package ca.uhn.fhirtest;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.bulk.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.jpa.provider.r4.JpaConformanceProviderR4;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
-import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
+import ca.uhn.fhir.jpa.provider.r5.JpaConformanceProviderR5;
+import ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
+import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.server.ETagSupportEnum;
+import ca.uhn.fhir.rest.server.ElementsSupportEnum;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.BanUnsupportedHttpMethodsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import ca.uhn.fhirtest.config.*;
+import ca.uhn.fhirtest.config.TestDstu2Config;
+import ca.uhn.fhirtest.config.TestDstu3Config;
+import ca.uhn.fhirtest.config.TestR4Config;
+import ca.uhn.fhirtest.config.TestR5Config;
 import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -37,6 +48,7 @@ import java.util.List;
 
 public class TestRestfulServer extends RestfulServer {
 
+	public static final String FHIR_BASEURL_R5 = "fhir.baseurl.r5";
 	public static final String FHIR_BASEURL_R4 = "fhir.baseurl.r4";
 	public static final String FHIR_BASEURL_DSTU2 = "fhir.baseurl.dstu2";
 	public static final String FHIR_BASEURL_DSTU3 = "fhir.baseurl.dstu3";
@@ -115,7 +127,8 @@ public class TestRestfulServer extends RestfulServer {
 				JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
-				providers.add(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
+				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
+				providers.add(myAppCtx.getBean(GraphQLProvider.class));
 				break;
 			}
 			case "R4": {
@@ -133,7 +146,26 @@ public class TestRestfulServer extends RestfulServer {
 				JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
-				providers.add(myAppCtx.getBean(TerminologyUploaderProviderR4.class));
+				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
+				providers.add(myAppCtx.getBean(GraphQLProvider.class));
+				break;
+			}
+			case "R5": {
+				myAppCtx = new AnnotationConfigWebApplicationContext();
+				myAppCtx.setServletConfig(getServletConfig());
+				myAppCtx.setParent(parentAppCtx);
+				myAppCtx.register(TestR5Config.class, WebsocketDispatcherConfig.class);
+				baseUrlProperty = FHIR_BASEURL_R5;
+				myAppCtx.refresh();
+				setFhirContext(FhirContext.forR5());
+				beans = myAppCtx.getBean("myResourceProvidersR5", ResourceProviderFactory.class);
+				providers.add(myAppCtx.getBean("mySystemProviderR5", JpaSystemProviderR5.class));
+				systemDao = myAppCtx.getBean("mySystemDaoR5", IFhirSystemDao.class);
+				etagSupport = ETagSupportEnum.ENABLED;
+				JpaConformanceProviderR5 confProvider = new JpaConformanceProviderR5(this, systemDao, myAppCtx.getBean(DaoConfig.class));
+				confProvider.setImplementationDescription(implDesc);
+				setServerConformanceProvider(confProvider);
+				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
 				break;
 			}
@@ -218,6 +250,20 @@ public class TestRestfulServer extends RestfulServer {
 		 */
 		SubscriptionInterceptorLoader subscriptionInterceptorLoader = myAppCtx.getBean(SubscriptionInterceptorLoader.class);
 		subscriptionInterceptorLoader.registerInterceptors();
+
+		/*
+		 * Cascading deletes
+		 */
+		DaoRegistry daoRegistry = myAppCtx.getBean(DaoRegistry.class);
+		IInterceptorBroadcaster interceptorBroadcaster = myAppCtx.getBean(IInterceptorBroadcaster.class);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(daoRegistry, interceptorBroadcaster);
+		registerInterceptor(cascadingDeleteInterceptor);
+
+		/*
+		 * Bulk Export
+		 */
+		registerProvider(myAppCtx.getBean(BulkDataExportProvider.class));
+
 	}
 
 	/**

@@ -17,12 +17,12 @@
 			<th:block th:case="'DSTU1'">
 				<th:block th:if="${not resource.name.textElement.empty}" th:text="${resource.name.textElement.value}"/>
 				<th:block th:if="    ${resource.name.textElement.empty} and ${not resource.name.coding[0].displayElement.empty}" th:text="${resource.name.coding[0].display}"/>
-				<th:block th:if=    "${resource.name.textElement.empty} and     ${resource.name.coding[0].displayElement.empty}" th:text="Untitled Diagnostic Report"/>
+				<th:block th:if=    "${resource.name.textElement.empty} and     ${resource.name.coding[0].displayElement.empty}" th:text="'Untitled Diagnostic Report'"/>
 			</th:block>
 			<th:block th:case="*">
 				<th:block th:if="${not resource.code.textElement.empty} or ${resource.code.coding.empty}" th:text="${resource.code.textElement.value}"/>
 				<th:block th:if="${not resource.code.coding.empty} and ${resource.code.textElement.empty} and ${not resource.code.coding[0].displayElement.empty}" th:text="${resource.code.coding[0].display}"/>
-				<th:block th:if="${not resource.code.coding.empty} and ${resource.code.textElement.empty} and     ${resource.code.coding[0].displayElement.empty}" th:text="Untitled Diagnostic Report"/>
+				<th:block th:if="${not resource.code.coding.empty} and ${resource.code.textElement.empty} and     ${resource.code.coding[0].displayElement.empty}" th:text="'Untitled Diagnostic Report'"/>
 			</th:block>
 		</th:block>
 		<!--/*--> Complete Blood Count <!--*/-->
@@ -60,23 +60,58 @@
 				<tr th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
 					<td>
 						<th:block th:switch="${fhirVersion}">
-							<th:block th:case="'DSTU1'">
-								<th:block th:if="${not result.resource.name.textElement.empty}" th:text="${result.resource.name.textElement.value}"/>
-								<th:block th:if="${result.resource.name.textElement.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${not result.resource.name.coding[0].displayElement.empty}" th:text="${result.resource.name.coding[0].display}"/>
-								<th:block th:if="${result.resource.name.textElement.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${result.resource.name.coding[0].displayElement.empty}" th:text="'?'"/>
-							</th:block>
+                     <th:block th:case="'DSTU2'">
+                        <th:block th:if="${not result.resource.code.textElement.empty}" th:text="${result.resource.code.textElement.value}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${not result.resource.code.coding[0].displayElement.empty}" th:text="${result.resource.code.coding[0].display}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${result.resource.code.coding[0].displayElement.empty}" th:text="'?'"/>
+                     </th:block>
+                     <th:block th:case="'DSTU2_HL7ORG'">
+                        <th:block th:if="${not result.resource.code.textElement.empty}" th:text="${result.resource.code.textElement.value}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${not result.resource.code.coding[0].displayElement.empty}" th:text="${result.resource.code.coding[0].display}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${result.resource.code.coding[0].displayElement.empty}" th:text="'?'"/>
+                     </th:block>
+                     <th:block th:case="'DSTU2_1'">
+                        <th:block th:if="${not result.resource.code.textElement.empty}" th:text="${result.resource.code.textElement.value}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${not result.resource.code.coding[0].displayElement.empty}" th:text="${result.resource.code.coding[0].display}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${result.resource.code.coding[0].displayElement.empty}" th:text="'?'"/>
+                     </th:block>
+                     <th:block th:case="'DSTU3'">
+                        <th:block th:if="${not result.resource.code.textElement.empty}" th:text="${result.resource.code.textElement.value}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${not result.resource.code.coding[0].displayElement.empty}" th:text="${result.resource.code.coding[0].display}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${result.resource.code.coding[0].displayElement.empty}" th:text="'?'"/>
+                     </th:block>
 							<th:block th:case="*">
-								<th:block th:if="${not result.resource.code.textElement.empty}" th:text="${result.resource.code.textElement.value}"/>
-								<th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${not result.resource.code.coding[0].displayElement.empty}" th:text="${result.resource.code.coding[0].display}"/>
-								<th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${result.resource.code.coding[0].displayElement.empty}" th:text="'?'"/>
+                        <th:block th:if="${not result.resource.code.textElement.empty}" th:text="${result.resource.code.textElement.value}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${not result.resource.code.coding[0].displayElement.empty}" th:text="${result.resource.code.coding[0].display}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${result.resource.code.coding[0].displayElement.empty}" th:text="'?'"/>
 							</th:block>
 						</th:block>
 						<!--/*--> Hb <!--*/-->
 					</td>
 					<td th:narrative="${result.resource.value}">2.2 g/L</td>
 					<td>
-						<th:block th:if="${not result.resource.interpretation.textElement.empty}" th:text="${result.resource.interpretation.text}"/>
-						<th:block th:if="${result.resource.interpretation.textElement.empty} and ${not result.resource.interpretation.coding.empty} and ${not result.resource.interpretation.coding[0].displayElement.empty}" th:text="${result.resource.interpretation.coding[0].display}"/>
+                  <th:block th:switch="${fhirVersion}">
+                     <th:block th:case="'DSTU2'">
+                        <th:block th:if="${not result.resource.interpretation.textElement.empty}" th:text="${result.resource.interpretation.text}"/>
+                        <th:block th:if="${result.resource.interpretation.textElement.empty} and ${not result.resource.interpretation.coding.empty} and ${not result.resource.interpretation.coding[0].displayElement.empty}" th:text="${result.resource.interpretation.coding[0].display}"/>
+                     </th:block>
+                     <th:block th:case="'DSTU2_HL7ORG'">
+                        <th:block th:if="${not result.resource.interpretation.textElement.empty}" th:text="${result.resource.interpretation.text}"/>
+                        <th:block th:if="${result.resource.interpretation.textElement.empty} and ${not result.resource.interpretation.coding.empty} and ${not result.resource.interpretation.coding[0].displayElement.empty}" th:text="${result.resource.interpretation.coding[0].display}"/>
+                     </th:block>
+                     <th:block th:case="'DSTU2_1'">
+                        <th:block th:if="${not result.resource.interpretation.textElement.empty}" th:text="${result.resource.interpretation.text}"/>
+                        <th:block th:if="${result.resource.interpretation.textElement.empty} and ${not result.resource.interpretation.coding.empty} and ${not result.resource.interpretation.coding[0].displayElement.empty}" th:text="${result.resource.interpretation.coding[0].display}"/>
+                     </th:block>
+                     <th:block th:case="'DSTU3'">
+                        <th:block th:if="${not result.resource.interpretation.textElement.empty}" th:text="${result.resource.interpretation.text}"/>
+                        <th:block th:if="${result.resource.interpretation.textElement.empty} and ${not result.resource.interpretation.coding.empty} and ${not result.resource.interpretation.coding[0].displayElement.empty}" th:text="${result.resource.interpretation.coding[0].display}"/>
+                     </th:block>
+                     <th:block th:case="*">
+                        <th:block th:if="${not result.resource.interpretation.empty} and ${not result.resource.interpretation[0].textElement.empty}" th:text="${result.resource.interpretation[0].text}"/>
+                        <th:block th:if="${not result.resource.interpretation.empty} and ${result.resource.interpretation[0].textElement.empty} and ${not result.resource.interpretation[0].coding.empty} and ${not result.resource.interpretation[0].coding[0].displayElement.empty}" th:text="${result.resource.interpretation.coding[0].display}"/>
+                     </th:block>
+                  </th:block>
 						<!--/*--> N <!--*/-->
 					</td>
 					<td>
@@ -90,18 +125,33 @@
 				</tr>
 
 				<th:block th:switch="${fhirVersion}">
-					<th:block th:case="'DSTU3'">
-						<tr th:if="${not result.resource.commentElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
-							<td th:text="${result.resource.commentElement.value}" colspan="5">This is a comment</td>
-						</tr>
-					</th:block>
-					<th:block th:case="*">
+					<th:block th:case="'DSTU2'">
 						<tr th:if="${not result.resource.commentsElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
 							<td th:text="${result.resource.commentsElement.value}" colspan="5">This is a comment</td>
 						</tr>
 					</th:block>
+               <th:block th:case="'DSTU2_HL7ORG'">
+                  <tr th:if="${not result.resource.commentElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
+                     <td th:text="${result.resource.commentElement.value}" colspan="5">This is a comment</td>
+                  </tr>
+               </th:block>
+               <th:block th:case="'DSTU2_1'">
+                  <tr th:if="${not result.resource.commentElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
+                     <td th:text="${result.resource.commentElement.value}" colspan="5">This is a comment</td>
+                  </tr>
+               </th:block>
+               <th:block th:case="'DSTU3'">
+                  <tr th:if="${not result.resource.commentElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
+                     <td th:text="${result.resource.commentElement.value}" colspan="5">This is a comment</td>
+                  </tr>
+               </th:block>
+					<th:block th:case="*">
+						<tr th:if="${not result.resource.note.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
+							<td th:text="${result.resource.note[0].text}" colspan="5">This is a comment</td>
+						</tr>
+					</th:block>
 				</th:block>
-				
+
 				<!--/* The following are just examples that don't appear in the generated narrative -->
 				<tr class="hapiTableOfValuesRowEven"><td>Lkc</td><td>198 g/L</td><td>H</td><td>78 g/L - 99 g/L</td><td>final</td></tr>
 				<tr class="hapiTableOfValuesRowEven"><td colspan="5">Yet another comment</td></tr>

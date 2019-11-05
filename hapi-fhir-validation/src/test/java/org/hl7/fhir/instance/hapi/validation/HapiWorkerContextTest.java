@@ -1,8 +1,8 @@
 package org.hl7.fhir.instance.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.instance.model.ValueSet;
-import org.hl7.fhir.instance.utils.IWorkerContext;
+import org.hl7.fhir.dstu2.model.ValueSet;
+import org.hl7.fhir.dstu2.utils.IWorkerContext;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;

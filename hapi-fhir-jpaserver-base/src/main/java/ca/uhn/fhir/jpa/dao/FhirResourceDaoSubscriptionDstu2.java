@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,7 +38,7 @@ import java.util.Date;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subscription> implements IFhirResourceDaoSubscription<Subscription> {
+public class FhirResourceDaoSubscriptionDstu2 extends BaseHapiFhirResourceDao<Subscription> implements IFhirResourceDaoSubscription<Subscription> {
 
 	@Autowired
 	private ISubscriptionTableDao mySubscriptionTableDao;
@@ -54,8 +54,8 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 	}
 
 	@Override
-	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId) {
-		ResourceTable entity = readEntityLatestVersion(theId);
+	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest) {
+		ResourceTable entity = readEntityLatestVersion(theId, theRequest);
 		SubscriptionTable table = mySubscriptionTableDao.findOneByResourcePid(entity.getId());
 		if (table == null) {
 			return null;
@@ -73,8 +73,8 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 
 
 	@Override
-	protected ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
-													 Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
+												 Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
 		if (theDeletedTimestampOrNull != null) {
@@ -83,51 +83,5 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		return retVal;
 	}
 
-	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
-		String query = theResource.getCriteria();
-		if (isBlank(query)) {
-			throw new UnprocessableEntityException("Subscription.criteria must be populated");
-		}
-
-		int sep = query.indexOf('?');
-		if (sep <= 1) {
-			throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
-		}
-
-		String resType = query.substring(0, sep);
-		if (resType.contains("/")) {
-			throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
-		}
-
-		RuntimeResourceDefinition resDef;
-		try {
-			resDef = getContext().getResourceDefinition(resType);
-		} catch (DataFormatException e) {
-			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resType);
-		}
-		return resDef;
-	}
-
-	@Override
-	protected void validateResourceForStorage(Subscription theResource, ResourceTable theEntityToSave) {
-		super.validateResourceForStorage(theResource, theEntityToSave);
-
-		RuntimeResourceDefinition resDef = validateCriteriaAndReturnResourceDefinition(theResource);
-
-		IFhirResourceDao<? extends IBaseResource> dao = getDao(resDef.getImplementingClass());
-		if (dao == null) {
-			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resDef);
-		}
-
-		if (theResource.getChannel().getType() == null) {
-			throw new UnprocessableEntityException("Subscription.channel.type must be populated on this server");
-		}
-
-		SubscriptionStatusEnum status = theResource.getStatusElement().getValueAsEnum();
-		if (status == null) {
-			throw new UnprocessableEntityException("Subscription.status must be populated on this server");
-		}
-
-	}
 
 }

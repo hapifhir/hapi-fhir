@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -110,6 +111,7 @@ public class OperationDuplicateServerDstu2Test {
 
 		servlet.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2));
 
+		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
 		servlet.setFhirContext(ourCtx);
 		servlet.setResourceProviders(new PatientProvider(), new OrganizationProvider());
 		servlet.setPlainProviders(new PlainProvider());

@@ -8,7 +8,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.hl7.fhir.instance.model.*;
+import org.hl7.fhir.dstu2.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.mockito.Mockito;
 

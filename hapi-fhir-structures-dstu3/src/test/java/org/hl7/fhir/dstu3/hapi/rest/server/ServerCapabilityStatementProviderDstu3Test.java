@@ -3,20 +3,23 @@ package org.hl7.fhir.dstu3.hapi.rest.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.RestulfulServerConfiguration;
+import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -89,7 +92,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new SearchProviderWithExplicitChains());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -106,7 +109,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 			}
 		}
 		assertTrue(found);
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -129,12 +132,12 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ConditionalProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -152,12 +155,12 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -165,7 +168,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		assertEquals(1, conformance.getRest().get(0).getOperation().size());
 		assertEquals("everything", conformance.getRest().get(0).getOperation().get(0).getName());
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"));
+		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 		validate(opDef);
 		assertEquals("everything", opDef.getCode());
 		assertThat(opDef.getSystem(), is(false));
@@ -179,13 +182,13 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider() {
 		};
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"));
+		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 		validate(opDef);
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
@@ -201,12 +204,12 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new InstanceHistoryProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -220,7 +223,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new MultiOptionalProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -238,7 +241,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		}
 
 		assertTrue(found);
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -253,12 +256,12 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new NonConditionalProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -278,12 +281,12 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new MultiTypePatientProvider(), new MultiTypeEncounterProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -296,7 +299,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		assertThat(operationIdParts, containsInAnyOrder("Patient-i-someOp", "Encounter-i-someOp", "Patient-i-validate", "Encounter-i-validate"));
 
 		{
-			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-someOp"));
+			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-someOp"), createRequestDetails(rs));
 			validate(opDef);
 			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
@@ -311,7 +314,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 			assertEquals("Patient", opDef.getParameter().get(1).getType());
 		}
 		{
-			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Encounter-i-someOp"));
+			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Encounter-i-someOp"), createRequestDetails(rs));
 			validate(opDef);
 			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
@@ -326,7 +329,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 			assertEquals("Encounter", opDef.getParameter().get(1).getType());
 		}
 		{
-			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-validate"));
+			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-validate"), createRequestDetails(rs));
 			validate(opDef);
 			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
@@ -339,19 +342,19 @@ public class ServerCapabilityStatementProviderDstu3Test {
 			assertEquals("Patient", opDef.getParameter().get(0).getType());
 		}
 	}
-
+	
 	@Test
 	public void testOperationDocumentation() throws Exception {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new SearchProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 
@@ -365,17 +368,17 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new PlainProviderWithExtendedOperationOnNoType());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider() {
 			@Override
-			public CapabilityStatement getServerConformance(HttpServletRequest theRequest) {
-				return super.getServerConformance(theRequest);
+			public CapabilityStatement getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
+				return super.getServerConformance(theRequest, createRequestDetails(rs));
 			}
 		};
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/-is-plain"));
+		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/-is-plain"), createRequestDetails(rs));
 		validate(opDef);
 
 		assertEquals("plain", opDef.getCode());
@@ -405,12 +408,12 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ProviderWithRequiredAndOptional());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -435,12 +438,12 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new VreadProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -455,12 +458,12 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ReadProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -475,7 +478,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new SearchProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -496,7 +499,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 			}
 		}
 		assertTrue(found);
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -515,7 +518,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new PatientResourceProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -532,7 +535,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 			}
 		}
 		assertTrue(found);
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -548,7 +551,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new SearchProviderWithWhitelist());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -565,7 +568,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 			}
 		}
 		assertTrue(found);
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -581,37 +584,37 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	@Test
 	public void testSearchReferenceParameterWithList() throws Exception {
 
-		RestfulServer rsNoType = new RestfulServer(ourCtx) {
+		RestfulServer rsNoType = new RestfulServer(ourCtx){
 			@Override
-			public RestulfulServerConfiguration createConfiguration() {
-				RestulfulServerConfiguration retVal = super.createConfiguration();
+			public RestfulServerConfiguration createConfiguration() {
+				RestfulServerConfiguration retVal = super.createConfiguration();
 				retVal.setConformanceDate(new InstantDt("2011-02-22T11:22:33Z"));
 				return retVal;
 			}
 		};
 		rsNoType.registerProvider(new SearchProviderWithListNoType());
-		ServerCapabilityStatementProvider scNoType = new ServerCapabilityStatementProvider(rsNoType);
+		ServerCapabilityStatementProvider scNoType = new ServerCapabilityStatementProvider();
 		rsNoType.setServerConformanceProvider(scNoType);
 		rsNoType.init(createServletConfig());
 
-		CapabilityStatement conformance = scNoType.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = scNoType.getServerConformance(createHttpServletRequest(), createRequestDetails(rsNoType));
 		String confNoType = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(confNoType);
 
-		RestfulServer rsWithType = new RestfulServer(ourCtx) {
+		RestfulServer rsWithType = new RestfulServer(ourCtx){
 			@Override
-			public RestulfulServerConfiguration createConfiguration() {
-				RestulfulServerConfiguration retVal = super.createConfiguration();
+			public RestfulServerConfiguration createConfiguration() {
+				RestfulServerConfiguration retVal = super.createConfiguration();
 				retVal.setConformanceDate(new InstantDt("2011-02-22T11:22:33Z"));
 				return retVal;
 			}
 		};
 		rsWithType.registerProvider(new SearchProviderWithListWithType());
-		ServerCapabilityStatementProvider scWithType = new ServerCapabilityStatementProvider(rsWithType);
+		ServerCapabilityStatementProvider scWithType = new ServerCapabilityStatementProvider();
 		rsWithType.setServerConformanceProvider(scWithType);
 		rsWithType.init(createServletConfig());
 
-		CapabilityStatement conformanceWithType = scWithType.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformanceWithType = scWithType.getServerConformance(createHttpServletRequest(), createRequestDetails(rsWithType));
 		String confWithType = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformanceWithType);
 		ourLog.info(confWithType);
 
@@ -625,12 +628,12 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new SystemHistoryProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -644,12 +647,12 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new TypeHistoryProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -663,12 +666,12 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new MultiOptionalProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(conformance);
@@ -680,12 +683,12 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new NamedQueryPlainProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
@@ -695,7 +698,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		String operationReference = operationComponent.getDefinition().getReference();
 		assertThat(operationReference, not(nullValue()));
 
-		OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference));
+		OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
 		assertThat(operationDefinition.getCode(), is(NamedQueryPlainProvider.QUERY_NAME));
@@ -724,12 +727,12 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new NamedQueryResourceProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
@@ -737,7 +740,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		String operationReference = operationComponent.getDefinition().getReference();
 		assertThat(operationReference, not(nullValue()));
 
-		OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference));
+		OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
 		assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), is(NamedQueryResourceProvider.QUERY_NAME));
@@ -757,8 +760,8 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		assertThat(param.getUse(), is(OperationParameterUse.IN));
 
 		CapabilityStatementRestResourceComponent patientResource = restComponent.getResource().stream()
-			.filter(r -> patientResourceName.equals(r.getType()))
-			.findAny().get();
+				.filter(r -> patientResourceName.equals(r.getType()))
+				.findAny().get();
 		assertThat("Named query parameters should not appear in the resource search params", patientResource.getSearchParam(), is(empty()));
 	}
 
@@ -767,12 +770,12 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new TypeLevelOperationProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -781,13 +784,33 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		assertThat(operations.size(), is(1));
 		assertThat(operations.get(0).getName(), is(TypeLevelOperationProvider.OPERATION_NAME));
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdType(operations.get(0).getDefinition().getReference()));
+		OperationDefinition opDef = sc.readOperationDefinition(new IdType(operations.get(0).getDefinition().getReference()), createRequestDetails(rs));
 		validate(opDef);
 		assertEquals(TypeLevelOperationProvider.OPERATION_NAME, opDef.getCode());
 		assertThat(opDef.getSystem(), is(false));
 		assertThat(opDef.getType(), is(true));
 		assertThat(opDef.getInstance(), is(false));
 	}
+
+    @Test
+    public void testProfiledResourceStructureDefinitionLinks() throws Exception {
+        RestfulServer rs = new RestfulServer(ourCtx);
+        rs.setResourceProviders(new ProfiledPatientProvider(), new MultipleProfilesPatientProvider());
+
+        ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
+        rs.setServerConformanceProvider(sc);
+
+        rs.init(createServletConfig());
+
+        CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+        ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+        List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+        CapabilityStatementRestResourceComponent patientResource = resources.stream()
+            .filter(resource -> "Patient".equals(resource.getType()))
+            .findFirst().get();
+        assertThat(patientResource.getProfile().getReference(), containsString(PATIENT_SUB));
+    }
 
 	private List<String> toOperationIdParts(List<CapabilityStatementRestOperationComponent> theOperation) {
 		ArrayList<String> retVal = Lists.newArrayList();
@@ -820,7 +843,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		ValidationResult result = ourValidator.validateWithResult(theOpDef);
 		String outcome = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info("Outcome: {}", outcome);
-
+		
 		assertTrue(outcome, result.isSuccessful());
 	}
 
@@ -881,7 +904,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		@Search(type = Patient.class)
 		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier,
-											@Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringParam theName) {
+				@Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringParam theName) {
 			return null;
 		}
 
@@ -892,7 +915,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		@Operation(name = "someOp")
 		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId,
-													 @OperationParam(name = "someOpParam1") DateType theStart, @OperationParam(name = "someOpParam2") Encounter theEnd) {
+				@OperationParam(name = "someOpParam1") DateType theStart, @OperationParam(name = "someOpParam2") Encounter theEnd) {
 			return null;
 		}
 
@@ -913,7 +936,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		@Operation(name = "someOp")
 		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId,
-													 @OperationParam(name = "someOpParam1") DateType theStart, @OperationParam(name = "someOpParam2") Patient theEnd) {
+				@OperationParam(name = "someOpParam1") DateType theStart, @OperationParam(name = "someOpParam2") Patient theEnd) {
 			return null;
 		}
 
@@ -957,9 +980,9 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	@SuppressWarnings("unused")
 	public static class PlainProviderWithExtendedOperationOnNoType {
 
-		@Operation(name = "plain", idempotent = true, returnParameters = {@OperationParam(min = 1, max = 2, name = "out1", type = StringType.class)})
+		@Operation(name = "plain", idempotent = true, returnParameters = { @OperationParam(min = 1, max = 2, name = "out1", type = StringType.class) })
 		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart,
-													 @OperationParam(name = "end") DateType theEnd) {
+				@OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}
 
@@ -970,7 +993,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		@Operation(name = "everything", idempotent = true)
 		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart,
-													 @OperationParam(name = "end") DateType theEnd) {
+				@OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}
 
@@ -987,8 +1010,8 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		@Description(shortDefinition = "This is a search for stuff!")
 		@Search
 		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) TokenParam thePatientId,
-																						 @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
-																						 @IncludeParam(allow = {"DiagnosticReport.result"}) Set<Include> theIncludes) throws Exception {
+				@OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
+				@IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
 			return null;
 		}
 
@@ -1019,7 +1042,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		@Search(type = Patient.class)
 		public Patient findPatient2(
-			@Description(shortDefinition = "All patients linked to the given patient") @OptionalParam(name = "link", targetTypes = {Patient.class}) ReferenceAndListParam theLink) {
+				@Description(shortDefinition = "All patients linked to the given patient") @OptionalParam(name = "link", targetTypes = { Patient.class }) ReferenceAndListParam theLink) {
 			return null;
 		}
 
@@ -1029,15 +1052,15 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	public static class SearchProviderWithWhitelist {
 
 		@Search(type = Patient.class)
-		public Patient findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION, chainWhitelist = {"foo",
-			"bar"}) ReferenceAndListParam theIdentifier) {
+		public Patient findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION, chainWhitelist = { "foo",
+				"bar" }) ReferenceAndListParam theIdentifier) {
 			return null;
 		}
 
 	}
 
 	@SuppressWarnings("unused")
-	public static class SearchProviderWithListNoType implements IResourceProvider {
+	public static class SearchProviderWithListNoType  implements IResourceProvider {
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
@@ -1053,7 +1076,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	}
 
 	@SuppressWarnings("unused")
-	public static class SearchProviderWithListWithType implements IResourceProvider {
+	public static class SearchProviderWithListWithType  implements IResourceProvider {
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
@@ -1061,7 +1084,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		}
 
 
-		@Search(type = Patient.class)
+		@Search(type=Patient.class)
 		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION) ReferenceAndListParam theIdentifier) {
 			return null;
 		}
@@ -1105,7 +1128,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		}
 
 	}
-
+  
 	public static class TypeLevelOperationProvider implements IResourceProvider {
 
 		public static final String OPERATION_NAME = "op";
@@ -1155,6 +1178,56 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+  
+  public static class ProfiledPatientProvider implements IResourceProvider {
+
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+      return PatientSubSub2.class;
+    }
+    
+    @Search
+    public List<PatientSubSub2> find() {
+      return null;
+    }
+  }
+  
+  public static class MultipleProfilesPatientProvider implements IResourceProvider {
+
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+      return PatientSubSub.class;
+    }
+    
+    @Read(type = PatientTripleSub.class)
+    public PatientTripleSub read(@IdParam IdType theId) {
+      return null;
+    }
+    
+  }
+  
+  public static final String PATIENT_SUB = "PatientSub";
+  public static final String PATIENT_SUB_SUB = "PatientSubSub";
+  public static final String PATIENT_SUB_SUB_2 = "PatientSubSub2";
+  public static final String PATIENT_TRIPLE_SUB = "PatientTripleSub";
+  
+  @ResourceDef(id = PATIENT_SUB)
+  public static class PatientSub extends Patient {}
+  
+  @ResourceDef(id = PATIENT_SUB_SUB)
+  public static class PatientSubSub extends PatientSub {}
+  
+  @ResourceDef(id = PATIENT_SUB_SUB_2)
+  public static class PatientSubSub2 extends PatientSub {}
+  
+  @ResourceDef(id = PATIENT_TRIPLE_SUB)
+  public static class PatientTripleSub extends PatientSubSub {}
+
+	private RequestDetails createRequestDetails(RestfulServer theServer) {
+		ServletRequestDetails retVal = new ServletRequestDetails(null);
+		retVal.setServer(theServer);
+		return retVal;
 	}
 
 }

@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -29,15 +30,14 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.*;
 
 /**
  * Test the rest-hook subscriptions
@@ -90,6 +90,19 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {
+		Subscription subscription = newSubscription(criteria, payload, endpoint);
+
+		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		subscription.setId(methodOutcome.getId().getIdPart());
+		mySubscriptionIds.add(methodOutcome.getId());
+
+		waitForQueueToDrain();
+
+		return subscription;
+	}
+
+	@NotNull
+	private Subscription newSubscription(String criteria, String payload, String endpoint) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(SubscriptionStatusEnum.REQUESTED);
@@ -100,13 +113,6 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		channel.setPayload(payload);
 		channel.setEndpoint(endpoint);
 		subscription.setChannel(channel);
-
-		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
-		subscription.setId(methodOutcome.getId().getIdPart());
-		mySubscriptionIds.add(methodOutcome.getId());
-
-		waitForQueueToDrain();
-
 		return subscription;
 	}
 
@@ -294,6 +300,20 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		Assert.assertFalse(observation1.getId().isEmpty());
 		Assert.assertFalse(observation2.getId().isEmpty());
 	}
+
+	@Test
+	public void testSubscriptionWithNoStatusIsRejected() {
+		Subscription subscription = newSubscription("Observation?", "application/json", null);
+		subscription.getStatusElement().setValueAsEnum(null);
+
+		try {
+			ourClient.create().resource(subscription).execute();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Can not process submitted Subscription - Subscription.status must be populated on this server"));
+		}
+	}
+
 
 	private void waitForQueueToDrain() throws InterruptedException {
 		mySubscriptionTestUtil.waitForQueueToDrain();

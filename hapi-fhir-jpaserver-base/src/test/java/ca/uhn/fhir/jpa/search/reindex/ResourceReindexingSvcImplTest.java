@@ -26,6 +26,8 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -92,6 +94,17 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		mySvc.setTxManagerForUnitTest(myTxManager);
 		mySvc.setSearchParamRegistryForUnitTest(mySearchParamRegistry);
 		mySvc.start();
+	}
+
+	@Test
+	public void testNoParallelReindexing() throws InterruptedException {
+		CountDownLatch latch = new CountDownLatch(1);
+		new Thread(()->{
+			mySvc.getIndexingLockForUnitTest().lock();
+			latch.countDown();
+		}).start();
+		latch.await(10, TimeUnit.SECONDS);
+		mySvc.runReindexingPass();
 	}
 
 	@Test
@@ -236,6 +249,24 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		verify(myReindexJobDao, times(1)).findAll(any(), eq(true));
 		verify(myReindexJobDao, times(1)).getReindexCount(any());
 		verify(myReindexJobDao, times(1)).setReindexCount(any(), anyInt());
+		verifyNoMoreInteractions(myReindexJobDao);
+	}
+
+	@Test
+	public void testReindexThrowsError() {
+		mockNothingToExpunge();
+		mockSingleReindexingJob("Patient");
+		List<Long> values = Arrays.asList(0L, 1L, 2L, 3L);
+		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(myPageRequestCaptor.capture(), myTypeCaptor.capture(), myLowCaptor.capture(), myHighCaptor.capture())).thenReturn(new SliceImpl<>(values));
+		when(myResourceTableDao.findById(anyLong())).thenThrow(new NullPointerException("A MESSAGE"));
+
+		int count = mySvc.forceReindexingPass();
+		assertEquals(0, count);
+
+		// Make sure we didn't do anything unexpected
+		verify(myReindexJobDao, times(1)).findAll(any(), eq(false));
+		verify(myReindexJobDao, times(1)).findAll(any(), eq(true));
+		verify(myReindexJobDao, times(1)).setSuspendedUntil(any());
 		verifyNoMoreInteractions(myReindexJobDao);
 	}
 

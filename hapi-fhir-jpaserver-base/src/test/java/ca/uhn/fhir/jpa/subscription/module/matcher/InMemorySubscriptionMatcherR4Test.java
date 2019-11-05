@@ -66,7 +66,7 @@ public class InMemorySubscriptionMatcherR4Test {
 
 	private InMemoryMatchResult match(String criteria, Resource theResource) {
 		ourLog.info("Criteria: <{}>", criteria);
-		return mySearchParamMatcher.match(criteria, theResource);
+		return mySearchParamMatcher.match(criteria, theResource, null);
 	}
 
 	private void assertUnsupported(Resource resource, SearchParameterMap theParams) {
@@ -399,13 +399,26 @@ public class InMemorySubscriptionMatcherR4Test {
 			subscription.setCriteriaString(criteria);
 			subscription.setIdElement(new IdType("Subscription", 123L));
 			ResourceModifiedMessage msg = new ResourceModifiedMessage(myContext, patient, ResourceModifiedMessage.OperationTypeEnum.CREATE);
-			msg.setSubscriptionId("Subscription/123");
+			msg.setSubscriptionId("123");
 			msg.setId(new IdType("Patient/ABC"));
 			InMemoryMatchResult result = myInMemorySubscriptionMatcher.match(subscription, msg);
 			fail();
 		} catch (AssertionError e){
 			assertEquals("Reference at managingOrganization is invalid: urn:uuid:13720262-b392-465f-913e-54fb198ff954", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testReferenceAlias() {
+		Observation obs = new Observation();
+		obs.setId("Observation/123");
+		obs.getSubject().setReference("Patient/123");
+
+		SearchParameterMap params;
+
+		params = new SearchParameterMap();
+		params.add(Observation.SP_PATIENT, new ReferenceParam("Patient/123"));
+		assertMatched(obs, params);
 	}
 
 	@Test

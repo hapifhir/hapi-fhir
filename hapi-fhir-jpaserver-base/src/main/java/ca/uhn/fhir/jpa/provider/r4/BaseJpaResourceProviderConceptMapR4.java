@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.provider.r4;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.term.TranslationRequest;
 import ca.uhn.fhir.jpa.term.TranslationResult;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -62,7 +62,7 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 			&& theSourceValueSet.hasValue();
 		boolean haveSourceCoding = theSourceCoding != null
 			&& theSourceCoding.hasCode();
-		boolean haveSourceCodeableConcept= theSourceCodeableConcept != null
+		boolean haveSourceCodeableConcept = theSourceCodeableConcept != null
 			&& theSourceCodeableConcept.hasCoding()
 			&& theSourceCodeableConcept.getCodingFirstRep().hasCode();
 		boolean haveTargetValueSet = theTargetValueSet != null
