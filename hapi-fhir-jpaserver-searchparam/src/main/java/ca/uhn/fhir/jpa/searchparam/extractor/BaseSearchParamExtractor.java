@@ -154,7 +154,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				case "canonical":
 					params.addWarning("Ignoring canonical reference (indexing canonical is not yet supported)");
 					break;
-				case "reference":
+				case "Reference":
 					IBaseReference valueRef = (IBaseReference) value;
 
 					IIdType nextId = valueRef.getReferenceElement();
