@@ -381,8 +381,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			path = path.trim();
 			if (isNotBlank(path)) {
 
-				for (Object next : extractValues(path, theResource)) {
-					retVal.add(new PathAndRef(path, next));
+				for (IBase next : extractValues(path, theResource)) {
+					if (next instanceof IBaseReference) {
+						retVal.add(new PathAndRef(theNextSpDef.getName(), path, (IBaseReference)next));
+					}
 				}
 			}
 		}

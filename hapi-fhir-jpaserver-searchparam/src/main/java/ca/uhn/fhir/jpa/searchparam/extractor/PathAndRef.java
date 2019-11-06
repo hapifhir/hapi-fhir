@@ -20,20 +20,34 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.api.IBaseReference;
+
 public class PathAndRef {
 
 	private final String myPath;
-	public String getPath() {
-		return myPath;
-	}
-	public PathAndRef(String thePath, Object theRef) {
+	private final IBaseReference myRef;
+	private final String mySearchParamName;
+
+	/**
+	 * Constructor
+	 */
+	public PathAndRef(String theSearchParamName, String thePath, IBaseReference theRef) {
 		super();
+		mySearchParamName = theSearchParamName;
 		myPath = thePath;
 		myRef = theRef;
 	}
-	public Object getRef() {
+
+	public String getSearchParamName() {
+		return mySearchParamName;
+	}
+
+	public String getPath() {
+		return myPath;
+	}
+
+	public IBaseReference getRef() {
 		return myRef;
 	}
-	private final Object myRef;
-	
+
 }

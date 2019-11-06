@@ -79,6 +79,7 @@ public class SearchParamExtractorR4Test {
 		assertNotNull(param);
 		List<PathAndRef> links = extractor.extractResourceLinks(enc, param);
 		assertEquals(1, links.size());
+		assertEquals("location", links.get(0).getSearchParamName());
 		assertEquals("Encounter.location.location", links.get(0).getPath());
 		assertEquals("Location/123", ((Reference) links.get(0).getRef()).getReference());
 	}

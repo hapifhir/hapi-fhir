@@ -599,7 +599,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private Predicate addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, Join<ResourceTable, ResourceLink> theJoin, List<Predicate> theCodePredicates, ReferenceParam theRef, RequestDetails theRequest) {
 		final List<Class<? extends IBaseResource>> resourceTypes;
-		String resourceId;
 		if (!theRef.hasResourceType()) {
 
 			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
@@ -657,14 +656,11 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 			}
 
-			resourceId = theRef.getValue();
-
 		} else {
 			try {
 				RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theRef.getResourceType());
 				resourceTypes = new ArrayList<>(1);
 				resourceTypes.add(resDef.getImplementingClass());
-				resourceId = theRef.getIdPart();
 			} catch (DataFormatException e) {
 				throw new InvalidRequestException("Invalid resource type: " + theRef.getResourceType());
 			}
