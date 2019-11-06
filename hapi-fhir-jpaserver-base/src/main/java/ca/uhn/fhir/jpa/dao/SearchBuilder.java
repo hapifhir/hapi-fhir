@@ -572,7 +572,7 @@ public class SearchBuilder implements ISearchBuilder {
 		if (!targetPids.isEmpty()) {
 			ourLog.debug("Searching for resource link with target PIDs: {}", targetPids);
 			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, join);
-			Predicate pidPredicate = join.get("myTargetResourcePid").in(targetPids);
+			Predicate pidPredicate = join.get("myTargetResourcePid").in(ResourcePersistentId.toLongList(targetPids));
 			codePredicates.add(myBuilder.and(pathPredicate, pidPredicate));
 		}
 

@@ -175,7 +175,6 @@ public abstract class BaseStorageDao {
 		return oo;
 	}
 
-	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	protected ResourceGoneException createResourceGoneException(IBasePersistedResource theResourceEntity) {
 		StringBuilder b = new StringBuilder();
