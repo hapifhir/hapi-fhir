@@ -211,7 +211,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		id = myCodeSystemDao.update(codeSystem, null, true, true, mySrd).getId().toUnqualified();
 		table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
 		cs.setResource(table);
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getIdAsResourcePersistentId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getPersistentId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		// Try to update to a different resource
 		codeSystem = new CodeSystem();
@@ -1781,7 +1781,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		child.addChild(parent, RelationshipTypeEnum.ISA);
 
 		try {
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getIdAsResourcePersistentId(), "http://foo", "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getPersistentId(), "http://foo", "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("CodeSystem contains circular reference around code parent", e.getMessage());

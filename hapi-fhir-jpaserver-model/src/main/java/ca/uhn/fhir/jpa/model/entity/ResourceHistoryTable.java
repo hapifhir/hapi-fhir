@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.*;
@@ -160,4 +161,8 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		myResourceVersion = theVersion;
 	}
 
+	@Override
+	public ResourcePersistentId getPersistentId() {
+		return new ResourcePersistentId(myResourceId);
+	}
 }

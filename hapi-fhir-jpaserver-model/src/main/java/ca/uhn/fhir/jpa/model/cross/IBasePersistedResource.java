@@ -1,16 +1,8 @@
-package ca.uhn.fhir.jpa.dao.r5;
+package ca.uhn.fhir.jpa.model.cross;
 
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.hl7.fhir.r5.model.Bundle;
-
-import java.util.Set;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
-/*
+/*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Model
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -28,8 +20,21 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * #L%
  */
 
-public class FhirResourceDaoBundleR5 extends BaseHapiFhirResourceDao<Bundle> {
+import org.hl7.fhir.instance.model.api.IIdType;
 
-	// nothing
+import java.util.Date;
+
+public interface IBasePersistedResource {
+
+	IIdType getIdDt();
+
+	boolean isDeleted();
+
+	/**
+	 * If the resource is deleted, returns the date/time that the resource was deleted at. Otherwie, returns <code>null</code>
+	 */
+	Date getDeleted();
+
+	ResourcePersistentId getPersistentId();
 
 }

@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -139,7 +140,7 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 	}
 
 	@Override
-	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
+	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 		if (!retVal.isUnchangedInCurrentOperation()) {
@@ -147,7 +148,7 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 			CodeSystem cs = (CodeSystem) theResource;
 			addPidToResource(theEntity, theResource);
 
-			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem(cs), theEntity);
+			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem(cs), (ResourceTable) theEntity);
 		}
 
 		return retVal;

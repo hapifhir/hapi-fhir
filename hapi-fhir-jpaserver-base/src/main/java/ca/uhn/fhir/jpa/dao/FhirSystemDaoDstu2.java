@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.delete.DeleteConflictList;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -216,9 +217,9 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 		List<IIdType> deletedResources = new ArrayList<>();
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
-		Map<Entry, ResourceTable> entriesToProcess = new IdentityHashMap<>();
-		Set<ResourceTable> nonUpdatedEntities = new HashSet<ResourceTable>();
-		Set<ResourceTable> updatedEntities = new HashSet<>();
+		Map<Entry, IBasePersistedResource> entriesToProcess = new IdentityHashMap<>();
+		Set<IBasePersistedResource> nonUpdatedEntities = new HashSet<>();
+		Set<IBasePersistedResource> updatedEntities = new HashSet<>();
 
 		/*
 		 * Handle: GET/PUT/POST
@@ -296,7 +297,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 		}
 
-		for (Map.Entry<Entry, ResourceTable> nextEntry : entriesToProcess.entrySet()) {
+		for (Map.Entry<Entry, IBasePersistedResource> nextEntry : entriesToProcess.entrySet()) {
 			nextEntry.getKey().getResponse().setLocation(nextEntry.getValue().getIdDt().toUnqualified().getValue());
 			nextEntry.getKey().getResponse().setEtag(nextEntry.getValue().getIdDt().getVersionIdPart());
 		}
@@ -304,13 +305,13 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		long delay = System.currentTimeMillis() - start;
 		int numEntries = theRequest.getEntry().size();
 		long delayPer = delay / numEntries;
-		ourLog.info("{} completed in {}ms ({} entries at {}ms per entry)", new Object[] {theActionName, delay, numEntries, delayPer});
+		ourLog.info("{} completed in {}ms ({} entries at {}ms per entry)", theActionName, delay, numEntries, delayPer);
 
 		response.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
 		return response;
 	}
 
-	private void handleTransactionWriteOperations(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName, Date theUpdateTime, Set<IdDt> theAllIds, Map<IdDt, IdDt> theIdSubstitutions, Map<IdDt, DaoMethodOutcome> theIdToPersistedOutcome, Bundle theResponse, IdentityHashMap<Entry, Integer> theOriginalRequestOrder, List<IIdType> theDeletedResources, DeleteConflictList theDeleteConflicts, Map<Entry, ResourceTable> theEntriesToProcess, Set<ResourceTable> theNonUpdatedEntities, Set<ResourceTable> theUpdatedEntities) {
+	private void handleTransactionWriteOperations(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName, Date theUpdateTime, Set<IdDt> theAllIds, Map<IdDt, IdDt> theIdSubstitutions, Map<IdDt, DaoMethodOutcome> theIdToPersistedOutcome, Bundle theResponse, IdentityHashMap<Entry, Integer> theOriginalRequestOrder, List<IIdType> theDeletedResources, DeleteConflictList theDeleteConflicts, Map<Entry, IBasePersistedResource> theEntriesToProcess, Set<IBasePersistedResource> theNonUpdatedEntities, Set<IBasePersistedResource> theUpdatedEntities) {
 		/*
 		 * Loop through the request and process any entries of type
 		 * PUT, POST or DELETE
@@ -334,7 +335,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 					}
 				}
 
-				if (nextResourceId.hasIdPart() && nextResourceId.getIdPart().matches("[a-zA-Z]+\\:.*") && !isPlaceholder(nextResourceId)) {
+				if (nextResourceId.hasIdPart() && nextResourceId.getIdPart().matches("[a-zA-Z]+:.*") && !isPlaceholder(nextResourceId)) {
 					throw new InvalidRequestException("Invalid placeholder ID found: " + nextResourceId.getIdPart() + " - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'");
 				}
 
@@ -626,11 +627,11 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 	}
 
 	private Bundle transaction(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName) {
-		super.markRequestAsProcessingSubRequest(theRequestDetails);
+		markRequestAsProcessingSubRequest(theRequestDetails);
 		try {
 			return doTransaction(theRequestDetails, theRequest, theActionName);
 		} finally {
-			super.clearRequestAsProcessingSubRequest(theRequestDetails);
+			clearRequestAsProcessingSubRequest(theRequestDetails);
 		}
 	}
 
@@ -658,15 +659,13 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 	private static boolean isPlaceholder(IdDt theId) {
 		if (theId.getValue() != null) {
-			if (theId.getValue().startsWith("urn:oid:") || theId.getValue().startsWith("urn:uuid:")) {
-				return true;
-			}
+			return theId.getValue().startsWith("urn:oid:") || theId.getValue().startsWith("urn:uuid:");
 		}
 		return false;
 	}
 
 	private static String toStatusString(int theStatusCode) {
-		return Integer.toString(theStatusCode) + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
+		return theStatusCode + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
 	}
 
 	@Override

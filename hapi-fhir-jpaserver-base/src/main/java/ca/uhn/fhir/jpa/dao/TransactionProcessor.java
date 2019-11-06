@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.delete.DeleteConflictList;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
@@ -391,15 +392,15 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		 * database connections.
 		 */
 		TransactionTemplate txManager = new TransactionTemplate(myTxManager);
-		Map<BUNDLEENTRY, ResourceTable> entriesToProcess = txManager.execute(status -> {
-			Map<BUNDLEENTRY, ResourceTable> retVal = doTransactionWriteOperations(theRequestDetails, theActionName, updateTime, allIds, idSubstitutions, idToPersistedOutcome, response, originalRequestOrder, entries, transactionStopWatch);
+		Map<BUNDLEENTRY, IBasePersistedResource> entriesToProcess = txManager.execute(status -> {
+			Map<BUNDLEENTRY, IBasePersistedResource> retVal = doTransactionWriteOperations(theRequestDetails, theActionName, updateTime, allIds, idSubstitutions, idToPersistedOutcome, response, originalRequestOrder, entries, transactionStopWatch);
 
 			transactionStopWatch.startTask("Commit writes to database");
 			return retVal;
 		});
 		transactionStopWatch.endCurrentTask();
 
-		for (Map.Entry<BUNDLEENTRY, ResourceTable> nextEntry : entriesToProcess.entrySet()) {
+		for (Map.Entry<BUNDLEENTRY, IBasePersistedResource> nextEntry : entriesToProcess.entrySet()) {
 			String responseLocation = nextEntry.getValue().getIdDt().toUnqualified().getValue();
 			String responseEtag = nextEntry.getValue().getIdDt().getVersionIdPart();
 			myVersionAdapter.setResponseLocation(nextEntry.getKey(), responseLocation);
@@ -511,7 +512,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	}
 
 
-	private Map<BUNDLEENTRY, ResourceTable> doTransactionWriteOperations(final ServletRequestDetails theRequest, String theActionName, Date theUpdateTime, Set<IIdType> theAllIds,
+	private Map<BUNDLEENTRY, IBasePersistedResource> doTransactionWriteOperations(final ServletRequestDetails theRequest, String theActionName, Date theUpdateTime, Set<IIdType> theAllIds,
 																								Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, BUNDLE theResponse, IdentityHashMap<BUNDLEENTRY, Integer> theOriginalRequestOrder, List<BUNDLEENTRY> theEntries, StopWatch theTransactionStopWatch) {
 
 		if (theRequest != null) {
@@ -521,9 +522,9 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 			Set<String> deletedResources = new HashSet<>();
 			DeleteConflictList deleteConflicts = new DeleteConflictList();
-			Map<BUNDLEENTRY, ResourceTable> entriesToProcess = new IdentityHashMap<>();
-			Set<ResourceTable> nonUpdatedEntities = new HashSet<>();
-			Set<ResourceTable> updatedEntities = new HashSet<>();
+			Map<BUNDLEENTRY, IBasePersistedResource> entriesToProcess = new IdentityHashMap<>();
+			Set<IBasePersistedResource> nonUpdatedEntities = new HashSet<>();
+			Set<IBasePersistedResource> updatedEntities = new HashSet<>();
 			List<IBaseResource> updatedResources = new ArrayList<>();
 			Map<String, Class<? extends IBaseResource>> conditionalRequestUrls = new HashMap<>();
 

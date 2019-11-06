@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
@@ -73,12 +74,12 @@ public class FhirResourceDaoSubscriptionDstu2 extends BaseHapiFhirResourceDao<Su
 
 
 	@Override
-	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
+	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
 												 Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
 		if (theDeletedTimestampOrNull != null) {
-			mySubscriptionTableDao.deleteAllForSubscription(theEntity);
+			mySubscriptionTableDao.deleteAllForSubscription((ResourceTable) theEntity);
 		}
 		return retVal;
 	}

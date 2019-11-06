@@ -88,4 +88,9 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	}
 
 
+	@Nullable
+	@Override
+	protected String getResourceName() {
+		return null;
+	}
 }

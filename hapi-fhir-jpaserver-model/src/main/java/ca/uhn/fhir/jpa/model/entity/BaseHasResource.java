@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -32,7 +33,7 @@ import java.util.Collection;
 import java.util.Date;
 
 @MappedSuperclass
-public abstract class BaseHasResource implements IBaseResourceEntity {
+public abstract class BaseHasResource implements IBaseResourceEntity, IBasePersistedResource {
 
 	@Column(name = "RES_DELETED_AT", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -86,10 +87,6 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 		return cloneDate(myDeleted);
 	}
 
-	public void setDeleted(Date theDate) {
-		myDeleted = theDate;
-	}
-
 	@Override
 	public FhirVersionEnum getFhirVersion() {
 		return myFhirVersion;
@@ -120,6 +117,15 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 			String forcedId = getTransientForcedId() != null ? getTransientForcedId() : getForcedId().getForcedId();
 			return new IdDt(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		}
+	}
+
+	@Override
+	public boolean isDeleted() {
+		return myDeleted != null;
+	}
+
+	public void setDeleted(Date theDate) {
+		myDeleted = theDate;
 	}
 
 	@Override
@@ -175,10 +181,6 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 
 	public void setHasTags(boolean theHasTags) {
 		myHasTags = theHasTags;
-	}
-
-	public ResourcePersistentId getIdAsResourcePersistentId() {
-		return new ResourcePersistentId(getId());
 	}
 
 	static Date cloneDate(Date theDate) {

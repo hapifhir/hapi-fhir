@@ -77,7 +77,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 				newResource.setId(resName + "/" + theId);
 				IFhirResourceDao<IBaseResource> placeholderResourceDao = (IFhirResourceDao<IBaseResource>) myDaoRegistry.getResourceDao(newResource.getClass());
 				ourLog.debug("Automatically creating empty placeholder resource: {}", newResource.getIdElement().getValue());
-				valueOf = new ResourcePersistentId(placeholderResourceDao.update(newResource).getEntity().getId());
+				valueOf = placeholderResourceDao.update(newResource).getEntity().getPersistentId();
 			} else {
 				throw new InvalidRequestException("Resource " + resName + "/" + theId + " not found, specified in path: " + theNextPathsUnsplit);
 			}

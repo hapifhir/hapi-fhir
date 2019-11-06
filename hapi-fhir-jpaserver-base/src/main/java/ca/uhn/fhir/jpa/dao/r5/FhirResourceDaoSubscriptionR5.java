@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -74,7 +75,7 @@ public class FhirResourceDaoSubscriptionR5 extends BaseHapiFhirResourceDao<Subsc
 
 
 	@Override
-	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
+	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
 												 Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 

@@ -152,7 +152,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			code.addPropertyString("HELLO", "12345-2");
 			cs.getConcepts().add(code);
 
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getIdAsResourcePersistentId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getPersistentId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		});
 	}
 
