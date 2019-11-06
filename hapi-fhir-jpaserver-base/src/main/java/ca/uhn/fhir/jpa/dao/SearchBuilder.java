@@ -2766,7 +2766,7 @@ public class SearchBuilder implements ISearchBuilder {
 //			addPredicateTag(Collections.singletonList(Collections.singletonList(new UriParam(((SearchFilterParser.FilterParameter) theFilter).getValue()))),
 //				searchParam.getName());
 //		}
-		else if (searchParam != null) {
+		else {
 			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
 			if (typeEnum == RestSearchParameterTypeEnum.URI) {
 				return addPredicateUri(theResourceName,
@@ -2814,8 +2814,6 @@ public class SearchBuilder implements ISearchBuilder {
 					Collections.singletonList(param),
 					theFilter.getOperation());
 			}
-		} else {
-			throw new InvalidRequestException("Invalid search parameter specified, " + theFilter.getParamPath().getName() + ", for resource type " + theResourceName);
 		}
 		return null;
 	}
