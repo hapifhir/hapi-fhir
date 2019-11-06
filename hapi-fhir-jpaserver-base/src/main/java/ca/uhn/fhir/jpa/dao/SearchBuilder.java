@@ -599,7 +599,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private Predicate addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, Join<ResourceTable, ResourceLink> theJoin, List<Predicate> theCodePredicates, ReferenceParam theRef, RequestDetails theRequest) {
 		final List<Class<? extends IBaseResource>> resourceTypes;
-		String resourceId;
 		if (!theRef.hasResourceType()) {
 
 			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
