@@ -95,8 +95,8 @@ public class BaseDstu3Config extends BaseConfigDstu3Plus {
 	}
 
 	@Bean
-	public TransactionProcessor<Bundle, Bundle.BundleEntryComponent> transactionProcessor() {
-		return new TransactionProcessor<>();
+	public TransactionProcessor transactionProcessor() {
+		return new TransactionProcessor();
 	}
 
 	@Bean(name = "myInstanceValidatorDstu3")

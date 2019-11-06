@@ -60,21 +60,16 @@ public class ResourceLinkExtractor {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public void extractResourceLinks(ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, boolean theFailOnInvalidReference, RequestDetails theRequest) {
-		Map<String, RuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveSearchParams(toResourceName(theResource.getClass()));
+		String resourceName = myContext.getResourceDefinition(theResource).getName();
 
-		for (RuntimeSearchParam nextSpDef : searchParams.values()) {
-			extractResourceLinks(theParams, theEntity, theResource, theUpdateTime, theResourceLinkResolver, nextSpDef, theFailOnInvalidReference, theRequest);
-		}
-
-		theEntity.setHasLinks(theParams.myLinks.size() > 0);
-	}
-
-	private void extractResourceLinks(ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, RuntimeSearchParam nextSpDef, boolean theFailOnInvalidReference, RequestDetails theRequest) {
 		ISearchParamExtractor.SearchParamSet<PathAndRef> refs = mySearchParamExtractor.extractResourceLinks(theResource);
 		SearchParamExtractorService.handleWarnings(theRequest, myInterceptorBroadcaster, refs);
 		for (PathAndRef nextPathAndRef : refs) {
-			extractResourceLinks(theParams, theEntity, theUpdateTime, theResourceLinkResolver, nextSpDef, nextPathAndRef, theFailOnInvalidReference, theRequest);
+			RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(resourceName, nextPathAndRef.getSearchParamName());
+			extractResourceLinks(theParams, theEntity, theUpdateTime, theResourceLinkResolver, searchParam, nextPathAndRef, theFailOnInvalidReference, theRequest);
 		}
+
+		theEntity.setHasLinks(theParams.myLinks.size() > 0);
 	}
 
 	private void extractResourceLinks(ResourceIndexedSearchParams theParams, ResourceTable theEntity, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, RuntimeSearchParam theRuntimeSearchParam, PathAndRef thePathAndRef, boolean theFailOnInvalidReference, RequestDetails theRequest) {
@@ -91,7 +86,7 @@ public class ResourceLinkExtractor {
 			nextId = nextObject.getResource().getIdElement();
 		}
 
-		theParams.myPopulatedResourceLinkParameters.add(theRuntimeSearchParam.getName());
+		theParams.myPopulatedResourceLinkParameters.add(thePathAndRef.getSearchParamName());
 
 		if (LogicalReferenceHelper.isLogicalReference(myModelConfig, nextId)) {
 			ResourceLink resourceLink = new ResourceLink(thePathAndRef.getPath(), theEntity, nextId, theUpdateTime);

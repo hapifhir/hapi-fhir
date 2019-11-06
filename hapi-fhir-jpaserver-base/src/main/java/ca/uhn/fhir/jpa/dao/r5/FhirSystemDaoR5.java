@@ -45,7 +45,7 @@ public class FhirSystemDaoR5 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoR5.class);
 
 	@Autowired
-	private TransactionProcessor<Bundle, BundleEntryComponent> myTransactionProcessor;
+	private TransactionProcessor myTransactionProcessor;
 
 	@Override
 	@PostConstruct

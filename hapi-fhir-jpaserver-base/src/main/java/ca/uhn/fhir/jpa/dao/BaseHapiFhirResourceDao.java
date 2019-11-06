@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.delete.DeleteConflictList;
+import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
@@ -300,7 +301,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails);
 
-		myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+		DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
 
 		ourLog.debug("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return retVal;
@@ -323,7 +324,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		List<ResourceTable> deletedResources = new ArrayList<>();
 		for (ResourcePersistentId pid : resourceIds) {
-			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid);
+			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid.getId());
 			deletedResources.add(entity);
 
 			T resourceToDelete = toResource(myResourceType, entity, null, false);
@@ -391,7 +392,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequestDetails);
 
-		myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+		DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
 
 		return outcome;
 	}
@@ -424,7 +425,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new PreconditionFailedException(msg);
 			} else if (match.size() == 1) {
 				ResourcePersistentId pid = match.iterator().next();
-				entity = myEntityManager.find(ResourceTable.class, pid);
+				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				IBaseResource resource = toResource(entity, false);
 				theResource.setId(resource.getIdElement().getValue());
 				return toMethodOutcome(theRequest, entity, resource).setCreated(false);
@@ -977,7 +978,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (entity == null) {
 			if (theId.hasVersionIdPart()) {
 				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
-				q.setParameter("RID", pid);
+				q.setParameter("RID", pid.getId());
 				q.setParameter("RTYP", myResourceName);
 				q.setParameter("RVER", theId.getVersionIdPartAsLong());
 				try {
@@ -1258,7 +1259,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new PreconditionFailedException(msg);
 			} else if (match.size() == 1) {
 				ResourcePersistentId pid = match.iterator().next();
-				entity = myEntityManager.find(ResourceTable.class, pid);
+				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				resourceId = entity.getIdDt();
 			} else {
 				return create(theResource, null, thePerformIndexing, new Date(), theRequest);
@@ -1352,7 +1353,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
 				myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, true, theRequest);
 			}
-			myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+			DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
 
 			IBaseOperationOutcome oo = createInfoOperationOutcome("Ok to delete");
 			return new MethodOutcome(new IdDt(theId.getValue()), oo);

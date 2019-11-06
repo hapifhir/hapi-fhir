@@ -43,7 +43,7 @@ import java.util.List;
 public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
 	@Autowired
-	private TransactionProcessor<Bundle, BundleEntryComponent> myTransactionProcessor;
+	private TransactionProcessor myTransactionProcessor;
 
 	@Override
 	@PostConstruct

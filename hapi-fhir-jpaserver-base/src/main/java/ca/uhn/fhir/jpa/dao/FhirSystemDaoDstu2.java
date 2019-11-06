@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.delete.DeleteConflictList;
+import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -448,7 +449,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		 */
 
 		theDeleteConflicts.removeIf(next -> theDeletedResources.contains(next.getTargetId().toVersionless()));
-		myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(theDeleteConflicts);
+		DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(getContext(), theDeleteConflicts);
 
 		/*
 		 * Perform ID substitutions and then index each resource we have saved

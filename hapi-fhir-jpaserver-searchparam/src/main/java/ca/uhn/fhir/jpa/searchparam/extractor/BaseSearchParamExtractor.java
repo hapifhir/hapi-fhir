@@ -158,6 +158,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					IBaseReference valueRef = (IBaseReference) value;
 
 					IIdType nextId = valueRef.getReferenceElement();
+					if (nextId.isEmpty() && valueRef.getResource() != null) {
+						nextId = valueRef.getResource().getIdElement();
+					}
+
 					if (nextId == null ||
 						nextId.isEmpty() ||
 						nextId.getValue().startsWith("#") ||

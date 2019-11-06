@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -77,11 +78,11 @@ public class SearchParamExtractorR4Test {
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Encounter", "location");
 		assertNotNull(param);
-		List<PathAndRef> links = extractor.extractResourceLinks(enc, param);
+		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(enc);
 		assertEquals(1, links.size());
-		assertEquals("location", links.get(0).getSearchParamName());
-		assertEquals("Encounter.location.location", links.get(0).getPath());
-		assertEquals("Location/123", ((Reference) links.get(0).getRef()).getReference());
+		assertEquals("location", links.iterator().next().getSearchParamName());
+		assertEquals("Encounter.location.location", links.iterator().next().getPath());
+		assertEquals("Location/123", ((Reference) links.iterator().next().getRef()).getReference());
 	}
 
 	@Test
@@ -92,10 +93,10 @@ public class SearchParamExtractorR4Test {
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Consent", Consent.SP_SOURCE_REFERENCE);
 		assertNotNull(param);
-		List<PathAndRef> links = extractor.extractResourceLinks(consent, param);
+		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(consent);
 		assertEquals(1, links.size());
-		assertEquals("Consent.source", links.get(0).getPath());
-		assertEquals("Consent/999", ((Reference) links.get(0).getRef()).getReference());
+		assertEquals("Consent.source", links.iterator().next().getPath());
+		assertEquals("Consent/999", ((Reference) links.iterator().next().getRef()).getReference());
 	}
 
 
@@ -109,7 +110,7 @@ public class SearchParamExtractorR4Test {
 		patient.addExtension("http://patext", new Reference("Organization/AAA"));
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
-		List<PathAndRef> links = extractor.extractResourceLinks(patient, sp);
+		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(patient);
 		assertEquals(1, links.size());
 	}
 
