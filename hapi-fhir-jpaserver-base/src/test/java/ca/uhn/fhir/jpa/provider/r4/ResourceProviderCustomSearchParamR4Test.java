@@ -1,15 +1,19 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -49,6 +53,8 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		super.after();
 
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
+		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
+
 	}
 
 	@Override
@@ -430,6 +436,102 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		assertThat(foundResources, contains(patId.getValue()));
 
 	}
+
+	/**
+	 * See #1300
+	 */
+	@Test
+	public void testCustomParameterMatchingManyValues() {
+		myDaoConfig.setAllowContainsSearches(true);
+
+		// Add a custom search parameter
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Questionnaire");
+		fooSp.setCode("item-text");
+		fooSp.setName("item-text");
+		fooSp.setType(Enumerations.SearchParamType.STRING);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("Questionnaire.item.text | Questionnaire.item.item.text | Questionnaire.item.item.item.text");
+		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(fooSp, mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		int textIndex = 0;
+		for (int i = 0; i < 200; i++) {
+			//Lots and lots of matches
+			Questionnaire q = new Questionnaire();
+			q
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++));
+			q
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++));
+			q
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++));
+			q
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++));
+			q
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++));
+			myQuestionnaireDao.create(q);
+		}
+
+		int foundCount = 0;
+		Bundle bundle = null;
+		do {
+
+			if (bundle == null) {
+				bundle = ourClient
+					.search()
+					.byUrl(ourServerBase + "/Questionnaire?item-text:contains=Section")
+					.returnBundle(Bundle.class)
+					.execute();
+			} else {
+				bundle = ourClient
+					.loadPage()
+					.next(bundle)
+					.execute();
+			}
+			foundCount += BundleUtil.toListOfResources(myFhirCtx, bundle).size();
+
+		} while (bundle.getLink("next") != null);
+
+		runInTransaction(()->{
+			List<Search> searches = mySearchEntityDao.findAll();
+			assertEquals(1, searches.size());
+			Search search = searches.get(0);
+			assertEquals(search.toString(), 200, search.getNumFound());
+			assertEquals(search.toString(), 200, search.getTotalCount().intValue());
+			assertEquals(search.toString(), SearchStatusEnum.FINISHED, search.getStatus());
+		});
+
+		assertEquals(200, foundCount);
+
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {
