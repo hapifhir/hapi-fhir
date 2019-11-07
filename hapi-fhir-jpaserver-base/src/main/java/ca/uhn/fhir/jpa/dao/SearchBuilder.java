@@ -2087,7 +2087,7 @@ public class SearchBuilder implements ISearchBuilder {
 					myAlsoIncludePids = new ArrayList<>(1);
 				}
 				myAlsoIncludePids.add(pid);
-				myPredicates.add(myBuilder.equal(join.get("myTargetResourcePid").as(Long.class), pid));
+				myPredicates.add(myBuilder.equal(join.get("myTargetResourcePid").as(Long.class), pid.getIdAsLong()));
 			} else {
 				Predicate targetTypePredicate = myBuilder.equal(join.get("myTargetResourceType").as(String.class), myResourceName);
 				Predicate sourceTypePredicate = myBuilder.equal(myResourceTableRoot.get("myResourceType").as(String.class), myResourceName);
