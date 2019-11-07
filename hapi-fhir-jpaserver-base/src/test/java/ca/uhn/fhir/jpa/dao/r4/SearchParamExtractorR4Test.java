@@ -3,7 +3,10 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
@@ -14,7 +17,15 @@ import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -22,7 +33,13 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -33,7 +50,7 @@ public class SearchParamExtractorR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamExtractorR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private static IValidationSupport ourValidationSupport;
-	private ISearchParamRegistry mySearchParamRegistry;
+	private MySearchParamRegistry mySearchParamRegistry;
 
 	@Before
 	public void before() {
@@ -105,6 +122,7 @@ public class SearchParamExtractorR4Test {
 		String path = "Patient.extension('http://patext').value.as(Reference)";
 
 		RuntimeSearchParam sp = new RuntimeSearchParam("extpat", "Patient SP", path, RestSearchParameterTypeEnum.REFERENCE, new HashSet<>(), Sets.newHashSet("Patient"), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+		mySearchParamRegistry.addSearchParam(sp);
 
 		Patient patient = new Patient();
 		patient.addExtension("http://patext", new Reference("Organization/AAA"));
@@ -131,6 +149,10 @@ public class SearchParamExtractorR4Test {
 	}
 
 	private static class MySearchParamRegistry implements ISearchParamRegistry {
+
+
+		private List<RuntimeSearchParam> myExtraSearchParams = new ArrayList<>();
+
 		@Override
 		public void forceRefresh() {
 			// nothing
@@ -160,7 +182,15 @@ public class SearchParamExtractorR4Test {
 				sps.put(nextSp.getName(), nextSp);
 			}
 
+			for (RuntimeSearchParam next : myExtraSearchParams) {
+				sps.put(next.getName(), next);
+			}
+
 			return sps;
+		}
+
+		public void addSearchParam(RuntimeSearchParam theSearchParam) {
+			myExtraSearchParams.add(theSearchParam);
 		}
 
 		@Override

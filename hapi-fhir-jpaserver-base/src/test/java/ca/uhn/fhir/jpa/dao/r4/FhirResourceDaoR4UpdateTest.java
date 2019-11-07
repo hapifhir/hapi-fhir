@@ -571,7 +571,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		Set<ResourcePersistentId> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")), null);
 		assertEquals(1, ids.size());
-		assertThat(ids, contains(p1id.getIdPartAsLong()));
+		assertThat(ResourcePersistentId.toLongList(ids), contains(p1id.getIdPartAsLong()));
 
 		// Update the name
 		p1.getName().get(0).getGiven().get(0).setValue("testUpdateMaintainsSearchParamsDstu2BBB");

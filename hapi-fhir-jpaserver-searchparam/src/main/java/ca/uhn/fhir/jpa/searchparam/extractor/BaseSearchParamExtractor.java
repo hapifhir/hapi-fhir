@@ -154,6 +154,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				case "canonical":
 					params.addWarning("Ignoring canonical reference (indexing canonical is not yet supported)");
 					break;
+				case "reference":
 				case "Reference":
 					IBaseReference valueRef = (IBaseReference) value;
 
@@ -761,16 +762,20 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				continue;
 			}
 
-			String nextPath = nextSpDef.getPath();
-			if (isBlank(nextPath)) {
+			String nextPathUnsplit = nextSpDef.getPath();
+			if (isBlank(nextPathUnsplit)) {
 				continue;
 			}
 
-			for (IBase nextObject : extractValues(nextPath, theResource)) {
-				if (nextObject != null) {
-					String typeName = toRootTypeName(nextObject);
-					if (!myIgnoredForSearchDatatypes.contains(typeName)) {
-						theExtractor.extract(retVal, nextSpDef, nextObject, nextPath);
+			String[] splitPaths = split(nextPathUnsplit);
+			for (String nextPath : splitPaths) {
+				nextPath = trim(nextPath);
+				for (IBase nextObject : extractValues(nextPath, theResource)) {
+					if (nextObject != null) {
+						String typeName = toRootTypeName(nextObject);
+						if (!myIgnoredForSearchDatatypes.contains(typeName)) {
+							theExtractor.extract(retVal, nextSpDef, nextObject, nextPath);
+						}
 					}
 				}
 			}
