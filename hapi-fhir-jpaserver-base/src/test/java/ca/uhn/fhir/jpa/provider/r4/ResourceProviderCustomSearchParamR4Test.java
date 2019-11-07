@@ -3,8 +3,10 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -516,6 +518,15 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			foundCount += BundleUtil.toListOfResources(myFhirCtx, bundle).size();
 
 		} while (bundle.getLink("next") != null);
+
+		runInTransaction(()->{
+			List<Search> searches = mySearchEntityDao.findAll();
+			assertEquals(1, searches.size());
+			Search search = searches.get(0);
+			assertEquals(search.toString(), 200, search.getNumFound());
+			assertEquals(search.toString(), 200, search.getTotalCount().intValue());
+			assertEquals(search.toString(), SearchStatusEnum.FINISHED, search.getStatus());
+		});
 
 		assertEquals(200, foundCount);
 
