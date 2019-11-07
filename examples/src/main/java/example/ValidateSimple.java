@@ -31,10 +31,12 @@ public class ValidateSimple {
 
 		// Read in the file and validate it
 		String nextFile = args[0];
-		String input = IOUtils.toString(new FileReader(nextFile));
-		ValidationResult result = val.validateWithResult(input);
-		IBaseOperationOutcome oo = result.toOperationOutcome();
-		ourLog.info("Result:\n{}", ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
+		try (FileReader fileReader = new FileReader(nextFile)) {
+			String input = IOUtils.toString(fileReader);
+			ValidationResult result = val.validateWithResult(input);
+			IBaseOperationOutcome oo = result.toOperationOutcome();
+			ourLog.info("Result:\n{}", ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
+		}
 
 	}
 
