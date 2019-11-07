@@ -625,8 +625,8 @@
 		<hibernate_validator_version>5.4.2.Final</hibernate_validator_version>
 		<httpcore_version>4.4.11</httpcore_version>
 		<httpclient_version>4.5.9</httpclient_version>
-		<jackson_version>2.9.9</jackson_version>
-		<jackson_databind_version>2.9.10</jackson_databind_version>
+		<jackson_version>2.10.0</jackson_version>
+		<jackson_databind_version>2.10.0</jackson_databind_version>
 		<maven_assembly_plugin_version>3.1.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<resteasy_version>4.0.0.Beta3</resteasy_version>

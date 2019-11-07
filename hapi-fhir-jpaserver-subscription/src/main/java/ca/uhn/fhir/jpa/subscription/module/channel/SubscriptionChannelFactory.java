@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.subscription.module.channel;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
@@ -35,10 +37,10 @@ public class SubscriptionChannelFactory {
 	}
 
 	public SubscribableChannel newDeliveryChannel(String theChannelName) {
-		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName, mySubscribableChannelFactory.getDeliveryChannelConcurrentConsumers());
+		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName, ResourceDeliveryMessage.class, mySubscribableChannelFactory.getDeliveryChannelConcurrentConsumers());
 	}
 
 	public SubscribableChannel newMatchingChannel(String theChannelName) {
-		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName, mySubscribableChannelFactory.getMatchingChannelConcurrentConsumers());
+		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName, ResourceModifiedMessage.class, mySubscribableChannelFactory.getMatchingChannelConcurrentConsumers());
 	}
 }
