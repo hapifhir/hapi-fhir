@@ -1884,9 +1884,11 @@ public class SearchBuilder implements ISearchBuilder {
 				codes.addAll(myTerminologySvc.expandValueSet(code));
 			} else if (modifier == TokenParamModifier.ABOVE) {
 				system = determineSystemIfMissing(theParamName, code, system);
+				validateHaveSystemAndCodeForToken(theParamName, code, system);
 				codes.addAll(myTerminologySvc.findCodesAbove(system, code));
 			} else if (modifier == TokenParamModifier.BELOW) {
 				system = determineSystemIfMissing(theParamName, code, system);
+				validateHaveSystemAndCodeForToken(theParamName, code, system);
 				codes.addAll(myTerminologySvc.findCodesBelow(system, code));
 			} else {
 				codes.add(new VersionIndependentConcept(system, code));
@@ -1927,6 +1929,19 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		return retVal;
+	}
+
+	private void validateHaveSystemAndCodeForToken(String theParamName, String theCode, String theSystem) {
+		String systemDesc = defaultIfBlank(theSystem, "(missing)");
+		String codeDesc = defaultIfBlank(theCode, "(missing)");
+		if (isBlank(theCode)) {
+			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "invalidCodeMissingSystem", theParamName, systemDesc, codeDesc);
+			throw new InvalidRequestException(msg);
+		}
+		if (isBlank(theSystem)) {
+			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "invalidCodeMissingCode", theParamName, systemDesc, codeDesc);
+			throw new InvalidRequestException(msg);
+		}
 	}
 
 	private Predicate addPredicateToken(String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamToken> theFrom, List<VersionIndependentConcept> theTokens, TokenParamModifier theModifier, TokenModeEnum theTokenMode) {
