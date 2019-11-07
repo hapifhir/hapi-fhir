@@ -734,6 +734,42 @@ public class SearchBuilder implements ISearchBuilder {
 		return predicate;
 	}
 
+	private void addPredicateSource(List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest) {
+		for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+			addPredicateSource(nextAnd, SearchFilterParser.CompareOperation.eq, theRequest);
+		}
+	}
+
+	private Predicate addPredicateSource(List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
+		if (myDaoConfig.getStoreMetaSourceInformation() == DaoConfig.StoreMetaSourceInformationEnum.NONE) {
+			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "sourceParamDisabled");
+			throw new InvalidRequestException(msg);
+		}
+
+		Join<ResourceTable, ResourceHistoryProvenanceEntity> join = myResourceTableRoot.join("myProvenance", JoinType.LEFT);
+
+		List<Predicate> codePredicates = new ArrayList<>();
+
+		for (IQueryParameterType nextParameter : theList) {
+			SourceParam sourceParameter = new SourceParam(nextParameter.getValueAsQueryToken(myContext));
+			String sourceUri = sourceParameter.getSourceUri();
+			String requestId = sourceParameter.getRequestId();
+			Predicate sourceUriPredicate = myBuilder.equal(join.get("mySourceUri"), sourceUri);
+			Predicate requestIdPredicate = myBuilder.equal(join.get("myRequestId"), requestId);
+			if (isNotBlank(sourceUri) && isNotBlank(requestId)) {
+				codePredicates.add(myBuilder.and(sourceUriPredicate, requestIdPredicate));
+			} else if (isNotBlank(sourceUri)) {
+				codePredicates.add(sourceUriPredicate);
+			} else if (isNotBlank(requestId)) {
+				codePredicates.add(requestIdPredicate);
+			}
+		}
+
+		Predicate retVal = myBuilder.or(toArray(codePredicates));
+		myPredicates.add(retVal);
+		return retVal;
+	}
+
 	private Subquery<Long> createLinkSubquery(boolean theFoundChainMatch, String theChain, String theSubResourceName, List<IQueryParameterType> theOrValues, RequestDetails theRequest) {
 		Subquery<Long> subQ = myResourceTableQuery.subquery(Long.class);
 		Root<ResourceTable> subQfrom = subQ.from(ResourceTable.class);
@@ -794,8 +830,8 @@ public class SearchBuilder implements ISearchBuilder {
 		return chainValue;
 	}
 
-	private Predicate addPredicateResourceId(String theResourceName, List<List<IQueryParameterType>> theValues, RequestDetails theRequest) {
-		return addPredicateResourceId(theValues, theResourceName, null, theRequest);
+	private void addPredicateResourceId(String theResourceName, List<List<IQueryParameterType>> theValues, RequestDetails theRequest) {
+		addPredicateResourceId(theValues, theResourceName, null, theRequest);
 	}
 
 	private Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
@@ -856,13 +892,18 @@ public class SearchBuilder implements ISearchBuilder {
 
 			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, SearchFilterParser.CompareOperation.eq);
 			assert operation == SearchFilterParser.CompareOperation.eq || operation == SearchFilterParser.CompareOperation.ne;
+			List<Predicate> codePredicates = new ArrayList<>();
 			switch (operation) {
 				default:
 				case eq:
-					nextPredicate = theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids));
+                    codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)));
+					codePredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), theResourceName));
+					nextPredicate = myBuilder.and(toArray(codePredicates));
 					break;
 				case ne:
-					nextPredicate = theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)).not();
+                    codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)).not());
+					codePredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), theResourceName));
+					nextPredicate = myBuilder.and(toArray(codePredicates));
 					break;
 			}
 
@@ -872,41 +913,12 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 
-	private Predicate addPredicateSource(List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
-		if (myDaoConfig.getStoreMetaSourceInformation() == DaoConfig.StoreMetaSourceInformationEnum.NONE) {
-			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "sourceParamDisabled");
-			throw new InvalidRequestException(msg);
-		}
-
-		Join<ResourceTable, ResourceHistoryProvenanceEntity> join = myResourceTableRoot.join("myProvenance", JoinType.LEFT);
-
-		List<Predicate> codePredicates = new ArrayList<>();
-
-		for (IQueryParameterType nextParameter : theList) {
-			SourceParam sourceParameter = new SourceParam(nextParameter.getValueAsQueryToken(myContext));
-			String sourceUri = sourceParameter.getSourceUri();
-			String requestId = sourceParameter.getRequestId();
-			Predicate sourceUriPredicate = myBuilder.equal(join.get("mySourceUri"), sourceUri);
-			Predicate requestIdPredicate = myBuilder.equal(join.get("myRequestId"), requestId);
-			if (isNotBlank(sourceUri) && isNotBlank(requestId)) {
-				codePredicates.add(myBuilder.and(sourceUriPredicate, requestIdPredicate));
-			} else if (isNotBlank(sourceUri)) {
-				codePredicates.add(sourceUriPredicate);
-			} else if (isNotBlank(requestId)) {
-				codePredicates.add(requestIdPredicate);
-			}
-		}
-
-		Predicate retVal = myBuilder.or(toArray(codePredicates));
-		myPredicates.add(retVal);
-		return retVal;
-	}
 
 
-	private Predicate addPredicateString(String theResourceName,
-													 String theParamName,
-													 List<? extends IQueryParameterType> theList) {
-		return addPredicateString(theResourceName,
+	private void addPredicateString(String theResourceName,
+											  String theParamName,
+											  List<? extends IQueryParameterType> theList) {
+		addPredicateString(theResourceName,
 			theParamName,
 			theList,
 			SearchFilterParser.CompareOperation.sw);
@@ -2438,7 +2450,7 @@ public class SearchBuilder implements ISearchBuilder {
 	 */
 	@Override
 	public HashSet<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Set<Include> theRevIncludes,
-																	  boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest) {
+												 boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest) {
 		if (theMatches.size() == 0) {
 			return new HashSet<>();
 		}
@@ -2740,7 +2752,9 @@ public class SearchBuilder implements ISearchBuilder {
 
 		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, theFilter.getParamPath().getName());
 
-		if (searchParam.getName().equals(IAnyResource.SP_RES_ID)) {
+		if (searchParam == null) {
+			throw new InvalidRequestException("Invalid search parameter specified, " + theFilter.getParamPath().getName() + ", for resource type " + theResourceName);
+		} else if (searchParam.getName().equals(IAnyResource.SP_RES_ID)) {
 			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null,
@@ -2781,7 +2795,7 @@ public class SearchBuilder implements ISearchBuilder {
 //			addPredicateTag(Collections.singletonList(Collections.singletonList(new UriParam(((SearchFilterParser.FilterParameter) theFilter).getValue()))),
 //				searchParam.getName());
 //		}
-		else if (searchParam != null) {
+		else {
 			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
 			if (typeEnum == RestSearchParameterTypeEnum.URI) {
 				return addPredicateUri(theResourceName,
@@ -2829,34 +2843,32 @@ public class SearchBuilder implements ISearchBuilder {
 					Collections.singletonList(param),
 					theFilter.getOperation());
 			}
-		} else {
-			throw new InvalidRequestException("Invalid search parameter specified, " + theFilter.getParamPath().getName() + ", for resource type " + theResourceName);
 		}
 		return null;
 	}
 
-	private Predicate processFilter(SearchFilterParser.Filter filter,
+	private Predicate processFilter(SearchFilterParser.Filter theFilter,
 											  String theResourceName, RequestDetails theRequest) {
 
-		if (filter instanceof SearchFilterParser.FilterParameter) {
-			return processFilterParameter((SearchFilterParser.FilterParameter) filter,
+		if (theFilter instanceof SearchFilterParser.FilterParameter) {
+			return processFilterParameter((SearchFilterParser.FilterParameter) theFilter,
 				theResourceName, theRequest);
-		} else if (filter instanceof SearchFilterParser.FilterLogical) {
+		} else if (theFilter instanceof SearchFilterParser.FilterLogical) {
 			// Left side
-			Predicate leftPredicate = processFilter(((SearchFilterParser.FilterLogical) filter).getFilter1(),
+			Predicate xPredicate = processFilter(((SearchFilterParser.FilterLogical) theFilter).getFilter1(),
 				theResourceName, theRequest);
 
 			// Right side
-			Predicate rightPredicate = processFilter(((SearchFilterParser.FilterLogical) filter).getFilter2(),
+			Predicate yPredicate = processFilter(((SearchFilterParser.FilterLogical) theFilter).getFilter2(),
 				theResourceName, theRequest);
 
-			if (((SearchFilterParser.FilterLogical) filter).getOperation() == SearchFilterParser.FilterLogicalOperation.and) {
-				return myBuilder.and(leftPredicate, rightPredicate);
-			} else if (((SearchFilterParser.FilterLogical) filter).getOperation() == SearchFilterParser.FilterLogicalOperation.or) {
-				return myBuilder.or(leftPredicate, rightPredicate);
+			if (((SearchFilterParser.FilterLogical) theFilter).getOperation() == SearchFilterParser.FilterLogicalOperation.and) {
+				return myBuilder.and(xPredicate, yPredicate);
+			} else if (((SearchFilterParser.FilterLogical) theFilter).getOperation() == SearchFilterParser.FilterLogicalOperation.or) {
+				return myBuilder.or(xPredicate, yPredicate);
 			}
-		} else if (filter instanceof SearchFilterParser.FilterParameterGroup) {
-			return processFilter(((SearchFilterParser.FilterParameterGroup) filter).getContained(),
+		} else if (theFilter instanceof SearchFilterParser.FilterParameterGroup) {
+			return processFilter(((SearchFilterParser.FilterParameterGroup) theFilter).getContained(),
 				theResourceName, theRequest);
 		}
 		return null;
@@ -2868,114 +2880,116 @@ public class SearchBuilder implements ISearchBuilder {
 			return;
 		}
 
-		if (theParamName.equals(IAnyResource.SP_RES_ID)) {
+		switch (theParamName) {
+			case IAnyResource.SP_RES_ID:
+				addPredicateResourceId(theResourceName, theAndOrParams, theRequest);
+				break;
 
-			addPredicateResourceId(theResourceName, theAndOrParams, theRequest);
+			case IAnyResource.SP_RES_LANGUAGE:
+				addPredicateLanguage(theAndOrParams);
+				break;
 
-		} else if (theParamName.equals(IAnyResource.SP_RES_LANGUAGE)) {
+			case Constants.PARAM_HAS:
+				addPredicateHas(theAndOrParams, theRequest);
+				break;
 
-			addPredicateLanguage(theAndOrParams);
+			case Constants.PARAM_TAG:
+			case Constants.PARAM_PROFILE:
+			case Constants.PARAM_SECURITY:
+				addPredicateTag(theAndOrParams, theParamName);
+				break;
 
-		} else if (theParamName.equals(Constants.PARAM_HAS)) {
+			case Constants.PARAM_SOURCE:
+				addPredicateSource(theAndOrParams, theRequest);
+				break;
 
-			addPredicateHas(theAndOrParams, theRequest);
+			default:
 
-		} else if (theParamName.equals(Constants.PARAM_TAG) || theParamName.equals(Constants.PARAM_PROFILE) || theParamName.equals(Constants.PARAM_SECURITY)) {
-
-			addPredicateTag(theAndOrParams, theParamName);
-
-		} else if (theParamName.equals(Constants.PARAM_SOURCE)) {
-
-			for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-				addPredicateSource(nextAnd, SearchFilterParser.CompareOperation.eq, theRequest);
-			}
-
-		} else {
-
-			RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
-			if (nextParamDef != null) {
-				switch (nextParamDef.getParamType()) {
-					case DATE:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							addPredicateDate(theResourceName, theParamName, nextAnd);
-						}
-						break;
-					case QUANTITY:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							addPredicateQuantity(theResourceName, theParamName, nextAnd);
-						}
-						break;
-					case REFERENCE:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							addPredicateReference(theResourceName, theParamName, nextAnd, theRequest);
-						}
-						break;
-					case STRING:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							addPredicateString(theResourceName, theParamName, nextAnd);
-						}
-						break;
-					case TOKEN:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							addPredicateToken(theResourceName, theParamName, nextAnd);
-						}
-						break;
-					case NUMBER:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							addPredicateNumber(theResourceName, theParamName, nextAnd);
-						}
-						break;
-					case COMPOSITE:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							addPredicateComposite(theResourceName, nextParamDef, nextAnd);
-						}
-						break;
-					case URI:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							addPredicateUri(theResourceName, theParamName, nextAnd);
-						}
-						break;
-					case HAS:
-					case SPECIAL:
-						// should not happen
-						break;
-				}
-			} else {
-				if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
-					// These are handled later
-				} else if (Constants.PARAM_FILTER.equals(theParamName)) {
-					// Parse the predicates enumerated in the _filter separated by AND or OR...
-					if (theAndOrParams.get(0).get(0) instanceof StringParam) {
-						String filterString = ((StringParam) theAndOrParams.get(0).get(0)).getValue();
-						SearchFilterParser.Filter filter;
-						try {
-							filter = SearchFilterParser.parse(filterString);
-						} catch (SearchFilterParser.FilterSyntaxException theE) {
-							throw new InvalidRequestException("Error parsing _filter syntax: " + theE.getMessage());
-						}
-						if (filter != null) {
-
-							if (!myDaoConfig.isFilterParameterEnabled()) {
-								throw new InvalidRequestException(Constants.PARAM_FILTER + " parameter is disabled on this server");
+				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+				if (nextParamDef != null) {
+					switch (nextParamDef.getParamType()) {
+						case DATE:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								addPredicateDate(theResourceName, theParamName, nextAnd);
 							}
-
-							// TODO: we clear the predicates below because the filter builds up
-							// its own collection of predicates. It'd probably be good at some
-							// point to do something more fancy...
-							ArrayList<Predicate> holdPredicates = new ArrayList<>(myPredicates);
-
-							Predicate filterPredicate = processFilter(filter, theResourceName, theRequest);
-							myPredicates.clear();
-							myPredicates.addAll(holdPredicates);
-							myPredicates.add(filterPredicate);
-						}
+							break;
+						case QUANTITY:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								addPredicateQuantity(theResourceName, theParamName, nextAnd);
+							}
+							break;
+						case REFERENCE:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								addPredicateReference(theResourceName, theParamName, nextAnd, theRequest);
+							}
+							break;
+						case STRING:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								addPredicateString(theResourceName, theParamName, nextAnd);
+							}
+							break;
+						case TOKEN:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								addPredicateToken(theResourceName, theParamName, nextAnd);
+							}
+							break;
+						case NUMBER:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								addPredicateNumber(theResourceName, theParamName, nextAnd);
+							}
+							break;
+						case COMPOSITE:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								addPredicateComposite(theResourceName, nextParamDef, nextAnd);
+							}
+							break;
+						case URI:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								addPredicateUri(theResourceName, theParamName, nextAnd);
+							}
+							break;
+						case HAS:
+						case SPECIAL:
+							// should not happen
+							break;
 					}
-
-
 				} else {
-					throw new InvalidRequestException("Unknown search parameter " + theParamName + " for resource type " + theResourceName);
+					if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
+						// These are handled later
+					} else if (Constants.PARAM_FILTER.equals(theParamName)) {
+						// Parse the predicates enumerated in the _filter separated by AND or OR...
+						if (theAndOrParams.get(0).get(0) instanceof StringParam) {
+							String filterString = ((StringParam) theAndOrParams.get(0).get(0)).getValue();
+							SearchFilterParser.Filter filter;
+							try {
+								filter = SearchFilterParser.parse(filterString);
+							} catch (SearchFilterParser.FilterSyntaxException theE) {
+								throw new InvalidRequestException("Error parsing _filter syntax: " + theE.getMessage());
+							}
+							if (filter != null) {
+
+								if (!myDaoConfig.isFilterParameterEnabled()) {
+									throw new InvalidRequestException(Constants.PARAM_FILTER + " parameter is disabled on this server");
+								}
+
+								// TODO: we clear the predicates below because the filter builds up
+								// its own collection of predicates. It'd probably be good at some
+								// point to do something more fancy...
+								ArrayList<Predicate> holdPredicates = new ArrayList<>(myPredicates);
+
+								Predicate filterPredicate = processFilter(filter, theResourceName, theRequest);
+								myPredicates.clear();
+								myPredicates.addAll(holdPredicates);
+								myPredicates.add(filterPredicate);
+							}
+						}
+
+
+					} else {
+						throw new InvalidRequestException("Unknown search parameter " + theParamName + " for resource type " + theResourceName);
+					}
 				}
-			}
+				break;
 		}
 	}
 
