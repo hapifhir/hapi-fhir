@@ -896,12 +896,12 @@ public class SearchBuilder implements ISearchBuilder {
 			switch (operation) {
 				default:
 				case eq:
-                    codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)));
+					codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)));
 					codePredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), theResourceName));
 					nextPredicate = myBuilder.and(toArray(codePredicates));
 					break;
 				case ne:
-                    codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)).not());
+					codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)).not());
 					codePredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), theResourceName));
 					nextPredicate = myBuilder.and(toArray(codePredicates));
 					break;
@@ -911,8 +911,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 		return nextPredicate;
 	}
-
-
 
 
 	private void addPredicateString(String theResourceName,
@@ -2450,7 +2448,7 @@ public class SearchBuilder implements ISearchBuilder {
 	 */
 	@Override
 	public HashSet<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Set<Include> theRevIncludes,
-												 boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest) {
+																	  boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest) {
 		if (theMatches.size() == 0) {
 			return new HashSet<>();
 		}
@@ -3221,8 +3219,8 @@ public class SearchBuilder implements ISearchBuilder {
 					if (myNext == null) {
 						while (myResultsIterator.hasNext()) {
 							Long nextLong = myResultsIterator.next();
-							ResourcePersistentId next = new ResourcePersistentId(nextLong);
-							if (next != null) {
+							if (nextLong != null) {
+								ResourcePersistentId next = new ResourcePersistentId(nextLong);
 								if (myPidSet.add(next)) {
 									myNext = next;
 									break;
