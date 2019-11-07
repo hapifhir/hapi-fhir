@@ -30,10 +30,10 @@ import java.util.Date;
 
 public interface IJpaDao<T extends IBaseResource> {
 	@SuppressWarnings("unchecked")
-	ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource
+	IBasePersistedResource updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource
 		theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 										boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry);
 
-	ResourceTable updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
+	IBasePersistedResource updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
 										  IBasePersistedResource theEntity, IIdType theResourceId, IBaseResource theOldResource);
 }

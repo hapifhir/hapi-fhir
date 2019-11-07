@@ -817,7 +817,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new PreconditionFailedException(msg);
 			} else if (match.size() == 1) {
 				ResourcePersistentId pid = match.iterator().next();
-				entityToUpdate = myEntityManager.find(ResourceTable.class, pid);
+				entityToUpdate = myEntityManager.find(ResourceTable.class, pid.getId());
 			} else {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", theConditionalUrl);
 				throw new ResourceNotFoundException(msg);

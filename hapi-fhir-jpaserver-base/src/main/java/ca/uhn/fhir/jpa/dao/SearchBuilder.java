@@ -859,10 +859,10 @@ public class SearchBuilder implements ISearchBuilder {
 			switch (operation) {
 				default:
 				case eq:
-					nextPredicate = theRoot.get("myId").as(Long.class).in(allOrPids);
+					nextPredicate = theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids));
 					break;
 				case ne:
-					nextPredicate = theRoot.get("myId").as(Long.class).in(allOrPids).not();
+					nextPredicate = theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)).not();
 					break;
 			}
 
@@ -2438,7 +2438,7 @@ public class SearchBuilder implements ISearchBuilder {
 	 */
 	@Override
 	public HashSet<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Set<Include> theRevIncludes,
-												 boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest) {
+																	  boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest) {
 		if (theMatches.size() == 0) {
 			return new HashSet<>();
 		}

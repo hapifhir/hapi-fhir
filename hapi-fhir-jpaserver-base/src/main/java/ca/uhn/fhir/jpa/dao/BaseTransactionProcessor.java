@@ -476,7 +476,6 @@ public abstract class BaseTransactionProcessor {
 
 	protected void validateDependencies() {
 		Validate.notNull(myContext);
-		Validate.notNull(myDao);
 		Validate.notNull(myTxManager);
 	}
 
