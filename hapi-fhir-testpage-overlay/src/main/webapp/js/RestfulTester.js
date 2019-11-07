@@ -479,9 +479,9 @@ function addSearchControlQuantity(theSearchParamName, theContainerRowNum, theRow
 }
 
 function handleSearchParamTypeChange(select, params, theContainerRowNum, theParamRowNum) {
-	var oldVal = select.prevVal;
-	var newVal = select.val();
-	if (oldVal === newVal) {
+	let oldVal = select.prevVal;
+	let newVal = select.val();
+	if (oldVal == newVal || !(newVal)) {
 		return;
 	}
 	$('#search-param-rowopts-' + theContainerRowNum).empty();

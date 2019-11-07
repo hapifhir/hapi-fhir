@@ -121,9 +121,9 @@ public class SearchCoordinatorSvcImplTest {
 
 	private Answer<Void> loadPids() {
 		return theInvocation -> {
-			List<Long> pids = (List<Long>) theInvocation.getArguments()[0];
+			List<ResourcePersistentId> pids = (List<ResourcePersistentId>) theInvocation.getArguments()[0];
 			List<IBaseResource> resources = (List<IBaseResource>) theInvocation.getArguments()[2];
-			for (Long nextPid : pids) {
+			for (ResourcePersistentId nextPid : pids) {
 				Patient pt = new Patient();
 				pt.setId(nextPid.toString());
 				resources.add(pt);
@@ -436,9 +436,10 @@ public class SearchCoordinatorSvcImplTest {
 			}
 
 			when(mySearchResultCacheSvc.fetchResultPids(any(Search.class), anyInt(), anyInt())).thenAnswer(theInvocation -> {
-				ArrayList<Long> results = new ArrayList<>();
+				ArrayList<ResourcePersistentId> results = new ArrayList<>();
 				for (long i = theInvocation.getArgument(1, Integer.class); i < theInvocation.getArgument(2, Integer.class); i++) {
-					results.add(i + 10L);
+					Long nextPid = i + 10L;
+					results.add(new ResourcePersistentId(nextPid));
 				}
 
 				return results;
