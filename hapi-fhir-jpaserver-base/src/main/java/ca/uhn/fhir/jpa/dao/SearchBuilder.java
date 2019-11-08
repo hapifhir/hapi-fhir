@@ -3141,6 +3141,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 		private final SearchRuntimeDetails mySearchRuntimeDetails;
 		private final RequestDetails myRequest;
+		private final boolean myHaveRawSqlHooks;
+		private final boolean myHavePerftraceFoundIdHook;
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
 		private Long myNext;
@@ -3159,13 +3161,16 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myParams.getEverythingMode() != null) {
 				myStillNeedToFetchIncludes = true;
 			}
+
+			myHavePerftraceFoundIdHook =JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, myInterceptorBroadcaster, myRequest);
+			myHaveRawSqlHooks = JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, myRequest);
+
 		}
 
 		private void fetchNext() {
 
-			boolean haveRawSqlHooks = JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, myRequest);
 			try {
-				if (haveRawSqlHooks) {
+				if (myHaveRawSqlHooks) {
 					CurrentThreadCaptureQueriesListener.startCapturing();
 				}
 
@@ -3206,6 +3211,13 @@ public class SearchBuilder implements ISearchBuilder {
 					if (myNext == null) {
 						while (myResultsIterator.hasNext()) {
 							Long next = myResultsIterator.next();
+							if (myHavePerftraceFoundIdHook) {
+								HookParams params = new HookParams()
+									.add(Integer.class, System.identityHashCode(this))
+									.add(Object.class, next);
+								JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, params);
+							}
+
 							if (next != null) {
 								if (myPidSet.add(next)) {
 									myNext = next;
@@ -3244,7 +3256,7 @@ public class SearchBuilder implements ISearchBuilder {
 				mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
 
 			} finally {
-				if (haveRawSqlHooks) {
+				if (myHaveRawSqlHooks) {
 					SqlQueryList capturedQueries = CurrentThreadCaptureQueriesListener.getCurrentQueueAndStopCapturing();
 					HookParams params = new HookParams()
 						.add(RequestDetails.class, myRequest)

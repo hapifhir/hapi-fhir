@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
@@ -35,7 +37,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -114,9 +115,9 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
 
 		CapabilityStatement conformance = ourClient
-				.fetchConformance()
-				.ofType(CapabilityStatement.class)
-				.execute();
+			.fetchConformance()
+			.ofType(CapabilityStatement.class)
+			.execute();
 		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = extractSearchParams(conformance, "Patient");
 
 		CapabilityStatementRestResourceSearchParamComponent param = map.get("foo");
@@ -166,9 +167,9 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		});
 
 		conformance = ourClient
-				.fetchConformance()
-				.ofType(CapabilityStatement.class)
-				.execute();
+			.fetchConformance()
+			.ofType(CapabilityStatement.class)
+			.execute();
 		map = extractSearchParams(conformance, "Patient");
 
 		param = map.get("foo");
@@ -184,9 +185,9 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(false);
 
 		CapabilityStatement conformance = ourClient
-				.fetchConformance()
-				.ofType(CapabilityStatement.class)
-				.execute();
+			.fetchConformance()
+			.ofType(CapabilityStatement.class)
+			.execute();
 		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = extractSearchParams(conformance, "Patient");
 
 		CapabilityStatementRestResourceSearchParamComponent param = map.get("foo");
@@ -221,9 +222,9 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		mySearchParamRegistry.forceRefresh();
 
 		conformance = ourClient
-				.fetchConformance()
-				.ofType(CapabilityStatement.class)
-				.execute();
+			.fetchConformance()
+			.ofType(CapabilityStatement.class)
+			.execute();
 		map = extractSearchParams(conformance, "Patient");
 
 		param = map.get("foo");
@@ -260,7 +261,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceReindexJobEntity> allJobs = myResourceReindexJobDao.findAll();
 			assertEquals(1, allJobs.size());
 			assertEquals("Patient", allJobs.get(0).getResourceType());
@@ -327,9 +328,9 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
 
 		ourClient
-				.create()
-				.resource(eyeColourSp)
-				.execute();
+			.create()
+			.resource(eyeColourSp)
+			.execute();
 
 		mySearchParamRegistry.forceRefresh();
 
@@ -346,11 +347,11 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
 
 		Bundle bundle = ourClient
-				.search()
-				.forResource(Patient.class)
-				.where(new TokenClientParam("eyecolour").exactly().code("blue"))
-				.returnBundle(Bundle.class)
-				.execute();
+			.search()
+			.forResource(Patient.class)
+			.where(new TokenClientParam("eyecolour").exactly().code("blue"))
+			.returnBundle(Bundle.class)
+			.execute();
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
@@ -393,11 +394,11 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		Bundle result;
 
 		result = ourClient
-				.search()
-				.forResource(Observation.class)
-				.where(new ReferenceClientParam("foo").hasChainedProperty(Patient.GENDER.exactly().code("male")))
-				.returnBundle(Bundle.class)
-				.execute();
+			.search()
+			.forResource(Observation.class)
+			.where(new ReferenceClientParam("foo").hasChainedProperty(Patient.GENDER.exactly().code("male")))
+			.returnBundle(Bundle.class)
+			.execute();
 		foundResources = toUnqualifiedVersionlessIdValues(result);
 		assertThat(foundResources, contains(obsId1.getValue()));
 
@@ -433,11 +434,11 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		Bundle result;
 
 		result = ourClient
-				.search()
-				.forResource(Patient.class)
-				.where(new TokenClientParam("foo").exactly().code("male"))
-				.returnBundle(Bundle.class)
-				.execute();
+			.search()
+			.forResource(Patient.class)
+			.where(new TokenClientParam("foo").exactly().code("male"))
+			.returnBundle(Bundle.class)
+			.execute();
 
 		foundResources = toUnqualifiedVersionlessIdValues(result);
 		assertThat(foundResources, contains(patId.getValue()));
@@ -450,103 +451,118 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	@Test
 	public void testCustomParameterMatchingManyValues() {
 
-		myDaoConfig.setAllowContainsSearches(true);
+		List<String> found = new ArrayList<>();
 
-		// Add a custom search parameter
-		SearchParameter fooSp = new SearchParameter();
-		fooSp.addBase("Questionnaire");
-		fooSp.setCode("item-text");
-		fooSp.setName("item-text");
-		fooSp.setType(Enumerations.SearchParamType.STRING);
-		fooSp.setTitle("FOO SP");
-		fooSp.setExpression("Questionnaire.item.text | Questionnaire.item.item.text | Questionnaire.item.item.item.text");
-		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
-		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(fooSp, mySrd);
-		mySearchParamRegistry.forceRefresh();
-
-		int textIndex = 0;
-		List<Long> ids = new ArrayList<>();
-		for (int i = 0; i < 200; i++) {
-			//Lots and lots of matches
-			Questionnaire q = new Questionnaire();
-			q
-				.addItem()
-				.setText("Section " + (textIndex++))
-				.addItem()
-				.setText("Section " + (textIndex++))
-				.addItem()
-				.setText("Section " + (textIndex++));
-			q
-				.addItem()
-				.setText("Section " + (textIndex++))
-				.addItem()
-				.setText("Section " + (textIndex++))
-				.addItem()
-				.setText("Section " + (textIndex++));
-			q
-				.addItem()
-				.setText("Section " + (textIndex++))
-				.addItem()
-				.setText("Section " + (textIndex++))
-				.addItem()
-				.setText("Section " + (textIndex++));
-			q
-				.addItem()
-				.setText("Section " + (textIndex++))
-				.addItem()
-				.setText("Section " + (textIndex++))
-				.addItem()
-				.setText("Section " + (textIndex++));
-			q
-				.addItem()
-				.setText("Section " + (textIndex++))
-				.addItem()
-				.setText("Section " + (textIndex++))
-				.addItem()
-				.setText("Section " + (textIndex++));
-			ids.add(myQuestionnaireDao.create(q).getId().getIdPartAsLong());
-		}
-
-		int foundCount = 0;
-		Bundle bundle = null;
-		List<Long> actualIds = new ArrayList<>();
-		do {
-
-			if (bundle == null) {
-				bundle = ourClient
-					.search()
-					.byUrl(ourServerBase + "/Questionnaire?item-text:contains=Section")
-					.returnBundle(Bundle.class)
-					.execute();
-			} else {
-				bundle = ourClient
-					.loadPage()
-					.next(bundle)
-					.execute();
+		class Interceptor {
+			@Hook(Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID)
+			public void foundId(Integer theSearchId, Object theId) {
+				found.add(theSearchId + "/" + theId);
 			}
-			List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, bundle);
-			resources.forEach(t->actualIds.add(t.getIdElement().getIdPartAsLong()));
-			foundCount += resources.size();
+		}
+		Interceptor interceptor = new Interceptor();
+		myInterceptorRegistry.registerInterceptor(interceptor);
+		try {
+			myDaoConfig.setAllowContainsSearches(true);
 
-		} while (bundle.getLink("next") != null);
+			// Add a custom search parameter
+			SearchParameter fooSp = new SearchParameter();
+			fooSp.addBase("Questionnaire");
+			fooSp.setCode("item-text");
+			fooSp.setName("item-text");
+			fooSp.setType(Enumerations.SearchParamType.STRING);
+			fooSp.setTitle("FOO SP");
+			fooSp.setExpression("Questionnaire.item.text | Questionnaire.item.item.text | Questionnaire.item.item.item.text");
+			fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+			fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+			mySearchParameterDao.create(fooSp, mySrd);
+			mySearchParamRegistry.forceRefresh();
 
+			int textIndex = 0;
+			List<Long> ids = new ArrayList<>();
+			for (int i = 0; i < 200; i++) {
+				//Lots and lots of matches
+				Questionnaire q = new Questionnaire();
+				q
+					.addItem()
+					.setText("Section " + (textIndex++))
+					.addItem()
+					.setText("Section " + (textIndex++))
+					.addItem()
+					.setText("Section " + (textIndex++));
+				q
+					.addItem()
+					.setText("Section " + (textIndex++))
+					.addItem()
+					.setText("Section " + (textIndex++))
+					.addItem()
+					.setText("Section " + (textIndex++));
+				q
+					.addItem()
+					.setText("Section " + (textIndex++))
+					.addItem()
+					.setText("Section " + (textIndex++))
+					.addItem()
+					.setText("Section " + (textIndex++));
+				q
+					.addItem()
+					.setText("Section " + (textIndex++))
+					.addItem()
+					.setText("Section " + (textIndex++))
+					.addItem()
+					.setText("Section " + (textIndex++));
+				q
+					.addItem()
+					.setText("Section " + (textIndex++))
+					.addItem()
+					.setText("Section " + (textIndex++))
+					.addItem()
+					.setText("Section " + (textIndex++));
+				ids.add(myQuestionnaireDao.create(q).getId().getIdPartAsLong());
+			}
 
-		runInTransaction(()->{
+			int foundCount = 0;
+			Bundle bundle = null;
+			List<Long> actualIds = new ArrayList<>();
+			do {
 
-			List<Search> searches = mySearchEntityDao.findAll();
-			assertEquals(1, searches.size());
-			Search search = searches.get(0);
-			String message = "\nWanted: " + ids + "\n" +
-			"Actual: " + actualIds + "\n" +
-				search.toString();
-			assertEquals(message, 200, search.getNumFound());
-			assertEquals(message, 200, search.getTotalCount().intValue());
-			assertEquals(message, SearchStatusEnum.FINISHED, search.getStatus());
-		});
+				if (bundle == null) {
+					bundle = ourClient
+						.search()
+						.byUrl(ourServerBase + "/Questionnaire?item-text:contains=Section")
+						.returnBundle(Bundle.class)
+						.execute();
+				} else {
+					bundle = ourClient
+						.loadPage()
+						.next(bundle)
+						.execute();
+				}
+				List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, bundle);
+				resources.forEach(t -> actualIds.add(t.getIdElement().getIdPartAsLong()));
+				foundCount += resources.size();
 
-		assertEquals(200, foundCount);
+			} while (bundle.getLink("next") != null);
 
+			ourLog.info("Found: {}", found);
+
+			runInTransaction(() -> {
+
+				List<Search> searches = mySearchEntityDao.findAll();
+				assertEquals(1, searches.size());
+				Search search = searches.get(0);
+				String message = "\nWanted: " + ids + "\n" +
+					"Actual: " + actualIds + "\n" +
+					"Found : " + found + "\n" +
+					search.toString();
+				assertEquals(message, 200, search.getNumFound());
+				assertEquals(message, 200, search.getTotalCount().intValue());
+				assertEquals(message, SearchStatusEnum.FINISHED, search.getStatus());
+			});
+
+			assertEquals(200, foundCount);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
 	}
 
 
