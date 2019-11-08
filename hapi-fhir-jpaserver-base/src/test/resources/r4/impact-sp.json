@@ -1,0 +1,29 @@
+{
+	"resourceType": "SearchParameter",
+	"id": "54805",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2019-11-04T18:33:47.918+00:00",
+		"source": "#pt4ERkOO6LGm5ZoA"
+	},
+	"text": {
+		"status": "generated",
+		"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Search for a questionnaire by item.text nested field - up to 3 levels.</div>"
+	},
+	"url": "https://impact-fhir.mitre.org/r4/SearchParameter/QuestionnaireItemText",
+	"version": "0.0.1",
+	"name": "QuestionnaireItemText",
+	"status": "active",
+	"date": "2019-10-25T15:38:45-04:00",
+	"description": "Search for a questionnaire by item.text nested field - up to 3 levels.",
+	"code": "item-text",
+	"base": [
+		"Questionnaire"
+	],
+	"type": "string",
+	"expression": "Questionnaire.item.text | Questionnaire.item.item.text | Questionnaire.item.item.item.text",
+	"xpathUsage": "normal",
+	"modifier": [
+		"contains"
+	]
+}

@@ -1,21 +1,19 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.SpringObjectCaster;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -33,9 +31,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.ProxyUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -48,7 +43,11 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProviderR4Test {
 
@@ -80,7 +79,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	}
 
 	private Map<String, CapabilityStatementRestResourceSearchParamComponent> extractSearchParams(CapabilityStatement conformance, String resType) {
-		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = new HashMap<String, CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent>();
+		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = new HashMap<>();
 		for (CapabilityStatementRestComponent nextRest : conformance.getRest()) {
 			for (CapabilityStatementRestResourceComponent nextResource : nextRest.getResource()) {
 				if (!resType.equals(nextResource.getType())) {
@@ -95,7 +94,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	}
 
 	@Test
-	public void saveCreateSearchParamInvalidWithMissingStatus() throws IOException {
+	public void saveCreateSearchParamInvalidWithMissingStatus() {
 		SearchParameter sp = new SearchParameter();
 		sp.setCode("foo");
 		sp.setExpression("Patient.gender");
