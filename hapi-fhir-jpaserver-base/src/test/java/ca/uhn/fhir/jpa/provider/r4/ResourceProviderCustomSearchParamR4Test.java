@@ -1,10 +1,16 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.SpringObjectCaster;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
@@ -14,6 +20,7 @@ import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent;
@@ -26,11 +33,15 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.ProxyUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,12 +54,15 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderCustomSearchParamR4Test.class);
 
+
 	@Override
 	@After
 	public void after() throws Exception {
 		super.after();
 
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
+		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
+
 	}
 
 	@Override
@@ -430,6 +444,112 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		assertThat(foundResources, contains(patId.getValue()));
 
 	}
+
+	/**
+	 * See #1300
+	 */
+	@Test
+	public void testCustomParameterMatchingManyValues() {
+
+		myDaoConfig.setAllowContainsSearches(true);
+
+		// Add a custom search parameter
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Questionnaire");
+		fooSp.setCode("item-text");
+		fooSp.setName("item-text");
+		fooSp.setType(Enumerations.SearchParamType.STRING);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("Questionnaire.item.text | Questionnaire.item.item.text | Questionnaire.item.item.item.text");
+		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(fooSp, mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		int textIndex = 0;
+		List<Long> ids = new ArrayList<>();
+		for (int i = 0; i < 200; i++) {
+			//Lots and lots of matches
+			Questionnaire q = new Questionnaire();
+			q
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++));
+			q
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++));
+			q
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++));
+			q
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++));
+			q
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++))
+				.addItem()
+				.setText("Section " + (textIndex++));
+			ids.add(myQuestionnaireDao.create(q).getId().getIdPartAsLong());
+		}
+
+		int foundCount = 0;
+		Bundle bundle = null;
+		List<Long> actualIds = new ArrayList<>();
+		do {
+
+			if (bundle == null) {
+				bundle = ourClient
+					.search()
+					.byUrl(ourServerBase + "/Questionnaire?item-text:contains=Section")
+					.returnBundle(Bundle.class)
+					.execute();
+			} else {
+				bundle = ourClient
+					.loadPage()
+					.next(bundle)
+					.execute();
+			}
+			List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, bundle);
+			resources.forEach(t->actualIds.add(t.getIdElement().getIdPartAsLong()));
+			foundCount += resources.size();
+
+		} while (bundle.getLink("next") != null);
+
+
+		runInTransaction(()->{
+
+			List<Search> searches = mySearchEntityDao.findAll();
+			assertEquals(1, searches.size());
+			Search search = searches.get(0);
+			String message = "\nWanted: " + ids + "\n" +
+			"Actual: " + actualIds + "\n" +
+				search.toString();
+			assertEquals(message, 200, search.getNumFound());
+			assertEquals(message, 200, search.getTotalCount().intValue());
+			assertEquals(message, SearchStatusEnum.FINISHED, search.getStatus());
+		});
+
+		assertEquals(200, foundCount);
+
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {
