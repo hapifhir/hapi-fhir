@@ -49,4 +49,9 @@ public class FluentPathDstu3 implements IFluentPath {
     return evaluate(theInput, thePath, theReturnType).stream().findFirst();
   }
 
+  @Override
+  public void parse(String theExpression) {
+    myEngine.parse(theExpression);
+  }
+
 }
