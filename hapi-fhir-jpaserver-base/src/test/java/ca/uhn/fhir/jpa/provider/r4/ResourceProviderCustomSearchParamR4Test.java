@@ -49,6 +49,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.thymeleaf.util.ListUtils.sort;
 
 public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProviderR4Test {
 
@@ -550,9 +551,9 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				List<Search> searches = mySearchEntityDao.findAll();
 				assertEquals(1, searches.size());
 				Search search = searches.get(0);
-				String message = "\nWanted: " + ids + "\n" +
-					"Actual: " + actualIds + "\n" +
-					"Found : " + found + "\n" +
+				String message = "\nWanted: " + sort(ids) + "\n" +
+					"Actual: " + sort(actualIds) + "\n" +
+					"Found : " + sort(found) + "\n" +
 					search.toString();
 				assertEquals(message, 200, search.getNumFound());
 				assertEquals(message, 200, search.getTotalCount().intValue());
