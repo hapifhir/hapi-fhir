@@ -130,6 +130,11 @@ public class SearchParamExtractorR4Test {
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(patient);
 		assertEquals(1, links.size());
+
+
+		sp.putUserData("HELLO", "GOODBYE");
+		assertEquals("GOODBYE", sp.getUserData("HELLO"));
+
 	}
 
 	@Test
