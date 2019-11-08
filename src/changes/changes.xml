@@ -501,6 +501,18 @@
 				A NullPointerException in the XML Parser was fixed when serializing a resource containing an extension
 				on a primitive datatype that was missing a URL declaration.
 			</action>
+			<action type="fix">
+				When using the _filter search parameter in the JPA server with an untyped resource ID, the
+				filter could bring in search results of the wrong type. Thanks to Anthony Sute for the Pull
+				Request and Jens Villadsen for reporting!
+			</action>
+			<action type="fix" issue="1300">
+				In some cases where where a single search parameter matches the same resource many times with 
+				different distinct values (e.g. a search by Patient:name where there are hundreds of patients having
+				hundreds of distinct names each) the Search Coordinator would end up in an infinite loop and never
+				return all of the possible results. Thanks to @imranmoezkhan for reporting, and to 
+				Tim Shaffer for providing a reproducible test case!
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">

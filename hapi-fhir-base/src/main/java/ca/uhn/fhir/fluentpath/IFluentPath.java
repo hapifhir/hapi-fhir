@@ -47,5 +47,9 @@ public interface IFluentPath {
 	 */
 	<T extends IBase> Optional<T> evaluateFirst(IBase theInput, String thePath, Class<T> theReturnType);
 
-	
+
+	/**
+	 * Parses the expression and throws an exception if it can not parse correctly
+	 */
+	void parse(String theExpression) throws Exception;
 }
