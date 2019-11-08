@@ -234,6 +234,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				ourLog.trace("Going to try to start next search");
 				Optional<Search> newSearch = mySearchCacheSvc.tryToMarkSearchAsInProgress(search);
 				if (newSearch.isPresent()) {
+					ourLog.trace("Launching new search");
 					search = newSearch.get();
 					String resourceType = search.getResourceType();
 					SearchParameterMap params = search.getSearchParameterMap().orElseThrow(() -> new IllegalStateException("No map in PASSCOMPLET search"));
@@ -1115,7 +1116,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						throw newResourceGoneException(getSearch().getUuid());
 					}
 
-					ourLog.debug("Have {} previously added IDs in search: {}", previouslyAddedResourcePids.size(), getSearch().getUuid());
+					ourLog.trace("Have {} previously added IDs in search: {}", previouslyAddedResourcePids.size(), getSearch().getUuid());
 					setPreviouslyAddedResourcePids(previouslyAddedResourcePids);
 					return null;
 				});
