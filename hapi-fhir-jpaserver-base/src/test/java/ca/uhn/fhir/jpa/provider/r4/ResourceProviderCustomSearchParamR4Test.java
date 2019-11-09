@@ -37,10 +37,12 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
@@ -520,6 +522,8 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				ids.add(myQuestionnaireDao.create(q).getId().getIdPartAsLong());
 			}
 
+			myCaptureQueriesListener.clear();
+
 			int foundCount = 0;
 			Bundle bundle = null;
 			List<Long> actualIds = new ArrayList<>();
@@ -543,18 +547,30 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 			} while (bundle.getLink("next") != null);
 
+			String queries = " * " + myCaptureQueriesListener
+				.getSelectQueries()
+				.stream()
+				.map(t->t.getSql(true, false))
+				.collect(Collectors.joining("\n * "));
+
 			ourLog.info("Found: {}", found);
 
 			runInTransaction(() -> {
 
+				List currentResults = myEntityManager.createNativeQuery("select distinct resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE resourceta0_ left outer join HFJ_SPIDX_STRING myparamsst1_ on resourceta0_.RES_ID=myparamsst1_.RES_ID where myparamsst1_.HASH_NORM_PREFIX='5901791607832193956' and (myparamsst1_.SP_VALUE_NORMALIZED like 'SECTION%') limit '500'")					.getResultList();
+				List currentResources = myEntityManager.createNativeQuery("select resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE")					.getResultList();
+
 				List<Search> searches = mySearchEntityDao.findAll();
 				assertEquals(1, searches.size());
 				Search search = searches.get(0);
-				String message = "\nWanted: " + (ids) + "\n" +
-					"Actual: " + (actualIds) + "\n" +
-					"Found : " + (found) + "\n" +
-					search.toString();
-				assertEquals(message, 200, search.getNumFound());
+				String message = "\nWanted : " + (ids) + "\n" +
+					"Actual : " + (actualIds) + "\n" +
+					"Found  : " + (found) + "\n" +
+					"Current: " + currentResults + "\n" +
+					"Current: " + currentResources + "\n" +
+					search.toString() +
+					"\nQueries :\n" + queries;
+				assertEquals(message, 201, search.getNumFound());
 				assertEquals(message, 200, search.getTotalCount().intValue());
 				assertEquals(message, SearchStatusEnum.FINISHED, search.getStatus());
 			});
