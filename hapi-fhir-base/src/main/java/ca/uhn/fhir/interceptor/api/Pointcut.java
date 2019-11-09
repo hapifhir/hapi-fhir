@@ -1600,6 +1600,33 @@ public enum Pointcut {
 
 
 	/**
+	 * THIS IS AN EXPERIMENTAL HOOK AND MAY BE REMOVED OR CHANGED WITHOUT WARNING.
+	 *
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
+	 * <p>
+	 * This hook is invoked when a search has found an individual ID.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * java.lang.Integer - The query ID
+	 * </li>
+	 * <li>
+	 * java.lang.Object - The ID
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	JPA_PERFTRACE_SEARCH_FOUND_ID(void.class,
+		"java.lang.Integer",
+		"java.lang.Object"
+	),
+
+
+	/**
 	 * Note that this is a performance tracing hook. Use with caution in production
 	 * systems, since calling it may (or may not) carry a cost.
 	 * <p>
