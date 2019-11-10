@@ -309,7 +309,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			hashPrefixLength = 0;
 		}
 
-		return hash(theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
+		long hash = hash(theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
+		return hash;
 	}
 
 	@Override

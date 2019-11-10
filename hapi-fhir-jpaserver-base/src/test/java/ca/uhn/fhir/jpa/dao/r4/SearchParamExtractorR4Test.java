@@ -131,10 +131,6 @@ public class SearchParamExtractorR4Test {
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(patient);
 		assertEquals(1, links.size());
 
-
-		sp.putUserData("HELLO", "GOODBYE");
-		assertEquals("GOODBYE", sp.getUserData("HELLO"));
-
 	}
 
 	@Test

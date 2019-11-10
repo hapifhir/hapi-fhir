@@ -120,7 +120,9 @@ public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry<SearchPara
 			components.add(new JpaRuntimeSearchParam.Component(next.getExpression(), next.getDefinition()));
 		}
 
-		return new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, theNextSp.getBase());
+		JpaRuntimeSearchParam retVal = new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, theNextSp.getBase());
+		extractExtensions(theNextSp, retVal);
+		return retVal;
 	}
 
 }

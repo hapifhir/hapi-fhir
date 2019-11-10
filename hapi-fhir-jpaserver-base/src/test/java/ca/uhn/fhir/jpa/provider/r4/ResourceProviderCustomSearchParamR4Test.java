@@ -63,15 +63,14 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	@After
 	public void after() throws Exception {
 		super.after();
-
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
-
 	}
 
 	@Override
 	public void before() throws Exception {
 		super.before();
+		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 	}
 
 	@Override
@@ -466,8 +465,6 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		Interceptor interceptor = new Interceptor();
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		try {
-			myDaoConfig.setAllowContainsSearches(true);
-
 			// Add a custom search parameter
 			SearchParameter fooSp = new SearchParameter();
 			fooSp.addBase("Questionnaire");
@@ -575,7 +572,11 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 				for (Long next :ids) {
 					if (!actualIds.contains(next)) {
-						List<ResourceIndexedSearchParamString> indexes = myResourceIndexedSearchParamStringDao.findForResourceId(next);
+						List<ResourceIndexedSearchParamString> indexes = myResourceIndexedSearchParamStringDao
+							.findAll()
+							.stream()
+							.filter(t->t.getResourcePid().equals(next))
+							.collect(Collectors.toList());
 						message += "\n\nResource " + next + " has prefixes:\n * " + indexes.stream().map(t->t.toString()).collect(Collectors.joining("\n * "));
 						break;
 					}

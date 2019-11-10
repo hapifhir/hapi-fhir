@@ -41,6 +41,9 @@ import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -49,10 +52,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implements ISearchParamRegistry {
 
@@ -281,7 +292,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 
 					Map<String, RuntimeSearchParam> searchParamMap = getSearchParamMap(searchParams, nextBaseName);
 					String name = runtimeSp.getName();
-					if (myModelConfig.isDefaultSearchParamsCanBeOverridden() || !searchParamMap.containsKey(name)) {
+					if (!searchParamMap.containsKey(name) || myModelConfig.isDefaultSearchParamsCanBeOverridden()) {
 						searchParamMap.put(name, runtimeSp);
 						overriddenCount++;
 					}
@@ -389,6 +400,23 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	void setSchedulerServiceForUnitTest(ISchedulerService theSchedulerService) {
 		mySchedulerService = theSchedulerService;
 	}
+
+	/**
+	 * Extracts any extensions from the resource and populates an extension field in the
+	 */
+	protected void extractExtensions(IBaseResource theSearchParamResource, JpaRuntimeSearchParam theRuntimeSearchParam) {
+		if (theSearchParamResource instanceof IBaseHasExtensions) {
+			List<? extends IBaseExtension<?, ?>> extensions = ((IBaseHasExtensions) theSearchParamResource).getExtension();
+			for (IBaseExtension<?, ?> next : extensions) {
+				IBaseDatatype nextValue = next.getValue();
+				String nextUrl = next.getUrl();
+				if (isNotBlank(nextUrl) && nextValue != null) {
+					theRuntimeSearchParam.addExtension(nextUrl, nextValue);
+				}
+			}
+		}
+	}
+
 
 	public static class SubmitJob implements Job {
 		@Autowired

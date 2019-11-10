@@ -125,6 +125,8 @@ public class SearchParamRegistryR4 extends BaseSearchParamRegistry<SearchParamet
 			components.add(new JpaRuntimeSearchParam.Component(next.getExpression(), new Reference(next.getDefinition())));
 		}
 
-		return new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, theNextSp.getBase());
+		JpaRuntimeSearchParam retVal = new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, theNextSp.getBase());
+		extractExtensions(theNextSp, retVal);
+		return retVal;
 	}
 }

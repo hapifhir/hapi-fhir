@@ -6,6 +6,11 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -101,6 +106,42 @@ public class BaseSearchParamRegistryTest {
 
 		registry.setSearchParamProviderForUnitTest(mySearchParamProvider);
 		Map<String, RuntimeSearchParam> outcome = registry.getActiveSearchParams("Patient");
+	}
+
+	@Test
+	public void testExtractExtensions() {
+		SearchParamRegistryR4 registry = new SearchParamRegistryR4();
+		registry.setFhirContextForUnitTest(FhirContext.forR4());
+		registry.postConstruct();
+
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setCode("foo");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setExpression("Patient.name");
+		searchParameter.addBase("Patient");
+		searchParameter.addExtension("http://foo", new StringType("FOO"));
+		searchParameter.addExtension("http://bar", new StringType("BAR"));
+
+		// Invalid entries
+		searchParameter.addExtension("http://bar", null);
+		searchParameter.addExtension(null, new StringType("BAR"));
+
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(searchParameter));
+		when(mySearchParamProvider.refreshCache(any(), anyLong())).thenAnswer(t -> {
+			registry.doRefresh(0);
+			return 0;
+		});
+
+		registry.setSearchParamProviderForUnitTest(mySearchParamProvider);
+		Map<String, RuntimeSearchParam> outcome = registry.getActiveSearchParams("Patient");
+
+		RuntimeSearchParam converted = outcome.get("foo");
+		assertNotNull(converted);
+
+		assertEquals(1, converted.getExtensions("http://foo").size());
+		assertEquals("FOO", ((IPrimitiveType<?>)converted.getExtensions("http://foo").get(0)).getValueAsString());
+
 	}
 
 }
