@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.in;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -570,6 +572,15 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 					"Current: " + currentResources + "\n" +
 					search.toString() +
 					"\nQueries :\n" + queries;
+
+				for (Long next :ids) {
+					if (actualIds.contains(next)) {
+						List<ResourceIndexedSearchParamString> indexes = myResourceIndexedSearchParamStringDao.findForResourceId(next);
+						message += "\n\nResource " + next + " has prefixes:\n * " + indexes.stream().map(t->t.toString()).collect(Collectors.joining("\n * "));
+						break;
+					}
+				}
+
 				assertEquals(message, 200, search.getNumFound());
 				assertEquals(message, 200, search.getTotalCount().intValue());
 				assertEquals(message, SearchStatusEnum.FINISHED, search.getStatus());
