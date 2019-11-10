@@ -574,7 +574,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 					"\nQueries :\n" + queries;
 
 				for (Long next :ids) {
-					if (actualIds.contains(next)) {
+					if (!actualIds.contains(next)) {
 						List<ResourceIndexedSearchParamString> indexes = myResourceIndexedSearchParamStringDao.findForResourceId(next);
 						message += "\n\nResource " + next + " has prefixes:\n * " + indexes.stream().map(t->t.toString()).collect(Collectors.joining("\n * "));
 						break;
