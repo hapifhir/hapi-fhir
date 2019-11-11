@@ -79,6 +79,13 @@
 				stored in the RDBMS.
 				]]>
 			</action>
+			<action type="fix">
+				<![CDATA[
+				<b>New Feature</b>:
+				The R4 structures have been upgraded to the new 4.0.1 (Technical Correction) release, and the
+				R5 structure have been upgraded to the current (October) snapshot.
+				]]>
+			</action>
 			<action type="add" issue="1489">
             <![CDATA[
 				<b>Performance Improvement</b>:

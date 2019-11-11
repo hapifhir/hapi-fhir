@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.registry.BaseSearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -44,7 +44,7 @@ public class DaoSearchParamProvider implements ISearchParamProvider {
 	}
 
 	@Override
-	public <SP extends IBaseResource> int refreshCache(BaseSearchParamRegistry<SP> theSearchParamRegistry, long theRefreshInterval) {
+	public int refreshCache(SearchParamRegistryImpl theSearchParamRegistry, long theRefreshInterval) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		return txTemplate.execute(t-> theSearchParamRegistry.doRefresh(theRefreshInterval));
 	}

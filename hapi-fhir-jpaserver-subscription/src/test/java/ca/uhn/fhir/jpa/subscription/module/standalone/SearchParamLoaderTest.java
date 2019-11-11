@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.standalone;
 
-import ca.uhn.fhir.jpa.searchparam.registry.BaseSearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -20,7 +20,7 @@ public class SearchParamLoaderTest extends BaseBlockingQueueSubscribableChannelD
 	@Autowired
 	private MockFhirClientSearchParamProvider myMockFhirClientSearchParamProvider;
 	@Autowired
-	private BaseSearchParamRegistry mySearchParamRegistry;
+	private SearchParamRegistryImpl mySearchParamRegistry;
 
 	@Before
 	public void setFailCount() {
