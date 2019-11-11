@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
@@ -54,7 +55,7 @@ public class RuntimeSearchParam {
 	private final Set<String> myProvidesMembershipInCompartments;
 	private final RuntimeSearchParamStatusEnum myStatus;
 	private final String myUri;
-	private final Map<String, List<IBaseDatatype>> myExtensions = new HashMap<>();
+	private final Map<String, List<IBaseExtension<?, ?>>> myExtensions = new HashMap<>();
 
 	/**
 	 * Constructor
@@ -113,8 +114,8 @@ public class RuntimeSearchParam {
 	 *
 	 * @return
 	 */
-	public List<IBaseDatatype> getExtensions(String theKey) {
-		List<IBaseDatatype> retVal = myExtensions.get(theKey);
+	public List<IBaseExtension<?, ?>> getExtensions(String theKey) {
+		List<IBaseExtension<?, ?>> retVal = myExtensions.get(theKey);
 		if (retVal != null) {
 			retVal = Collections.unmodifiableList(retVal);
 		}
@@ -124,8 +125,8 @@ public class RuntimeSearchParam {
 	/**
 	 * Sets user data - This can be used to store any application-specific data
 	 */
-	public RuntimeSearchParam addExtension(String theKey, IBaseDatatype theValue) {
-		List<IBaseDatatype> valuesList = myExtensions.computeIfAbsent(theKey, k -> new ArrayList<>());
+	public RuntimeSearchParam addExtension(String theKey, IBaseExtension theValue) {
+		List<IBaseExtension<?, ?>> valuesList = myExtensions.computeIfAbsent(theKey, k -> new ArrayList<>());
 		valuesList.add(theValue);
 		return this;
 	}

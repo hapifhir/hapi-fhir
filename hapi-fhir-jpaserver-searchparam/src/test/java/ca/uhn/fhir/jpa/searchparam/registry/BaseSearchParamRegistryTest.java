@@ -6,7 +6,8 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -140,7 +141,8 @@ public class BaseSearchParamRegistryTest {
 		assertNotNull(converted);
 
 		assertEquals(1, converted.getExtensions("http://foo").size());
-		assertEquals("FOO", ((IPrimitiveType<?>)converted.getExtensions("http://foo").get(0)).getValueAsString());
+		IPrimitiveType<?> value = (IPrimitiveType<?>) converted.getExtensions("http://foo").get(0).getValue();
+		assertEquals("FOO", value.getValueAsString());
 
 	}
 

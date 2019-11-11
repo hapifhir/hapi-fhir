@@ -408,10 +408,9 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		if (theSearchParamResource instanceof IBaseHasExtensions) {
 			List<? extends IBaseExtension<?, ?>> extensions = ((IBaseHasExtensions) theSearchParamResource).getExtension();
 			for (IBaseExtension<?, ?> next : extensions) {
-				IBaseDatatype nextValue = next.getValue();
 				String nextUrl = next.getUrl();
-				if (isNotBlank(nextUrl) && nextValue != null) {
-					theRuntimeSearchParam.addExtension(nextUrl, nextValue);
+				if (isNotBlank(nextUrl)) {
+					theRuntimeSearchParam.addExtension(nextUrl, next);
 				}
 			}
 		}
