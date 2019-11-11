@@ -31,21 +31,13 @@ import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.trim;
-
 public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
-	@Autowired
-	private org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport myValidationSupport;
-
-	private HapiWorkerContext myWorkerContext;
 	private FHIRPathEngine myFhirPathEngine;
 
 	/**
@@ -59,8 +51,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	@VisibleForTesting
 	public SearchParamExtractorDstu3(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
 		super(theCtx, theSearchParamRegistry);
-		myValidationSupport = theValidationSupport;
-		start(null);
+		initFhirPathEngine(theValidationSupport);
 		start();
 	}
 
@@ -77,12 +68,19 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		};
 	}
 
-	@EventListener
-	public void start(ContextRefreshedEvent theEvent) {
-		if (myValidationSupport == null) {
-			myValidationSupport = myApplicationContext.getBean(IValidationSupport.class);
+
+	@Override
+	@PostConstruct
+	public void start() {
+		super.start();
+		if (myFhirPathEngine == null) {
+			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
+			initFhirPathEngine(support);
 		}
-		IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
+	}
+
+	public void initFhirPathEngine(IValidationSupport theSupport) {
+		IWorkerContext worker = new HapiWorkerContext(getContext(), theSupport);
 		myFhirPathEngine = new FHIRPathEngine(worker);
 	}
 

@@ -13,6 +13,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 
+import javax.annotation.Nonnull;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -117,7 +119,7 @@ public class RuntimeSearchParam {
 		if (theTargets != null && theTargets.isEmpty() == false) {
 			myTargets = Collections.unmodifiableSet(theTargets);
 		} else {
-			myTargets = null;
+			myTargets = Collections.emptySet();
 		}
 
 		if (theBase == null || theBase.isEmpty()) {
@@ -138,8 +140,13 @@ public class RuntimeSearchParam {
 		return myBase;
 	}
 
+	@Nonnull
 	public Set<String> getTargets() {
 		return myTargets;
+	}
+
+	public boolean hasTargets() {
+		return !myTargets.isEmpty();
 	}
 
 	public RuntimeSearchParamStatusEnum getStatus() {
@@ -176,7 +183,7 @@ public class RuntimeSearchParam {
 			return Collections.singletonList(path);
 		}
 
-		List<String> retVal = new ArrayList<String>();
+		List<String> retVal = new ArrayList<>();
 		StringTokenizer tok = new StringTokenizer(path, "|");
 		while (tok.hasMoreElements()) {
 			String nextPath = tok.nextToken().trim();
@@ -191,6 +198,7 @@ public class RuntimeSearchParam {
 	public Set<String> getProvidesMembershipInCompartments() {
 		return myProvidesMembershipInCompartments;
 	}
+
 
 	public enum RuntimeSearchParamStatusEnum {
 		ACTIVE,

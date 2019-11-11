@@ -579,9 +579,8 @@ public class SearchBuilder implements ISearchBuilder {
 			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 			resourceTypes = new ArrayList<>();
 
-			Set<String> targetTypes = param.getTargets();
-
-			if (targetTypes != null && !targetTypes.isEmpty()) {
+			if (param.hasTargets()) {
+				Set<String> targetTypes = param.getTargets();
 				for (String next : targetTypes) {
 					resourceTypes.add(myContext.getResourceDefinition(next).getImplementingClass());
 				}
@@ -835,13 +834,18 @@ public class SearchBuilder implements ISearchBuilder {
 
 			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, SearchFilterParser.CompareOperation.eq);
 			assert operation == SearchFilterParser.CompareOperation.eq || operation == SearchFilterParser.CompareOperation.ne;
+			List<Predicate> codePredicates = new ArrayList<>();
 			switch (operation) {
 				default:
 				case eq:
-					nextPredicate = theRoot.get("myId").as(Long.class).in(allOrPids);
+					codePredicates.add(theRoot.get("myId").as(Long.class).in(allOrPids));
+					codePredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), theResourceName));
+					nextPredicate = myBuilder.and(toArray(codePredicates));
 					break;
 				case ne:
-					nextPredicate = theRoot.get("myId").as(Long.class).in(allOrPids).not();
+					codePredicates.add(theRoot.get("myId").as(Long.class).in(allOrPids).not());
+					codePredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), theResourceName));
+					nextPredicate = myBuilder.and(toArray(codePredicates));
 					break;
 			}
 
@@ -1853,9 +1857,11 @@ public class SearchBuilder implements ISearchBuilder {
 				codes.addAll(myTerminologySvc.expandValueSet(code));
 			} else if (modifier == TokenParamModifier.ABOVE) {
 				system = determineSystemIfMissing(theParamName, code, system);
+				validateHaveSystemAndCodeForToken(theParamName, code, system);
 				codes.addAll(myTerminologySvc.findCodesAbove(system, code));
 			} else if (modifier == TokenParamModifier.BELOW) {
 				system = determineSystemIfMissing(theParamName, code, system);
+				validateHaveSystemAndCodeForToken(theParamName, code, system);
 				codes.addAll(myTerminologySvc.findCodesBelow(system, code));
 			} else {
 				codes.add(new VersionIndependentConcept(system, code));
@@ -1896,6 +1902,19 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		return retVal;
+	}
+
+	private void validateHaveSystemAndCodeForToken(String theParamName, String theCode, String theSystem) {
+		String systemDesc = defaultIfBlank(theSystem, "(missing)");
+		String codeDesc = defaultIfBlank(theCode, "(missing)");
+		if (isBlank(theCode)) {
+			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "invalidCodeMissingSystem", theParamName, systemDesc, codeDesc);
+			throw new InvalidRequestException(msg);
+		}
+		if (isBlank(theSystem)) {
+			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "invalidCodeMissingCode", theParamName, systemDesc, codeDesc);
+			throw new InvalidRequestException(msg);
+		}
 	}
 
 	private Predicate addPredicateToken(String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamToken> theFrom, List<VersionIndependentConcept> theTokens, TokenParamModifier theModifier, TokenModeEnum theTokenMode) {
@@ -2052,6 +2071,7 @@ public class SearchBuilder implements ISearchBuilder {
 				outerQuery.multiselect(myBuilder.countDistinct(myResourceTableRoot));
 			} else {
 				outerQuery.multiselect(myResourceTableRoot.get("myId").as(Long.class));
+				outerQuery.distinct(true);
 			}
 
 		}
@@ -2494,7 +2514,7 @@ public class SearchBuilder implements ISearchBuilder {
 					for (String nextPath : paths) {
 						String sql;
 
-						boolean haveTargetTypesDefinedByParam = param.getTargets() != null && param.getTargets().isEmpty() == false;
+						boolean haveTargetTypesDefinedByParam = param.hasTargets();
 						if (targetResourceType != null) {
 							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
 						} else if (haveTargetTypesDefinedByParam) {
@@ -2719,7 +2739,9 @@ public class SearchBuilder implements ISearchBuilder {
 
 		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, theFilter.getParamPath().getName());
 
-		if (searchParam.getName().equals(IAnyResource.SP_RES_ID)) {
+		if (searchParam == null) {
+			throw new InvalidRequestException("Invalid search parameter specified, " + theFilter.getParamPath().getName() + ", for resource type " + theResourceName);
+		} else if (searchParam.getName().equals(IAnyResource.SP_RES_ID)) {
 			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null,
@@ -2760,7 +2782,7 @@ public class SearchBuilder implements ISearchBuilder {
 //			addPredicateTag(Collections.singletonList(Collections.singletonList(new UriParam(((SearchFilterParser.FilterParameter) theFilter).getValue()))),
 //				searchParam.getName());
 //		}
-		else if (searchParam != null) {
+		else {
 			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
 			if (typeEnum == RestSearchParameterTypeEnum.URI) {
 				return addPredicateUri(theResourceName,
@@ -2808,8 +2830,6 @@ public class SearchBuilder implements ISearchBuilder {
 					Collections.singletonList(param),
 					theFilter.getOperation());
 			}
-		} else {
-			throw new InvalidRequestException("Invalid search parameter specified, " + theFilter.getParamPath().getName() + ", for resource type " + theResourceName);
 		}
 		return null;
 	}
@@ -3121,6 +3141,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 		private final SearchRuntimeDetails mySearchRuntimeDetails;
 		private final RequestDetails myRequest;
+		private final boolean myHaveRawSqlHooks;
+		private final boolean myHavePerftraceFoundIdHook;
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
 		private Long myNext;
@@ -3139,13 +3161,16 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myParams.getEverythingMode() != null) {
 				myStillNeedToFetchIncludes = true;
 			}
+
+			myHavePerftraceFoundIdHook =JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, myInterceptorBroadcaster, myRequest);
+			myHaveRawSqlHooks = JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, myRequest);
+
 		}
 
 		private void fetchNext() {
 
-			boolean haveRawSqlHooks = JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, myRequest);
 			try {
-				if (haveRawSqlHooks) {
+				if (myHaveRawSqlHooks) {
 					CurrentThreadCaptureQueriesListener.startCapturing();
 				}
 
@@ -3186,6 +3211,13 @@ public class SearchBuilder implements ISearchBuilder {
 					if (myNext == null) {
 						while (myResultsIterator.hasNext()) {
 							Long next = myResultsIterator.next();
+							if (myHavePerftraceFoundIdHook) {
+								HookParams params = new HookParams()
+									.add(Integer.class, System.identityHashCode(this))
+									.add(Object.class, next);
+								JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, params);
+							}
+
 							if (next != null) {
 								if (myPidSet.add(next)) {
 									myNext = next;
@@ -3224,7 +3256,7 @@ public class SearchBuilder implements ISearchBuilder {
 				mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
 
 			} finally {
-				if (haveRawSqlHooks) {
+				if (myHaveRawSqlHooks) {
 					SqlQueryList capturedQueries = CurrentThreadCaptureQueriesListener.getCurrentQueueAndStopCapturing();
 					HookParams params = new HookParams()
 						.add(RequestDetails.class, myRequest)

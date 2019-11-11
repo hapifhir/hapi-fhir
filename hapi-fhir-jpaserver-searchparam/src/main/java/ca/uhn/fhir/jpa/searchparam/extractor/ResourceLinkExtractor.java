@@ -39,9 +39,12 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -69,13 +72,6 @@ public class ResourceLinkExtractor {
 
 	public void extractResourceLinks(ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, boolean theFailOnInvalidReference, RequestDetails theRequest) {
 		String resourceType = theEntity.getResourceType();
-
-		/*
-		 * For now we don't try to load any of the links in a bundle if it's the actual bundle we're storing..
-		 */
-		if (theResource instanceof IBaseBundle) {
-			return;
-		}
 
 		Map<String, RuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveSearchParams(toResourceName(theResource.getClass()));
 
@@ -107,8 +103,8 @@ public class ResourceLinkExtractor {
 		}
 	}
 
-	private void extractResourceLinks(ResourceIndexedSearchParams theParams, ResourceTable theEntity, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, String theResourceType, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, boolean theMultiType, PathAndRef nextPathAndRef, boolean theFailOnInvalidReference, RequestDetails theRequest) {
-		Object nextObject = nextPathAndRef.getRef();
+	private void extractResourceLinks(ResourceIndexedSearchParams theParams, ResourceTable theEntity, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, String theResourceType, RuntimeSearchParam theRuntimeSearchParam, String thePath, boolean theMultiType, PathAndRef thePathAndRef, boolean theFailOnInvalidReference, RequestDetails theRequest) {
+		Object nextObject = thePathAndRef.getRef();
 
 		/*
 		 * A search parameter on an extension field that contains
@@ -149,35 +145,41 @@ public class ResourceLinkExtractor {
 				nextId = nextValue.getResource().getIdElement();
 			}
 
-			if (nextId.isEmpty() || nextId.getValue().startsWith("#")) {
-				// This is a blank or contained resource reference
-				return;
-			}
 		} else if (nextObject instanceof IBaseResource) {
-			nextId = ((IBaseResource) nextObject).getIdElement();
-			if (nextId == null || nextId.hasIdPart() == false) {
-				return;
-			}
-		} else if (myContext.getElementDefinition((Class<? extends IBase>) nextObject.getClass()).getName().equals("uri")) {
-			return;
-		} else if (theResourceType.equals("Consent") && nextPathAndRef.getPath().equals("Consent.source")) {
-			// Consent#source-identifier has a path that isn't typed - This is a one-off to deal with that
+//			nextId = ((IBaseResource) nextObject).getIdElement().toUnqualified();
 			return;
 		} else {
-			if (!theMultiType) {
-				if (nextSpDef.getName().equals("sourceuri")) {
+			@SuppressWarnings("unchecked")
+			Class<? extends IBase> clazz = (Class<? extends IBase>) nextObject.getClass();
+			if (myContext.getElementDefinition(clazz).getName().equals("uri")) {
+				return;
+			} else if (theResourceType.equals("Consent") && thePathAndRef.getPath().equals("Consent.source")) {
+				// Consent#source-identifier has a path that isn't typed - This is a one-off to deal with that
+				return;
+			} else {
+				if (!theMultiType) {
+					if (theRuntimeSearchParam.getName().equals("sourceuri")) {
+						return;
+					}
+					throw new ConfigurationException("Search param " + theRuntimeSearchParam.getName() + " is of unexpected datatype: " + nextObject.getClass());
+				} else {
 					return;
 				}
-				throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
-			} else {
-				return;
 			}
 		}
 
-		theParams.myPopulatedResourceLinkParameters.add(nextSpDef.getName());
+		if (nextId == null ||
+			nextId.isEmpty() ||
+//			nextId.hasIdPart() == false ||
+			nextId.getValue().startsWith("#") ||
+			nextId.getValue().startsWith("urn:")) {
+			return;
+		}
+
+		theParams.myPopulatedResourceLinkParameters.add(theRuntimeSearchParam.getName());
 
 		if (LogicalReferenceHelper.isLogicalReference(myModelConfig, nextId)) {
-			ResourceLink resourceLink = new ResourceLink(nextPathAndRef.getPath(), theEntity, nextId, theUpdateTime);
+			ResourceLink resourceLink = new ResourceLink(thePathAndRef.getPath(), theEntity, nextId, theUpdateTime);
 			if (theParams.myLinks.add(resourceLink)) {
 				ourLog.debug("Indexing remote resource reference URL: {}", nextId);
 			}
@@ -187,7 +189,7 @@ public class ResourceLinkExtractor {
 		String baseUrl = nextId.getBaseUrl();
 		String typeString = nextId.getResourceType();
 		if (isBlank(typeString)) {
-			String msg = "Invalid resource reference found at path[" + theNextPathsUnsplit + "] - Does not contain resource type - " + nextId.getValue();
+			String msg = "Invalid resource reference found at path[" + thePath + "] - Does not contain resource type - " + nextId.getValue();
 			if (theFailOnInvalidReference) {
 				throw new InvalidRequestException(msg);
 			} else {
@@ -199,11 +201,17 @@ public class ResourceLinkExtractor {
 		try {
 			resourceDefinition = myContext.getResourceDefinition(typeString);
 		} catch (DataFormatException e) {
-			String msg = "Invalid resource reference found at path[" + theNextPathsUnsplit + "] - Resource type is unknown or not supported on this server - " + nextId.getValue();
+			String msg = "Invalid resource reference found at path[" + thePath + "] - Resource type is unknown or not supported on this server - " + nextId.getValue();
 			if (theFailOnInvalidReference) {
 				throw new InvalidRequestException(msg);
 			} else {
 				ourLog.debug(msg);
+				return;
+			}
+		}
+
+		if (theRuntimeSearchParam.hasTargets()) {
+			if (!theRuntimeSearchParam.getTargets().contains(typeString)) {
 				return;
 			}
 		}
@@ -213,7 +221,7 @@ public class ResourceLinkExtractor {
 				String msg = myContext.getLocalizer().getMessage(BaseSearchParamExtractor.class, "externalReferenceNotAllowed", nextId.getValue());
 				throw new InvalidRequestException(msg);
 			} else {
-				ResourceLink resourceLink = new ResourceLink(nextPathAndRef.getPath(), theEntity, nextId, theUpdateTime);
+				ResourceLink resourceLink = new ResourceLink(thePathAndRef.getPath(), theEntity, nextId, theUpdateTime);
 				if (theParams.myLinks.add(resourceLink)) {
 					ourLog.debug("Indexing remote resource reference URL: {}", nextId);
 				}
@@ -224,7 +232,7 @@ public class ResourceLinkExtractor {
 		Class<? extends IBaseResource> type = resourceDefinition.getImplementingClass();
 		String id = nextId.getIdPart();
 		if (StringUtils.isBlank(id)) {
-			String msg = "Invalid resource reference found at path[" + theNextPathsUnsplit + "] - Does not contain resource ID - " + nextId.getValue();
+			String msg = "Invalid resource reference found at path[" + thePath + "] - Does not contain resource ID - " + nextId.getValue();
 			if (theFailOnInvalidReference) {
 				throw new InvalidRequestException(msg);
 			} else {
@@ -234,15 +242,19 @@ public class ResourceLinkExtractor {
 		}
 
 		theResourceLinkResolver.validateTypeOrThrowException(type);
-		ResourceLink resourceLink = createResourceLink(theEntity, theUpdateTime, theResourceLinkResolver, nextSpDef, theNextPathsUnsplit, nextPathAndRef, nextId, typeString, type, id, theRequest);
-		if (resourceLink == null) return;
+		ResourceLink resourceLink = createResourceLink(theEntity, theUpdateTime, theResourceLinkResolver, theRuntimeSearchParam, thePath, thePathAndRef, nextId, typeString, type, id, theRequest);
+		if (resourceLink == null) {
+			return;
+		}
 		theParams.myLinks.add(resourceLink);
 	}
 
 	private ResourceLink createResourceLink(ResourceTable theEntity, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, String theId, RequestDetails theRequest) {
 		ResourceTable targetResource = theResourceLinkResolver.findTargetResource(nextSpDef, theNextPathsUnsplit, theNextId, theTypeString, theType, theId, theRequest);
 
-		if (targetResource == null) return null;
+		if (targetResource == null) {
+			return null;
+		}
 		ResourceLink resourceLink = new ResourceLink(nextPathAndRef.getPath(), theEntity, targetResource, theUpdateTime);
 		return resourceLink;
 	}

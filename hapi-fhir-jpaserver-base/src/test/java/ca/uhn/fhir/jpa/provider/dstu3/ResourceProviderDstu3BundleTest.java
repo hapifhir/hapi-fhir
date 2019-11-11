@@ -18,27 +18,6 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3BundleTest.class);
 
-	/**
-	 * See #401
-	 */
-	@Test
-	public void testBundlePreservesFullUrl() {
-
-		Bundle bundle = new Bundle();
-		bundle.setType(BundleType.DOCUMENT);
-
-		Composition composition = new Composition();
-		composition.setTitle("Visit Summary");
-		bundle.addEntry().setFullUrl("http://foo").setResource(composition);
-
-		IIdType id = ourClient.create().resource(bundle).execute().getId();
-
-		Bundle retBundle = ourClient.read().resource(Bundle.class).withId(id).execute();
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
-
-		assertEquals("http://foo", bundle.getEntry().get(0).getFullUrl());
-	}
-
 	@Test
 	public void testProcessMessage() {
 

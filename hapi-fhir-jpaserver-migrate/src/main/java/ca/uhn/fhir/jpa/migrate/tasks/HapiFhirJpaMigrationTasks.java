@@ -60,6 +60,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init410() {
 		Builder version = forVersion(VersionEnum.V4_1_0);
 
+		version.onTable("HFJ_SPIDX_NUMBER").modifyColumn("RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_TOKEN").modifyColumn("RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_DATE").modifyColumn("RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_URI").modifyColumn("RES_ID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+
 		// HFJ_SEARCH
 		version.onTable("HFJ_SEARCH").addColumn("EXPIRY_OR_NULL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
 		version.onTable("HFJ_SEARCH").addColumn("NUM_BLOCKED").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
