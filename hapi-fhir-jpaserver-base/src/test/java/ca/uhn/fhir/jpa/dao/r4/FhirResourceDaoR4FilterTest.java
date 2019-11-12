@@ -9,12 +9,15 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -555,6 +558,168 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.add(Constants.PARAM_FILTER, new StringParam("family le jackson"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		assertThat(found, Matchers.empty());
+
+	}
+
+	@Test
+	public void testDateComparatorEq() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("Smith").addGiven("John");
+		p.setBirthDateElement(new DateType("1955-01-01"));
+		p.setActive(true);
+		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("birthdate eq 1955-01-01"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
+
+	}
+
+	@Test
+	public void testDateComparatorNe() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("Smith").addGiven("John");
+		p.setBirthDateElement(new DateType("1955-01-01"));
+		p.setActive(true);
+		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("birthdate ne 1955-01-01"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, Matchers.empty());
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("birthdate ne 1995-01-01"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
+
+	}
+
+	@Test
+	public void testDateComparatorGt() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("Smith").addGiven("John");
+		p.setBirthDateElement(new DateType("1955-01-01"));
+		p.setActive(true);
+		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("birthdate gt 1954-12-31"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("birthdate gt 1955-01-01"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, Matchers.empty());
+
+	}
+
+	@Test
+	public void testDateComparatorLt() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("Smith").addGiven("John");
+		p.setBirthDateElement(new DateType("1955-01-01"));
+		p.setActive(true);
+		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("birthdate lt 1955-01-02"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("birthdate lt 1955-01-01"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, Matchers.empty());
+
+	}
+
+	@Test
+	public void testDateComparatorGe() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("Smith").addGiven("John");
+		p.setBirthDateElement(new DateType("1955-01-01"));
+		p.setActive(true);
+		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("birthdate ge 1955-01-01"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("birthdate ge 1954-12-31"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("birthdate ge 1955-01-02"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, Matchers.empty());
+
+	}
+
+	@Test
+	public void testDateComparatorLe() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("Smith").addGiven("John");
+		p.setBirthDateElement(new DateType("1955-01-01"));
+		p.setActive(true);
+		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("birthdate le 1955-01-01"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("birthdate le 1954-12-31"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, Matchers.empty());
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("birthdate le 1955-01-02"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
 
 	}
 
