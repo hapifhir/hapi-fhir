@@ -252,6 +252,7 @@ public class Constants {
 	 * </p>
 	 */
 	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
+	public static final String CODESYSTEM_VALIDATE_NOT_NEEDED = UUID.randomUUID().toString();
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
@@ -352,5 +353,10 @@ public class Constants {
 		corsAllowedMethods.addAll(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 		CORS_ALLWED_METHODS = Collections.unmodifiableSet(corsAllowedMethods);
 	}
+
+	public static boolean codeSystemNotNeeded(String theCodeSystem) {
+		return Constants.CODESYSTEM_VALIDATE_NOT_NEEDED.equals(theCodeSystem);
+	}
+
 
 }

@@ -212,7 +212,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		if (isNotBlank(theVs.getUrl())) {
 			outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
 		} else {
-			outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs);
+			outcome = myValidationSupport.validateCodeInValueSet(myCtx, theSystem, theCode, theDisplay, theVs);
 		}
 
 		if (outcome != null && outcome.isOk()) {

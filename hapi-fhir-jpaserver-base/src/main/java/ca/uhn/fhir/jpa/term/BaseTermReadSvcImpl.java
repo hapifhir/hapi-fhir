@@ -23,8 +23,13 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
-import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.IDao;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
@@ -37,6 +42,7 @@ import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -53,7 +59,11 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.TermsQuery;
-import org.apache.lucene.search.*;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.MultiPhraseQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.RegexpQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.search.jpa.FullTextEntityManager;
@@ -90,21 +100,27 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNoneBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationContextAware {
 	public static final int DEFAULT_FETCH_SIZE = 250;
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseTermReadSvcImpl.class);
 	public static final String VALUESET_LANGUAGES = "http://hl7.org/fhir/ValueSet/languages";
 	public static final String VALUESET_MIMETYPES = "http://hl7.org/fhir/ValueSet/mimetypes";
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseTermReadSvcImpl.class);
 	private static boolean ourLastResultsFromTranslationCache; // For testing.
 	private static boolean ourLastResultsFromTranslationWithReverseCache; // For testing.
 	@Autowired
@@ -546,7 +562,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 		if (hasSystem) {
 
-			if (theWantConceptOrNull != null && theWantConceptOrNull.getSystem() != null && !system.equals(theWantConceptOrNull.getSystem())) {
+			if (theWantConceptOrNull != null && theWantConceptOrNull.getSystem() != null && !Constants.codeSystemNotNeeded(theWantConceptOrNull.getSystem()) && !system.equals(theWantConceptOrNull.getSystem())) {
 				return false;
 			}
 
@@ -1088,7 +1104,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		}
 
 		for (ValueSet.ConceptReferenceComponent next : theInclude.getConcept()) {
-			if (!theSystem.equals(theInclude.getSystem())) {
+			if (!theSystem.equals(theInclude.getSystem()) && !Constants.codeSystemNotNeeded(theSystem)) {
 				continue;
 			}
 			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, null, theAdd, theCodeCounter, theSystem, next.getCode(), next.getDisplay());
@@ -1128,7 +1144,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		if (isNotBlank(theCode)) {
 			if (isNotBlank(theSystem)) {
 				concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, theSystem, theCode));
-			} else {
+			} if (Constants.codeSystemNotNeeded(theSystem)) {
 				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(valueSetResourcePid, theCode));
 			}
 		} else if (theCoding != null) {
@@ -1633,7 +1649,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 		// Validation with only a code but no system can happen when validating against a
 		// valueset, which only the full term service can handle
-		if (theSystem == null) {
+		if (theSystem == null || Constants.codeSystemNotNeeded(theSystem)) {
 			return true;
 		}
 
@@ -1862,7 +1878,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		List<VersionIndependentConcept> expansionOutcome = expandValueSetAndReturnVersionIndependentConcepts(canonicalValueSet, wantConcept);
 		return expansionOutcome
 			.stream()
-			.filter(t -> (theCodeSystem == null || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
+			.filter(t -> (Constants.codeSystemNotNeeded(theCodeSystem) || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
 			.findFirst();
 	}
 

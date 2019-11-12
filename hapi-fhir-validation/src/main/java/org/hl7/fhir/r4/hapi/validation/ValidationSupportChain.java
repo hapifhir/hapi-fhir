@@ -161,10 +161,10 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	public CodeValidationResult validateCodeInValueSet(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		CodeValidationResult retVal = null;
 		for (IValidationSupport next : myChain) {
-			retVal = next.validateCode(theContext, theCodeSystem, theCode, theDisplay, theValueSet);
+			retVal = next.validateCodeInValueSet(theContext, theCodeSystem, theCode, theDisplay, theValueSet);
 			if (retVal != null) {
 				break;
 			}

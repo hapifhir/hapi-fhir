@@ -82,8 +82,8 @@ public class CachingValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-		return myWrap.validateCode(theContext, theCodeSystem, theCode, theDisplay, theValueSet);
+	public CodeValidationResult validateCodeInValueSet(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+		return myWrap.validateCodeInValueSet(theContext, theCodeSystem, theCode, theDisplay, theValueSet);
 	}
 
 	@Override

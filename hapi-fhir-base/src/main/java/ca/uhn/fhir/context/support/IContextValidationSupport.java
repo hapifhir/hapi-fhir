@@ -130,7 +130,7 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 	 * @param theValueSet   The ValueSet to validate against. Must not be null, and must be a ValueSet resource.
 	 * @return Returns a validation result object, or <code>null</code> if this validation support module can not handle this kind of request
 	 */
-	default CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) { return null; }
+	default CodeValidationResult validateCodeInValueSet(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) { return null; }
 
 	/**
 	 * Look up a code using the system and code value
@@ -275,9 +275,9 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 			this.myMessage = message;
 		}
 
-		public CodeValidationResult(Enum theSeverity, String theS, IBase theDefinition, String theDisplay) {
+		public CodeValidationResult(Enum theSeverity, String theMessage, IBase theDefinition, String theDisplay) {
 			this.mySeverity = theSeverity;
-			this.myMessage = theS;
+			this.myMessage = theMessage;
 			this.myDefinition = theDefinition;
 			this.myDisplay = theDisplay;
 		}

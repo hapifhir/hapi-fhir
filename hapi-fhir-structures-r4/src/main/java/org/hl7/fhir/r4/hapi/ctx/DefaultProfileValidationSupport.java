@@ -170,7 +170,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
   @Override
   public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
-    if (isBlank(theSystem)) {
+    if (isBlank(theSystem) || Constants.codeSystemNotNeeded(theSystem)) {
       return false;
     }
     CodeSystem cs = fetchCodeSystem(theContext, theSystem);
@@ -277,7 +277,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
         nextCandidate = nextCandidate.toUpperCase();
       }
       if (nextCandidate.equals(code)) {
-        retVal = new CodeValidationResult(next);
+        retVal = new CodeValidationResult(null, null, next, next.getDisplay());
         break;
       }
 

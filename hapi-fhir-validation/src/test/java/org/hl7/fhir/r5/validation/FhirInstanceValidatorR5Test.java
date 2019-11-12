@@ -917,7 +917,7 @@ public class FhirInstanceValidatorR5Test {
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertEquals(
-			"Code http://example.com/foo/bar/bar was not validated because the code system is not present",
+			"None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code) (codes = http://example.com/foo/bar#bar)",
 			all.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 

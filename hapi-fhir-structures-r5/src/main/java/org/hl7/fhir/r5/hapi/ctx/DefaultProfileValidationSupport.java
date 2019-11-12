@@ -279,7 +279,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 				nextCandidate = nextCandidate.toUpperCase();
 			}
 			if (nextCandidate.equals(code)) {
-				retVal = new CodeValidationResult(next);
+				retVal = new CodeValidationResult(null, null, next, next.getDisplay());
 				break;
 			}
 
@@ -345,7 +345,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	@Override
 	public IContextValidationSupport.LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
-		return validateCode(theContext, theSystem, theCode, null, (String)null).asLookupCodeResult(theSystem, theCode);
+		return validateCode(theContext, theSystem, theCode, null, null).asLookupCodeResult(theSystem, theCode);
 	}
 
 }

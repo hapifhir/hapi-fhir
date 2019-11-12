@@ -11,7 +11,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.fhir.ucum.UcumService;
-import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r4.context.IWorkerContext;
@@ -214,7 +213,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     if (isNotBlank(theVs.getUrl())) {
       outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
     } else {
-      outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs);
+      outcome = myValidationSupport.validateCodeInValueSet(myCtx, theSystem, theCode, theDisplay, theVs);
     }
 
     if (outcome != null && outcome.isOk()) {

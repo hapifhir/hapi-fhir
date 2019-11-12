@@ -154,6 +154,11 @@ public class QuestionnaireResponseValidatorR4Test {
 
 			when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class),
 				eq(qa.getQuestionnaire()))).thenReturn(q);
+			when(myValSupport.validateCode(any(), any(), any(), any(), nullable(String.class)))
+				.thenReturn(new IContextValidationSupport.CodeValidationResult(ValidationMessage.IssueSeverity.ERROR, "Unknown code"));
+			when(myValSupport.validateCodeInValueSet(any(), any(), any(), any(), nullable(ValueSet.class)))
+				.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent().setCode("code0")));
+
 
 			ValidationResult errors = myVal.validateWithResult(qa);
 
@@ -191,9 +196,13 @@ public class QuestionnaireResponseValidatorR4Test {
 
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
-		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code0"), any(), anyString()))
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult(new CodeSystem.ConceptDefinitionComponent().setCode("code0")));
-		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code1"), any(),anyString()))
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
+			.thenReturn(new IValidationSupport.CodeValidationResult(ValidationMessage.IssueSeverity.ERROR, "Unknown code"));
+		when(myValSupport.validateCodeInValueSet(any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(ValueSet.class)))
+			.thenReturn(new IValidationSupport.CodeValidationResult(new CodeSystem.ConceptDefinitionComponent().setCode("code0")));
+		when(myValSupport.validateCodeInValueSet(any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(ValueSet.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult(ValidationMessage.IssueSeverity.ERROR, "Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
@@ -775,6 +784,7 @@ public class QuestionnaireResponseValidatorR4Test {
 
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire()))).thenReturn(questionnaire);
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(ID_VS_SCHOOLTYPE))).thenReturn(iccSchoolTypeVs);
+		when(myValSupport.validateCodeInValueSet(any(), any(), any(), any(), any(ValueSet.class) )).thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(new CodeType(CODE_ICC_SCHOOLTYPE_PT))));
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());

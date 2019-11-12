@@ -263,7 +263,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
         nextCandidate = nextCandidate.toUpperCase();
       }
       if (nextCandidate.equals(code)) {
-        retVal = new CodeValidationResult(next);
+        retVal = new CodeValidationResult(null, null, next, next.getDisplay());
         break;
       }
 
