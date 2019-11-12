@@ -99,17 +99,15 @@
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  		<span class="jxr_string">"LEFT OUTER JOIN ResourceTable t ON (v.myResourceId = t.myId) "</span> +
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  		<span class="jxr_string">"WHERE v.myResourceVersion != t.myVersion"</span>)
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>  	Slice&lt;Long&gt; findIdsOfPreviousVersionsOfResources(Pageable thePage);
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  	
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  	@Query(<span class="jxr_string">""</span> + 
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  		<span class="jxr_string">"SELECT h FROM ResourceHistoryTable h "</span> + 
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  		<span class="jxr_string">"INNER JOIN ResourceTable r ON (r.myId = h.myResourceId and r.myVersion = h.myResourceVersion) "</span> + 
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  		<span class="jxr_string">"WHERE r.myId in (:pids)"</span>)
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  	Collection&lt;ResourceHistoryTable&gt; findByResourceIds(@Param(<span class="jxr_string">"pids"</span>) Collection&lt;Long&gt; pids);
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 	@Modifying
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	@Query(<span class="jxr_string">"UPDATE ResourceHistoryTable r SET r.myResourceVersion = :newVersion WHERE r.myResourceId = :id AND r.myResourceVersion = :oldVersion"</span>)
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 	<strong class="jxr_keyword">void</strong> updateVersion(@Param(<span class="jxr_string">"id"</span>) <strong class="jxr_keyword">long</strong> theId, @Param(<span class="jxr_string">"oldVersion"</span>) <strong class="jxr_keyword">long</strong> theOldVersion, @Param(<span class="jxr_string">"newVersion"</span>) <strong class="jxr_keyword">long</strong> theNewVersion);
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> }
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  	@Modifying
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  	@Query(<span class="jxr_string">"UPDATE ResourceHistoryTable r SET r.myResourceVersion = :newVersion WHERE r.myResourceId = :id AND r.myResourceVersion = :oldVersion"</span>)
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  	<strong class="jxr_keyword">void</strong> updateVersion(@Param(<span class="jxr_string">"id"</span>) <strong class="jxr_keyword">long</strong> theId, @Param(<span class="jxr_string">"oldVersion"</span>) <strong class="jxr_keyword">long</strong> theOldVersion, @Param(<span class="jxr_string">"newVersion"</span>) <strong class="jxr_keyword">long</strong> theNewVersion);
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  	@Modifying
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 	@Query(<span class="jxr_string">"DELETE FROM ResourceHistoryTable t WHERE t.myId = :pid"</span>)
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 	<strong class="jxr_keyword">void</strong> deleteByPid(@Param(<span class="jxr_string">"pid"</span>) Long theId);
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

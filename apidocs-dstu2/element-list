@@ -1,0 +1,5 @@
+ca.uhn.fhir.model.dstu2
+ca.uhn.fhir.model.dstu2.composite
+ca.uhn.fhir.model.dstu2.resource
+ca.uhn.fhir.model.dstu2.valueset
+ca.uhn.fhir.rest.server.provider.dstu2

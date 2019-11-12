@@ -1608,119 +1608,146 @@
 <a class="jxr_linenumber" name="L1600" href="#L1600">1600</a> 
 <a class="jxr_linenumber" name="L1601" href="#L1601">1601</a> 
 <a class="jxr_linenumber" name="L1602" href="#L1602">1602</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1603" href="#L1603">1603</a> <em class="jxr_javadoccomment">	 * Note that this is a performance tracing hook. Use with caution in production</em>
-<a class="jxr_linenumber" name="L1604" href="#L1604">1604</a> <em class="jxr_javadoccomment">	 * systems, since calling it may (or may not) carry a cost.</em>
-<a class="jxr_linenumber" name="L1605" href="#L1605">1605</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
-<a class="jxr_linenumber" name="L1606" href="#L1606">1606</a> <em class="jxr_javadoccomment">	 * This hook is invoked when a query has executed, and includes the raw SQL</em>
-<a class="jxr_linenumber" name="L1607" href="#L1607">1607</a> <em class="jxr_javadoccomment">	 * statements that were executed against the database.</em>
-<a class="jxr_linenumber" name="L1608" href="#L1608">1608</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
-<a class="jxr_linenumber" name="L1609" href="#L1609">1609</a> <em class="jxr_javadoccomment">	 * Hooks may accept the following parameters:</em>
-<a class="jxr_linenumber" name="L1610" href="#L1610">1610</a> <em class="jxr_javadoccomment">	 * &lt;ul&gt;</em>
-<a class="jxr_linenumber" name="L1611" href="#L1611">1611</a> <em class="jxr_javadoccomment">	 * &lt;li&gt;</em>
-<a class="jxr_linenumber" name="L1612" href="#L1612">1612</a> <em class="jxr_javadoccomment">	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the</em>
-<a class="jxr_linenumber" name="L1613" href="#L1613">1613</a> <em class="jxr_javadoccomment">	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been</em>
-<a class="jxr_linenumber" name="L1614" href="#L1614">1614</a> <em class="jxr_javadoccomment">	 * pulled out of the servlet request. Note that the bean</em>
-<a class="jxr_linenumber" name="L1615" href="#L1615">1615</a> <em class="jxr_javadoccomment">	 * properties are not all guaranteed to be populated, depending on how early during processing the</em>
-<a class="jxr_linenumber" name="L1616" href="#L1616">1616</a> <em class="jxr_javadoccomment">	 * exception occurred.</em>
+<a class="jxr_linenumber" name="L1603" href="#L1603">1603</a> <em class="jxr_javadoccomment">	 * THIS IS AN EXPERIMENTAL HOOK AND MAY BE REMOVED OR CHANGED WITHOUT WARNING.</em>
+<a class="jxr_linenumber" name="L1604" href="#L1604">1604</a> <em class="jxr_javadoccomment">	 *</em>
+<a class="jxr_linenumber" name="L1605" href="#L1605">1605</a> <em class="jxr_javadoccomment">	 * Note that this is a performance tracing hook. Use with caution in production</em>
+<a class="jxr_linenumber" name="L1606" href="#L1606">1606</a> <em class="jxr_javadoccomment">	 * systems, since calling it may (or may not) carry a cost.</em>
+<a class="jxr_linenumber" name="L1607" href="#L1607">1607</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L1608" href="#L1608">1608</a> <em class="jxr_javadoccomment">	 * This hook is invoked when a search has found an individual ID.</em>
+<a class="jxr_linenumber" name="L1609" href="#L1609">1609</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L1610" href="#L1610">1610</a> <em class="jxr_javadoccomment">	 * Hooks may accept the following parameters:</em>
+<a class="jxr_linenumber" name="L1611" href="#L1611">1611</a> <em class="jxr_javadoccomment">	 * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L1612" href="#L1612">1612</a> <em class="jxr_javadoccomment">	 * &lt;li&gt;</em>
+<a class="jxr_linenumber" name="L1613" href="#L1613">1613</a> <em class="jxr_javadoccomment">	 * java.lang.Integer - The query ID</em>
+<a class="jxr_linenumber" name="L1614" href="#L1614">1614</a> <em class="jxr_javadoccomment">	 * &lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L1615" href="#L1615">1615</a> <em class="jxr_javadoccomment">	 * &lt;li&gt;</em>
+<a class="jxr_linenumber" name="L1616" href="#L1616">1616</a> <em class="jxr_javadoccomment">	 * java.lang.Object - The ID</em>
 <a class="jxr_linenumber" name="L1617" href="#L1617">1617</a> <em class="jxr_javadoccomment">	 * &lt;/li&gt;</em>
-<a class="jxr_linenumber" name="L1618" href="#L1618">1618</a> <em class="jxr_javadoccomment">	 * &lt;li&gt;</em>
-<a class="jxr_linenumber" name="L1619" href="#L1619">1619</a> <em class="jxr_javadoccomment">	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the</em>
-<a class="jxr_linenumber" name="L1620" href="#L1620">1620</a> <em class="jxr_javadoccomment">	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been</em>
-<a class="jxr_linenumber" name="L1621" href="#L1621">1621</a> <em class="jxr_javadoccomment">	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will</em>
-<a class="jxr_linenumber" name="L1622" href="#L1622">1622</a> <em class="jxr_javadoccomment">	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.</em>
-<a class="jxr_linenumber" name="L1623" href="#L1623">1623</a> <em class="jxr_javadoccomment">	 * &lt;/li&gt;</em>
-<a class="jxr_linenumber" name="L1624" href="#L1624">1624</a> <em class="jxr_javadoccomment">	 * &lt;li&gt;</em>
-<a class="jxr_linenumber" name="L1625" href="#L1625">1625</a> <em class="jxr_javadoccomment">	 * ca.uhn.fhir.jpa.util.SqlQueryList - Contains details about the raw SQL queries.</em>
-<a class="jxr_linenumber" name="L1626" href="#L1626">1626</a> <em class="jxr_javadoccomment">	 * &lt;/li&gt;</em>
-<a class="jxr_linenumber" name="L1627" href="#L1627">1627</a> <em class="jxr_javadoccomment">	 * &lt;/ul&gt;</em>
-<a class="jxr_linenumber" name="L1628" href="#L1628">1628</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
-<a class="jxr_linenumber" name="L1629" href="#L1629">1629</a> <em class="jxr_javadoccomment">	 * Hooks should return &lt;code&gt;void&lt;/code&gt;.</em>
-<a class="jxr_linenumber" name="L1630" href="#L1630">1630</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
-<a class="jxr_linenumber" name="L1631" href="#L1631">1631</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1632" href="#L1632">1632</a> 	JPA_PERFTRACE_RAW_SQL(<strong class="jxr_keyword">void</strong>.<strong class="jxr_keyword">class</strong>,
-<a class="jxr_linenumber" name="L1633" href="#L1633">1633</a> 		<span class="jxr_string">"ca.uhn.fhir.rest.api.server.RequestDetails"</span>,
-<a class="jxr_linenumber" name="L1634" href="#L1634">1634</a> 		<span class="jxr_string">"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"</span>,
-<a class="jxr_linenumber" name="L1635" href="#L1635">1635</a> 		<span class="jxr_string">"ca.uhn.fhir.jpa.util.SqlQueryList"</span>
-<a class="jxr_linenumber" name="L1636" href="#L1636">1636</a> 	),
-<a class="jxr_linenumber" name="L1637" href="#L1637">1637</a> 
-<a class="jxr_linenumber" name="L1638" href="#L1638">1638</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1639" href="#L1639">1639</a> <em class="jxr_javadoccomment">	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or</em>
-<a class="jxr_linenumber" name="L1640" href="#L1640">1640</a> <em class="jxr_javadoccomment">	 * removed at any time.</em>
-<a class="jxr_linenumber" name="L1641" href="#L1641">1641</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1642" href="#L1642">1642</a> 	TEST_RB(
-<a class="jxr_linenumber" name="L1643" href="#L1643">1643</a> 		<strong class="jxr_keyword">boolean</strong>.<strong class="jxr_keyword">class</strong>,
-<a class="jxr_linenumber" name="L1644" href="#L1644">1644</a> 		<strong class="jxr_keyword">new</strong> ExceptionHandlingSpec().addLogAndSwallow(IllegalStateException.<strong class="jxr_keyword">class</strong>),
-<a class="jxr_linenumber" name="L1645" href="#L1645">1645</a> 		String.<strong class="jxr_keyword">class</strong>.getName(),
-<a class="jxr_linenumber" name="L1646" href="#L1646">1646</a> 		String.<strong class="jxr_keyword">class</strong>.getName()),
-<a class="jxr_linenumber" name="L1647" href="#L1647">1647</a> 
-<a class="jxr_linenumber" name="L1648" href="#L1648">1648</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1649" href="#L1649">1649</a> <em class="jxr_javadoccomment">	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or</em>
-<a class="jxr_linenumber" name="L1650" href="#L1650">1650</a> <em class="jxr_javadoccomment">	 * removed at any time.</em>
-<a class="jxr_linenumber" name="L1651" href="#L1651">1651</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1652" href="#L1652">1652</a> 	TEST_RO(BaseServerResponseException.<strong class="jxr_keyword">class</strong>, String.<strong class="jxr_keyword">class</strong>.getName(), String.<strong class="jxr_keyword">class</strong>.getName())
-<a class="jxr_linenumber" name="L1653" href="#L1653">1653</a> 
-<a class="jxr_linenumber" name="L1654" href="#L1654">1654</a> 	;
-<a class="jxr_linenumber" name="L1655" href="#L1655">1655</a> 
-<a class="jxr_linenumber" name="L1656" href="#L1656">1656</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> List&lt;String&gt; myParameterTypes;
-<a class="jxr_linenumber" name="L1657" href="#L1657">1657</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Class&lt;?&gt; myReturnType;
-<a class="jxr_linenumber" name="L1658" href="#L1658">1658</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> ExceptionHandlingSpec myExceptionHandlingSpec;
-<a class="jxr_linenumber" name="L1659" href="#L1659">1659</a> 
-<a class="jxr_linenumber" name="L1660" href="#L1660">1660</a> 	Pointcut(@Nonnull String theReturnType, String... theParameterTypes) {
-<a class="jxr_linenumber" name="L1661" href="#L1661">1661</a> 		<strong class="jxr_keyword">this</strong>(toReturnTypeClass(theReturnType), <strong class="jxr_keyword">new</strong> ExceptionHandlingSpec(), theParameterTypes);
-<a class="jxr_linenumber" name="L1662" href="#L1662">1662</a> 	}
-<a class="jxr_linenumber" name="L1663" href="#L1663">1663</a> 
-<a class="jxr_linenumber" name="L1664" href="#L1664">1664</a> 	Pointcut(@Nonnull Class&lt;?&gt; theReturnType, @Nonnull ExceptionHandlingSpec theExceptionHandlingSpec, String... theParameterTypes) {
-<a class="jxr_linenumber" name="L1665" href="#L1665">1665</a> 		myReturnType = theReturnType;
-<a class="jxr_linenumber" name="L1666" href="#L1666">1666</a> 		myExceptionHandlingSpec = theExceptionHandlingSpec;
-<a class="jxr_linenumber" name="L1667" href="#L1667">1667</a> 		myParameterTypes = Collections.unmodifiableList(Arrays.asList(theParameterTypes));
-<a class="jxr_linenumber" name="L1668" href="#L1668">1668</a> 	}
-<a class="jxr_linenumber" name="L1669" href="#L1669">1669</a> 
-<a class="jxr_linenumber" name="L1670" href="#L1670">1670</a> 	Pointcut(@Nonnull Class&lt;?&gt; theReturnType, String... theParameterTypes) {
-<a class="jxr_linenumber" name="L1671" href="#L1671">1671</a> 		<strong class="jxr_keyword">this</strong>(theReturnType, <strong class="jxr_keyword">new</strong> ExceptionHandlingSpec(), theParameterTypes);
-<a class="jxr_linenumber" name="L1672" href="#L1672">1672</a> 	}
-<a class="jxr_linenumber" name="L1673" href="#L1673">1673</a> 
-<a class="jxr_linenumber" name="L1674" href="#L1674">1674</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isShouldLogAndSwallowException(@Nonnull Throwable theException) {
-<a class="jxr_linenumber" name="L1675" href="#L1675">1675</a> 		<strong class="jxr_keyword">for</strong> (Class&lt;? <strong class="jxr_keyword">extends</strong> Throwable&gt; next : myExceptionHandlingSpec.myTypesToLogAndSwallow) {
-<a class="jxr_linenumber" name="L1676" href="#L1676">1676</a> 			<strong class="jxr_keyword">if</strong> (next.isAssignableFrom(theException.getClass())) {
-<a class="jxr_linenumber" name="L1677" href="#L1677">1677</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L1678" href="#L1678">1678</a> 			}
-<a class="jxr_linenumber" name="L1679" href="#L1679">1679</a> 		}
-<a class="jxr_linenumber" name="L1680" href="#L1680">1680</a> 		<strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L1681" href="#L1681">1681</a> 	}
+<a class="jxr_linenumber" name="L1618" href="#L1618">1618</a> <em class="jxr_javadoccomment">	 * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L1619" href="#L1619">1619</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L1620" href="#L1620">1620</a> <em class="jxr_javadoccomment">	 * Hooks should return &lt;code&gt;void&lt;/code&gt;.</em>
+<a class="jxr_linenumber" name="L1621" href="#L1621">1621</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L1622" href="#L1622">1622</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L1623" href="#L1623">1623</a> 	JPA_PERFTRACE_SEARCH_FOUND_ID(<strong class="jxr_keyword">void</strong>.<strong class="jxr_keyword">class</strong>,
+<a class="jxr_linenumber" name="L1624" href="#L1624">1624</a> 		<span class="jxr_string">"java.lang.Integer"</span>,
+<a class="jxr_linenumber" name="L1625" href="#L1625">1625</a> 		<span class="jxr_string">"java.lang.Object"</span>
+<a class="jxr_linenumber" name="L1626" href="#L1626">1626</a> 	),
+<a class="jxr_linenumber" name="L1627" href="#L1627">1627</a> 
+<a class="jxr_linenumber" name="L1628" href="#L1628">1628</a> 
+<a class="jxr_linenumber" name="L1629" href="#L1629">1629</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1630" href="#L1630">1630</a> <em class="jxr_javadoccomment">	 * Note that this is a performance tracing hook. Use with caution in production</em>
+<a class="jxr_linenumber" name="L1631" href="#L1631">1631</a> <em class="jxr_javadoccomment">	 * systems, since calling it may (or may not) carry a cost.</em>
+<a class="jxr_linenumber" name="L1632" href="#L1632">1632</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L1633" href="#L1633">1633</a> <em class="jxr_javadoccomment">	 * This hook is invoked when a query has executed, and includes the raw SQL</em>
+<a class="jxr_linenumber" name="L1634" href="#L1634">1634</a> <em class="jxr_javadoccomment">	 * statements that were executed against the database.</em>
+<a class="jxr_linenumber" name="L1635" href="#L1635">1635</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L1636" href="#L1636">1636</a> <em class="jxr_javadoccomment">	 * Hooks may accept the following parameters:</em>
+<a class="jxr_linenumber" name="L1637" href="#L1637">1637</a> <em class="jxr_javadoccomment">	 * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L1638" href="#L1638">1638</a> <em class="jxr_javadoccomment">	 * &lt;li&gt;</em>
+<a class="jxr_linenumber" name="L1639" href="#L1639">1639</a> <em class="jxr_javadoccomment">	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the</em>
+<a class="jxr_linenumber" name="L1640" href="#L1640">1640</a> <em class="jxr_javadoccomment">	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been</em>
+<a class="jxr_linenumber" name="L1641" href="#L1641">1641</a> <em class="jxr_javadoccomment">	 * pulled out of the servlet request. Note that the bean</em>
+<a class="jxr_linenumber" name="L1642" href="#L1642">1642</a> <em class="jxr_javadoccomment">	 * properties are not all guaranteed to be populated, depending on how early during processing the</em>
+<a class="jxr_linenumber" name="L1643" href="#L1643">1643</a> <em class="jxr_javadoccomment">	 * exception occurred.</em>
+<a class="jxr_linenumber" name="L1644" href="#L1644">1644</a> <em class="jxr_javadoccomment">	 * &lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L1645" href="#L1645">1645</a> <em class="jxr_javadoccomment">	 * &lt;li&gt;</em>
+<a class="jxr_linenumber" name="L1646" href="#L1646">1646</a> <em class="jxr_javadoccomment">	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the</em>
+<a class="jxr_linenumber" name="L1647" href="#L1647">1647</a> <em class="jxr_javadoccomment">	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been</em>
+<a class="jxr_linenumber" name="L1648" href="#L1648">1648</a> <em class="jxr_javadoccomment">	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will</em>
+<a class="jxr_linenumber" name="L1649" href="#L1649">1649</a> <em class="jxr_javadoccomment">	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.</em>
+<a class="jxr_linenumber" name="L1650" href="#L1650">1650</a> <em class="jxr_javadoccomment">	 * &lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L1651" href="#L1651">1651</a> <em class="jxr_javadoccomment">	 * &lt;li&gt;</em>
+<a class="jxr_linenumber" name="L1652" href="#L1652">1652</a> <em class="jxr_javadoccomment">	 * ca.uhn.fhir.jpa.util.SqlQueryList - Contains details about the raw SQL queries.</em>
+<a class="jxr_linenumber" name="L1653" href="#L1653">1653</a> <em class="jxr_javadoccomment">	 * &lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L1654" href="#L1654">1654</a> <em class="jxr_javadoccomment">	 * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L1655" href="#L1655">1655</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L1656" href="#L1656">1656</a> <em class="jxr_javadoccomment">	 * Hooks should return &lt;code&gt;void&lt;/code&gt;.</em>
+<a class="jxr_linenumber" name="L1657" href="#L1657">1657</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L1658" href="#L1658">1658</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L1659" href="#L1659">1659</a> 	JPA_PERFTRACE_RAW_SQL(<strong class="jxr_keyword">void</strong>.<strong class="jxr_keyword">class</strong>,
+<a class="jxr_linenumber" name="L1660" href="#L1660">1660</a> 		<span class="jxr_string">"ca.uhn.fhir.rest.api.server.RequestDetails"</span>,
+<a class="jxr_linenumber" name="L1661" href="#L1661">1661</a> 		<span class="jxr_string">"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"</span>,
+<a class="jxr_linenumber" name="L1662" href="#L1662">1662</a> 		<span class="jxr_string">"ca.uhn.fhir.jpa.util.SqlQueryList"</span>
+<a class="jxr_linenumber" name="L1663" href="#L1663">1663</a> 	),
+<a class="jxr_linenumber" name="L1664" href="#L1664">1664</a> 
+<a class="jxr_linenumber" name="L1665" href="#L1665">1665</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1666" href="#L1666">1666</a> <em class="jxr_javadoccomment">	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or</em>
+<a class="jxr_linenumber" name="L1667" href="#L1667">1667</a> <em class="jxr_javadoccomment">	 * removed at any time.</em>
+<a class="jxr_linenumber" name="L1668" href="#L1668">1668</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L1669" href="#L1669">1669</a> 	TEST_RB(
+<a class="jxr_linenumber" name="L1670" href="#L1670">1670</a> 		<strong class="jxr_keyword">boolean</strong>.<strong class="jxr_keyword">class</strong>,
+<a class="jxr_linenumber" name="L1671" href="#L1671">1671</a> 		<strong class="jxr_keyword">new</strong> ExceptionHandlingSpec().addLogAndSwallow(IllegalStateException.<strong class="jxr_keyword">class</strong>),
+<a class="jxr_linenumber" name="L1672" href="#L1672">1672</a> 		String.<strong class="jxr_keyword">class</strong>.getName(),
+<a class="jxr_linenumber" name="L1673" href="#L1673">1673</a> 		String.<strong class="jxr_keyword">class</strong>.getName()),
+<a class="jxr_linenumber" name="L1674" href="#L1674">1674</a> 
+<a class="jxr_linenumber" name="L1675" href="#L1675">1675</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1676" href="#L1676">1676</a> <em class="jxr_javadoccomment">	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or</em>
+<a class="jxr_linenumber" name="L1677" href="#L1677">1677</a> <em class="jxr_javadoccomment">	 * removed at any time.</em>
+<a class="jxr_linenumber" name="L1678" href="#L1678">1678</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L1679" href="#L1679">1679</a> 	TEST_RO(BaseServerResponseException.<strong class="jxr_keyword">class</strong>, String.<strong class="jxr_keyword">class</strong>.getName(), String.<strong class="jxr_keyword">class</strong>.getName())
+<a class="jxr_linenumber" name="L1680" href="#L1680">1680</a> 
+<a class="jxr_linenumber" name="L1681" href="#L1681">1681</a> 	;
 <a class="jxr_linenumber" name="L1682" href="#L1682">1682</a> 
-<a class="jxr_linenumber" name="L1683" href="#L1683">1683</a> 	@Nonnull
-<a class="jxr_linenumber" name="L1684" href="#L1684">1684</a> 	<strong class="jxr_keyword">public</strong> Class&lt;?&gt; getReturnType() {
-<a class="jxr_linenumber" name="L1685" href="#L1685">1685</a> 		<strong class="jxr_keyword">return</strong> myReturnType;
-<a class="jxr_linenumber" name="L1686" href="#L1686">1686</a> 	}
-<a class="jxr_linenumber" name="L1687" href="#L1687">1687</a> 
-<a class="jxr_linenumber" name="L1688" href="#L1688">1688</a> 	@Nonnull
-<a class="jxr_linenumber" name="L1689" href="#L1689">1689</a> 	<strong class="jxr_keyword">public</strong> List&lt;String&gt; getParameterTypes() {
-<a class="jxr_linenumber" name="L1690" href="#L1690">1690</a> 		<strong class="jxr_keyword">return</strong> myParameterTypes;
-<a class="jxr_linenumber" name="L1691" href="#L1691">1691</a> 	}
-<a class="jxr_linenumber" name="L1692" href="#L1692">1692</a> 
-<a class="jxr_linenumber" name="L1693" href="#L1693">1693</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> UnknownType {
-<a class="jxr_linenumber" name="L1694" href="#L1694">1694</a> 	}
-<a class="jxr_linenumber" name="L1695" href="#L1695">1695</a> 
-<a class="jxr_linenumber" name="L1696" href="#L1696">1696</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> ExceptionHandlingSpec {
-<a class="jxr_linenumber" name="L1697" href="#L1697">1697</a> 
-<a class="jxr_linenumber" name="L1698" href="#L1698">1698</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Set&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> Throwable&gt;&gt; myTypesToLogAndSwallow = <strong class="jxr_keyword">new</strong> HashSet&lt;&gt;();
-<a class="jxr_linenumber" name="L1699" href="#L1699">1699</a> 
-<a class="jxr_linenumber" name="L1700" href="#L1700">1700</a> 		ExceptionHandlingSpec addLogAndSwallow(@Nonnull Class&lt;? <strong class="jxr_keyword">extends</strong> Throwable&gt; theType) {
-<a class="jxr_linenumber" name="L1701" href="#L1701">1701</a> 			myTypesToLogAndSwallow.add(theType);
-<a class="jxr_linenumber" name="L1702" href="#L1702">1702</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L1703" href="#L1703">1703</a> 		}
-<a class="jxr_linenumber" name="L1704" href="#L1704">1704</a> 
-<a class="jxr_linenumber" name="L1705" href="#L1705">1705</a> 	}
-<a class="jxr_linenumber" name="L1706" href="#L1706">1706</a> 
-<a class="jxr_linenumber" name="L1707" href="#L1707">1707</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Class&lt;?&gt; toReturnTypeClass(String theReturnType) {
-<a class="jxr_linenumber" name="L1708" href="#L1708">1708</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L1709" href="#L1709">1709</a> 			<strong class="jxr_keyword">return</strong> Class.forName(theReturnType);
-<a class="jxr_linenumber" name="L1710" href="#L1710">1710</a> 		} <strong class="jxr_keyword">catch</strong> (ClassNotFoundException theE) {
-<a class="jxr_linenumber" name="L1711" href="#L1711">1711</a> 			<strong class="jxr_keyword">return</strong> UnknownType.<strong class="jxr_keyword">class</strong>;
-<a class="jxr_linenumber" name="L1712" href="#L1712">1712</a> 		}
+<a class="jxr_linenumber" name="L1683" href="#L1683">1683</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> List&lt;String&gt; myParameterTypes;
+<a class="jxr_linenumber" name="L1684" href="#L1684">1684</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Class&lt;?&gt; myReturnType;
+<a class="jxr_linenumber" name="L1685" href="#L1685">1685</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> ExceptionHandlingSpec myExceptionHandlingSpec;
+<a class="jxr_linenumber" name="L1686" href="#L1686">1686</a> 
+<a class="jxr_linenumber" name="L1687" href="#L1687">1687</a> 	Pointcut(@Nonnull String theReturnType, String... theParameterTypes) {
+<a class="jxr_linenumber" name="L1688" href="#L1688">1688</a> 		<strong class="jxr_keyword">this</strong>(toReturnTypeClass(theReturnType), <strong class="jxr_keyword">new</strong> ExceptionHandlingSpec(), theParameterTypes);
+<a class="jxr_linenumber" name="L1689" href="#L1689">1689</a> 	}
+<a class="jxr_linenumber" name="L1690" href="#L1690">1690</a> 
+<a class="jxr_linenumber" name="L1691" href="#L1691">1691</a> 	Pointcut(@Nonnull Class&lt;?&gt; theReturnType, @Nonnull ExceptionHandlingSpec theExceptionHandlingSpec, String... theParameterTypes) {
+<a class="jxr_linenumber" name="L1692" href="#L1692">1692</a> 		myReturnType = theReturnType;
+<a class="jxr_linenumber" name="L1693" href="#L1693">1693</a> 		myExceptionHandlingSpec = theExceptionHandlingSpec;
+<a class="jxr_linenumber" name="L1694" href="#L1694">1694</a> 		myParameterTypes = Collections.unmodifiableList(Arrays.asList(theParameterTypes));
+<a class="jxr_linenumber" name="L1695" href="#L1695">1695</a> 	}
+<a class="jxr_linenumber" name="L1696" href="#L1696">1696</a> 
+<a class="jxr_linenumber" name="L1697" href="#L1697">1697</a> 	Pointcut(@Nonnull Class&lt;?&gt; theReturnType, String... theParameterTypes) {
+<a class="jxr_linenumber" name="L1698" href="#L1698">1698</a> 		<strong class="jxr_keyword">this</strong>(theReturnType, <strong class="jxr_keyword">new</strong> ExceptionHandlingSpec(), theParameterTypes);
+<a class="jxr_linenumber" name="L1699" href="#L1699">1699</a> 	}
+<a class="jxr_linenumber" name="L1700" href="#L1700">1700</a> 
+<a class="jxr_linenumber" name="L1701" href="#L1701">1701</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isShouldLogAndSwallowException(@Nonnull Throwable theException) {
+<a class="jxr_linenumber" name="L1702" href="#L1702">1702</a> 		<strong class="jxr_keyword">for</strong> (Class&lt;? <strong class="jxr_keyword">extends</strong> Throwable&gt; next : myExceptionHandlingSpec.myTypesToLogAndSwallow) {
+<a class="jxr_linenumber" name="L1703" href="#L1703">1703</a> 			<strong class="jxr_keyword">if</strong> (next.isAssignableFrom(theException.getClass())) {
+<a class="jxr_linenumber" name="L1704" href="#L1704">1704</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1705" href="#L1705">1705</a> 			}
+<a class="jxr_linenumber" name="L1706" href="#L1706">1706</a> 		}
+<a class="jxr_linenumber" name="L1707" href="#L1707">1707</a> 		<strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1708" href="#L1708">1708</a> 	}
+<a class="jxr_linenumber" name="L1709" href="#L1709">1709</a> 
+<a class="jxr_linenumber" name="L1710" href="#L1710">1710</a> 	@Nonnull
+<a class="jxr_linenumber" name="L1711" href="#L1711">1711</a> 	<strong class="jxr_keyword">public</strong> Class&lt;?&gt; getReturnType() {
+<a class="jxr_linenumber" name="L1712" href="#L1712">1712</a> 		<strong class="jxr_keyword">return</strong> myReturnType;
 <a class="jxr_linenumber" name="L1713" href="#L1713">1713</a> 	}
 <a class="jxr_linenumber" name="L1714" href="#L1714">1714</a> 
-<a class="jxr_linenumber" name="L1715" href="#L1715">1715</a> }
+<a class="jxr_linenumber" name="L1715" href="#L1715">1715</a> 	@Nonnull
+<a class="jxr_linenumber" name="L1716" href="#L1716">1716</a> 	<strong class="jxr_keyword">public</strong> List&lt;String&gt; getParameterTypes() {
+<a class="jxr_linenumber" name="L1717" href="#L1717">1717</a> 		<strong class="jxr_keyword">return</strong> myParameterTypes;
+<a class="jxr_linenumber" name="L1718" href="#L1718">1718</a> 	}
+<a class="jxr_linenumber" name="L1719" href="#L1719">1719</a> 
+<a class="jxr_linenumber" name="L1720" href="#L1720">1720</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> UnknownType {
+<a class="jxr_linenumber" name="L1721" href="#L1721">1721</a> 	}
+<a class="jxr_linenumber" name="L1722" href="#L1722">1722</a> 
+<a class="jxr_linenumber" name="L1723" href="#L1723">1723</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> ExceptionHandlingSpec {
+<a class="jxr_linenumber" name="L1724" href="#L1724">1724</a> 
+<a class="jxr_linenumber" name="L1725" href="#L1725">1725</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Set&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> Throwable&gt;&gt; myTypesToLogAndSwallow = <strong class="jxr_keyword">new</strong> HashSet&lt;&gt;();
+<a class="jxr_linenumber" name="L1726" href="#L1726">1726</a> 
+<a class="jxr_linenumber" name="L1727" href="#L1727">1727</a> 		ExceptionHandlingSpec addLogAndSwallow(@Nonnull Class&lt;? <strong class="jxr_keyword">extends</strong> Throwable&gt; theType) {
+<a class="jxr_linenumber" name="L1728" href="#L1728">1728</a> 			myTypesToLogAndSwallow.add(theType);
+<a class="jxr_linenumber" name="L1729" href="#L1729">1729</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L1730" href="#L1730">1730</a> 		}
+<a class="jxr_linenumber" name="L1731" href="#L1731">1731</a> 
+<a class="jxr_linenumber" name="L1732" href="#L1732">1732</a> 	}
+<a class="jxr_linenumber" name="L1733" href="#L1733">1733</a> 
+<a class="jxr_linenumber" name="L1734" href="#L1734">1734</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Class&lt;?&gt; toReturnTypeClass(String theReturnType) {
+<a class="jxr_linenumber" name="L1735" href="#L1735">1735</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L1736" href="#L1736">1736</a> 			<strong class="jxr_keyword">return</strong> Class.forName(theReturnType);
+<a class="jxr_linenumber" name="L1737" href="#L1737">1737</a> 		} <strong class="jxr_keyword">catch</strong> (ClassNotFoundException theE) {
+<a class="jxr_linenumber" name="L1738" href="#L1738">1738</a> 			<strong class="jxr_keyword">return</strong> UnknownType.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="L1739" href="#L1739">1739</a> 		}
+<a class="jxr_linenumber" name="L1740" href="#L1740">1740</a> 	}
+<a class="jxr_linenumber" name="L1741" href="#L1741">1741</a> 
+<a class="jxr_linenumber" name="L1742" href="#L1742">1742</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

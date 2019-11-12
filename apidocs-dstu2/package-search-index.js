@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"ca.uhn.fhir.model.dstu2"},{"l":"ca.uhn.fhir.model.dstu2.composite"},{"l":"ca.uhn.fhir.model.dstu2.resource"},{"l":"ca.uhn.fhir.model.dstu2.valueset"},{"l":"ca.uhn.fhir.rest.server.provider.dstu2"}]

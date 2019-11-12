@@ -96,8 +96,8 @@
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>  	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>  	<strong class="jxr_keyword">protected</strong> EntityManager myEntityManager;
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> populateFromResource(ResourceIndexedSearchParams theParams, <a name="IDao" href="../../../../../../ca/uhn/fhir/jpa/dao/IDao.html#IDao">IDao</a> theCallingDao, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  		mySearchParamExtractorService.extractFromResource(theParams, theEntity, theResource);
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> populateFromResource(ResourceIndexedSearchParams theParams, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  		mySearchParamExtractorService.extractFromResource(theRequest, theParams, theEntity, theResource);
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>  
 <a class="jxr_linenumber" name="L94" href="#L94">94</a>  		Set&lt;Map.Entry&lt;String, RuntimeSearchParam&gt;&gt; activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  		<strong class="jxr_keyword">if</strong> (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {

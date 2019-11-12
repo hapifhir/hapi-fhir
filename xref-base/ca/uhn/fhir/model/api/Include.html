@@ -48,7 +48,7 @@
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> serialVersionUID = 1L;
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>  	
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> myImmutable;
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myRecurse;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myIterate;
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  	<strong class="jxr_keyword">private</strong> String myValue;
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  	<em class="jxr_javadoccomment">/**</em>
@@ -67,12 +67,12 @@
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment">	 * </em>
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment">	 * @param theValue</em>
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment">	 *           The &lt;code&gt;_include&lt;/code&gt; value, e.g. "Patient:name"</em>
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment">	 * @param theRecurse</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment">	 * @param theIterate</em>
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment">	 *           Should the include recurse</em>
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  	<strong class="jxr_keyword">public</strong> <a name="Include" href="../../../../../ca/uhn/fhir/model/api/Include.html#Include">Include</a>(String theValue, <strong class="jxr_keyword">boolean</strong> theRecurse) {
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  	<strong class="jxr_keyword">public</strong> <a name="Include" href="../../../../../ca/uhn/fhir/model/api/Include.html#Include">Include</a>(String theValue, <strong class="jxr_keyword">boolean</strong> theIterate) {
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  		myValue = theValue;
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		myRecurse = theRecurse;
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		myIterate = theIterate;
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  		myImmutable = false;
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  	}
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  
@@ -81,12 +81,12 @@
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment">	 * </em>
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_javadoccomment">	 * @param theValue</em>
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_javadoccomment">	 *           The &lt;code&gt;_include&lt;/code&gt; value, e.g. "Patient:name"</em>
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_javadoccomment">	 * @param theRecurse</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_javadoccomment">	 * @param theIterate</em>
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_javadoccomment">	 *           Should the include recurse</em>
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  	<strong class="jxr_keyword">public</strong> <a name="Include" href="../../../../../ca/uhn/fhir/model/api/Include.html#Include">Include</a>(String theValue, <strong class="jxr_keyword">boolean</strong> theRecurse, <strong class="jxr_keyword">boolean</strong> theImmutable) {
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  	<strong class="jxr_keyword">public</strong> <a name="Include" href="../../../../../ca/uhn/fhir/model/api/Include.html#Include">Include</a>(String theValue, <strong class="jxr_keyword">boolean</strong> theIterate, <strong class="jxr_keyword">boolean</strong> theImmutable) {
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  		myValue = theValue;
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  		myRecurse = theRecurse;
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  		myIterate = theIterate;
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  		myImmutable = theImmutable;
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  	}
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  
@@ -119,7 +119,7 @@
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 			<strong class="jxr_keyword">return</strong> false;
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 		}
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 		Include other = (<a name="Include" href="../../../../../ca/uhn/fhir/model/api/Include.html#Include">Include</a>) obj;
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 		<strong class="jxr_keyword">if</strong> (myRecurse != other.myRecurse) {
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 		<strong class="jxr_keyword">if</strong> (myIterate != other.myIterate) {
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 			<strong class="jxr_keyword">return</strong> false;
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 		}
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 		<strong class="jxr_keyword">if</strong> (myValue == <strong class="jxr_keyword">null</strong>) {
@@ -185,7 +185,7 @@
 <a class="jxr_linenumber" name="L177" href="#L177">177</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> hashCode() {
 <a class="jxr_linenumber" name="L178" href="#L178">178</a> 		<strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> prime = 31;
 <a class="jxr_linenumber" name="L179" href="#L179">179</a> 		<strong class="jxr_keyword">int</strong> result = 1;
-<a class="jxr_linenumber" name="L180" href="#L180">180</a> 		result = prime * result + (myRecurse ? 1231 : 1237);
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 		result = prime * result + (myIterate ? 1231 : 1237);
 <a class="jxr_linenumber" name="L181" href="#L181">181</a> 		result = prime * result + ((myValue == <strong class="jxr_keyword">null</strong>) ? 0 : myValue.hashCode());
 <a class="jxr_linenumber" name="L182" href="#L182">182</a> 		<strong class="jxr_keyword">return</strong> result;
 <a class="jxr_linenumber" name="L183" href="#L183">183</a> 	}
@@ -198,7 +198,7 @@
 <a class="jxr_linenumber" name="L190" href="#L190">190</a> 	}
 <a class="jxr_linenumber" name="L191" href="#L191">191</a> 
 <a class="jxr_linenumber" name="L192" href="#L192">192</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isRecurse() {
-<a class="jxr_linenumber" name="L193" href="#L193">193</a> 		<strong class="jxr_keyword">return</strong> myRecurse;
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> 		<strong class="jxr_keyword">return</strong> myIterate;
 <a class="jxr_linenumber" name="L194" href="#L194">194</a> 	}
 <a class="jxr_linenumber" name="L195" href="#L195">195</a> 
 <a class="jxr_linenumber" name="L196" href="#L196">196</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -207,7 +207,7 @@
 <a class="jxr_linenumber" name="L199" href="#L199">199</a> <em class="jxr_javadoccomment">	 * @return  Returns a reference to &lt;code&gt;this&lt;/code&gt; for easy method chaining</em>
 <a class="jxr_linenumber" name="L200" href="#L200">200</a> <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L201" href="#L201">201</a> 	<strong class="jxr_keyword">public</strong> <a name="Include" href="../../../../../ca/uhn/fhir/model/api/Include.html#Include">Include</a> setRecurse(<strong class="jxr_keyword">boolean</strong> theRecurse) {
-<a class="jxr_linenumber" name="L202" href="#L202">202</a> 		myRecurse = theRecurse;
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> 		myIterate = theRecurse;
 <a class="jxr_linenumber" name="L203" href="#L203">203</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L204" href="#L204">204</a> 	}
 <a class="jxr_linenumber" name="L205" href="#L205">205</a> 
@@ -222,7 +222,7 @@
 <a class="jxr_linenumber" name="L214" href="#L214">214</a> <em class="jxr_javadoccomment">	 * Return a new</em>
 <a class="jxr_linenumber" name="L215" href="#L215">215</a> <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L216" href="#L216">216</a> 	<strong class="jxr_keyword">public</strong> <a name="Include" href="../../../../../ca/uhn/fhir/model/api/Include.html#Include">Include</a> toLocked() {
-<a class="jxr_linenumber" name="L217" href="#L217">217</a> 		Include retVal = <strong class="jxr_keyword">new</strong> <a name="Include" href="../../../../../ca/uhn/fhir/model/api/Include.html#Include">Include</a>(myValue, myRecurse, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> 		Include retVal = <strong class="jxr_keyword">new</strong> <a name="Include" href="../../../../../ca/uhn/fhir/model/api/Include.html#Include">Include</a>(myValue, myIterate, <strong class="jxr_keyword">true</strong>);
 <a class="jxr_linenumber" name="L218" href="#L218">218</a> 		<strong class="jxr_keyword">return</strong> retVal;
 <a class="jxr_linenumber" name="L219" href="#L219">219</a> 	}
 <a class="jxr_linenumber" name="L220" href="#L220">220</a> 
@@ -230,7 +230,7 @@
 <a class="jxr_linenumber" name="L222" href="#L222">222</a> 	<strong class="jxr_keyword">public</strong> String toString() {
 <a class="jxr_linenumber" name="L223" href="#L223">223</a> 		ToStringBuilder builder = <strong class="jxr_keyword">new</strong> ToStringBuilder(<strong class="jxr_keyword">this</strong>);
 <a class="jxr_linenumber" name="L224" href="#L224">224</a> 		builder.append(<span class="jxr_string">"value"</span>, myValue);
-<a class="jxr_linenumber" name="L225" href="#L225">225</a> 		builder.append(<span class="jxr_string">"recurse"</span>, myRecurse);
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> 		builder.append(<span class="jxr_string">"iterate"</span>, myIterate);
 <a class="jxr_linenumber" name="L226" href="#L226">226</a> 		<strong class="jxr_keyword">return</strong> builder.toString();
 <a class="jxr_linenumber" name="L227" href="#L227">227</a> 	}
 <a class="jxr_linenumber" name="L228" href="#L228">228</a> 
@@ -281,7 +281,7 @@
 <a class="jxr_linenumber" name="L273" href="#L273">273</a> 			b.append(':');
 <a class="jxr_linenumber" name="L274" href="#L274">274</a> 			b.append(theResourceType);
 <a class="jxr_linenumber" name="L275" href="#L275">275</a> 		}
-<a class="jxr_linenumber" name="L276" href="#L276">276</a> 		Include retVal = <strong class="jxr_keyword">new</strong> <a name="Include" href="../../../../../ca/uhn/fhir/model/api/Include.html#Include">Include</a>(b.toString(), myRecurse, myImmutable);
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> 		Include retVal = <strong class="jxr_keyword">new</strong> <a name="Include" href="../../../../../ca/uhn/fhir/model/api/Include.html#Include">Include</a>(b.toString(), myIterate, myImmutable);
 <a class="jxr_linenumber" name="L277" href="#L277">277</a> 		<strong class="jxr_keyword">return</strong> retVal;
 <a class="jxr_linenumber" name="L278" href="#L278">278</a> 	}
 <a class="jxr_linenumber" name="L279" href="#L279">279</a> 

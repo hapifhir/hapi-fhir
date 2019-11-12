@@ -31,7 +31,7 @@
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.TermConcept;
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.term.IRecordHandler;
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.csv.CSVRecord;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  
@@ -64,13 +64,13 @@
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>           parent.addPropertyCoding(
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>           	<span class="jxr_string">"child"</span>,
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  				IHapiTerminologyLoaderSvc.LOINC_URI,
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  				ITermLoaderSvc.LOINC_URI,
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  				child.getCode(),
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  				child.getDisplay());
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>           child.addPropertyCoding(
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>           	<span class="jxr_string">"parent"</span>,
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  				IHapiTerminologyLoaderSvc.LOINC_URI,
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  				ITermLoaderSvc.LOINC_URI,
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  				parent.getCode(),
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  				parent.getDisplay());
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>        }

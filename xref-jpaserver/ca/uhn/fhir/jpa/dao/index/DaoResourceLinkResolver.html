@@ -108,7 +108,7 @@
 <a class="jxr_linenumber" name="L100" href="#L100">100</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"Resource "</span> + resName + <span class="jxr_string">"/"</span> + theId + <span class="jxr_string">" is deleted, specified in path: "</span> + theNextPathsUnsplit);
 <a class="jxr_linenumber" name="L101" href="#L101">101</a> 		}
 <a class="jxr_linenumber" name="L102" href="#L102">102</a> 
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 		<strong class="jxr_keyword">if</strong> (theNextSpDef.getTargets() != <strong class="jxr_keyword">null</strong> &amp;&amp; !theNextSpDef.getTargets().contains(theTypeString)) {
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 		<strong class="jxr_keyword">if</strong> (!theNextSpDef.hasTargets() &amp;&amp; theNextSpDef.getTargets().contains(theTypeString)) {
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L105" href="#L105">105</a> 		}
 <a class="jxr_linenumber" name="L106" href="#L106">106</a> 		<strong class="jxr_keyword">return</strong> target;

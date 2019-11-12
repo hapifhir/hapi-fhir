@@ -57,8 +57,8 @@
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  	}
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  	@Override
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	<strong class="jxr_keyword">public</strong> StoredDetails storeBlob(IIdType theResourceId, String theContentType, InputStream theInputStream) <strong class="jxr_keyword">throws</strong> IOException {
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  		String id = newRandomId();
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	<strong class="jxr_keyword">public</strong> <a name="StoredDetails" href="../../../../../ca/uhn/fhir/jpa/binstore/StoredDetails.html#StoredDetails">StoredDetails</a> storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  		String id = <strong class="jxr_keyword">super</strong>.provideIdForNewBlob(theBlobIdOrNull);
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  		String key = toKey(theResourceId, id);
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  		HashingInputStream hashingIs = createHashingInputStream(theInputStream);
@@ -67,13 +67,13 @@
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  		byte[] bytes = IOUtils.toByteArray(countingIs);
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  		theInputStream.close();
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  		myDataMap.put(key, bytes);
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  		StoredDetails storedDetails = <strong class="jxr_keyword">new</strong> StoredDetails(id, countingIs.getCount(), theContentType, hashingIs, <strong class="jxr_keyword">new</strong> Date());
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  		StoredDetails storedDetails = <strong class="jxr_keyword">new</strong> <a name="StoredDetails" href="../../../../../ca/uhn/fhir/jpa/binstore/StoredDetails.html#StoredDetails">StoredDetails</a>(id, countingIs.getCount(), theContentType, hashingIs, <strong class="jxr_keyword">new</strong> Date());
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  		myDetailsMap.put(key, storedDetails);
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  		<strong class="jxr_keyword">return</strong> storedDetails;
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  	}
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  	@Override
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	<strong class="jxr_keyword">public</strong> StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	<strong class="jxr_keyword">public</strong> <a name="StoredDetails" href="../../../../../ca/uhn/fhir/jpa/binstore/StoredDetails.html#StoredDetails">StoredDetails</a> fetchBlobDetails(IIdType theResourceId, String theBlobId) {
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  		String key = toKey(theResourceId, theBlobId);
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  		<strong class="jxr_keyword">return</strong> myDetailsMap.get(key);
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  	}
@@ -93,13 +93,24 @@
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> expungeBlob(IIdType theResourceId, String theBlobId) {
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  		String key = toKey(theResourceId, theBlobId);
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  		myDataMap.remove(key);
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  	}
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  	<strong class="jxr_keyword">private</strong> String toKey(IIdType theResourceId, String theBlobId) {
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  		<strong class="jxr_keyword">return</strong> theBlobId + '-' + theResourceId.toUnqualifiedVersionless().getValue();
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  	}
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  }
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  		myDetailsMap.remove(key);
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  	}
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  	@Override
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  	<strong class="jxr_keyword">public</strong> byte[] fetchBlob(IIdType theResourceId, String theBlobId) {
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  		String key = toKey(theResourceId, theBlobId);
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		<strong class="jxr_keyword">return</strong> myDataMap.get(key);
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  	}
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  	<strong class="jxr_keyword">private</strong> String toKey(IIdType theResourceId, String theBlobId) {
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  		<strong class="jxr_keyword">return</strong> theBlobId + '-' + theResourceId.toUnqualifiedVersionless().getValue();
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  	}
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> clear() {
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		myDetailsMap.clear();
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 		myDataMap.clear();
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 	}
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

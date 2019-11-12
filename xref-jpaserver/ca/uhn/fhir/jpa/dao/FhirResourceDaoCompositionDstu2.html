@@ -40,7 +40,7 @@
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> javax.servlet.http.HttpServletRequest;
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="FhirResourceDaoCompositionDstu2" href="../../../../../ca/uhn/fhir/jpa/dao/FhirResourceDaoCompositionDstu2.html#FhirResourceDaoCompositionDstu2">FhirResourceDaoCompositionDstu2</a> <strong class="jxr_keyword">extends</strong> FhirResourceDaoDstu2&lt;Composition&gt;<strong class="jxr_keyword">implements</strong> IFhirResourceDaoComposition&lt;Composition&gt; {
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="FhirResourceDaoCompositionDstu2" href="../../../../../ca/uhn/fhir/jpa/dao/FhirResourceDaoCompositionDstu2.html#FhirResourceDaoCompositionDstu2">FhirResourceDaoCompositionDstu2</a> <strong class="jxr_keyword">extends</strong> BaseHapiFhirResourceDao&lt;Composition&gt;<strong class="jxr_keyword">implements</strong> IFhirResourceDaoComposition&lt;Composition&gt; {
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  	@Override
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  	<strong class="jxr_keyword">public</strong> IBundleProvider getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType&lt;Integer&gt; theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {

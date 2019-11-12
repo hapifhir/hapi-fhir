@@ -28,25 +28,25 @@
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * #L%</em>
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> */</em>
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  
-<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> java.lang.reflect.Constructor;
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> java.util.*;
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.util.UrlUtil;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.util.UrlUtil;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBase;
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBase;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> java.lang.reflect.Constructor;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.util.*;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> BaseRuntimeElementDefinition&lt;T <strong class="jxr_keyword">extends</strong> IBase&gt; {
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Class&lt;Void&gt; VOID_CLASS = Void.<strong class="jxr_keyword">class</strong>;
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  	
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  	<strong class="jxr_keyword">private</strong> Map&lt;Class&lt;?&gt;, Constructor&lt;T&gt;&gt; myConstructors = Collections.synchronizedMap(<strong class="jxr_keyword">new</strong> HashMap&lt;Class&lt;?&gt;, Constructor&lt;T&gt;&gt;());
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  	<strong class="jxr_keyword">private</strong> List&lt;RuntimeChildDeclaredExtensionDefinition&gt; myExtensions = <strong class="jxr_keyword">new</strong> ArrayList&lt;RuntimeChildDeclaredExtensionDefinition&gt;();
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  	<strong class="jxr_keyword">private</strong> List&lt;RuntimeChildDeclaredExtensionDefinition&gt; myExtensionsModifier = <strong class="jxr_keyword">new</strong> ArrayList&lt;RuntimeChildDeclaredExtensionDefinition&gt;();
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>  	<strong class="jxr_keyword">private</strong> List&lt;RuntimeChildDeclaredExtensionDefinition&gt; myExtensionsNonModifier = <strong class="jxr_keyword">new</strong> ArrayList&lt;RuntimeChildDeclaredExtensionDefinition&gt;();
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Class&lt;? <strong class="jxr_keyword">extends</strong> T&gt; myImplementingClass;
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String myName;
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> myStandardType;
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  	<strong class="jxr_keyword">private</strong> Map&lt;String, RuntimeChildDeclaredExtensionDefinition&gt; myUrlToExtension = <strong class="jxr_keyword">new</strong> HashMap&lt;String, RuntimeChildDeclaredExtensionDefinition&gt;();
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Class&lt;? <strong class="jxr_keyword">extends</strong> T&gt; myImplementingClass;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String myName;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> myStandardType;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  	<strong class="jxr_keyword">private</strong> Map&lt;Class&lt;?&gt;, Constructor&lt;T&gt;&gt; myConstructors = Collections.synchronizedMap(<strong class="jxr_keyword">new</strong> HashMap&lt;Class&lt;?&gt;, Constructor&lt;T&gt;&gt;());
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  	<strong class="jxr_keyword">private</strong> List&lt;RuntimeChildDeclaredExtensionDefinition&gt; myExtensions = <strong class="jxr_keyword">new</strong> ArrayList&lt;RuntimeChildDeclaredExtensionDefinition&gt;();
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  	<strong class="jxr_keyword">private</strong> List&lt;RuntimeChildDeclaredExtensionDefinition&gt; myExtensionsModifier = <strong class="jxr_keyword">new</strong> ArrayList&lt;RuntimeChildDeclaredExtensionDefinition&gt;();
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  	<strong class="jxr_keyword">private</strong> List&lt;RuntimeChildDeclaredExtensionDefinition&gt; myExtensionsNonModifier = <strong class="jxr_keyword">new</strong> ArrayList&lt;RuntimeChildDeclaredExtensionDefinition&gt;();
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  	<strong class="jxr_keyword">private</strong> Map&lt;String, RuntimeChildDeclaredExtensionDefinition&gt; myUrlToExtension = <strong class="jxr_keyword">new</strong> HashMap&lt;String, RuntimeChildDeclaredExtensionDefinition&gt;();
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  	<strong class="jxr_keyword">private</strong> BaseRuntimeElementDefinition&lt;?&gt; myRootParentDefinition;
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  	<strong class="jxr_keyword">public</strong> <a name="BaseRuntimeElementDefinition" href="../../../../ca/uhn/fhir/context/BaseRuntimeElementDefinition.html#BaseRuntimeElementDefinition">BaseRuntimeElementDefinition</a>(String theName, Class&lt;? <strong class="jxr_keyword">extends</strong> T&gt; theImplementingClass, <strong class="jxr_keyword">boolean</strong> theStandardType) {
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  		assert StringUtils.isNotBlank(theName);
@@ -57,8 +57,8 @@
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  		<strong class="jxr_keyword">if</strong> (name.endsWith(<span class="jxr_string">"Dt"</span>)) {
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  			name = name.substring(0, name.length() - 2);
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  		}
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  		
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  		
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  		myName = name;
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  		myStandardType = theStandardType;
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  		myImplementingClass = theImplementingClass;
@@ -75,14 +75,14 @@
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  	@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  	<strong class="jxr_keyword">private</strong> Constructor&lt;T&gt; getConstructor(Object theArgument) {
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  		
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  		Class&lt;? <strong class="jxr_keyword">extends</strong> Object&gt; argumentType;
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  		<strong class="jxr_keyword">if</strong> (theArgument == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  			argumentType = VOID_CLASS;
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  		} <strong class="jxr_keyword">else</strong> {
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  			argumentType = theArgument.getClass();
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  		}
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  		Constructor&lt;T&gt; retVal = myConstructors.get(argumentType);
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  		<strong class="jxr_keyword">if</strong> (retVal == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  			<strong class="jxr_keyword">for</strong> (Constructor&lt;?&gt; next : getImplementingClass().getConstructors()) {
@@ -145,7 +145,7 @@
 <a class="jxr_linenumber" name="L137" href="#L137">137</a> 
 <a class="jxr_linenumber" name="L138" href="#L138">138</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L139" href="#L139">139</a> <em class="jxr_javadoccomment">	 * @return Returns the runtime name for this resource (i.e. the name that</em>
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> <em class="jxr_javadoccomment">	 *         will be used in encoded messages)</em>
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> <em class="jxr_javadoccomment">	 * will be used in encoded messages)</em>
 <a class="jxr_linenumber" name="L141" href="#L141">141</a> <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L142" href="#L142">142</a> 	<strong class="jxr_keyword">public</strong> String getName() {
 <a class="jxr_linenumber" name="L143" href="#L143">143</a> 		<strong class="jxr_keyword">return</strong> myName;
@@ -176,72 +176,90 @@
 <a class="jxr_linenumber" name="L168" href="#L168">168</a> 		}
 <a class="jxr_linenumber" name="L169" href="#L169">169</a> 	}
 <a class="jxr_linenumber" name="L170" href="#L170">170</a> 
-<a class="jxr_linenumber" name="L171" href="#L171">171</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L172" href="#L172">172</a> <em class="jxr_javadoccomment">	 * Invoked prior to use to perform any initialization and make object</em>
-<a class="jxr_linenumber" name="L173" href="#L173">173</a> <em class="jxr_javadoccomment">	 * mutable.</em>
-<a class="jxr_linenumber" name="L174" href="#L174">174</a> <em class="jxr_javadoccomment">	 * @param theContext TODO</em>
-<a class="jxr_linenumber" name="L175" href="#L175">175</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L176" href="#L176">176</a> 	<strong class="jxr_keyword">void</strong> sealAndInitialize(<a name="FhirContext" href="../../../../ca/uhn/fhir/context/FhirContext.html#FhirContext">FhirContext</a> theContext, Map&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {
-<a class="jxr_linenumber" name="L177" href="#L177">177</a> 		<strong class="jxr_keyword">for</strong> (<a name="BaseRuntimeChildDefinition" href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html#BaseRuntimeChildDefinition">BaseRuntimeChildDefinition</a> next : myExtensions) {
-<a class="jxr_linenumber" name="L178" href="#L178">178</a> 			next.sealAndInitialize(theContext, theClassToElementDefinitions);
-<a class="jxr_linenumber" name="L179" href="#L179">179</a> 		}
-<a class="jxr_linenumber" name="L180" href="#L180">180</a> 
-<a class="jxr_linenumber" name="L181" href="#L181">181</a> 		<strong class="jxr_keyword">for</strong> (<a name="RuntimeChildDeclaredExtensionDefinition" href="../../../../ca/uhn/fhir/context/RuntimeChildDeclaredExtensionDefinition.html#RuntimeChildDeclaredExtensionDefinition">RuntimeChildDeclaredExtensionDefinition</a> next : myExtensions) {
-<a class="jxr_linenumber" name="L182" href="#L182">182</a> 			String extUrl = next.getExtensionUrl();
-<a class="jxr_linenumber" name="L183" href="#L183">183</a> 			<strong class="jxr_keyword">if</strong> (myUrlToExtension.containsKey(extUrl)) {
-<a class="jxr_linenumber" name="L184" href="#L184">184</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a>(<span class="jxr_string">"Duplicate extension URL["</span> + extUrl + <span class="jxr_string">"] in Element["</span> + getName() + <span class="jxr_string">"]"</span>);
-<a class="jxr_linenumber" name="L185" href="#L185">185</a> 			}
-<a class="jxr_linenumber" name="L186" href="#L186">186</a> 			myUrlToExtension.put(extUrl, next);
-<a class="jxr_linenumber" name="L187" href="#L187">187</a> 			<strong class="jxr_keyword">if</strong> (next.isModifier()) {
-<a class="jxr_linenumber" name="L188" href="#L188">188</a> 				myExtensionsModifier.add(next);
-<a class="jxr_linenumber" name="L189" href="#L189">189</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L190" href="#L190">190</a> 				myExtensionsNonModifier.add(next);
-<a class="jxr_linenumber" name="L191" href="#L191">191</a> 			}
-<a class="jxr_linenumber" name="L192" href="#L192">192</a> 
-<a class="jxr_linenumber" name="L193" href="#L193">193</a> 		}
-<a class="jxr_linenumber" name="L194" href="#L194">194</a> 
-<a class="jxr_linenumber" name="L195" href="#L195">195</a> 		myExtensions = Collections.unmodifiableList(myExtensions);
-<a class="jxr_linenumber" name="L196" href="#L196">196</a> 	}
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> 	<strong class="jxr_keyword">public</strong> BaseRuntimeElementDefinition&lt;?&gt; getRootParentDefinition() {
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 		<strong class="jxr_keyword">return</strong> myRootParentDefinition;
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 	}
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> <em class="jxr_javadoccomment">	 * Invoked prior to use to perform any initialization and make object</em>
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> <em class="jxr_javadoccomment">	 * mutable.</em>
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> <em class="jxr_javadoccomment">	 *</em>
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> <em class="jxr_javadoccomment">	 * @param theContext TODO</em>
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 	<strong class="jxr_keyword">void</strong> sealAndInitialize(<a name="FhirContext" href="../../../../ca/uhn/fhir/context/FhirContext.html#FhirContext">FhirContext</a> theContext, Map&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 		<strong class="jxr_keyword">for</strong> (<a name="BaseRuntimeChildDefinition" href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html#BaseRuntimeChildDefinition">BaseRuntimeChildDefinition</a> next : myExtensions) {
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 			next.sealAndInitialize(theContext, theClassToElementDefinitions);
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> 		}
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> 		<strong class="jxr_keyword">for</strong> (<a name="RuntimeChildDeclaredExtensionDefinition" href="../../../../ca/uhn/fhir/context/RuntimeChildDeclaredExtensionDefinition.html#RuntimeChildDeclaredExtensionDefinition">RuntimeChildDeclaredExtensionDefinition</a> next : myExtensions) {
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> 			String extUrl = next.getExtensionUrl();
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> 			<strong class="jxr_keyword">if</strong> (myUrlToExtension.containsKey(extUrl)) {
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a>(<span class="jxr_string">"Duplicate extension URL["</span> + extUrl + <span class="jxr_string">"] in Element["</span> + getName() + <span class="jxr_string">"]"</span>);
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> 			}
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> 			myUrlToExtension.put(extUrl, next);
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 			<strong class="jxr_keyword">if</strong> (next.isModifier()) {
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> 				myExtensionsModifier.add(next);
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> 				myExtensionsNonModifier.add(next);
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> 			}
 <a class="jxr_linenumber" name="L197" href="#L197">197</a> 
-<a class="jxr_linenumber" name="L198" href="#L198">198</a> 	@Override
-<a class="jxr_linenumber" name="L199" href="#L199">199</a> 	<strong class="jxr_keyword">public</strong> String toString() {
-<a class="jxr_linenumber" name="L200" href="#L200">200</a> 		<strong class="jxr_keyword">return</strong> getClass().getSimpleName()+<span class="jxr_string">"["</span> + getName() + <span class="jxr_string">", "</span> + getImplementingClass().getSimpleName() + <span class="jxr_string">"]"</span>;
-<a class="jxr_linenumber" name="L201" href="#L201">201</a> 	}
-<a class="jxr_linenumber" name="L202" href="#L202">202</a> 
-<a class="jxr_linenumber" name="L203" href="#L203">203</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> validateSealed() {
-<a class="jxr_linenumber" name="L204" href="#L204">204</a> 		<em class="jxr_comment">/* </em>
-<a class="jxr_linenumber" name="L205" href="#L205">205</a> <em class="jxr_comment">		 * this does nothing, but BaseRuntimeElementCompositeDefinition</em>
-<a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_comment">		 * overrides this method to provide functionality because that class</em>
-<a class="jxr_linenumber" name="L207" href="#L207">207</a> <em class="jxr_comment">		 * defers the dealing process</em>
-<a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_comment">		 */</em>
-<a class="jxr_linenumber" name="L209" href="#L209">209</a> 		
-<a class="jxr_linenumber" name="L210" href="#L210">210</a> 	}
-<a class="jxr_linenumber" name="L211" href="#L211">211</a> 
-<a class="jxr_linenumber" name="L212" href="#L212">212</a> 	<strong class="jxr_keyword">public</strong> enum ChildTypeEnum {
-<a class="jxr_linenumber" name="L213" href="#L213">213</a> 		COMPOSITE_DATATYPE, <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L214" href="#L214">214</a> <em class="jxr_javadoccomment">		 * HL7.org structure style.</em>
-<a class="jxr_linenumber" name="L215" href="#L215">215</a> <em class="jxr_javadoccomment">		 */</em>
-<a class="jxr_linenumber" name="L216" href="#L216">216</a> 		CONTAINED_RESOURCE_LIST, <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L217" href="#L217">217</a> <em class="jxr_javadoccomment">		 * HAPI structure style.</em>
-<a class="jxr_linenumber" name="L218" href="#L218">218</a> <em class="jxr_javadoccomment">		 */</em>
-<a class="jxr_linenumber" name="L219" href="#L219">219</a> 		CONTAINED_RESOURCES, EXTENSION_DECLARED, 
-<a class="jxr_linenumber" name="L220" href="#L220">220</a> 		ID_DATATYPE, 
-<a class="jxr_linenumber" name="L221" href="#L221">221</a> 		PRIMITIVE_DATATYPE, <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L222" href="#L222">222</a> <em class="jxr_javadoccomment">		 * HAPI style.</em>
-<a class="jxr_linenumber" name="L223" href="#L223">223</a> <em class="jxr_javadoccomment">		 */</em>
-<a class="jxr_linenumber" name="L224" href="#L224">224</a> 		PRIMITIVE_XHTML, 
-<a class="jxr_linenumber" name="L225" href="#L225">225</a> 		<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L226" href="#L226">226</a> <em class="jxr_javadoccomment">		 * HL7.org style.</em>
-<a class="jxr_linenumber" name="L227" href="#L227">227</a> <em class="jxr_javadoccomment">		 */</em>
-<a class="jxr_linenumber" name="L228" href="#L228">228</a> 		PRIMITIVE_XHTML_HL7ORG, 
-<a class="jxr_linenumber" name="L229" href="#L229">229</a> 		RESOURCE, 
-<a class="jxr_linenumber" name="L230" href="#L230">230</a> 		RESOURCE_BLOCK, 
-<a class="jxr_linenumber" name="L231" href="#L231">231</a> 		
-<a class="jxr_linenumber" name="L232" href="#L232">232</a> 		UNDECL_EXT, 
-<a class="jxr_linenumber" name="L233" href="#L233">233</a> 		
-<a class="jxr_linenumber" name="L234" href="#L234">234</a> 	}
-<a class="jxr_linenumber" name="L235" href="#L235">235</a> 
-<a class="jxr_linenumber" name="L236" href="#L236">236</a> }
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> 		}
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> 
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> 		myExtensions = Collections.unmodifiableList(myExtensions);
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> 
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> 		Class parent = myImplementingClass;
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> 		<strong class="jxr_keyword">do</strong> {
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> 			BaseRuntimeElementDefinition&lt;?&gt; parentDefinition = theClassToElementDefinitions.get(parent);
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> 			<strong class="jxr_keyword">if</strong> (parentDefinition != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> 				myRootParentDefinition = parentDefinition;
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> 			}
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> 			parent = parent.getSuperclass();
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> 		} <strong class="jxr_keyword">while</strong> (!parent.equals(Object.<strong class="jxr_keyword">class</strong>));
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> 
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> 	}
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> 
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> 	@Override
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> 	<strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> 		<strong class="jxr_keyword">return</strong> getClass().getSimpleName() + <span class="jxr_string">"["</span> + getName() + <span class="jxr_string">", "</span> + getImplementingClass().getSimpleName() + <span class="jxr_string">"]"</span>;
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> 	}
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> 
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> validateSealed() {
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> 		<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> <em class="jxr_comment">		 * this does nothing, but BaseRuntimeElementCompositeDefinition</em>
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> <em class="jxr_comment">		 * overrides this method to provide functionality because that class</em>
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> <em class="jxr_comment">		 * defers the dealing process</em>
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> <em class="jxr_comment">		 */</em>
+<a class="jxr_linenumber" name="L224" href="#L224">224</a> 
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> 	}
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> 
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> 	<strong class="jxr_keyword">public</strong> enum ChildTypeEnum {
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> 		COMPOSITE_DATATYPE,
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> 		<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> <em class="jxr_javadoccomment">		 * HL7.org structure style.</em>
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> <em class="jxr_javadoccomment">		 */</em>
+<a class="jxr_linenumber" name="L232" href="#L232">232</a> 		CONTAINED_RESOURCE_LIST,
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> 		<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> <em class="jxr_javadoccomment">		 * HAPI structure style.</em>
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> <em class="jxr_javadoccomment">		 */</em>
+<a class="jxr_linenumber" name="L236" href="#L236">236</a> 		CONTAINED_RESOURCES, EXTENSION_DECLARED,
+<a class="jxr_linenumber" name="L237" href="#L237">237</a> 		ID_DATATYPE,
+<a class="jxr_linenumber" name="L238" href="#L238">238</a> 		PRIMITIVE_DATATYPE,
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> 		<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L240" href="#L240">240</a> <em class="jxr_javadoccomment">		 * HAPI style.</em>
+<a class="jxr_linenumber" name="L241" href="#L241">241</a> <em class="jxr_javadoccomment">		 */</em>
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> 		PRIMITIVE_XHTML,
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> 		<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> <em class="jxr_javadoccomment">		 * HL7.org style.</em>
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> <em class="jxr_javadoccomment">		 */</em>
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> 		PRIMITIVE_XHTML_HL7ORG,
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> 		RESOURCE,
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> 		RESOURCE_BLOCK,
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> 
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> 		UNDECL_EXT,
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> 
+<a class="jxr_linenumber" name="L252" href="#L252">252</a> 	}
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> 
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

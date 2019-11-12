@@ -8,34 +8,34 @@
 <div id="overview"><a href="../../../../../../apidocs/ca/uhn/fhir/rest/api/QualifiedParamList.html">View Javadoc</a></div><pre>
 <a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api;
 <a class="jxr_linenumber" name="L2" href="#L2">2</a>   
-<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.commons.lang3.StringUtils.isBlank;
-<a class="jxr_linenumber" name="L4" href="#L4">4</a>   
-<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * #%L</em>
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * HAPI FHIR - Core Library</em>
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * %%</em>
-<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2019 University Health Network</em>
-<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * %%</em>
-<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
-<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> *</em>
-<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
-<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
-<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * See the License for the specific language governing permissions and</em>
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * limitations under the License.</em>
-<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * #L%</em>
-<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> */</em>
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>  
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> java.util.StringTokenizer;
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.FhirContext;
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IQueryParameterOr;
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IQueryParameterType;
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.FhirContext;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IQueryParameterOr;
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IQueryParameterType;
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> java.util.ArrayList;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> java.util.StringTokenizer;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.commons.lang3.StringUtils.isBlank;
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * #%L</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * HAPI FHIR - Core Library</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * %%</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * Copyright (C) 2014 - 2019 University Health Network</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * %%</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_comment"> * See the License for the specific language governing permissions and</em>
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_comment"> * limitations under the License.</em>
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_comment"> * #L%</em>
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_comment"> */</em>
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="QualifiedParamList" href="../../../../../ca/uhn/fhir/rest/api/QualifiedParamList.html#QualifiedParamList">QualifiedParamList</a> <strong class="jxr_keyword">extends</strong> ArrayList&lt;String&gt; {
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  
@@ -91,16 +91,16 @@
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  				prev = <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  				<strong class="jxr_keyword">continue</strong>;
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  			}
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  			
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  			<strong class="jxr_keyword">if</strong> (str.equals(<span class="jxr_string">","</span>)) {
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  					<strong class="jxr_keyword">if</strong> (countTrailingSlashes(prev) % 2 == 1) {
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  						<strong class="jxr_keyword">int</strong> idx = retVal.size() - 1;
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  						String existing = retVal.get(idx);
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  						prev = existing.substring(0, existing.length() - 1) + ',';
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  						retVal.set(idx, prev);
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  					} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  						prev = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  					}
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  				<strong class="jxr_keyword">if</strong> (countTrailingSlashes(prev) % 2 == 1) {
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  					<strong class="jxr_keyword">int</strong> idx = retVal.size() - 1;
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  					String existing = retVal.get(idx);
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  					prev = existing.substring(0, existing.length() - 1) + ',';
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  					retVal.set(idx, prev);
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  					prev = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  				}
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  				<strong class="jxr_keyword">continue</strong>;
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>  			}
 <a class="jxr_linenumber" name="L98" href="#L98">98</a>  
@@ -116,25 +116,32 @@
 <a class="jxr_linenumber" name="L108" href="#L108">108</a> 
 <a class="jxr_linenumber" name="L109" href="#L109">109</a> 		}
 <a class="jxr_linenumber" name="L110" href="#L110">110</a> 
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 	}
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> countTrailingSlashes(String theString) {
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 		<strong class="jxr_keyword">if</strong>(theString==<strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			<strong class="jxr_keyword">return</strong> 0;
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> 		}
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		<strong class="jxr_keyword">int</strong> retVal = 0;
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = theString.length() - 1; i &gt;= 0; i--) {
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 			<strong class="jxr_keyword">char</strong> nextChar = theString.charAt(i);
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 			<strong class="jxr_keyword">if</strong> (nextChar != '&#92;&#92;') {
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 			}
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 			retVal++;
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		}
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 	}
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> }
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 		<em class="jxr_comment">// If no value was found, at least add that empty string as a value. It should get ignored later, but at</em>
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 		<em class="jxr_comment">// least this lets us give a sensible error message if the parameter name was bad. See</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 		<em class="jxr_comment">// ResourceProviderR4Test#testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch for an example</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 		<strong class="jxr_keyword">if</strong> (retVal.size() == 0) {
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			retVal.add(<span class="jxr_string">""</span>);
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 		}
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 	}
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> countTrailingSlashes(String theString) {
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 		<strong class="jxr_keyword">if</strong> (theString == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 			<strong class="jxr_keyword">return</strong> 0;
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 		}
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		<strong class="jxr_keyword">int</strong> retVal = 0;
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = theString.length() - 1; i &gt;= 0; i--) {
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 			<strong class="jxr_keyword">char</strong> nextChar = theString.charAt(i);
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 			<strong class="jxr_keyword">if</strong> (nextChar != '&#92;&#92;') {
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 			}
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 			retVal++;
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 		}
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 	}
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

@@ -53,7 +53,7 @@
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment">	 *</em>
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  	<strong class="jxr_keyword">boolean</strong> acceptUndeclaredExtension(IBaseExtension&lt;?, ?&gt; theNextExt, List&lt;IBase&gt; theContainingElementPath, List&lt;BaseRuntimeChildDefinition&gt; theChildDefinitionPath, List&lt;BaseRuntimeElementDefinition&lt;?&gt;&gt; theElementDefinitionPath);
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  	<strong class="jxr_keyword">default</strong> <strong class="jxr_keyword">boolean</strong> acceptUndeclaredExtension(IBaseExtension&lt;?, ?&gt; theNextExt, List&lt;IBase&gt; theContainingElementPath, List&lt;BaseRuntimeChildDefinition&gt; theChildDefinitionPath, List&lt;BaseRuntimeElementDefinition&lt;?&gt;&gt; theElementDefinitionPath) { <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>; }
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  }

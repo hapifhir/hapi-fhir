@@ -49,8 +49,8 @@
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>  	@Query(<span class="jxr_string">"SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system AND c.myCode = :code"</span>)
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  	Optional&lt;TermConcept&gt; findByCodeSystemAndCode(@Param(<span class="jxr_string">"code_system"</span>) <a name="TermCodeSystemVersion" href="../../../../../../ca/uhn/fhir/jpa/entity/TermCodeSystemVersion.html#TermCodeSystemVersion">TermCodeSystemVersion</a> theCodeSystem, @Param(<span class="jxr_string">"code"</span>) String theCode);
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  	@Query(<span class="jxr_string">"SELECT t FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid"</span>)
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  	Slice&lt;TermConcept&gt; findByCodeSystemVersion(Pageable thePage, @Param(<span class="jxr_string">"cs_pid"</span>) Long thePid);
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  	@Query(<span class="jxr_string">"SELECT t.myId FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid"</span>)
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  	Slice&lt;Long&gt; findIdsByCodeSystemVersion(Pageable thePage, @Param(<span class="jxr_string">"cs_pid"</span>) Long thePid);
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  	@Query(<span class="jxr_string">"SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system"</span>)
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  	List&lt;TermConcept&gt; findByCodeSystemVersion(@Param(<span class="jxr_string">"code_system"</span>) <a name="TermCodeSystemVersion" href="../../../../../../ca/uhn/fhir/jpa/entity/TermCodeSystemVersion.html#TermCodeSystemVersion">TermCodeSystemVersion</a> theCodeSystem);
@@ -58,11 +58,7 @@
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  	@Query(<span class="jxr_string">"SELECT t FROM TermConcept t WHERE t.myIndexStatus = null"</span>)
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  	Page&lt;TermConcept&gt; findResourcesRequiringReindexing(Pageable thePageRequest);
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>  
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  	@Query(<span class="jxr_string">"UPDATE TermConcept t SET t.myIndexStatus = null"</span>)
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  	@Modifying
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  	<strong class="jxr_keyword">int</strong> markAllForReindexing();
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  }
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

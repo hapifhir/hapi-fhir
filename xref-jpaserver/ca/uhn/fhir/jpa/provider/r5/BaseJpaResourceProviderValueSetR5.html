@@ -68,7 +68,7 @@
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options."</span>);
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  		}
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  		<strong class="jxr_keyword">int</strong> offset = myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental();
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  		<strong class="jxr_keyword">int</strong> offset = myDaoConfig.getPreExpandValueSetsDefaultOffset();
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  		<strong class="jxr_keyword">if</strong> (theOffset != <strong class="jxr_keyword">null</strong> &amp;&amp; theOffset.hasValue()) {
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  			<strong class="jxr_keyword">if</strong> (theOffset.getValue() &gt;= 0) {
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  				offset = theOffset.getValue();
@@ -77,7 +77,7 @@
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  			}
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  		}
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		<strong class="jxr_keyword">int</strong> count = myDaoConfig.getPreExpandValueSetsDefaultCountExperimental();
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		<strong class="jxr_keyword">int</strong> count = myDaoConfig.getPreExpandValueSetsDefaultCount();
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  		<strong class="jxr_keyword">if</strong> (theCount != <strong class="jxr_keyword">null</strong> &amp;&amp; theCount.hasValue()) {
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  			<strong class="jxr_keyword">if</strong> (theCount.getValue() &gt;= 0) {
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  				count = theCount.getValue();
@@ -85,7 +85,7 @@
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"count parameter for $expand operation must be &gt;= 0 when specified. count: "</span> + theCount.getValue());
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  			}
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  		}
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  		<strong class="jxr_keyword">int</strong> countMax = myDaoConfig.getPreExpandValueSetsMaxCountExperimental();
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  		<strong class="jxr_keyword">int</strong> countMax = myDaoConfig.getPreExpandValueSetsMaxCount();
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  		<strong class="jxr_keyword">if</strong> (count &gt; countMax) {
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  			ourLog.warn(<span class="jxr_string">"count parameter for $expand operation of {} exceeds maximum value of {}; using maximum value."</span>, count, countMax);
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  			count = countMax;
@@ -94,7 +94,7 @@
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  		startRequest(theServletRequest);
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  		<strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>  			IFhirResourceDaoValueSet&lt;ValueSet, Coding, CodeableConcept&gt; dao = (IFhirResourceDaoValueSet&lt;ValueSet, Coding, CodeableConcept&gt;) getDao();
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  			<strong class="jxr_keyword">if</strong> (myDaoConfig.isPreExpandValueSetsExperimental()) {
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  			<strong class="jxr_keyword">if</strong> (myDaoConfig.isPreExpandValueSets()) {
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  				<strong class="jxr_keyword">if</strong> (haveId) {
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  					<strong class="jxr_keyword">return</strong> dao.expand(theId, toFilterString(theFilter), offset, count, theRequestDetails);
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (haveIdentifier) {

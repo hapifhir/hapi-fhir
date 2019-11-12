@@ -46,7 +46,7 @@
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.commons.lang3.StringUtils.isBlank;
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="FhirResourceDaoSubscriptionDstu2" href="../../../../../ca/uhn/fhir/jpa/dao/FhirResourceDaoSubscriptionDstu2.html#FhirResourceDaoSubscriptionDstu2">FhirResourceDaoSubscriptionDstu2</a> <strong class="jxr_keyword">extends</strong> FhirResourceDaoDstu2&lt;Subscription&gt; <strong class="jxr_keyword">implements</strong> IFhirResourceDaoSubscription&lt;Subscription&gt; {
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="FhirResourceDaoSubscriptionDstu2" href="../../../../../ca/uhn/fhir/jpa/dao/FhirResourceDaoSubscriptionDstu2.html#FhirResourceDaoSubscriptionDstu2">FhirResourceDaoSubscriptionDstu2</a> <strong class="jxr_keyword">extends</strong> BaseHapiFhirResourceDao&lt;Subscription&gt; <strong class="jxr_keyword">implements</strong> IFhirResourceDaoSubscription&lt;Subscription&gt; {
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  	@Autowired
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  	<strong class="jxr_keyword">private</strong> <a name="ISubscriptionTableDao" href="../../../../../ca/uhn/fhir/jpa/dao/data/ISubscriptionTableDao.html#ISubscriptionTableDao">ISubscriptionTableDao</a> mySubscriptionTableDao;
@@ -81,8 +81,8 @@
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  	@Override
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">protected</strong> ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, <strong class="jxr_keyword">boolean</strong> thePerformIndexing, <strong class="jxr_keyword">boolean</strong> theUpdateVersion,
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  													 Date theUpdateTime, <strong class="jxr_keyword">boolean</strong> theForceUpdate, <strong class="jxr_keyword">boolean</strong> theCreateNewHistoryEntry) {
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">public</strong> ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, <strong class="jxr_keyword">boolean</strong> thePerformIndexing, <strong class="jxr_keyword">boolean</strong> theUpdateVersion,
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  												 Date theUpdateTime, <strong class="jxr_keyword">boolean</strong> theForceUpdate, <strong class="jxr_keyword">boolean</strong> theCreateNewHistoryEntry) {
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  		ResourceTable retVal = <strong class="jxr_keyword">super</strong>.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  		<strong class="jxr_keyword">if</strong> (theDeletedTimestampOrNull != <strong class="jxr_keyword">null</strong>) {
@@ -91,58 +91,8 @@
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  		<strong class="jxr_keyword">return</strong> retVal;
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  	}
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  	<strong class="jxr_keyword">public</strong> RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  		<strong class="jxr_keyword">if</strong> (theResource.getStatus() == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(<span class="jxr_string">"Can not process submitted Subscription - Subscription.status must be populated on this server"</span>);
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  		}
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  		String query = theResource.getCriteria();
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  		<strong class="jxr_keyword">if</strong> (isBlank(query)) {
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(<span class="jxr_string">"Subscription.criteria must be populated"</span>);
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		}
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  		<strong class="jxr_keyword">int</strong> sep = query.indexOf('?');
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  		<strong class="jxr_keyword">if</strong> (sep &lt;= 1) {
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(<span class="jxr_string">"Subscription.criteria must be in the form \&quot;{Resource Type}?[params]\&quot;"</span>);
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  		}
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 		String resType = query.substring(0, sep);
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		<strong class="jxr_keyword">if</strong> (resType.contains(<span class="jxr_string">"/"</span>)) {
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(<span class="jxr_string">"Subscription.criteria must be in the form \&quot;{Resource Type}?[params]\&quot;"</span>);
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 		}
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 		RuntimeResourceDefinition resDef;
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 			resDef = getContext().getResourceDefinition(resType);
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 		} <strong class="jxr_keyword">catch</strong> (DataFormatException e) {
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(<span class="jxr_string">"Subscription.criteria contains invalid/unsupported resource type: "</span> + resType);
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 		}
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 		<strong class="jxr_keyword">return</strong> resDef;
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 	}
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 	@Override
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> validateResourceForStorage(Subscription theResource, ResourceTable theEntityToSave) {
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> 		<strong class="jxr_keyword">super</strong>.validateResourceForStorage(theResource, theEntityToSave);
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 		RuntimeResourceDefinition resDef = validateCriteriaAndReturnResourceDefinition(theResource);
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 		IFhirResourceDao&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; dao = getDao(resDef.getImplementingClass());
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 		<strong class="jxr_keyword">if</strong> (dao == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(<span class="jxr_string">"Subscription.criteria contains invalid/unsupported resource type: "</span> + resDef);
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 		}
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 		<strong class="jxr_keyword">if</strong> (theResource.getChannel().getType() == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(<span class="jxr_string">"Subscription.channel.type must be populated on this server"</span>);
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 		}
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> 
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 		SubscriptionStatusEnum status = theResource.getStatusElement().getValueAsEnum();
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 		<strong class="jxr_keyword">if</strong> (status == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(<span class="jxr_string">"Subscription.status must be populated on this server"</span>);
-<a class="jxr_linenumber" name="L133" href="#L133">133</a> 		}
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 
-<a class="jxr_linenumber" name="L135" href="#L135">135</a> 	}
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> }
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

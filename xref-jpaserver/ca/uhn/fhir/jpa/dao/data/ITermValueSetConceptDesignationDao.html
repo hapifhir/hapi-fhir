@@ -38,10 +38,10 @@
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a name="ITermValueSetConceptDesignationDao" href="../../../../../../ca/uhn/fhir/jpa/dao/data/ITermValueSetConceptDesignationDao.html#ITermValueSetConceptDesignationDao">ITermValueSetConceptDesignationDao</a> <strong class="jxr_keyword">extends</strong> JpaRepository&lt;TermValueSetConceptDesignation, Long&gt; {
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  	@Query(<span class="jxr_string">"SELECT COUNT(vscd) FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSet.myId = :pid"</span>)
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  	@Query(<span class="jxr_string">"SELECT COUNT(vscd) FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSetPid = :pid"</span>)
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  	Integer countByTermValueSetId(@Param(<span class="jxr_string">"pid"</span>) Long theValueSetId);
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  	@Query(<span class="jxr_string">"DELETE FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSet.myId = :pid"</span>)
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  	@Query(<span class="jxr_string">"DELETE FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSetPid = :pid"</span>)
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  	@Modifying
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  	<strong class="jxr_keyword">void</strong> deleteByTermValueSetId(@Param(<span class="jxr_string">"pid"</span>) Long theValueSetId);
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  

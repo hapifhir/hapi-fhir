@@ -29,37 +29,39 @@
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> */</em>
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.TermValueSetConcept;
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.domain.Pageable;
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.domain.Slice;
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.JpaRepository;
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.Modifying;
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.Query;
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.repository.query.Param;
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> java.util.List;
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> java.util.Optional;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.JpaRepository;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.Modifying;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.Query;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.repository.query.Param;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> java.util.Optional;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a name="ITermValueSetConceptDao" href="../../../../../../ca/uhn/fhir/jpa/dao/data/ITermValueSetConceptDao.html#ITermValueSetConceptDao">ITermValueSetConceptDao</a> <strong class="jxr_keyword">extends</strong> JpaRepository&lt;TermValueSetConcept, Long&gt; {
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a name="ITermValueSetConceptDao" href="../../../../../../ca/uhn/fhir/jpa/dao/data/ITermValueSetConceptDao.html#ITermValueSetConceptDao">ITermValueSetConceptDao</a> <strong class="jxr_keyword">extends</strong> JpaRepository&lt;TermValueSetConcept, Long&gt; {
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  	@Query(<span class="jxr_string">"SELECT COUNT(*) FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid"</span>)
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>  	Integer countByTermValueSetId(@Param(<span class="jxr_string">"pid"</span>) Long theValueSetId);
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>  
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  	@Query(<span class="jxr_string">"DELETE FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid"</span>)
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  	@Modifying
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  	<strong class="jxr_keyword">void</strong> deleteByTermValueSetId(@Param(<span class="jxr_string">"pid"</span>) Long theValueSetId);
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>  
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  	@Query(<span class="jxr_string">"SELECT vsc from TermValueSetConcept vsc LEFT OUTER JOIN FETCH vsc.myDesignations WHERE vsc.myValueSet.myId = :pid"</span>)
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  	Slice&lt;TermValueSetConcept&gt; findByTermValueSetIdAndPreFetchDesignations(Pageable thePage, @Param(<span class="jxr_string">"pid"</span>) Long theValueSetId);
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>  	@Query(<span class="jxr_string">"SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval"</span>)
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	Optional&lt;TermValueSetConcept&gt; findByTermValueSetIdSystemAndCode(@Param(<span class="jxr_string">"pid"</span>) Long theValueSetId, @Param(<span class="jxr_string">"system_url"</span>) String theSystem, @Param(<span class="jxr_string">"codeval"</span>) String theCode);
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  	@Query(<span class="jxr_string">"SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myResourcePid = :resource_pid AND vsc.myCode = :codeval"</span>)
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	List&lt;TermValueSetConcept&gt; findByValueSetResourcePidAndCode(@Param(<span class="jxr_string">"resource_pid"</span>) Long theValueSetId, @Param(<span class="jxr_string">"codeval"</span>) String theCode);
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	@Query(<span class="jxr_string">"SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myResourcePid = :resource_pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval"</span>)
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  	Optional&lt;TermValueSetConcept&gt; findByValueSetResourcePidSystemAndCode(@Param(<span class="jxr_string">"resource_pid"</span>) Long theValueSetId, @Param(<span class="jxr_string">"system_url"</span>) String theSystem, @Param(<span class="jxr_string">"codeval"</span>) String theCode);
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  }
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  	@Query(<span class="jxr_string">"SELECT COUNT(*) FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid"</span>)
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  	Integer countByTermValueSetId(@Param(<span class="jxr_string">"pid"</span>) Long theValueSetId);
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  	@Query(<span class="jxr_string">"DELETE FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid"</span>)
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  	@Modifying
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  	<strong class="jxr_keyword">void</strong> deleteByTermValueSetId(@Param(<span class="jxr_string">"pid"</span>) Long theValueSetId);
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  	@Query(<span class="jxr_string">"SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval"</span>)
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  	Optional&lt;TermValueSetConcept&gt; findByTermValueSetIdSystemAndCode(@Param(<span class="jxr_string">"pid"</span>) Long theValueSetId, @Param(<span class="jxr_string">"system_url"</span>) String theSystem, @Param(<span class="jxr_string">"codeval"</span>) String theCode);
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  	@Query(<span class="jxr_string">"SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myResourcePid = :resource_pid AND vsc.myCode = :codeval"</span>)
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  	List&lt;TermValueSetConcept&gt; findByValueSetResourcePidAndCode(@Param(<span class="jxr_string">"resource_pid"</span>) Long theValueSetId, @Param(<span class="jxr_string">"codeval"</span>) String theCode);
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	@Query(<span class="jxr_string">"SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myResourcePid = :resource_pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval"</span>)
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  	Optional&lt;TermValueSetConcept&gt; findByValueSetResourcePidSystemAndCode(@Param(<span class="jxr_string">"resource_pid"</span>) Long theValueSetId, @Param(<span class="jxr_string">"system_url"</span>) String theSystem, @Param(<span class="jxr_string">"codeval"</span>) String theCode);
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	@Query(<span class="jxr_string">"SELECT vsc.myId FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid ORDER BY vsc.myId"</span>)
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  	List&lt;Long&gt; findIdsByTermValueSetId(@Param(<span class="jxr_string">"pid"</span>) Long theValueSetId);
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  	@Query(<span class="jxr_string">"UPDATE TermValueSetConcept vsc SET vsc.myOrder = :order WHERE vsc.myId = :pid"</span>)
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  	@Modifying
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  	<strong class="jxr_keyword">void</strong> updateOrderById(@Param(<span class="jxr_string">"pid"</span>) Long theId, @Param(<span class="jxr_string">"order"</span>) <strong class="jxr_keyword">int</strong> theOrder);
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

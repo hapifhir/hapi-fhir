@@ -36,16 +36,23 @@
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> javax.annotation.Nullable;
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> java.util.List;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a name="ISearchCoordinatorSvc" href="../../../../../ca/uhn/fhir/jpa/search/ISearchCoordinatorSvc.html#ISearchCoordinatorSvc">ISearchCoordinatorSvc</a> {
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  	<strong class="jxr_keyword">void</strong> cancelAllActiveSearches();
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  	List&lt;Long&gt; getResources(String theUuid, <strong class="jxr_keyword">int</strong> theFrom, <strong class="jxr_keyword">int</strong> theTo, @Nullable RequestDetails theRequestDetails);
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>  
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>  	IBundleProvider registerSearch(<a name="IDao" href="../../../../../ca/uhn/fhir/jpa/dao/IDao.html#IDao">IDao</a> theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, @Nullable RequestDetails theRequestDetails);
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  }
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> java.util.Optional;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a name="ISearchCoordinatorSvc" href="../../../../../ca/uhn/fhir/jpa/search/ISearchCoordinatorSvc.html#ISearchCoordinatorSvc">ISearchCoordinatorSvc</a> {
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  	<strong class="jxr_keyword">void</strong> cancelAllActiveSearches();
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  	List&lt;Long&gt; getResources(String theUuid, <strong class="jxr_keyword">int</strong> theFrom, <strong class="jxr_keyword">int</strong> theTo, @Nullable RequestDetails theRequestDetails);
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  	IBundleProvider registerSearch(<a name="IDao" href="../../../../../ca/uhn/fhir/jpa/dao/IDao.html#IDao">IDao</a> theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, @Nullable RequestDetails theRequestDetails);
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment">	 * Fetch the total number of search results for the given currently executing search, if one is currently executing and</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_javadoccomment">	 * the total is known. Will return empty otherwise</em>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  	Optional&lt;Integer&gt; getSearchTotal(String theUuid);
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
