@@ -81,9 +81,10 @@
 			</action>
 			<action type="fix">
 				<![CDATA[
-				<b>New Feature</b>:
-				The R4 structures have been upgraded to the new 4.0.1 (Technical Correction) release, and the
-				R5 structure have been upgraded to the current (October) snapshot.
+				<b>Model Update</b>:
+				The DSTU3 structures have been upgraded to the new 3.0.2 (Technical Correction) release.<br/>
+				The R4 structures have been upgraded to the new 4.0.1 (Technical Correction) release.<br/>
+				The R5 structure have been upgraded to the current (October) snapshot.
 				]]>
 			</action>
 			<action type="add" issue="1489">

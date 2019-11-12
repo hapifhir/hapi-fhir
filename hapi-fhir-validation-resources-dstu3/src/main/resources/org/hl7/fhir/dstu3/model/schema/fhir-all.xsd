@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (c) 2011+, HL7, Inc
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without modification, 
+ are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this 
+ list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, 
+ this list of conditions and the following disclaimer in the documentation 
+ and/or other materials provided with the distribution.
+ * Neither the name of HL7 nor the names of its contributors may be used to 
+ endorse or promote products derived from this software without specific 
+ prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+ IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+ INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ POSSIBILITY OF SUCH DAMAGE.
+
+ Generated on Wed, Apr 19, 2017 07:44+1000 for FHIR v3.0.1
+-->
+<xs:schema xmlns="http://hl7.org/fhir" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="3.0.1">
+  <xs:include schemaLocation="account.xsd"/>
+  <xs:include schemaLocation="activitydefinition.xsd"/>
+  <xs:include schemaLocation="adverseevent.xsd"/>
+  <xs:include schemaLocation="allergyintolerance.xsd"/>
+  <xs:include schemaLocation="appointment.xsd"/>
+  <xs:include schemaLocation="appointmentresponse.xsd"/>
+  <xs:include schemaLocation="auditevent.xsd"/>
+  <xs:include schemaLocation="basic.xsd"/>
+  <xs:include schemaLocation="binary.xsd"/>
+  <xs:include schemaLocation="bodysite.xsd"/>
+  <xs:include schemaLocation="bundle.xsd"/>
+  <xs:include schemaLocation="capabilitystatement.xsd"/>
+  <xs:include schemaLocation="careplan.xsd"/>
+  <xs:include schemaLocation="careteam.xsd"/>
+  <xs:include schemaLocation="chargeitem.xsd"/>
+  <xs:include schemaLocation="claim.xsd"/>
+  <xs:include schemaLocation="claimresponse.xsd"/>
+  <xs:include schemaLocation="clinicalimpression.xsd"/>
+  <xs:include schemaLocation="codesystem.xsd"/>
+  <xs:include schemaLocation="communication.xsd"/>
+  <xs:include schemaLocation="communicationrequest.xsd"/>
+  <xs:include schemaLocation="compartmentdefinition.xsd"/>
+  <xs:include schemaLocation="composition.xsd"/>
+  <xs:include schemaLocation="conceptmap.xsd"/>
+  <xs:include schemaLocation="condition.xsd"/>
+  <xs:include schemaLocation="consent.xsd"/>
+  <xs:include schemaLocation="contract.xsd"/>
+  <xs:include schemaLocation="coverage.xsd"/>
+  <xs:include schemaLocation="dataelement.xsd"/>
+  <xs:include schemaLocation="detectedissue.xsd"/>
+  <xs:include schemaLocation="device.xsd"/>
+  <xs:include schemaLocation="devicecomponent.xsd"/>
+  <xs:include schemaLocation="devicemetric.xsd"/>
+  <xs:include schemaLocation="devicerequest.xsd"/>
+  <xs:include schemaLocation="deviceusestatement.xsd"/>
+  <xs:include schemaLocation="diagnosticreport.xsd"/>
+  <xs:include schemaLocation="documentmanifest.xsd"/>
+  <xs:include schemaLocation="documentreference.xsd"/>
+  <xs:include schemaLocation="eligibilityrequest.xsd"/>
+  <xs:include schemaLocation="eligibilityresponse.xsd"/>
+  <xs:include schemaLocation="encounter.xsd"/>
+  <xs:include schemaLocation="endpoint.xsd"/>
+  <xs:include schemaLocation="enrollmentrequest.xsd"/>
+  <xs:include schemaLocation="enrollmentresponse.xsd"/>
+  <xs:include schemaLocation="episodeofcare.xsd"/>
+  <xs:include schemaLocation="expansionprofile.xsd"/>
+  <xs:include schemaLocation="explanationofbenefit.xsd"/>
+  <xs:include schemaLocation="familymemberhistory.xsd"/>
+  <xs:include schemaLocation="flag.xsd"/>
+  <xs:include schemaLocation="goal.xsd"/>
+  <xs:include schemaLocation="graphdefinition.xsd"/>
+  <xs:include schemaLocation="group.xsd"/>
+  <xs:include schemaLocation="guidanceresponse.xsd"/>
+  <xs:include schemaLocation="healthcareservice.xsd"/>
+  <xs:include schemaLocation="imagingmanifest.xsd"/>
+  <xs:include schemaLocation="imagingstudy.xsd"/>
+  <xs:include schemaLocation="immunization.xsd"/>
+  <xs:include schemaLocation="immunizationrecommendation.xsd"/>
+  <xs:include schemaLocation="implementationguide.xsd"/>
+  <xs:include schemaLocation="library.xsd"/>
+  <xs:include schemaLocation="linkage.xsd"/>
+  <xs:include schemaLocation="list.xsd"/>
+  <xs:include schemaLocation="location.xsd"/>
+  <xs:include schemaLocation="measure.xsd"/>
+  <xs:include schemaLocation="measurereport.xsd"/>
+  <xs:include schemaLocation="media.xsd"/>
+  <xs:include schemaLocation="medication.xsd"/>
+  <xs:include schemaLocation="medicationadministration.xsd"/>
+  <xs:include schemaLocation="medicationdispense.xsd"/>
+  <xs:include schemaLocation="medicationrequest.xsd"/>
+  <xs:include schemaLocation="medicationstatement.xsd"/>
+  <xs:include schemaLocation="messagedefinition.xsd"/>
+  <xs:include schemaLocation="messageheader.xsd"/>
+  <xs:include schemaLocation="namingsystem.xsd"/>
+  <xs:include schemaLocation="nutritionorder.xsd"/>
+  <xs:include schemaLocation="observation.xsd"/>
+  <xs:include schemaLocation="operationdefinition.xsd"/>
+  <xs:include schemaLocation="operationoutcome.xsd"/>
+  <xs:include schemaLocation="organization.xsd"/>
+  <xs:include schemaLocation="parameters.xsd"/>
+  <xs:include schemaLocation="patient.xsd"/>
+  <xs:include schemaLocation="paymentnotice.xsd"/>
+  <xs:include schemaLocation="paymentreconciliation.xsd"/>
+  <xs:include schemaLocation="person.xsd"/>
+  <xs:include schemaLocation="plandefinition.xsd"/>
+  <xs:include schemaLocation="practitioner.xsd"/>
+  <xs:include schemaLocation="practitionerrole.xsd"/>
+  <xs:include schemaLocation="procedure.xsd"/>
+  <xs:include schemaLocation="procedurerequest.xsd"/>
+  <xs:include schemaLocation="processrequest.xsd"/>
+  <xs:include schemaLocation="processresponse.xsd"/>
+  <xs:include schemaLocation="provenance.xsd"/>
+  <xs:include schemaLocation="questionnaire.xsd"/>
+  <xs:include schemaLocation="questionnaireresponse.xsd"/>
+  <xs:include schemaLocation="referralrequest.xsd"/>
+  <xs:include schemaLocation="relatedperson.xsd"/>
+  <xs:include schemaLocation="requestgroup.xsd"/>
+  <xs:include schemaLocation="researchstudy.xsd"/>
+  <xs:include schemaLocation="researchsubject.xsd"/>
+  <xs:include schemaLocation="riskassessment.xsd"/>
+  <xs:include schemaLocation="schedule.xsd"/>
+  <xs:include schemaLocation="searchparameter.xsd"/>
+  <xs:include schemaLocation="sequence.xsd"/>
+  <xs:include schemaLocation="servicedefinition.xsd"/>
+  <xs:include schemaLocation="slot.xsd"/>
+  <xs:include schemaLocation="specimen.xsd"/>
+  <xs:include schemaLocation="structuredefinition.xsd"/>
+  <xs:include schemaLocation="structuremap.xsd"/>
+  <xs:include schemaLocation="subscription.xsd"/>
+  <xs:include schemaLocation="substance.xsd"/>
+  <xs:include schemaLocation="supplydelivery.xsd"/>
+  <xs:include schemaLocation="supplyrequest.xsd"/>
+  <xs:include schemaLocation="task.xsd"/>
+  <xs:include schemaLocation="testreport.xsd"/>
+  <xs:include schemaLocation="testscript.xsd"/>
+  <xs:include schemaLocation="valueset.xsd"/>
+  <xs:include schemaLocation="visionprescription.xsd"/>
+
+</xs:schema>
