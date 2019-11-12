@@ -616,7 +616,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 				throw new InternalErrorException(e);
 			}
 
-			org.hl7.fhir.r5.context.IWorkerContext.ValidationResult result = myWrap.validateCode(theOptions, null, code, null, convertedVs);
+			org.hl7.fhir.r5.context.IWorkerContext.ValidationResult result = myWrap.validateCode(theOptions, Constants.CODESYSTEM_VALIDATE_NOT_NEEDED, code, null, convertedVs);
 			return convertValidationResult(result);
 		}
 

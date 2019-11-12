@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="4.1.0" date="TBD" description="Igloo">
+		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
 			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
@@ -21,6 +21,8 @@
 					<li>Postgresql JDBC Driver (JPA): 42.2.6.jre7 -&gt; 42.2.8</li>
 					<li>MSSQL JDBC Driver (JPA): 7.0.0.jre8 -&gt; 7.4.1.jre8</li>
 					<li>Spring Boot (Boot): 2.1.1 -&gt; 2.2.0</li>
+					<li>Phloc Schematron (Validator): 5.0.4 -&gt; 5.2.0</li>
+					<li>Phloc Commons (Validator): 9.1.1 -&gt; 9.3.8</li>
 				</ul>
 				]]>
 			</action>
@@ -81,9 +83,10 @@
 			</action>
 			<action type="fix">
 				<![CDATA[
-				<b>New Feature</b>:
-				The R4 structures have been upgraded to the new 4.0.1 (Technical Correction) release, and the
-				R5 structure have been upgraded to the current (October) snapshot.
+				<b>Model Update</b>:
+				The DSTU3 structures have been upgraded to the new 3.0.2 (Technical Correction) release.<br/>
+				The R4 structures have been upgraded to the new 4.0.1 (Technical Correction) release.<br/>
+				The R5 structure have been upgraded to the current (October) snapshot.
 				]]>
 			</action>
 			<action type="add" issue="1489">

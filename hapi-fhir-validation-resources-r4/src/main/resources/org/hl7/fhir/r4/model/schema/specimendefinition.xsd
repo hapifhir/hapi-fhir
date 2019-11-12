@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Fri, Nov 1, 2019 09:29+1100 for FHIR v4.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="SpecimenDefinition" type="SpecimenDefinition">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A kind of specimen with associated set of requirements.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="SpecimenDefinition">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A kind of specimen with associated set of requirements.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="1" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A business identifier associated with the kind of specimen.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="typeCollected" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The kind of material to be collected.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="patientPreparation" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Preparation of the patient for specimen collection.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="timeAspect" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Time aspect of specimen collection (duration or offset).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="collection" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The action to be performed for collecting the specimen.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="typeTested" type="SpecimenDefinition.TypeTested" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Specimen conditioned in a container as expected by the testing laboratory.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="SpecimenDefinition.TypeTested">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A kind of specimen with associated set of requirements.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="isDerived" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Primary of secondary specimen.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="type" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The kind of specimen conditioned for testing expected by lab.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="preference" minOccurs="1" maxOccurs="1" type="SpecimenContainedPreference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The preference for this type of conditioned specimen.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="container" type="SpecimenDefinition.Container" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The specimen's container.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="requirement" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Requirements for delivery and special handling of this kind of conditioned specimen.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="retentionTime" minOccurs="0" maxOccurs="1" type="Duration">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The usual time that a specimen of this kind is retained after the ordered tests are completed, for the purpose of additional testing.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="rejectionCriterion" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Criterion for rejection of the specimen in its container by the laboratory.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="handling" type="SpecimenDefinition.Handling" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Set of instructions for preservation/transport of the specimen at a defined temperature interval, prior the testing process.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="SpecimenDefinition.Container">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A kind of specimen with associated set of requirements.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="material" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The type of material of the container.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="type" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The type of container used to contain this kind of specimen.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="cap" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Color of container cap.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The textual description of the kind of container.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="capacity" minOccurs="0" maxOccurs="1" type="Quantity">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The capacity (volume or other measure) of this kind of container.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:choice minOccurs="0" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The minimum volume to be conditioned in the container.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="minimumVolumeQuantity" type="Quantity"/>
+            <xs:element name="minimumVolumeString" type="string"/>
+          </xs:choice>
+          <xs:element name="additive" type="SpecimenDefinition.Additive" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="preparation" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Special processing that should be applied to the container for this kind of specimen.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="SpecimenDefinition.Additive">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A kind of specimen with associated set of requirements.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:choice minOccurs="1" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="additiveCodeableConcept" type="CodeableConcept"/>
+            <xs:element name="additiveReference" type="Reference"/>
+          </xs:choice>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="SpecimenDefinition.Handling">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A kind of specimen with associated set of requirements.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="temperatureQualifier" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">It qualifies the interval of temperature, which characterizes an occurrence of handling. Conditions that are not related to temperature may be handled in the instruction element.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="temperatureRange" minOccurs="0" maxOccurs="1" type="Range">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The temperature interval for this set of handling instructions.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="maxDuration" minOccurs="0" maxOccurs="1" type="Duration">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The maximum time interval of preservation of the specimen with these conditions.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="instruction" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Additional textual instructions for the preservation or transport of the specimen. For instance, 'Protect from light exposure'.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="SpecimenContainedPreference-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="preferred">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Preferred</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="alternate">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Alternate</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="SpecimenContainedPreference">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Degree of preference of a type of conditioned specimen.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="SpecimenContainedPreference-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

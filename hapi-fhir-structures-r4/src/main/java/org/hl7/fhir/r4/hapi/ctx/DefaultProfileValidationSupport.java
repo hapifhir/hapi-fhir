@@ -2,7 +2,6 @@ package org.hl7.fhir.r4.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -22,8 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class DefaultProfileValidationSupport implements IValidationSupport {
 
@@ -172,6 +170,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
   @Override
   public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+    if (isBlank(theSystem) || Constants.codeSystemNotNeeded(theSystem)) {
+      return false;
+    }
     CodeSystem cs = fetchCodeSystem(theContext, theSystem);
     return cs != null && cs.getContent() != CodeSystemContentMode.NOTPRESENT;
   }
@@ -276,7 +277,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
         nextCandidate = nextCandidate.toUpperCase();
       }
       if (nextCandidate.equals(code)) {
-        retVal = new CodeValidationResult(next);
+        retVal = new CodeValidationResult(null, null, next, next.getDisplay());
         break;
       }
 
@@ -308,7 +309,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
             .getExpansion()
             .getContains()
             .stream()
-            .filter(t -> (theCodeSystem == null || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
+            .filter(t -> (Constants.codeSystemNotNeeded(theCodeSystem) || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
             .findFirst();
           if (haveMatch.isPresent()) {
             return new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(theCode)));
@@ -342,7 +343,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
   @Override
   public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
-    return validateCode(theContext, theSystem, theCode, null, null).asLookupCodeResult(theSystem, theCode);
+    return validateCode(theContext, theSystem, theCode, null, (String)null).asLookupCodeResult(theSystem, theCode);
   }
 
 }
