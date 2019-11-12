@@ -172,7 +172,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	@Override
 	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
-		if (isBlank(theSystem)) {
+		if (isBlank(theSystem) || Constants.codeSystemNotNeeded(theSystem)) {
 			return false;
 		}
 		CodeSystem cs = fetchCodeSystem(theContext, theSystem);
