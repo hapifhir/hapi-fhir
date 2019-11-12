@@ -204,6 +204,210 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testStringComparatorNe() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("Smith").addGiven("John");
+		p.setActive(true);
+		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		p = new Patient();
+		p.addName().setFamily("Jones").addGiven("Frank");
+		p.setActive(false);
+		String id2 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("family ne smith"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id2));
+		assertThat(found, containsInAnyOrder(Matchers.not(id1)));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("family ne jones"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found, containsInAnyOrder(Matchers.not(id2)));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("given ne john"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id2));
+		assertThat(found, containsInAnyOrder(Matchers.not(id1)));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("given ne frank"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
+		assertThat(found, containsInAnyOrder(Matchers.not(id2)));
+
+	}
+
+	@Test
+	public void testReferenceComparatorNe() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("Smith").addGiven("John");
+		p.setActive(true);
+		IIdType ptId = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.addName().setFamily("Smith").addGiven("John2");
+		p.setActive(true);
+		IIdType ptId2 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		CarePlan cp = new CarePlan();
+		cp.getSubject().setReference(ptId.getValue());
+		String cpId = myCarePlanDao.create(cp).getId().toUnqualifiedVersionless().getValue();
+
+		cp = new CarePlan();
+		cp.addActivity().getDetail().addPerformer().setReference(ptId2.getValue());
+		String cpId2 = myCarePlanDao.create(cp).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("subject ne " + ptId.getValue()));
+		found = toUnqualifiedVersionlessIdValues(myCarePlanDao.search(map));
+		assertThat(found, containsInAnyOrder(cpId2));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("subject ne " + ptId.getIdPart()));
+		found = toUnqualifiedVersionlessIdValues(myCarePlanDao.search(map));
+		assertThat(found, containsInAnyOrder(cpId2));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("(subject ne " + ptId.getIdPart() + ") and (performer ne " + ptId2.getValue() + ")"));
+		found = toUnqualifiedVersionlessIdValues(myCarePlanDao.search(map));
+		assertThat(found, Matchers.empty());
+
+	}
+
+	@Test
+	public void testStringComparatorCo() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("Smith").addGiven("John");
+		p.setActive(true);
+		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		p = new Patient();
+		p.addName().setFamily("Jones").addGiven("Frank");
+		p.setActive(false);
+		String id2 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("name co smi"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("name co smith"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("given co frank"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id2));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("family co jones"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id2));
+
+	}
+
+	@Test
+	public void testStringComparatorSw() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("Smith").addGiven("John");
+		p.setActive(true);
+		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		p = new Patient();
+		p.addName().setFamily("Jones").addGiven("Frank");
+		p.setActive(false);
+		String id2 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("name sw smi"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("name sw mi"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, Matchers.empty());
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("given sw fr"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id2));
+
+	}
+
+	@Test
+	public void testStringComparatorEw() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("Smith").addGiven("John");
+		p.setActive(true);
+		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		p = new Patient();
+		p.addName().setFamily("Jones").addGiven("Frank");
+		p.setActive(false);
+		String id2 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("family ew ith"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("name ew it"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, Matchers.empty());
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("given ew nk"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id2));
+
+	}
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

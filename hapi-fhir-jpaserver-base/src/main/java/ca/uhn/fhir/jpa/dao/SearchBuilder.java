@@ -545,16 +545,20 @@ public class SearchBuilder implements ISearchBuilder {
 		List<Long> targetPids = myIdHelperService.translateForcedIdToPids(targetIds, theRequest);
 		if (!targetPids.isEmpty()) {
 			ourLog.debug("Searching for resource link with target PIDs: {}", targetPids);
-			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, join);
-			Predicate pidPredicate = join.get("myTargetResourcePid").in(targetPids);
+			Predicate pathPredicate = ((operation == null) || (operation == SearchFilterParser.CompareOperation.eq)) ? createResourceLinkPathPredicate(theResourceName, theParamName, join)
+				: createResourceLinkPathPredicate(theResourceName, theParamName, join).not();
+			Predicate pidPredicate = ((operation == null) || (operation == SearchFilterParser.CompareOperation.eq)) ? join.get("myTargetResourcePid").in(targetPids)
+				: join.get("myTargetResourcePid").in(targetPids).not();
 			codePredicates.add(myBuilder.and(pathPredicate, pidPredicate));
 		}
 
 		// Resources by fully qualified URL
 		if (!targetQualifiedUrls.isEmpty()) {
 			ourLog.debug("Searching for resource link with target URLs: {}", targetQualifiedUrls);
-			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, join);
-			Predicate pidPredicate = join.get("myTargetResourceUrl").in(targetQualifiedUrls);
+			Predicate pathPredicate = ((operation == null) || (operation == SearchFilterParser.CompareOperation.eq)) ? createResourceLinkPathPredicate(theResourceName, theParamName, join)
+				: createResourceLinkPathPredicate(theResourceName, theParamName, join).not();
+			Predicate pidPredicate = ((operation == null) || (operation == SearchFilterParser.CompareOperation.eq)) ? join.get("myTargetResourceUrl").in(targetQualifiedUrls)
+				: join.get("myTargetResourceUrl").in(targetQualifiedUrls).not();
 			codePredicates.add(myBuilder.and(pathPredicate, pidPredicate));
 		}
 
@@ -1717,35 +1721,39 @@ public class SearchBuilder implements ISearchBuilder {
 
 		boolean exactMatch = theParameter instanceof StringParam && ((StringParam) theParameter).isExact();
 		if (exactMatch) {
-
 			// Exact match
-
 			Long hash = ResourceIndexedSearchParamString.calculateHashExact(theResourceName, theParamName, rawSearchTerm);
 			return theBuilder.equal(theFrom.get("myHashExact").as(Long.class), hash);
-
 		} else {
-
 			// Normalized Match
-
 			String normalizedString = StringNormalizer.normalizeString(rawSearchTerm);
 			String likeExpression;
-			if (theParameter instanceof StringParam &&
-				((StringParam) theParameter).isContains() &&
-				myDaoConfig.isAllowContainsSearches()) {
+			if ((theParameter instanceof StringParam) &&
+				(((((StringParam) theParameter).isContains()) &&
+					(myCallingDao.getConfig().isAllowContainsSearches())) ||
+					(operation == SearchFilterParser.CompareOperation.co))) {
 				likeExpression = createLeftAndRightMatchLikeExpression(normalizedString);
+			} else if ((operation != SearchFilterParser.CompareOperation.ne) &&
+					(operation != SearchFilterParser.CompareOperation.gt) &&
+					(operation != SearchFilterParser.CompareOperation.lt) &&
+					(operation != SearchFilterParser.CompareOperation.ge) &&
+					(operation != SearchFilterParser.CompareOperation.le)) {
+				if (operation == SearchFilterParser.CompareOperation.ew) {
+					likeExpression = createRightMatchLikeExpression(normalizedString);
+				} else {
+					likeExpression = createLeftMatchLikeExpression(normalizedString);
+				}
 			} else {
-				likeExpression = createLeftMatchLikeExpression(normalizedString);
+				likeExpression = normalizedString;
 			}
 
 			Predicate predicate;
 			if ((operation == null) ||
 				(operation == SearchFilterParser.CompareOperation.sw) ||
-				(operation == SearchFilterParser.CompareOperation.ew)) {
-
-				Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
-				Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
+				(operation == SearchFilterParser.CompareOperation.ew) ||
+				(operation == SearchFilterParser.CompareOperation.co)) {
 				Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
-				predicate = theBuilder.and(hashCode, singleCode);
+				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
 			} else if (operation == SearchFilterParser.CompareOperation.eq) {
 				Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
 				Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
@@ -1857,11 +1865,9 @@ public class SearchBuilder implements ISearchBuilder {
 				codes.addAll(myTerminologySvc.expandValueSet(code));
 			} else if (modifier == TokenParamModifier.ABOVE) {
 				system = determineSystemIfMissing(theParamName, code, system);
-				validateHaveSystemAndCodeForToken(theParamName, code, system);
 				codes.addAll(myTerminologySvc.findCodesAbove(system, code));
 			} else if (modifier == TokenParamModifier.BELOW) {
 				system = determineSystemIfMissing(theParamName, code, system);
-				validateHaveSystemAndCodeForToken(theParamName, code, system);
 				codes.addAll(myTerminologySvc.findCodesBelow(system, code));
 			} else {
 				codes.add(new VersionIndependentConcept(system, code));
@@ -1902,19 +1908,6 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		return retVal;
-	}
-
-	private void validateHaveSystemAndCodeForToken(String theParamName, String theCode, String theSystem) {
-		String systemDesc = defaultIfBlank(theSystem, "(missing)");
-		String codeDesc = defaultIfBlank(theCode, "(missing)");
-		if (isBlank(theCode)) {
-			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "invalidCodeMissingSystem", theParamName, systemDesc, codeDesc);
-			throw new InvalidRequestException(msg);
-		}
-		if (isBlank(theSystem)) {
-			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "invalidCodeMissingCode", theParamName, systemDesc, codeDesc);
-			throw new InvalidRequestException(msg);
-		}
 	}
 
 	private Predicate addPredicateToken(String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamToken> theFrom, List<VersionIndependentConcept> theTokens, TokenParamModifier theModifier, TokenModeEnum theTokenMode) {
@@ -2071,7 +2064,6 @@ public class SearchBuilder implements ISearchBuilder {
 				outerQuery.multiselect(myBuilder.countDistinct(myResourceTableRoot));
 			} else {
 				outerQuery.multiselect(myResourceTableRoot.get("myId").as(Long.class));
-				outerQuery.distinct(true);
 			}
 
 		}
@@ -3141,8 +3133,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 		private final SearchRuntimeDetails mySearchRuntimeDetails;
 		private final RequestDetails myRequest;
-		private final boolean myHaveRawSqlHooks;
-		private final boolean myHavePerftraceFoundIdHook;
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
 		private Long myNext;
@@ -3161,16 +3151,13 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myParams.getEverythingMode() != null) {
 				myStillNeedToFetchIncludes = true;
 			}
-
-			myHavePerftraceFoundIdHook =JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, myInterceptorBroadcaster, myRequest);
-			myHaveRawSqlHooks = JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, myRequest);
-
 		}
 
 		private void fetchNext() {
 
+			boolean haveRawSqlHooks = JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, myRequest);
 			try {
-				if (myHaveRawSqlHooks) {
+				if (haveRawSqlHooks) {
 					CurrentThreadCaptureQueriesListener.startCapturing();
 				}
 
@@ -3211,13 +3198,6 @@ public class SearchBuilder implements ISearchBuilder {
 					if (myNext == null) {
 						while (myResultsIterator.hasNext()) {
 							Long next = myResultsIterator.next();
-							if (myHavePerftraceFoundIdHook) {
-								HookParams params = new HookParams()
-									.add(Integer.class, System.identityHashCode(this))
-									.add(Object.class, next);
-								JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, params);
-							}
-
 							if (next != null) {
 								if (myPidSet.add(next)) {
 									myNext = next;
@@ -3256,7 +3236,7 @@ public class SearchBuilder implements ISearchBuilder {
 				mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
 
 			} finally {
-				if (myHaveRawSqlHooks) {
+				if (haveRawSqlHooks) {
 					SqlQueryList capturedQueries = CurrentThreadCaptureQueriesListener.getCurrentQueueAndStopCapturing();
 					HookParams params = new HookParams()
 						.add(RequestDetails.class, myRequest)
