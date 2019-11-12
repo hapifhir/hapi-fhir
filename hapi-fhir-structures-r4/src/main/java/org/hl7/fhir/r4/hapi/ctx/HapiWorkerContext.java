@@ -223,7 +223,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       return new ValidationResult(definition);
     }
 
-    return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");
+    return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + Constants.codeSystemWithDefaultDescription(theSystem) + "]");
   }
 
   @Override

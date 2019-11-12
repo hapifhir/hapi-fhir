@@ -309,7 +309,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
             .getExpansion()
             .getContains()
             .stream()
-            .filter(t -> (theCodeSystem == null || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
+            .filter(t -> (Constants.codeSystemNotNeeded(theCodeSystem) || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
             .findFirst();
           if (haveMatch.isPresent()) {
             return new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(theCode)));

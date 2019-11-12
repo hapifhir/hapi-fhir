@@ -359,4 +359,11 @@ public class Constants {
 	}
 
 
+	public static String codeSystemWithDefaultDescription(String theSystem) {
+		if (codeSystemNotNeeded(theSystem)) {
+			return "(none)";
+		} else {
+			return theSystem;
+		}
+	}
 }

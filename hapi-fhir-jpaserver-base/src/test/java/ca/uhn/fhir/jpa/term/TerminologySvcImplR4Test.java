@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -1801,11 +1802,14 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		assertNull(result);
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, "11378-7", null, null, null);
+		assertNull(result);
+
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, Constants.CODESYSTEM_VALIDATE_NOT_NEEDED, "11378-7", null, null, null);
 		assertTrue(result.isResult());
 		assertEquals("Validation succeeded", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, Constants.CODESYSTEM_VALIDATE_NOT_NEEDED, "11378-7", "Systolic blood pressure at First encounter", null, null);
 		assertTrue(result.isResult());
 		assertEquals("Validation succeeded", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
@@ -1851,11 +1855,14 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		assertNull(result);
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, "11378-7", null, null, null);
+		assertNull(result);
+
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, Constants.CODESYSTEM_VALIDATE_NOT_NEEDED, "11378-7", null, null, null);
 		assertTrue(result.isResult());
 		assertEquals("Validation succeeded", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, Constants.CODESYSTEM_VALIDATE_NOT_NEEDED, "11378-7", "Systolic blood pressure at First encounter", null, null);
 		assertTrue(result.isResult());
 		assertEquals("Validation succeeded", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());

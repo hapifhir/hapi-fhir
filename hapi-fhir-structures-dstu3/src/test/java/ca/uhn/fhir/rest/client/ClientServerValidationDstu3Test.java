@@ -61,7 +61,7 @@ public class ClientServerValidationDstu3Test {
 
 	@Test
 	public void testServerReturnsAppropriateVersionDstu3() throws Exception {
-		String appropriateFhirVersion = "3.0.1";
+		String appropriateFhirVersion = "3.0.2";
 		assertThat(appropriateFhirVersion, is(FhirVersionEnum.DSTU3.getFhirVersionString()));
 		CapabilityStatement conf = new CapabilityStatement();
 		conf.setFhirVersion(appropriateFhirVersion);
@@ -125,7 +125,7 @@ public class ClientServerValidationDstu3Test {
 
 	@Test
 	public void testServerReturnsRightVersionDstu3() throws Exception {
-		String appropriateFhirVersion = "3.0.1";
+		String appropriateFhirVersion = "3.0.2";
 		assertThat(appropriateFhirVersion, is(FhirVersionEnum.DSTU3.getFhirVersionString()));
 		CapabilityStatement conf = new CapabilityStatement();
 		conf.setFhirVersion(appropriateFhirVersion);

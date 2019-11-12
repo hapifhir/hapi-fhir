@@ -621,24 +621,6 @@ public class ServerCapabilityStatementProviderR4Test {
 	}
 
 	@Test
-	public void testValidateGeneratedStatement() throws Exception {
-
-		RestfulServer rs = new RestfulServer(ourCtx);
-		rs.setProviders(new MultiOptionalProvider());
-
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
-		rs.setServerConformanceProvider(sc);
-
-		rs.init(createServletConfig());
-
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
-
-		ValidationResult result = ourCtx.newValidator().validateWithResult(conformance);
-		assertTrue(result.getMessages().toString(), result.isSuccessful());
-	}
-
-	@Test
 	public void testSystemLevelNamedQueryWithParameters() throws Exception {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new NamedQueryPlainProvider());

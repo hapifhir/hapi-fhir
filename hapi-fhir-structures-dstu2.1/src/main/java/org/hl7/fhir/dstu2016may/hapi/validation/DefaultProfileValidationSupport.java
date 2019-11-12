@@ -1,6 +1,7 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -274,7 +275,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 						.getExpansion()
 						.getContains()
 						.stream()
-						.filter(t -> (theCodeSystem == null || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
+						.filter(t -> (Constants.codeSystemNotNeeded(theCodeSystem) || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
 						.findFirst();
 					if (haveMatch.isPresent()) {
 						return new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(theCode)));

@@ -2,6 +2,7 @@ package org.hl7.fhir.dstu2016may.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.Validate;
@@ -203,7 +204,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		if (isNotBlank(theSystem)) {
 			CodeSystem system = fetchCodeSystem(theSystem);
 			if (system == null) {
-				return new ValidationResult(OperationOutcome.IssueSeverity.INFORMATION, "Code " + theSystem + "/" + theCode + " was not validated because the code system is not present");
+				return new ValidationResult(OperationOutcome.IssueSeverity.INFORMATION, "Code " + Constants.codeSystemWithDefaultDescription(theSystem) + "/" + theCode + " was not validated because the code system is not present");
 			}
 
 			if (system.hasCaseSensitive()) {
@@ -251,7 +252,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 			}
 		}
 
-		return new ValidationResult(OperationOutcome.IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");
+		return new ValidationResult(OperationOutcome.IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + Constants.codeSystemWithDefaultDescription(theSystem) + "]");
 	}
 
 	@Override
