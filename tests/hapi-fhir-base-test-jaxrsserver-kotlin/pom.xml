@@ -6,8 +6,8 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>4.1.0-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
+		<version>4.1.0</version>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-base-test-jaxrsserver-kotlin</artifactId>
