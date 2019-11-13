@@ -495,12 +495,6 @@ public class SearchParameterMap implements Serializable {
 		}
 	}
 
-	public boolean wantOnlyCount(SearchTotalModeEnum theDefaultTotalMode) {
-		return SummaryEnum.COUNT.equals(mySummaryMode) ||
-				SearchTotalModeEnum.ACCURATE.equals(mySearchTotalMode) ||
-				(mySearchTotalMode == null && SearchTotalModeEnum.ACCURATE.equals(theDefaultTotalMode));
-	}
-
 	public enum EverythingModeEnum {
 		/*
 		 * Don't reorder! We rely on the ordinals
