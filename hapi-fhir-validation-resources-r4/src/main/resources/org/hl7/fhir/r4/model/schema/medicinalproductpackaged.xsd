@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Fri, Nov 1, 2019 09:29+1100 for FHIR v4.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="MedicinalProductPackaged" type="MedicinalProductPackaged">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A medicinal product in a container or package.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="MedicinalProductPackaged">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A medicinal product in a container or package.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Unique identifier.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="subject" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The product with this is a pack for.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Textual description.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="legalStatusOfSupply" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The legal status of supply of the medicinal product as classified by the regulator.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="marketingStatus" minOccurs="0" maxOccurs="unbounded" type="MarketingStatus">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Marketing information.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="marketingAuthorization" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Manufacturer of this Package Item.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="manufacturer" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Manufacturer of this Package Item.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="batchIdentifier" type="MedicinalProductPackaged.BatchIdentifier" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Batch numbering.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="packageItem" type="MedicinalProductPackaged.PackageItem" minOccurs="1" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A packaging item, as a contained for medicine, possibly with other packaging items within.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="MedicinalProductPackaged.BatchIdentifier">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A medicinal product in a container or package.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="outerPackaging" minOccurs="1" maxOccurs="1" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A number appearing on the outer packaging of a specific batch.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="immediatePackaging" minOccurs="0" maxOccurs="1" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A number appearing on the immediate packaging (and not the outer packaging).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="MedicinalProductPackaged.PackageItem">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A medicinal product in a container or package.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Including possibly Data Carrier Identifier.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="type" minOccurs="1" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The physical type of the container of the medicine.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="quantity" minOccurs="1" maxOccurs="1" type="Quantity">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The quantity of this package in the medicinal product, at the current level of packaging. The outermost is always 1.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="material" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Material type of the package item.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="alternateMaterial" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A possible alternate material for the packaging.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="device" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A device accompanying a medicinal product.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="manufacturedItem" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The manufactured item as contained in the packaged medicinal product.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="packageItem" type="MedicinalProductPackaged.PackageItem" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Allows containers within containers.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="physicalCharacteristics" minOccurs="0" maxOccurs="1" type="ProdCharacteristic">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Dimensions, color etc.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="otherCharacteristics" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Other codeable characteristics.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="shelfLifeStorage" minOccurs="0" maxOccurs="unbounded" type="ProductShelfLife">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Shelf Life and storage information.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="manufacturer" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Manufacturer of this Package Item.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

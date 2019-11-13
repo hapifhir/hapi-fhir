@@ -250,7 +250,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
-		assertEquals(4, expansion.getExpansion().getContains().size());
+		assertEquals(6, expansion.getExpansion().getContains().size());
 
 	}
 

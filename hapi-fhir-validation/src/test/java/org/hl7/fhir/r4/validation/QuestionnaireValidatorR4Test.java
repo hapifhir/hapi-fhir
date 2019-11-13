@@ -88,7 +88,7 @@ public class QuestionnaireValidatorR4Test {
 				.setType(QuestionnaireItemType.STRING)
 				.addExtension()
 				.setUrl(extensionDomainToTest)
-				.setValue(new CodeableConcept().addCoding(new Coding(null, "text-box", null)));
+				.setValue(new CodeableConcept().addCoding(new Coding("http://hl7.org/fhir/questionnaire-item-control", "text-box", null)));
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());

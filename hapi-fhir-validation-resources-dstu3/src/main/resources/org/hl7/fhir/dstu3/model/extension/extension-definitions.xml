@@ -3,7 +3,7 @@
 <Bundle xmlns="http://hl7.org/fhir">
   <id value="extensions"/>
   <meta>
-    <lastUpdated value="2017-04-19T07:44:43.294+10:00"/>
+    <lastUpdated value="2019-10-24T11:53:00+11:00"/>
   </meta>
   <type value="collection"/>
   <entry>
@@ -20,10 +20,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-history"/>
         <name value="history"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Information on changes made to the Value Set Definition over time and a contained audit trail of all such changes."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -1252,7 +1252,7 @@
           </telecom>
         </contact>
         <description value="The registered place of birth of the patient. A sytem may use the address.text if they don&#39;t store the birthPlace address in discrete elements."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -1430,10 +1430,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-map"/>
         <name value="map"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="A reference to a concept map that is relevant for the interpretation of this value set."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -1627,7 +1627,7 @@
           </telecom>
         </contact>
         <description value="A specific offset time in milliseconds from the stated time in the Observation.appliesDateTime to allow for representation of sequential recording  of sampled data from the same lead or data stream.  For example, an ECG recorder may record sequentially 3 leads four time to receive 12-lead ECG, see [ISO 22077](https://www.iso.org/obp/ui/#iso:std:61871:en)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -1816,7 +1816,7 @@
           </telecom>
         </contact>
         <description value="Clinical Interpretations for variant. It&#39;s a reference to an Observation resource."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -2005,7 +2005,7 @@
           </telecom>
         </contact>
         <description value="Identifies internal processing status for the data element; e.g. &quot;Under review&quot;."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="iso11179"/>
           <uri value="http://metadata-standards.org/11179/"/>
@@ -2211,10 +2211,10 @@
         <name value="cadavericDonor"/>
         <title value="cadavericDonor"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Flag indicating whether the patient authorized the donation of body parts after death."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -2401,7 +2401,7 @@
           </telecom>
         </contact>
         <description value="Text description about the clinical management provided."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -2580,10 +2580,10 @@
         <name value="definition"/>
         <title value="Definition"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="A display name that describes the meaning of this code when used as part of this value set."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -2776,7 +2776,7 @@
           </telecom>
         </contact>
         <description value="The coded reason why the diagnostic order was rejected."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -2963,7 +2963,7 @@
           </telecom>
         </contact>
         <description value="Record of the date and/or time of the first exposure to the Substance for this Reaction Event."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -3153,7 +3153,7 @@
           </telecom>
         </contact>
         <description value="The amount of time that the Adverse Reaction persisted."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -3340,7 +3340,7 @@
           </telecom>
         </contact>
         <description value="Provides a coded expression for the content represented in a string."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -3550,7 +3550,7 @@
           </telecom>
         </contact>
         <description value="A protocol, guideline or other definition that was adhered to in whole or in part by this event."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -3731,10 +3731,10 @@
         <name value="congregation"/>
         <title value="congregation"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="A group or place of religious practice that may provide services to the patient."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -3921,7 +3921,7 @@
           </telecom>
         </contact>
         <description value="Indicates that the style extensions ([style](extension-rendering-style.html), [markdown](extension-rendering-markdown.html)) and [xhtml](extension-rendering-xhtml.html)) in this resource are essential to the interpretation of the styled text and that it cannot be rendered without the style without losing essential information."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -4110,7 +4110,7 @@
           </telecom>
         </contact>
         <description value="Identifies a document that conveys some sort of information related to the data element."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="iso11179"/>
           <uri value="http://metadata-standards.org/11179/"/>
@@ -4312,7 +4312,7 @@
           </telecom>
         </contact>
         <description value="The numeric portion of a building number."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -4498,10 +4498,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-conceptOrder"/>
         <name value="conceptOrder"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Identifies the relative order in which concepts within the value set should be presented to a user."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -4691,7 +4691,7 @@
           </telecom>
         </contact>
         <description value="Source of sample used to determine the sequence in sequencing lab -- germline, somatic, prenatal. LOINC Code: ([48002-0](http://loinc.org/48002-0))."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -4899,7 +4899,7 @@
           </telecom>
         </contact>
         <description value="The platform, methodology and software applied at the time of the&#xD;genotyping."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -5086,7 +5086,7 @@
           </telecom>
         </contact>
         <description value="Describes the intended purpose of the rendered text.  For example - instructions, guidance on access control, maintenance information, etc."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -5303,7 +5303,7 @@
           </telecom>
         </contact>
         <description value="Identifies a sibling of the relative."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -5897,7 +5897,7 @@
           </telecom>
         </contact>
         <description value="Identifies the date on which the element became (or is expected to become) active and the date on which the element became (or is expected to become) retired."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -6105,7 +6105,7 @@
           </telecom>
         </contact>
         <description value="A FHIRPath statement that defines whether an element is in the slice."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -6302,7 +6302,7 @@
           </telecom>
         </contact>
         <description value="If true, indicates that the extended item should not be displayed to the user."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -6492,7 +6492,7 @@
           </telecom>
         </contact>
         <description value="The XML (schema) type of a property - used for the value attribute of a primitive type (for which there is no type in the FHIR typing system)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -6681,7 +6681,7 @@
           </telecom>
         </contact>
         <description value="streetName."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -6877,7 +6877,7 @@
           </telecom>
         </contact>
         <description value="A code to track a detailed progress of  a procedure (e.g. In Recovery, Prepared for Surgery)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -7084,7 +7084,7 @@
           </telecom>
         </contact>
         <description value="A physical quality which inheres to the allele by virtue of the number instances of the allele within a population. LOINC Code: ([81258-6](http://loinc.org/81258-6))."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -7272,7 +7272,7 @@
           </telecom>
         </contact>
         <description value="The type of the encounter."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -7459,7 +7459,7 @@
           </telecom>
         </contact>
         <description value="If true, indicates that the specified coding corresponds to the data element concept for the data element."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -7681,7 +7681,7 @@
           </telecom>
         </contact>
         <description value="This Contact is the preferred contact at this organization for the purpose of the contact&#xA;&#xA;There can be multiple contacts on an Organizations record with this value set to true, but these should all have different purpose values."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -7868,7 +7868,7 @@
           </telecom>
         </contact>
         <description value="The person in the receiving organization that will receive the response."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -8072,10 +8072,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-sourceReference"/>
         <name value="sourceReference"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="This text is intended to act as a citation to work done elsewhere that is not part of the current stewarding process where the referenced source is in some way a basis of the current value set definition."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -8267,7 +8267,7 @@
           </telecom>
         </contact>
         <description value="A quality common to all members of an object class. A property may be any feature that humans naturally use to distinguish one individual object from another. It is the human perception of a single quality of an object class in the real world.  It is conceptual and thus has no particular associated means of representation by which the property can be communicated."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -8501,10 +8501,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-trusted-expansion"/>
         <name value="trusted-expansion"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Indicates an authoritative source for performing value set expansions."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -8693,7 +8693,7 @@
           </telecom>
         </contact>
         <description value="A numbered box located in a post station."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -8889,7 +8889,7 @@
           </telecom>
         </contact>
         <description value="The target rate to reach for this infusion.  Note that deliveryRateGoal is typically less than the maximum delivery rate which is the rate not to exceed. For enteral feeding orders, a target tube feeding rate of 75ml/hour may be specified."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -9078,7 +9078,7 @@
           </telecom>
         </contact>
         <description value="A protocol, guideline, or other definition that is adhered to in whole or in part by this request."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -9278,7 +9278,7 @@
           </telecom>
         </contact>
         <description value="The level of occurrence of a single DNA Sequence Variant within a set of chromosomes. Heterozygous indicates the DNA sequence variant is only present in one of the two genes contained in homologous chromosomes. Homozygous indicates the DNA Sequence Variant is present in both genes contained in homologous chromosomes. Hemizygous indicates the DNA Sequence Variant exists in the only single copy of a gene in a non-homologous chromosome (the male X and Y chromosome are non-homologous). Hemiplasmic indicates that the DNA Sequence Variant is present in some but not all of the copies of mitochondrial DNA. Homoplasmic indicates that the DNA Sequence Variant is present in all of the copies of mitochondrial DNA. LOINC Code: ([53034-5](http://loinc.org/53034-5))."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -9466,7 +9466,7 @@
           </telecom>
         </contact>
         <description value="The type of user initiating the request, e.g. patient, healthcare provider, or specific type of healthcare provider (physician, nurse, etc.)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -9653,7 +9653,7 @@
           </telecom>
         </contact>
         <description value="If true, indicates that the specified times, frequencies, periods are expected to be adhered to as precisely as possible.  If false, indicates that a typical degree of variability based on institutional and/or patient convenience is acceptable."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -9862,7 +9862,7 @@
           </telecom>
         </contact>
         <description value="Period of time after which the rate increment should be attempted, e.g., 4 hours."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -10051,7 +10051,7 @@
           </telecom>
         </contact>
         <description value="Identifies whether a patient arrives at the reporting facility via ambulance and the type of ambulance that was used."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -10259,7 +10259,7 @@
           </telecom>
         </contact>
         <description value="A summary report that points to subordinate target reports."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -10442,10 +10442,10 @@
         <name value="group"/>
         <title value="Context Group"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Defines the group in which this usage context is a member. Multiple groups are &quot;OR&#39;ed&quot;, contexts within a group are &quot;AND&#39;ed&quot;."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -10632,7 +10632,7 @@
           </telecom>
         </contact>
         <description value="A URL that resolves to additional supporting information or guidance related to the question."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -10831,7 +10831,7 @@
           </telecom>
         </contact>
         <description value="The type of individual that will consume the response content. This may be different from the requesting user type (e.g. if a clinician is getting disease management guidance for provision to a patient). E.g. patient, healthcare provider or specific type of healthcare provider (physician, nurse, etc.)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -11017,7 +11017,7 @@
           </telecom>
         </contact>
         <description value="The number of a building, house or lot alongside the street. Also known as &quot;primary street number&quot;. This does not number the street but rather the building."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -11213,7 +11213,7 @@
           </telecom>
         </contact>
         <description value="Allows capturing, on a specific question or group of questions, exactly who was responsible for providing the answer(s)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -11438,7 +11438,7 @@
           </telecom>
         </contact>
         <description value="Indicates another resource whose existence justifies this event."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -11659,7 +11659,7 @@
           </telecom>
         </contact>
         <description value="Facility location where this report was prepared."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -11850,7 +11850,7 @@
           </telecom>
         </contact>
         <description value="Any alphabetic character, fraction or other text that may appear after the numeric portion of a building number."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -12045,7 +12045,7 @@
           </telecom>
         </contact>
         <description value="A V3 compliant, RFC 3966 conformant URI version of the telephone or fax number."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -12243,7 +12243,7 @@
           </telecom>
         </contact>
         <description value="The position of the body when the observation was done, e.g. standing, sitting. To be used only when the body position in not precoordinated in the observation code."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -12422,10 +12422,10 @@
         <name value="deprecated"/>
         <title value="Deprecated"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Set to true of the concept has been deprecated (still can be used, but soon to be withdrawn)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -12615,7 +12615,7 @@
           </telecom>
         </contact>
         <description value="Status code taken from [HL7 template specification](http://wiki.hl7.org/images/7/7a/TemplatesDSTU-20140910b-96.pdf.zip) - allows for alignment with the template DSTU, and has more authoring status codes."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -12824,7 +12824,7 @@
           </telecom>
         </contact>
         <description value="The level of equivalence between the element containing the mapping and the element mapped to."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -13046,7 +13046,7 @@
           </telecom>
         </contact>
         <description value="Expresses the linkage between the internal codes used for storage and the codes used for exchange."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -13275,7 +13275,7 @@
           </telecom>
         </contact>
         <description value="The reason the goal was not accepted. Applies only if the status of the goal is rejected."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="qdm"/>
           <uri value="http://www.healthit.gov/quality-data-model"/>
@@ -13476,7 +13476,7 @@
           </telecom>
         </contact>
         <description value="Codes to represent the functional status of a device implanted in a patient.  Both overall device status and an implant status need to be considered. The implant status should only be used when the [device status](device-definitions.html#Device.status) is `active `."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -13676,7 +13676,7 @@
         <url value="http://hl7.org/fhir/StructureDefinition/auditevent-MPPS"/>
         <name value="MPPS"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="Health Level Seven, Inc. - Security WG"/>
         <contact>
           <telecom>
@@ -13685,7 +13685,7 @@
           </telecom>
         </contact>
         <description value="An MPPS Instance UID associated with this entity."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="dicom"/>
           <uri value="http://nema.org/dicom"/>
@@ -13885,7 +13885,7 @@
           </telecom>
         </contact>
         <description value="Link to an actual medication administration record with the full details of the administration, if a link is known."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -14075,7 +14075,7 @@
           </telecom>
         </contact>
         <description value="Completed or terminated task(s) whose function is taken by this new task."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="workflow"/>
           <uri value="http://hl7.org/fhir/workflow"/>
@@ -14279,10 +14279,10 @@
         <name value="interpreterRequired"/>
         <title value="interpreterRequired"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="This Patient requires an interpreter to communicate healthcare information to the practitioner."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -14472,7 +14472,7 @@
           </telecom>
         </contact>
         <description value="If the encountered was cancelled after it was planned, why? Applies only if the status is cancelled."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -14659,7 +14659,7 @@
           </telecom>
         </contact>
         <description value="The amount of time the individual was exposed to the Substance."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -14837,10 +14837,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-ordinalValue"/>
         <name value="ordinalValue"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="A numeric value that allows the comparison (less than, greater than) or other numerical manipulation of a concept (e.g. adding up components of a score)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -15029,7 +15029,7 @@
           </telecom>
         </contact>
         <description value="This is an equivalent of the string on which the extension is sent, but includes additional markdown (see documentation about [markdown](datatypes.html#markdown). Note that using HTML  [xhtml](extension-rendering-xhtml.html) can allow for greater precision of display."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -15225,7 +15225,7 @@
           </telecom>
         </contact>
         <description value="A CodeableConcept that assigns meaning to the response object on which it appears."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -15404,10 +15404,10 @@
         <name value="lastReviewDate"/>
         <title value="Last Review Date"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The date on which the asset content was last reviewed. Review happens periodically after that, but doesn&#39;t change the original approval date."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -15608,7 +15608,7 @@
           </telecom>
         </contact>
         <description value="A numerical value associated with the coded ordinal value."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -15805,7 +15805,7 @@
           </telecom>
         </contact>
         <description value="Whether the binding is used on multiple resources, or only on this resource."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -15994,7 +15994,7 @@
           </telecom>
         </contact>
         <description value="The primary measure of variance/uncertainty of the value (the square root of the sum of the squares of the differences between all data points and the mean)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -16191,7 +16191,7 @@
           </telecom>
         </contact>
         <description value="The prefix portion (e.g. voorvoegsel) of the family name that is derived from the person&#39;s partner&#39;s surname, as distinguished from any portion that is derived from the surname of the person&#39;s own."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -16402,7 +16402,7 @@
           </telecom>
         </contact>
         <description value="The report references related (&quot;sibling&quot;) reports."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -16593,7 +16593,7 @@
           </telecom>
         </contact>
         <description value="Observations that confirm or refute the risk and/or the substance."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -16791,7 +16791,7 @@
           </telecom>
         </contact>
         <description value="The type of data entry control or structure that should be used to render the item."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -17001,7 +17001,7 @@
           </telecom>
         </contact>
         <description value="Identifies the desired orientation when rendering a list of choices (typically radio-box or check-box lists)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -17213,7 +17213,7 @@
           </telecom>
         </contact>
         <description value="The maximum volume of fluid to administer to a patient."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -17402,7 +17402,7 @@
           </telecom>
         </contact>
         <description value="The class of encounter (inpatient, outpatient, etc)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -17579,10 +17579,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-warning"/>
         <name value="warning"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="An extra warning about the correct use of the value set."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -17771,7 +17771,7 @@
           </telecom>
         </contact>
         <description value="Direction (e.g., N, S, W, E)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -17967,7 +17967,7 @@
           </telecom>
         </contact>
         <description value="The reason associated with the rejection by the receiver of this device use request. Applicable only if the status is rejected."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -18154,7 +18154,7 @@
           </telecom>
         </contact>
         <description value="Additional details about the clinical management provided for this Reaction Event."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -18343,7 +18343,7 @@
           </telecom>
         </contact>
         <description value="Unique identifier for a study protocol."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -18540,7 +18540,7 @@
           </telecom>
         </contact>
         <description value="Delimiters are printed without framing white space. If no value component is provided, the delimiter appears as a line break."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -18738,7 +18738,7 @@
           </telecom>
         </contact>
         <description value="The task the system user is performing, e.g. laboratory results review, medication list review, etc. This information can be used to tailor decision support outputs, such as recommended information resources."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -18917,10 +18917,10 @@
         <name value="mothersMaidenName"/>
         <title value="Mother&#39;s Maiden Name"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Mother&#39;s maiden (unmarried) name, commonly collected to help verify patient identity."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -19128,7 +19128,7 @@
           </telecom>
         </contact>
         <description value="Name Representation."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -19345,7 +19345,7 @@
           </telecom>
         </contact>
         <description value="A subsection of a municipality."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -19541,7 +19541,7 @@
           </telecom>
         </contact>
         <description value="Reference to a specific Questionnaire Resource as an ordered item.  Allows for ordering a specific questionnaire to be completed."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -19731,7 +19731,7 @@
           </telecom>
         </contact>
         <description value="Describes why the event occurred in coded or textual form."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -19960,7 +19960,7 @@
           </telecom>
         </contact>
         <description value="Identifies the kind(s) of attachmemt allowed to be sent for an element."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -20193,7 +20193,7 @@
           </telecom>
         </contact>
         <description value="Identifies how the specified element should be rendered when displayed."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -20390,7 +20390,7 @@
           </telecom>
         </contact>
         <description value="The portion of the family name that is derived from the person&#39;s father."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -20589,10 +20589,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-usage"/>
         <name value="usage"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Consumers of the value set and the implementations, projects or standards that the author has utilized the value set in."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -21163,7 +21163,7 @@
           </telecom>
         </contact>
         <description value="A code specifying the type of probability distribution for the uncertainty."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -21380,7 +21380,7 @@
           </telecom>
         </contact>
         <description value="StructureMaps that have this Questionnaire as &#39;target&#39; - i.e. that can be used to create QuestionnaireResponses that are valid against this Questionnaire."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -21569,7 +21569,7 @@
           </telecom>
         </contact>
         <description value="A code that represents the preferred display order of the components of this human name."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -21777,7 +21777,7 @@
           </telecom>
         </contact>
         <description value="The type of dose, e.g., initial, maintenance, loading."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -21966,7 +21966,7 @@
           </telecom>
         </contact>
         <description value="Provides a rendered version of the value intended for human display. &#xA0;For example, a sensitive identifier (e.g. social security number)&#xA0;partially obscured by asterisks;&#xA0;a drivers licence&#xA0;number with dashes inserted; a date formatted as MMM dd, yyyy;&#xA0;etc."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -22164,7 +22164,7 @@
           </telecom>
         </contact>
         <description value="Purpose of the family member history or why it was created, such as when family member history is targeted for cardiovascular health, mental health, or genetic counseling."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -22353,7 +22353,7 @@
           </telecom>
         </contact>
         <description value="Identifies a filter to apply when looking up candidate answers for the question."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -22552,7 +22552,7 @@
           </telecom>
         </contact>
         <description value="Identifier for DNA sequence variant.  If a germline variant, ClinVar or dbSNP identifier should be used.  If a somatic variant, COSMIC identifier should be used, unless in ClinVar then either maybe used. Need to provide the code system used (ClinVar, dbSNP, COSMIC) LOINC Code: ([48003-8](http://loinc.org/48003-8))."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -22730,10 +22730,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-label"/>
         <name value="label"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The label to list in front of a code when presenting a list of possible values in a questionnaire-like fashion."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -22924,7 +22924,7 @@
           </telecom>
         </contact>
         <description value="The time interval when the medication must be administered. The start and end times must be expressed as dateTimes, not times relative to the dispensing time (e.g. use within 24 hours)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -23102,10 +23102,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-otherName"/>
         <name value="otherName"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Human readable names for the codesystem."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -23678,7 +23678,7 @@
           </telecom>
         </contact>
         <description value="The maximum allowable value set, for use when the binding strength is &#39;extensible&#39;. This value set is the value set from which extensions can be taken from."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -23884,7 +23884,7 @@
           </telecom>
         </contact>
         <description value="A human readable name for the region of interest. Typically Exon #, Intron # or other. NOTE: This is not standardized and is mainly for convenience and display purposes.  LOINC Code: ([47999-8](http://loinc.org/47999-8))."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -24092,7 +24092,7 @@
           </telecom>
         </contact>
         <description value="Indicates the type of delivery installation (the facility to which the mail will be delivered prior to final shipping via the delivery mode.) Example: post office, letter carrier depot, community mail center, station, etc."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -24288,7 +24288,7 @@
           </telecom>
         </contact>
         <description value="The target body site used for this procedure.  Multiple locations are allowed."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -24469,10 +24469,10 @@
         <name value="alias"/>
         <title value="Alias"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Other names that this location is known as. (for Example, &quot;Pembo HC&quot; and &quot;Pembo Health Clinic&quot;)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -24659,7 +24659,7 @@
           </telecom>
         </contact>
         <description value="The default/suggested phrasing to use when prompting a human to capture the data element in question form (e.g. In a survey)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -24856,7 +24856,7 @@
           </telecom>
         </contact>
         <description value="For questionnaires generated from FHIR profiles, indicates the FHIR data type or resource type that corresponds to this node."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -25058,10 +25058,10 @@
         <name value="comments"/>
         <title value="Comment"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="A comment that explains how this code is used in this context (where the value set is expected to be used)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -25252,7 +25252,7 @@
           </telecom>
         </contact>
         <description value="StructureMaps that have this Questionnaire as &#39;source&#39; - i.e. that can be used to create other artifacts from QuestionnaireResponses that are valid against this Questionnaire."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -25441,7 +25441,7 @@
           </telecom>
         </contact>
         <description value="Carries additional confidentiality codes beyond the base fixed code specified in the CDA document."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -25630,7 +25630,7 @@
           </telecom>
         </contact>
         <description value="A regular expression that defines the syntax for the data element to be considered valid."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -25840,7 +25840,7 @@
           </telecom>
         </contact>
         <description value="A reference to a Library containing the formal logic used by the artifact."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -26029,7 +26029,7 @@
           </telecom>
         </contact>
         <description value="If true, indicates that if this option is selected, no other options may be selected, even if the item is a repeating question."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -26219,7 +26219,7 @@
           </telecom>
         </contact>
         <description value="A link to one to more patient records for the relation."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -26408,7 +26408,7 @@
           </telecom>
         </contact>
         <description value="Summarizes changes to the data element since the previous version."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -26596,7 +26596,7 @@
           </telecom>
         </contact>
         <description value="The person initiating the request."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -26810,7 +26810,7 @@
           </telecom>
         </contact>
         <description value="A reference to a stored contraindication that is the basis for this issue. A recipient can expect that the item referenced in this extension is being retained for record keeping purposes."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -27001,7 +27001,7 @@
           </telecom>
         </contact>
         <description value="The name of the party who will take receipt at the specified address, and will take on responsibility for ensuring delivery to the target recipient."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -27187,10 +27187,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-workflowStatus"/>
         <name value="workflowStatus"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Workflow Status is used to represent details of the value set development process while the value set has an Activity Status of Preliminary. The development of a value set often follows a formal workflow process from initiation to completion, and this element carries the state variable for this state machine. The assumption is that when first created a value set would have a workflow state of Draft. Additional workflow states may be used."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -27382,7 +27382,7 @@
           </telecom>
         </contact>
         <description value="The healthcare professional responsible for authorizing the initial prescription."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -27571,7 +27571,7 @@
           </telecom>
         </contact>
         <description value="Represents the routing information such as a letter carrier route number. It is the identifying number of the designator (the box number or rural route number)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -27767,7 +27767,7 @@
           </telecom>
         </contact>
         <description value="The organization that will receive the response."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -27946,7 +27946,7 @@
         <url value="http://hl7.org/fhir/StructureDefinition/auditevent-Anonymized"/>
         <name value="Anonymized"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="Health Level Seven, Inc. - Security WG"/>
         <contact>
           <telecom>
@@ -27955,7 +27955,7 @@
           </telecom>
         </contact>
         <description value="True or False indicating whether all patient identifying information was removed from the data."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="dicom"/>
           <uri value="http://nema.org/dicom"/>
@@ -28155,7 +28155,7 @@
           </telecom>
         </contact>
         <description value="Hinting information for the narrative generator - a series of name: value; pairs."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -28345,7 +28345,7 @@
           </telecom>
         </contact>
         <description value="The requested approach body site used for this procedure. Multiple locations are allowed."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -28535,7 +28535,7 @@
           </telecom>
         </contact>
         <description value="A code system that is supported by the system that is not defined in a value set resource."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -28726,7 +28726,7 @@
           </telecom>
         </contact>
         <description value="Identifies a map that links the questionnaire (source) to a DataElement server and identifies which questions correspond to which data elements (by linkId and local identifier, respectively)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -28915,7 +28915,7 @@
           </telecom>
         </contact>
         <description value="A region (or regions) that includes all of the sequence elements necessary to encode a functional transcript. A gene may include regulatory regions, transcribed regions and/or other functional sequence regions ([SO:0000704](http://www.sequenceontology.org/browser/current_svn/term/SO:0000704)). This element is the official gene symbol approved by the HGNC, which is a short abbreviated form of the gene name ([HGNC](http://www.genenames.org)). LOINC Code: ([48018-6](http://loinc.org/48018-6))."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -29121,7 +29121,7 @@
           </telecom>
         </contact>
         <description value="Change in the dosing rate applied each rateIncrementInterval, e.g., 20 mL/hour. The rate increment is usually an increase for a patient who is initiating tube feeding. The increase is continued until the maxDeliveryRate or rateGoal is reached."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -29310,7 +29310,7 @@
           </telecom>
         </contact>
         <description value="The urgency of sample collection, such as STAT, ASAP, ASAP-ED, ROUTINE, ROUTINE-AM, etc&#x2026;."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -29517,7 +29517,7 @@
           </telecom>
         </contact>
         <description value="Organization responsible for submitting the data element to its registry."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="iso11179"/>
           <uri value="http://metadata-standards.org/11179/"/>
@@ -29711,10 +29711,10 @@
         <name value="toocostly"/>
         <title value="Expansion Truncated"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Marks that the expansion is  incomplete, because the full value set is too large to represent, and the client asked for an incomplete fragment."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -29905,7 +29905,7 @@
           </telecom>
         </contact>
         <description value="Refers to the Sequence resource, representing raw genetics data."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -30116,7 +30116,7 @@
           </telecom>
         </contact>
         <description value="This extension enables the capability currently available through MSH-16 (Application Level acknowledgement) in HL7 Version 2 to declare at a message instance level whether a response is required or only upon error or success, or never."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -30348,7 +30348,7 @@
           </telecom>
         </contact>
         <description value="A variation that increases or decreases the copy number of a given region ([SO:0001019](http://www.sequenceontology.org/browser/current_svn/term/SO:0001019)). Values: amplification/deletion/LOH."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -30538,7 +30538,7 @@
           </telecom>
         </contact>
         <description value="A protocol, guideline, orderset or other definition that was adhered to in whole or in part by this event."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -30760,7 +30760,7 @@
           </telecom>
         </contact>
         <description value="The location of the delivery installation, usually a town or city, and is only required if the area is different from the municipality. Area to which mail delivery service is provided from any postal facility or service such as an individual letter carrier, rural route, or postal route."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -30956,7 +30956,7 @@
           </telecom>
         </contact>
         <description value="If true, indicates that the described event (combination of code, timing, performer, etc.) did not actually occur."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -31156,7 +31156,7 @@
           </telecom>
         </contact>
         <description value="Simple concise instructions to be read by the patient.  For example  &#x201C;twice a day&#x201D; rather than &#x201C;BID.&#x201D;."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -31739,7 +31739,7 @@
           </telecom>
         </contact>
         <description value="Mark that an invariant represents &#39;best practice&#39; rule - a rule that implementers may choose to enforce at error level in some or all circumstances."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -31970,7 +31970,7 @@
           </telecom>
         </contact>
         <description value="The estimated patient age at which the allergy or intolerance resolved. Should be specified only if the status is resolved."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -32159,7 +32159,7 @@
           </telecom>
         </contact>
         <description value="Identifies that the specified element should only appear in certain &quot;modes&quot; of operation."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -32378,7 +32378,7 @@
           </telecom>
         </contact>
         <description value="The distinct identification code required by &#xA7;1271.290(c) for a human cell, tissue, or cellular and tissue-based product (HCT/P) regulated as a device - which is a conditional, variable portion of the production identifier (PI) of a [Unique device Identifier (UDI)](http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/UDIBasics/default.htm).   If the content is from an [ICCBBA](https://www.iccbba.org/)-encoded UDI, the URI to use for the system is:  http://hl7.org/fhir/NamingSystem/iccbba-din.  GS1 and HIBCC formatted UDIs do not currently convey the DIN element.&#xA;&#xA;*Note to balloters: The Orders and Observations Workgroup has not yet determined whether the Device resource will include Devices of Human (or other) Origin (tissue, blood, etc.) and so the need for Donation Identification number is currently being met through this extension.  If it is determined a separate resource is to be used for Devices of Human (or other) Origin (tissue, blood, etc.)  then this extension may be deprecated in the future.  Feedback on this issue is welcome."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -32556,10 +32556,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-map"/>
         <name value="map"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="A reference to a concept map that is relevant for the interpretation of this value set."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -32753,7 +32753,7 @@
           </telecom>
         </contact>
         <description value="Number of refills allowed or remaining after a dispensing event."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -32941,7 +32941,7 @@
           </telecom>
         </contact>
         <description value="An allele is one of a set of coexisting sequence variants of a gene ([SO:0001023](http://www.sequenceontology.org/browser/current_svn/term/SO:0001023)). This element is the common name for the allele. LOINC Code: ([48008-7](http://loinc.org/48008-7))."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -33166,7 +33166,7 @@
           </telecom>
         </contact>
         <description value="Statement about the degree of clinical certainty that the specific substance was the cause of the manifestation in this reaction event."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -33374,10 +33374,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-comment"/>
         <name value="comment"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Each comment is a time-stamped entry of arbitrary length that is not editable except by anyone in the author group."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -33947,7 +33947,7 @@
           </telecom>
         </contact>
         <description value="Explanation for rejection or failure of the communication. Applicable only if the status is suspended, rejected, or failed."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -34137,7 +34137,7 @@
           </telecom>
         </contact>
         <description value="Identifies the individuals who are candidates for being the owner of the task."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="workflow"/>
           <uri value="http://hl7.org/fhir/workflow"/>
@@ -34382,7 +34382,7 @@
           </telecom>
         </contact>
         <description value="A number, letter or name identifying a delivery installation. For example, for Station A, the delivery installation qualifier would be &#39;A&#39;."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -34568,10 +34568,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-reference"/>
         <name value="reference"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="A logical reference (e.g. a reference to ValueSet.url) that identifies the value set/version that identifies the set of possible coded values this coding was chosen from or constrained by."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -34773,10 +34773,10 @@
         <name value="bidirectional"/>
         <title value="Bi-directional"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Set to true of the concept map can be safely intepreted in reversse."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -34966,7 +34966,7 @@
           </telecom>
         </contact>
         <description value="The requested target body site for this procedure. Multiple locations are allowed."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -35156,7 +35156,7 @@
           </telecom>
         </contact>
         <description value="The qualitative change in the value relative to the previous measurement. Usually only recorded if the change is clinically significant."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -35344,7 +35344,7 @@
           </telecom>
         </contact>
         <description value="Individual responsible for ensuring that the questionnaire response have been completed appropriately and signs off on the content."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -35542,7 +35542,7 @@
           </telecom>
         </contact>
         <description value="Language translation from base language of resource to another language."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -36152,7 +36152,7 @@
         <name value="location"/>
         <title value="Location of Access restriction"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="Health Level Seven, Inc. - CBCC WG"/>
         <contact>
           <telecom>
@@ -36161,7 +36161,7 @@
           </telecom>
         </contact>
         <description value="Restricts this exception to only apply a specific location as defined."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -36351,7 +36351,7 @@
           </telecom>
         </contact>
         <description value="The method used to perform this procedure."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -36541,7 +36541,7 @@
           </telecom>
         </contact>
         <description value="The minimum total quantity of a therapeutic substance that may be administered to a subject over the period of time. E.g., 10 mg in 24 hours."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -36729,7 +36729,7 @@
           </telecom>
         </contact>
         <description value="The minimum number of characters that must be present in the simple data type to be considered a &quot;valid&quot; instance."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -36940,7 +36940,7 @@
           </telecom>
         </contact>
         <description value="The portion of the family name that is derived from the person&#39;s mother."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -37149,7 +37149,7 @@
           </telecom>
         </contact>
         <description value="An assigned number on the specimen denoting the order of collection."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -37337,7 +37337,7 @@
           </telecom>
         </contact>
         <description value="The reason the referral request was refused. Only applicable when status = refused."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -37525,7 +37525,7 @@
           </telecom>
         </contact>
         <description value="The reason associated with the rejection of this communication request by the receiver. Applicable only if the status is rejected."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -37705,7 +37705,7 @@
         <url value="http://hl7.org/fhir/StructureDefinition/auditevent-Accession"/>
         <name value="Accession"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="Health Level Seven, Inc. - Security WG"/>
         <contact>
           <telecom>
@@ -37714,7 +37714,7 @@
           </telecom>
         </contact>
         <description value="An Accession Number associated with this participant object."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="dicom"/>
           <uri value="http://nema.org/dicom"/>
@@ -37905,10 +37905,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-author"/>
         <name value="author"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="User or Org actually involved in creating the value set content."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -38088,10 +38088,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-workflowStatus"/>
         <name value="workflowStatus"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Workflow Status is used to represent details of the value set development process while the value set has an Activity Status of Preliminary. The development of a value set often follows a formal workflow process from initiation to completion, and this element carries the state variable for this state machine. The assumption is that when first created a value set would have a workflow state of Draft. Additional workflow states may be used."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -38283,7 +38283,7 @@
           </telecom>
         </contact>
         <description value="Characterizes potential impact of the condition on life, durable physiological function, or quality of life. May include concepts such as self-resolving, life-threatening, requires hospitalization, or potential loss of function or capacity.  Different from severity in that a moderate subarachnoid hemorrhage is likely to be highly critical, whereas a moderate headache is not as important."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -38466,10 +38466,10 @@
         <name value="adoptionInfo"/>
         <title value="adoptionInfo"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Code indication the adoption status of the patient."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -38656,7 +38656,7 @@
           </telecom>
         </contact>
         <description value="The minimum allowable value set, for use when the binding strength is &#39;required&#39; or &#39;extensible&#39;. This value set is the minimum value set that any conformant system SHALL support."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -38863,7 +38863,7 @@
           </telecom>
         </contact>
         <description value="A code capturing the explanation of why the allergy or intolerance has been refuted. Should be specified only if the status is refuted."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -39042,10 +39042,10 @@
         <name value="birthTime"/>
         <title value="birthTime"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The time of day that the Patient was born. This includes the date to ensure that the timezone information can be communicated effectively."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -39233,7 +39233,7 @@
           </telecom>
         </contact>
         <description value="The supplements or provides additional information for the target report."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -39425,7 +39425,7 @@
           </telecom>
         </contact>
         <description value="Additional text for the summary presentation."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -39612,7 +39612,7 @@
           </telecom>
         </contact>
         <description value="Identifies the maximum number of decimal places that may be specified for the data element."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -39812,10 +39812,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-warning"/>
         <name value="warning"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="An extra warning about the correct use of the value set."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -39995,10 +39995,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-comment"/>
         <name value="comment"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Each comment is a time-stamped entry of arbitrary length that is not editable except by anyone in the author group."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -40558,10 +40558,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-label"/>
         <name value="label"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The label to list in front of a code when presenting a list of possible values in a questionnaire-like fashion."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -40750,7 +40750,7 @@
           </telecom>
         </contact>
         <description value="The regular expression that applies to the value, if one exists."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -40937,7 +40937,7 @@
           </telecom>
         </contact>
         <description value="Human Genome Variation Society (HGVS) nomenclature for an amino acid change. Reference sequence ID used for HGVS naming must be annotated. An amino acid is a sequence feature that corresponds to a single amino acid residue in a polypeptide ([SO:0001237](http://www.sequenceontology.org/browser/current_svn/term/SO:0001237)). LOINC Code: ([48005-3](http://loinc.org/48005-3))."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -41152,10 +41152,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-expirationDate"/>
         <name value="expirationDate"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The date when the value set version is no longer expected to be used to create new content. This is the first date-time when the value set version becomes Inactive, so this value SHALL present on all Inactive value set versions. The start Date_time is expected to be as of 0001 UTC of the Expiration Date."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -41347,7 +41347,7 @@
           </telecom>
         </contact>
         <description value="Information that may be needed by/relevant to the performer in their execution of this request."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -41538,7 +41538,7 @@
           </telecom>
         </contact>
         <description value="Codified type for associated DNA sequence variant. DNA sequence variants use the HGVS notation, which implies the DNA sequence variant type. LOINC Code: ([48019-4](http://loinc.org/48019-4))."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -41747,7 +41747,7 @@
           </telecom>
         </contact>
         <description value="Allows expressing the value set that must be stored internally by the system (as distinct from the base value set which defines values for exchange)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -41967,10 +41967,10 @@
         <name value="comments"/>
         <title value="Comment"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="A comment that explains how this code is used in this context (where the value set is expected to be used)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -42161,7 +42161,7 @@
           </telecom>
         </contact>
         <description value="Where the type for a question is &quot;Reference&quot;, indicates a type of resource that is permitted."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -42386,7 +42386,7 @@
           </telecom>
         </contact>
         <description value="Allows capturing risk-relevant observations about the relative that aren&#39;t themselves a specific health condition; e.g. Certain ethnic ancestries that are disease-relevant, presence of particular genetic markers, etc."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -42578,10 +42578,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-conceptOrder"/>
         <name value="conceptOrder"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Identifies the relative order in which concepts within the value set should be presented to a user."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -42761,10 +42761,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-unclosed"/>
         <name value="unclosed"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Marks that the expansion is  incomplete, and values other than those listed may be valid. This may be used because post-coordinated codes are allowed, and no practical expansion can be produced."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -42956,7 +42956,7 @@
           </telecom>
         </contact>
         <description value="A reference to where the rule is defined (based on the authoritative URLs in the applicable conformance resources)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -43143,7 +43143,7 @@
           </telecom>
         </contact>
         <description value="The inclusive lower bound on the range of allowed values for the data element."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -43384,7 +43384,7 @@
           </telecom>
         </contact>
         <description value="Postal address for a contact for the data element."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="iso11179"/>
           <uri value="http://metadata-standards.org/11179/"/>
@@ -43584,7 +43584,7 @@
           </telecom>
         </contact>
         <description value="The number or name of a specific unit contained within a building or complex, as assigned by that building or complex."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -43780,7 +43780,7 @@
           </telecom>
         </contact>
         <description value="This procedure is because of the related item."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -44059,7 +44059,7 @@
           </telecom>
         </contact>
         <description value="A FHIRPath expression that provides the value for the element or resource on which it appears."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -44246,7 +44246,7 @@
           </telecom>
         </contact>
         <description value="Identifies a parent of the relative."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -44863,7 +44863,7 @@
           </telecom>
         </contact>
         <description value="The factor(s) that caused the questionnaire to be answered."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -45057,10 +45057,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-replacedby"/>
         <name value="replacedby"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="A code that replaces this - use this code instead."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -45242,10 +45242,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-system"/>
         <name value="system"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Allows a direct reference to the code system for FHIR query."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -45427,10 +45427,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-otherName"/>
         <name value="otherName"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Human readable names for the valueset."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -46004,7 +46004,7 @@
           </telecom>
         </contact>
         <description value="Points to the Observation, AllergyIntolerance or other record that provides additional supporting information about this flag."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -46194,7 +46194,7 @@
           </telecom>
         </contact>
         <description value="The date range that this organization should be considered available."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -46371,10 +46371,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-systemName"/>
         <name value="systemName"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The human-readable name for the code system."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -46554,10 +46554,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate"/>
         <name value="effectiveDate"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="This is the first date-time when the value set version becomes active, so this value is present on Inactive value set versions as well. The start Date_time is expected to be as of 0001 UTC of the Effective Date."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -46747,7 +46747,7 @@
           </telecom>
         </contact>
         <description value="Regular life events the observation is tied to. This is useful for recording imprecise or &quot;fuzzy&quot; times when the observation occurred.  For example, a blood glucose measurement &quot;after breakfast&quot;.  It is interpreted as relative to the `effectiveTime` element or the `issued` element if `effectiveTime` is absent.  For example the blood glucose measurement could be reported that same day (&quot;today after breakfast&quot;) or some other day (&quot;yesterday after breakfast&quot;)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -47350,10 +47350,10 @@
         <name value="nationality"/>
         <title value="nationality"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The nationality of the patient."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -47916,7 +47916,7 @@
           </telecom>
         </contact>
         <description value="The category under which the resource type is presented on the official resource list."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -48106,7 +48106,7 @@
           </telecom>
         </contact>
         <description value="The organization initiating the request."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -48295,7 +48295,7 @@
           </telecom>
         </contact>
         <description value="Other names that this Organization is known as."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -48484,7 +48484,7 @@
           </telecom>
         </contact>
         <description value="Provides a computable unit of measure associated with numeric questions to support subsequent computation on responses."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -48683,7 +48683,7 @@
           </telecom>
         </contact>
         <description value="A delivery address line is frequently used instead of breaking out delivery mode, delivery installation, etc. An address generally has only a delivery address line or a street address line, but not both."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -48879,7 +48879,7 @@
           </telecom>
         </contact>
         <description value="Information about the acceptance and relative priority assigned to the goal by the patient, practitioners and other stake-holders."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -49627,10 +49627,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-keyWord"/>
         <name value="keyWord"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Word or words used in an information retrieval system to indicate the content of the value set."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -49820,7 +49820,7 @@
           </telecom>
         </contact>
         <description value="Defines the level of expectation associated with a given system capability."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -50057,7 +50057,7 @@
           </telecom>
         </contact>
         <description value="Identifies whether the useContext is a true context or a classification."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -50289,7 +50289,7 @@
         <url value="http://hl7.org/fhir/StructureDefinition/auditevent-ParticipantObjectContainsStudy"/>
         <name value="ParticipantObjectContainsStudy"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="Health Level Seven, Inc. - Security WG"/>
         <contact>
           <telecom>
@@ -50298,7 +50298,7 @@
           </telecom>
         </contact>
         <description value="A Study Instance ID, which may be used when the Entity type is not (110180, DCM, &quot;Study Instance UID&quot;)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="dicom"/>
           <uri value="http://nema.org/dicom"/>
@@ -50498,7 +50498,7 @@
           </telecom>
         </contact>
         <description value="If the value is not a proper value, indicates the reason."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -50720,10 +50720,10 @@
         <name value="citizenship"/>
         <title value="citizenship"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The patient&#39;s legal status as citizen of a country."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -51287,7 +51287,7 @@
           </telecom>
         </contact>
         <description value="The name of an expression in a referenced library that determines an initial value."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -51474,7 +51474,7 @@
           </telecom>
         </contact>
         <description value="For items of type reference, the reference can be populated either by picking an existing entity or by creating a new one.  In the latter case, this Questionnaire allows specifying the Questionnaire to use in creating the target instance.  This can be direct (if the Reference is to a Questionnaire) or indirect via mapping if the Reference is to some other sort of resource."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -51671,7 +51671,7 @@
           </telecom>
         </contact>
         <description value="Codified type for associated Amino Acid Change.  LOINC Code: ([48006-1](http://loinc.org/48006-1))."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -51879,7 +51879,7 @@
           </telecom>
         </contact>
         <description value="Chromosomal phase set identifier (UUID/OID). All sequences with the same PhaseSet identifier are asserted to be on the same chromosome (cis)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -52066,7 +52066,7 @@
           </telecom>
         </contact>
         <description value="This can be a unit designator, such as apartment number, suite number, or floor. There may be several unit designators in an address (e.g., &quot;3rd floor, Appt. 342&quot;). This can also be a designator pointing away from the location, rather than specifying a smaller location within some larger one (e.g., Dutch &quot;t.o.&quot; means &quot;opposite to&quot; for house boats located across the street facing houses)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -52262,7 +52262,7 @@
           </telecom>
         </contact>
         <description value="A concept that represents a set of ideas, abstractions, or things in the real world that can be identified with explicit boundaries and meaning and whose properties and behavior follow the same rules. It may be either a single concept or a group of associated concepts, abstractions, or things."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -52506,7 +52506,7 @@
           </telecom>
         </contact>
         <description value="Days of a possibly repeating cycle on which the action is to be performed. The cycle is defined by the first action with a timing element that is a parent of the daysOfCycle."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -52937,7 +52937,7 @@
           </telecom>
         </contact>
         <description value="haploid."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -53635,7 +53635,7 @@
           </telecom>
         </contact>
         <description value="The organization that is the custodian for this data element."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="iso11179"/>
           <uri value="http://metadata-standards.org/11179/"/>
@@ -53838,7 +53838,7 @@
           </telecom>
         </contact>
         <description value="Further conditions, problems, diagnoses, procedures or events or the substance that caused/triggered this Condition."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -54097,7 +54097,7 @@
           </telecom>
         </contact>
         <description value="The Current HL7 ballot status of this artifact."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -54284,7 +54284,7 @@
           </telecom>
         </contact>
         <description value="A name to use for the type, in implementations. This is a suggestion; it&#39;s not a normative part of the FHIR specification, but it does appear in the UML diagrams, and is used in generated code, schemas, etc.to identify the type."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -54471,7 +54471,7 @@
           </telecom>
         </contact>
         <description value="The inclusive upper bound on the range of allowed values for the data element."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -54703,7 +54703,7 @@
         <url value="http://hl7.org/fhir/StructureDefinition/auditevent-Encrypted"/>
         <name value="Encrypted"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="Health Level Seven, Inc. - Security WG"/>
         <contact>
           <telecom>
@@ -54712,7 +54712,7 @@
           </telecom>
         </contact>
         <description value="True or False indicating whether the data was encrypted."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="dicom"/>
           <uri value="http://nema.org/dicom"/>
@@ -54905,10 +54905,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-ordinalValue"/>
         <name value="ordinalValue"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="A numeric value that allows the comparison (less than, greater than) or other numerical manipulation of a concept (e.g. Adding up components of a score)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -55098,7 +55098,7 @@
           </telecom>
         </contact>
         <description value="The base name of a roadway or artery recognized by a municipality (excluding street type and direction)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -55293,7 +55293,7 @@
           </telecom>
         </contact>
         <description value="The label to list in front of a code when presenting a list of possible values in a questionnaire-like fashion."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -55491,7 +55491,7 @@
           </telecom>
         </contact>
         <description value="If set to true, indicates that support for the specified behavior would make a system non=conformant with the specification."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -55697,10 +55697,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-reference"/>
         <name value="reference"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="A logical reference (e.g. a reference to CodeSystem.url) that identifies the value set/version that identifies the set of possible coded values this coding was chosen from or constrained by."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -55911,7 +55911,7 @@
           </telecom>
         </contact>
         <description value="Assessment of resource match outcome - how likely this resource is to be a match."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -56119,7 +56119,7 @@
           </telecom>
         </contact>
         <description value="The name of the organization responsible for creating the specification being mapped to."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -56306,7 +56306,7 @@
           </telecom>
         </contact>
         <description value="Indicates a date on which this identifier value was deemed to apply to this instance."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -56508,10 +56508,10 @@
         <name value="animalSpecies"/>
         <title value="animalSpecies"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="This extension should be used to specifiy that a practioner or RelatedPerson resource is a service animal."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -56720,7 +56720,7 @@
           </telecom>
         </contact>
         <description value="A complex extension allowing structured capture of the exposure risk of the patient for an adverse reaction (allergy or intolerance) to the specified substance/product."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -57355,10 +57355,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-caseSensitive"/>
         <name value="caseSensitive"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="If this a case sensitive code."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -57550,7 +57550,7 @@
           </telecom>
         </contact>
         <description value="Additional notes about any item in a structure definition."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -57738,7 +57738,7 @@
           </telecom>
         </contact>
         <description value="The reason the request was refused. Applies only if the status is refused."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -57916,7 +57916,7 @@
         <url value="http://hl7.org/fhir/StructureDefinition/auditevent-NumberOfInstances"/>
         <name value="NumberOfInstances"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="Health Level Seven, Inc. - Security WG"/>
         <contact>
           <telecom>
@@ -57925,7 +57925,7 @@
           </telecom>
         </contact>
         <description value="The Number of SOP Instances referred to by this entity."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="dicom"/>
           <uri value="http://nema.org/dicom"/>
@@ -58125,7 +58125,7 @@
           </telecom>
         </contact>
         <description value="This identifies the underlying type in a profile, when a questionnaire is generated from a profile."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -58341,7 +58341,7 @@
           </telecom>
         </contact>
         <description value="The portion of the family name that is derived from the person&#39;s partner&#39;s surname, as distinguished from any portion that is derived from the surname of the person&#39;s own name."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -58551,7 +58551,7 @@
           </telecom>
         </contact>
         <description value="The XML (schema) type of a property as used in RDF - used for the value attribute of a primitive type (for which there is no type in the FHIR typing system)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -58741,7 +58741,7 @@
           </telecom>
         </contact>
         <description value="Indicates that the resource is related to either the measurement, achievement or progress towards the referenced goal."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -58933,7 +58933,7 @@
           </telecom>
         </contact>
         <description value="A canonical URL for a StructureDefinition that this is derived from. This is a de-normalization of a chain of StructureDefinition.baseDefinition."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -59122,7 +59122,7 @@
           </telecom>
         </contact>
         <description value="For attachment answers, indicates the maximum size an attachment can be."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -59333,7 +59333,7 @@
           </telecom>
         </contact>
         <description value="The FMM level that would be assigned to the artifact if it had no warnings."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -59522,7 +59522,7 @@
           </telecom>
         </contact>
         <description value="glstring."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -60085,7 +60085,7 @@
           </telecom>
         </contact>
         <description value="Method value was verified."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -60286,7 +60286,7 @@
           </telecom>
         </contact>
         <description value="Additional instructions for the user to guide their input (i.e. a human readable version of a regular expression like &quot;nnn-nnn-nnn&quot;). In most UIs this is the placeholder (or &#39;ghost&#39;) text placed directly inside the edit controls and that disappear when the control gets the focus."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -60496,7 +60496,7 @@
           </telecom>
         </contact>
         <description value="The focus of an observation when not the patient of record  (i.e. different from Observation.subject).   For example, the focal subject may be a fetus, or a donor."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -60707,7 +60707,7 @@
           </telecom>
         </contact>
         <description value="The anatomical location / body site(s) where the symptoms manifested."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -60914,7 +60914,7 @@
           </telecom>
         </contact>
         <description value="The measure criteria that resulted in the resource being included in a particular evaluatedResources bundle."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -61615,7 +61615,7 @@
           </telecom>
         </contact>
         <description value="A bibliographic citation for the related resource. This text SHOULD be formatted according to an accepted citation format."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -61796,7 +61796,7 @@
         <name value="Witness"/>
         <title value="Witness"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="Health Level Seven, Inc. - CBCC WG"/>
         <contact>
           <telecom>
@@ -61805,7 +61805,7 @@
           </telecom>
         </contact>
         <description value="Any witness to the consent."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -62020,7 +62020,7 @@
           </telecom>
         </contact>
         <description value="The organization the practitioner was acting on behalf of."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -62231,7 +62231,7 @@
           </telecom>
         </contact>
         <description value="Use this extension to indicate tha the element has an XML namespace different to http://hl7.org/fhir."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -62430,7 +62430,7 @@
           </telecom>
         </contact>
         <description value="A qualification of the seriousness or impact on health of the family member condition."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -62629,10 +62629,10 @@
         <name value="classification"/>
         <title value="classification"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The more specific service or occupation within the health care provider type of the practitioner at a specific organization unit, for example, counselor."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -62819,7 +62819,7 @@
           </telecom>
         </contact>
         <description value="Record details about the anatomical location of a specimen or body part. This resource may be used when a coded concept does not provide the necessary detail needed for the use case."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -63008,7 +63008,7 @@
           </telecom>
         </contact>
         <description value="The SNOMED CT Description ID for the display."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -63208,10 +63208,10 @@
         <name value="effectivePeriod"/>
         <title value="Effective Period"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The period during which the resource content was or is planned to be effective."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -63412,7 +63412,7 @@
           </telecom>
         </contact>
         <description value="Human Genome Variation Society (HGVS) nomenclature for a single or set of DNA Sequence Variation(s) identified in testing.  The use of the nomenclature is also used to describe non-variations (aka. wild types). LOINC Code: ([48004-6](http://loinc.org/48004-6))."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -63615,7 +63615,7 @@
           </telecom>
         </contact>
         <description value="Indicates the type of specific unit contained within a building or complex. E.g. Appartment, Floor."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -63810,7 +63810,7 @@
           </telecom>
         </contact>
         <description value="Uses of Addresses - codes not defined as part of Address.use."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -64025,7 +64025,7 @@
           </telecom>
         </contact>
         <description value="Allele Database."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -64204,10 +64204,10 @@
         <name value="primaryInd"/>
         <title value="primaryInd"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Flag indicating if the specialty is the primary specialty of the provider. Normally, a practitioner will have one primary specialty, but in some cases more than one can be primary."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -64397,7 +64397,7 @@
           </telecom>
         </contact>
         <description value="The absolute geographic location of the Location, expressed using the WGS84 datum (This is the same co-ordinate system used in KML)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -64962,7 +64962,7 @@
           </telecom>
         </contact>
         <description value="Knowledge-based comments on the effect of the sequence on patient&#39;s condition/medication reaction."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -65525,7 +65525,7 @@
           </telecom>
         </contact>
         <description value="Flag denoting whether parent item is preferred - e.g., a preferred address or telephone number."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -65704,10 +65704,10 @@
         <name value="approvalDate"/>
         <title value="Approval Date"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -65909,7 +65909,7 @@
           </telecom>
         </contact>
         <description value="Identifies what potential diagnoses have been ruled out for this condition."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -66099,7 +66099,7 @@
           </telecom>
         </contact>
         <description value="The maximum rate of substance administration. For volume medications, the maximum rate is to be expressed as a volume per time period. This value may be used as a stopping condition when a deliveryRateIncrement is specified without a count."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -66288,7 +66288,7 @@
           </telecom>
         </contact>
         <description value="In a transaction, every single interaction can have multiple HTTP response headers returned as a result of the interaction."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -66490,10 +66490,10 @@
         <name value="clinicalTrial"/>
         <title value="clinicalTrial"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The clinical trials this patient has or is participating in."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -67191,7 +67191,7 @@
           </telecom>
         </contact>
         <description value="A name that can be used for code generation when generating named enumerations for the binding."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -67371,10 +67371,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-keyWord"/>
         <name value="keyWord"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Word or words used in an information retrieval system to indicate the content of the value set."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -67555,10 +67555,10 @@
         <name value="subsumes"/>
         <title value="Subsumes"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Refers to another code defined within the code system that is also subsumed by this code. I.e. This concept subsumes the referenced concept.  Because meaning is inferred from hierarchy as well as definition, the presence of this extension modifies the meaning of the extended concept."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -67748,7 +67748,7 @@
           </telecom>
         </contact>
         <description value="Agent that ordered the communication."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -67966,7 +67966,7 @@
           </telecom>
         </contact>
         <description value="The designation given to the street. (e.g. Street, Avenue, Crescent, etc.)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -68161,7 +68161,7 @@
           </telecom>
         </contact>
         <description value="This is an equivalent of the string on which the extension is sent, but includes additional XHTML markup, such as bold, italics, styles, tables, etc. Existing [restrictions on XHTML content](narrative.html#security) apply. Note that using [markdown](extension-rendering-markdown.html) allows for greater flexibility of display."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -68356,7 +68356,7 @@
           </telecom>
         </contact>
         <description value="Description: A street address line is frequently used instead of breaking out build number, street name, street type, etc. An address generally has only a delivery address line or a street address line, but not both."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -68552,7 +68552,7 @@
           </telecom>
         </contact>
         <description value="Establishes a relationship between this goal and other goals."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -69137,7 +69137,7 @@
           </telecom>
         </contact>
         <description value="A geographic sub-unit delineated for demographic purposes."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -69332,7 +69332,7 @@
           </telecom>
         </contact>
         <description value="A reference to an extensible value set specified in a parent profie in order to allow a conformance checking tool to validate that a code not in the extensible value set of the profile is not violating rules defined by parent profile bindings."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -69539,7 +69539,7 @@
           </telecom>
         </contact>
         <description value="The home page location for this resource (e.g. for users to view this resource)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -69717,10 +69717,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-expansionSource"/>
         <name value="expansionSource"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The logical URL of the ValueSet definition that was used to generate this expansion."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -69909,7 +69909,7 @@
           </telecom>
         </contact>
         <description value="External Identifiers associated with this element - these are identifiers that are associated with the concept this element represents."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -70118,7 +70118,7 @@
           </telecom>
         </contact>
         <description value="A container for a single allowable parameter combination."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -70745,7 +70745,7 @@
           </telecom>
         </contact>
         <description value="Provides a reason why the expected value or elements in the element that is extended are missing."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -70967,7 +70967,7 @@
           </telecom>
         </contact>
         <description value="A result of the condition. The &quot;Cause of death&quot; for a patient is typically captured as an Observation.  The &quot;outcome&quot; doesn&#39;t imply causality.  Some outcomes may not be assessable until the condition.clinicalStatus is no longer active."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -71165,10 +71165,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-sourceReference"/>
         <name value="sourceReference"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="This text is intended to act as a citation to work done elsewhere that is not part of the current stewarding process where the referenced source is in some way a basis of the current value set definition."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -71360,7 +71360,7 @@
           </telecom>
         </contact>
         <description value="Preferred language of the person that will consume the content."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -71583,7 +71583,7 @@
           </telecom>
         </contact>
         <description value="Preferred language of the person using the system."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -71806,7 +71806,7 @@
           </telecom>
         </contact>
         <description value="Where the server provides its web socket end-point."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -71988,7 +71988,7 @@
         <url value="http://hl7.org/fhir/StructureDefinition/auditevent-Instance"/>
         <name value="Instance"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="Health Level Seven, Inc. - Security WG"/>
         <contact>
           <telecom>
@@ -71997,7 +71997,7 @@
           </telecom>
         </contact>
         <description value="Th SOP Instance UID values."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="dicom"/>
           <uri value="http://nema.org/dicom"/>
@@ -72200,7 +72200,7 @@
           </telecom>
         </contact>
         <description value="Further conditions, problems, diagnoses, procedures or events or the substance that preceded this Condition."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -72448,7 +72448,7 @@
         <name value="NotificationEndpoint"/>
         <title value="Disclosure Notification Endpoint"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="Health Level Seven, Inc. - CBCC WG"/>
         <contact>
           <telecom>
@@ -72457,7 +72457,7 @@
           </telecom>
         </contact>
         <description value="Endpoint for sending Disclosure notifications in the form of FHIR AuditEvent records."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -72645,7 +72645,7 @@
           </telecom>
         </contact>
         <description value="A name to use to show mappings of this type in the generated summary tables."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -72833,7 +72833,7 @@
           </telecom>
         </contact>
         <description value="The strength of the recommendation assigned to this reference. The code system used specifies the rating scale used to rate this recommendation while the code specifies the actual recommendation rating (represented as a coded value) associated with this recommendation."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -73041,7 +73041,7 @@
           </telecom>
         </contact>
         <description value="The name of an expression in a referenced library that determines a calculated value."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -73228,7 +73228,7 @@
           </telecom>
         </contact>
         <description value="Indicates the type of service offered, method of delivery. For example: post office box, rural route, general delivery, etc."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -73415,10 +73415,10 @@
         <name value="disability"/>
         <title value="disability"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Value(s) identifying physical or mental condition(s) that limits a person&#39;s movements, senses, or activities."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -73606,7 +73606,7 @@
           </telecom>
         </contact>
         <description value="The approach body site used for this procedure.  Multiple locations are allowed."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -73795,7 +73795,7 @@
           </telecom>
         </contact>
         <description value="The FMM level assigned to the artifact."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -73975,10 +73975,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-author"/>
         <name value="author"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="User or Org actually involved in creating the value set content."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -74168,7 +74168,7 @@
           </telecom>
         </contact>
         <description value="The typical route into the body for this medication."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -74358,7 +74358,7 @@
           </telecom>
         </contact>
         <description value="The order, plan or recommendation being satisfied in whole or in part by this condition record."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -74555,10 +74555,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-trusted-expansion"/>
         <name value="trusted-expansion"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Indicates an authoritative source for performing value set expansions."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -74748,7 +74748,7 @@
           </telecom>
         </contact>
         <description value="The quality of the evidence described. The code system used specifies the quality scale used to grade this evidence source while the code specifies the actual quality score (represented as a coded value) associated with the evidence."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -74956,7 +74956,7 @@
           </telecom>
         </contact>
         <description value="A calculated distance between the resource and a provided location."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -75146,7 +75146,7 @@
           </telecom>
         </contact>
         <description value="For infused medications, the length of time the infusion process, as a duration.  Note the difference between infuseOver and duration of treatment (specified in administrationFrequency). An order may call for infusing a patient TID for an hour each time over a duration of 5 days."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -75334,7 +75334,7 @@
           </telecom>
         </contact>
         <description value="The specific diagnostic investigations that are requested as part of this request. Sometimes, there can only be one item per request, but in most contexts, more than one investigation can be requested."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -76172,7 +76172,7 @@
           </telecom>
         </contact>
         <description value="A CQL expression that provides the value for the element or resource on which it appears."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -76360,7 +76360,7 @@
           </telecom>
         </contact>
         <description value="If the recorded quantity of the specimen is reported as a weight, if it is a dry weight."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -76539,10 +76539,10 @@
         <name value="religion"/>
         <title value="religion"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The patient&#39;s professed religious affiliations."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -76747,7 +76747,7 @@
           </telecom>
         </contact>
         <description value="Where the type for a question is &quot;Reference&quot;, indicates a profile that the resource instances pointed to in answers to this question must be valid against."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -76940,7 +76940,7 @@
           </telecom>
         </contact>
         <description value="The prefix portion (e.g. voorvoegsel) of the family name that is derived from the person&#39;s own surname, as distinguished from any portion that is derived from the surname of the person&#39;s partner or spouse."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -77150,7 +77150,7 @@
           </telecom>
         </contact>
         <description value="The minimum number of times the group must appear, or the minimum number of answers for a question - when greater than 1."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -77350,7 +77350,7 @@
           </telecom>
         </contact>
         <description value="This extension associates a structure definition with a data dictionary - a collection of data elements that any instance of data that conforms to the structure definition must also conform to. The value of the extension is a uri that defines a query that identifies the collection of relevant data elements&#xA;&#xA;This extension can be used on any structure definition that is a constraint on the resource types Observation and Questionnaire. THe profile specifies which elements are mandatory etc., but any elements in a resource that conforms to the structure definition must also conform to one of the defined data elements.&#xA;&#xA;For Observation:&#xA;* Observation.code must be associated with a matching Data Element by DataElement.code. &#xA;* The structure definition should bind Observation.code to a value set that has the same codes as the collection of data elements (though it can be narrower)&#xA;* the unit and the quantity value should conform to the rules laid down in the matching Data Element&#xA;&#xA;For Questionnaire:&#xA;* todo."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -77530,10 +77530,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/valueset-systemRef"/>
         <name value="systemRef"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The formal URI for the code system.  I.e. ValueSet.codeSystem.system (or its equivalent)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -77723,7 +77723,7 @@
           </telecom>
         </contact>
         <description value="The schedule that was followed."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -77910,7 +77910,7 @@
             <value value="HL7"/>
           </telecom>
         </contact>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -78088,10 +78088,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-usage"/>
         <name value="usage"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Consumers of the value set and the implementations, projects or standards that the author has utilized the value set in."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -78662,7 +78662,7 @@
           </telecom>
         </contact>
         <description value="Text description about exposure to the Substance."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -78850,7 +78850,7 @@
           </telecom>
         </contact>
         <description value="The name of a condition expression that determines the applicability of the item. For example, when appearing on a question in a questionnaire, if the expression evaluates to true, the question is applicable, otherwise, the question is not applicable."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -79038,7 +79038,7 @@
           </telecom>
         </contact>
         <description value="The practitioner who authorized the procedure request, usually the same as the orderer when the orderer is a practitioner."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -79218,7 +79218,7 @@
         <url value="http://hl7.org/fhir/StructureDefinition/auditevent-SOPClass"/>
         <name value="SOPClass"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="Health Level Seven, Inc. - Security WG"/>
         <contact>
           <telecom>
@@ -79227,7 +79227,7 @@
           </telecom>
         </contact>
         <description value="Required if ParticipantObjectIDTypeCode is (110180, DCM, &quot;Study Instance UID&quot;) and any of the optional fields (AccessionNumber, ContainsMPPS, NumberOfInstances, ContainsSOPInstances,Encrypted,Anonymized) are present in this Participant Object. May be present if ParticipantObjectIDTypeCode is (110180, DCM, &quot;Study Instance UID&quot;) even though none of the optional fields are present."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="dicom"/>
           <uri value="http://nema.org/dicom"/>
@@ -79429,7 +79429,7 @@
           </telecom>
         </contact>
         <description value="Used to denote condition context for genetic testing, which may influence reported variants and interpretation for large genomic testing panels e.g. lung cancer or familial breast cancer."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -79630,10 +79630,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-effectiveDate"/>
         <name value="effectiveDate"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="This is the first date-time when the value set version becomes active, so this value is present on Inactive value set versions as well. The start Date_time is expected to be as of 0001 UTC of the Effective Date."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -79823,7 +79823,7 @@
           </telecom>
         </contact>
         <description value="It contains enriched media representation of the alert message, such as a voice recording.  This may be used, for example for compliance with jurisdictional accessibility requirements, literacy issues, or translations of the unstructured text content in other languages."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -80011,7 +80011,7 @@
           </telecom>
         </contact>
         <description value="A code that identifies the priority of the alert, for example the Alert Priority flags column in IHE PCD TF 2 Table B.8-4."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -80219,7 +80219,7 @@
           </telecom>
         </contact>
         <description value="Links to Provenance records for past versions of this resource or fulfilling request or event resources that identify key state transitions or updates that are likely to be relevant to a user looking at the current version of the resource."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -80413,7 +80413,7 @@
           </telecom>
         </contact>
         <description value="Special handling during the collection, transport, or storage of the specimen."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -80600,7 +80600,7 @@
           </telecom>
         </contact>
         <description value="The portion of the family name that is derived from the person&#39;s own surname, as distinguished from any portion that is derived from the surname of the person&#39;s partner or spouse."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -80810,7 +80810,7 @@
           </telecom>
         </contact>
         <description value="Significant health events and conditions for a person related to the patient relevant in the context of care for the patient."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -80991,10 +80991,10 @@
         <name value="importance"/>
         <title value="importance"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The importance of the patient (e.g. VIP)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -81182,7 +81182,7 @@
           </telecom>
         </contact>
         <description value="Human-friendly name for the activity."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -81369,7 +81369,7 @@
           </telecom>
         </contact>
         <description value="Identifies the units of measure in which the element should be captured or expressed."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -81609,7 +81609,7 @@
           </telecom>
         </contact>
         <description value="A URI that refers to the value set from which this coding was chosen. The URI may be a URN specifying an OID, or it may be the canoncical URL for a ValueSet resource."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -81797,7 +81797,7 @@
           </telecom>
         </contact>
         <description value="The procedure, condition, or observation this condition was created as part of (such as elevated blood pressure is part of diabetes)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -82003,7 +82003,7 @@
           </telecom>
         </contact>
         <description value="Whether translations might be expected for this element in resource instances."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -82193,7 +82193,7 @@
           </telecom>
         </contact>
         <description value="The condition or state of the patient, prior or during the diagnostic procedure or test, for example, fasting, at-rest, or post-operative. This captures circumstances that may influence the measured value and have bearing on the interpretation of the result."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -82381,7 +82381,7 @@
           </telecom>
         </contact>
         <description value="The report replaces the target resource.  For example, when a final anatomic pathology report replaces a preliminary anatomic pathology report replaces  where the subsequent observation of case and report  may be on more or different material (specimen).  Note that  this is not same concept as` DiagnosticReport.status`  = preliminary of final, but industry definition of preliminary and final."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -82573,7 +82573,7 @@
           </telecom>
         </contact>
         <description value="Period or duration of processing."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -82767,7 +82767,7 @@
           </telecom>
         </contact>
         <description value="The work group that owns and maintains this resource."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -82977,7 +82977,7 @@
           </telecom>
         </contact>
         <description value="This encounter occurs within the scope of the referenced encounter."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -83157,10 +83157,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-history"/>
         <name value="history"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="Information on changes made to the Value Set Definition over time, and also has a contained audit trail of all such changes."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -84390,7 +84390,7 @@
           </telecom>
         </contact>
         <description value="The approximate date, age, or flag indicating that the condition of the family member resolved. The abatement should only be specified if the condition is stated in the positive sense, i.e., the didNotHave flag is false."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -84590,7 +84590,7 @@
           </telecom>
         </contact>
         <description value="The maximum number of times the group must appear, or the minimum number of answers for a question - when greater than 1 and not unlimited."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -84790,7 +84790,7 @@
           </telecom>
         </contact>
         <description value="The time of the first incision."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -84977,7 +84977,7 @@
           </telecom>
         </contact>
         <description value="A set of codes each of which specifies a certain subcategory of the name part in addition to the main name part type."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -85200,7 +85200,7 @@
           </telecom>
         </contact>
         <description value="A larger event of which this particular event is a component or step."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -85414,7 +85414,7 @@
           </telecom>
         </contact>
         <description value="Helps a user track down the source of the problem."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -85602,7 +85602,7 @@
           </telecom>
         </contact>
         <description value="Describes the type of participation (e.g.  a responsible party, author, or verifier). Indicates who or what participated in producing the result."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="v2"/>
           <uri value="http://hl7.org/v2"/>
@@ -85829,7 +85829,7 @@
           </telecom>
         </contact>
         <description value="The order of diagnosis importance (1 = highest in importance), from the clinical perspective, may be used in billing."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -86007,10 +86007,10 @@
         <url value="http://hl7.org/fhir/StructureDefinition/codesystem-expirationDate"/>
         <name value="expirationDate"/>
         <status value="draft"/>
-        <date value="2017-04-19T07:44:43+10:00"/>
+        <date value="2019-10-24T11:53:00+11:00"/>
         <publisher value="HL7"/>
         <description value="The date when the value set version is no longer expected to be used to create new content. This is the first date-time when the value set version becomes Inactive, so this value MUST present on all Inactive value set versions. The start Date_time is expected to be as of 0001 UTC of the Expiration Date."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -86201,7 +86201,7 @@
           </telecom>
         </contact>
         <description value="The JSON type of a property - used for the value property of a primitive type (for which there is no type in the FHIR typing system)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -86390,7 +86390,7 @@
           </telecom>
         </contact>
         <description value="Comments captured about the completion of the form in general or about specific groups or questions within it."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>
@@ -86580,7 +86580,7 @@
           </telecom>
         </contact>
         <description value="A numeric value that allows the comparison (less than, greater than) or other numerical manipulation of a concept (e.g. adding up components of a score)."/>
-        <fhirVersion value="3.0.1"/>
+        <fhirVersion value="3.0.2"/>
         <mapping>
           <identity value="rim"/>
           <uri value="http://hl7.org/v3"/>

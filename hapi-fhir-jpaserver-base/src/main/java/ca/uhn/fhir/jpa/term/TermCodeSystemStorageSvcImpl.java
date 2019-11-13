@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -144,7 +145,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		CodeSystem codeSystem = myTerminologySvc.getCodeSystemFromContext(theSystem);
 		if (codeSystem.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
-			throw new InvalidRequestException("CodeSystem with url[" + theSystem + "] can not apply a delta - wrong content mode: " + codeSystem.getContent());
+			throw new InvalidRequestException("CodeSystem with url[" + Constants.codeSystemWithDefaultDescription(theSystem) + "] can not apply a delta - wrong content mode: " + codeSystem.getContent());
 		}
 
 		Validate.notNull(cs);

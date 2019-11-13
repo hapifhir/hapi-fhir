@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Fri, Nov 1, 2019 09:29+1100 for FHIR v4.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="OperationOutcome" type="OperationOutcome">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A collection of error, warning, or information messages that result from a system action.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="OperationOutcome">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A collection of error, warning, or information messages that result from a system action.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="issue" type="OperationOutcome.Issue" minOccurs="1" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An error, warning, or information message that results from a system action.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="OperationOutcome.Issue">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A collection of error, warning, or information messages that result from a system action.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="severity" minOccurs="1" maxOccurs="1" type="IssueSeverity">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Indicates whether the issue indicates a variation from successful processing.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="code" minOccurs="1" maxOccurs="1" type="IssueType">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="details" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Additional details about the error. This may be a text description of the error or a system code that identifies the error.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="diagnostics" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Additional diagnostic information about the issue.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="location" minOccurs="0" maxOccurs="unbounded" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">This element is deprecated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
+
+For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be &quot;http.&quot; + the parameter name.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="expression" minOccurs="0" maxOccurs="unbounded" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="IssueType-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="invalid">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Invalid Content</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="structure">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Structural Issue</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="required">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Required element missing</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="value">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Element value invalid</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="invariant">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Validation rule failed</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="security">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Security Problem</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="login">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Login Required</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="unknown">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Unknown User</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="expired">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Session Expired</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="forbidden">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Forbidden</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="suppressed">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Information  Suppressed</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="processing">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Processing Failure</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="not-supported">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Content not supported</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="duplicate">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Duplicate</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="multiple-matches">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Multiple Matches</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="not-found">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Not Found</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="deleted">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Deleted</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="too-long">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Content Too Long</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="code-invalid">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Invalid Code</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="extension">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Unacceptable Extension</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="too-costly">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Operation Too Costly</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="business-rule">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Business Rule Violation</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="conflict">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Edit Version Conflict</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="transient">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Transient Issue</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="lock-error">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Lock Error</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="no-store">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">No Store Available</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="exception">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Exception</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="timeout">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Timeout</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="incomplete">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Incomplete Results</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="throttled">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Throttled</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="informational">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Informational Note</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="IssueType">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A code that describes the type of issue.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="IssueType-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="IssueSeverity-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="fatal">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Fatal</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="error">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Error</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="warning">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Warning</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="information">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Information</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="IssueSeverity">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">How the issue affects the success of the action.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="IssueSeverity-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

@@ -452,7 +452,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForSize(3, ourUpdatedObservations);
 
 		ourClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
-		waitForQueueToDrain();
+		waitForActivatedSubscriptionCount(1);
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();

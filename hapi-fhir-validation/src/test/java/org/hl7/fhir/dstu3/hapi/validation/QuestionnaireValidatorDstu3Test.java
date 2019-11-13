@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -88,12 +89,27 @@ public class QuestionnaireValidatorDstu3Test {
 				.setType(QuestionnaireItemType.STRING)
 				.addExtension()
 				.setUrl(extensionDomainToTest)
-				.setValue(new CodeableConcept().addCoding(new Coding(null, "text-box", null)));
+				.setValue(new CodeableConcept().addCoding(new Coding("http://hl7.org/fhir/questionnaire-item-control", "text-box", null)));
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
 			assertThat(errors.isSuccessful(), Matchers.is(true));
 			assertThat(errors.getMessages(), Matchers.empty());
+		}
+		for (String extensionDomainToTest : extensionDomainsToTest) {
+			Questionnaire q = new Questionnaire();
+			q.setStatus(PublicationStatus.ACTIVE)
+				.addItem()
+				.setLinkId("link0")
+				.setType(QuestionnaireItemType.STRING)
+				.addExtension()
+				.setUrl(extensionDomainToTest)
+				.setValue(new CodeableConcept().addCoding(new Coding(null, "text-box", null)));
+
+			ValidationResult errors = myVal.validateWithResult(q);
+			ourLog.info(errors.toString());
+			assertThat(errors.isSuccessful(), Matchers.is(true));
+			assertThat(errors.getMessages().get(0).getMessage(), containsString("and a code should come from this value set unless it has no suitable code) (codes = null#text-box)"));
 		}
 	}
 

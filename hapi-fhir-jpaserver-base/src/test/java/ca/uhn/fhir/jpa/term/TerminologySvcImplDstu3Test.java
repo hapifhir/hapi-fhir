@@ -1935,7 +1935,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	@Ignore
 	public void testValidateCodeWithProperties() {
 		createCodeSystem();
-		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(myFhirCtx, CS_URL, "childAAB", null, null);
+		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(myFhirCtx, CS_URL, "childAAB", null, (String)null);
 		assertEquals(true, code.isOk());
 		assertEquals(2, code.getProperties().size());
 	}
