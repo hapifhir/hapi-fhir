@@ -17,7 +17,7 @@
 				<br/>
 				<iframe src="https://ghbtns.com/github-btn.html?user=jamesagnew&amp;repo=hapi-fhir&amp;type=fork&amp;count=true&amp;v=2" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
 				<br/>
-				<a href="https://dev.azure.com/jamesagnew214/jamesagnew214/_build/latest?definitionId=1&branchName=master"><img src="https://dev.azure.com/jamesagnew214/jamesagnew214/_apis/build/status/jamesagnew.hapi-fhir?branchName=master" alt="Build Status"/></a>
+				<a href="https://dev.azure.com/jamesagnew214/jamesagnew214/_build/latest?definitionId=1&amp;branchName=master"><img src="https://dev.azure.com/jamesagnew214/jamesagnew214/_apis/build/status/jamesagnew.hapi-fhir?branchName=master" alt="Build Status"/></a>
 				<br/>
 				<a href="https://codecov.io/gh/jamesagnew/hapi-fhir"><img src="https://codecov.io/gh/jamesagnew/hapi-fhir/branch/master/graph/badge.svg" alt="Coverage Status"/></a>
 				<br/>
