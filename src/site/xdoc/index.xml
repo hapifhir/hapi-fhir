@@ -76,6 +76,11 @@
 			</p>
 			<ul>
 				<li>
+					Structures JARs have been updated to incorporate the latest technical corrections. 
+					DSTU3 structures are upgraded to FHIR 3.0.2, R4 structures are upgraded to 
+					FHIR 4.0.1, and R5 draft structures are upgraded to the October 2019 draft revision.
+				</li>
+				<li>
 					ValueSets are now automatically pre-expanded by the JPA server into
 					a dedicated set of database tables. This "precalculated expansion" is used
 					to provide much better performance for validation and expanion operations, and
