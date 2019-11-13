@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BaseSearchParamRegistryTest {
+public class SearchParamRegistryImplTest {
 
 	@Mock
 	private ISchedulerService mySchedulerService;
@@ -43,7 +43,7 @@ public class BaseSearchParamRegistryTest {
 	public void testRefreshAfterExpiry() {
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
 
-		SearchParamRegistryR4 registry = new SearchParamRegistryR4();
+		SearchParamRegistryImpl registry = new SearchParamRegistryImpl();
 		registry.setSchedulerServiceForUnitTest(mySchedulerService);
 		registry.setFhirContextForUnitTest(FhirContext.forR4());
 		registry.setSearchParamProviderForUnitTest(mySearchParamProvider);
@@ -60,7 +60,7 @@ public class BaseSearchParamRegistryTest {
 
 	@Test
 	public void testRefreshCacheIfNecessary() {
-		SearchParamRegistryR4 registry = new SearchParamRegistryR4();
+		SearchParamRegistryImpl registry = new SearchParamRegistryImpl();
 
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
 		when(mySearchParamProvider.refreshCache(any(), anyLong())).thenAnswer(t -> {
@@ -83,13 +83,13 @@ public class BaseSearchParamRegistryTest {
 
 	@Test
 	public void testGetActiveUniqueSearchParams_Empty() {
-		SearchParamRegistryR4 registry = new SearchParamRegistryR4();
+		SearchParamRegistryImpl registry = new SearchParamRegistryImpl();
 		assertThat(registry.getActiveUniqueSearchParams("Patient"), Matchers.empty());
 	}
 
 	@Test
 	public void testGetActiveSearchParams() {
-		SearchParamRegistryR4 registry = new SearchParamRegistryR4();
+		SearchParamRegistryImpl registry = new SearchParamRegistryImpl();
 		registry.setFhirContextForUnitTest(FhirContext.forR4());
 		registry.postConstruct();
 
@@ -111,7 +111,7 @@ public class BaseSearchParamRegistryTest {
 
 	@Test
 	public void testExtractExtensions() {
-		SearchParamRegistryR4 registry = new SearchParamRegistryR4();
+		SearchParamRegistryImpl registry = new SearchParamRegistryImpl();
 		registry.setFhirContextForUnitTest(FhirContext.forR4());
 		registry.postConstruct();
 

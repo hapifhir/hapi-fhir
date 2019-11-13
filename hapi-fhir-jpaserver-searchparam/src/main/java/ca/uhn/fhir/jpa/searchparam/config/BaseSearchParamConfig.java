@@ -20,6 +20,9 @@ package ca.uhn.fhir.jpa.searchparam.config;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -28,5 +31,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @ComponentScan(basePackages = {"ca.uhn.fhir.jpa.searchparam"})
 abstract public class BaseSearchParamConfig {
+
+	@Bean
+	public ISearchParamRegistry searchParamRegistry() {
+		return new SearchParamRegistryImpl();
+	}
 
 }

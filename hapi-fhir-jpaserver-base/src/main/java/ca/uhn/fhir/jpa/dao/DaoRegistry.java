@@ -80,8 +80,7 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	 * @throws InvalidRequestException If the given resource type is not supported
 	 */
 	public IFhirResourceDao getResourceDao(String theResourceName) {
-		init();
-		IFhirResourceDao retVal = myResourceNameToResourceDao.get(theResourceName);
+		IFhirResourceDao<IBaseResource> retVal = getResourceDaoOrNull(theResourceName);
 		if (retVal == null) {
 			List<String> supportedResourceTypes = myResourceNameToResourceDao
 				.keySet()
@@ -126,12 +125,9 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	}
 
 	@Nullable
-	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoOrNull(String theResourceType) {
-		try {
-			return (IFhirResourceDao<T>) getResourceDao(theResourceType);
-		} catch (InvalidRequestException e) {
-			return null;
-		}
+	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoOrNull(String theResourceName) {
+		init();
+		return (IFhirResourceDao<T>) myResourceNameToResourceDao.get(theResourceName);
 	}
 
 	@Override

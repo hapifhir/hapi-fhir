@@ -27,6 +27,8 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingInterceptor;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.CompositeInMemoryDaoSubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.DaoSubscriptionMatcher;
@@ -129,6 +131,12 @@ public abstract class BaseConfig {
 		b.afterPropertiesSet();
 		return b;
 	}
+
+	@Bean
+	public ISearchParamRegistry searchParamRegistry() {
+		return new SearchParamRegistryImpl();
+	}
+
 
 	@Bean(name = "mySubscriptionTriggeringProvider")
 	@Lazy
