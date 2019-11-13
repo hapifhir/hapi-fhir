@@ -40,6 +40,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -962,8 +963,12 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 *
 			 * before doing anything else.
 			 */
-			boolean wantOnlyCount = myParams.wantOnlyCount(myDaoConfig.getDefaultTotalMode());
-			if (wantOnlyCount) {
+			boolean wantOnlyCount = SummaryEnum.COUNT.equals(myParams.getSummaryMode());
+			boolean wantCount =
+				wantOnlyCount ||
+					SearchTotalModeEnum.ACCURATE.equals(myParams.getSearchTotalMode()) ||
+					(myParams.getSearchTotalMode() == null && SearchTotalModeEnum.ACCURATE.equals(myDaoConfig.getDefaultTotalMode()));
+			if (wantCount) {
 				ourLog.trace("Performing count");
 				ISearchBuilder sb = newSearchBuilder();
 				Iterator<Long> countIterator = sb.createCountQuery(myParams, mySearch.getUuid(), myRequest);
