@@ -111,7 +111,7 @@ public class SearchParameterMap implements Serializable {
 		}
 	}
 
-		public void add(String theName, IQueryParameterOr<?> theOr) {
+	public void add(String theName, IQueryParameterOr<?> theOr) {
 		if (theOr == null) {
 			return;
 		}
@@ -493,6 +493,12 @@ public class SearchParameterMap implements Serializable {
 				andListIdx--;
 			}
 		}
+	}
+
+	public boolean wantOnlyCount(SearchTotalModeEnum theDefaultTotalMode) {
+		return SummaryEnum.COUNT.equals(mySummaryMode) ||
+				SearchTotalModeEnum.ACCURATE.equals(mySearchTotalMode) ||
+				(mySearchTotalMode == null && SearchTotalModeEnum.ACCURATE.equals(theDefaultTotalMode));
 	}
 
 	public enum EverythingModeEnum {
