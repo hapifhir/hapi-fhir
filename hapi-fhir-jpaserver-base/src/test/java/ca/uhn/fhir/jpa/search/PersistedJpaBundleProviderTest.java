@@ -26,7 +26,9 @@ public class PersistedJpaBundleProviderTest {
 
 	@Test
 	public void zeroNumFoundDoesntCallCache() {
-		myPersistedJpaBundleProvider.setSearchEntity(new Search());
+		Search searchEntity = new Search();
+		searchEntity.setTotalCount(1);
+		myPersistedJpaBundleProvider.setSearchEntity(searchEntity);
 		myPersistedJpaBundleProvider.doSearchOrEverything(0, 0);
 		verifyNoInteractions(myDao);
 	}
