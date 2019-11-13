@@ -165,6 +165,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	protected List<IBaseResource> doSearchOrEverything(final int theFromIndex, final int theToIndex) {
+		if (mySearchEntity.getNumFound() <= 0) {
+			return Collections.emptyList();
+		}
 		final ISearchBuilder sb = myDao.newSearchBuilder();
 
 		String resourceName = mySearchEntity.getResourceType();
