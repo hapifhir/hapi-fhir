@@ -1467,29 +1467,9 @@ public class SearchBuilder implements ISearchBuilder {
 														  BigDecimal theValue,
 														  final Expression<BigDecimal> thePath,
 														  String invalidMessageName) {
-		return createPredicateNumeric(theResourceName,
-			theParamName,
-			theFrom,
-			builder,
-			theParam,
-			thePrefix,
-			theValue,
-			thePath,
-			invalidMessageName,
-			null);
-	}
-
-	private Predicate createPredicateNumeric(String theResourceName,
-														  String theParamName,
-														  From<?, ? extends BaseResourceIndexedSearchParam> theFrom,
-														  CriteriaBuilder builder,
-														  IQueryParameterType theParam,
-														  ParamPrefixEnum thePrefix,
-														  BigDecimal theValue,
-														  final Expression<BigDecimal> thePath,
-														  String invalidMessageName,
-														  SearchFilterParser.CompareOperation operation) {
 		Predicate num;
+		// Per discussions with Grahame Grieve and James Agnew on 11/13/19, modified logic for EQUAL and NOT_EQUAL operators below so as to
+		//   use exact value matching.  The "fuzz amount" matching is still used with the APPROXIMATE operator.
 		switch (thePrefix) {
 			case GREATERTHAN:
 				num = builder.gt(thePath, theValue);
@@ -1503,25 +1483,22 @@ public class SearchBuilder implements ISearchBuilder {
 			case LESSTHAN_OR_EQUALS:
 				num = builder.le(thePath, theValue);
 				break;
-			case APPROXIMATE:
 			case EQUAL:
+				num = builder.equal(thePath, theValue);
+				break;
 			case NOT_EQUAL:
+				num = builder.notEqual(thePath, theValue);
+				break;
+			case APPROXIMATE:
 				BigDecimal mul = calculateFuzzAmount(thePrefix, theValue);
 				BigDecimal low = theValue.subtract(mul, MathContext.DECIMAL64);
 				BigDecimal high = theValue.add(mul, MathContext.DECIMAL64);
 				Predicate lowPred;
 				Predicate highPred;
-				if (thePrefix != ParamPrefixEnum.NOT_EQUAL) {
-					lowPred = builder.ge(thePath.as(BigDecimal.class), low);
-					highPred = builder.le(thePath.as(BigDecimal.class), high);
-					num = builder.and(lowPred, highPred);
-					ourLog.trace("Searching for {} <= val <= {}", low, high);
-				} else {
-					// Prefix was "ne", so reverse it!
-					lowPred = builder.lt(thePath.as(BigDecimal.class), low);
-					highPred = builder.gt(thePath.as(BigDecimal.class), high);
-					num = builder.or(lowPred, highPred);
-				}
+				lowPred = builder.ge(thePath.as(BigDecimal.class), low);
+				highPred = builder.le(thePath.as(BigDecimal.class), high);
+				num = builder.and(lowPred, highPred);
+				ourLog.trace("Searching for {} <= val <= {}", low, high);
 				break;
 			case ENDS_BEFORE:
 			case STARTS_AFTER:

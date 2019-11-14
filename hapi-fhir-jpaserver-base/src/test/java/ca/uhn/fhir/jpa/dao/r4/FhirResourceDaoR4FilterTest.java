@@ -8,9 +8,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.DateType;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.*;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -720,6 +718,228 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.add(Constants.PARAM_FILTER, new StringParam("birthdate le 1955-01-02"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		assertThat(found, containsInAnyOrder(id1));
+
+	}
+
+	@Test
+	public void testNumericComparatorEq() {
+
+		RiskAssessment ra1 = new RiskAssessment();
+		RiskAssessment ra2 = new RiskAssessment();
+
+		RiskAssessment.RiskAssessmentPredictionComponent component = new RiskAssessment.RiskAssessmentPredictionComponent();
+		DecimalType doseNumber = new DecimalType(0.25);
+		component.setProbability(doseNumber);
+		ra1.addPrediction(component);
+		String raId1 = myRiskAssessmentDao.create(ra1).getId().toUnqualifiedVersionless().getValue();
+
+		component = new RiskAssessment.RiskAssessmentPredictionComponent();
+		doseNumber = new DecimalType(0.3);
+		component.setProbability(doseNumber);
+		ra2.addPrediction(component);
+		String raId2 = myRiskAssessmentDao.create(ra2).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("probability eq 0.25"));
+		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
+		assertThat(found, containsInAnyOrder(raId1));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("probability eq 0.3"));
+		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
+		assertThat(found, containsInAnyOrder(raId2));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("probability eq 0.1"));
+		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
+		assertThat(found, Matchers.empty());
+
+	}
+
+	@Test
+	public void testNumericComparatorNe() {
+
+		RiskAssessment ra1 = new RiskAssessment();
+		RiskAssessment ra2 = new RiskAssessment();
+
+		RiskAssessment.RiskAssessmentPredictionComponent component = new RiskAssessment.RiskAssessmentPredictionComponent();
+		DecimalType doseNumber = new DecimalType(0.25);
+		component.setProbability(doseNumber);
+		ra1.addPrediction(component);
+		String raId1 = myRiskAssessmentDao.create(ra1).getId().toUnqualifiedVersionless().getValue();
+
+		component = new RiskAssessment.RiskAssessmentPredictionComponent();
+		doseNumber = new DecimalType(0.3);
+		component.setProbability(doseNumber);
+		ra2.addPrediction(component);
+		String raId2 = myRiskAssessmentDao.create(ra2).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("probability ne 0.25"));
+		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
+		assertThat(found, containsInAnyOrder(raId2));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("probability ne 0.3"));
+		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
+		assertThat(found, containsInAnyOrder(raId1));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("probability ne 0.1"));
+		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
+		assertThat(found, containsInAnyOrder(raId1, raId2));
+
+	}
+
+	@Test
+	public void testNumericComparatorGt() {
+
+		RiskAssessment ra1 = new RiskAssessment();
+		RiskAssessment ra2 = new RiskAssessment();
+
+		RiskAssessment.RiskAssessmentPredictionComponent component = new RiskAssessment.RiskAssessmentPredictionComponent();
+		DecimalType doseNumber = new DecimalType(0.25);
+		component.setProbability(doseNumber);
+		ra1.addPrediction(component);
+		String raId1 = myRiskAssessmentDao.create(ra1).getId().toUnqualifiedVersionless().getValue();
+
+		component = new RiskAssessment.RiskAssessmentPredictionComponent();
+		doseNumber = new DecimalType(0.3);
+		component.setProbability(doseNumber);
+		ra2.addPrediction(component);
+		String raId2 = myRiskAssessmentDao.create(ra2).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("probability gt 0.25"));
+		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
+		assertThat(found, containsInAnyOrder(raId2));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("probability gt 0.3"));
+		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
+		assertThat(found, Matchers.empty());
+
+	}
+
+	@Test
+	public void testNumericComparatorLt() {
+
+		RiskAssessment ra1 = new RiskAssessment();
+		RiskAssessment ra2 = new RiskAssessment();
+
+		RiskAssessment.RiskAssessmentPredictionComponent component = new RiskAssessment.RiskAssessmentPredictionComponent();
+		DecimalType doseNumber = new DecimalType(0.25);
+		component.setProbability(doseNumber);
+		ra1.addPrediction(component);
+		String raId1 = myRiskAssessmentDao.create(ra1).getId().toUnqualifiedVersionless().getValue();
+
+		component = new RiskAssessment.RiskAssessmentPredictionComponent();
+		doseNumber = new DecimalType(0.3);
+		component.setProbability(doseNumber);
+		ra2.addPrediction(component);
+		String raId2 = myRiskAssessmentDao.create(ra2).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("probability lt 0.3"));
+		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
+		assertThat(found, containsInAnyOrder(raId1));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("probability lt 0.25"));
+		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
+		assertThat(found, Matchers.empty());
+
+	}
+
+	@Test
+	public void testNumericComparatorGe() {
+
+		RiskAssessment ra1 = new RiskAssessment();
+		RiskAssessment ra2 = new RiskAssessment();
+
+		RiskAssessment.RiskAssessmentPredictionComponent component = new RiskAssessment.RiskAssessmentPredictionComponent();
+		DecimalType doseNumber = new DecimalType(0.25);
+		component.setProbability(doseNumber);
+		ra1.addPrediction(component);
+		String raId1 = myRiskAssessmentDao.create(ra1).getId().toUnqualifiedVersionless().getValue();
+
+		component = new RiskAssessment.RiskAssessmentPredictionComponent();
+		doseNumber = new DecimalType(0.3);
+		component.setProbability(doseNumber);
+		ra2.addPrediction(component);
+		String raId2 = myRiskAssessmentDao.create(ra2).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("probability ge 0.25"));
+		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
+		assertThat(found, containsInAnyOrder(raId1, raId2));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("probability ge 0.3"));
+		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
+		assertThat(found, containsInAnyOrder(raId2));
+
+	}
+
+	@Test
+	public void testNumericComparatorLe() {
+
+		RiskAssessment ra1 = new RiskAssessment();
+		RiskAssessment ra2 = new RiskAssessment();
+
+		RiskAssessment.RiskAssessmentPredictionComponent component = new RiskAssessment.RiskAssessmentPredictionComponent();
+		DecimalType doseNumber = new DecimalType(0.25);
+		component.setProbability(doseNumber);
+		ra1.addPrediction(component);
+		String raId1 = myRiskAssessmentDao.create(ra1).getId().toUnqualifiedVersionless().getValue();
+
+		component = new RiskAssessment.RiskAssessmentPredictionComponent();
+		doseNumber = new DecimalType(0.3);
+		component.setProbability(doseNumber);
+		ra2.addPrediction(component);
+		String raId2 = myRiskAssessmentDao.create(ra2).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("probability le 0.25"));
+		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
+		assertThat(found, containsInAnyOrder(raId1));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("probability le 0.3"));
+		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
+		assertThat(found, containsInAnyOrder(raId1, raId2));
 
 	}
 
