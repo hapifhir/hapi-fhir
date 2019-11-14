@@ -210,7 +210,7 @@ public enum FhirVersionEnum {
 				Class<?> c = Class.forName("org.hl7.fhir.r4.model.Constants");
 				myVersion = (String) c.getDeclaredField("VERSION").get(null);
 			} catch (Exception e) {
-				myVersion = "4.0.0";
+				myVersion = "4.0.1";
 			}
 		}
 
