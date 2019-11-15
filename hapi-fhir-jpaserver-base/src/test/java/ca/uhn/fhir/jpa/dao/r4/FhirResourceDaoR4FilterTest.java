@@ -4,7 +4,10 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -19,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"Duplicates"})
@@ -940,6 +944,228 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.add(Constants.PARAM_FILTER, new StringParam("probability le 0.3"));
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
 		assertThat(found, containsInAnyOrder(raId1, raId2));
+
+	}
+
+	@Test
+	public void testSearchUriEq() throws Exception {
+
+		ValueSet vs1 = new ValueSet();
+		vs1.setUrl("http://hl7.org/foo/baz");
+		IIdType vsId1 = myValueSetDao.create(vs1, mySrd).getId().toUnqualifiedVersionless();
+
+		ValueSet vs2 = new ValueSet();
+		vs2.setUrl("http://hl7.org/foo/bar");
+		IIdType vsId2 = myValueSetDao.create(vs2, mySrd).getId().toUnqualifiedVersionless();
+
+		IBundleProvider result;
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url eq http://hl7.org/foo/baz")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1));
+
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url eq http://hl7.org/foo/bar")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId2));
+
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url eq http://hl7.org/foo/bar/bar")));
+		assertThat(toUnqualifiedVersionlessIds(result), Matchers.empty());
+
+	}
+
+	@Test
+	public void testSearchUriNe() throws Exception {
+
+		ValueSet vs1 = new ValueSet();
+		vs1.setUrl("http://hl7.org/foo/baz");
+		IIdType vsId1 = myValueSetDao.create(vs1, mySrd).getId().toUnqualifiedVersionless();
+
+		ValueSet vs2 = new ValueSet();
+		vs2.setUrl("http://hl7.org/foo/bar");
+		IIdType vsId2 = myValueSetDao.create(vs2, mySrd).getId().toUnqualifiedVersionless();
+
+		IBundleProvider result;
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url ne http://hl7.org/foo/baz")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId2));
+
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url ne http://hl7.org/foo/bar")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1));
+
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url ne http://hl7.org/foo/baz and url ne http://hl7.org/foo/bar")));
+		assertThat(toUnqualifiedVersionlessIds(result), Matchers.empty());
+
+	}
+
+	@Test
+	public void testSearchUriCo() throws Exception {
+
+		ValueSet vs1 = new ValueSet();
+		vs1.setUrl("http://hl7.org/foo/baz");
+		IIdType vsId1 = myValueSetDao.create(vs1, mySrd).getId().toUnqualifiedVersionless();
+
+		ValueSet vs2 = new ValueSet();
+		vs2.setUrl("http://hl7.org/foo/bar");
+		IIdType vsId2 = myValueSetDao.create(vs2, mySrd).getId().toUnqualifiedVersionless();
+
+		IBundleProvider result;
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url co http://hl7.org/foo")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1, vsId2));
+
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url co baz")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1));
+
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url co http://hl7.org/foo/bat")));
+		assertThat(toUnqualifiedVersionlessIds(result), Matchers.empty());
+
+	}
+
+	@Test
+	public void testSearchUriGt() throws Exception {
+
+		ValueSet vs1 = new ValueSet();
+		vs1.setUrl("http://hl7.org/foo/baz");
+		IIdType vsId1 = myValueSetDao.create(vs1, mySrd).getId().toUnqualifiedVersionless();
+
+		ValueSet vs2 = new ValueSet();
+		vs2.setUrl("http://hl7.org/foo/bar");
+		IIdType vsId2 = myValueSetDao.create(vs2, mySrd).getId().toUnqualifiedVersionless();
+
+		IBundleProvider result;
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url gt http://hl7.org/foo")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1, vsId2));
+
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url gt http://hl7.org/foo/bar")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1));
+
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url gt http://hl7.org/foo/baza")));
+		assertThat(toUnqualifiedVersionlessIds(result), Matchers.empty());
+
+	}
+
+	@Test
+	public void testSearchUriLt() throws Exception {
+
+		ValueSet vs1 = new ValueSet();
+		vs1.setUrl("http://hl7.org/foo/baz");
+		IIdType vsId1 = myValueSetDao.create(vs1, mySrd).getId().toUnqualifiedVersionless();
+
+		ValueSet vs2 = new ValueSet();
+		vs2.setUrl("http://hl7.org/foo/bar");
+		IIdType vsId2 = myValueSetDao.create(vs2, mySrd).getId().toUnqualifiedVersionless();
+
+		IBundleProvider result;
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url lt http://hl7.org/foo")));
+		assertThat(toUnqualifiedVersionlessIds(result), Matchers.empty());
+
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url lt http://hl7.org/foo/baz")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId2));
+
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url lt http://hl7.org/foo/bara")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId2));
+
+	}
+
+	@Test
+	public void testSearchUriGe() throws Exception {
+
+		ValueSet vs1 = new ValueSet();
+		vs1.setUrl("http://hl7.org/foo/baz");
+		IIdType vsId1 = myValueSetDao.create(vs1, mySrd).getId().toUnqualifiedVersionless();
+
+		ValueSet vs2 = new ValueSet();
+		vs2.setUrl("http://hl7.org/foo/bar");
+		IIdType vsId2 = myValueSetDao.create(vs2, mySrd).getId().toUnqualifiedVersionless();
+
+		IBundleProvider result;
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url ge http://hl7.org/foo/bar")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1, vsId2));
+
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url ge http://hl7.org/foo/baza")));
+		assertThat(toUnqualifiedVersionlessIds(result), Matchers.empty());
+
+	}
+
+	@Test
+	public void testSearchUriLe() throws Exception {
+
+		ValueSet vs1 = new ValueSet();
+		vs1.setUrl("http://hl7.org/foo/baz");
+		IIdType vsId1 = myValueSetDao.create(vs1, mySrd).getId().toUnqualifiedVersionless();
+
+		ValueSet vs2 = new ValueSet();
+		vs2.setUrl("http://hl7.org/foo/bar");
+		IIdType vsId2 = myValueSetDao.create(vs2, mySrd).getId().toUnqualifiedVersionless();
+
+		IBundleProvider result;
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url le http://hl7.org/foo/baz")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1, vsId2));
+
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url le http://hl7.org/foo/bar")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId2));
+
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url lt http://hl7.org/foo/baza")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1, vsId2));
+
+	}
+
+	@Test
+	public void testSearchUriSw() throws Exception {
+
+		ValueSet vs1 = new ValueSet();
+		vs1.setUrl("http://hl7.org/foo/baz");
+		IIdType vsId1 = myValueSetDao.create(vs1, mySrd).getId().toUnqualifiedVersionless();
+
+		ValueSet vs2 = new ValueSet();
+		vs2.setUrl("http://hl7.org/foo/bar");
+		IIdType vsId2 = myValueSetDao.create(vs2, mySrd).getId().toUnqualifiedVersionless();
+
+		IBundleProvider result;
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url sw http://hl7.org")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1, vsId2));
+
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url sw hl7.org/foo/bar")));
+		assertThat(toUnqualifiedVersionlessIds(result), Matchers.empty());
+
+	}
+
+	@Test
+	public void testSearchUriEw() throws Exception {
+
+		ValueSet vs1 = new ValueSet();
+		vs1.setUrl("http://hl7.org/foo/baz");
+		IIdType vsId1 = myValueSetDao.create(vs1, mySrd).getId().toUnqualifiedVersionless();
+
+		ValueSet vs2 = new ValueSet();
+		vs2.setUrl("http://hl7.org/foo/bar");
+		IIdType vsId2 = myValueSetDao.create(vs2, mySrd).getId().toUnqualifiedVersionless();
+
+		IBundleProvider result;
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url ew baz")));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(vsId1));
+
+		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Constants.PARAM_FILTER,
+			new StringParam("url ew ba")));
+		assertThat(toUnqualifiedVersionlessIds(result), Matchers.empty());
 
 	}
 
