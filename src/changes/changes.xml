@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="4.1.0" date="TBD" description="Igloo">
+		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
 			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
@@ -21,6 +21,8 @@
 					<li>Postgresql JDBC Driver (JPA): 42.2.6.jre7 -&gt; 42.2.8</li>
 					<li>MSSQL JDBC Driver (JPA): 7.0.0.jre8 -&gt; 7.4.1.jre8</li>
 					<li>Spring Boot (Boot): 2.1.1 -&gt; 2.2.0</li>
+					<li>Phloc Schematron (Validator): 5.0.4 -&gt; 5.2.0</li>
+					<li>Phloc Commons (Validator): 9.1.1 -&gt; 9.3.8</li>
 				</ul>
 				]]>
 			</action>
@@ -77,6 +79,14 @@
 				When using Externalized Binary Storage in the JPA server, the system will now automatically
 				externalize Binary and Attachment payloads, meaning that these will automatically not be
 				stored in the RDBMS.
+				]]>
+			</action>
+			<action type="fix">
+				<![CDATA[
+				<b>Model Update</b>:
+				The DSTU3 structures have been upgraded to the new 3.0.2 (Technical Correction) release.<br/>
+				The R4 structures have been upgraded to the new 4.0.1 (Technical Correction) release.<br/>
+				The R5 structure have been upgraded to the current (October) snapshot.
 				]]>
 			</action>
 			<action type="add" issue="1489">
@@ -496,6 +506,22 @@
 				The CapabilityStatement generator will now determine supported profiles by navigating the complete
 				hierarchy of supported resource types, instead of just using the root resource for each type.
 				Thanks to Stig Døssing for the pull request!
+			</action>
+			<action type="fix">
+				A NullPointerException in the XML Parser was fixed when serializing a resource containing an extension
+				on a primitive datatype that was missing a URL declaration.
+			</action>
+			<action type="fix">
+				When using the _filter search parameter in the JPA server with an untyped resource ID, the
+				filter could bring in search results of the wrong type. Thanks to Anthony Sute for the Pull
+				Request and Jens Villadsen for reporting!
+			</action>
+			<action type="fix" issue="1300">
+				In some cases where where a single search parameter matches the same resource many times with 
+				different distinct values (e.g. a search by Patient:name where there are hundreds of patients having
+				hundreds of distinct names each) the Search Coordinator would end up in an infinite loop and never
+				return all of the possible results. Thanks to @imranmoezkhan for reporting, and to 
+				Tim Shaffer for providing a reproducible test case!
 			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">

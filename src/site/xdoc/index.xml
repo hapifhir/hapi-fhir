@@ -17,9 +17,9 @@
 				<br/>
 				<iframe src="https://ghbtns.com/github-btn.html?user=jamesagnew&amp;repo=hapi-fhir&amp;type=fork&amp;count=true&amp;v=2" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
 				<br/>
-				<a href="https://travis-ci.org/jamesagnew/hapi-fhir"><img src="https://travis-ci.org/jamesagnew/hapi-fhir.svg?branch=master" alt="Build Status"/></a>
+				<a href="https://dev.azure.com/jamesagnew214/jamesagnew214/_build/latest?definitionId=1&amp;branchName=master"><img src="https://dev.azure.com/jamesagnew214/jamesagnew214/_apis/build/status/jamesagnew.hapi-fhir?branchName=master" alt="Build Status"/></a>
 				<br/>
-				<a href="https://coveralls.io/r/jamesagnew/hapi-fhir?branch=master"><img src="https://coveralls.io/repos/jamesagnew/hapi-fhir/badge.svg?branch=master" alt="Coverage Status"/></a>
+				<a href="https://codecov.io/gh/jamesagnew/hapi-fhir"><img src="https://codecov.io/gh/jamesagnew/hapi-fhir/branch/master/graph/badge.svg" alt="Coverage Status"/></a>
 				<br/>
 				<a href="https://maven-badges.herokuapp.com/maven-central/ca.uhn.hapi.fhir/hapi-fhir-base/badge.svg"><img src="https://maven-badges.herokuapp.com/maven-central/ca.uhn.hapi.fhir/hapi-fhir-base/badge.svg" alt="Maven Central"/></a>
 				<br/>
@@ -67,6 +67,68 @@
 		</section>
 
 		<section name="Announcements">
+			<p>
+				<b>November 13, 2019 - HAPI FHIR 4.1.0 (Jitterbug)</b> -
+				It's time for another release of HAPI FHIR!
+			</p>
+			<p>
+				This release brings some good stuff, including:
+			</p>
+			<ul>
+				<li>
+					Structures JARs have been updated to incorporate the latest technical corrections. 
+					DSTU3 structures are upgraded to FHIR 3.0.2, R4 structures are upgraded to 
+					FHIR 4.0.1, and R5 draft structures are upgraded to the October 2019 draft revision.
+				</li>
+				<li>
+					ValueSets are now automatically pre-expanded by the JPA server into
+					a dedicated set of database tables. This "precalculated expansion" is used
+					to provide much better performance for validation and expanion operations, and
+					introduced the ability to successfully expand very large ValueSets
+					such as the LOINC implicit (all codes) valueset.
+				</li>
+				<li>
+					Support for the FHIR Bulk Export specification has been added. We are now
+					working on adding support for Bulk Import!
+				</li>
+				<li>
+					First-order support for ElasticSearch as a full-text and terminology service
+					backend implementation. At this time, both raw Lucene and ElasticSearch are
+					supported (this may change in the future but we do not have any current
+					plans to deprecate Lucene).
+				</li>
+				<li>
+					Live Terminology Service operations for terminology file maintenance based on
+					delta files has been added.
+				</li>
+				<li>
+					Binary resources and Media/DocumentReference instances with binary attachments
+					stored in the FHIR repository can now take advantage of
+					externalized binary storage for the binary content when that feature is enabled.
+					This allows much better scalability of repositories containing large amounts
+					of binary content (e.g. document repositories).
+				</li>
+			</ul>
+			<p>
+				As always, see the
+				<a href="http://hapifhir.io/changes-report.html">changelog</a> for a full list
+				of changes.
+			</p>
+			<p>
+				Thanks to everyone who contributed to this release!
+			</p>
+			<p>
+				Also, as a reminder, if you have not already filled out our annual
+				user survey, please take a moment to do so. Access the survey here:
+				<a href="http://bit.ly/33HO4cs">http://bit.ly/33HO4cs</a> (note that this URL was originally posted incorrectly. It is now fixed)
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<br/><br/>
+
+
+
 			<p>
 				<b>September 3, 2019 - Community Survey and HAPI FHIR 4.0.1</b> -
 				It is time for us to do another HAPI FHIR community survey. The survey is a not-quite-annual 
@@ -129,6 +191,7 @@
 			</p>
 			<br/><br/>
 
+			<!--
 			<p>
 				<b>May 30, 2019 - HAPI FHIR 3.8.0 (Hippo) Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and
@@ -255,7 +318,7 @@
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>
 			</p>
 			<br/><br/>
-
+			-->
 
 			
 			<!--

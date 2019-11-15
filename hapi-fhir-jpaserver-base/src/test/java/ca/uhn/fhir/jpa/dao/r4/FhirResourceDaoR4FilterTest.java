@@ -169,6 +169,41 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		}
 	}
 
+	@Test
+	public void testRetrieveDifferentTypeEq() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("Smith").addGiven("John");
+		p.setActive(true);
+		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+		String idVal = id1.split("/")[1];
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam(String.format("status eq active or _id eq %s",
+			idVal)));
+		found = toUnqualifiedVersionlessIdValues(myEncounterDao.search(map));
+		assertThat(found, Matchers.empty());
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam(String.format("_id eq %s",
+			idVal)));
+		found = toUnqualifiedVersionlessIdValues(myEncounterDao.search(map));
+		assertThat(found, Matchers.empty());
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam(String.format("_id eq %s",
+			idVal)));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
+
+	}
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

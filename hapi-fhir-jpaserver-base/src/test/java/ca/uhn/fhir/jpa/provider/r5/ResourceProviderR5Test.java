@@ -1,15 +1,20 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.DateTimeType;
@@ -18,17 +23,23 @@ import org.hl7.fhir.r5.model.Patient;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR5Test.class);
 	private CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 
 	@Override
@@ -117,7 +128,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(response0.getId(), response1.getId());
 
 		// Pretend the search was errored out
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(1L, mySearchEntityDao.count());
 			Search search = mySearchEntityDao.findAll().iterator().next();
 			search.setStatus(SearchStatusEnum.FAILED);
@@ -156,7 +167,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(1, response0.getEntry().size());
 
 		// Pretend the search was errored out
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(1L, mySearchEntityDao.count());
 			Search search = mySearchEntityDao.findAll().iterator().next();
 			search.setStatus(SearchStatusEnum.FAILED);
@@ -172,6 +183,28 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			assertThat(e.getMessage(), containsString("Some Failure Message"));
 		}
 
+	}
+
+	@Test
+	public void testValidateGeneratedCapabilityStatement() throws IOException {
+
+		String input;
+		HttpGet get = new HttpGet(ourServerBase + "/metadata?_format=json");
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			input = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info(input);
+		}
+
+
+		HttpPost post = new HttpPost(ourServerBase + "/CapabilityStatement/$validate?_pretty=true");
+		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
+
+		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
+			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info(respString);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+		}
 	}
 
 	@Test

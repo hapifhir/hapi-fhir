@@ -446,9 +446,10 @@ public class XmlParser extends BaseParser {
 		if (isBlank(extensionUrl)) {
 			ParseLocation loc = new ParseLocation(theEncodeContext.toString());
 			getErrorHandler().missingRequiredElement(loc, "url");
+		} else {
+			theEventWriter.writeAttribute("url", extensionUrl);
 		}
 
-		theEventWriter.writeAttribute("url", extensionUrl);
 		encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName, childDef, null, theContainedResource, nextChildElem, theEncodeContext);
 		theEventWriter.writeEndElement();
 	}
@@ -610,7 +611,9 @@ public class XmlParser extends BaseParser {
 			}
 
 			String url = getExtensionUrl(next.getUrl());
-			theEventWriter.writeAttribute("url", url);
+			if (isNotBlank(url)) {
+				theEventWriter.writeAttribute("url", url);
+			}
 
 			if (next.getValue() != null) {
 				IBaseDatatype value = next.getValue();
