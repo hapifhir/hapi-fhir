@@ -111,7 +111,7 @@ public class SearchParameterMap implements Serializable {
 		}
 	}
 
-		public void add(String theName, IQueryParameterOr<?> theOr) {
+	public void add(String theName, IQueryParameterOr<?> theOr) {
 		if (theOr == null) {
 			return;
 		}
