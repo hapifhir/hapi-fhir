@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -58,7 +58,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	protected static RestfulServer ourRestServer;
 	protected static String ourServerBase;
 	protected static GenericWebApplicationContext ourWebApplicationContext;
-	protected static SearchParamRegistryDstu3 ourSearchParamRegistry;
+	protected static SearchParamRegistryImpl ourSearchParamRegistry;
 	protected static DatabaseBackedPagingProvider ourPagingProvider;
 	protected static ISearchCoordinatorSvc ourSearchCoordinatorSvc;
 	private static Server ourServer;
@@ -153,7 +153,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
 			myValidationSupport = wac.getBean(JpaValidationSupportChainDstu3.class);
 			ourSearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
-			ourSearchParamRegistry = wac.getBean(SearchParamRegistryDstu3.class);
+			ourSearchParamRegistry = wac.getBean(SearchParamRegistryImpl.class);
 			ourSubscriptionTriggeringProvider = wac.getBean(SubscriptionTriggeringProvider.class);
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
