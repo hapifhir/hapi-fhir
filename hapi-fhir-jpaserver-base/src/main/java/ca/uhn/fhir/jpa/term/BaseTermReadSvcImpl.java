@@ -1144,7 +1144,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 			if (isNotBlank(theSystem)) {
 				concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, theSystem, theCode));
 			} else if (Constants.codeSystemNotNeeded(theSystem)) {
-				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(valueSetResourcePid, theCode));
+				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(valueSetResourcePid.getIdAsLong(), theCode));
 			}
 		} else if (theCoding != null) {
 			if (theCoding.hasSystem() && theCoding.hasCode()) {
