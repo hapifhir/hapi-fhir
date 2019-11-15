@@ -45,6 +45,7 @@ import javax.mail.internet.MimeMultipart;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -57,6 +58,7 @@ public class JavaMailEmailSender implements IEmailSender {
 	private JavaMailSenderImpl mySender;
 	private String mySmtpServerUsername;
 	private String mySmtpServerPassword;
+	private boolean mySmtpServerTls = false;
 
 	public String getSmtpServerHostname() {
 		return mySmtpServerHostname;
@@ -95,6 +97,10 @@ public class JavaMailEmailSender implements IEmailSender {
 	public void setSmtpServerUsername(String theSmtpServerUsername) {
 		mySmtpServerUsername = theSmtpServerUsername;
 	}
+
+	public void setSmtpServerTls(boolean theSmtpServerTls) { mySmtpServerTls = theSmtpServerTls; }
+
+	public boolean getSmtpServerTls() { return mySmtpServerTls; }
 
 	@Override
 	public void send(EmailDetails theDetails) {
@@ -153,6 +159,13 @@ public class JavaMailEmailSender implements IEmailSender {
 		Validate.notBlank(mySmtpServerHostname, "No SMTP host defined");
 
 		mySender = new JavaMailSenderImpl();
+
+		if (getSmtpServerTls()) {
+			Properties props = new Properties();
+			props.setProperty("mail.smtp.starttls.enable", "true");
+			mySender.setJavaMailProperties(props);
+		}
+
 		mySender.setHost(getSmtpServerHostname());
 		mySender.setPort(getSmtpServerPort());
 		mySender.setUsername(getSmtpServerUsername());
