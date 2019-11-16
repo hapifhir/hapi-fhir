@@ -518,22 +518,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		return loadSynchronousUpTo;
 	}
 
-	private void callInterceptorStoragePreAccessResources(IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequestDetails, ISearchBuilder theSb, List<Long> thePids) {
-		if (thePids.isEmpty() == false) {
-			JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(thePids, () -> theSb);
-			HookParams params = new HookParams()
-				.add(IPreResourceAccessDetails.class, accessDetails)
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-			for (int i = thePids.size() - 1; i >= 0; i--) {
-				if (accessDetails.isDontReturnResourceAtIndex(i)) {
-					thePids.remove(i);
-				}
-			}
-		}
-	}
-
 	@VisibleForTesting
 	void setContextForUnitTest(FhirContext theCtx) {
 		myContext = theCtx;
