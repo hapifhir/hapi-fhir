@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
@@ -251,7 +252,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			OutputStreamWriter writer = new OutputStreamWriter(outputStream, Constants.CHARSET_UTF8);
 			IParser parser = myContext.newJsonParser().setPrettyPrint(false);
 
-			List<Long> pidsSpool = new ArrayList<>();
+			List<ResourcePersistentId> pidsSpool = new ArrayList<>();
 			List<IBaseResource> resourcesSpool = new ArrayList<>();
 			while (query.hasNext()) {
 				pidsSpool.add(query.next());

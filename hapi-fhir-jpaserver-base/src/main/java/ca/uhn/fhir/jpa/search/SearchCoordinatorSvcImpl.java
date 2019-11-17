@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
@@ -173,7 +174,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	 */
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
-	public List<Long> getResources(final String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails) {
+	public List<ResourcePersistentId> getResources(final String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
@@ -193,7 +194,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			if (myNeverUseLocalSearchForUnitTests == false) {
 				if (searchTask != null) {
 					ourLog.trace("Local search found");
-					List<Long> resourcePids = searchTask.getResourcePids(theFrom, theTo);
+					List<ResourcePersistentId> resourcePids = searchTask.getResourcePids(theFrom, theTo);
 					ourLog.trace("Local search returned {} pids, wanted {}-{} - Search: {}", resourcePids.size(), theFrom, theTo, searchTask.getSearch());
 
 					/*
@@ -249,7 +250,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		ourLog.trace("Finished looping");
 
-		List<Long> pids = mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
+		List<ResourcePersistentId> pids = mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
 		if (pids == null) {
 			throw newResourceGoneException(theUuid);
 		}
@@ -446,7 +447,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		return txTemplate.execute(t -> {
 
 			// Load the results synchronously
-			final List<Long> pids = new ArrayList<>();
+			final List<ResourcePersistentId> pids = new ArrayList<>();
 
 			try (IResultIterator resultIter = theSb.createQuery(theParams, searchRuntimeDetails, theRequestDetails)) {
 				while (resultIter.hasNext()) {
@@ -485,10 +486,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 * On the other hand for async queries we load includes/revincludes
 			 * individually for pages as we return them to clients
 			 */
-			final Set<Long> includedPids = new HashSet<>();
+			final Set<ResourcePersistentId> includedPids = new HashSet<>();
 			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
 			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
-			List<Long> includedPidsList = new ArrayList<>(includedPids);
+			List<ResourcePersistentId> includedPidsList = new ArrayList<>(includedPids);
 
 			List<IBaseResource> resources = new ArrayList<>();
 			theSb.loadResourcesByPid(pids, includedPidsList, resources, false, theRequestDetails);
@@ -580,10 +581,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		private final SearchParameterMap myParams;
 		private final IDao myCallingDao;
 		private final String myResourceType;
-		private final ArrayList<Long> mySyncedPids = new ArrayList<>();
+		private final ArrayList<ResourcePersistentId> mySyncedPids = new ArrayList<>();
 		private final CountDownLatch myInitialCollectionLatch = new CountDownLatch(1);
 		private final CountDownLatch myCompletionLatch;
-		private final ArrayList<Long> myUnsyncedPids = new ArrayList<>();
+		private final ArrayList<ResourcePersistentId> myUnsyncedPids = new ArrayList<>();
 		private final RequestDetails myRequest;
 		private Search mySearch;
 		private boolean myAbortRequested;
@@ -591,7 +592,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		private int myCountSavedThisPass = 0;
 		private int myCountBlockedThisPass = 0;
 		private boolean myAdditionalPrefetchThresholdsRemaining;
-		private List<Long> myPreviouslyAddedResourcePids;
+		private List<ResourcePersistentId> myPreviouslyAddedResourcePids;
 		private Integer myMaxResultsToFetch;
 		private SearchRuntimeDetails mySearchRuntimeDetails;
 
@@ -635,7 +636,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			return myInitialCollectionLatch;
 		}
 
-		void setPreviouslyAddedResourcePids(List<Long> thePreviouslyAddedResourcePids) {
+		void setPreviouslyAddedResourcePids(List<ResourcePersistentId> thePreviouslyAddedResourcePids) {
 			myPreviouslyAddedResourcePids = thePreviouslyAddedResourcePids;
 			myCountSavedTotal = myPreviouslyAddedResourcePids.size();
 		}
@@ -649,7 +650,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 		@Nonnull
-		List<Long> getResourcePids(int theFromIndex, int theToIndex) {
+		List<ResourcePersistentId> getResourcePids(int theFromIndex, int theToIndex) {
 			ourLog.debug("Requesting search PIDs from {}-{}", theFromIndex, theToIndex);
 
 			boolean keepWaiting;
@@ -673,6 +674,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 								break;
 							case FAILED:
 							case FINISHED:
+							case GONE:
 							default:
 								keepWaiting = false;
 								break;
@@ -690,7 +692,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			ourLog.debug("Proceeding, as we have {} results", mySyncedPids.size());
 
-			ArrayList<Long> retVal = new ArrayList<>();
+			ArrayList<ResourcePersistentId> retVal = new ArrayList<>();
 			synchronized (mySyncedPids) {
 				verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
 
@@ -713,7 +715,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 			txTemplate.execute(new TransactionCallbackWithoutResult() {
 				@Override
-				protected void doInTransactionWithoutResult(@NotNull TransactionStatus theArg0) {
+				protected void doInTransactionWithoutResult(@Nonnull @NotNull TransactionStatus theArg0) {
 					doSaveSearch();
 				}
 
@@ -725,12 +727,12 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 			txTemplate.execute(new TransactionCallbackWithoutResult() {
 				@Override
-				protected void doInTransactionWithoutResult(@NotNull TransactionStatus theArg0) {
+				protected void doInTransactionWithoutResult(@Nonnull @NotNull TransactionStatus theArg0) {
 					if (mySearch.getId() == null) {
 						doSaveSearch();
 					}
 
-					ArrayList<Long> unsyncedPids = myUnsyncedPids;
+					ArrayList<ResourcePersistentId> unsyncedPids = myUnsyncedPids;
 					int countBlocked = 0;
 
 					// Interceptor call: STORAGE_PREACCESS_RESOURCES
@@ -847,7 +849,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 				txTemplate.execute(new TransactionCallbackWithoutResult() {
 					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 						doSearch();
 					}
 				});
@@ -962,7 +964,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 				txTemplate.execute(new TransactionCallbackWithoutResult() {
 					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
 						mySearch.setTotalCount(count.intValue());
 						if (wantOnlyCount) {
 							mySearch.setStatus(SearchStatusEnum.FINISHED);
@@ -1093,7 +1095,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 				txTemplate.afterPropertiesSet();
 				txTemplate.execute(t -> {
-					List<Long> previouslyAddedResourcePids = mySearchResultCacheSvc.fetchAllResultPids(getSearch());
+					List<ResourcePersistentId> previouslyAddedResourcePids = mySearchResultCacheSvc.fetchAllResultPids(getSearch());
 					if (previouslyAddedResourcePids == null) {
 						throw newResourceGoneException(getSearch().getUuid());
 					}

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term.api;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -40,7 +41,7 @@ public interface ITermCodeSystemStorageSvc {
 
 	void deleteCodeSystem(TermCodeSystem theCodeSystem);
 
-	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable);
+	void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable);
 
 	/**
 	 * @return Returns the ID of the created/updated code system
@@ -55,5 +56,5 @@ public interface ITermCodeSystemStorageSvc {
 
 	int saveConcept(TermConcept theNextConcept);
 
-	Long getValueSetResourcePid(IIdType theIdElement);
+	ResourcePersistentId getValueSetResourcePid(IIdType theIdElement);
 }

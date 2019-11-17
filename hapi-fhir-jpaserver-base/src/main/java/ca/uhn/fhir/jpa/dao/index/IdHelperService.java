@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.dao.index;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -61,7 +63,7 @@ public class IdHelperService {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	public Long translateForcedIdToPid(IIdType theId, RequestDetails theRequestDetails) {
+	public ResourcePersistentId translateForcedIdToPid(IIdType theId, RequestDetails theRequestDetails) {
 		return translateForcedIdToPid(theId.getResourceType(), theId.getIdPart(), theRequestDetails);
 	}
 
@@ -69,10 +71,10 @@ public class IdHelperService {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	public Long translateForcedIdToPid(String theResourceName, String theResourceId, RequestDetails theRequestDetails) throws ResourceNotFoundException {
+	public ResourcePersistentId translateForcedIdToPid(String theResourceName, String theResourceId, RequestDetails theRequestDetails) throws ResourceNotFoundException {
 		// We only pass 1 input in so only 0..1 will come back
 		IdDt id = new IdDt(theResourceName, theResourceId);
-		List<Long> matches = translateForcedIdToPids(myDaoConfig, myInterceptorBroadcaster, theRequestDetails, myForcedIdDao, Collections.singletonList(id));
+		List<ResourcePersistentId> matches = translateForcedIdToPids(myDaoConfig, myInterceptorBroadcaster, theRequestDetails, myForcedIdDao, Collections.singletonList(id));
 		assert matches.size() <= 1;
 		if (matches.isEmpty()) {
 			throw new ResourceNotFoundException(id);
@@ -80,23 +82,23 @@ public class IdHelperService {
 		return matches.get(0);
 	}
 
-	public List<Long> translateForcedIdToPids(Collection<IIdType> theId, RequestDetails theRequestDetails) {
+	public List<ResourcePersistentId> translateForcedIdToPids(Collection<IIdType> theId, RequestDetails theRequestDetails) {
 		return IdHelperService.translateForcedIdToPids(myDaoConfig, myInterceptorBroadcaster, theRequestDetails, myForcedIdDao, theId);
 	}
 
-	private static List<Long> translateForcedIdToPids(DaoConfig theDaoConfig, IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequest, IForcedIdDao theForcedIdDao, Collection<IIdType> theId) {
+	private static List<ResourcePersistentId> translateForcedIdToPids(DaoConfig theDaoConfig, IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequest, IForcedIdDao theForcedIdDao, Collection<IIdType> theId) {
 		theId.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
 		if (theId.isEmpty()) {
 			return Collections.emptyList();
 		}
 
-		List<Long> retVal = new ArrayList<>();
+		List<ResourcePersistentId> retVal = new ArrayList<>();
 
 		ListMultimap<String, String> typeToIds = MultimapBuilder.hashKeys().arrayListValues().build();
 		for (IIdType nextId : theId) {
 			if (theDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY && isValidPid(nextId)) {
-				retVal.add(nextId.getIdPartAsLong());
+				retVal.add(new ResourcePersistentId(nextId.getIdPartAsLong()));
 			} else {
 				if (nextId.hasResourceType()) {
 					typeToIds.put(nextId.getResourceType(), nextId.getIdPart());
@@ -119,18 +121,34 @@ public class IdHelperService {
 					.add(StorageProcessingMessage.class, msg);
 				JpaInterceptorBroadcaster.doCallHooks(theInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 
-				retVal.addAll(theForcedIdDao.findByForcedId(nextIds));
+				theForcedIdDao
+					.findByForcedId(nextIds)
+					.stream()
+					.map(t->new ResourcePersistentId(t))
+					.forEach(t->retVal.add(t));
 
 			} else {
-				retVal.addAll(theForcedIdDao.findByTypeAndForcedId(nextResourceType, nextIds));
+
+				theForcedIdDao
+					.findByTypeAndForcedId(nextResourceType, nextIds)
+					.stream()
+					.map(t->new ResourcePersistentId(t))
+					.forEach(t->retVal.add(t));
+
 			}
 		}
 
 			return retVal;
 	}
 
-	String translatePidIdToForcedId(String theResourceType, Long theId) {
-		ForcedId forcedId = myForcedIdDao.findByResourcePid(theId);
+	public IIdType translatePidIdToForcedId(FhirContext theCtx, String theResourceType, ResourcePersistentId theId) {
+		IIdType retVal = theCtx.getVersion().newIdType();
+		retVal.setValue(translatePidIdToForcedId(theResourceType, theId));
+		return retVal;
+	}
+
+	public String translatePidIdToForcedId(String theResourceType, ResourcePersistentId theId) {
+		ForcedId forcedId = myForcedIdDao.findByResourcePid(theId.getIdAsLong());
 		if (forcedId != null) {
 			return forcedId.getResourceType() + '/' + forcedId.getForcedId();
 		} else {

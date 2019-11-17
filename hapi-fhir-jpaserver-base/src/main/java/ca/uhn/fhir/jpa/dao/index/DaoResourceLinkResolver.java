@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -60,7 +61,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	@Override
 	public ResourceTable findTargetResource(RuntimeSearchParam theNextSpDef, String theNextPathsUnsplit, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, String theId, RequestDetails theRequest) {
 		ResourceTable target;
-		Long valueOf;
+		ResourcePersistentId valueOf;
 		try {
 			valueOf = myIdHelperService.translateForcedIdToPid(theTypeString, theId, theRequest);
 			ourLog.trace("Translated {}/{} to resource PID {}", theType, theId, valueOf);
@@ -76,12 +77,12 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 				newResource.setId(resName + "/" + theId);
 				IFhirResourceDao<IBaseResource> placeholderResourceDao = (IFhirResourceDao<IBaseResource>) myDaoRegistry.getResourceDao(newResource.getClass());
 				ourLog.debug("Automatically creating empty placeholder resource: {}", newResource.getIdElement().getValue());
-				valueOf = placeholderResourceDao.update(newResource).getEntity().getId();
+				valueOf = placeholderResourceDao.update(newResource).getEntity().getPersistentId();
 			} else {
 				throw new InvalidRequestException("Resource " + resName + "/" + theId + " not found, specified in path: " + theNextPathsUnsplit);
 			}
 		}
-		target = myEntityManager.find(ResourceTable.class, valueOf);
+		target = myEntityManager.find(ResourceTable.class, valueOf.getIdAsLong());
 		RuntimeResourceDefinition targetResourceDef = myContext.getResourceDefinition(theType);
 		if (target == null) {
 			String resName = targetResourceDef.getName();

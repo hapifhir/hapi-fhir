@@ -288,7 +288,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
-		b.append("value", getValueNormalized());
+		b.append("hashNormalizedPrefix", getHashNormalizedPrefix());
+		b.append("valueNormalized", getValueNormalized());
 		return b.build();
 	}
 
@@ -308,7 +309,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			hashPrefixLength = 0;
 		}
 
-		return hash(theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
+		long hash = hash(theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
+		return hash;
 	}
 
 	@Override

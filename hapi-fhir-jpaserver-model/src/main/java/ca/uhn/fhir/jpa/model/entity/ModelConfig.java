@@ -62,6 +62,13 @@ public class ModelConfig {
 	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
 
 	/**
+	 * Constructor
+	 */
+	public ModelConfig() {
+		super();
+	}
+
+	/**
 	 * If set to {@code true} the default search params (i.e. the search parameters that are
 	 * defined by the FHIR specification itself) may be overridden by uploading search
 	 * parameters to the server with the same code as the built-in search parameter.

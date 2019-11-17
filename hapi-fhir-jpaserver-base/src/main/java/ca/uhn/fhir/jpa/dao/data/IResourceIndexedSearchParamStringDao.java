@@ -27,10 +27,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface IResourceIndexedSearchParamStringDao extends JpaRepository<ResourceIndexedSearchParamString, Long> {
+import java.util.List;
 
-	@Query("select count(*) from ResourceIndexedSearchParamString t WHERE t.myResourcePid = :resid")
-	int countForResourceId(@Param("resid") Long theResourcePid);
+public interface IResourceIndexedSearchParamStringDao extends JpaRepository<ResourceIndexedSearchParamString, Long> {
 
 	@Modifying
 	@Query("delete from ResourceIndexedSearchParamString t WHERE t.myResourcePid = :resid")

@@ -132,12 +132,12 @@ public class DeleteConflictService {
 		}
 	}
 
-	public void validateDeleteConflictsEmptyOrThrowException(DeleteConflictList theDeleteConflicts) {
+	public static void validateDeleteConflictsEmptyOrThrowException(FhirContext theFhirContext, DeleteConflictList theDeleteConflicts) {
 		if (theDeleteConflicts.isEmpty()) {
 			return;
 		}
 
-		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(theFhirContext);
 		String firstMsg = null;
 
 		Iterator<DeleteConflict> iterator = theDeleteConflicts.iterator();
@@ -154,7 +154,7 @@ public class DeleteConflictService {
 			if (firstMsg == null) {
 				firstMsg = msg;
 			}
-			OperationOutcomeUtil.addIssue(myFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, msg, null, "processing");
+			OperationOutcomeUtil.addIssue(theFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, msg, null, "processing");
 		}
 
 		throw new ResourceVersionConflictException(firstMsg, oo);
