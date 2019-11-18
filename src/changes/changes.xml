@@ -6,6 +6,16 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="4.2.0" date="TBD">
+			<action type="fix" issue="1583">
+				As of FHIR R4, some fields that were previously of type reference are now of type canonical.
+				One example is QuestionnaireResponse.questionnaire. Technically this means that this field
+				should no longer contain a relative reference, but as they are sometimes used that way, HAPI
+				FHIR will now try to be permissive and will index relative link canonical fields 
+				such as (Questionnaire/123) as though it actually was a local relative link. Thanks to 
+				Dean Atchley for reporting and providing a test case!
+			</action>
+		</release>
 		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
 			<action type="add">
 				The version of a few dependencies have been bumped to the
