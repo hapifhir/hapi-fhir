@@ -94,7 +94,7 @@ public class SubscriptionLoader {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(SubscriptionLoader.class.getName());
 		jobDetail.setJobClass(SubscriptionLoader.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(REFRESH_INTERVAL, false, jobDetail);
+		mySchedulerService.scheduleFixedDelayLocal(REFRESH_INTERVAL, jobDetail);
 	}
 
 	@VisibleForTesting

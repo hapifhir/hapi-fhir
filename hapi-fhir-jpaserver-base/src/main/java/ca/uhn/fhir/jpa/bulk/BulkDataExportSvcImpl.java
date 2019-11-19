@@ -25,13 +25,13 @@ import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -319,7 +319,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(BulkDataExportSvcImpl.class.getName());
 		jobDetail.setJobClass(BulkDataExportSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(REFRESH_INTERVAL, true, jobDetail);
+		mySchedulerService.scheduleFixedDelayClustered(REFRESH_INTERVAL, jobDetail);
 	}
 
 	@Transactional

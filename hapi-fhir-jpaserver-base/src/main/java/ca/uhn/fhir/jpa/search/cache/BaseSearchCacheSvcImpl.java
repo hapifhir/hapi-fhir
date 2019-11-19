@@ -55,7 +55,7 @@ public abstract class BaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(BaseSearchCacheSvcImpl.class.getName());
 		jobDetail.setJobClass(BaseSearchCacheSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(10 * DateUtils.MILLIS_PER_SECOND, false, jobDetail);
+		mySchedulerService.scheduleFixedDelayLocal(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
 	@Override

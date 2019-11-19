@@ -192,7 +192,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(ResourceReindexingSvcImpl.class.getName());
 		jobDetail.setJobClass(ResourceReindexingSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(10 * DateUtils.MILLIS_PER_SECOND, true, jobDetail);
+		mySchedulerService.scheduleFixedDelayClustered(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
 	@VisibleForTesting

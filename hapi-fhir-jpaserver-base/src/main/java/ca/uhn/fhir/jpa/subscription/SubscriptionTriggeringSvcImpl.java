@@ -164,7 +164,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(SubscriptionTriggeringSvcImpl.class.getName());
 		jobDetail.setJobClass(SubscriptionTriggeringSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(SCHEDULE_DELAY, false, jobDetail);
+		mySchedulerService.scheduleFixedDelayLocal(SCHEDULE_DELAY, jobDetail);
 	}
 
 	@Override

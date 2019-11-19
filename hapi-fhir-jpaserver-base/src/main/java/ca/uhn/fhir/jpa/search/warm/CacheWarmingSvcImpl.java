@@ -88,7 +88,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(CacheWarmingSvcImpl.class.getName());
 		jobDetail.setJobClass(CacheWarmingSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(SCHEDULED_JOB_INTERVAL, true, jobDetail);
+		mySchedulerService.scheduleFixedDelayClustered(SCHEDULED_JOB_INTERVAL, jobDetail);
 	}
 
 	private void refreshNow(WarmCacheEntry theCacheEntry) {

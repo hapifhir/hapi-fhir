@@ -266,7 +266,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
 		jobDefinition.setId(BaseTermReadSvcImpl.class.getName() + "_saveDeferred");
 		jobDefinition.setJobClass(SaveDeferredJob.class);
-		mySchedulerService.scheduleFixedDelay(SCHEDULE_INTERVAL_MILLIS, false, jobDefinition);
+		mySchedulerService.scheduleFixedDelayLocal(SCHEDULE_INTERVAL_MILLIS, jobDefinition);
 	}
 
 	@VisibleForTesting

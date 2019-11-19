@@ -10,7 +10,6 @@ import org.junit.runner.RunWith;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,7 +17,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.util.ProxyUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.AopTestUtils;
@@ -50,7 +48,7 @@ public class SchedulerServiceImplTest {
 			.setId(CountingJob.class.getName())
 			.setJobClass(CountingJob.class);
 
-		mySvc.scheduleFixedDelay(100, false, def);
+		mySvc.scheduleFixedDelayLocal(100, def);
 
 		sleepAtLeast(1000);
 
@@ -69,10 +67,10 @@ public class SchedulerServiceImplTest {
 
 		SchedulerServiceImpl svc = AopTestUtils.getTargetObject(mySvc);
 		svc.stop();
+		svc.create();
 		svc.start();
-		svc.contextStarted(null);
 
-		mySvc.scheduleFixedDelay(100, false, def);
+		mySvc.scheduleFixedDelayLocal(100, def);
 
 		sleepAtLeast(1000);
 
@@ -90,7 +88,7 @@ public class SchedulerServiceImplTest {
 			.setJobClass(CountingJob.class);
 		ourTaskDelay = 500;
 
-		mySvc.scheduleFixedDelay(100, false, def);
+		mySvc.scheduleFixedDelayLocal(100, def);
 
 		sleepAtLeast(1000);
 
@@ -108,7 +106,7 @@ public class SchedulerServiceImplTest {
 			.setJobClass(CountingIntervalJob.class);
 		ourTaskDelay = 500;
 
-		mySvc.scheduleFixedDelay(100, false, def);
+		mySvc.scheduleFixedDelayLocal(100, def);
 
 		sleepAtLeast(2000);
 

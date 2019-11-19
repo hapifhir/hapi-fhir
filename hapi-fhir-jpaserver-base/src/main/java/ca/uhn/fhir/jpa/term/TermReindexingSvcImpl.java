@@ -156,7 +156,7 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
 		jobDefinition.setId(TermReindexingSvcImpl.class.getName() + "_reindex");
 		jobDefinition.setJobClass(SaveDeferredJob.class);
-		mySchedulerService.scheduleFixedDelay(SCHEDULE_INTERVAL_MILLIS, false, jobDefinition);
+		mySchedulerService.scheduleFixedDelayLocal(SCHEDULE_INTERVAL_MILLIS, jobDefinition);
 	}
 
 	public static class SaveDeferredJob extends FireAtIntervalJob {

@@ -20,28 +20,29 @@ package ca.uhn.fhir.jpa.sched;
  * #L%
  */
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.model.api.ISmartLifecyclePhase;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
-import org.quartz.Calendar;
 import org.quartz.*;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
-import org.quartz.spi.JobFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.core.env.Environment;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.util.*;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.quartz.impl.StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME;
@@ -63,22 +64,24 @@ import static org.quartz.impl.StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME;
  * </li>
  * </ul>
  */
-public class SchedulerServiceImpl implements ISchedulerService {
+public class SchedulerServiceImpl implements ISchedulerService, SmartLifecycle {
 	public static final String SCHEDULING_DISABLED = "scheduling_disabled";
 	public static final String SCHEDULING_DISABLED_EQUALS_TRUE = SCHEDULING_DISABLED + "=true";
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SchedulerServiceImpl.class);
-	private static int ourNextSchedulerId = 0;
+	private static AtomicInteger ourNextSchedulerId = new AtomicInteger();
 	private Scheduler myLocalScheduler;
 	private Scheduler myClusteredScheduler;
 	private String myThreadNamePrefix;
 	private boolean myLocalSchedulingEnabled;
 	private boolean myClusteredSchedulingEnabled;
-	@Autowired
-	private AutowiringSpringBeanJobFactory mySpringBeanJobFactory;
 	private AtomicBoolean myStopping = new AtomicBoolean(false);
 	@Autowired
+	private AutowiringSpringBeanJobFactory mySpringBeanJobFactory;
+	@Autowired
 	private Environment myEnvironment;
+	@Autowired
+	private ApplicationContext myApplicationContext;
 
 	/**
 	 * Constructor
@@ -114,30 +117,10 @@ public class SchedulerServiceImpl implements ISchedulerService {
 	}
 
 	@PostConstruct
-	public void start() throws SchedulerException {
+	public void create() throws SchedulerException {
 		myLocalScheduler = createLocalScheduler();
 		myClusteredScheduler = createClusteredScheduler();
 		myStopping.set(false);
-	}
-
-	/**
-	 * We defer startup of executing started tasks until we're sure we're ready for it
-	 * and the startup is completely done
-	 */
-	@EventListener
-	public void contextStarted(ContextRefreshedEvent theEvent) throws SchedulerException {
-		try {
-			ourLog.info("Starting task schedulers for context {}", theEvent != null ? theEvent.getApplicationContext().getId() : "null");
-			if (myLocalScheduler != null) {
-				myLocalScheduler.start();
-			}
-			if (myClusteredScheduler != null) {
-				myClusteredScheduler.start();
-			}
-		} catch (Exception e) {
-			ourLog.error("Failed to start context", e);
-			throw new SchedulerException(e);
-		}
 	}
 
 	private Scheduler createLocalScheduler() throws SchedulerException {
@@ -145,7 +128,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
 			return new NullScheduler();
 		}
 		Properties localProperties = new Properties();
-		localProperties.setProperty(PROP_SCHED_INSTANCE_NAME, "local-" + ourNextSchedulerId++);
+		localProperties.setProperty(PROP_SCHED_INSTANCE_NAME, "local-" + ourNextSchedulerId.getAndIncrement());
 		quartzPropertiesCommon(localProperties);
 		quartzPropertiesLocal(localProperties);
 		StdSchedulerFactory factory = new StdSchedulerFactory();
@@ -161,7 +144,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
 			return new NullScheduler();
 		}
 		Properties clusteredProperties = new Properties();
-		clusteredProperties.setProperty(PROP_SCHED_INSTANCE_NAME, "clustered-" + ourNextSchedulerId++);
+		clusteredProperties.setProperty(PROP_SCHED_INSTANCE_NAME, "clustered-" + ourNextSchedulerId.getAndIncrement());
 		quartzPropertiesCommon(clusteredProperties);
 		quartzPropertiesClustered(clusteredProperties);
 		StdSchedulerFactory factory = new StdSchedulerFactory();
@@ -176,13 +159,54 @@ public class SchedulerServiceImpl implements ISchedulerService {
 		theScheduler.setJobFactory(mySpringBeanJobFactory);
 	}
 
-	@PreDestroy
-	public void stop() throws SchedulerException {
+	/**
+	 * We defer startup of executing started tasks until we're sure we're ready for it
+	 * and the startup is completely done
+	 */
+
+	@Override
+	public int getPhase() {
+		return ISmartLifecyclePhase.SCHEDULER_1000;
+	}
+
+	@Override
+	public void start() {
+		try {
+			ourLog.info("Starting task schedulers for context {}", myApplicationContext.getId());
+			if (myLocalScheduler != null) {
+				myLocalScheduler.start();
+			}
+			if (myClusteredScheduler != null) {
+				myClusteredScheduler.start();
+			}
+		} catch (Exception e) {
+			ourLog.error("Failed to start scheduler", e);
+			throw new ConfigurationException("Failed to start scheduler", e);
+		}
+	}
+
+	@Override
+	public void stop() {
 		ourLog.info("Shutting down task scheduler...");
 
 		myStopping.set(true);
-		myLocalScheduler.shutdown(true);
-		myClusteredScheduler.shutdown(true);
+		try {
+			myLocalScheduler.shutdown(true);
+			myClusteredScheduler.shutdown(true);
+		} catch (SchedulerException e) {
+			ourLog.error("Failed to shut down scheduler");
+			throw new ConfigurationException("Failed to shut down scheduler", e);
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		try {
+			return !myStopping.get() && myLocalScheduler.isStarted() && myClusteredScheduler.isStarted();
+		} catch (SchedulerException e) {
+			ourLog.error("Failed to determine scheduler status", e);
+			return false;
+		}
 	}
 
 	@Override
@@ -192,7 +216,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
 	}
 
 	@Override
-	public void logStatus() {
+	public void logStatusForUnitTest() {
 		try {
 			Set<JobKey> keys = myLocalScheduler.getJobKeys(GroupMatcher.anyGroup());
 			String keysString = keys.stream().map(t -> t.getName()).collect(Collectors.joining(", "));
@@ -207,7 +231,16 @@ public class SchedulerServiceImpl implements ISchedulerService {
 	}
 
 	@Override
-	public void scheduleFixedDelay(long theIntervalMillis, boolean theClusteredTask, ScheduledJobDefinition theJobDefinition) {
+	public void scheduleFixedDelayLocal(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
+		scheduleFixedDelay(theIntervalMillis, myLocalScheduler, theJobDefinition);
+	}
+
+	@Override
+	public void scheduleFixedDelayClustered(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
+		scheduleFixedDelay(theIntervalMillis, myClusteredScheduler, theJobDefinition);
+	}
+
+	private void scheduleFixedDelay(long theIntervalMillis, Scheduler theScheduler, ScheduledJobDefinition theJobDefinition) {
 		Validate.isTrue(theIntervalMillis >= 100);
 
 		Validate.notNull(theJobDefinition);
@@ -235,13 +268,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
 
 		Set<? extends Trigger> triggers = Sets.newHashSet(trigger);
 		try {
-			Scheduler scheduler;
-			if (theClusteredTask) {
-				scheduler = myClusteredScheduler;
-			} else {
-				scheduler = myLocalScheduler;
-			}
-			scheduler.scheduleJob(jobDetail, triggers, true);
+			theScheduler.scheduleJob(jobDetail, triggers, true);
 		} catch (SchedulerException e) {
 			ourLog.error("Failed to schedule job", e);
 			throw new InternalErrorException(e);
@@ -285,293 +312,6 @@ public class SchedulerServiceImpl implements ISchedulerService {
 		@Override
 		public boolean isConcurrentExectionDisallowed() {
 			return true;
-		}
-	}
-
-	private static class NullScheduler implements Scheduler {
-		@Override
-		public String getSchedulerName() {
-			return null;
-		}
-
-		@Override
-		public String getSchedulerInstanceId() {
-			return null;
-		}
-
-		@Override
-		public SchedulerContext getContext() {
-			return null;
-		}
-
-		@Override
-		public void start() {
-
-		}
-
-		@Override
-		public void startDelayed(int seconds) {
-
-		}
-
-		@Override
-		public boolean isStarted() {
-			return false;
-		}
-
-		@Override
-		public void standby() {
-
-		}
-
-		@Override
-		public boolean isInStandbyMode() {
-			return false;
-		}
-
-		@Override
-		public void shutdown() {
-
-		}
-
-		@Override
-		public void shutdown(boolean waitForJobsToComplete) {
-
-		}
-
-		@Override
-		public boolean isShutdown() {
-			return false;
-		}
-
-		@Override
-		public SchedulerMetaData getMetaData() {
-			return null;
-		}
-
-		@Override
-		public List<JobExecutionContext> getCurrentlyExecutingJobs() {
-			return null;
-		}
-
-		@Override
-		public void setJobFactory(JobFactory factory) {
-
-		}
-
-		@Override
-		public ListenerManager getListenerManager() {
-			return null;
-		}
-
-		@Override
-		public Date scheduleJob(JobDetail jobDetail, Trigger trigger) {
-			return null;
-		}
-
-		@Override
-		public Date scheduleJob(Trigger trigger) {
-			return null;
-		}
-
-		@Override
-		public void scheduleJobs(Map<JobDetail, Set<? extends Trigger>> triggersAndJobs, boolean replace) {
-
-		}
-
-		@Override
-		public void scheduleJob(JobDetail jobDetail, Set<? extends Trigger> triggersForJob, boolean replace) {
-
-		}
-
-		@Override
-		public boolean unscheduleJob(TriggerKey triggerKey) {
-			return false;
-		}
-
-		@Override
-		public boolean unscheduleJobs(List<TriggerKey> triggerKeys) {
-			return false;
-		}
-
-		@Override
-		public Date rescheduleJob(TriggerKey triggerKey, Trigger newTrigger) {
-			return null;
-		}
-
-		@Override
-		public void addJob(JobDetail jobDetail, boolean replace) {
-
-		}
-
-		@Override
-		public void addJob(JobDetail jobDetail, boolean replace, boolean storeNonDurableWhileAwaitingScheduling) {
-
-		}
-
-		@Override
-		public boolean deleteJob(JobKey jobKey) {
-			return false;
-		}
-
-		@Override
-		public boolean deleteJobs(List<JobKey> jobKeys) {
-			return false;
-		}
-
-		@Override
-		public void triggerJob(JobKey jobKey) {
-
-		}
-
-		@Override
-		public void triggerJob(JobKey jobKey, JobDataMap data) {
-
-		}
-
-		@Override
-		public void pauseJob(JobKey jobKey) {
-
-		}
-
-		@Override
-		public void pauseJobs(GroupMatcher<JobKey> matcher) {
-
-		}
-
-		@Override
-		public void pauseTrigger(TriggerKey triggerKey) {
-
-		}
-
-		@Override
-		public void pauseTriggers(GroupMatcher<TriggerKey> matcher) {
-
-		}
-
-		@Override
-		public void resumeJob(JobKey jobKey) {
-
-		}
-
-		@Override
-		public void resumeJobs(GroupMatcher<JobKey> matcher) {
-
-		}
-
-		@Override
-		public void resumeTrigger(TriggerKey triggerKey) {
-
-		}
-
-		@Override
-		public void resumeTriggers(GroupMatcher<TriggerKey> matcher) {
-
-		}
-
-		@Override
-		public void pauseAll() {
-
-		}
-
-		@Override
-		public void resumeAll() {
-
-		}
-
-		@Override
-		public List<String> getJobGroupNames() {
-			return null;
-		}
-
-		@Override
-		public Set<JobKey> getJobKeys(GroupMatcher<JobKey> matcher) {
-			return null;
-		}
-
-		@Override
-		public List<? extends Trigger> getTriggersOfJob(JobKey jobKey) {
-			return null;
-		}
-
-		@Override
-		public List<String> getTriggerGroupNames() {
-			return null;
-		}
-
-		@Override
-		public Set<TriggerKey> getTriggerKeys(GroupMatcher<TriggerKey> matcher) {
-			return null;
-		}
-
-		@Override
-		public Set<String> getPausedTriggerGroups() {
-			return null;
-		}
-
-		@Override
-		public JobDetail getJobDetail(JobKey jobKey) {
-			return null;
-		}
-
-		@Override
-		public Trigger getTrigger(TriggerKey triggerKey) {
-			return null;
-		}
-
-		@Override
-		public Trigger.TriggerState getTriggerState(TriggerKey triggerKey) {
-			return null;
-		}
-
-		@Override
-		public void resetTriggerFromErrorState(TriggerKey triggerKey) {
-
-		}
-
-		@Override
-		public void addCalendar(String calName, Calendar calendar, boolean replace, boolean updateTriggers) {
-
-		}
-
-		@Override
-		public boolean deleteCalendar(String calName) {
-			return false;
-		}
-
-		@Override
-		public Calendar getCalendar(String calName) {
-			return null;
-		}
-
-		@Override
-		public List<String> getCalendarNames() {
-			return null;
-		}
-
-		@Override
-		public boolean interrupt(JobKey jobKey) throws UnableToInterruptJobException {
-			return false;
-		}
-
-		@Override
-		public boolean interrupt(String fireInstanceId) throws UnableToInterruptJobException {
-			return false;
-		}
-
-		@Override
-		public boolean checkExists(JobKey jobKey) {
-			return false;
-		}
-
-		@Override
-		public boolean checkExists(TriggerKey triggerKey) {
-			return false;
-		}
-
-		@Override
-		public void clear() {
-
 		}
 	}
 
