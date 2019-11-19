@@ -57,7 +57,6 @@ public class SchedulerServiceImpl implements ISchedulerService, SmartLifecycle {
 	public static final String SCHEDULING_DISABLED_EQUALS_TRUE = SCHEDULING_DISABLED + "=true";
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SchedulerServiceImpl.class);
-	public static final String THREAD_NAME_PREFIX = "hapi-fhir-jpa-scheduler";
 	private IHapiScheduler myLocalScheduler;
 	private IHapiScheduler myClusteredScheduler;
 	private boolean myLocalSchedulingEnabled;
@@ -65,7 +64,7 @@ public class SchedulerServiceImpl implements ISchedulerService, SmartLifecycle {
 	private AtomicBoolean myStopping = new AtomicBoolean(false);
 
 	@Autowired
-	private AutowiringSpringBeanJobFactory mySpringBeanJobFactory;
+	private SchedulerFactory mySchedulerFactory;
 	@Autowired
 	private Environment myEnvironment;
 	@Autowired
@@ -108,9 +107,9 @@ public class SchedulerServiceImpl implements ISchedulerService, SmartLifecycle {
 		}
 		IHapiScheduler retval;
 		if (theClustered) {
-			retval = new ClusteredHapiScheduler(THREAD_NAME_PREFIX, mySpringBeanJobFactory);
+			retval = mySchedulerFactory.newClusteredHapiScheduler();
 		} else {
-			retval = new LocalHapiScheduler(THREAD_NAME_PREFIX, mySpringBeanJobFactory);
+			retval = mySchedulerFactory.newLocalHapiScheduler();
 		}
 		retval.init();
 		return retval;

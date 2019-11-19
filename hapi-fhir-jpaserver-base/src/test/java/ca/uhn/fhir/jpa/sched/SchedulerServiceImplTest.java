@@ -192,6 +192,11 @@ public class SchedulerServiceImplTest {
 		}
 
 		@Bean
+		public SchedulerFactory schedulerFactory() {
+			return new SchedulerFactory();
+		}
+
+		@Bean
 		public String stringBean() {
 			return "String beans are good.";
 		}

@@ -10,13 +10,13 @@ import ca.uhn.fhir.jpa.bulk.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
+import ca.uhn.fhir.jpa.sched.SchedulerFactory;
 import ca.uhn.fhir.jpa.sched.SchedulerServiceImpl;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -36,13 +36,6 @@ import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribable
 import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
-import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
-import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
-import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
-import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
@@ -258,6 +251,11 @@ public abstract class BaseConfig {
 	@Bean
 	public ISchedulerService schedulerService() {
 		return new SchedulerServiceImpl();
+	}
+
+	@Bean
+	public SchedulerFactory schedulerFactory() {
+		return new SchedulerFactory();
 	}
 
 	@Bean
