@@ -1,10 +1,13 @@
 package ca.uhn.fhir.jpa.subscription.module.config;
 
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionProvider;
-import org.springframework.context.annotation.*;
+import ca.uhn.fhir.rest.server.sched.ISchedulerService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;

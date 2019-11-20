@@ -1,6 +1,5 @@
-package ca.uhn.fhir.jpa.sched;
+package ca.uhn.fhir.rest.server.sched;
 
-import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import org.quartz.SchedulerException;
 
 public interface IHapiScheduler {

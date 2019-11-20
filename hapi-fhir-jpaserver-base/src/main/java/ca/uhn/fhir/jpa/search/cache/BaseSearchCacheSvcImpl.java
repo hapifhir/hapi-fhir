@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.search.cache;
  */
 
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.rest.server.sched.ISchedulerService;
+import ca.uhn.fhir.rest.server.sched.ScheduledJobDefinition;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;

@@ -21,9 +21,11 @@ package ca.uhn.fhir.jpa.sched;
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.model.api.ISmartLifecyclePhase;
+import ca.uhn.fhir.rest.server.sched.IHapiScheduler;
+import ca.uhn.fhir.rest.server.sched.ISchedulerFactory;
+import ca.uhn.fhir.rest.server.sched.ISchedulerService;
+import ca.uhn.fhir.rest.server.sched.ScheduledJobDefinition;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +66,7 @@ public class SchedulerServiceImpl implements ISchedulerService, SmartLifecycle {
 	private AtomicBoolean myStopping = new AtomicBoolean(false);
 
 	@Autowired
-	private SchedulerFactory mySchedulerFactory;
+	private ISchedulerFactory mySchedulerFactory;
 	@Autowired
 	private Environment myEnvironment;
 	@Autowired

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.sched;
+package ca.uhn.fhir.rest.server.sched;
 
 /*-
  * #%L

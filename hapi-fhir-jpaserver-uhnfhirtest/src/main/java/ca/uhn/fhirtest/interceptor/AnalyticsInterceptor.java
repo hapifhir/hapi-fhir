@@ -1,10 +1,10 @@
 package ca.uhn.fhirtest.interceptor;
 
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
+import ca.uhn.fhir.rest.server.sched.ISchedulerService;
+import ca.uhn.fhir.rest.server.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.http.client.HttpClient;

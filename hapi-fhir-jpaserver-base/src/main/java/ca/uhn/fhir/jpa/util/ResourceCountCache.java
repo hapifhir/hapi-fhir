@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.sched.ISchedulerService;
+import ca.uhn.fhir.rest.server.sched.ScheduledJobDefinition;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.Job;

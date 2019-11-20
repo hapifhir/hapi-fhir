@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.sched;
 
+import ca.uhn.fhir.rest.server.sched.IHapiScheduler;
+import ca.uhn.fhir.rest.server.sched.ISchedulerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class SchedulerFactory {
+public class HapiSchedulerFactory implements ISchedulerFactory {
 	public static final String THREAD_NAME_PREFIX = "hapi-fhir-jpa-scheduler";
 
 	@Autowired

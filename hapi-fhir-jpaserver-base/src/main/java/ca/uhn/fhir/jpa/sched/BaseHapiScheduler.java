@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.sched;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.sched.IHapiScheduler;
+import ca.uhn.fhir.rest.server.sched.ScheduledJobDefinition;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
 import org.quartz.*;
