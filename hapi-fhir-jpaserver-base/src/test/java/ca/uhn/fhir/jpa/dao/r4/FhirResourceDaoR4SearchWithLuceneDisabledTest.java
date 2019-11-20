@@ -218,7 +218,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 		// Deferred expand
 		IIdType id = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		outcome = myValueSetDao.read(id);
+		outcome = myValueSetDao.expand(id, null, mySrd);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("CODEA", outcome.getExpansion().getContains().get(0).getCode());
 	}
