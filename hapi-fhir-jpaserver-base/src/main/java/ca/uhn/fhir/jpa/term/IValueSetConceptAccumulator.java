@@ -31,7 +31,7 @@ public interface IValueSetConceptAccumulator {
 
 	void includeConcept(String theSystem, String theCode, String theDisplay);
 
-	void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations);
+	void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, @Nullable Collection<TermConceptDesignation> theDesignations);
 
 	void excludeConcept(String theSystem, String theCode);
 

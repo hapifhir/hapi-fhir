@@ -15,6 +15,10 @@
 				such as (Questionnaire/123) as though it actually was a local relative link. Thanks to 
 				Dean Atchley for reporting and providing a test case!
 			</action>
+			<action type="fix">
+				ValueSet PreCalculation did not successfully expand valuesets when Lucene was not enabled
+				in the JPA server. This has been corrected.
+			</action>
 		</release>
 		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
 			<action type="add">
