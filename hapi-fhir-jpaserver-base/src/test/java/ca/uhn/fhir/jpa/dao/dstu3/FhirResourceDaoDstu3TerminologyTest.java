@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
@@ -101,7 +102,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		TermConcept childCA = new TermConcept(cs, "childCA").setDisplay("Child CA");
 		parentC.addChild(childCA, RelationshipTypeEnum.ISA);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 
@@ -132,7 +133,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 			parentB.addChild(childI, RelationshipTypeEnum.ISA);
 		}
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
 	}
 
 	private void createExternalCsAndLocalVs() {
@@ -167,7 +168,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		TermConcept beagle = new TermConcept(cs, "beagle").setDisplay("Beagle");
 		dogs.addChild(beagle, RelationshipTypeEnum.ISA);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM,"SYSTEM NAME", "SYSTEM VERSION" , cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM,"SYSTEM NAME", "SYSTEM VERSION" , cs, table);
 		return codeSystem;
 	}
 
@@ -686,7 +687,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		cs.setResource(table);
 		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
 		cs.getConcepts().add(parentA);
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), "http://snomed.info/sct", "Snomed CT", "SYSTEM VERSION" , cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), "http://snomed.info/sct", "Snomed CT", "SYSTEM VERSION" , cs, table);
 
 		StringType code = new StringType("ParentA");
 		StringType system = new StringType("http://snomed.info/sct");

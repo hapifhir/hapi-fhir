@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -116,10 +117,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		}
 	}
 
-	private List<Long> doSearch(String theResourceName, SearchParameterMap theParams, Long theReferencingPid) {
+	private List<ResourcePersistentId> doSearch(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 
-		List<Long> pids = null;
+		List<ResourcePersistentId> pids = null;
 		
 		/*
 		 * Handle textual params
@@ -202,12 +203,12 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		// execute search
 		List<?> result = jpaQuery.getResultList();
 
-		ArrayList<Long> retVal = new ArrayList<>();
+		ArrayList<ResourcePersistentId> retVal = new ArrayList<>();
 		for (Object object : result) {
 			Object[] nextArray = (Object[]) object;
 			Long next = (Long) nextArray[0];
 			if (next != null) {
-				retVal.add(next);
+				retVal.add(new ResourcePersistentId(next));
 			}
 		}
 
@@ -215,9 +216,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	@Override
-	public List<Long> everything(String theResourceName, SearchParameterMap theParams, RequestDetails theRequest) {
+	public List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, RequestDetails theRequest) {
 
-		Long pid = null;
+		ResourcePersistentId pid = null;
 		if (theParams.get(IAnyResource.SP_RES_ID) != null) {
 			String idParamValue;
 			IQueryParameterType idParam = theParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
@@ -231,8 +232,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			pid = myIdHelperService.translateForcedIdToPid(theResourceName, idParamValue, theRequest);
 		}
 
-		Long referencingPid = pid;
-		List<Long> retVal = doSearch(null, theParams, referencingPid);
+		ResourcePersistentId referencingPid = pid;
+		List<ResourcePersistentId> retVal = doSearch(null, theParams, referencingPid);
 		if (referencingPid != null) {
 			retVal.add(referencingPid);
 		}
@@ -264,7 +265,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Transactional()
 	@Override
-	public List<Long> search(String theResourceName, SearchParameterMap theParams) {
+	public List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams) {
 		return doSearch(theResourceName, theParams, null);
 	}
 
@@ -281,7 +282,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		if (contextParts.length != 3 || "Patient".equals(contextParts[0]) == false || "$everything".equals(contextParts[2]) == false) {
 			throw new InvalidRequestException("Invalid context: " + theContext);
 		}
-		Long pid = myIdHelperService.translateForcedIdToPid(contextParts[0], contextParts[1], theRequest);
+		ResourcePersistentId pid = myIdHelperService.translateForcedIdToPid(contextParts[0], contextParts[1], theRequest);
 
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 

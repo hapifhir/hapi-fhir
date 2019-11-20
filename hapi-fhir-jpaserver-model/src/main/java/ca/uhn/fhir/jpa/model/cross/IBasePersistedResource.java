@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.model.cross;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Model
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,13 +20,21 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.io.Closeable;
-import java.util.Iterator;
+import java.util.Date;
 
-public interface IResultIterator extends Iterator<ResourcePersistentId>, Closeable {
+public interface IBasePersistedResource {
 
-	int getSkippedCount();
+	IIdType getIdDt();
+
+	boolean isDeleted();
+
+	/**
+	 * If the resource is deleted, returns the date/time that the resource was deleted at. Otherwie, returns <code>null</code>
+	 */
+	Date getDeleted();
+
+	ResourcePersistentId getPersistentId();
 
 }

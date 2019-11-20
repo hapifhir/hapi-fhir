@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
@@ -157,7 +158,7 @@ public class FhirResourceDaoConceptMapR4 extends BaseHapiFhirResourceDao<Concept
 	}
 
 	@Override
-	public ResourceTable updateEntity(RequestDetails theRequestDetails, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
+	public ResourceTable updateEntity(RequestDetails theRequestDetails, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 

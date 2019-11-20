@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
@@ -166,9 +167,9 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		p2.addName().addFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2BBB");
 		myPatientDao.create(p2, mySrd);
 
-		Set<Long> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA")), null);
+		Set<ResourcePersistentId> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA")), null);
 		assertEquals(1, ids.size());
-		assertThat(ids, contains(p1id.getIdPartAsLong()));
+		assertThat(ResourcePersistentId.toLongList(ids), contains(p1id.getIdPartAsLong()));
 
 		// Update the name
 		p1.getNameFirstRep().getGivenFirstRep().setValue("testUpdateMaintainsSearchParamsDstu2BBB");

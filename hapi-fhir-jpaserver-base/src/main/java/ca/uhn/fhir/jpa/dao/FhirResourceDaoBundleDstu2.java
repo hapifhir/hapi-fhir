@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Set;
 
@@ -31,16 +32,10 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 public class FhirResourceDaoBundleDstu2 extends BaseHapiFhirResourceDao<Bundle> {
 
 	@Override
-	protected void preProcessResourceForStorage(Bundle theResource) {
+	protected void preProcessResourceForStorage(IBaseResource theResource) {
 		super.preProcessResourceForStorage(theResource);
 
-		Set<String> allowedBundleTypes = getConfig().getBundleTypesAllowedForStorage();
-		if (!allowedBundleTypes.contains(defaultString(theResource.getType()))) {
-			String message = "Unable to store a Bundle resource on this server with a Bundle.type value of: " + (theResource.getType() != null ? theResource.getType() : "(missing)");
-			throw new UnprocessableEntityException(message);
-		}
-
-		for (Entry next : theResource.getEntry()) {
+		for (Entry next : ((Bundle)theResource).getEntry()) {
 			next.setFullUrl((String) null);
 		}
 	}

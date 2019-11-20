@@ -33,16 +33,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class FhirResourceDaoBundleR4 extends BaseHapiFhirResourceDao<Bundle> {
 
-	@Override
-	protected void preProcessResourceForStorage(Bundle theResource) {
-		super.preProcessResourceForStorage(theResource);
-
-		Set<String> allowedBundleTypes = getConfig().getBundleTypesAllowedForStorage();
-		if (theResource.getType() == null || !allowedBundleTypes.contains(defaultString(theResource.getType().toCode()))) {
-			String message = "Unable to store a Bundle resource on this server with a Bundle.type value of: " + (theResource.getType() != null ? theResource.getType().toCode() : "(missing)");
-			throw new UnprocessableEntityException(message);
-		}
-
-	}
+	// nothing for now
 
 }

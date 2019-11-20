@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -97,7 +98,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		return id;
 	}
@@ -116,7 +117,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermConcept parentA = new TermConcept(cs, "CS2");
 		cs.getConcepts().add(parentA);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 	}
 
@@ -185,7 +186,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				code2.getDisplay());
 			cs.getConcepts().add(code4);
 
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		});
 	}
 
@@ -201,7 +202,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		// Update
 		cs = new TermCodeSystemVersion();
@@ -210,7 +211,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		id = myCodeSystemDao.update(codeSystem, null, true, true, mySrd).getId().toUnqualified();
 		table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
 		cs.setResource(table);
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getPersistentId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		// Try to update to a different resource
 		codeSystem = new CodeSystem();
@@ -1780,7 +1781,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		child.addChild(parent, RelationshipTypeEnum.ISA);
 
 		try {
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), "http://foo", "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getPersistentId(), "http://foo", "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("CodeSystem contains circular reference around code parent", e.getMessage());
@@ -1905,7 +1906,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		runInTransaction(() -> {
 			ResourceTable resTable = myEntityManager.find(ResourceTable.class, csId.getIdPartAsLong());
 			version.setResource(resTable);
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(csId.getIdPartAsLong(), cs.getUrl(), "My System", "SYSTEM VERSION", version, resTable);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(csId.getIdPartAsLong()), cs.getUrl(), "My System", "SYSTEM VERSION", version, resTable);
 		});
 
 		org.hl7.fhir.dstu3.model.ValueSet vs = new org.hl7.fhir.dstu3.model.ValueSet();

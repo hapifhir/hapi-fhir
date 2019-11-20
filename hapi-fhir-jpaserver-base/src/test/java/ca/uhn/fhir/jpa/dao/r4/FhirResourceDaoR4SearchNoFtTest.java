@@ -3867,6 +3867,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(ValueSet.SP_URL, new UriParam("http://hl7.org/fhir/ValueSet/FOOOOOO")));
 		assertThat(toUnqualifiedVersionlessIds(result), empty());
 
+
 	}
 
 	@Test
