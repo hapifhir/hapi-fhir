@@ -40,8 +40,8 @@ import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.*;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -113,6 +113,8 @@ public class SearchBuilder implements ISearchBuilder {
 	 * for an explanation of why we use the constant 800
 	 */
 	private static final int MAXIMUM_PAGE_SIZE = 800;
+	private static final int MAX_INCLUDE_ROUNDS = 100;
+	private static final int MAX_INCLUDE_RESOURCES_ALLOWED = 100000;
 	private static Long NO_MORE = -1L;
 	private final boolean myDontUseHashesForSearch;
 	private final DaoConfig myDaoConfig;
@@ -2545,9 +2547,17 @@ public class SearchBuilder implements ISearchBuilder {
 
 			addedSomeThisRound = allAdded.addAll(pidsToInclude);
 			nextRoundMatches = pidsToInclude;
-		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
+		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound && roundCounts < MAX_INCLUDE_ROUNDS && allAdded.size() < MAX_INCLUDE_RESOURCES_ALLOWED);
 
-		ourLog.info("Loaded {} {} in {} rounds and {} ms for search {}", allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart(), theSearchIdOrDescription);
+		if (roundCounts >= MAX_INCLUDE_ROUNDS) {
+			ourLog.error("Too many rounds.  Aborted after loading {} {} in {} rounds and {} ms for search {}", allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart(), theSearchIdOrDescription);
+			throw new InternalErrorException("Too many resources matched.  Aborting search.");
+		} else if (allAdded.size() >= MAX_INCLUDE_RESOURCES_ALLOWED) {
+			ourLog.error("Too many resources loaded.  Aborted after loading {} {} in {} rounds and {} ms for search {}", allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart(), theSearchIdOrDescription);
+			throw new InternalErrorException("Too many resources matched.  Aborting search.");
+		} else {
+			ourLog.info("Loaded {} {} in {} rounds and {} ms for search {}", allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart(), theSearchIdOrDescription);
+		}
 
 		// Interceptor call: STORAGE_PREACCESS_RESOURCES
 		// This can be used to remove results from the search result details before
