@@ -62,6 +62,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -2547,6 +2548,8 @@ public class SearchBuilder implements ISearchBuilder {
 			nextRoundMatches = pidsToInclude;
 		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
 
+		allAdded.removeAll(original);
+
 		ourLog.info("Loaded {} {} in {} rounds and {} ms for search {}", allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart(), theSearchIdOrDescription);
 
 		// Interceptor call: STORAGE_PREACCESS_RESOURCES
@@ -3059,19 +3062,26 @@ public class SearchBuilder implements ISearchBuilder {
 
 	}
 
+	@VisibleForTesting
+	void setParamsForUnitTest(SearchParameterMap theParams) {
+		myParams = theParams;
+	}
+
+	SearchParameterMap getParams() {
+		return myParams;
+	}
+
 	public class IncludesIterator extends BaseIterator<Long> implements Iterator<Long> {
 
 		private final RequestDetails myRequest;
 		private Iterator<Long> myCurrentIterator;
-		private int myCurrentOffset;
-		private ArrayList<Long> myCurrentPids;
+		private Set<Long> myCurrentPids;
 		private Long myNext;
 		private int myPageSize = myDaoConfig.getEverythingIncludesFetchPageSize();
 
 		IncludesIterator(Set<Long> thePidSet, RequestDetails theRequest) {
-			myCurrentPids = new ArrayList<>(thePidSet);
+			myCurrentPids = new HashSet<>(thePidSet);
 			myCurrentIterator = EMPTY_LONG_LIST.iterator();
-			myCurrentOffset = 0;
 			myRequest = theRequest;
 		}
 
@@ -3083,21 +3093,13 @@ public class SearchBuilder implements ISearchBuilder {
 					break;
 				}
 
-				int start = myCurrentOffset;
-				int end = myCurrentOffset + myPageSize;
-				if (end > myCurrentPids.size()) {
-					end = myCurrentPids.size();
-				}
-				if (end - start <= 0) {
+				Set<Include> includes = Collections.singleton(new Include("*", true));
+				Set<Long> newPids = loadIncludes(myContext, myEntityManager, myCurrentPids, includes, false, getParams().getLastUpdated(), mySearchUuid, myRequest);
+				if (newPids.isEmpty()) {
 					myNext = NO_MORE;
 					break;
 				}
-				myCurrentOffset = end;
-				Collection<Long> pidsToScan = myCurrentPids.subList(start, end);
-				Set<Include> includes = Collections.singleton(new Include("*", true));
-				Set<Long> newPids = loadIncludes(myContext, myEntityManager, pidsToScan, includes, false, myParams.getLastUpdated(), mySearchUuid, myRequest);
 				myCurrentIterator = newPids.iterator();
-
 			}
 		}
 
@@ -3421,4 +3423,8 @@ public class SearchBuilder implements ISearchBuilder {
 		return thePredicates.toArray(new Predicate[0]);
 	}
 
+	@VisibleForTesting
+	void setEntityManagerForUnitTest(EntityManager theEntityManager) {
+		myEntityManager = theEntityManager;
+	}
 }
