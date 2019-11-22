@@ -20,15 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
-import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -51,18 +43,8 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.jpa.util.BaseIterator;
-import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
-import ca.uhn.fhir.jpa.util.SqlQueryList;
-import ca.uhn.fhir.model.api.IPrimitiveDatatype;
-import ca.uhn.fhir.model.api.IQueryParameterAnd;
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.jpa.util.*;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
@@ -70,11 +52,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.QualifiedParamList;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.*;
@@ -85,6 +63,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -119,11 +98,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * The SearchBuilder is responsible for actually forming the SQL query that handles
@@ -2595,6 +2570,8 @@ public class SearchBuilder implements ISearchBuilder {
 			nextRoundMatches = pidsToInclude;
 		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
 
+		allAdded.removeAll(original);
+
 		ourLog.info("Loaded {} {} in {} rounds and {} ms for search {}", allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart(), theSearchIdOrDescription);
 
 		// Interceptor call: STORAGE_PREACCESS_RESOURCES
@@ -3109,19 +3086,26 @@ public class SearchBuilder implements ISearchBuilder {
 
 	}
 
+	@VisibleForTesting
+	void setParamsForUnitTest(SearchParameterMap theParams) {
+		myParams = theParams;
+	}
+
+	SearchParameterMap getParams() {
+		return myParams;
+	}
+
 	public class IncludesIterator extends BaseIterator<ResourcePersistentId> implements Iterator<ResourcePersistentId> {
 
 		private final RequestDetails myRequest;
 		private Iterator<ResourcePersistentId> myCurrentIterator;
-		private int myCurrentOffset;
-		private ArrayList<ResourcePersistentId> myCurrentPids;
+		private Set<ResourcePersistentId> myCurrentPids;
 		private ResourcePersistentId myNext;
 		private int myPageSize = myDaoConfig.getEverythingIncludesFetchPageSize();
 
 		IncludesIterator(Set<ResourcePersistentId> thePidSet, RequestDetails theRequest) {
-			myCurrentPids = new ArrayList<>(thePidSet);
+			myCurrentPids = new HashSet<>(thePidSet);
 			myCurrentIterator = EMPTY_LONG_LIST.iterator();
-			myCurrentOffset = 0;
 			myRequest = theRequest;
 		}
 
@@ -3133,21 +3117,13 @@ public class SearchBuilder implements ISearchBuilder {
 					break;
 				}
 
-				int start = myCurrentOffset;
-				int end = myCurrentOffset + myPageSize;
-				if (end > myCurrentPids.size()) {
-					end = myCurrentPids.size();
-				}
-				if (end - start <= 0) {
+				Set<Include> includes = Collections.singleton(new Include("*", true));
+				Set<ResourcePersistentId> newPids = loadIncludes(myContext, myEntityManager, myCurrentPids, includes, false, getParams().getLastUpdated(), mySearchUuid, myRequest);
+				if (newPids.isEmpty()) {
 					myNext = NO_MORE;
 					break;
 				}
-				myCurrentOffset = end;
-				Collection<ResourcePersistentId> pidsToScan = myCurrentPids.subList(start, end);
-				Set<Include> includes = Collections.singleton(new Include("*", true));
-				Set<ResourcePersistentId> newPids = loadIncludes(myContext, myEntityManager, pidsToScan, includes, false, myParams.getLastUpdated(), mySearchUuid, myRequest);
 				myCurrentIterator = newPids.iterator();
-
 			}
 		}
 
@@ -3484,4 +3460,8 @@ public class SearchBuilder implements ISearchBuilder {
 		return thePredicates.toArray(new Predicate[0]);
 	}
 
+	@VisibleForTesting
+	void setEntityManagerForUnitTest(EntityManager theEntityManager) {
+		myEntityManager = theEntityManager;
+	}
 }
