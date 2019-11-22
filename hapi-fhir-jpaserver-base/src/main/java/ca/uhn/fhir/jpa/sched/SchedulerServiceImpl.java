@@ -65,8 +65,8 @@ public class SchedulerServiceImpl implements ISchedulerService, SmartLifecycle {
 	private boolean myClusteredSchedulingEnabled;
 	private AtomicBoolean myStopping = new AtomicBoolean(false);
 
-	@Autowired
-	private ISchedulerFactory mySchedulerFactory;
+
+	private final ISchedulerFactory mySchedulerFactory;
 	@Autowired
 	private Environment myEnvironment;
 	@Autowired
@@ -74,10 +74,16 @@ public class SchedulerServiceImpl implements ISchedulerService, SmartLifecycle {
 
 	/**
 	 * Constructor
+	 * @param theSchedulerFactory
 	 */
-	public SchedulerServiceImpl() {
+	public SchedulerServiceImpl(ISchedulerFactory theSchedulerFactory) {
+		mySchedulerFactory = theSchedulerFactory;
 		setLocalSchedulingEnabled(true);
 		setClusteredSchedulingEnabled(true);
+	}
+
+	public ISchedulerFactory getSchedulerFactory() {
+		return mySchedulerFactory;
 	}
 
 	public boolean isLocalSchedulingEnabled() {

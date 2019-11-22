@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.sched;
 
 import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
-import ca.uhn.fhir.rest.server.sched.ISchedulerFactory;
 import ca.uhn.fhir.rest.server.sched.ISchedulerService;
 import ca.uhn.fhir.rest.server.sched.ScheduledJobDefinition;
 import org.junit.After;
@@ -180,21 +179,14 @@ public class SchedulerServiceImplTest {
 				sleepAtLeast(ourTaskDelay);
 			ourCount++;
 		}
-
 	}
-
 
 	@Configuration
 	public static class TestConfiguration {
 
 		@Bean
 		public ISchedulerService schedulerService() {
-			return new SchedulerServiceImpl();
-		}
-
-		@Bean
-		public ISchedulerFactory schedulerFactory() {
-			return new HapiSchedulerFactory();
+			return new SchedulerServiceImpl(new HapiSchedulerFactory());
 		}
 
 		@Bean

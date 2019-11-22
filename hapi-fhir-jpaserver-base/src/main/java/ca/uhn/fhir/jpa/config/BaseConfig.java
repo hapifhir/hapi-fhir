@@ -36,7 +36,6 @@ import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
-import ca.uhn.fhir.rest.server.sched.ISchedulerFactory;
 import ca.uhn.fhir.rest.server.sched.ISchedulerService;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
@@ -251,12 +250,7 @@ public abstract class BaseConfig {
 
 	@Bean
 	public ISchedulerService schedulerService() {
-		return new SchedulerServiceImpl();
-	}
-
-	@Bean
-	public ISchedulerFactory schedulerFactory() {
-		return new HapiSchedulerFactory();
+		return new SchedulerServiceImpl(new HapiSchedulerFactory());
 	}
 
 	@Bean
