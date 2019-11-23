@@ -9,6 +9,7 @@ trigger:
 
 pool:
   vmImage: 'ubuntu-latest'
+container: openjdk:11
 
 jobs:
   - job: Build
