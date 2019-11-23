@@ -38,7 +38,7 @@ public class ServerInvalidDefinitionR4Test {
 		} catch (ServletException e) {
 			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
 			assertThat(e.getCause().toString(), StringContains.containsString(
-				"Parameters annotated with @ConditionalUrlParam must be of type String, found incorrect parameteter in method \"public ca.uhn.fhir.rest.api.MethodOutcome ca.uhn.fhir.rest.server.ServerInvalidDefinitionDstu2Test$UpdateWithWrongConditionalUrlType.update(ca.uhn.fhir.rest.param.TokenParam,ca.uhn.fhir.model.dstu2.resource.Patient)"));
+				"Parameters annotated with @ConditionalUrlParam must be of type String, found incorrect parameter in method \"public ca.uhn.fhir.rest.api.MethodOutcome ca.uhn.fhir.rest.server.ServerInvalidDefinitionR4Test$UpdateWithWrongConditionalUrlType.update(ca.uhn.fhir.rest.param.TokenParam,org.hl7.fhir.r4.model.Patient)"));
 		}
 	}
 

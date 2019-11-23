@@ -40,6 +40,10 @@ public class ModifiableBundleEntry {
 		myBundleEntryMutator.setRequestUrl(theFhirContext, theRequestUrl);
 	}
 
+	public String getFullUrl() {
+		return myBundleEntryParts.getFullUrl();
+	}
+
 	public String getRequestUrl() {
 		return myBundleEntryParts.getUrl();
 	}
