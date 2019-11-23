@@ -176,16 +176,16 @@ public class Builder {
 		/**
 		 * @param theOldName                            The old column name
 		 * @param theNewName                            The new column name
-		 * @param theAllowNeitherColumnToExist          Setting this to true means that it's not an error if neither column exists
-		 * @param theDeleteTargetColumnFirstIfBothEixst Setting this to true causes the migrator to be ok with the target column existing. It will make sure that there is no data in the column with the new name, then delete it if so in order to make room for the renamed column. If there is data it will still bomb out.
+		 * @param isOkayIfNeitherColumnExists          Setting this to true means that it's not an error if neither column exists
+		 * @param theDeleteTargetColumnFirstIfBothExist Setting this to true causes the migrator to be ok with the target column existing. It will make sure that there is no data in the column with the new name, then delete it if so in order to make room for the renamed column. If there is data it will still bomb out.
 		 */
-		public BuilderWithTableName renameColumn(String theVersion, String theOldName, String theNewName, boolean theAllowNeitherColumnToExist, boolean theDeleteTargetColumnFirstIfBothEixst) {
+		public BuilderWithTableName renameColumn(String theVersion, String theOldName, String theNewName, boolean isOkayIfNeitherColumnExists, boolean theDeleteTargetColumnFirstIfBothExist) {
 			RenameColumnTask task = new RenameColumnTask(myRelease, theVersion);
 			task.setTableName(myTableName);
 			task.setOldName(theOldName);
 			task.setNewName(theNewName);
-			task.setAllowNeitherColumnToExist(theAllowNeitherColumnToExist);
-			task.setDeleteTargetColumnFirstIfBothExist(theDeleteTargetColumnFirstIfBothEixst);
+			task.setOkayIfNeitherColumnExists(isOkayIfNeitherColumnExists);
+			task.setDeleteTargetColumnFirstIfBothExist(theDeleteTargetColumnFirstIfBothExist);
 			addTask(task);
 			return this;
 		}

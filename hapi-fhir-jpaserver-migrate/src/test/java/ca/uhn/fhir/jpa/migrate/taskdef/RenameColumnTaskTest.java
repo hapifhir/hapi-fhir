@@ -112,7 +112,7 @@ public class RenameColumnTaskTest extends BaseTest {
 		task.setTableName("SOMETABLE");
 		task.setOldName("myTextCol");
 		task.setNewName("TEXTCOL");
-		task.setAllowNeitherColumnToExist(true);
+		task.setOkayIfNeitherColumnExists(true);
 		getMigrator().addTask(task);
 
 		getMigrator().migrate();

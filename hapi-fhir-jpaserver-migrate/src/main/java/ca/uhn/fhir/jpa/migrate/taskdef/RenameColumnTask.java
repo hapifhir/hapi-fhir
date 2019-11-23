@@ -37,7 +37,7 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 	private static final Logger ourLog = LoggerFactory.getLogger(RenameColumnTask.class);
 	private String myOldName;
 	private String myNewName;
-	private boolean myAllowNeitherColumnToExist;
+	private boolean myIsOkayIfNeitherColumnExists;
 	private boolean myDeleteTargetColumnFirstIfBothExist;
 
 	public RenameColumnTask(String theProductVersion, String theSchemaVersion) {
@@ -89,7 +89,7 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 				throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist!");
 			}
 		} else if (!haveOldName && !haveNewName) {
-			if (isAllowNeitherColumnToExist()) {
+			if (isOkayIfNeitherColumnExists()) {
 				return;
 			}
 			throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because neither column exists!");
@@ -128,12 +128,12 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 
 	}
 
-	public boolean isAllowNeitherColumnToExist() {
-		return myAllowNeitherColumnToExist;
+	public boolean isOkayIfNeitherColumnExists() {
+		return myIsOkayIfNeitherColumnExists;
 	}
 
-	public void setAllowNeitherColumnToExist(boolean theAllowNeitherColumnToExist) {
-		myAllowNeitherColumnToExist = theAllowNeitherColumnToExist;
+	public void setOkayIfNeitherColumnExists(boolean theOkayIfNeitherColumnExists) {
+		myIsOkayIfNeitherColumnExists = theOkayIfNeitherColumnExists;
 	}
 
 	@Override
@@ -146,7 +146,7 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 
 		return new EqualsBuilder()
 			.appendSuper(super.equals(theO))
-			.append(myAllowNeitherColumnToExist, that.myAllowNeitherColumnToExist)
+			.append(myIsOkayIfNeitherColumnExists, that.myIsOkayIfNeitherColumnExists)
 			.append(myDeleteTargetColumnFirstIfBothExist, that.myDeleteTargetColumnFirstIfBothExist)
 			.append(myOldName, that.myOldName)
 			.append(myNewName, that.myNewName)
@@ -159,7 +159,7 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 			.appendSuper(super.hashCode())
 			.append(myOldName)
 			.append(myNewName)
-			.append(myAllowNeitherColumnToExist)
+			.append(myIsOkayIfNeitherColumnExists)
 			.append(myDeleteTargetColumnFirstIfBothExist)
 			.toHashCode();
 	}

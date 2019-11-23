@@ -34,7 +34,7 @@ public class SchemaMigrator {
 
 	public void validate() {
 		if (mySkipValidation) {
-			ourLog.info("Database running in hibernate auto-update mode.  Skipping schema validation.");
+			ourLog.warn("Database running in hibernate auto-update mode.  Skipping schema validation.");
 			return;
 		}
 		try (Connection connection = myDataSource.getConnection()) {
@@ -52,7 +52,7 @@ public class SchemaMigrator {
 
 	public void migrate() {
 		if (mySkipValidation) {
-			ourLog.info("Database running in hibernate auto-update mode.  Skipping schema migration.");
+			ourLog.warn("Database running in hibernate auto-update mode.  Skipping schema migration.");
 			return;
 		}
 		myMigrator.migrate();

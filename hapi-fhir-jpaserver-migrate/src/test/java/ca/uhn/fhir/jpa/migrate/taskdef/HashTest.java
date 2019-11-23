@@ -32,7 +32,7 @@ public class HashTest {
 	}
 
 	@Test
-	public void checkAllHashes() {
+	public void testCheckAllHashes() {
 		List<BaseTask<?>> tasks1 = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
 		Map<String, Integer> hashesByVersion = new HashMap<>();
 		for (BaseTask task : tasks1) {

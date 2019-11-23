@@ -145,7 +145,6 @@ public abstract class BaseTask<T extends BaseTask> {
 	public abstract void execute() throws SQLException;
 
 	public String getFlywayVersion() {
-		String retval = "";
 		String releasePart = myProductVersion;
 		if (releasePart.startsWith("V")) {
 			releasePart = releasePart.substring(1);
