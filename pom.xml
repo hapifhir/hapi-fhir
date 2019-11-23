@@ -2494,7 +2494,7 @@
 		<profile>
 			<id>CI</id>
 			<properties>
-				<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m -Xshare:on -XX:TieredStopAtLevel=1 -XX:+UseParallelGC -Xverify:none  -Dfile.encoding=UTF-8 -Xmx20484M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M</surefire_jvm_args>
+				<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m -XX:TieredStopAtLevel=1 -XX:+UseParallelGC -Xverify:none  -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M</surefire_jvm_args>
 			</properties>
 		</profile>
 		<profile>
