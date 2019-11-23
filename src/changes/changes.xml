@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
+		<release version="4.2.0" date="2019-02-01" description="K">
 			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
@@ -33,6 +33,13 @@
 			format. Thanks to Raul Estrada for the pull request!
 		</action>
 		-->
+			<action type="change">
+				Changed database migration to use flyway.  This adds a new table called flyway_schema_history that records all
+				database migration tasks that have already been applied.  The hapi-fhir-cli migrate tool has been changed
+				to use flyway.  Learn more about flyway on https://flywaydb.org/.
+			</action>
+		</release>
+		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
 			<action type="add">
 				<![CDATA[
 				<b>New Feature</b>:
