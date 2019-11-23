@@ -375,6 +375,10 @@ public abstract class BaseClient implements IRestfulClient {
 					}
 				}
 
+				if (inputStreamToReturn == null) {
+					inputStreamToReturn = new ByteArrayInputStream(new byte[]{});
+				}
+
 				return binding.invokeClient(mimeType, inputStreamToReturn, response.getStatus(), headers);
 			}
 
