@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -173,6 +174,34 @@ public class JsonParserR4Test extends BaseTest {
 		p = (Patient) ourCtx.newJsonParser().parseResource(encoded);
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">Copy © 1999</div>", p.getText().getDivAsString());
 	}
+
+	@Test
+	public void testEncodeAndParseBundleWithFullUrlAndResourceIdMismatch() {
+
+		MessageHeader header = new MessageHeader();
+		header.setId("1.1.1.1");
+		header.setDefinition("Hello");
+
+		Bundle input = new Bundle();
+		input
+			.addEntry()
+			.setFullUrl("urn:uuid:0.0.0.0")
+			.setResource(header);
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+
+		ourLog.info("Encoded: {}", encoded);
+		assertThat(encoded, stringContainsInOrder(
+			"\"fullUrl\": \"urn:uuid:0.0.0.0\"",
+			"\"id\": \"1.1.1.1\""
+		));
+
+		input = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
+		assertEquals("urn:uuid:0.0.0.0", input.getEntry().get(0).getFullUrl());
+		assertEquals("MessageHeader/1.1.1.1", input.getEntry().get(0).getResource().getId());
+
+	}
+
 
 	@Test
 	public void testEncodeBinary() {

@@ -21,6 +21,7 @@ package ca.uhn.fhir.util.bundle;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class ModifiableBundleEntry {
 	private final BundleEntryParts myBundleEntryParts;
@@ -41,5 +42,9 @@ public class ModifiableBundleEntry {
 
 	public String getRequestUrl() {
 		return myBundleEntryParts.getUrl();
+	}
+
+	public IBaseResource getResource() {
+		return myBundleEntryParts.getResource();
 	}
 }
