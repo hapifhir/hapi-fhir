@@ -13,7 +13,7 @@ pool:
 jobs:
   - job: Build
     timeoutInMinutes: 360
-    container: openjdk:3-jdk-11
+    container: maven:3-jdk-11
     steps:
       - task: CacheBeta@0
         inputs:
