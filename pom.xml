@@ -582,8 +582,10 @@
 
 	<properties>
 
-		<fhir_core_version>4.1.0</fhir_core_version>
+		<fhir_core_version>4.1.7-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
+
+		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx1024m</surefire_jvm_args>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
@@ -1657,9 +1659,9 @@
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<runOrder>random</runOrder>
-						<argLine>-Dfile.encoding=UTF-8 -Xmx1024m</argLine>
+						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
 						<forkCount>1.0C</forkCount>
-                        <trimStackTrace>false</trimStackTrace>
+						<trimStackTrace>false</trimStackTrace>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -2488,6 +2490,12 @@
 			<modules>
 				<module>hapi-fhir-jacoco</module>
 			</modules>
+		</profile>
+		<profile>
+			<id>CI</id>
+			<properties>
+				<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m -Xshare:on -XX:TieredStopAtLevel=1 -XX:+UseParallelGC -Xverify:none  -Dfile.encoding=UTF-8 -Xmx20484M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M</surefire_jvm_args>
+			</properties>
 		</profile>
 		<profile>
 			<id>NOPARALLEL</id>
