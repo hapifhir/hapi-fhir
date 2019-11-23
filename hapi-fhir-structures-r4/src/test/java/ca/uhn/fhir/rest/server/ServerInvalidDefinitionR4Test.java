@@ -1,30 +1,30 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
-import javax.servlet.ServletException;
-
-import org.hamcrest.core.StringContains;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Test;
-
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.TestUtil;
+import org.hamcrest.core.StringContains;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
+import org.junit.AfterClass;
+import org.junit.Test;
 
-public class ServerInvalidDefinitionDstu2Test {
+import javax.servlet.ServletException;
 
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
+public class ServerInvalidDefinitionR4Test {
+
+	private static FhirContext ourCtx = FhirContext.forR4();
 
 	@Test
 	public void testWrongConditionalUrlType() {
@@ -38,7 +38,7 @@ public class ServerInvalidDefinitionDstu2Test {
 		} catch (ServletException e) {
 			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
 			assertThat(e.getCause().toString(), StringContains.containsString(
-					"Parameters annotated with @ConditionalUrlParam must be of type String, found incorrect parameteter in method \"public ca.uhn.fhir.rest.api.MethodOutcome ca.uhn.fhir.rest.server.ServerInvalidDefinitionDstu2Test$UpdateWithWrongConditionalUrlType.update(ca.uhn.fhir.rest.param.TokenParam,ca.uhn.fhir.model.dstu2.resource.Patient)"));
+				"Parameters annotated with @ConditionalUrlParam must be of type String, found incorrect parameter in method \"public ca.uhn.fhir.rest.api.MethodOutcome ca.uhn.fhir.rest.server.ServerInvalidDefinitionR4Test$UpdateWithWrongConditionalUrlType.update(ca.uhn.fhir.rest.param.TokenParam,org.hl7.fhir.r4.model.Patient)"));
 		}
 	}
 
@@ -54,7 +54,7 @@ public class ServerInvalidDefinitionDstu2Test {
 		} catch (ServletException e) {
 			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
 			assertThat(e.getCause().toString(), StringContains
-					.containsString("Method 'update' is annotated with @ResourceParam but has a type that is not an implemtation of org.hl7.fhir.instance.model.api.IBaseResource or String or byte[]"));
+				.containsString("Method 'update' is annotated with @ResourceParam but has a type that is not an implemtation of org.hl7.fhir.instance.model.api.IBaseResource or String or byte[]"));
 		}
 	}
 
@@ -85,6 +85,29 @@ public class ServerInvalidDefinitionDstu2Test {
 		} catch (ServletException e) {
 			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
 			assertThat(e.getCause().toString(), StringContains.containsString("Parameter annotated with @Validate.Profile must be of type java.lang.String"));
+		}
+	}
+
+	@Test
+	public void testWrongParameterAnnotationOnOperation() {
+		class MyProvider {
+
+			@Operation(name = "foo")
+			public MethodOutcome update(@OptionalParam(name = "foo") StringType theFoo) {
+				return null;
+			}
+
+		}
+
+		RestfulServer srv = new RestfulServer(ourCtx);
+		srv.setFhirContext(ourCtx);
+		srv.registerProvider(new MyProvider());
+
+		try {
+			srv.init();
+			fail();
+		} catch (ServletException e) {
+			assertThat(e.getCause().toString(), StringContains.containsString("Failure scanning class MyProvider: Illegal method parameter annotation @OptionalParam on method: public ca.uhn.fhir.rest.api.MethodOutcome ca.uhn.fhir.rest.server.ServerInvalidDefinitionR4Test$1MyProvider.update(org.hl7.fhir.r4.model.StringType)"));
 		}
 	}
 
@@ -142,6 +165,11 @@ public class ServerInvalidDefinitionDstu2Test {
 			return null;
 		}
 
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }
