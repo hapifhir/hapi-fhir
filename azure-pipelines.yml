@@ -20,6 +20,8 @@ jobs:
           key: maven
           path: $(MAVEN_CACHE_FOLDER)
       - task: Maven@3
+        env:
+          JAVA_HOME_11_X64: /usr/local/openjdk-11
         inputs:
           goals: 'clean install'
           # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
