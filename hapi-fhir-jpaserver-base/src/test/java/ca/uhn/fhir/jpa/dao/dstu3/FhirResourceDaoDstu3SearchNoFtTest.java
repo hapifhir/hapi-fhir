@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -227,6 +228,36 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		ourLog.info("Actual   {} - {}", ids.size(), ids);
 		assertEquals(allIds, ids);
 
+	}
+
+	@Test
+	public void testHasChain() {
+
+		Patient p = new Patient();
+		p.setId("P");
+		p.setActive(true);
+		myPatientDao.update(p);
+
+		Group group = new Group();
+		group.setId("G");
+		group.addMember().getEntity().setReference("Patient/P");
+		myGroupDao.update(group);
+
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId("DR");
+		dr.getSubject().setReference("Patient/P");
+		myDiagnosticReportDao.update(dr);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+
+		ReferenceParam referenceParam = new ReferenceParam();
+		referenceParam.setValueAsQueryToken(myFhirCtx, "subject", "._has:Group:member:_id", "Group/G");
+		map.add("subject", referenceParam);
+		List<String> actual = toUnqualifiedVersionlessIdValues(myDiagnosticReportDao.search(map));
+		assertThat(actual, containsInAnyOrder("DiagnosticReport/DR"));
+
+		// http://hapi.fhir.org/baseR4/DiagnosticReport?subject._has:Group:member:_id=52152
 	}
 
 	@SuppressWarnings("unused")

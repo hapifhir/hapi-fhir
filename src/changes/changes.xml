@@ -37,6 +37,10 @@
 				HAPI FHIR 4.1.0 the value in Bundle.entry.fullUrl will only be used to set the parsed resource
 				ID if the resource has no ID present.
 			</action>
+			<action type="add">
+				Chained searches using the _has search parameter as the chain value are now supported by
+				the JPA server.
+			</action>
 		</release>
 		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
 			<action type="add">

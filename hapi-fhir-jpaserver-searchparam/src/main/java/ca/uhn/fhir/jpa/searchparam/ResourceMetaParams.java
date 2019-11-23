@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.searchparam;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -61,6 +63,8 @@ public class ResourceMetaParams {
 		resourceMetaAndParams.put(Constants.PARAM_PROFILE, UriAndListParam.class);
 		resourceMetaParams.put(Constants.PARAM_SECURITY, TokenParam.class);
 		resourceMetaAndParams.put(Constants.PARAM_SECURITY, TokenAndListParam.class);
+		resourceMetaParams.put(Constants.PARAM_HAS, HasParam.class);
+		resourceMetaAndParams.put(Constants.PARAM_HAS, HasAndListParam.class);
 		RESOURCE_META_PARAMS = Collections.unmodifiableMap(resourceMetaParams);
 		RESOURCE_META_AND_PARAMS = Collections.unmodifiableMap(resourceMetaAndParams);
 
