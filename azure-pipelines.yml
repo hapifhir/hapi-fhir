@@ -10,8 +10,6 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-container: openjdk:11
-
 jobs:
   - job: Build
     timeoutInMinutes: 360
@@ -20,7 +18,6 @@ jobs:
         inputs:
           key: maven
           path: $(MAVEN_CACHE_FOLDER)
-          displayName: Cache Maven local repo
       - task: Maven@3
         inputs:
           goals: 'clean install'
@@ -28,6 +25,7 @@ jobs:
           options: '-P ALLMODULES,JACOCO,CI -nsu'
           # These are JVM options (and don't show up in the build logs)
           mavenOptions: '-Xmx2048m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
+          jdkVersionOption: 1.11
       - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
         displayName: 'codecov'
       - task: PublishCodeCoverageResults@1
