@@ -77,11 +77,14 @@ public class SearchCoordinatorSvcImplTest {
 
 	@After
 	public void after() {
+		System.clearProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK);
 		verify(myCallingDao, atMost(myExpectedNumberOfSearchBuildersCreated)).newSearchBuilder();
 	}
 
 	@Before
 	public void before() {
+		System.setProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK, "true");
+
 		myCurrentSearch = null;
 
 		mySvc = new SearchCoordinatorSvcImpl();
@@ -148,7 +151,8 @@ public class SearchCoordinatorSvcImplTest {
 		try {
 			result.getResources(0, 100000);
 		} catch (InternalErrorException e) {
-			assertEquals("FAILED", e.getMessage());
+			assertThat(e.getMessage(), containsString("FAILED"));
+			assertThat(e.getMessage(), containsString("at ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImplTest"));
 		}
 
 	}
@@ -187,9 +191,7 @@ public class SearchCoordinatorSvcImplTest {
 		when(mySearchResultCacheSvc.fetchAllResultPids(any())).thenReturn(allResults);
 
 		when(mySearchCacheSvc.tryToMarkSearchAsInProgress(any())).thenAnswer(t->{
-			Object argument = t.getArgument(0);
-			Validate.isTrue( argument instanceof Search, "Argument is " + argument);
-			Search search = (Search) argument;
+			Search search = t.getArgument(0, Search.class);
 			assertEquals(SearchStatusEnum.PASSCMPLET, search.getStatus());
 			search.setStatus(SearchStatusEnum.LOADING);
 			return Optional.of(search);
@@ -202,7 +204,7 @@ public class SearchCoordinatorSvcImplTest {
 		List<IBaseResource> resources;
 
 		when(mySearchCacheSvc.save(any())).thenAnswer(t -> {
-			Search search = (Search) t.getArguments()[0];
+			Search search = t.getArgument(0, Search.class);
 			myCurrentSearch = search;
 			return search;
 		});
@@ -328,7 +330,8 @@ public class SearchCoordinatorSvcImplTest {
 		try {
 			result.getResources(10, 20);
 		} catch (InternalErrorException e) {
-			assertEquals("Abort has been requested", e.getMessage());
+			assertThat(e.getMessage(), containsString("Abort has been requested"));
+			assertThat(e.getMessage(), containsString("at ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl"));
 		}
 
 		completionLatch.await(10, TimeUnit.SECONDS);

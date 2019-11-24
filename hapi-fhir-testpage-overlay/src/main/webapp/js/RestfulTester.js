@@ -540,7 +540,7 @@ function updateURLParameter(url, param, paramVal){
     var temp = "";
     if (additionalURL) {
         tempArray = additionalURL.split("&");
-        for (i=0; i<tempArray.length; i++){
+        for (var i=0; i<tempArray.length; i++){
             if(tempArray[i].split('=')[0] !== param){
                 newAdditionalURL += temp + tempArray[i];
                 temp = "&";
