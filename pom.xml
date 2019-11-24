@@ -582,8 +582,10 @@
 
 	<properties>
 
-		<fhir_core_version>4.1.0</fhir_core_version>
+		<fhir_core_version>4.1.7-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
+
+		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx1024m</surefire_jvm_args>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
@@ -615,7 +617,7 @@
 		<jaxb_runtime_version>2.3.1</jaxb_runtime_version>
 		<jersey_version>2.25.1</jersey_version>
 		<!-- 9.4.17 seems to have issues -->
-		<jetty_version>9.4.14.v20181114</jetty_version>
+		<jetty_version>9.4.23.v20191118</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<flyway_version>6.0.8</flyway_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
@@ -712,7 +714,7 @@
 			<dependency>
 				<groupId>com.icegreen</groupId>
 				<artifactId>greenmail</artifactId>
-				<version>1.5.10</version>
+				<version>1.5.11</version>
 			</dependency>
 			<dependency>
 				<groupId>com.icegreen</groupId>
@@ -1663,9 +1665,9 @@
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<runOrder>random</runOrder>
-						<argLine>-Dfile.encoding=UTF-8 -Xmx1024m</argLine>
+						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
 						<forkCount>1.0C</forkCount>
-                        <trimStackTrace>false</trimStackTrace>
+						<trimStackTrace>false</trimStackTrace>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -2494,6 +2496,31 @@
 			<modules>
 				<module>hapi-fhir-jacoco</module>
 			</modules>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<configuration>
+							<dumpOnExit>true</dumpOnExit>
+						</configuration>
+						<executions>
+							<execution>
+								<id>default-prepare-agent</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>CI</id>
+			<properties>
+				<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m -XX:TieredStopAtLevel=1 -XX:+UseParallelGC -Xverify:none  -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M</surefire_jvm_args>
+			</properties>
 		</profile>
 		<profile>
 			<id>NOPARALLEL</id>

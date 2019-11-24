@@ -168,6 +168,8 @@ public class BundleUtil {
 
 		BaseRuntimeElementCompositeDefinition<?> entryChildContentsDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
 
+		BaseRuntimeChildDefinition fullUrlChildDef = entryChildContentsDef.getChildByName("fullUrl");
+
 		BaseRuntimeChildDefinition resourceChildDef = entryChildContentsDef.getChildByName("resource");
 		BaseRuntimeChildDefinition requestChildDef = entryChildContentsDef.getChildByName("request");
 		BaseRuntimeElementCompositeDefinition<?> requestChildContentsDef = (BaseRuntimeElementCompositeDefinition<?>) requestChildDef.getChildByName("request");
@@ -180,6 +182,11 @@ public class BundleUtil {
 			String url = null;
 			RequestTypeEnum requestType = null;
 			String conditionalUrl = null;
+			String fullUrl = fullUrlChildDef
+				.getAccessor()
+				.getFirstValueOrNull(nextEntry)
+				.map(t->((IPrimitiveType<?>)t).getValueAsString())
+				.orElse(null);
 
 			for (IBase nextResource : resourceChildDef.getAccessor().getValues(nextEntry)) {
 				resource = (IBaseResource) nextResource;
@@ -217,7 +224,7 @@ public class BundleUtil {
 			 * order in the original bundle.
 			 */
 			BundleEntryMutator mutator = new BundleEntryMutator(nextEntry, requestChildDef, requestChildContentsDef);
-			ModifiableBundleEntry entry = new ModifiableBundleEntry(new BundleEntryParts(requestType, url, resource, conditionalUrl), mutator);
+			ModifiableBundleEntry entry = new ModifiableBundleEntry(new BundleEntryParts(fullUrl, requestType, url, resource, conditionalUrl), mutator);
 			theProcessor.accept(entry);
 		}
 	}

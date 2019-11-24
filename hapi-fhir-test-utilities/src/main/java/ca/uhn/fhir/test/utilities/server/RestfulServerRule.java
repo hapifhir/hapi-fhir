@@ -112,4 +112,8 @@ public class RestfulServerRule implements TestRule {
 	public RestfulServer getRestfulServer() {
 		return myServlet;
 	}
+
+	public int getPort() {
+		return myPort;
+	}
 }

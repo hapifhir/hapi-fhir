@@ -96,6 +96,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public static final int DEFAULT_SYNC_SIZE = 250;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
+	public static final String UNIT_TEST_CAPTURE_STACK = "unit_test_capture_stack";
 	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
 	@Autowired
 	private FhirContext myContext;
@@ -900,6 +901,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				int failureCode = InternalErrorException.STATUS_CODE;
 				if (t instanceof BaseServerResponseException) {
 					failureCode = ((BaseServerResponseException) t).getStatusCode();
+				}
+
+				if (System.getProperty(UNIT_TEST_CAPTURE_STACK) != null) {
+					failureMessage += "\n" + ExceptionUtils.getStackTrace(rootCause);
 				}
 
 				mySearch.setFailureMessage(failureMessage);

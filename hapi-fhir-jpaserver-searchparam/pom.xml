@@ -160,7 +160,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx20484M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC</argLine>
+					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
 					<forkCount>0.6C</forkCount>
 					<excludes>*StressTest*</excludes>
 				</configuration>

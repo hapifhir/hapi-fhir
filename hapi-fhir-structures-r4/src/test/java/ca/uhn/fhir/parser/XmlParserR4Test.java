@@ -1,8 +1,13 @@
 package ca.uhn.fhir.parser;
 
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
 
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Narrative;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -41,5 +46,33 @@ public class XmlParserR4Test {
 		int idx = encoded.indexOf(sectionText);
 		assertNotEquals(-1, idx);
 	}
-	
+
+	@Test
+	public void testEncodeAndParseBundleWithFullUrlAndResourceIdMismatch() {
+
+		MessageHeader header = new MessageHeader();
+		header.setId("1.1.1.1");
+		header.setDefinition("Hello");
+
+		Bundle input = new Bundle();
+		input
+			.addEntry()
+			.setFullUrl("urn:uuid:0.0.0.0")
+			.setResource(header);
+
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input);
+
+		ourLog.info("Encoded: {}", encoded);
+		assertThat(encoded, stringContainsInOrder(
+			"<fullUrl value=\"urn:uuid:0.0.0.0\"/>",
+			"<id value=\"1.1.1.1\"/>"
+		));
+
+		input = ourCtx.newXmlParser().parseResource(Bundle.class, encoded);
+		assertEquals("urn:uuid:0.0.0.0", input.getEntry().get(0).getFullUrl());
+		assertEquals("MessageHeader/1.1.1.1", input.getEntry().get(0).getResource().getId());
+
+	}
+
+
 }
