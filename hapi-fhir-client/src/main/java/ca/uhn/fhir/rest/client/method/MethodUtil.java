@@ -208,23 +208,10 @@ public class MethodUtil {
 		return b;
 	}
 
-	public static void extractDescription(SearchParameter theParameter, Annotation[] theAnnotations) {
-		for (Annotation annotation : theAnnotations) {
-			if (annotation instanceof Description) {
-				Description desc = (Description) annotation;
-				if (isNotBlank(desc.formalDefinition())) {
-					theParameter.setDescription(desc.formalDefinition());
-				} else {
-					theParameter.setDescription(desc.shortDefinition());
-				}
-			}
-		}
-	}
-
 	@SuppressWarnings("unchecked")
 	public static List<IParameter> getResourceParameters(final FhirContext theContext, Method theMethod,
 			Object theProvider, RestOperationTypeEnum theRestfulOperationTypeEnum) {
-		List<IParameter> parameters = new ArrayList<IParameter>();
+		List<IParameter> parameters = new ArrayList<>();
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 		int paramIndex = 0;
@@ -271,7 +258,6 @@ public class MethodUtil {
 						parameter.setChainlists(((RequiredParam) nextAnnotation).chainWhitelist(),
 								((RequiredParam) nextAnnotation).chainBlacklist());
 						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
-						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;
 					} else if (nextAnnotation instanceof OptionalParam) {
 						SearchParameter parameter = new SearchParameter();
@@ -282,7 +268,6 @@ public class MethodUtil {
 						parameter.setChainlists(((OptionalParam) nextAnnotation).chainWhitelist(),
 								((OptionalParam) nextAnnotation).chainBlacklist());
 						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
-						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;
 					} else if (nextAnnotation instanceof RawParam) {
 						param = new RawParamsParmeter();
