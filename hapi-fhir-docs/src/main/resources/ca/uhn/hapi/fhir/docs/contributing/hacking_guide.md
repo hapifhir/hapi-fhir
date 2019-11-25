@@ -111,6 +111,3 @@ Next, browse to the directory where you checked out the HAPI FHIR sources. You m
 			</subsection>
 			
 		</section>
-	</body>
-
-</document>
