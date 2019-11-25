@@ -47,7 +47,7 @@ class ConditionalParamBinder implements IParameter {
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null || theInnerCollectionType != null || theParameterType.equals(String.class) == false) {
 			throw new ConfigurationException(
-					"Parameters annotated with @" + ConditionalUrlParam.class.getSimpleName() + " must be of type String, found incorrect parameteter in method \"" + theMethod + "\"");
+					"Parameters annotated with @" + ConditionalUrlParam.class.getSimpleName() + " must be of type String, found incorrect parameter in method \"" + theMethod + "\"");
 		}
 	}
 
