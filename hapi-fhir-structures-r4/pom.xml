@@ -32,13 +32,6 @@
 			<version>${fhir_core_version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>org.hl7.fhir.r4</artifactId>
-			<classifier>javadoc</classifier>
-			<scope>provided</scope>
-			<version>${fhir_core_version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.fhir</groupId>
 			<artifactId>ucum</artifactId>
 		</dependency>
@@ -364,5 +357,21 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>DIST</id>
+			<dependencies>
+				<!-- When we're building a DIST, make sure that the javadocs for fhir_core are available -->
+				<dependency>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>org.hl7.fhir.r4</artifactId>
+					<classifier>javadoc</classifier>
+					<scope>provided</scope>
+					<version>${fhir_core_version}</version>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 
 </project>
