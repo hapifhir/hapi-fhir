@@ -22,10 +22,8 @@ package ca.uhn.fhir.model.primitive;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -39,6 +37,8 @@ import ca.uhn.fhir.parser.DataFormatException;
 public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	static final long NANOS_PER_MILLIS = 1000000L;
 	static final long NANOS_PER_SECOND = 1000000000L;
+
+	private static final Map<String, TimeZone> timezoneCache = new ConcurrentHashMap<>();
 
 	private static final FastDateFormat ourHumanDateFormat = FastDateFormat.getDateInstance(FastDateFormat.MEDIUM);
 	private static final FastDateFormat ourHumanDateTimeFormat = FastDateFormat.getDateTimeInstance(FastDateFormat.MEDIUM, FastDateFormat.MEDIUM);
@@ -574,10 +574,15 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 			parseInt(theWholeValue, theValue.substring(1, 3), 0, 23);
 			parseInt(theWholeValue, theValue.substring(4, 6), 0, 59);
 			clearTimeZone();
-			setTimeZone(TimeZone.getTimeZone("GMT" + theValue));
+			setTimeZone(getTimeZone(theValue));
 		}
 
 		return this;
+	}
+
+	private TimeZone getTimeZone(String offset) {
+		return timezoneCache.computeIfAbsent(offset, (offsetLocal) ->
+			TimeZone.getTimeZone("GMT" + offsetLocal));
 	}
 
 	public BaseDateTimeDt setTimeZone(TimeZone theTimeZone) {
