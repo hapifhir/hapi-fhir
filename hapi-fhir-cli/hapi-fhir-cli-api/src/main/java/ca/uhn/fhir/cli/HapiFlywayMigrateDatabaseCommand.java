@@ -21,9 +21,12 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
+import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,5 +47,11 @@ public class HapiFlywayMigrateDatabaseCommand extends BaseFlywayMigrateDatabaseC
 	protected void addTasks(FlywayMigrator theMigrator) {
 		List<BaseTask<?>> tasks = new HapiFhirJpaMigrationTasks(getFlags()).getAllTasks(VersionEnum.values());
 		theMigrator.addTasks(tasks);
+	}
+
+	@Override
+	public void run(CommandLine theCommandLine) throws ParseException {
+		setMigrationTableName(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
+		super.run(theCommandLine);
 	}
 }
