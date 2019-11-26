@@ -22,7 +22,11 @@ package ca.uhn.fhir.model.primitive;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
