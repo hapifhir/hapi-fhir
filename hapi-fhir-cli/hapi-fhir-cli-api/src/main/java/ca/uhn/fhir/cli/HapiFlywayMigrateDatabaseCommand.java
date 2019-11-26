@@ -21,6 +21,7 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
+import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
@@ -29,6 +30,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class HapiFlywayMigrateDatabaseCommand extends BaseFlywayMigrateDatabaseCommand<VersionEnum> {
+
+	public HapiFlywayMigrateDatabaseCommand() {
+		super(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
+	}
 
 	@Override
 	protected List<VersionEnum> provideAllowedVersions() {
