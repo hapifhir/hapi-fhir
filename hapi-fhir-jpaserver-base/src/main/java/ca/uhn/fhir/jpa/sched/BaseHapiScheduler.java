@@ -56,10 +56,13 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		myScheduler.standby();
 	}
 
-	private void setProperties() {
-		myProperties.put("org.quartz.threadPool.threadCount", "4");
-		myProperties.put("org.quartz.threadPool.threadNamePrefix", myThreadNamePrefix + "-" + myProperties.get(PROP_SCHED_INSTANCE_NAME));
-		addProperties(myProperties);
+	protected void setProperties() {
+		addProperty("org.quartz.threadPool.threadCount", "4");
+		addProperty("org.quartz.threadPool.threadNamePrefix", myThreadNamePrefix + "-" + myProperties.get(PROP_SCHED_INSTANCE_NAME));
+	}
+
+	protected void addProperty(String key, String value) {
+		myProperties.put(key, value);
 	}
 
 	@Override
@@ -155,8 +158,4 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			return true;
 		}
 	}
-
-	abstract void addProperties(Properties theProperties);
-// FIXME KHS
-//	quartzPropertiesClustered(clusteredProperties);
 }

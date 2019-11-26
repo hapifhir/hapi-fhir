@@ -115,8 +115,10 @@ public class SchedulerServiceImpl implements ISchedulerService, SmartLifecycle {
 		}
 		IHapiScheduler retval;
 		if (theClustered) {
+			ourLog.info("Creating Clustered Scheduler");
 			retval = mySchedulerFactory.newClusteredHapiScheduler();
 		} else {
+			ourLog.info("Creating Local Scheduler");
 			retval = mySchedulerFactory.newLocalHapiScheduler();
 		}
 		retval.init();
