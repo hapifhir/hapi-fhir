@@ -15,7 +15,7 @@ The following is a list of key subprojects you might open in your IDE:
 # Getting the Sources
 
 <p style="float:right;">
-<a class="externalLink" href="https://dev.azure.com/jamesagnew214/jamesagnew214/_build/latest?definitionId=1&branchName=master"><img src="https://dev.azure.com/jamesagnew214/jamesagnew214/_apis/build/status/jamesagnew.hapi-fhir?branchName=master" alt="Build Status" class="img-fluid"></a>
+    <a class="externalLink" href="https://dev.azure.com/jamesagnew214/jamesagnew214/_build/latest?definitionId=1&branchName=master"><img src="https://dev.azure.com/jamesagnew214/jamesagnew214/_apis/build/status/jamesagnew.hapi-fhir?branchName=master" alt="Build Status" class="img-fluid"/></a>
 </p>
 
 The best way to grab our sources is with Git. Grab the repository URL from our [GitHub page](https://github.com/jamesagnew/hapi-fhir). We try our best to ensure that the sources are always left in a buildable state. Check Azure Pipelines CI (see the image/link on the right) to see if the sources currently build.
@@ -87,27 +87,11 @@ Next, browse to the directory where you checked out the HAPI FHIR sources. You m
 
 <img src="../../images/hacking_import_step2.png"/>
 
-##
-			<subsection name="Troubleshooting">
-			
-				<p>
-					When importing the HAPI projects into Eclipse, sometimes Eclipse 
-					will fail to correctly import libraries. If you import a module
-					into Eclipse and it fails to compile with many errors relating to
-					packages other than HAPI's, the following steps will fix this:
-				</p>
-				<ul>
-					<li>Delete the project from your Eclipse workspace</li>
-					<li>
-						On the local filesystem, delete the files <code>.project</code>
-						and <code>.classpath</code>, and the directory <code>.settings</code>
-						from each module you want to open.
-					</li>
-					<li>
-						Import each module again using the instructions above
-					</li>
-				</ul>
-				
-			</subsection>
-			
-		</section>
+## Troubleshooting
+
+When importing the HAPI projects into Eclipse, sometimes Eclipse will fail to correctly import libraries. If you import a module into Eclipse and it fails to compile with many errors relating to packages other than HAPI's, the following steps will fix this:
+
+* Delete the project from your Eclipse workspace
+* On the local filesystem, delete the files `.project` and `.classpath`, and the directory `.settings` from each module you want to open.
+* Import each module again using the instructions above
+
