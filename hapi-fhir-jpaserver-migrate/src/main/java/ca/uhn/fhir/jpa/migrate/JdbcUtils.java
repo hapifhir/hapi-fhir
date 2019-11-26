@@ -441,7 +441,7 @@ public class JdbcUtils {
 						if ("SYSTEM TABLE".equalsIgnoreCase(tableType)) {
 							continue;
 						}
-						if ("FLYWAY_SCHEMA_HISTORY".equalsIgnoreCase(tableName)) {
+						if (SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME.equalsIgnoreCase(tableName)) {
 							continue;
 						}
 
