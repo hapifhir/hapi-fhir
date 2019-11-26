@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.intellij.lang.annotations.Language;
 import org.junit.After;
@@ -16,7 +17,6 @@ import java.util.Set;
 
 public class BaseTest {
 
-	public static final String TEST_MIGRATION_TABLE = "TEST_MIGRATION";
 	private static final String DATABASE_NAME = "DATABASE";
 	private static int ourDatabaseUrl = 0;
 	private String myUrl;
@@ -42,7 +42,7 @@ public class BaseTest {
 		myDataSource.setUsername("SA");
 		myDataSource.setPassword("SA");
 		myDataSource.setDriverClassName(DriverTypeEnum.H2_EMBEDDED.getDriverClassName());
-		myMigrator = new FlywayMigrator(TEST_MIGRATION_TABLE, myDataSource);
+		myMigrator = new FlywayMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, myDataSource);
 	}
 
 	protected BasicDataSource getDataSource() {
@@ -52,8 +52,8 @@ public class BaseTest {
 	@After
 	public void resetMigrationVersion() throws SQLException {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
-		if (tableNames.contains(TEST_MIGRATION_TABLE)) {
-			executeSql("DELETE from " + TEST_MIGRATION_TABLE + " where \"installed_rank\" > 0");
+		if (tableNames.contains(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME)) {
+			executeSql("DELETE from " + SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME + " where \"installed_rank\" > 0");
 		}
 	}
 
