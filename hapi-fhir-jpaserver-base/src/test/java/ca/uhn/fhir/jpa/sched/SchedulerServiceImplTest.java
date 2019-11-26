@@ -65,7 +65,7 @@ public class SchedulerServiceImplTest {
 			.setId(CountingJob.class.getName())
 			.setJobClass(CountingJob.class);
 
-		SchedulerServiceImpl svc = AopTestUtils.getTargetObject(mySvc);
+		BaseSchedulerServiceImpl svc = AopTestUtils.getTargetObject(mySvc);
 		svc.stop();
 		svc.create();
 		svc.start();
@@ -186,7 +186,7 @@ public class SchedulerServiceImplTest {
 
 		@Bean
 		public ISchedulerService schedulerService() {
-			return new SchedulerServiceImpl(new HapiSchedulerFactory());
+			return new HapiSchedulerServiceImpl();
 		}
 
 		@Bean

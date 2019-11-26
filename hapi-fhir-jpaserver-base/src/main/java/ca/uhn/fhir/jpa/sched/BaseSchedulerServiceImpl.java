@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.sched;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.ISmartLifecyclePhase;
 import ca.uhn.fhir.rest.server.sched.IHapiScheduler;
-import ca.uhn.fhir.rest.server.sched.ISchedulerFactory;
 import ca.uhn.fhir.rest.server.sched.ISchedulerService;
 import ca.uhn.fhir.rest.server.sched.ScheduledJobDefinition;
 import org.quartz.SchedulerException;
@@ -54,36 +53,27 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * </li>
  * </ul>
  */
-public class SchedulerServiceImpl implements ISchedulerService, SmartLifecycle {
+public abstract class BaseSchedulerServiceImpl implements ISchedulerService, SmartLifecycle {
 	public static final String SCHEDULING_DISABLED = "scheduling_disabled";
 	public static final String SCHEDULING_DISABLED_EQUALS_TRUE = SCHEDULING_DISABLED + "=true";
 
-	private static final Logger ourLog = LoggerFactory.getLogger(SchedulerServiceImpl.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseSchedulerServiceImpl.class);
 	private IHapiScheduler myLocalScheduler;
 	private IHapiScheduler myClusteredScheduler;
 	private boolean myLocalSchedulingEnabled;
 	private boolean myClusteredSchedulingEnabled;
 	private AtomicBoolean myStopping = new AtomicBoolean(false);
 
-
-	private final ISchedulerFactory mySchedulerFactory;
 	@Autowired
 	private Environment myEnvironment;
 	@Autowired
 	private ApplicationContext myApplicationContext;
+	@Autowired
+	protected AutowiringSpringBeanJobFactory mySchedulerJobFactory;
 
-	/**
-	 * Constructor
-	 * @param theSchedulerFactory
-	 */
-	public SchedulerServiceImpl(ISchedulerFactory theSchedulerFactory) {
-		mySchedulerFactory = theSchedulerFactory;
+	public BaseSchedulerServiceImpl() {
 		setLocalSchedulingEnabled(true);
 		setClusteredSchedulingEnabled(true);
-	}
-
-	public ISchedulerFactory getSchedulerFactory() {
-		return mySchedulerFactory;
 	}
 
 	public boolean isLocalSchedulingEnabled() {
@@ -116,14 +106,18 @@ public class SchedulerServiceImpl implements ISchedulerService, SmartLifecycle {
 		IHapiScheduler retval;
 		if (theClustered) {
 			ourLog.info("Creating Clustered Scheduler");
-			retval = mySchedulerFactory.newClusteredHapiScheduler();
+			retval = getClusteredScheduler();
 		} else {
 			ourLog.info("Creating Local Scheduler");
-			retval = mySchedulerFactory.newLocalHapiScheduler();
+			retval = getLocalHapiScheduler();
 		}
 		retval.init();
 		return retval;
 	}
+
+	protected abstract IHapiScheduler getLocalHapiScheduler();
+
+	protected abstract IHapiScheduler getClusteredScheduler();
 
 	/**
 	 * We defer startup of executing started tasks until we're sure we're ready for it
