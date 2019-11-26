@@ -959,7 +959,7 @@ public interface HistoryClient extends IBasicClient {
 
 public void bbbbb() throws DataFormatException, IOException {
 //START SNIPPET: metadataClientUsage
-FhirContext ctx = FhirContext.forDstu2();
+FhirContext ctx = FhirContext.forR4();
 MetadataClient client = ctx.newRestfulClient(MetadataClient.class, "http://spark.furore.com/fhir");
 CapabilityStatement metadata = client.getServerMetadata();
 System.out.println(ctx.newXmlParser().encodeResourceToString(metadata));
@@ -995,7 +995,7 @@ private interface IPatientClient extends IBasicClient
 
 public void clientRead() {
 //START SNIPPET: clientReadTags
-IPatientClient client = FhirContext.forDstu2().newRestfulClient(IPatientClient.class, "http://foo/fhir");
+IPatientClient client = FhirContext.forR4().newRestfulClient(IPatientClient.class, "http://foo/fhir");
 Patient patient = client.readPatient(new IdType("1234"));
   
 // Access the tag list
@@ -1049,7 +1049,6 @@ public Bundle transaction(@TransactionParam Bundle theInput) {
    return retVal;
 }
 //END SNIPPET: transaction
-
 
 }
 

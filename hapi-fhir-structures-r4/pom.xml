@@ -32,6 +32,13 @@
 			<version>${fhir_core_version}</version>
 		</dependency>
 		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>org.hl7.fhir.r4</artifactId>
+			<classifier>javadoc</classifier>
+			<scope>provided</scope>
+			<version>${fhir_core_version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.fhir</groupId>
 			<artifactId>ucum</artifactId>
 		</dependency>
