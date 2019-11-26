@@ -22,6 +22,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
+import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends BaseCommand {
+
 
 	public static final String MIGRATE_DATABASE = "migrate-database";
 	private Set<String> myFlags;
@@ -108,7 +110,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 			.filter(StringUtils::isNotBlank)
 			.collect(Collectors.toSet());
 
-		FlywayMigrator migrator = new FlywayMigrator();
+		FlywayMigrator migrator = new FlywayMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
 		migrator.setConnectionUrl(url);
 		migrator.setDriverType(driverType);
 		migrator.setUsername(username);

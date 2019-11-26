@@ -20,7 +20,7 @@ public class SchemaMigratorTest extends BaseTest {
 		task.addSql(DriverTypeEnum.H2_EMBEDDED, "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 		getMigrator().addTask(task);
 
-		SchemaMigrator schemaMigrator = new SchemaMigrator(getDataSource(), new Properties(), Collections.singletonList(task));
+		SchemaMigrator schemaMigrator = new SchemaMigrator("TEST_MIGRATION", getDataSource(), new Properties(), Collections.singletonList(task));
 
 		try {
 			schemaMigrator.validate();

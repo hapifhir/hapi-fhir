@@ -37,6 +37,7 @@ public class FlywayMigrator {
 	private static final Logger ourLog = LoggerFactory.getLogger(FlywayMigrator.class);
 
 	private DriverTypeEnum myDriverType;
+	private final String myMigrationTableName;
 	private String myConnectionUrl;
 	private String myUsername;
 	private String myPassword;
@@ -44,9 +45,8 @@ public class FlywayMigrator {
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
 
-	public FlywayMigrator() {}
-
-	public FlywayMigrator(BasicDataSource theDataSource) {
+	public FlywayMigrator(String theMigrationTableName, BasicDataSource theDataSource) {
+		this(theMigrationTableName);
 		myConnectionUrl = theDataSource.getUrl();
 		myUsername = theDataSource.getUsername();
 		myPassword = theDataSource.getPassword();
@@ -60,6 +60,10 @@ public class FlywayMigrator {
 				ourLog.error("Unknown driver class " + driverClassName);
 			}
 		}
+	}
+
+	public FlywayMigrator(String theMigrationTableName) {
+		myMigrationTableName = theMigrationTableName;
 	}
 
 	public void setDriverType(DriverTypeEnum theDriverType) {
@@ -97,7 +101,8 @@ public class FlywayMigrator {
 
 	private Flyway initFlyway(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
 		// TODO KHS Is there a way we can use datasource instead of url, username, password here
-			Flyway flyway = Flyway.configure()
+		Flyway flyway = Flyway.configure()
+			.table(myMigrationTableName)
 			.dataSource(myConnectionUrl, myUsername, myPassword)
 			.baselineOnMigrate(true)
 			.javaMigrations(myTasks.toArray(new JavaMigration[0]))

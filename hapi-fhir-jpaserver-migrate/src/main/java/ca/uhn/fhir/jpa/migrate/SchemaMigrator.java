@@ -16,19 +16,20 @@ import java.util.Properties;
 
 public class SchemaMigrator {
 	private static final Logger ourLog = LoggerFactory.getLogger(SchemaMigrator.class);
+	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "FLY_HFJ_MIGRATION";
 
 	private final BasicDataSource myDataSource;
 	private final FlywayMigrator myMigrator;
 	private final boolean mySkipValidation;
 
-	public SchemaMigrator(BasicDataSource theDataSource, Properties jpaProperties, List<BaseTask<?>> theMigrationTasks) {
+	public SchemaMigrator(String theMigrationTableName, BasicDataSource theDataSource, Properties jpaProperties, List<BaseTask<?>> theMigrationTasks) {
 		myDataSource = theDataSource;
 		if (jpaProperties.containsKey(AvailableSettings.HBM2DDL_AUTO) && "update".equals(jpaProperties.getProperty(AvailableSettings.HBM2DDL_AUTO))) {
 			mySkipValidation = true;
 		} else {
 			mySkipValidation = false;
 		}
-		myMigrator = new FlywayMigrator(theDataSource);
+		myMigrator = new FlywayMigrator(theMigrationTableName, theDataSource);
 		myMigrator.addTasks(theMigrationTasks);
 	}
 

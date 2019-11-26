@@ -41,7 +41,7 @@ public class BaseTest {
 		myDataSource.setUsername("SA");
 		myDataSource.setPassword("SA");
 		myDataSource.setDriverClassName(DriverTypeEnum.H2_EMBEDDED.getDriverClassName());
-		myMigrator = new FlywayMigrator(myDataSource);
+		myMigrator = new FlywayMigrator("TEST_MIGRATION", myDataSource);
 	}
 
 	protected BasicDataSource getDataSource() {
