@@ -465,60 +465,23 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		Interceptor interceptor = new Interceptor();
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		try {
-			// Add a custom search parameter
-			SearchParameter fooSp = new SearchParameter();
-			fooSp.addBase("Questionnaire");
-			fooSp.setCode("item-text");
-			fooSp.setName("item-text");
-			fooSp.setType(Enumerations.SearchParamType.STRING);
-			fooSp.setTitle("FOO SP");
-			fooSp.setExpression("Questionnaire.item.text | Questionnaire.item.item.text | Questionnaire.item.item.item.text");
-			fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
-			fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
-			mySearchParameterDao.create(fooSp, mySrd);
-			mySearchParamRegistry.forceRefresh();
 
 			int textIndex = 0;
 			List<Long> ids = new ArrayList<>();
 			for (int i = 0; i < 200; i++) {
 				//Lots and lots of matches
-				Questionnaire q = new Questionnaire();
-				q
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++));
-				q
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++));
-				q
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++));
-				q
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++));
-				q
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++));
-				ids.add(myQuestionnaireDao.create(q).getId().getIdPartAsLong());
+				Patient q = new Patient();
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				ids.add(myPatientDao.create(q).getId().getIdPartAsLong());
 			}
 
 			myCaptureQueriesListener.clear();
@@ -531,7 +494,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				if (bundle == null) {
 					bundle = ourClient
 						.search()
-						.byUrl(ourServerBase + "/Questionnaire?item-text=Section")
+						.byUrl(ourServerBase + "/Patient?identifier=FOO")
 						.returnBundle(Bundle.class)
 						.execute();
 				} else {
