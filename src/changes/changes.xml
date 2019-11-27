@@ -42,7 +42,7 @@
 				the JPA server.
 			</action>
 			<action type="change">
-				Changed database migration to use flyway. This adds a new table called FLY_HFJ_MIGRATION that records all
+				Changed database migration to use flyway.  This adds a new table called FLY_HFJ_MIGRATION that records all
 				database migration tasks that have already been applied.  The hapi-fhir-cli migrate tool has been changed
 				to use flyway.  Learn more about flyway here: https://flywaydb.org/.
 			</action>
