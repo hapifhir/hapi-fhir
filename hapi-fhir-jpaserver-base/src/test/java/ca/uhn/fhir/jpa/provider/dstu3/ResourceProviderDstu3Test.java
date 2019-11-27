@@ -134,7 +134,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType patientId = ourClient.create().resource(patient).execute().getId();
 
 		//Reference patientReference = new Reference("Patient/" + patientId.getIdPart()); <--- this works
-		Reference patientReference = new Reference(patientId); // <--- this is seen as an external reference
+		Reference patientReference = new Reference(patientId.toVersionless()); // <--- this is seen as an external reference
 
 		Media media = new Media();
 		Attachment attachment = new Attachment();
