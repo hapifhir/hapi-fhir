@@ -248,6 +248,11 @@
 			<artifactId>jansi</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+
 		<!-- Test Deps -->
 		<dependency>
 			<groupId>org.awaitility</groupId>

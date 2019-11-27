@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import java.sql.SQLException;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
 
@@ -18,7 +17,7 @@ public class AddForeignKeyTaskTest extends BaseTest {
 		executeSql("create table FOREIGNTBL (PID bigint not null, HOMEREF bigint)");
 		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "HOME", "FOREIGNTBL"), empty());
 
-		AddForeignKeyTask task = new AddForeignKeyTask();
+		AddForeignKeyTask task = new AddForeignKeyTask("1", "1");
 		task.setTableName("FOREIGNTBL");
 		task.setColumnName("HOMEREF");
 		task.setConstraintName("FK_HOME_FOREIGN");
