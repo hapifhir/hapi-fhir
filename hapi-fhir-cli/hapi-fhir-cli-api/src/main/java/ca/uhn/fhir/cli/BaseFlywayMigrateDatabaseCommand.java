@@ -21,7 +21,7 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.Migrator;
+import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -35,10 +35,12 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-public abstract class BaseMigrateDatabaseCommand<T extends Enum> extends BaseCommand {
+public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends BaseCommand {
 
-	private static final String MIGRATE_DATABASE = "migrate-database";
+
+	public static final String MIGRATE_DATABASE = "migrate-database";
 	private Set<String> myFlags;
+	private String myMigrationTableName;
 
 	protected Set<String> getFlags() {
 		return myFlags;
@@ -46,7 +48,7 @@ public abstract class BaseMigrateDatabaseCommand<T extends Enum> extends BaseCom
 
 	@Override
 	public String getCommandDescription() {
-		return "This command migrates a HAPI FHIR JPA database from one version of HAPI FHIR to a newer version";
+		return "This command migrates a HAPI FHIR JPA database to the current version";
 	}
 
 	protected abstract List<T> provideAllowedVersions();
@@ -74,8 +76,6 @@ public abstract class BaseMigrateDatabaseCommand<T extends Enum> extends BaseCom
 		addRequiredOption(retVal, "u", "url", "URL", "The JDBC database URL");
 		addRequiredOption(retVal, "n", "username", "Username", "The JDBC database username");
 		addRequiredOption(retVal, "p", "password", "Password", "The JDBC database password");
-		addRequiredOption(retVal, "f", "from", "Version", "The database schema version to migrate FROM");
-		addRequiredOption(retVal, "t", "to", "Version", "The database schema version to migrate TO");
 		addRequiredOption(retVal, "d", "driver", "Driver", "The database driver to use (Options are " + driverOptions() + ")");
 		addOptionalOption(retVal, "x", "flags", "Flags", "A comma-separated list of any specific migration flags (these flags are version specific, see migrator documentation for details)");
 		addOptionalOption(retVal, null, "no-column-shrink", false, "If this flag is set, the system will not attempt to reduce the length of columns. This is useful in environments with a lot of existing data, where shrinking a column can take a very long time.");
@@ -101,11 +101,6 @@ public abstract class BaseMigrateDatabaseCommand<T extends Enum> extends BaseCom
 			throw new ParseException("Invalid driver type \"" + driverTypeString + "\". Valid values are: " + driverOptions());
 		}
 
-		T from = getAndParseOptionEnum(theCommandLine, "f", provideVersionEnumType(), true, null);
-		validateVersionSupported(from);
-		T to = getAndParseOptionEnum(theCommandLine, "t", provideVersionEnumType(), true, null);
-		validateVersionSupported(to);
-
 		boolean dryRun = theCommandLine.hasOption("r");
 		boolean noColumnShrink = theCommandLine.hasOption("no-column-shrink");
 
@@ -115,23 +110,20 @@ public abstract class BaseMigrateDatabaseCommand<T extends Enum> extends BaseCom
 			.filter(StringUtils::isNotBlank)
 			.collect(Collectors.toSet());
 
-		Migrator migrator = new Migrator();
+		FlywayMigrator migrator = new FlywayMigrator(myMigrationTableName);
 		migrator.setConnectionUrl(url);
 		migrator.setDriverType(driverType);
 		migrator.setUsername(username);
 		migrator.setPassword(password);
 		migrator.setDryRun(dryRun);
 		migrator.setNoColumnShrink(noColumnShrink);
-		addTasks(migrator, from, to);
-
+		addTasks(migrator);
 		migrator.migrate();
 	}
 
-	private void validateVersionSupported(T theFrom) throws ParseException {
-		if (provideAllowedVersions().contains(theFrom) == false) {
-			throw new ParseException("The version " + theFrom + " is not supported for migration");
-		}
-	}
+	protected abstract void addTasks(FlywayMigrator theMigrator);
 
-	protected abstract void addTasks(Migrator theMigrator, T theFrom, T theTo);
+	public void setMigrationTableName(String theMigrationTableName) {
+		myMigrationTableName = theMigrationTableName;
+	}
 }

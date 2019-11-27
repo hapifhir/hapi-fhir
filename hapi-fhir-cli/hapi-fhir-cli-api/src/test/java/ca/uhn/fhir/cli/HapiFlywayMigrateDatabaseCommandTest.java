@@ -1,7 +1,7 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.util.VersionEnum;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -26,13 +26,11 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-public class HapiMigrateDatabaseCommandTest {
+public class HapiFlywayMigrateDatabaseCommandTest {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrateDatabaseCommandTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(HapiFlywayMigrateDatabaseCommandTest.class);
 	public static final String DB_DIRECTORY = "target/h2_test";
 
 	static {
@@ -40,7 +38,7 @@ public class HapiMigrateDatabaseCommandTest {
 	}
 
 	@Test
-	public void testMigrate_340_current() throws IOException {
+	public void testMigrateFrom340() throws IOException, SQLException {
 
 		File location = getLocation("migrator_h2_test_340_current");
 
@@ -57,15 +55,15 @@ public class HapiMigrateDatabaseCommandTest {
 		ourLog.info("**********************************************");
 
 		String[] args = new String[]{
-			"migrate-database",
+			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
 			"-d", "H2_EMBEDDED",
 			"-u", url,
 			"-n", "",
-			"-p", "",
-			"-f", "V3_4_0",
-			"-t", VersionEnum.latestVersion().toString()
+			"-p", ""
 		};
+		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RES_REINDEX_JOB"));
 		App.main(args);
+		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RES_REINDEX_JOB"));
 
 		connectionProperties.getTxTemplate().execute(t -> {
 			JdbcTemplate jdbcTemplate = connectionProperties.newJdbcTemplate();
@@ -77,6 +75,33 @@ public class HapiMigrateDatabaseCommandTest {
 			assertEquals(7001889285610424179L, values.get(0).get("HASH_IDENTITY"));
 			return null;
 		});
+	}
+
+	@Test
+	public void testMigrateFromEmptySchema() throws IOException, SQLException {
+
+		File location = getLocation("migrator_h2_test_empty_current");
+
+		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
+		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
+
+		ourLog.info("**********************************************");
+		ourLog.info("Starting Migration...");
+		ourLog.info("**********************************************");
+
+		String[] args = new String[]{
+			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
+			"-d", "H2_EMBEDDED",
+			"-u", url,
+			"-n", "",
+			"-p", ""
+		};
+
+		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE"));
+		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB"));
+		App.main(args);
+		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE")); // Early table
+		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB")); // Late table
 	}
 
 	@NotNull
@@ -88,111 +113,6 @@ public class HapiMigrateDatabaseCommandTest {
 
 		return new File(DB_DIRECTORY + "/" + theDatabaseName);
 	}
-
-	@Test
-	public void testMigrate_340_370() throws IOException {
-
-		File location = getLocation("migrator_h2_test_340_360");
-
-		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
-
-		String initSql = "/persistence_create_h2_340.sql";
-		executeSqlStatements(connectionProperties, initSql);
-
-		seedDatabase340(connectionProperties);
-
-		ourLog.info("**********************************************");
-		ourLog.info("Done Setup, Starting Migration...");
-		ourLog.info("**********************************************");
-
-		String[] args = new String[]{
-			"migrate-database",
-			"-d", "H2_EMBEDDED",
-			"-u", url,
-			"-n", "",
-			"-p", "",
-			"-f", "V3_4_0",
-			"-t", "V3_7_0"
-		};
-		App.main(args);
-
-		connectionProperties.getTxTemplate().execute(t -> {
-			JdbcTemplate jdbcTemplate = connectionProperties.newJdbcTemplate();
-			List<Map<String, Object>> values = jdbcTemplate.queryForList("SELECT * FROM hfj_spidx_token");
-			assertEquals(1, values.size());
-			assertEquals("identifier", values.get(0).get("SP_NAME"));
-			assertEquals("12345678", values.get(0).get("SP_VALUE"));
-			assertTrue(values.get(0).keySet().contains("HASH_IDENTITY"));
-			assertEquals(7001889285610424179L, values.get(0).get("HASH_IDENTITY"));
-			return null;
-		});
-	}
-
-
-	@Test
-	public void testMigrate_340_350() throws IOException {
-
-		File location = getLocation("migrator_h2_test_340_350");
-
-		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
-
-		String initSql = "/persistence_create_h2_340.sql";
-		executeSqlStatements(connectionProperties, initSql);
-
-		seedDatabase340(connectionProperties);
-
-		ourLog.info("**********************************************");
-		ourLog.info("Done Setup, Starting Dry Run...");
-		ourLog.info("**********************************************");
-
-		String[] args = new String[]{
-			"migrate-database",
-			"-d", "H2_EMBEDDED",
-			"-u", url,
-			"-n", "",
-			"-p", "",
-			"-r",
-			"-f", "V3_4_0",
-			"-t", "V3_5_0"
-		};
-		App.main(args);
-
-		connectionProperties.getTxTemplate().execute(t -> {
-			JdbcTemplate jdbcTemplate = connectionProperties.newJdbcTemplate();
-			List<Map<String, Object>> values = jdbcTemplate.queryForList("SELECT * FROM hfj_spidx_token");
-			assertFalse(values.get(0).keySet().contains("HASH_IDENTITY"));
-			return null;
-		});
-
-		ourLog.info("**********************************************");
-		ourLog.info("Done Setup, Starting Migration...");
-		ourLog.info("**********************************************");
-
-		args = new String[]{
-			"migrate-database",
-			"-d", "H2_EMBEDDED",
-			"-u", url,
-			"-n", "",
-			"-p", "",
-			"-f", "V3_4_0",
-			"-t", "V3_5_0"
-		};
-		App.main(args);
-
-		connectionProperties.getTxTemplate().execute(t -> {
-			JdbcTemplate jdbcTemplate = connectionProperties.newJdbcTemplate();
-			List<Map<String, Object>> values = jdbcTemplate.queryForList("SELECT * FROM hfj_spidx_token");
-			assertEquals(1, values.size());
-			assertEquals("identifier", values.get(0).get("SP_NAME"));
-			assertEquals("12345678", values.get(0).get("SP_VALUE"));
-			assertTrue(values.get(0).keySet().contains("HASH_IDENTITY"));
-			assertEquals(7001889285610424179L, values.get(0).get("HASH_IDENTITY"));
-			return null;
-		});
-	}
-
 
 	private void seedDatabase340(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
 		theConnectionProperties.getTxTemplate().execute(t -> {
@@ -306,51 +226,9 @@ public class HapiMigrateDatabaseCommandTest {
 
 	}
 
-
-	@Test
-	public void testMigrate_340_350_NoMigrateHashes() throws IOException {
-
-		File location = getLocation("migrator_h2_test_340_350_nmh");
-
-		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
-
-		String initSql = "/persistence_create_h2_340.sql";
-		executeSqlStatements(connectionProperties, initSql);
-
-		seedDatabase340(connectionProperties);
-
-		ourLog.info("**********************************************");
-		ourLog.info("Done Setup, Starting Migration...");
-		ourLog.info("**********************************************");
-
-		String[] args = new String[]{
-			"migrate-database",
-			"-d", "H2_EMBEDDED",
-			"-u", url,
-			"-n", "",
-			"-p", "",
-			"-f", "V3_4_0",
-			"-t", "V3_5_0",
-			"-x", "no-migrate-350-hashes"
-		};
-		App.main(args);
-
-		connectionProperties.getTxTemplate().execute(t -> {
-			JdbcTemplate jdbcTemplate = connectionProperties.newJdbcTemplate();
-			List<Map<String, Object>> values = jdbcTemplate.queryForList("SELECT * FROM hfj_spidx_token");
-			assertEquals(1, values.size());
-			assertEquals("identifier", values.get(0).get("SP_NAME"));
-			assertEquals("12345678", values.get(0).get("SP_VALUE"));
-			assertEquals(null, values.get(0).get("HASH_IDENTITY"));
-			return null;
-		});
-
-	}
-
 	private void executeSqlStatements(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theInitSql) throws
 		IOException {
-		String script = IOUtils.toString(HapiMigrateDatabaseCommandTest.class.getResourceAsStream(theInitSql), Charsets.UTF_8);
+		String script = IOUtils.toString(HapiFlywayMigrateDatabaseCommandTest.class.getResourceAsStream(theInitSql), Charsets.UTF_8);
 		List<String> scriptStatements = new ArrayList<>(Arrays.asList(script.split("\n")));
 		for (int i = 0; i < scriptStatements.size(); i++) {
 			String nextStatement = scriptStatements.get(i);

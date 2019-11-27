@@ -19,7 +19,7 @@ public class DropForeignKeyTaskTest extends BaseTest {
 
 		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
 
-		DropForeignKeyTask task = new DropForeignKeyTask();
+		DropForeignKeyTask task = new DropForeignKeyTask("1",  "1");
 		task.setTableName("CHILD");
 		task.setParentTableName("PARENT");
 		task.setConstraintName("FK_MOM");

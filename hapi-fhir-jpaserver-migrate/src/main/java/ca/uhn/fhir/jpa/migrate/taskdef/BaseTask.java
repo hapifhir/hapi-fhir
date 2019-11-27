@@ -32,10 +32,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class BaseTask<T extends BaseTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTask.class);
+	public static final String MIGRATION_VERSION_PATTERN = "\\d{8}\\.\\d+";
+	private static final Pattern versionPattern = Pattern.compile(MIGRATION_VERSION_PATTERN);
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 	private DriverTypeEnum myDriverType;
 	private String myDescription;
@@ -43,6 +47,13 @@ public abstract class BaseTask<T extends BaseTask> {
 	private boolean myDryRun;
 	private List<ExecutedStatement> myExecutedStatements = new ArrayList<>();
 	private boolean myNoColumnShrink;
+	private final String myProductVersion;
+	private final String mySchemaVersion;
+
+	protected BaseTask(String theProductVersion, String theSchemaVersion) {
+		myProductVersion = theProductVersion;
+		mySchemaVersion = theSchemaVersion;
+	}
 
 	public boolean isNoColumnShrink() {
 		return myNoColumnShrink;
@@ -61,6 +72,9 @@ public abstract class BaseTask<T extends BaseTask> {
 	}
 
 	public String getDescription() {
+		if (myDescription == null) {
+			return this.getClass().getSimpleName();
+		}
 		return myDescription;
 	}
 
@@ -88,7 +102,7 @@ public abstract class BaseTask<T extends BaseTask> {
 			Integer changes = getConnectionProperties().getTxTemplate().execute(t -> {
 				JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 				int changesCount = jdbcTemplate.update(theSql, theArguments);
-				ourLog.info("SQL \"{}\" returned {}", theSql, changesCount);
+				logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
 				return changesCount;
 			});
 
@@ -129,6 +143,25 @@ public abstract class BaseTask<T extends BaseTask> {
 	}
 
 	public abstract void execute() throws SQLException;
+
+	public String getFlywayVersion() {
+		String releasePart = myProductVersion;
+		if (releasePart.startsWith("V")) {
+			releasePart = releasePart.substring(1);
+		}
+		return releasePart + "." + mySchemaVersion;
+	}
+
+	protected void logInfo(Logger theLog, String theFormattedMessage, Object... theArguments) {
+		theLog.info(getFlywayVersion() + ": " + theFormattedMessage, theArguments);
+	}
+
+	public void validateVersion() {
+		Matcher matcher = versionPattern.matcher(mySchemaVersion);
+		if (!matcher.matches()) {
+			throw new IllegalStateException("The version " + mySchemaVersion + " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
+		}
+	}
 
 	public static class ExecutedStatement {
 		private final String mySql;

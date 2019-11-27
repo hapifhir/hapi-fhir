@@ -31,12 +31,21 @@ public class AddColumnTask extends BaseTableColumnTypeTask<AddColumnTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddColumnTask.class);
 
+	public AddColumnTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
+
+	@Override
+	public void validate() {
+		super.validate();
+		setDescription("Add column " + getColumnName() + " on table " + getTableName());
+	}
 
 	@Override
 	public void execute() throws SQLException {
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 		if (columnNames.contains(getColumnName())) {
-			ourLog.info("Column {} already exists on table {} - No action performed", getColumnName(), getTableName());
+			logInfo(ourLog, "Column {} already exists on table {} - No action performed", getColumnName(), getTableName());
 			return;
 		}
 
@@ -59,7 +68,7 @@ public class AddColumnTask extends BaseTableColumnTypeTask<AddColumnTask> {
 				throw new IllegalStateException();
 		}
 
-		ourLog.info("Adding column {} of type {} to table {}", getColumnName(), getSqlType(), getTableName());
+		logInfo(ourLog, "Adding column {} of type {} to table {}", getColumnName(), getSqlType(), getTableName());
 		executeSql(getTableName(), sql);
 	}
 
