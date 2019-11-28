@@ -28,4 +28,6 @@ public interface ISchemaInitializationProvider {
 	List<String> getSqlStatements(DriverTypeEnum theDriverType);
 
 	String getSchemaExistsIndicatorTable();
+
+	String getDescription();
 }
