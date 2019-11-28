@@ -41,23 +41,28 @@ public abstract class FireAtIntervalJob implements Job {
 
 	@Override
 	public final void execute(JobExecutionContext theContext) {
+		/** FIXME KHS
 		Long nextExecution = (Long) theContext.getJobDetail().getJobDataMap().get(NEXT_EXECUTION_TIME);
 
 		if (nextExecution != null) {
 			long cutoff = System.currentTimeMillis();
 			if (nextExecution >= cutoff) {
+				ourLog.info("Not enough time has passed since last execution of {}.  Skipping this one.", theContext.getJobDetail().getDescription());
 				return;
 			}
 		}
-
+*/
 		try {
 			doExecute(theContext);
 		} catch (Throwable t) {
 			ourLog.error("Job threw uncaught exception", t);
-		} finally {
+		}
+		/** FIXME KHS
+		finally {
 			long newNextExecution = System.currentTimeMillis() + myMillisBetweenExecutions;
 			theContext.getJobDetail().getJobDataMap().put(NEXT_EXECUTION_TIME, newNextExecution);
 		}
+		 */
 	}
 
 	protected abstract void doExecute(JobExecutionContext theContext);
