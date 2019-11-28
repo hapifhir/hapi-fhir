@@ -32,10 +32,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SchemaInitializationProvider implements ISchemaInitializationProvider {
+	private static final Pattern ourTrailingCommaPattern = Pattern.compile(",(\\s+)\\)");
 	private final String mySchemaFileClassPath;
 	private final String mySchemaExistsIndicatorTable;
 
@@ -72,22 +75,11 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 		return retval;
 	}
 
-	private String clean(String theStatement) {
-		String[] lines = theStatement.split("\\n");
-		String retval = "";
-		for (String fullLine : lines) {
-			String line = fullLine.trim();
-			if (isBlank(line) ||
-				line.startsWith("--")) {
-				continue;
-			}
-			// FIXME KHS hack to fix bug in Quartz SQL
-			if ("BOOL_PROP_2 BOOLEAN NULL,".equals(line)) {
-				line = "BOOL_PROP_2 BOOLEAN NULL";
-			}
-			retval += line + "\n";
-		}
-		return retval;
+	static String clean(String theStatement) {
+		// Remove commas before brackets.  Some databases don't like this and
+		// some schemas shipped with Quartz include them
+		Matcher matcher = ourTrailingCommaPattern.matcher(theStatement);
+		return matcher.replaceAll("$1\\)");
 	}
 
 	@Nonnull
