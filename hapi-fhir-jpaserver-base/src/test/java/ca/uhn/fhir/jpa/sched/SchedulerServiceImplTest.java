@@ -51,7 +51,7 @@ public class SchedulerServiceImplTest {
 			.setId(CountingJob.class.getName())
 			.setJobClass(CountingJob.class);
 
-		mySvc.scheduleFixedDelayLocal(100, def);
+		mySvc.scheduleLocalJob(100, def);
 
 		sleepAtLeast(1000);
 
@@ -73,7 +73,7 @@ public class SchedulerServiceImplTest {
 		svc.create();
 		svc.start();
 
-		mySvc.scheduleFixedDelayLocal(100, def);
+		mySvc.scheduleLocalJob(100, def);
 
 		sleepAtLeast(1000);
 
@@ -91,7 +91,7 @@ public class SchedulerServiceImplTest {
 			.setJobClass(CountingJob.class);
 		ourTaskDelay = 500;
 
-		mySvc.scheduleFixedDelayLocal(100, def);
+		mySvc.scheduleLocalJob(100, def);
 
 		sleepAtLeast(1000);
 
@@ -109,7 +109,7 @@ public class SchedulerServiceImplTest {
 			.setJobClass(CountingIntervalJob.class);
 		ourTaskDelay = 500;
 
-		mySvc.scheduleFixedDelayLocal(100, def);
+		mySvc.scheduleLocalJob(100, def);
 
 		sleepAtLeast(2000);
 

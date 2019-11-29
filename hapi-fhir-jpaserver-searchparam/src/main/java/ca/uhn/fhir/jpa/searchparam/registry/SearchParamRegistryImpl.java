@@ -728,7 +728,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(SearchParamRegistryImpl.class.getName());
 		jobDetail.setJobClass(SubmitJob.class);
-		mySchedulerService.scheduleFixedDelayLocal(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+		mySchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
 	@Override

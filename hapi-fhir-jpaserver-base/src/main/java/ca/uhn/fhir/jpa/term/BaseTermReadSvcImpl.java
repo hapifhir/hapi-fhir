@@ -1309,7 +1309,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		ScheduledJobDefinition vsJobDefinition = new ScheduledJobDefinition();
 		vsJobDefinition.setId(BaseTermReadSvcImpl.class.getName() + "_preExpandValueSets");
 		vsJobDefinition.setJobClass(PreExpandValueSetsJob.class);
-		mySchedulerService.scheduleFixedDelayClustered(10 * DateUtils.MILLIS_PER_MINUTE, vsJobDefinition);
+		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_MINUTE, vsJobDefinition);
 	}
 
 	@Override

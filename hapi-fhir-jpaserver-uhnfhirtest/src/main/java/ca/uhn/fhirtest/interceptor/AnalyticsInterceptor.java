@@ -70,7 +70,7 @@ public class AnalyticsInterceptor extends InterceptorAdapter {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(SubmitJob.class);
-		mySchedulerService.scheduleFixedDelayLocal(5000, jobDetail);
+		mySchedulerService.scheduleLocalJob(5000, jobDetail);
 	}
 
 	@PreDestroy

@@ -35,14 +35,14 @@ public interface ISchedulerService {
 	 * @param theIntervalMillis How many milliseconds between passes should this job run
 	 * @param theJobDefinition  The Job to fire
 	 */
-	void scheduleFixedDelayLocal(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
+	void scheduleLocalJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
 
 	/**
 	 * This task will execute locally (and should execute on all nodes of the cluster if there is a cluster)
 	 * @param theIntervalMillis How many milliseconds between passes should this job run
 	 * @param theJobDefinition  The Job to fire
 	 */
-	void scheduleFixedDelayClustered(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
+	void scheduleClusteredJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
 
 	boolean isStopping();
 }

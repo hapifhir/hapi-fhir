@@ -110,7 +110,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(this.getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleFixedDelayClustered(JOB_INTERVAL_MILLIS, jobDetail);
+		mySchedulerService.scheduleClusteredJob(JOB_INTERVAL_MILLIS, jobDetail);
 	}
 
 	public static class Job implements HapiJob {

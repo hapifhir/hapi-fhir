@@ -96,7 +96,7 @@ public class ResourceCountCache {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(ResourceCountCache.class.getName());
 		jobDetail.setJobClass(ResourceCountCache.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelayLocal(10 * DateUtils.MILLIS_PER_MINUTE, jobDetail);
+		mySchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_MINUTE, jobDetail);
 	}
 
 	public static class SubmitJob implements Job {

@@ -172,12 +172,12 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 	}
 
 	@Override
-	public void scheduleFixedDelayLocal(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
+	public void scheduleLocalJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
 		myLocalScheduler.scheduleFixedDelay(theIntervalMillis, theJobDefinition);
 	}
 
 	@Override
-	public void scheduleFixedDelayClustered(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
+	public void scheduleClusteredJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
 		myClusteredScheduler.scheduleFixedDelay(theIntervalMillis, theJobDefinition);
 	}
 

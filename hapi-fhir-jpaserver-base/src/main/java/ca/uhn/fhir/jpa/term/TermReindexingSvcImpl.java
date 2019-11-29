@@ -157,7 +157,7 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
 		jobDefinition.setId(this.getClass().getName());
 		jobDefinition.setJobClass(Job.class);
-		mySchedulerService.scheduleFixedDelayLocal(JOB_INTERVAL_MILLIS, jobDefinition);
+		mySchedulerService.scheduleLocalJob(JOB_INTERVAL_MILLIS, jobDefinition);
 	}
 
 	public static class Job implements HapiJob {
