@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  */
 
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
-import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -33,9 +33,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
-import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.PersistJobDataAfterExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,18 +158,12 @@ public class SubscriptionLoader {
 		mySubscriptionProvider = theSubscriptionProvider;
 	}
 
-	@DisallowConcurrentExecution
-	@PersistJobDataAfterExecution
-	public static class SubmitJob extends FireAtIntervalJob {
+	public static class SubmitJob implements HapiJob {
 		@Autowired
 		private SubscriptionLoader myTarget;
 
-		public SubmitJob() {
-			super(REFRESH_INTERVAL);
-		}
-
 		@Override
-		protected void doExecute(JobExecutionContext theContext) {
+		public void execute(JobExecutionContext theContext) {
 			myTarget.syncSubscriptions();
 		}
 	}

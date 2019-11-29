@@ -1,13 +1,16 @@
 package ca.uhn.fhir.jpa.sched;
 
-import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.rest.server.sched.ISchedulerService;
 import ca.uhn.fhir.rest.server.sched.ScheduledJobDefinition;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.quartz.*;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -157,10 +160,7 @@ public class SchedulerServiceImplTest {
 		}
 	}
 
-
-	@DisallowConcurrentExecution
-	@PersistJobDataAfterExecution
-	public static class CountingIntervalJob extends FireAtIntervalJob {
+	public static class CountingIntervalJob implements HapiJob {
 
 		private static int ourCount;
 
@@ -169,12 +169,8 @@ public class SchedulerServiceImplTest {
 		private String myStringBean;
 		private ApplicationContext myAppCtx;
 
-		public CountingIntervalJob() {
-			super(500);
-		}
-
 		@Override
-		public void doExecute(JobExecutionContext theContext) {
+		public void execute(JobExecutionContext theContext) {
 				ourLog.info("Job has fired, going to sleep for {}ms", ourTaskDelay);
 				sleepAtLeast(ourTaskDelay);
 			ourCount++;

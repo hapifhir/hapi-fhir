@@ -25,7 +25,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
@@ -289,20 +289,12 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		myConceptDao = theConceptDao;
 	}
 
-	public static class SaveDeferredJob extends FireAtIntervalJob {
-
+	public static class SaveDeferredJob implements HapiJob {
 		@Autowired
 		private ITermDeferredStorageSvc myTerminologySvc;
 
-		/**
-		 * Constructor
-		 */
-		public SaveDeferredJob() {
-			super(SCHEDULE_INTERVAL_MILLIS);
-		}
-
 		@Override
-		protected void doExecute(JobExecutionContext theContext) {
+		public void execute(JobExecutionContext theContext) {
 			myTerminologySvc.saveDeferred();
 		}
 	}
