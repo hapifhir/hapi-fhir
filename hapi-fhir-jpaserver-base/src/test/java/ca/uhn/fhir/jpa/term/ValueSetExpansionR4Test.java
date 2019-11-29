@@ -120,6 +120,28 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	}
 
 	@Test
+	public void testExpandTermValueSetAndChildren2() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		CodeSystem codeSystem = loadResource(myFhirCtx, CodeSystem.class, "/r4/CodeSystem-iar-chymh-cb-calculated-cap-10.xml");
+		myCodeSystemDao.create(codeSystem);
+
+		ValueSet valueSet = loadResource(myFhirCtx, ValueSet.class, "/r4/ValueSet-iar-chymh-cb-calculated-cap-10.xml");
+		myValueSetDao.create(valueSet);
+
+
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		myCaptureQueriesListener.clear();
+
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, 0, 100);
+		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		assertEquals(3, expandedValueSet.getExpansion().getContains().size());
+	}
+
+
+		@Test
 	public void testExpandExistingValueSetNotPreExpanded() throws Exception {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 

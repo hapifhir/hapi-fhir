@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeSystem xmlns="http://hl7.org/fhir">
+	<id value="chymh-cb-calculated-cap-10"/>
+	<url value="http://ccim.on.ca/fhir/iar/CodeSystem/chymh-cb-calculated-cap-10"/>
+	<version value="0.1"/>
+	<name value="CYMH Interpersonal Conflict CAP"/>
+	<status value="draft"/>
+	<date value="2019-08-08"/>
+	<publisher value="CCIM"/>
+	<contact>
+		<telecom>
+			<system value="other"/>
+			<value value="https://www.ccim.on.ca"/>
+		</telecom>
+	</contact>
+	<caseSensitive value="true"/>
+	<compositional value="false"/>
+	<content value="complete"/>
+	<concept>
+		<code value="0"/>
+		<display value="Not Triggered"/>
+	</concept>
+	<concept>
+		<code value="1"/>
+		<display value="Triggered to reduce conflict within a specific domain"/>
+	</concept>
+	<concept>
+		<code value="2"/>
+		<display value=" Triggered to reduce widespread conflict"/>
+	</concept>
+</CodeSystem>
