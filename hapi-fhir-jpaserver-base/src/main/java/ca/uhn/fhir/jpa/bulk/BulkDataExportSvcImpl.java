@@ -78,7 +78,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
-	private static final long JOB_INTERVAL_MILLIS = 10 * DateUtils.MILLIS_PER_SECOND;
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImpl.class);
 	private int myReuseBulkExportForMillis = (int) (60 * DateUtils.MILLIS_PER_MINUTE);
 
@@ -311,13 +310,12 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	@PostConstruct
 	public void start() {
-		ourLog.info("Bulk export service starting with refresh interval {}", StopWatch.formatMillis(JOB_INTERVAL_MILLIS));
 		myTxTemplate = new TransactionTemplate(myTxManager);
 
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(this.getClass().getName());
+		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleClusteredJob(JOB_INTERVAL_MILLIS, jobDetail);
+		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
 	public static class Job implements HapiJob {

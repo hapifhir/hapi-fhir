@@ -20,12 +20,12 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.sched.ISchedulerService;
 import ca.uhn.fhir.rest.server.sched.ScheduledJobDefinition;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
-import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,14 +92,14 @@ public class ResourceCountCache {
 	}
 
 	@PostConstruct
-	public void registerScheduledJob() {
+	public void scheduleJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(ResourceCountCache.class.getName());
-		jobDetail.setJobClass(ResourceCountCache.SubmitJob.class);
+		jobDetail.setId(getClass().getName());
+		jobDetail.setJobClass(Job.class);
 		mySchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_MINUTE, jobDetail);
 	}
 
-	public static class SubmitJob implements Job {
+	public static class Job implements HapiJob {
 		@Autowired
 		private ResourceCountCache myTarget;
 

@@ -50,7 +50,6 @@ import java.util.concurrent.Semaphore;
 @Service
 @Lazy
 public class SubscriptionLoader {
-	public static final long JOB_INTERVAL_MILLIS = DateUtils.MILLIS_PER_MINUTE;
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
 	private static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
 	private final Object mySyncSubscriptionsLock = new Object();
@@ -90,9 +89,9 @@ public class SubscriptionLoader {
 	@PostConstruct
 	public void scheduleJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(this.getClass().getName());
+		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(JOB_INTERVAL_MILLIS, jobDetail);
+		mySchedulerService.scheduleLocalJob(DateUtils.MILLIS_PER_MINUTE, jobDetail);
 	}
 
 	public static class Job implements HapiJob {

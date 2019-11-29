@@ -25,6 +25,7 @@ import ca.uhn.fhir.model.api.ISmartLifecyclePhase;
 import ca.uhn.fhir.rest.server.sched.IHapiScheduler;
 import ca.uhn.fhir.rest.server.sched.ISchedulerService;
 import ca.uhn.fhir.rest.server.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.util.StopWatch;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -173,12 +174,14 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 
 	@Override
 	public void scheduleLocalJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
-		myLocalScheduler.scheduleFixedDelay(theIntervalMillis, theJobDefinition);
+		ourLog.info("Scheduling local job {} with interval {}", theJobDefinition.getId(), StopWatch.formatMillis(theIntervalMillis));
+		myLocalScheduler.scheduleJob(theIntervalMillis, theJobDefinition);
 	}
 
 	@Override
 	public void scheduleClusteredJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
-		myClusteredScheduler.scheduleFixedDelay(theIntervalMillis, theJobDefinition);
+		ourLog.info("Scheduling clustered job {} with interval {}", theJobDefinition.getId(), StopWatch.formatMillis(theIntervalMillis));
+		myClusteredScheduler.scheduleJob(theIntervalMillis, theJobDefinition);
 	}
 
 	private boolean isSchedulingDisabledForUnitTests() {

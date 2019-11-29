@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -69,7 +70,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
-import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -204,23 +204,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 			}
 		}
 		return retVal;
-	}
-
-	@PostConstruct
-	public void buildTranslationCaches() {
-		Long timeout = myDaoConfig.getTranslationCachesExpireAfterWriteInMinutes();
-
-		myTranslationCache =
-			Caffeine.newBuilder()
-				.maximumSize(10000)
-				.expireAfterWrite(timeout, TimeUnit.MINUTES)
-				.build();
-
-		myTranslationWithReverseCache =
-			Caffeine.newBuilder()
-				.maximumSize(10000)
-				.expireAfterWrite(timeout, TimeUnit.MINUTES)
-				.build();
 	}
 
 	/**
@@ -1300,16 +1283,44 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		RuleBasedTransactionAttribute rules = new RuleBasedTransactionAttribute();
 		rules.getRollbackRules().add(new NoRollbackRuleAttribute(ExpansionTooCostlyException.class));
 		myTxTemplate = new TransactionTemplate(myTransactionManager, rules);
+		buildTranslationCaches();
+		scheduleJob();
 	}
 
-	@PostConstruct
-	public void registerScheduledJob() {
+	private void buildTranslationCaches() {
+		Long timeout = myDaoConfig.getTranslationCachesExpireAfterWriteInMinutes();
+
+		myTranslationCache =
+			Caffeine.newBuilder()
+				.maximumSize(10000)
+				.expireAfterWrite(timeout, TimeUnit.MINUTES)
+				.build();
+
+		myTranslationWithReverseCache =
+			Caffeine.newBuilder()
+				.maximumSize(10000)
+				.expireAfterWrite(timeout, TimeUnit.MINUTES)
+				.build();
+	}
+
+	public void scheduleJob() {
+		// FIXME KHS what does this mean?
 		// Register scheduled job to pre-expand ValueSets
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition vsJobDefinition = new ScheduledJobDefinition();
-		vsJobDefinition.setId(BaseTermReadSvcImpl.class.getName() + "_preExpandValueSets");
-		vsJobDefinition.setJobClass(PreExpandValueSetsJob.class);
+		vsJobDefinition.setId(getClass().getName());
+		vsJobDefinition.setJobClass(Job.class);
 		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_MINUTE, vsJobDefinition);
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private ITermReadSvc myTerminologySvc;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTerminologySvc.preExpandDeferredValueSetsToTerminologyTables();
+		}
 	}
 
 	@Override
@@ -1863,17 +1874,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 			.stream()
 			.filter(t -> (Constants.codeSystemNotNeeded(theCodeSystem) || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
 			.findFirst();
-	}
-
-	public static class PreExpandValueSetsJob implements Job {
-
-		@Autowired
-		private ITermReadSvc myTerminologySvc;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTerminologySvc.preExpandDeferredValueSetsToTerminologyTables();
-		}
 	}
 
 	static List<TermConcept> toPersistedConcepts(List<CodeSystem.ConceptDefinitionComponent> theConcept, TermCodeSystemVersion theCodeSystemVersion) {

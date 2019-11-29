@@ -53,7 +53,6 @@ import java.util.List;
 
 public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
-	private static final int JOB_INTERVAL_MILLIS = 5000;
 	private static final Logger ourLog = LoggerFactory.getLogger(TermDeferredStorageSvcImpl.class);
 	@Autowired
 	protected ITermConceptDao myConceptDao;
@@ -267,7 +266,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
 		jobDefinition.setId(this.getClass().getName());
 		jobDefinition.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(JOB_INTERVAL_MILLIS, jobDefinition);
+		mySchedulerService.scheduleLocalJob(5000, jobDefinition);
 	}
 
 	public static class Job implements HapiJob {

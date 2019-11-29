@@ -21,10 +21,10 @@ package ca.uhn.fhir.jpa.search.cache;
  */
 
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.rest.server.sched.ISchedulerService;
 import ca.uhn.fhir.rest.server.sched.ScheduledJobDefinition;
 import org.apache.commons.lang3.time.DateUtils;
-import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -51,10 +51,10 @@ public abstract class BaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	}
 
 	@PostConstruct
-	public void registerScheduledJob() {
+	public void scheduleJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(BaseSearchCacheSvcImpl.class.getName());
-		jobDetail.setJobClass(BaseSearchCacheSvcImpl.SubmitJob.class);
+		jobDetail.setId(getClass().getName());
+		jobDetail.setJobClass(Job.class);
 		mySchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
@@ -73,7 +73,7 @@ public abstract class BaseSearchCacheSvcImpl implements ISearchCacheSvc {
 
 	protected abstract void flushLastUpdated(Long theSearchId, Date theLastUpdated);
 
-	public static class SubmitJob implements Job {
+	public static class Job implements HapiJob {
 		@Autowired
 		private ISearchCacheSvc myTarget;
 

@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
@@ -49,7 +50,6 @@ import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.Reference;
-import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -724,11 +724,21 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 	}
 
 	@PostConstruct
-	public void registerScheduledJob() {
+	public void scheduleJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(SearchParamRegistryImpl.class.getName());
-		jobDetail.setJobClass(SubmitJob.class);
+		jobDetail.setId(getClass().getName());
+		jobDetail.setJobClass(Job.class);
 		mySchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private ISearchParamRegistry myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.refreshCacheIfNecessary();
+		}
 	}
 
 	@Override
@@ -764,17 +774,6 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 					theRuntimeSearchParam.addExtension(nextUrl, next);
 				}
 			}
-		}
-	}
-
-
-	public static class SubmitJob implements Job {
-		@Autowired
-		private ISearchParamRegistry myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.refreshCacheIfNecessary();
 		}
 	}
 

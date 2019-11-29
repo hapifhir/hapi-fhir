@@ -113,7 +113,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 	}
 
 	@Override
-	public void scheduleFixedDelay(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
+	public void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
 		Validate.isTrue(theIntervalMillis >= 100);
 
 		Validate.notNull(theJobDefinition);

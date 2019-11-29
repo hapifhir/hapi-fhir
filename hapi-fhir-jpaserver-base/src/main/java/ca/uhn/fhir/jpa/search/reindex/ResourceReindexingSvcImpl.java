@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -46,7 +47,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.search.util.impl.Executors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
-import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,6 +146,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	public void start() {
 		myTxTemplate = new TransactionTemplate(myTxManager);
 		initExecutor();
+		scheduleJob();
 	}
 
 	public void initExecutor() {
@@ -158,6 +159,13 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			myReindexingThreadFactory,
 			rejectHandler
 		);
+	}
+
+	public void scheduleJob() {
+		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(getClass().getName());
+		jobDetail.setJobClass(Job.class);
+		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
 	@Override
@@ -187,12 +195,14 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		return job.getId();
 	}
 
-	@PostConstruct
-	public void registerScheduledJob() {
-		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(ResourceReindexingSvcImpl.class.getName());
-		jobDetail.setJobClass(ResourceReindexingSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+	public static class Job implements HapiJob {
+		@Autowired
+		private IResourceReindexingSvc myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.runReindexingPass();
+		}
 	}
 
 	@VisibleForTesting
@@ -543,16 +553,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			}
 
 			return myUpdated;
-		}
-	}
-
-	public static class SubmitJob implements Job {
-		@Autowired
-		private IResourceReindexingSvc myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.runReindexingPass();
 		}
 	}
 }

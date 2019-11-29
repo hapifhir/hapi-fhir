@@ -40,7 +40,7 @@ public class HapiNullScheduler implements IHapiScheduler {
 	}
 
 	@Override
-	public void scheduleFixedDelay(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
+	public void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
 		ourLog.debug("Skipping scheduling job {} since scheduling is disabled", theJobDefinition.getId());
 	}
 }

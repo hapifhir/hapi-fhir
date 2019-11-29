@@ -45,7 +45,6 @@ import java.util.*;
 @Component
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
-	public static final long JOB_INTERVAL_MILLIS = 10 * DateUtils.MILLIS_PER_SECOND;
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
 	@Autowired
 	private DaoConfig myDaoConfig;
@@ -108,9 +107,9 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
 	public void scheduleJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(this.getClass().getName());
+		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleClusteredJob(JOB_INTERVAL_MILLIS, jobDetail);
+		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
 	public static class Job implements HapiJob {

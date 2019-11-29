@@ -75,7 +75,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
 public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc {
-	public static final long JOB_INTERVAL_MILLIS = DateUtils.MILLIS_PER_SECOND;
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTriggeringProvider.class);
 	private static final int DEFAULT_MAX_SUBMIT = 10000;
 	private final List<SubscriptionTriggeringJobDetails> myActiveJobs = new ArrayList<>();
@@ -385,9 +384,9 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 	private void scheduleJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(this.getClass().getName());
+		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(JOB_INTERVAL_MILLIS, jobDetail);
+		mySchedulerService.scheduleLocalJob(DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
 	public static class Job implements HapiJob {

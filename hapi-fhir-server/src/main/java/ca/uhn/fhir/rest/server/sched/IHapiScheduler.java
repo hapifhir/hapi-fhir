@@ -15,5 +15,5 @@ public interface IHapiScheduler {
 
 	void logStatusForUnitTest();
 
-	void scheduleFixedDelay(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
+	void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
 }

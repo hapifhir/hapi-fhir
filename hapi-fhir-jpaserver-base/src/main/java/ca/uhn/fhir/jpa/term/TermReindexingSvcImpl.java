@@ -54,7 +54,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class TermReindexingSvcImpl implements ITermReindexingSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermReindexingSvcImpl.class);
-	private static final long JOB_INTERVAL_MILLIS = DateUtils.MILLIS_PER_MINUTE;
 	private static boolean ourForceSaveDeferredAlwaysForUnitTest;
 	@Autowired
 	protected ITermConceptDao myConceptDao;
@@ -157,7 +156,7 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
 		jobDefinition.setId(this.getClass().getName());
 		jobDefinition.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(JOB_INTERVAL_MILLIS, jobDefinition);
+		mySchedulerService.scheduleLocalJob(DateUtils.MILLIS_PER_MINUTE, jobDefinition);
 	}
 
 	public static class Job implements HapiJob {
