@@ -54,7 +54,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class TermReindexingSvcImpl implements ITermReindexingSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermReindexingSvcImpl.class);
-	private static final long SCHEDULE_INTERVAL_MILLIS = DateUtils.MILLIS_PER_MINUTE;
+	private static final long JOB_INTERVAL_MILLIS = DateUtils.MILLIS_PER_MINUTE;
 	private static boolean ourForceSaveDeferredAlwaysForUnitTest;
 	@Autowired
 	protected ITermConceptDao myConceptDao;
@@ -150,16 +150,17 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 	}
 
 	@PostConstruct
-	public void registerScheduledJob() {
+	public void scheduleJob() {
+		// FIXME KHS what does this mean?
 		// Register scheduled job to save deferred concepts
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
-		jobDefinition.setId(TermReindexingSvcImpl.class.getName() + "_reindex");
-		jobDefinition.setJobClass(SaveDeferredJob.class);
-		mySchedulerService.scheduleFixedDelayLocal(SCHEDULE_INTERVAL_MILLIS, jobDefinition);
+		jobDefinition.setId(this.getClass().getName());
+		jobDefinition.setJobClass(Job.class);
+		mySchedulerService.scheduleFixedDelayLocal(JOB_INTERVAL_MILLIS, jobDefinition);
 	}
 
-	public static class SaveDeferredJob implements HapiJob {
+	public static class Job implements HapiJob {
 		@Autowired
 		private ITermDeferredStorageSvc myTerminologySvc;
 

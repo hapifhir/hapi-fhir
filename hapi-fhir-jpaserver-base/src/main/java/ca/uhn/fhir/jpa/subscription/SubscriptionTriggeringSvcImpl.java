@@ -75,7 +75,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
 public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc {
-	public static final long SCHEDULE_DELAY = DateUtils.MILLIS_PER_SECOND;
+	public static final long JOB_INTERVAL_MILLIS = DateUtils.MILLIS_PER_SECOND;
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTriggeringProvider.class);
 	private static final int DEFAULT_MAX_SUBMIT = 10000;
 	private final List<SubscriptionTriggeringJobDetails> myActiveJobs = new ArrayList<>();
@@ -155,14 +155,6 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		value.setValueAsString("Subscription triggering job submitted as JOB ID: " + jobDetails.myJobId);
 		ParametersUtil.addParameterToParameters(myFhirContext, retVal, "information", value);
 		return retVal;
-	}
-
-	@PostConstruct
-	public void registerScheduledJob() {
-		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(SubscriptionTriggeringSvcImpl.class.getName());
-		jobDetail.setJobClass(SubscriptionTriggeringSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelayLocal(SCHEDULE_DELAY, jobDetail);
 	}
 
 	@Override
@@ -354,6 +346,11 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 	@PostConstruct
 	public void start() {
+		createExecutorService();
+		scheduleJob();
+	}
+
+	private void createExecutorService() {
 		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1000);
 		BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
 			.namingPattern("SubscriptionTriggering-%d")
@@ -384,10 +381,16 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			executorQueue,
 			threadFactory,
 			rejectedExecutionHandler);
-
 	}
 
-	public static class SubmitJob implements HapiJob {
+	private void scheduleJob() {
+		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(this.getClass().getName());
+		jobDetail.setJobClass(Job.class);
+		mySchedulerService.scheduleFixedDelayLocal(JOB_INTERVAL_MILLIS, jobDetail);
+	}
+
+	public static class Job implements HapiJob {
 		@Autowired
 		private ISubscriptionTriggeringSvc myTarget;
 

@@ -45,7 +45,7 @@ import java.util.*;
 @Component
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
-	public static final long SCHEDULED_JOB_INTERVAL = 10 * DateUtils.MILLIS_PER_SECOND;
+	public static final long JOB_INTERVAL_MILLIS = 10 * DateUtils.MILLIS_PER_SECOND;
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
 	@Autowired
 	private DaoConfig myDaoConfig;
@@ -81,14 +81,6 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
 	}
 
-	@PostConstruct
-	public void registerScheduledJob() {
-		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(CacheWarmingSvcImpl.class.getName());
-		jobDetail.setJobClass(CacheWarmingSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelayClustered(SCHEDULED_JOB_INTERVAL, jobDetail);
-	}
-
 	private void refreshNow(WarmCacheEntry theCacheEntry) {
 		String nextUrl = theCacheEntry.getUrl();
 
@@ -111,6 +103,24 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 	@PostConstruct
 	public void start() {
 		initCacheMap();
+		scheduleJob();
+	}
+
+	public void scheduleJob() {
+		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(this.getClass().getName());
+		jobDetail.setJobClass(Job.class);
+		mySchedulerService.scheduleFixedDelayClustered(JOB_INTERVAL_MILLIS, jobDetail);
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private ICacheWarmingSvc myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.performWarmingPass();
+		}
 	}
 
 	public synchronized Set<WarmCacheEntry> initCacheMap() {
@@ -127,16 +137,5 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 		}
 
 		return Collections.unmodifiableSet(myCacheEntryToNextRefresh.keySet());
-
-	}
-
-	public static class SubmitJob implements HapiJob {
-		@Autowired
-		private ICacheWarmingSvc myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.performWarmingPass();
-		}
 	}
 }

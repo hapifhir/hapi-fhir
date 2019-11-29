@@ -53,7 +53,7 @@ import java.util.List;
 
 public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
-	private static final int SCHEDULE_INTERVAL_MILLIS = 5000;
+	private static final int JOB_INTERVAL_MILLIS = 5000;
 	private static final Logger ourLog = LoggerFactory.getLogger(TermDeferredStorageSvcImpl.class);
 	@Autowired
 	protected ITermConceptDao myConceptDao;
@@ -260,13 +260,24 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	@PostConstruct
-	public void registerScheduledJob() {
+	public void scheduleJob() {
+		// FIXME KHS what does this mean?
 		// Register scheduled job to save deferred concepts
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
-		jobDefinition.setId(BaseTermReadSvcImpl.class.getName() + "_saveDeferred");
-		jobDefinition.setJobClass(SaveDeferredJob.class);
-		mySchedulerService.scheduleFixedDelayLocal(SCHEDULE_INTERVAL_MILLIS, jobDefinition);
+		jobDefinition.setId(this.getClass().getName());
+		jobDefinition.setJobClass(Job.class);
+		mySchedulerService.scheduleFixedDelayLocal(JOB_INTERVAL_MILLIS, jobDefinition);
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private ITermDeferredStorageSvc myTerminologySvc;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTerminologySvc.saveDeferred();
+		}
 	}
 
 	@VisibleForTesting
@@ -288,15 +299,4 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	void setConceptDaoForUnitTest(ITermConceptDao theConceptDao) {
 		myConceptDao = theConceptDao;
 	}
-
-	public static class SaveDeferredJob implements HapiJob {
-		@Autowired
-		private ITermDeferredStorageSvc myTerminologySvc;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTerminologySvc.saveDeferred();
-		}
-	}
-
 }

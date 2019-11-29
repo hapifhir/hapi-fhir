@@ -50,7 +50,7 @@ import java.util.concurrent.Semaphore;
 @Service
 @Lazy
 public class SubscriptionLoader {
-	public static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
+	public static final long JOB_INTERVAL_MILLIS = DateUtils.MILLIS_PER_MINUTE;
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
 	private static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
 	private final Object mySyncSubscriptionsLock = new Object();
@@ -88,11 +88,21 @@ public class SubscriptionLoader {
 
 
 	@PostConstruct
-	public void registerScheduledJob() {
+	public void scheduleJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(SubscriptionLoader.class.getName());
-		jobDetail.setJobClass(SubscriptionLoader.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelayLocal(REFRESH_INTERVAL, jobDetail);
+		jobDetail.setId(this.getClass().getName());
+		jobDetail.setJobClass(Job.class);
+		mySchedulerService.scheduleFixedDelayLocal(JOB_INTERVAL_MILLIS, jobDetail);
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private SubscriptionLoader myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.syncSubscriptions();
+		}
 	}
 
 	@VisibleForTesting
@@ -156,16 +166,6 @@ public class SubscriptionLoader {
 	@VisibleForTesting
 	public void setSubscriptionProviderForUnitTest(ISubscriptionProvider theSubscriptionProvider) {
 		mySubscriptionProvider = theSubscriptionProvider;
-	}
-
-	public static class SubmitJob implements HapiJob {
-		@Autowired
-		private SubscriptionLoader myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.syncSubscriptions();
-		}
 	}
 }
 
