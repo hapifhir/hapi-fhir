@@ -1,10 +1,10 @@
-# REST Operations: Operations Framework
+# REST Operations: Extended Operations
 
 The FHIR specification defines a special kind of operations that have an RPC-like functionality. These are called "Execute Operations", or simply "Operations" throughout the FHIR specification.
 
 A good introduction to this capability can be found on the [Operations Page](http://hl7.org/fhir/operations.html) of the FHIR Specification.
 
-FHIR operations are a special type of RPC-style invocation you can perform against a FHIR server, type, or resource instance. These invocations are named using the conventon `$name` (i.e. the name is prefixed with $) and will generally take a [Parameters](./apidocs-r4/org/hl7/fhir/r4/model/Parameters.html) resource as input and output. There are some cases where the input and/or output will be a different resource type however.
+FHIR extended operations are a special type of RPC-style invocation you can perform against a FHIR server, type, or resource instance. These invocations are named using the conventon `$name` (i.e. the name is prefixed with $) and will generally take a [Parameters](./apidocs-r4/org/hl7/fhir/r4/model/Parameters.html) resource as input and output. There are some cases where the input and/or output will be a different resource type however.
 
 ## Providers
 
