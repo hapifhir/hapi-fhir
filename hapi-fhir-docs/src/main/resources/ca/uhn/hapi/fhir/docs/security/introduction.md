@@ -2,9 +2,9 @@
 
 Security is a complex topic which goes far beyond the scope of FHIR or HAPI. Every system and architecture operates in a different set of rules, and has different security requirements.
 
-As such, HAPI FHIR does not provide a single one-size-fits-all security layer. Instead, it provides a numnber of useful tools and building blocks that can be built around as a part of your overall security architecture.
+As such, HAPI FHIR does not provide a single one-size-fits-all security layer. Instead, it provides a number of useful tools and building blocks that can be built around as a part of your overall security architecture.
 
-Because HAPI FHIR's REST server is based on the Servlet API, you may use any security mechanism which works in that environment. Some serlvet containers may provide security layers you can plug into. The rest of this page does not explore that method, but rather looks at HAPI FHIR hooks that can be used to implement FHIR specific security.
+Because HAPI FHIR's REST server is based on the Servlet API, you may use any security mechanism which works in that environment. Some servlet containers may provide security layers you can plug into. The rest of this page does not explore that method, but rather looks at HAPI FHIR hooks that can be used to implement FHIR specific security.
 
 # Authentication vs Authorization
 

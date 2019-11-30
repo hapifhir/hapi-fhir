@@ -12,7 +12,7 @@ In this mode, you write code that handles resource storage and retrieval logic, 
 * Parsing / Serialization
 * FHIR REST semantics
 
-This module was originally created at [University Health Network](https://uhn.ca) (UHN) as a mechanism for placing a common FHIR layer on top of a series of existing data sources, including an EMR, an enterprise patient scheduling system, and a series of clinical data repositories. All of these systems existed long before FHIR was adoped at UHN and HAPI FHIR was created to make the process of adoping FHIR easier.
+This module was originally created at [University Health Network](https://uhn.ca) (UHN) as a mechanism for placing a common FHIR layer on top of a series of existing data sources, including an EMR, an enterprise patient scheduling system, and a series of clinical data repositories. All of these systems existed long before FHIR was adopted at UHN and HAPI FHIR was created to make the process of adopting FHIR easier.
 
 This module has been used by many organizations to successfully create FHIR servers in a variety of use cases, including:
 

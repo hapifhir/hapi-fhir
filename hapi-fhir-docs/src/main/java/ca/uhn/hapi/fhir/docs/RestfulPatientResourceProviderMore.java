@@ -331,7 +331,7 @@ public void deletePatient(@IdParam IdType theId) {
 @Delete()
 public void deletePatientConditional(@IdParam IdType theId, @ConditionalUrlParam String theConditionalUrl) {
    // Only one of theId or theConditionalUrl will have a value depending
-   // on whether the URL receieved was a logical ID, or a conditional
+   // on whether the URL received was a logical ID, or a conditional
    // search string
    if (theId != null) {
       // do a normal delete
@@ -947,7 +947,7 @@ public interface HistoryClient extends IBasicClient {
   Bundle getHistoryPatientInstance(@IdParam IdType theId);
 
   /**
-   * Either (or both) of the "since" and "count" paramaters can
+   * Either (or both) of the "since" and "count" parameters can
    * also be included in any of the methods above.
    */
   @History
@@ -1024,8 +1024,8 @@ newPatient.getMeta().addTag("http://personality", "Friendly", "Friendly"); // TO
 @Create
 public MethodOutcome createPatientResource(@ResourceParam Patient thePatient) {
 
-  // ..save the resouce..
-  IdType id = new IdType("123"); // the new databse primary key for this resource
+  // ..save the resource..
+  IdType id = new IdType("123"); // the new database primary key for this resource
 
   // Get the tag list
   List<Coding> tags = thePatient.getMeta().getTag();
