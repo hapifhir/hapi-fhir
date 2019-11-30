@@ -140,7 +140,7 @@ public class ClientExamples {
       String password = "boobear";
       IClientInterceptor authInterceptor = new BasicAuthInterceptor(username, password);
 
-		// If you're usinf an annotation client, use this style to
+		// If you're using an annotation client, use this style to
 		// register it
       IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
 		annotationClient.registerInterceptor(authInterceptor);

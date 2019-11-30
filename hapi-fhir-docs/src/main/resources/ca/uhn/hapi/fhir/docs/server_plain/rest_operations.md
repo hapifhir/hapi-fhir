@@ -28,7 +28,7 @@ The following snippet shows how to define a client interface to handle a read me
 
 # Instance Level - VRead
 
-The	**[vread](http://hl7.org/implement/standards/fhir/http.html#vread)** operation retrieves a specific version of a resource with a given ID. To support vread, simply add "version=true" to your [@Read](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/Read.html) annotation. This means that the read method will support both "Read" and "VRead". The IdType instance passed into your method may or may not have the version populated depending on the client request.
+The	**[vread](http://hl7.org/implement/standards/fhir/http.html#vread)** operation retrieves a specific version of a resource with a given ID. To support vread, simply add "version=true" to your [@Read](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/Read.html) annotation. This means that the read method will support both "Read" and "VRead". The IdType instance passed into your method may or may not have the version populated depending on the client's request.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|vread}}
@@ -72,7 +72,7 @@ The following snippet shows how the corresponding client interface would look:
 
 ## Conditional Updates
 
-If you wish to suport conditional updates, you can add a parameter tagged with a [@ConditionalOperationParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/ConditionalOperationParam.html) annotation. If the request URL contains search parameters instead of a resource ID, then this parameter will be populated.
+If you wish to support conditional updates, you can add a parameter tagged with a [@ConditionalOperationParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/ConditionalOperationParam.html) annotation. If the request URL contains search parameters instead of a resource ID, then this parameter will be populated.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|updateConditional}}
@@ -90,7 +90,7 @@ http://fhir.example.com/Patient?identifier=system%7C00001
 
 If you wish to have access to the raw resource payload as well as the parsed value for any reason, you may also add parameters which have been annotated with the [@ResourceParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/ResourceParam.html) of type `String` (to access the raw resource body) and/or `EncodingEnum` (to determine which encoding was used).
 
-The following example shows how to use these additonal data elements.
+The following example shows how to use these additional data elements.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|updateRaw}}
@@ -112,7 +112,7 @@ In this type of request, the client adds a header containing `Prefer: return=rep
 
 ## Contention Aware Updating
 
-As of FHIR DSTU2, FHIR uses the `ETag` header to provide *conention aware updating*. Under this scheme, a client may create a request that contains an ETag specifying the version, and the server will fail if the given version is not the latest version.
+As of FHIR DSTU2, FHIR uses the `ETag` header to provide *contention aware updating*. Under this scheme, a client may create a request that contains an ETag specifying the version, and the server will fail if the given version is not the latest version.
 
 Such a request is shown below. In the following example, the update will only be applied if resource "Patient/123" is currently at version "3". Otherwise, it will fail with an `HTTP 409 Conflict` error.
 
@@ -238,7 +238,7 @@ The create operation also supports access to the raw payload, using the same sem
 
 The [search](http://hl7.org/implement/standards/fhir/http.html#search) operation returns a bundle with zero-to-many resources of a given type, matching a given set of parameters.
 
-Searching is a very powerful and potentially very complicated operation to implemenmt, with many possible parameters and combinations of parameters. See [REST Operations: Search](./rest_operations_search.html) for details on how to create search methods.
+Searching is a very powerful and potentially very complicated operation to implement, with many possible parameters and combinations of parameters. See [REST Operations: Search](./rest_operations_search.html) for details on how to create search methods.
 
 
 <a name="type_validate" />

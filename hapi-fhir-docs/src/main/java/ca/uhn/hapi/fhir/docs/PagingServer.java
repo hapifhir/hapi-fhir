@@ -31,7 +31,7 @@ public class PagingServer extends RestfulServer {
 		
 		/*
 		 * Set the resource providers as always. Here we are using the paging
-		 * provider from the example below, but it is not strictly neccesary
+		 * provider from the example below, but it is not strictly necessary
 		 * to use a paging resource provider as well. If a normal resource 
 		 * provider is used (one which returns List<?> instead of IBundleProvider)
 		 * then the loaded resources will be stored by the IPagingProvider.

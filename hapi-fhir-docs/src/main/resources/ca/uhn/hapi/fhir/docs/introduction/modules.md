@@ -123,7 +123,7 @@ The following table shows the modules that make up the HAPI FHIR library.
         </td>
         <td>
             This module contains the Android HAPI FHIR framework, which is a FHIR
-            client framework which has been tailed specifically to run on Android.
+            client framework which has been tailored specifically to run on Android.
         </td>
     </tr>
     <tr>

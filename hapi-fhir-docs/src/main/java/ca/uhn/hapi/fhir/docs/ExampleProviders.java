@@ -63,7 +63,7 @@ public class ExampleServlet extends ca.uhn.fhir.rest.server.RestfulServer {
     /*
      * Plain providers are passed to the server in the same way
      * as resource providers. You may pass both resource providers
-     * and and plain providers to the same server if you like. 
+     * and plain providers to the same server if you like.
      */
     registerProvider(new MyPlainProvider());
     

@@ -45,7 +45,7 @@ public DaoConfig daoConfig() {
 }
 ``` 
 
-On the other hand, if you want the server to be configurable to allow remote references, you can set this with the confguration below. Using the `setAllowExternalReferences` means that it will be possible to search for references that refer to these external references.
+On the other hand, if you want the server to be configurable to allow remote references, you can set this with the configuration below. Using the `setAllowExternalReferences` means that it will be possible to search for references that refer to these external references.
 
 ```java
 @Bean
@@ -67,7 +67,7 @@ In some cases, you may have references which are <i>Logical References</i>,
 which means that they act as an identifier and not necessarily as a literal
 web address.
 
-A common use for logical references is in references to conformance resources, such as ValueSets, StructureDefinitions, etc. For example, you might refer to the ValueSet `http://hl7.org/fhir/ValueSet/quantity-comparator` from your own resources. In this case, you are not neccesarily telling the server that this is a real address that it should resolve, but rather that this is an identifier for a ValueSet where `ValueSet.url` has the given URI/URL.
+A common use for logical references is in references to conformance resources, such as ValueSets, StructureDefinitions, etc. For example, you might refer to the ValueSet `http://hl7.org/fhir/ValueSet/quantity-comparator` from your own resources. In this case, you are not necessarily telling the server that this is a real address that it should resolve, but rather that this is an identifier for a ValueSet where `ValueSet.url` has the given URI/URL.
 
 HAPI can be configured to treat certain URI/URL patterns as logical by using the DaoConfig#setTreatReferencesAsLogical property (see [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-jpaserver-base/ca/uhn/fhir/jpa/dao/DaoConfig.html#setTreatReferencesAsLogical-java.util.Set-)).
 

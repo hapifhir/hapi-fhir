@@ -9,7 +9,7 @@ The HAPI FHIR [Codebase](https://github.com/jamesagnew/hapi-fhir) has a number o
 The following is a list of key subprojects you might open in your IDE:
 
 * [hapi-fhir-base](https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-base): This is the core library, containing the parsers, client/server frameworks, and many other features. Note that this module does not contain any model classes (e.g. the Patient model class) as these are found in "structures" projects below.
-* hapi-fhir-structures-[version]: There are several structures projects (e.g. `hapi-fhir-structures-r4`), each of which contains model classes for a specific version of FHIR. Generally speaking you don't need to edit these project directly, as most (but not all) of their code is generated.
+* hapi-fhir-structures-[version]: There are several structures projects (e.g. `hapi-fhir-structures-r4`), each of which contains model classes for a specific version of FHIR. Generally speaking you don't need to edit these projects directly, as most (but not all) of their code is generated.
 * hapi-fhir-jpaserver-base:	This module contains the JPA server.
 
 # Getting the Sources
@@ -77,7 +77,7 @@ If the build fails to execute successfully, try the following:
 
 **Maven Import**
 
-Import the HAPI projects as Maven Modules by selecing **File -&gt; Import...** from the File menu. Then select **Existing Module Projects** as shown below.
+Import the HAPI projects as Maven Modules by selecting **File -&gt; Import...** from the File menu. Then select **Existing Module Projects** as shown below.
 
 <img src="../../images/hacking_import.png"/>
 
