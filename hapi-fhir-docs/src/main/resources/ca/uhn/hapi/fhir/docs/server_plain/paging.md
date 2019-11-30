@@ -1,10 +1,10 @@
 # Paging Responses
 
-The **Search** and **History** operations both return a bundle which contain zero or more resources. FHIR RESTful servers may optionaly support paging responses, meaning that (for example) if a search returns 500 resources, the server can return a bundle containing only the first 20 and a link which will return the next 20, etc.
+The **Search** and **History** operations both return a bundle which contain zero or more resources. FHIR RESTful servers may optionally support paging responses, meaning that (for example) if a search returns 500 resources, the server can return a bundle containing only the first 20 and a link which will return the next 20, etc.
 
 By default, RESTful servers will not page, but will rather return all resources immediately in a single bundle. However, you can take advantage of built-in paging functionality to automatically add paging links to generated Bundle resources, and to handle these links by requesting further data.
  
-There are two complimentary parts to the HAPI FHIR server paging support: paging providers, and bundle providers.
+There are two complementary parts to the HAPI FHIR server paging support: paging providers, and bundle providers.
 
 ## Paging Providers
 

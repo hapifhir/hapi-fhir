@@ -36,9 +36,9 @@ HAPI provides a class called [RestfulServer](/apidocs/hapi-fhir-server/ca/uhn/fh
 
 # Plain Providers
 
-In addition to **Resource Providers**, which are resource-type specific, a second kind of provider known as **Plain Providers**. These providers can be used both to define resource operations that apply to multiple resource types, and to define opoerations that operate at the server level.
+In addition to **Resource Providers**, which are resource-type specific, a second kind of provider known as **Plain Providers**. These providers can be used both to define resource operations that apply to multiple resource types, and to define operations that operate at the server level.
 
-## Resource Operatipns
+## Resource Operations
 
 Defining one provider per resource is a good strategy to keep code readable and maintainable, but it is also possible to put methods for multiple resource types in a provider class.
 
@@ -80,7 +80,7 @@ Within your RESTful operations, you will generally be returning resources or bun
 
 ## Automatic Exception Handling
 
-By default, HAPI generates appropriate error responses for a several built-in conditions. For example, if the user makes a request for a resource type that does not exist, or tries to perform a search using an invalid parameter, HAPI will automatically generate an `HTTP 400 Invalid Request`, and provide an OperationOutcome resource as response containing details about the error.
+By default, HAPI generates appropriate error responses for several built-in conditions. For example, if the user makes a request for a resource type that does not exist, or tries to perform a search using an invalid parameter, HAPI will automatically generate an `HTTP 400 Invalid Request`, and provide an OperationOutcome resource as response containing details about the error.
 
 Similarly, if your method implementation throws any exceptions (checked or unchecked) instead of returning normally, the server will usually (see below) automatically generate an `HTTP 500 Internal Error` and generate an OperationOutcome with details about the exception.
 
@@ -88,9 +88,9 @@ Similarly, if your method implementation throws any exceptions (checked or unche
 
 In many cases, you will want to respond to client requests with a specific HTTP error code (and possibly your own error message too). Sometimes this is a requirement of the FHIR specification. (e.g. the "validate" operation requires a response of `HTTP 422 Unprocessable Entity` if the validation fails).
 
-Sometimes this is simply a requirement of your specific application (e.g. you want to provide application specific HTTP status codes for certain types of errors), and other times this may be a requirement of the FHIR or HTTP specifications to respond ini a specific way to certani conditions.
+Sometimes this is simply a requirement of your specific application (e.g. you want to provide application specific HTTP status codes for certain types of errors), and other times this may be a requirement of the FHIR or HTTP specifications to respond in a specific way to certain conditions.
 
-To customize the error that is returned by HAPI's server methods, you shuld throw an exception which extends HAPI's [BaseServerResponseException](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/exceptions/BaseServerResponseException.html) class. Various exceptions which extend this class will generate a different HTTP status code.
+To customize the error that is returned by HAPI's server methods, you should throw an exception which extends HAPI's [BaseServerResponseException](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/exceptions/BaseServerResponseException.html) class. Various exceptions which extend this class will generate a different HTTP status code.
 
 For example, the [ResourceNotFoundException](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/server/exceptions/ResourceNotFoundException.html) causes HAPI to return an `HTTP 404 Resource Not Found`. A complete list of available exceptions is available in the [exceptions package summary](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/server/exceptions/package-summary.html).
 

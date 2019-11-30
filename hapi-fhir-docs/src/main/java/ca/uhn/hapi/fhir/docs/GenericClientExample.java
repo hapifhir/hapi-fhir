@@ -206,7 +206,7 @@ public class GenericClientExample {
       }
        {
          // START SNIPPET: etagupdate
-         // First, let's retrive the latest version of a resource
+         // First, let's retrieve the latest version of a resource
          // from the server
          Patient patient = client.read().resource(Patient.class).withId("123").execute();
 

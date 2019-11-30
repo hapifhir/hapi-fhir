@@ -58,7 +58,7 @@ public class TermValueSetConceptView implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@Column(name="PID")
+	@Column(name="PID", length = 1000 /* length only needed to satisfy JpaEntityTest, it's not used*/)
 	private String id; // still set automatically
 
 	@Column(name = "CONCEPT_PID")

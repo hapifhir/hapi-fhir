@@ -11,7 +11,7 @@ When you have downloaded the archive (either ZIP or tar.bz2), expand it into a d
 
 You can now try the tool out by executing the following command: `hapi-fhir-cli`
 
-This command should show a help screen, as shown in the screeenshot below.
+This command should show a help screen, as shown in the screenshot below.
 
 <img src="/hapi-fhir/docs/images/hapi-fhir-cli.png" alt="Basic screen shot" style="margin-left: 40px;"/>
 

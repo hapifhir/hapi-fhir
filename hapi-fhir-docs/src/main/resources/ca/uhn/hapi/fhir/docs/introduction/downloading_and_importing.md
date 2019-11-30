@@ -57,7 +57,7 @@ compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${project.version}'
 
 The HAPI FHIR project generally releases a new full software release 4 times per year, or approximately every 3 months.
 
-Generally speaking it is a good idea to use a stable build. However, FHIR is a fast moving specification, and there is a lot of ongoing work in HAPI as well. There may be times when you want to try out the latest unreleased version, either to test a new feature or to get a bugfix. You can ususally	look at the [Changelog](/docs/introduction/changelog.html) to get a sense of what has changed in the next unreleased version.
+Generally speaking it is a good idea to use a stable build. However, FHIR is a fast moving specification, and there is a lot of ongoing work in HAPI as well. There may be times when you want to try out the latest unreleased version, either to test a new feature or to get a bugfix. You can usually look at the [Changelog](/docs/introduction/changelog.html) to get a sense of what has changed in the next unreleased version.
 
 ## Using Snapshot Builds
 
@@ -107,7 +107,7 @@ XML processing (for resource marshalling and unmarshalling) uses the Java StAX A
 Upon starting up, HAPI will emit a log line indicating which StAX implementation is being used, e.g:
 
 ```
-08:01:32.044 [main] INFO ca.uhn.fhir.util.XmlUtil - FHIR XML procesing will use StAX implementation 'Woodstox XML-phrocessor' version '4.4.0'
+08:01:32.044 [main] INFO ca.uhn.fhir.util.XmlUtil - FHIR XML processing will use StAX implementation 'Woodstox XML-phrocessor' version '4.4.0'
 ```
 
 Although most testing is done using the Woodstox implementation of StAX, it is not required and HAPI should work correctly with any compliant implementation of StAX.

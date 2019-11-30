@@ -1,6 +1,6 @@
 # Narrative Generation
 
-HAPI provides a several ways to add [Narrative Text](http://hl7.org/fhir/narrative.html) to your encoded messages.
+HAPI provides several ways to add [Narrative Text](http://hl7.org/fhir/narrative.html) to your encoded messages.
 
 The simplest way is to simply place the narrative text directly in the resource via the `setDivAsString()` method.
 
@@ -8,7 +8,7 @@ The simplest way is to simply place the narrative text directly in the resource 
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/Narrative.java|simple}}
 ```
 
-# Automatic Narrative Generartion
+# Automatic Narrative Generation
 
 HAPI FHIR also comes with a built-in mechanism for automatically generating narratives based on your resources.
 
