@@ -38,9 +38,9 @@ HAPI uses [SLF4j](http://www.slf4j.org/) for all internal logging. SLF4j is a *l
 This means that in order to successfully log anything, you will need to 
 add two (or three) dependency JARs to your application:
 
-* **slf4j-api-vXX.jar**: This is the SLF4j API and is neccesary for HAPI to function
+* **slf4j-api-vXX.jar**: This is the SLF4j API and is necessary for HAPI to function
 * An actual logging implementation, as well as its SLF4j binding. For example:
-   * The recommended logging framework to use is Logback. Logback is absolutely not neccesary for HAPI to function correctly, but it has a number of nice features and is a good default choice. To use logback, you would include `logback-vXX.jar`.
+   * The recommended logging framework to use is Logback. Logback is absolutely not necessary for HAPI to function correctly, but it has a number of nice features and is a good default choice. To use logback, you would include `logback-vXX.jar`.
    * If you wanted to use log4j you would include `log4j-vXX.jar` as well as `slf4j-log4j-vXX.jar`. Log4j is a mature framework that is very widely used.
    * If you wanted to use JDK logging (aka java.util.Logging) you would include `slf4j-jdk14-vXX.jar`. JDK logging is included with Java but is not particularly full featured compared to many other frameworks.
     

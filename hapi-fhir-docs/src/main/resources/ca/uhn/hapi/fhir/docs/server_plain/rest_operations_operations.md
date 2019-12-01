@@ -4,7 +4,7 @@ The FHIR specification defines a special kind of operations that have an RPC-lik
 
 A good introduction to this capability can be found on the [Operations Page](http://hl7.org/fhir/operations.html) of the FHIR Specification.
 
-FHIR operations are a special type of RPC-style invocation you can perform against a FHIR server, type, or resource instance. These invocations are named using the conventon `$name` (i.e. the name is prefixed with $) and will generally take a [Parameters](./apidocs-r4/org/hl7/fhir/r4/model/Parameters.html) resource as input and output. There are some cases where the input and/or output will be a different resource type however.
+FHIR operations are a special type of RPC-style invocation you can perform against a FHIR server, type, or resource instance. These invocations are named using the convention `$name` (i.e. the name is prefixed with $) and will generally take a [Parameters](./apidocs-r4/org/hl7/fhir/r4/model/Parameters.html) resource as input and output. There are some cases where the input and/or output will be a different resource type however.
 
 ## Providers
 
@@ -26,7 +26,7 @@ http://fhir.example.com/Patient/$everything
 
 # Instance-Level Operations
 
-To create an instance-specific operation (an operation which takes the ID of a specific resource instance as a part of its request URL), you can add a parameter annotated with the [@IdParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/IdParam.html) annotation, of type [IdType](/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/model/IdType.html). The following example show how to implement the `Patient/[id]/$everything` operation.
+To create an instance-specific operation (an operation which takes the ID of a specific resource instance as a part of its request URL), you can add a parameter annotated with the [@IdParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/IdParam.html) annotation, of type [IdType](/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/model/IdType.html). The following example shows how to implement the `Patient/[id]/$everything` operation.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServerOperations.java|patientInstanceOperation}}
@@ -40,7 +40,7 @@ http://fhir.example.com/Patient/123/$everything
 
 # Server-Level Operations
 
-Server-level operations do not operate on a specific resource type or instance, but rather operate globally on the server itself. The following example show how to implement the a server-level operation. Note that the `concept` parameter in the example has a cardinality of `0..*`, so a ``List<Coding>` is used as the parameter type.
+Server-level operations do not operate on a specific resource type or instance, but rather operate globally on the server itself. The following example shows how to implement a server-level operation. Note that the `concept` parameter in the example has a cardinality of `0..*`, so a ``List<Coding>` is used as the parameter type.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServerOperations.java|serverOperation}}
@@ -86,7 +86,7 @@ In all of the Operation examples above, the return type specified for the operat
 
 The FHIR specification allows for operations to be invoked using an HTTP GET instead of an HTTP POST **only** if the following two conditions are met:
 
-* All parameters have primtive datatype values
+* All parameters have primitive datatype values
 
 * The operation is marked as "affectsState = false". Note that early releases of the FHIR specification referred to an operation that did not affect state as "idempotent = true". It was subsequently determined that *idempotency* was the wrong term for the concept being expressed, but the term does persist in some HAPI FHIR documentation and code.
 

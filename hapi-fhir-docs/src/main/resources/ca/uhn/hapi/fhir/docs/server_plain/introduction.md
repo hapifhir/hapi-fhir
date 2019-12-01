@@ -82,7 +82,7 @@ In your own class extending this class, you can override the [`getServerConforma
 
 # Controlling Response Contents / Encoding / Formatting
 
-FHIR allows for the a number of special behaviours where only certain portions of resources are returned, instead of the entire resource body. These behaviours are automatically supported in HAPI FHIR Plain Server and no additional effort needs to be taken.
+FHIR allows for a number of special behaviours where only certain portions of resources are returned, instead of the entire resource body. These behaviours are automatically supported in HAPI FHIR Plain Server and no additional effort needs to be taken.
 
 The following behaviours are automatically supported by the HAPI server:
 

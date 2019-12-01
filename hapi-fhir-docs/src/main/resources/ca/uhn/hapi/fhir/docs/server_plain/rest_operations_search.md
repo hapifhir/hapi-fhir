@@ -50,7 +50,7 @@ http://fhir.example.com/Patient?identifier=urn:foo|7000135
 
 # Search Parameters: Date (Simple)
 
-The FHIR specification provides a sytax for specifying dates+times (but for simplicity we will just say dates here) as search criteria.
+The FHIR specification provides a syntax for specifying dates+times (but for simplicity we will just say dates here) as search criteria.
 
 Dates may be optionally prefixed with a qualifier. For example, the string `=ge2011-01-02` means any date on or after 2011-01-02.
 
@@ -66,7 +66,7 @@ Example URL to invoke this method:
 http://fhir.example.com/Observation?birthdate=gt2011-01-02
 ```
 
-Invoking a client of thie type involves the following syntax:
+Invoking a client of this type involves the following syntax:
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|dateClient}}
@@ -148,7 +148,7 @@ http://fhir.example.com/DiagnosticReport?subject.family=SMITH
 
 What this query says is "fetch me all of the DiagnosticReport resources where the **subject** (Patient) of the report has the **family** (name) of 'SMITH'".
 
-There are two ways of dealing with chained parameters in your methods: static chains and dynamic chains. Both are equally valid, although dyamic chains might lead to somewhat more compact and readable code.
+There are two ways of dealing with chained parameters in your methods: static chains and dynamic chains. Both are equally valid, although dynamic chains might lead to somewhat more compact and readable code.
 
 <a name="dynamic_chains"/>
 
