@@ -122,7 +122,7 @@ System.setProperty("javax.xml.stream.XMLEventFactory", "com.ctc.wstx.stax.WstxEv
 
 ## PH-Schematron
 
-If you are using the [Schematron Validation](/docs/validation/schema.html) module, you will also need to include the Ph-Schematron library on your classpath. (Note that prior to HAPI FHIR 3.4.0 we used Phloc-Schamtron instead, but that library has been discontinued).
+If you are using the [Schematron Validation](/docs/validation/schema_validator.html) module, you will also need to include the Ph-Schematron library on your classpath. (Note that prior to HAPI FHIR 3.4.0 we used Phloc-Schamtron instead, but that library has been discontinued).
 
 If you are using Maven, this library is not added by default (it is marked as an optional dependency) since not all applications need Schematron support. As a result you will need to manually add the following	dependencies to your project pom.xml:
 

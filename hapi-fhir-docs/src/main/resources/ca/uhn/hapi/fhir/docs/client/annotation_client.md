@@ -13,7 +13,7 @@ There is no difference in terms of capability between the two styles of client. 
 
 The first step in creating an annotation-driven client is to define a restful client interface.
 
-A restful client interface class must extend the [IRestfulClient](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/client/api/IRestfulClient.html) interface, and will contain one or more methods which have been annotated with special annotations indicating which REST operation
+A restful client interface class must extend the [IRestfulClient](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/client/api/IRestfulClient.html) interface, and will contain one or more methods which have been annotated with special annotations indicating which REST operation
 that method supports. 
 
 Below is a simple example of a resource provider which supports the [read](http://hl7.org/implement/standards/fhir/http.html#read) operation (i.e. retrieve a single resource by ID) as well as the [search](http://hl7.org/implement/standards/fhir/http.html#search) operation (i.e. find any resources matching a given criteria) for a specific search criteria.
@@ -38,7 +38,7 @@ Once your client interface is created, all that is left is to create a FhirConte
 
 # Configuring Encoding (JSON/XML)
 
-Restful client interfaces that you create will also extend the interface [IRestfulClient](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/client/api/IRestfulClient.html), which comes with some helpful methods for configuring the way that the client will interact with the server.
+Restful client interfaces that you create will also extend the interface [IRestfulClient](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/client/api/IRestfulClient.html), which comes with some helpful methods for configuring the way that the client will interact with the server.
 
 The following snippet shows how to configure the cliet to explicitly request JSON or XML responses, and how to request "pretty printed" responses on servers that support this (HAPI based servers currently).
 

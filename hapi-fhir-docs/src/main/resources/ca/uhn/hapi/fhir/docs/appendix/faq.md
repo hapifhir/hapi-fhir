@@ -30,7 +30,13 @@ There are a few options available to work around this fact:
 
 # Contributing
 
-### My build is failing with the following error: *[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:2.19.1:test (default-test) on project hapi-fhir-jpaserver-base: Execution default-test of goal org.apache.maven.plugins:maven-surefire-plugin:2.19.1:test failed: The forked VM terminated without properly saying goodbye. VM crash or System.exit called?*
+### My build is failing with the following error: *The forked VM terminated without properly saying goodbye. VM crash or System.exit called?*
+
+The complete error message typically resembles:
+
+```
+Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:2.19.1:test (default-test) on project hapi-fhir-jpaserver-base: Execution default-test of goal org.apache.maven.plugins:maven-surefire-plugin:2.19.1:test failed: The forked VM terminated without properly saying goodbye. VM crash or System.exit called?
+```
 
 This typically means that your build is running out of memory. HAPI's unit tests execute by default in multiple threads (the thread count is determined by the number of CPU cores available) so in an environment with lots of cores but not enough RAM, you may run out. If you are getting this error, try executing the build with the following arguments:
 
@@ -38,4 +44,4 @@ This typically means that your build is running out of memory. HAPI's unit tests
 mvn -P ALLMODULES,NOPARALLEL install
 ```
 
-See [Hacking HAPI FHIR](/hacking.html) for more information on the build process.
+See [Hacking HAPI FHIR](/docs/contributing/hacking_guide.html) for more information on the build process.

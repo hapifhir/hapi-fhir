@@ -94,7 +94,7 @@ The FHIR specification allows the use of an HTTP POST to transmit a search to a 
 an HTTP GET. With this style of search, the search parameters are included in the request body instead
 of the request URL, which can be useful if you need to transmit a search with a large number of parameters.
 
-The [`usingStyle(SearchStyleEnum)`](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/gclient/IQuery#usingStyle(SearchStyleEnum)) method controls which style to use. By default, GET style is used unless the client detects that the request would result in a very long URL (over 8000 chars) in which case the client automatically switches to POST.
+The [`usingStyle(SearchStyleEnum)`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/gclient/IQuery.html#usingStyle(ca.uhn.fhir.rest.api.SearchStyleEnum)) method controls which style to use. By default, GET style is used unless the client detects that the request would result in a very long URL (over 8000 chars) in which case the client automatically switches to POST.
 
 If you wish to force the use of HTTP POST, you can do that as well.
 
@@ -104,7 +104,7 @@ If you wish to force the use of HTTP POST, you can do that as well.
 
 ## Search - Compartments
 
-To search a [resource compartment](http://www.hl7.org/implement/standards/fhir/extras.html#compartment), simply use the [`withIdAndCompartment()`](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/gclient/IQuery#withIdAndCompartment(String,String)) method in your search.
+To search a [resource compartment](http://www.hl7.org/implement/standards/fhir/extras.html#compartment), simply use the [`withIdAndCompartment()`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/gclient/IQuery.html#withIdAndCompartment(java.lang.String,java.lang.String)) method in your search.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|searchCompartment}}
@@ -114,13 +114,13 @@ To search a [resource compartment](http://www.hl7.org/implement/standards/fhir/e
 
 Sometimes you may want to only ask the server to include some parts of returned resources (instead of the whole resource). Typically this is for performance or optimization reasons, but there may also be privacy reasons for doing this.
 
-To request that the server return only "summary" elements (those elements defined in the specification with the "Σ" flag), you can use the [`summaryMode(SummaryEnum)`](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/gclient/IClientExecutable#summaryMode(SummaryModeEnum)) qualifier:
+To request that the server return only "summary" elements (those elements defined in the specification with the "Σ" flag), you can use the [`summaryMode(SummaryEnum)`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/gclient/IClientExecutable.html#summaryMode(ca.uhn.fhir.rest.api.SummaryEnum)) qualifier:
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|searchSubsetSummary}}
 ```
 
-To request that the server return only elements from a custom list provided by the client, you can use the [`elementsSubset(String...)`](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/gclient/IClientExecutable#elementsSubset(String...)) qualifier:
+To request that the server return only elements from a custom list provided by the client, you can use the [`elementsSubset(String...)`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/gclient/IClientExecutable.html#elementsSubset(java.lang.String...)) qualifier:
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|searchSubsetElements}}
@@ -203,7 +203,7 @@ FHIR also specifies a type of update called "conditional updates", where insetad
 
 # History - Server/Type/Instance
 
-To retrieve the version history of all resources, or all resources of a given type, or of a specific instance of a resource, you call the [`history()`](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/client/api/IGenericClient#history()) method.
+To retrieve the version history of all resources, or all resources of a given type, or of a specific instance of a resource, you call the [`history()`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/client/api/IGenericClient.html#history()) method.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|historyDstu2}}
@@ -225,7 +225,7 @@ The following example shows how to execute a transaction using the generic clien
 
 # Capability Statement (metadata) - Server
 
-To retrieve the server's capability statement, simply call the [`capabilities()`](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/client/api/IGenericClient#capabilities()) method as shown below.
+To retrieve the server's capability statement, simply call the [`capabilities()`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/client/api/IGenericClient.html#capabilities()) method as shown below.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|conformance}}
@@ -235,7 +235,7 @@ To retrieve the server's capability statement, simply call the [`capabilities()`
 
 FHIR also supports a set of *extended operatioons*, which are operatons beyond the basic CRUD operations defined in the specificiation. These operations are an RPC style of invocation, with a set of named input parameters passed to the server and a set of named output parameters returned back.
 
-To invoke an operation using the client, you simply need to create the input [Parameters](/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/model/Parameters.html) resource, then pass that to the [`operation()`](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/client/api/IGenericClient#operation()) fluent method.
+To invoke an operation using the client, you simply need to create the input [Parameters](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/model/Parameters.html) resource, then pass that to the [`operation()`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/client/api/IGenericClient.html#operation()) fluent method.
 
 The example below shows a simple operation call.
 
@@ -297,7 +297,7 @@ ETag features are added simply by adding fluent method calls to the client metho
 
 ## Read / VRead ETags
 
-To notify the server that it should return an `HTTP 304 Not Modified` if the content has not changed, add an [`ifVersionMatches()`](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/gclient/IReadExecutable#ifVersionMatches(String)) invocation.
+To notify the server that it should return an `HTTP 304 Not Modified` if the content has not changed, add an [`ifVersionMatches()`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/gclient/IReadExecutable.html#ifVersionMatches(java.lang.String)) invocation.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|etagread}}

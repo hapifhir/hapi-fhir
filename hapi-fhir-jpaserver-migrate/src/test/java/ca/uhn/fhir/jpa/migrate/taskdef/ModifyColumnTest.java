@@ -219,7 +219,7 @@ public class ModifyColumnTest extends BaseTest {
 		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
 		executeSql("insert into SOMETABLE (TEXTCOL) values ('HELLO')");
 
-		ModifyColumnTask task = new ModifyColumnTask();
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);

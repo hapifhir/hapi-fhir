@@ -8,7 +8,7 @@ There are two complementary parts to the HAPI FHIR server paging support: paging
 
 ## Paging Providers
 
-To support paging, a server must have an [IPagingProvider](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/IPagingProvider.html) implementation set. The paging provider is used to store resource return lists between incoming calls by clients.
+To support paging, a server must have an [IPagingProvider](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/IPagingProvider.html) implementation set. The paging provider is used to store resource return lists between incoming calls by clients.
 
 A paging provider provides two key methods:
 
@@ -26,7 +26,7 @@ The following example shows a server implementation with paging	support.
 
 # Bundle Providers
 
-If a server supports a paging provider, a further optimization is to also use a bundle provider. A bundle provider simply takes the place of the `List<IBaseResource>` return type in your provider methods. In other words, instead of returning *List<IBaseResource>*, your search method will return [IBundleProvider](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/IBundleProvider.html).
+If a server supports a paging provider, a further optimization is to also use a bundle provider. A bundle provider simply takes the place of the `List<IBaseResource>` return type in your provider methods. In other words, instead of returning *List<IBaseResource>*, your search method will return [IBundleProvider](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/api/server/IBundleProvider.html).
 
 When using a bundle provider however, the server will only request small sublists of resources as they are actually being returned. This allows servers to optimize by not loading all resources into memory until they are actually needed.
 
@@ -46,5 +46,5 @@ Another option is to use "named pages", meaning that each page is simply assigne
 
 In order to support named pages, the IPagingProvider must implement the `retrieveResultList(RequestDetails theRequestDetails, String theSearchId, String thePageId)` method.
 
-Then, individual search/history methods may return a [BundleProviderWithNamedPages](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/BundleProviderWithNamedPages.html) or simply implement the `getPageId()` method on their own IBundleProvider implementation.
+Then, individual search/history methods may return a [BundleProviderWithNamedPages](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/BundleProviderWithNamedPages.html) or simply implement the `getPageId()` method on their own IBundleProvider implementation.
 

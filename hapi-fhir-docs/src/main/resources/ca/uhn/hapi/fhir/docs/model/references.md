@@ -2,7 +2,7 @@
 
 Resource references are a key part of the HAPI FHIR model, since almost any resource will have references to other resources within it.
 
-The [Reference](/apidics/hapi-fhir-structrues-r4/org/hl7/fhir/r4/model.Reference.html) type is the datatype for references. This datatype has a number of properties which help make working with FHIR simple.
+The [Reference](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/model/Reference.html) type is the datatype for references. This datatype has a number of properties which help make working with FHIR simple.
 
 The `getReference()` method returns a String that contains the identity of the resource being referenced. This is the item which is most commonly populated when interacting with FHIR. For example, consider the following Patient resource, which contains a reference to an Organization resource:
 
@@ -21,7 +21,7 @@ The `getReference()` method returns a String that contains the identity of the r
 
 Given a Patient resource obtained by invoking a client operation, a call to `String reference = patient.getManagingOrganization().getReference();` returns a String containing `Organization/112`.
 
-Reference also has a place for storing actual resource instances (i.e. an actual [IBaseResource](/apidocs/hapi-fhir-base/org/hl7/fhir/instance/model/api/IBaseResource.html) instance), and this can be very useful as shown below.
+Reference also has a place for storing actual resource instances (i.e. an actual [IBaseResource](/hapi-fhir/apidocs/hapi-fhir-base/org/hl7/fhir/instance/model/api/IBaseResource.html) instance), and this can be very useful as shown below.
 
 # References in Client Code
 

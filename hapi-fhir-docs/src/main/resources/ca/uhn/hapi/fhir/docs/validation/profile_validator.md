@@ -6,7 +6,7 @@ HAPI provides a built-in and configurable mechanism for validating resources. Th
 
 The resource validator is an extendible and modular system, and you can configure it in a number of ways in order to get the specific type of validation you want to achieve.
 
-The validator can be manually invoked at any time by creating a validator and configuring it with one or more [IValidatorModule](/apidocs/ca/uhn/fhir/validation/IValidatorModule.html) instances.
+The validator can be manually invoked at any time by creating a validator and configuring it with one or more [IValidatorModule](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/validation/IValidatorModule.html) instances.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ValidatorExamples.java|validationIntro}}
@@ -57,7 +57,7 @@ definitions provided either by HL7 or by the user.
     if you need to validate DSTU3 content.
 </div>
 
-To execute the validator, you simply create an instance of [FhirInstanceValidator](/apidocs/hapi-fhir-validation/org/hl7/fhir/r4/hapi/validation/FhirInstanceValidator.html) and register it to new validator, as shown in the example below.
+To execute the validator, you simply create an instance of [FhirInstanceValidator](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/r4/hapi/validation/FhirInstanceValidator.html) and register it to new validator, as shown in the example below.
 
 Note that the example below uses the official FHIR StructureDefintions and ValueSets
 to validate the resource. It will not work unless you include the
@@ -69,9 +69,9 @@ to validate the resource. It will not work unless you include the
 
 # Supplying Your Own Definitions 
 
-The FhirInstanceValidator relies on an implementation of an interface called [IValidationSupport](/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/IValidationSupport.html) interface to load StructureDefinitions, validate codes, etx.
+The FhirInstanceValidator relies on an implementation of an interface called [IValidationSupport](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/IValidationSupport.html) interface to load StructureDefinitions, validate codes, etx.
 
-By default, an implementation of this interface called [DefaultProfileValidationSupport](/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/DefaultProfileValidationSupport.html) is used. This implementation simply uses the built-in official FHIR definitions to validate against (and in many cases, this is good enough).
+By default, an implementation of this interface called [DefaultProfileValidationSupport](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/DefaultProfileValidationSupport.html) is used. This implementation simply uses the built-in official FHIR definitions to validate against (and in many cases, this is good enough).
  
 However, if you have needs beyond simply validating against the core FHIR specification, you may wish to use something more.
 
@@ -81,19 +81,19 @@ However, if you have needs beyond simply validating against the core FHIR specif
 
 # Buiilt-In Validation Support Classes
 
-There are a several implementations of the [IValidationSupport](/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/IValidationSupport.html) interface built into HAPI FHIR that can be used, typically in a chain.
+There are a several implementations of the [IValidationSupport](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/IValidationSupport.html) interface built into HAPI FHIR that can be used, typically in a chain.
 
-* [**DefaultProfileValidationSupport**](/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/DefaultProfileValidationSupport.html) - Supplies the built-in FHIR core structure definitions, including both structures and vocabulary.
+* [**DefaultProfileValidationSupport**](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/DefaultProfileValidationSupport.html) - Supplies the built-in FHIR core structure definitions, including both structures and vocabulary.
 
-* [**ValidationSupportChain**](/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/ValidationSupportChain.html) - Can be used to chain multiple implementations together so that for every request, each support class instance in the chain is tried in sequence.
+* [**ValidationSupportChain**](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/r4/hapi/validation/ValidationSupportChain.html) - Can be used to chain multiple implementations together so that for every request, each support class instance in the chain is tried in sequence.
 
-* [**PrePopulatedValidationSupport**](/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/PrePopulatedValidationSupport.html) - Contains a series of HashMaps that store loaded conformance resources in memory. Typically this is initialized at startup in order to add custom conformance resources into the chain.
+* [**PrePopulatedValidationSupport**](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/r4/hapi/validation/PrePopulatedValidationSupport.html) - Contains a series of HashMaps that store loaded conformance resources in memory. Typically this is initialized at startup in order to add custom conformance resources into the chain.
 
-* [**PrePopulatedValidationSupport**](/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/PrePopulatedValidationSupport.html) - Contains a series of HashMaps that store loaded conformance resources in memory. Typically this is initialized at startup in order to add custom conformance resources into the chain.
+* [**PrePopulatedValidationSupport**](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/r4/hapi/validation/PrePopulatedValidationSupport.html) - Contains a series of HashMaps that store loaded conformance resources in memory. Typically this is initialized at startup in order to add custom conformance resources into the chain.
 
-* [**CachingValidationSupport**](/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/CachingValidationSupport.html) - Caches results of calls to a wrapped service implementation for a period of time. This class can be a significant help in terms of performance if you are loading conformance resources or performing terminology operations from a database or disk.
+* [**CachingValidationSupport**](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/r4/hapi/validation/CachingValidationSupport.html) - Caches results of calls to a wrapped service implementation for a period of time. This class can be a significant help in terms of performance if you are loading conformance resources or performing terminology operations from a database or disk.
 
-* [**SnapshotGeneratingValidationSupport**](/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/SnapshotGeneratingValidationSupport.html) - Generates StructureDefinition snapshots as needed. This should be added to your chain if you are working wiith differential StructueDefinitions that do not include the snapshot view.
+* [**SnapshotGeneratingValidationSupport**](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/r4/hapi/validation/SnapshotGeneratingValidationSupport.html) - Generates StructureDefinition snapshots as needed. This should be added to your chain if you are working wiith differential StructueDefinitions that do not include the snapshot view.
 
 
 

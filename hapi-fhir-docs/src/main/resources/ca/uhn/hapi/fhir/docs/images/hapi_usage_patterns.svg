@@ -1,0 +1,594 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+	width="672px" height="468px" version="1.1">
+	<defs>
+		<linearGradient x1="0%" y1="0%" x2="0%" y2="100%"
+			id="mx-gradient-fff2cc-1-ffd966-1-s-0">
+			<stop offset="0%" style="stop-color:#FFF2CC" />
+			<stop offset="100%" style="stop-color:#FFD966" />
+		</linearGradient>
+		<linearGradient x1="0%" y1="0%" x2="0%" y2="100%"
+			id="mx-gradient-ffffff-0.9-ffffff-0.1-s-0">
+			<stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+			<stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.1" />
+		</linearGradient>
+		<linearGradient x1="0%" y1="0%" x2="0%" y2="100%"
+			id="mx-gradient-d5e8d4-1-97d077-1-s-0">
+			<stop offset="0%" style="stop-color:#D5E8D4" />
+			<stop offset="100%" style="stop-color:#97D077" />
+		</linearGradient>
+		<linearGradient x1="0%" y1="0%" x2="0%" y2="100%"
+			id="mx-gradient-f5f5f5-1-b3b3b3-1-s-0">
+			<stop offset="0%" style="stop-color:#F5F5F5" />
+			<stop offset="100%" style="stop-color:#B3B3B3" />
+		</linearGradient>
+	</defs>
+	<g transform="translate(0.5,0.5)">
+		<rect x="211" y="246" width="98" height="90" rx="13.5" ry="13.5"
+			fill="#ffffff" stroke="#000000" pointer-events="none" />
+		<rect x="213" y="248" width="94" height="86" rx="12.9" ry="12.9"
+			fill="#ffffff" stroke="#000000" pointer-events="none" />
+		<g transform="translate(213,277)">
+			<switch>
+				<foreignObject pointer-events="all" width="93" height="32"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 91px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					External FHIR Clients
+					<br />
+				</div></div></foreignObject>
+				<text x="47" y="22" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="211" y="127" width="195" height="90" fill="#a9c4eb"
+			stroke="#808080" stroke-width="2" pointer-events="none" />
+		<g transform="translate(184,172)rotate(-90,35.5,0)">
+			<switch>
+				<foreignObject pointer-events="all" width="71" height="32"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 71px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					Your
+					<br />
+					<div align="left">Application</div>
+				</div></div></foreignObject>
+				<text x="36" y="22" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="361" y="147" width="70" height="50" rx="7.5" ry="7.5"
+			fill="#d0d0d0" stroke="#d0d0d0" transform="translate(2,3)" opacity="1" />
+		<rect x="361" y="147" width="70" height="50" rx="7.5" ry="7.5"
+			fill="url(#mx-gradient-fff2cc-1-ffd966-1-s-0)" stroke="#d6b656"
+			pointer-events="none" />
+		<path
+			d="M 369.65 146 Q 360 146 360 155.65 L 360 167 Q 396 182 432 167 L 432 155.65 Q 432 146 422.35 146 Z"
+			fill="url(#mx-gradient-ffffff-0.9-ffffff-0.1-s-0)" stroke="none"
+			pointer-events="none" />
+		<g transform="translate(360,158)">
+			<switch>
+				<foreignObject pointer-events="all" width="71" height="32"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 71px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					HAPI FHIR
+					<br />
+					Client
+					<br />
+				</div></div></foreignObject>
+				<text x="36" y="22" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="281" y="147" width="70" height="50" rx="7.5" ry="7.5"
+			fill="#d0d0d0" stroke="#d0d0d0" transform="translate(2,3)" opacity="1" />
+		<rect x="281" y="147" width="70" height="50" rx="7.5" ry="7.5"
+			fill="url(#mx-gradient-fff2cc-1-ffd966-1-s-0)" stroke="#d6b656"
+			pointer-events="none" />
+		<path
+			d="M 289.65 146 Q 280 146 280 155.65 L 280 167 Q 316 182 352 167 L 352 155.65 Q 352 146 342.35 146 Z"
+			fill="url(#mx-gradient-ffffff-0.9-ffffff-0.1-s-0)" stroke="none"
+			pointer-events="none" />
+		<g transform="translate(289,150)">
+			<switch>
+				<foreignObject pointer-events="all" width="53" height="47"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 53px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					HAPI
+					<br />
+					Model
+					<br />
+					Objects
+				</div></div></foreignObject>
+				<text x="27" y="30" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="521" y="127" width="120" height="90" rx="13.5" ry="13.5"
+			fill="#ffffff" stroke="#000000" pointer-events="none" />
+		<rect x="523" y="129" width="116" height="86" rx="12.9" ry="12.9"
+			fill="#ffffff" stroke="#000000" pointer-events="none" />
+		<g transform="translate(553,150)">
+			<switch>
+				<foreignObject pointer-events="all" width="56" height="47"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 56px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					External
+					<br />
+					FHIR
+					<br />
+					Server
+					<br />
+				</div></div></foreignObject>
+				<text x="28" y="30" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<path
+			d="M 441.5 180.5 L 441.5 161.5 L 488.26 161.5 L 488.26 150 L 510.5 171 L 488.26 192 L 488.26 180.5 Z"
+			fill="#ff9999" stroke="#000000" stroke-linejoin="round"
+			stroke-miterlimit="10" pointer-events="none" />
+		<g transform="translate(461,165)">
+			<switch>
+				<foreignObject pointer-events="all" width="31" height="16"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 11px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; white-space: nowrap; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">HTTP</div></div></foreignObject>
+				<text x="16" y="14" fill="#000000" text-anchor="middle"
+					font-size="11px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<path
+			d="M 191 116 L 184.88 116 Q 178.75 116 178.75 126 L 178.75 161 Q 178.75 171 169.88 171 L 165.44 171 Q 161 171 169.88 171 L 174.31 171 Q 178.75 171 178.75 181 L 178.75 216 Q 178.75 226 184.88 226 L 191 226"
+			fill="none" stroke="#999999" stroke-miterlimit="10" pointer-events="none" />
+		<rect x="1" y="126" width="150" height="90" fill="none" stroke="none"
+			pointer-events="none" />
+		<g transform="translate(3,134)">
+			<switch>
+				<foreignObject pointer-events="all" width="146"
+					height="78" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(77, 77, 77); line-height: 1.26; vertical-align: top; overflow: hidden; max-height: 86px; max-width: 146px; width: 146px; white-space: normal; text-align: right;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					Use the HAPI FHIR client in an application to fetch from or store
+					resources to an external server.
+					<br />
+					<a href="/doc_rest_client.html">Learn Mode</a>
+				</div></div></foreignObject>
+				<text x="73" y="45" fill="#4D4D4D" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="421" y="246" width="230" height="90" fill="#a9c4eb"
+			stroke="#808080" stroke-width="2" pointer-events="none" />
+		<g transform="translate(611,262)rotate(-90,35.5,29)">
+			<switch>
+				<foreignObject pointer-events="all" width="71" height="32"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 71px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					Your
+					<br />
+					<div align="left">Application</div>
+				</div></div></foreignObject>
+				<text x="36" y="22" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="486" y="266" width="70" height="50" rx="7.5" ry="7.5"
+			fill="#d0d0d0" stroke="#d0d0d0" transform="translate(2,3)" opacity="1" />
+		<rect x="486" y="266" width="70" height="50" rx="7.5" ry="7.5"
+			fill="url(#mx-gradient-fff2cc-1-ffd966-1-s-0)" stroke="#d6b656"
+			pointer-events="none" />
+		<path
+			d="M 494.65 265 Q 485 265 485 274.65 L 485 286 Q 521 301 557 286 L 557 274.65 Q 557 265 547.35 265 Z"
+			fill="url(#mx-gradient-ffffff-0.9-ffffff-0.1-s-0)" stroke="none"
+			pointer-events="none" />
+		<g transform="translate(494,269)">
+			<switch>
+				<foreignObject pointer-events="all" width="53" height="47"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 53px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					HAPI
+					<br />
+					Model
+					<br />
+					Objects
+				</div></div></foreignObject>
+				<text x="27" y="30" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="396" y="266" width="70" height="50" rx="7.5" ry="7.5"
+			fill="#d0d0d0" stroke="#d0d0d0" transform="translate(2,3)" opacity="1" />
+		<rect x="396" y="266" width="70" height="50" rx="7.5" ry="7.5"
+			fill="url(#mx-gradient-fff2cc-1-ffd966-1-s-0)" stroke="#d6b656"
+			pointer-events="none" />
+		<path
+			d="M 404.65 265 Q 395 265 395 274.65 L 395 286 Q 431 301 467 286 L 467 274.65 Q 467 265 457.35 265 Z"
+			fill="url(#mx-gradient-ffffff-0.9-ffffff-0.1-s-0)" stroke="none"
+			pointer-events="none" />
+		<g transform="translate(395,277)">
+			<switch>
+				<foreignObject pointer-events="all" width="71" height="32"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 71px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					HAPI FHIR
+					<br />
+					Server
+				</div></div></foreignObject>
+				<text x="36" y="22" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<path
+			d="M 316.5 299.5 L 316.5 280.5 L 363.26 280.5 L 363.26 269 L 385.5 290 L 363.26 311 L 363.26 299.5 Z"
+			fill="#ff9999" stroke="#000000" stroke-linejoin="round"
+			stroke-miterlimit="10" pointer-events="none" />
+		<g transform="translate(336,284)">
+			<switch>
+				<foreignObject pointer-events="all" width="31" height="16"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 11px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; white-space: nowrap; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">HTTP</div></div></foreignObject>
+				<text x="16" y="14" fill="#000000" text-anchor="middle"
+					font-size="11px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<path
+			d="M 191 236 L 184.88 236 Q 178.75 236 178.75 246 L 178.75 281 Q 178.75 291 169.88 291 L 165.44 291 Q 161 291 169.88 291 L 174.31 291 Q 178.75 291 178.75 301 L 178.75 336 Q 178.75 346 184.88 346 L 191 346"
+			fill="none" stroke="#999999" stroke-miterlimit="10" pointer-events="none" />
+		<rect x="1" y="236" width="150" height="110" fill="none" stroke="none"
+			pointer-events="none" />
+		<g transform="translate(3,247)">
+			<switch>
+				<foreignObject pointer-events="all" width="146"
+					height="93" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(77, 77, 77); line-height: 1.26; vertical-align: top; overflow: hidden; max-height: 106px; max-width: 146px; width: 146px; white-space: normal; text-align: right;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					Use the HAPI FHIR server in an application to allow external
+					applications to access or modify your application's data.
+					<br />
+					<a href="/doc_rest_server.html">Learn More</a>
+					<br />
+				</div></div></foreignObject>
+				<text x="73" y="53" fill="#4D4D4D" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="424" y="366" width="227" height="90" fill="#99ff99"
+			stroke="#808080" stroke-width="2" pointer-events="none" />
+		<g transform="translate(603,367)rotate(-90,44,44)">
+			<switch>
+				<foreignObject pointer-events="all" width="88" height="47"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 86px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					HAPI JPA Database Server
+					<br />
+				</div></div></foreignObject>
+				<text x="44" y="30" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="396" y="386" width="70" height="50" rx="7.5" ry="7.5"
+			fill="#d0d0d0" stroke="#d0d0d0" transform="translate(2,3)" opacity="1" />
+		<rect x="396" y="386" width="70" height="50" rx="7.5" ry="7.5"
+			fill="url(#mx-gradient-fff2cc-1-ffd966-1-s-0)" stroke="#d6b656"
+			pointer-events="none" />
+		<path
+			d="M 404.65 385 Q 395 385 395 394.65 L 395 406 Q 431 421 467 406 L 467 394.65 Q 467 385 457.35 385 Z"
+			fill="url(#mx-gradient-ffffff-0.9-ffffff-0.1-s-0)" stroke="none"
+			pointer-events="none" />
+		<g transform="translate(396,397)">
+			<switch>
+				<foreignObject pointer-events="all" width="69" height="32"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 67px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					HAPI FHIR Server
+					<br />
+				</div></div></foreignObject>
+				<text x="35" y="22" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="481" y="386" width="70" height="50" rx="7.5" ry="7.5"
+			fill="#d0d0d0" stroke="#d0d0d0" transform="translate(2,3)" opacity="1" />
+		<rect x="481" y="386" width="70" height="50" rx="7.5" ry="7.5"
+			fill="url(#mx-gradient-fff2cc-1-ffd966-1-s-0)" stroke="#d6b656"
+			pointer-events="none" />
+		<path
+			d="M 489.65 385 Q 480 385 480 394.65 L 480 406 Q 516 421 552 406 L 552 394.65 Q 552 385 542.35 385 Z"
+			fill="url(#mx-gradient-ffffff-0.9-ffffff-0.1-s-0)" stroke="none"
+			pointer-events="none" />
+		<g transform="translate(481,389)">
+			<switch>
+				<foreignObject pointer-events="all" width="69" height="47"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 67px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					JPA Persistence Module
+					<br />
+				</div></div></foreignObject>
+				<text x="35" y="30" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="211" y="366" width="110" height="90" fill="#a9c4eb"
+			stroke="#808080" stroke-width="2" pointer-events="none" />
+		<g transform="translate(230,397)">
+			<switch>
+				<foreignObject pointer-events="all" width="71" height="32"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 71px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					Your
+					<br />
+					<div align="left">Application</div>
+				</div></div></foreignObject>
+				<text x="36" y="22" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<path
+			d="M 331.5 419.5 L 331.5 400.5 L 368.26 400.5 L 368.26 389 L 390.5 410 L 368.26 431 L 368.26 419.5 Z"
+			fill="#ff9999" stroke="#000000" stroke-linejoin="round"
+			stroke-miterlimit="10" pointer-events="none" />
+		<g transform="translate(346,404)">
+			<switch>
+				<foreignObject pointer-events="all" width="31" height="16"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 11px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; white-space: nowrap; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">HTTP</div></div></foreignObject>
+				<text x="16" y="14" fill="#000000" text-anchor="middle"
+					font-size="11px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<path
+			d="M 191 356 L 184.88 356 Q 178.75 356 178.75 366 L 178.75 401 Q 178.75 411 169.88 411 L 165.44 411 Q 161 411 169.88 411 L 174.31 411 Q 178.75 411 178.75 421 L 178.75 456 Q 178.75 466 184.88 466 L 191 466"
+			fill="none" stroke="#999999" stroke-miterlimit="10" pointer-events="none" />
+		<rect x="1" y="356" width="150" height="110" fill="none" stroke="none"
+			pointer-events="none" />
+		<g transform="translate(3,360)">
+			<switch>
+				<foreignObject pointer-events="all" width="146"
+					height="106" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(77, 77, 77); line-height: 1.26; vertical-align: top; overflow: hidden; max-height: 106px; max-width: 146px; width: 146px; white-space: normal; text-align: right;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					Use the HAPI JPA/Database Server to deploy a fully functional FHIR
+					server you can develop applications against.
+					<br />
+					<a href="/doc_jpa.html">Learn More</a>
+				</div></div></foreignObject>
+				<text x="73" y="59" fill="#4D4D4D" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="211" y="9" width="440" height="90" fill="#a9c4eb"
+			stroke="#808080" stroke-width="2" pointer-events="none" />
+		<g transform="translate(184,54)rotate(-90,35.5,0)">
+			<switch>
+				<foreignObject pointer-events="all" width="71" height="32"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 71px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					Your
+					<br />
+					<div align="left">Application</div>
+				</div></div></foreignObject>
+				<text x="36" y="22" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="266" y="29" width="55" height="50" rx="7.5" ry="7.5"
+			fill="#d0d0d0" stroke="#d0d0d0" transform="translate(2,3)" opacity="1" />
+		<rect x="266" y="29" width="55" height="50" rx="7.5" ry="7.5"
+			fill="url(#mx-gradient-fff2cc-1-ffd966-1-s-0)" stroke="#d6b656"
+			pointer-events="none" />
+		<path
+			d="M 274.65 28 Q 265 28 265 37.65 L 265 49 Q 293.5 64 322 49 L 322 37.65 Q 322 28 312.35 28 Z"
+			fill="url(#mx-gradient-ffffff-0.9-ffffff-0.1-s-0)" stroke="none"
+			pointer-events="none" />
+		<g transform="translate(267,32)">
+			<switch>
+				<foreignObject pointer-events="all" width="53" height="47"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 53px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					HAPI
+					<br />
+					Model
+					<br />
+					Objects
+				</div></div></foreignObject>
+				<text x="27" y="30" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="326" y="29" width="70" height="50" rx="7.5" ry="7.5"
+			fill="#d0d0d0" stroke="#d0d0d0" transform="translate(2,3)" opacity="1" />
+		<rect x="326" y="29" width="70" height="50" rx="7.5" ry="7.5"
+			fill="url(#mx-gradient-fff2cc-1-ffd966-1-s-0)" stroke="#d6b656"
+			pointer-events="none" />
+		<path
+			d="M 334.65 28 Q 325 28 325 37.65 L 325 49 Q 361 64 397 49 L 397 37.65 Q 397 28 387.35 28 Z"
+			fill="url(#mx-gradient-ffffff-0.9-ffffff-0.1-s-0)" stroke="none"
+			pointer-events="none" />
+		<g transform="translate(326,32)">
+			<switch>
+				<foreignObject pointer-events="all" width="69" height="47"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 67px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					HAPI FHIR
+					<br />
+					Parser (Xml/Json)
+					<br />
+				</div></div></foreignObject>
+				<text x="35" y="30" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<path
+			d="M 401.5 61.33 L 401.5 46.67 L 408.66 46.67 L 408.66 37.06 L 420.5 54 L 408.66 70.94 L 408.66 61.33 Z"
+			fill="none" stroke="#000000" stroke-linejoin="round"
+			stroke-miterlimit="10" pointer-events="none" />
+		<g transform="translate(410,43)">
+			<switch>
+				<foreignObject pointer-events="all" width="2" height="16"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 11px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; white-space: nowrap; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml"><br /></div></div></foreignObject>
+				<text x="1" y="14" fill="#000000" text-anchor="middle"
+					font-size="11px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<path d="M 454 24 L 484 24 L 484 84 L 424 84 L 424 54 Z" fill="none"
+			stroke="#000000" stroke-miterlimit="10" pointer-events="none" />
+		<g transform="translate(423,51)">
+			<switch>
+				<foreignObject pointer-events="all" width="61" height="32"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 59px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					Raw FHIR Resources
+					<br />
+				</div></div></foreignObject>
+				<text x="31" y="22" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<path d="M 450 30 L 482 30 L 482 50 L 450 50 Z" fill="url(#mx-gradient-d5e8d4-1-97d077-1-s-0)"
+			stroke="#82b366" stroke-miterlimit="10" pointer-events="none" />
+		<path d="M 450 30 L 466 40 L 482 30" fill="none" stroke="#82b366"
+			stroke-miterlimit="10" pointer-events="none" />
+		<rect x="510" y="29" width="70" height="50" rx="7.5" ry="7.5"
+			fill="#d0d0d0" stroke="#d0d0d0" transform="translate(2,3)" opacity="1" />
+		<rect x="510" y="29" width="70" height="50" rx="7.5" ry="7.5"
+			fill="url(#mx-gradient-fff2cc-1-ffd966-1-s-0)" stroke="#d6b656"
+			pointer-events="none" />
+		<path
+			d="M 518.65 28 Q 509 28 509 37.65 L 509 49 Q 545 64 581 49 L 581 37.65 Q 581 28 571.35 28 Z"
+			fill="url(#mx-gradient-ffffff-0.9-ffffff-0.1-s-0)" stroke="none"
+			pointer-events="none" />
+		<g transform="translate(510,32)">
+			<switch>
+				<foreignObject pointer-events="all" width="69" height="47"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 67px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					HAPI FHIR
+					<br />
+					Parser (Xml/Json)
+					<br />
+				</div></div></foreignObject>
+				<text x="35" y="30" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<rect x="586" y="29" width="55" height="50" rx="7.5" ry="7.5"
+			fill="#d0d0d0" stroke="#d0d0d0" transform="translate(2,3)" opacity="1" />
+		<rect x="586" y="29" width="55" height="50" rx="7.5" ry="7.5"
+			fill="url(#mx-gradient-fff2cc-1-ffd966-1-s-0)" stroke="#d6b656"
+			pointer-events="none" />
+		<path
+			d="M 594.65 28 Q 585 28 585 37.65 L 585 49 Q 613.5 64 642 49 L 642 37.65 Q 642 28 632.35 28 Z"
+			fill="url(#mx-gradient-ffffff-0.9-ffffff-0.1-s-0)" stroke="none"
+			pointer-events="none" />
+		<g transform="translate(587,32)">
+			<switch>
+				<foreignObject pointer-events="all" width="53" height="47"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 53px; white-space: normal; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					HAPI
+					<br />
+					Model
+					<br />
+					Objects
+				</div></div></foreignObject>
+				<text x="27" y="30" fill="#000000" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<path
+			d="M 489.5 61.33 L 489.5 46.67 L 496.66 46.67 L 496.66 37.06 L 508.5 54 L 496.66 70.94 L 496.66 61.33 Z"
+			fill="none" stroke="#000000" stroke-linejoin="round"
+			stroke-miterlimit="10" pointer-events="none" />
+		<g transform="translate(498,43)">
+			<switch>
+				<foreignObject pointer-events="all" width="2" height="16"
+					requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 11px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; white-space: nowrap; text-align: center;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml"><br /></div></div></foreignObject>
+				<text x="1" y="14" fill="#000000" text-anchor="middle"
+					font-size="11px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<path
+			d="M 191 1 L 184.88 1 Q 178.75 1 178.75 11 L 178.75 44 Q 178.75 54 169.88 54 L 165.44 54 Q 161 54 169.88 54 L 174.31 54 Q 178.75 54 178.75 64 L 178.75 97 Q 178.75 107 184.88 107 L 191 107"
+			fill="none" stroke="#999999" stroke-miterlimit="10" pointer-events="none" />
+		<rect x="1" y="9" width="150" height="90" fill="none" stroke="none"
+			pointer-events="none" />
+		<g transform="translate(3,17)">
+			<switch>
+				<foreignObject pointer-events="all" width="146"
+					height="78" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml"
+					style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(77, 77, 77); line-height: 1.26; vertical-align: top; overflow: hidden; max-height: 86px; max-width: 146px; width: 146px; white-space: normal; text-align: right;"><div
+					style="display:inline-block;text-align:inherit;text-decoration:inherit;"
+					xmlns="http://www.w3.org/1999/xhtml">
+					Use the HAPI FHIR parser and encoder to convert between FHIR and
+					your application's data model.
+					<br />
+					<a href="/doc_fhirobjects.html">Learn More</a>
+				</div></div></foreignObject>
+				<text x="73" y="45" fill="#4D4D4D" text-anchor="middle"
+					font-size="12px" font-family="Helvetica">[Not supported by viewer]</text>
+			</switch>
+		</g>
+		<path
+			d="M 574 279 C 574 268.33 604 268.33 604 279 L 604 303 C 604 313.67 574 313.67 574 303 Z"
+			fill="url(#mx-gradient-f5f5f5-1-b3b3b3-1-s-0)" stroke="#666666"
+			stroke-miterlimit="10" pointer-events="none" />
+		<path d="M 574 279 C 574 287 604 287 604 279" fill="none" stroke="#666666"
+			stroke-miterlimit="10" pointer-events="none" />
+		<path
+			d="M 565 399 C 565 388.33 595 388.33 595 399 L 595 423 C 595 433.67 565 433.67 565 423 Z"
+			fill="url(#mx-gradient-f5f5f5-1-b3b3b3-1-s-0)" stroke="#666666"
+			stroke-miterlimit="10" pointer-events="none" />
+		<path d="M 565 399 C 565 407 595 407 595 399" fill="none" stroke="#666666"
+			stroke-miterlimit="10" pointer-events="none" />
+	</g>
+</svg>

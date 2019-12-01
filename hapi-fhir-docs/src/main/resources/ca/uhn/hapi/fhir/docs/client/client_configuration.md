@@ -38,9 +38,9 @@ The Apache HTTP Client is very powerful and extremely flexible, but can be confu
 
 In many cases, the default configuration should suffice. HAPI FHIR also encapsulates some of the more common configuration settings you might want to use (socket timesouts, proxy settings, etc.) so that these can be configured through HAPI's API without needing to understand the underlying HTTP Client library.
 
-This configuration is provided by accessing the [IRestfulClientFactory](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/client/IRestfulClientFactory.html) class from the FhirContext.
+This configuration is provided by accessing the [IRestfulClientFactory](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/client/api/IRestfulClientFactory.html) class from the FhirContext.
 
-Note that individual requests and responses can be tweaked using [Client Interceptors](/docs/interceptors/client_initerceptors.html). This approach is generally useful for configuration involving tweaking the HTTP request/response, such as adding authorization headers or logging.
+Note that individual requests and responses can be tweaked using [Client Interceptors](/docs/interceptors/client_interceptors.html). This approach is generally useful for configuration involving tweaking the HTTP request/response, such as adding authorization headers or logging.
 
 ## Setting Socket Timeouts
 
