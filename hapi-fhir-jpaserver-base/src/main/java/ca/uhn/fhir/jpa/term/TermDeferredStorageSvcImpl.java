@@ -260,7 +260,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	@PostConstruct
 	public void scheduleJob() {
-		// FIXME KHS what does this mean?
+		// TODO KHS what does this mean?
 		// Register scheduled job to save deferred concepts
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
