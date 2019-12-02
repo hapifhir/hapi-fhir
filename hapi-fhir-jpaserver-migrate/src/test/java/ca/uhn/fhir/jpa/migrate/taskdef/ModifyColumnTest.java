@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import org.flywaydb.core.internal.command.DbMigrate;
 import org.junit.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -224,19 +225,32 @@ public class ModifyColumnTest extends BaseTest {
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 		task.setNullable(true);
+		task.setFailureAllowed(true);
+		getMigrator().addTask(task);
+
+		getMigrator().migrate();
+		assertEquals(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL").getColumnTypeEnum());
+
+	}
+
+	@Test
+	public void testFailureNotAllowed() throws SQLException {
+		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
+		executeSql("insert into SOMETABLE (TEXTCOL) values ('HELLO')");
+
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
+		task.setTableName("SOMETABLE");
+		task.setColumnName("TEXTCOL");
+		task.setColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		task.setNullable(true);
 		getMigrator().addTask(task);
 
 		try {
 			getMigrator().migrate();
 			fail();
-		} catch (DataIntegrityViolationException e) {
+		} catch (DbMigrate.FlywayMigrateException e) {
 			// expected
 		}
-		assertEquals(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL").getColumnTypeEnum());
-
-		task.setFailureAllowed(true);
-		getMigrator().migrate();
-		assertEquals(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL").getColumnTypeEnum());
 
 	}
 
