@@ -38,4 +38,4 @@ To get started with the JPA Server, jump to [JPA Server Introduction](/docs/serv
 
 For users in an environment where existing services using JAX-RS have been created, it is often desirable to use JAX-RS for FHIR servers as well. HAPI FHIR provides a JAX-RS FHIR server implementation for this purpose.
 
-To get started with the JAX-RS FHIR Server, jump to [JAX-RS FHIR Server Introduction](/docs/server_jaxrs/introduction.html).  
+To get started with the JAX-RS FHIR Server, jump to [JAX-RS FHIR Server Introduction](/docs/server_plain/jax_rs.html).  

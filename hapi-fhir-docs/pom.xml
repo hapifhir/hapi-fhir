@@ -93,6 +93,12 @@
 			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-testpage-overlay</artifactId>
+			<version>4.2.0-SNAPSHOT</version>
+			<classifier>classes</classifier>
+		</dependency>
 	</dependencies>
 
 	<build>

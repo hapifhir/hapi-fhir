@@ -18,11 +18,11 @@ http://fhir.example.com/Patient
 
 # Search Parameters: String Introduction
 
-To allow a search using given search parameters, add one or more parameters to your search method and tag these parameters as either [@RequiredParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/RequiredParam.html) or [@OptionalParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/OptionalParam.html).
+To allow a search using given search parameters, add one or more parameters to your search method and tag these parameters as either [@RequiredParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/RequiredParam.html) or [@OptionalParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/OptionalParam.html).
 
 This annotation takes a "name" parameter which specifies the parameter's name (as it will appear in the search URL). FHIR defines standardized parameter names for each resource, and these are available as constants on the individual HAPI resource classes.
 
-Parameters which take a string as their format should use the [StringParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/StringParam.html) type. They may also use normal java `String`, although it is not possible to use modifiers such as the `:exact` modifier in that case.
+Parameters which take a string as their format should use the [StringParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/StringParam.html) type. They may also use normal java `String`, although it is not possible to use modifiers such as the `:exact` modifier in that case.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|searchStringParam}}
@@ -54,7 +54,7 @@ The FHIR specification provides a syntax for specifying dates+times (but for sim
 
 Dates may be optionally prefixed with a qualifier. For example, the string `=ge2011-01-02` means any date on or after 2011-01-02.
 
-To accept a qualified date parameter, use the [DateParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/DateParam.html) parameter type.
+To accept a qualified date parameter, use the [DateParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/DateParam.html) parameter type.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|dates}}
@@ -80,7 +80,7 @@ A common scenario in searches is to allow searching for resources with values (i
 
 FHIR allows for multiple parameters with the same key, and interprets these as being an ***AND*** set. So, for example, a range of `&date=gt2011-01-01&date=lt2011-02-01` can be interpreted as any date within January 2011.
 
-The following snippet shows how to accept such a range, and combines it with a specific identifier, which is a common scenario. (i.e. Give me a list of observations for a specific patient within a given date range). This is accomplished using a single parameter of type [DateRangeParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/DateRangeParam.html).
+The following snippet shows how to accept such a range, and combines it with a specific identifier, which is a common scenario. (i.e. Give me a list of observations for a specific patient within a given date range). This is accomplished using a single parameter of type [DateRangeParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/DateRangeParam.html).
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|dateRange}}
@@ -108,7 +108,7 @@ An example of this might be the following URL, which refers to any Observation r
 http://fhir.example.com/Observation?subject.identifier=7000135&date=gt2011-01-01
 ```
 
-When such a request is made of a server (or to make such a request from a client), the `getLowerBound()` or `getUpperBound()` property of the [DateRangeParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/DateRangeParam.html) object will be set to `null`.
+When such a request is made of a server (or to make such a request from a client), the `getLowerBound()` or `getUpperBound()` property of the [DateRangeParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/DateRangeParam.html) object will be set to `null`.
 
 # Search Parameters: Quantity
 
@@ -130,11 +130,22 @@ http://fhir.example.com/Observation?value-quantity=lt123.2||mg|http://unitsofmea
 
 Many search parameters refer to resource references. For instance, the Patient parameter "provider" refers to the resource marked as the managing organization for patients.
 
-Reference parameters use the [ReferenceParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/ReferenceParam.html) type. Reference parameters are, in their most basic form, just a pointer to another resource. For example, you might want to query for DiagnosticReport resources where the subject (the Patient resource that the report is about) is Patient/123. The following example shows a simple resource reference parameter in use.
+Reference parameters use the [ReferenceParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/ReferenceParam.html) type. Reference parameters are, in their most basic form, just a pointer to another resource. For example, you might want to query for DiagnosticReport resources where the subject (the Patient resource that the report is about) is Patient/123. The following example shows a simple resource reference parameter in use.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|referenceSimple}}
 ``` 
+
+<a name="filter"/>
+
+# Search Parameters: Filter
+
+To implement the FHIR [_filter](http://hl7.org/fhir/search_filter.html) search style, you may create a parameter of type `StringParam` (or one of the and/or derivatives), as shown below.
+
+```java
+@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_FILTER)
+StringAndListParam theFtFilter
+```  
 
 # Chained Resource References
 
@@ -198,11 +209,11 @@ http://fhir.example.com/Observation?name-value-date=PROCTIME$2001-02-02
 
 # Combining Multiple Parameters
 
-Search methods may take multiple parameters, and these parameters may (or may not) be optional. To add a second required parameter, annotate the parameter with [@RequiredParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/RequiredParam.html). To add an optional parameter (which will be passed in as `null` if no value is supplied), annotate the method with [@OptionalParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/OptionalParam.html).
+Search methods may take multiple parameters, and these parameters may (or may not) be optional. To add a second required parameter, annotate the parameter with [@RequiredParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/RequiredParam.html). To add an optional parameter (which will be passed in as `null` if no value is supplied), annotate the method with [@OptionalParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/OptionalParam.html).
 
-You may annotate a method with any combination of as many [@RequiredParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/RequiredParam.html) and as many [@OptionalParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/OptionalParam.html) parameters as you want. It is valid to have only [@RequiredParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/RequiredParam.html) parameters, or only [@OptionalParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/OptionalParam.html) parameters, or any combination of the two.
+You may annotate a method with any combination of as many [@RequiredParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/RequiredParam.html) and as many [@OptionalParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/OptionalParam.html) parameters as you want. It is valid to have only [@RequiredParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/RequiredParam.html) parameters, or only [@OptionalParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/OptionalParam.html) parameters, or any combination of the two.
 
-If you wish to create a server that can accept any combination of a large number of parameters, (this is how the various reference servers behave, as well as the [Public HAPI Test Server](http://hapi.fhir.org)). The easiest way to accomplish this is to simply create one method with all allowable parameters, each annotated as [@OptionalParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/OptionalParam.html).
+If you wish to create a server that can accept any combination of a large number of parameters, (this is how the various reference servers behave, as well as the [Public HAPI Test Server](http://hapi.fhir.org)). The easiest way to accomplish this is to simply create one method with all allowable parameters, each annotated as [@OptionalParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/OptionalParam.html).
 
 On the other hand, if you have specific combinations of parameters you wish to support (a common scenario if you are building FHIR on top of existing data sources and only have certain indexes you can use) you could create multiple search methods, each with specific required and optional parameters matching the database indexes.
 
@@ -235,9 +246,9 @@ It is worth noting that according to the FHIR specification, you can have an AND
 
 ## OR Relationship Query Parameters
 
-To accept a composite parameter, use a parameter type which implements the [IQueryParameterOr](/apidocs/hapi-fhir-base/ca/uhn/fhir/model/api/IQueryParameterOr.html) interface.
+To accept a composite parameter, use a parameter type which implements the [IQueryParameterOr](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/model/api/IQueryParameterOr.html) interface.
 
-Each parameter type ([StringParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/StringParam.html), [TokenParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/TokenParam.html), etc.) has a corresponding parameter which accepts an ***OR*** list of parameters. These types are called "[type]OrListParam", for example: [StringOrListParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/StringOrListParam.html) and [TokenOrListParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/TokenOrListParam.html).
+Each parameter type ([StringParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/StringParam.html), [TokenParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/TokenParam.html), etc.) has a corresponding parameter which accepts an ***OR*** list of parameters. These types are called "[type]OrListParam", for example: [StringOrListParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/StringOrListParam.html) and [TokenOrListParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/TokenOrListParam.html).
 
 The following example shows a search for Observation by name, where a list of names may be passed in (and the expectation is that the server will return Observations that match any of these names):
 
@@ -253,7 +264,7 @@ http://fhir.example.com/Observation?name=urn:fakenames|123,urn:fakenames|456
 
 ## AND Relationship Query Parameters
 
-To accept a composite parameter, use a parameter type which implements the [IQueryParameterAnd](/apidocs/hapi-fhir-base/ca/uhn/fhir/model/api/IQueryParameterAnd.html) interface (which in turn encapsulates the corresponding IQueryParameterOr types).
+To accept a composite parameter, use a parameter type which implements the [IQueryParameterAnd](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/model/api/IQueryParameterAnd.html) interface (which in turn encapsulates the corresponding IQueryParameterOr types).
 
 An example follows which shows a search for Patients by address, where multiple string lists may be supplied by the client. For example, the client might request that the address match `("Montreal" OR "Sherbrooke") AND ("Quebec" OR "QC")` using the following query:
 
@@ -261,7 +272,7 @@ An example follows which shows a search for Patients by address, where multiple 
 http://fhir.example.com/Patient?address=Montreal,Sherbrooke&address=Quebec,QC
 ```
 
-The following code shows how to receive this parameter using a [StringAndListParameter](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/StringAndListParam.html), which can handle an AND list of multiple OR lists of strings.
+The following code shows how to receive this parameter using a [StringAndListParameter](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/StringAndListParam.html), which can handle an AND list of multiple OR lists of strings.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|searchMultipleAnd}}
@@ -272,7 +283,7 @@ in very specific cases where a composite parameter has been specifically defined
 
 # AND Relationship Query Parameters for Dates
 
-Dates are a special case, since it is a fairly common scenario to want to match a date range (which is really just an AND query on two qualified date parameters). See the section on [date ranges](#DATE_RANGES) for an example of a [DateRangeParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/DateRangeParam.html).
+Dates are a special case, since it is a fairly common scenario to want to match a date range (which is really just an AND query on two qualified date parameters). See the section on [date ranges](#DATE_RANGES) for an example of a [DateRangeParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/DateRangeParam.html).
 
 # Resource Includes (_include)
 
@@ -298,7 +309,7 @@ It is also possible to use a String type for the include parameter, which is mor
 
 # Reverse Resource Includes (_revinclude)
 
-To add support for reverse includes (via the `_revinclude` parameter), use the same format as with the `_include` parameter (shown above) but add `reverse=true` to the [@IncludeParam](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/IncludeParam.html) annotation, as shown below.
+To add support for reverse includes (via the `_revinclude` parameter), use the same format as with the `_include` parameter (shown above) but add `reverse=true` to the [@IncludeParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/IncludeParam.html) annotation, as shown below.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|revInclude}}
@@ -326,7 +337,7 @@ FHIR supports [sorting](http://www.hl7.org/implement/standards/fhir/search.html#
 
 According to the specification, sorting is requested by the client using a search param as the sort key. For example, when searching Patient resources, a sort key of "given" requests the "given" search param as the sort key. That param maps to the values in the field "Patient.name.given".
 
-Sort specifications can be passed into handler methods by adding a parameter of type [SortSpec](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/api/SortSpec.html), which has been annotated with the [@Sort](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/Sort.html) annotation, as shown in the following example:
+Sort specifications can be passed into handler methods by adding a parameter of type [SortSpec](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/api/SortSpec.html), which has been annotated with the [@Sort](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/Sort.html) annotation, as shown in the following example:
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|sort}}
@@ -340,7 +351,7 @@ http://fhir.example.com/Patient?_identifier=urn:foo|123&_sort=given
 
 # Adding Descriptions
 
-It is also possible to annotate search methods and/or parameters with the [@Description](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/Description.html) annotation. This annotation allows you to add a description of the method and the individual parameters. These descriptions will be placed in the server's conformance statement, which can be helpful to anyone who is developing software against your server.
+It is also possible to annotate search methods and/or parameters with the [@Description](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/model/api/annotation/Description.html) annotation. This annotation allows you to add a description of the method and the individual parameters. These descriptions will be placed in the server's conformance statement, which can be helpful to anyone who is developing software against your server.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|searchWithDocs}}

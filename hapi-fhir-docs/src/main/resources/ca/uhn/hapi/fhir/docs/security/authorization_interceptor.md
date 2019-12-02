@@ -1,6 +1,6 @@
 # Authorization Interceptor
 
-HAPI FHIR 1.5 introduced a new interceptor: [AuthorizationInterceptor](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.html).
+HAPI FHIR 1.5 introduced a new interceptor: [AuthorizationInterceptor](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.html).
 
 This interceptor can help with the complicated task of determining whether a user has the appropriate permission to perform a given task on a FHIR server. This is done by declaring a set of rules that can selectively allow (whitelist) and/or selectively block (blacklist) requests.
 
@@ -28,7 +28,7 @@ Note that there are performance implications to this mechanism, since an unautho
 
 See the following diagram for an example of how this works.
 
-<img src="/docs/images/hapi_authorizationinterceptor_read_normal.svg" alt="Write Authorization"/>
+<img src="/hapi-fhir/docs/images/hapi_authorizationinterceptor_read_normal.svg" alt="Write Authorization"/>
 
 ## Authorizing Write Operations
 
@@ -36,7 +36,7 @@ Write operations (create, update, etc.) are typically authorized by the intercep
 
 See the following diagram for an example of how this works.
 
-<img src="/docs/images/hapi_authorizationinterceptor_write_normal.svg" alt="Write Authorization"/>
+<img src="/hapi-fhir/docs/images/hapi_authorizationinterceptor_write_normal.svg" alt="Write Authorization"/>
 
 <a name="authorizing-sub-operations"/>
 

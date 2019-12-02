@@ -46,6 +46,10 @@
 				database migration tasks that have already been applied.  The hapi-fhir-cli migrate tool has been changed
 				to use flyway.  Learn more about flyway here: https://flywaydb.org/.
 			</action>
+			<action type="fix" issue="1613">
+				ValueSet Precalculation sometimes failed on Oracle DBs due to an invalid SQL function. This
+				has been corrected.
+			</action>
 		</release>
 		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
 			<action type="add">

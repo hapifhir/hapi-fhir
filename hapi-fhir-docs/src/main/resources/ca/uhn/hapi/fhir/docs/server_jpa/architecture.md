@@ -4,7 +4,7 @@
 
 The HAPI JPA Server has the following components:
 
-* **Resource Providers:** A RESTful server [Resource Provider](/hapi-fhir/docs/server/restful_server.html#resource_providers) is provided for each resource type in a given release of FHIR. Each resource provider implements a	[@Search](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/Search.html) method implementing the complete set of search parameters defined in the FHIR specification for the given resource type.
+* **Resource Providers:** A RESTful server [Resource Provider](/hapi-fhir/docs/server_plain/resource_providers.html) is provided for each resource type in a given release of FHIR. Each resource provider implements a	[@Search](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/Search.html) method implementing the complete set of search parameters defined in the FHIR specification for the given resource type.
 
    The resource providers also extend a superclass which implements all of the other FHIR methods, such as Read, Create, Delete, etc.
    

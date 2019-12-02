@@ -196,7 +196,7 @@ public class Builder {
 		/**
 		 * @param theOldName                            The old column name
 		 * @param theNewName                            The new column name
-		 * @param isOkayIfNeitherColumnExists          Setting this to true means that it's not an error if neither column exists
+		 * @param isOkayIfNeitherColumnExists           Setting this to true means that it's not an error if neither column exists
 		 * @param theDeleteTargetColumnFirstIfBothExist Setting this to true causes the migrator to be ok with the target column existing. It will make sure that there is no data in the column with the new name, then delete it if so in order to make room for the renamed column. If there is data it will still bomb out.
 		 */
 		public BuilderWithTableName renameColumn(String theVersion, String theOldName, String theNewName, boolean isOkayIfNeitherColumnExists, boolean theDeleteTargetColumnFirstIfBothExist) {
@@ -279,6 +279,7 @@ public class Builder {
 			public class BuilderModifyColumnWithNameAndNullable {
 				private final String myVersion;
 				private final boolean myNullable;
+				private boolean myFailureAllowed;
 
 				public BuilderModifyColumnWithNameAndNullable(String theVersion, boolean theNullable) {
 					myVersion = theVersion;
@@ -308,7 +309,13 @@ public class Builder {
 					}
 					task.setNullable(myNullable);
 					task.setColumnType(theColumnType);
+					task.setFailureAllowed(myFailureAllowed);
 					addTask(task);
+				}
+
+				public BuilderModifyColumnWithNameAndNullable failureAllowed() {
+					myFailureAllowed = true;
+					return this;
 				}
 			}
 		}

@@ -1,6 +1,6 @@
 # Search Narrowing Interceptor
 
-HAPI FHIR 3.7.0 introduced a new interceptor, the [SearchNarrowingInterceptor](/apidocs/hapi-fhr-server/ca/uhn/fhir/rest/server/interceptor/auth/SearchNarrowingInterceptor.html).
+HAPI FHIR 3.7.0 introduced a new interceptor, the [SearchNarrowingInterceptor](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/auth/SearchNarrowingInterceptor.html).
 
 This interceptor is designed to be used in conjunction with AuthorizationInterceptor. It uses a similar strategy where a dynamic list is built up for each request, but the purpose of this interceptor is to modify client searches that are received (after HAPI FHIR received the HTTP request, but before the search is actually performed) to restrict the search to only search for specific resources or compartments that the user has access to.
 

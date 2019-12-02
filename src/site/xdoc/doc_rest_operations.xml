@@ -1090,7 +1090,7 @@ If-Match: W/"3"]]></pre>
 				<p>
 					It is also possible to annotate search methods and/or parameters with
 					the
-					<a href="./apidocs/ca/uhn/fhir/model/api/annotation/Description.html">@Description</a>
+					<a href="/hapi-fhir/apidocs/ca/uhn/fhir/model/api/annotation/Description.html">@Description</a>
 					annotation. This annotation allows you to add a description of the method
 					and the individual parameters. These descriptions will be placed in the
 					server's conformance statement, which can be helpful to anyone who is developing

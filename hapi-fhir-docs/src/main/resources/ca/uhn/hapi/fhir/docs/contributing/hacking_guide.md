@@ -79,13 +79,13 @@ If the build fails to execute successfully, try the following:
 
 Import the HAPI projects as Maven Modules by selecting **File -&gt; Import...** from the File menu. Then select **Existing Module Projects** as shown below.
 
-<img src="../../images/hacking_import.png"/>
+<img src="/hapi-fhir/docs/images/hacking_import.png"/>
 
 **Select the Projects**
 
 Next, browse to the directory where you checked out the HAPI FHIR sources. You might want to select only the projects you are interested in editing, in order to keep Eclipse's memory use down. You can always come back and import more later.
 
-<img src="../../images/hacking_import_step2.png"/>
+<img src="/hapi-fhir/docs/images/hacking_import_step2.png"/>
 
 ## Troubleshooting
 

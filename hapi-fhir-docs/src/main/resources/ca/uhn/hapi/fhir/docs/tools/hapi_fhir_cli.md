@@ -82,6 +82,6 @@ Note that the path and exact filename of the terminology files will likely need 
 
 # Migrate Database
 
-The `migrate-database` command may be used to Migrate a database schema when upgrading a <a href="./doc_jpa.html">HAPI FHIR JPA</a> project from one version of HAPI	FHIR to another version.
+The `migrate-database` command may be used to Migrate a database schema when upgrading a [HAPI FHIR JPA](/docs/server_jpa/introduction.html) project from one version of HAPI	FHIR to another version.
 
-See <a href="./doc_jpa.html#upgrading">Upgrading HAPI FHIR JPA</a> for information on how to use this command.
+See [Upgrading HAPI FHIR JPA](/docs/server_jpa/upgrading.html) for information on how to use this command.
