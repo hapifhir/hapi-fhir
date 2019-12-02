@@ -545,15 +545,16 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), 0);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		String expanded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet);
+		ourLog.info("Expanded ValueSet:\n" + expanded);
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
-		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(expanded, 2, expandedValueSet.getExpansion().getParameter().size());
+		assertEquals(expanded, "offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
+		assertEquals(expanded, 0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals(expanded, "count", expandedValueSet.getExpansion().getParameter().get(1).getName());
+		assertEquals(expanded, 0, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 
 		assertFalse(expandedValueSet.getExpansion().hasContains());
 	}
