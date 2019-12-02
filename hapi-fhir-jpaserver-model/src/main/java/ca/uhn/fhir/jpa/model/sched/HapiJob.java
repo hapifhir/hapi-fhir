@@ -22,10 +22,7 @@ package ca.uhn.fhir.jpa.model.sched;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
-import org.quartz.PersistJobDataAfterExecution;
 
 @DisallowConcurrentExecution
-// TODO KHS do we still need this?
-@PersistJobDataAfterExecution
 public interface HapiJob extends Job {
 }
