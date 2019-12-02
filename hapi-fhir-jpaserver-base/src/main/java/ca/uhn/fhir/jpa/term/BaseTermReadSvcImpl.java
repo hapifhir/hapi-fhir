@@ -1824,8 +1824,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 						if (isNotBlank(targetCode) && isNotBlank(targetCodeSystem)) {
 							for (Iterator<TermConceptMapGroupElementTarget> iter = nextElement.getConceptMapGroupElementTargets().iterator(); iter.hasNext(); ) {
 								TermConceptMapGroupElementTarget next = iter.next();
-								if (targetCodeSystem.equals(next.getSystem())) {
-									if (targetCode.equals(next.getCode())) {
+								if (StringUtils.equals(targetCodeSystem, next.getSystem())) {
+									if (StringUtils.equals(targetCode, next.getCode())) {
 										continue;
 									}
 								}
