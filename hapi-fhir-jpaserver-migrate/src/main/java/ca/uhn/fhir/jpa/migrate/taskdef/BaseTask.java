@@ -24,6 +24,8 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -47,6 +49,7 @@ public abstract class BaseTask<T extends BaseTask> {
 	private boolean myDryRun;
 	private List<ExecutedStatement> myExecutedStatements = new ArrayList<>();
 	private boolean myNoColumnShrink;
+	private boolean myFailureAllowed;
 	private final String myProductVersion;
 	private final String mySchemaVersion;
 
@@ -101,9 +104,19 @@ public abstract class BaseTask<T extends BaseTask> {
 		if (isDryRun() == false) {
 			Integer changes = getConnectionProperties().getTxTemplate().execute(t -> {
 				JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
-				int changesCount = jdbcTemplate.update(theSql, theArguments);
+				try {
+					int changesCount = jdbcTemplate.update(theSql, theArguments);
 				logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
-				return changesCount;
+					return changesCount;
+				} catch (DataAccessException e) {
+					if (myFailureAllowed) {
+						ourLog.info("Task did not exit successfully, but task is allowed to fail");
+						ourLog.debug("Error was: {}", e.getMessage(), e);
+						return 0;
+					} else {
+						throw e;
+					}
+				}
 			});
 
 			myChangesCount += changes;
@@ -143,6 +156,10 @@ public abstract class BaseTask<T extends BaseTask> {
 	}
 
 	public abstract void execute() throws SQLException;
+
+	public void setFailureAllowed(boolean theFailureAllowed) {
+		myFailureAllowed = theFailureAllowed;
+	}
 
 	public String getFlywayVersion() {
 		String releasePart = myProductVersion;

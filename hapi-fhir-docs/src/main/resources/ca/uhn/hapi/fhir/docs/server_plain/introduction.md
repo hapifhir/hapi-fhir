@@ -56,7 +56,7 @@ This strategy is shown in the following example:
 
 ## Other Strategies
 
-See the	[IServerAddressStrategy](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/IServerAddressStrategy.html)	JavaDoc (specifically the list of "All Known Implementing Classes") to see	other strategies that are available.
+See the	[IServerAddressStrategy](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/IServerAddressStrategy.html)	JavaDoc (specifically the list of "All Known Implementing Classes") to see	other strategies that are available.
 
 <a name="capabilities"/>
 
@@ -64,7 +64,7 @@ See the	[IServerAddressStrategy](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/serv
 
 The HAPI FHIR RESTful Server will automatically generate a Server [CapabilityStatement](http://hl7.org/fhir/capabilitystatement.html) resource (or a Server [Conformance](https://www.hl7.org/fhir/DSTU2/conformance.html) resource for FHIR DSTU2).
 
-This statement is automatically generated based on the various annotated methods which are provided to the server. This behaviour may be modified by creating a new class containing a method annotated with a [@Metadata annotation](./restful_operations.html#system_conformance) and then passing an instance of that class to the [setServerConformanceProvider(Object)](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/RestfulServer.html#setServerConformanceProvider(java.lang.Object)) method on your RestfulServer instance.
+This statement is automatically generated based on the various annotated methods which are provided to the server. This behaviour may be modified by creating a new class containing a method annotated with a [@Metadata annotation](./rest_operations.html#system_capabilities) and then passing an instance of that class to the [setServerConformanceProvider(Object)](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/RestfulServer.html#setServerConformanceProvider(java.lang.Object)) method on your RestfulServer instance.
 
 ## Enhancing the Generated CapabilityStatement
 
@@ -72,12 +72,12 @@ If you have a need to add your own content (special extensions, etc.) to your se
 
 The generator class is version-specific, so you will need to extend the class appropriate for the version of FHIR you are implementing:
 
-* DSTU3: [ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider](/apidocs/hapi-fhir-structures-dstu2/ca/uhn/fhir/rest/server/provider/dstu2.ServerConformanceProvider.html)
-* DSTU3: [org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider](/apidocs/hapi-fhir-structures-dstu3/org/hl7/fhir/dstu3/hapi/rest/server/ServerCapabilityStatementProvider.html)
-* R4: [org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider](/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/rest/server/ServerCapabilityStatementProvider.html)
-* R5: [org.hl7.fhir.r5.hapi.rest.server.ServerCapabilityStatementProvider](/apidocs/hapi-fhir-structures-r5/org/hl7/fhir/r5/hapi/rest/server/ServerCapabilityStatementProvider.html)
+* DSTU3: [ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider](/hapi-fhir/apidocs/hapi-fhir-structures-dstu2/ca/uhn/fhir/rest/server/provider/dstu2/ServerConformanceProvider.html)
+* DSTU3: [org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider](/hapi-fhir/apidocs/hapi-fhir-structures-dstu3/org/hl7/fhir/dstu3/hapi/rest/server/ServerCapabilityStatementProvider.html)
+* R4: [org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/rest/server/ServerCapabilityStatementProvider.html)
+* R5: [org.hl7.fhir.r5.hapi.rest.server.ServerCapabilityStatementProvider](/hapi-fhir/apidocs/hapi-fhir-structures-r5/org/hl7/fhir/r5/hapi/rest/server/ServerCapabilityStatementProvider.html)
 
-In your own class extending this class, you can override the [`getServerConformance()`](/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/rest/server/ServerCapabilityStatementProvider.html#getServerConformance()) method to provide your own implementation. In this method, call `super.getServerConformance()` to obtain the built-in conformance statement and then add your own information to it.  
+In your own class extending this class, you can override the [`getServerConformance()`](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/rest/server/ServerCapabilityStatementProvider.html#getServerConformance(javax.servlet.http.HttpServletRequest,ca.uhn.fhir.rest.api.server.RequestDetails)) method to provide your own implementation. In this method, call `super.getServerConformance()` to obtain the built-in conformance statement and then add your own information to it.  
 
 
 # Controlling Response Contents / Encoding / Formatting

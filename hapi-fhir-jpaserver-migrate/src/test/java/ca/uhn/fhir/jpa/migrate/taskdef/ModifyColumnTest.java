@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import org.flywaydb.core.internal.command.DbMigrate;
 import org.junit.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.sql.SQLException;
 
@@ -211,6 +213,45 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL"));
+	}
+
+	@Test
+	public void testFailureAllowed() throws SQLException {
+		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
+		executeSql("insert into SOMETABLE (TEXTCOL) values ('HELLO')");
+
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
+		task.setTableName("SOMETABLE");
+		task.setColumnName("TEXTCOL");
+		task.setColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		task.setNullable(true);
+		task.setFailureAllowed(true);
+		getMigrator().addTask(task);
+
+		getMigrator().migrate();
+		assertEquals(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL").getColumnTypeEnum());
+
+	}
+
+	@Test
+	public void testFailureNotAllowed() throws SQLException {
+		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
+		executeSql("insert into SOMETABLE (TEXTCOL) values ('HELLO')");
+
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
+		task.setTableName("SOMETABLE");
+		task.setColumnName("TEXTCOL");
+		task.setColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		task.setNullable(true);
+		getMigrator().addTask(task);
+
+		try {
+			getMigrator().migrate();
+			fail();
+		} catch (DbMigrate.FlywayMigrateException e) {
+			// expected
+		}
+
 	}
 
 }

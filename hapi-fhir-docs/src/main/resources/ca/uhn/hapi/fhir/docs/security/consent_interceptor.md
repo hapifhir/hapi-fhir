@@ -1,6 +1,6 @@
 # Consent Interceptor
 
-HAPI FHIR 4.0.0 introduced a new interceptor, the [ConsentInterceptor](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/consent/ConsentInterceptor.html).
+HAPI FHIR 4.0.0 introduced a new interceptor, the [ConsentInterceptor](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/consent/ConsentInterceptor.html).
 
 The consent interceptor may be used to examine client requests to apply consent directives and create audit trail events. Like the AuthorizationInterceptor above, this interceptor is not a complete working solution, but instead is a framework designed to make it easier to implement local policies.
 
@@ -16,7 +16,7 @@ The consent interceptor has several primary purposes:
 
 * The consent service suppresses search the total being returned in Bundle.total for search results.
 
-The ConsentInterceptor requires a user-supplied instance of the [IConsentService](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/consent/IConsentService.html) interface. The following shows a simple example of an IConsentService implementation:
+The ConsentInterceptor requires a user-supplied instance of the [IConsentService](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/consent/IConsentService.html) interface. The following shows a simple example of an IConsentService implementation:
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ConsentInterceptors.java|service}}

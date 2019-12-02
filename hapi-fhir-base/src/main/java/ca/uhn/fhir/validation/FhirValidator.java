@@ -109,14 +109,16 @@ public class FhirValidator {
 	 * 
 	 * @param theValidator
 	 *           The validator module. Must not be null.
+	 * @return Returns a reference to <code>this</code> for easy method chaining.
 	 */
-	public synchronized void registerValidatorModule(IValidatorModule theValidator) {
+	public synchronized FhirValidator registerValidatorModule(IValidatorModule theValidator) {
 		Validate.notNull(theValidator, "theValidator must not be null");
 		ArrayList<IValidatorModule> newValidators = new ArrayList<IValidatorModule>(myValidators.size() + 1);
 		newValidators.addAll(myValidators);
 		newValidators.add(theValidator);
 
 		myValidators = newValidators;
+		return this;
 	}
 
 	/**
