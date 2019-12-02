@@ -38,17 +38,14 @@ import java.util.regex.Pattern;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SchemaInitializationProvider implements ISchemaInitializationProvider {
-	private final String mySchemaDescription;
 	private final String mySchemaFileClassPath;
 	private final String mySchemaExistsIndicatorTable;
 
 	/**
-	 * @param theSchemaDescription description of the schema being updated (for logging)
 	 * @param theSchemaFileClassPath        pathname to script used to initialize schema
 	 * @param theSchemaExistsIndicatorTable a table name we can use to determine if this schema has already been initialized
 	 */
-	public SchemaInitializationProvider(String theSchemaDescription, String theSchemaFileClassPath, String theSchemaExistsIndicatorTable) {
-		mySchemaDescription = theSchemaDescription;
+	public SchemaInitializationProvider(String theSchemaFileClassPath, String theSchemaExistsIndicatorTable) {
 		mySchemaFileClassPath = theSchemaFileClassPath;
 		mySchemaExistsIndicatorTable = theSchemaExistsIndicatorTable;
 	}
@@ -83,11 +80,6 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 		// Remove commas before brackets.  The Quartz h2 schema has a comma before a closing bracket that fails to execute...
 		Matcher matcher = ourTrailingCommaPattern.matcher(theStatement);
 		return matcher.replaceAll("$1\\)");
-	}
-
-	@Override
-	public String getDescription() {
-		return mySchemaDescription;
 	}
 
 	@Nonnull
