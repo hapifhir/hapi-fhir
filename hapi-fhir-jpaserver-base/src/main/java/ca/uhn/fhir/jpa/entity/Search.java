@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -184,6 +185,9 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	public void setFailureMessage(String theFailureMessage) {
 		myFailureMessage = left(theFailureMessage, FAILURE_MESSAGE_LENGTH);
+		if (System.getProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK) != null) {
+			myFailureMessage = theFailureMessage;
+		}
 	}
 
 	public Long getId() {
