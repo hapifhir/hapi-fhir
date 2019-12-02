@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.sched;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
+import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.sched.IHapiScheduler;
-import ca.uhn.fhir.rest.server.sched.ScheduledJobDefinition;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
 import org.quartz.*;
@@ -70,7 +70,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		try {
 			myScheduler.start();
 		} catch (SchedulerException e) {
-			ourLog.error("Failed to start up scheduler");
+			ourLog.error("Failed to start up scheduler", e);
 			throw new ConfigurationException("Failed to start up scheduler", e);
 		}
 	}
@@ -80,7 +80,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		try {
 			myScheduler.shutdown(true);
 		} catch (SchedulerException e) {
-			ourLog.error("Failed to shut down scheduler");
+			ourLog.error("Failed to shut down scheduler", e);
 			throw new ConfigurationException("Failed to shut down scheduler", e);
 		}
 	}
@@ -90,7 +90,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		try {
 			return myScheduler.isStarted();
 		} catch (SchedulerException e) {
-			ourLog.error("Failed to determine scheduler status");
+			ourLog.error("Failed to determine scheduler status", e);
 			return false;
 		}
 	}

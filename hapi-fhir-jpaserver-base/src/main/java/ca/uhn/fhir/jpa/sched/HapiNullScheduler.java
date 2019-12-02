@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.sched;
 
-import ca.uhn.fhir.rest.server.sched.IHapiScheduler;
-import ca.uhn.fhir.rest.server.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
+import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.model.api;
+package ca.uhn.fhir.jpa.model.sched;
 
 public interface ISmartLifecyclePhase {
 	// POST_CONSTRUCT is here as a marker for where post-construct fits into the smart lifecycle.  Beans with negative phases

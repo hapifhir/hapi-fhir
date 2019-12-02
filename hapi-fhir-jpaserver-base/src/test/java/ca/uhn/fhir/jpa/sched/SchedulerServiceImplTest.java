@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.sched;
 
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
-import ca.uhn.fhir.rest.server.sched.ISchedulerService;
-import ca.uhn.fhir.rest.server.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

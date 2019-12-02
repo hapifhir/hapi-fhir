@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
-import ca.uhn.fhir.rest.server.sched.ISchedulerService;
-import ca.uhn.fhir.rest.server.sched.ScheduledJobDefinition;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
