@@ -15,6 +15,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -25,7 +27,7 @@ import static org.mockito.Mockito.when;
 public class SearchMethodBindingTest {
 
 	private static final TestResourceProvider TEST_RESOURCE_PROVIDER = new TestResourceProvider();
-
+	private static final Logger ourLog = LoggerFactory.getLogger(SearchMethodBindingTest.class);
 	private FhirContext fhirContext;
 
 	@Before
@@ -78,6 +80,7 @@ public class SearchMethodBindingTest {
 	@Test
 	public void methodMatchesChainBlacklist() throws NoSuchMethodException {
 		SearchMethodBinding binding = getBinding("withChainBlacklist", ReferenceParam.class);
+		ourLog.info("Testing binding: {}", binding);
 		Assert.assertThat(binding.incomingServerRequestMatchesMethod(
 			mockSearchRequest(ImmutableMap.of("refChainBlacklist.badChain", new String[]{"foo"}))),
 			Matchers.is(false));

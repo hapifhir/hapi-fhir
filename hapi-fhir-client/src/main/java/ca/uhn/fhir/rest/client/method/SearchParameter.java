@@ -100,7 +100,6 @@ public class SearchParameter extends BaseQueryParameter {
 
 	private List<Class<? extends IQueryParameterType>> myCompositeTypes = Collections.emptyList();
 	private List<Class<? extends IBaseResource>> myDeclaredTypes;
-	private String myDescription;
 	private String myName;
 	private IParamBinder<?> myParamBinder;
 	private RestSearchParameterTypeEnum myParamType;
@@ -136,10 +135,6 @@ public class SearchParameter extends BaseQueryParameter {
 		}
 
 		return retVal;
-	}
-
-	public String getDescription() {
-		return myDescription;
 	}
 
 	/*
@@ -202,10 +197,6 @@ public class SearchParameter extends BaseQueryParameter {
 
 	public void setDeclaredTypes(Class<? extends IBaseResource>[] theTypes) {
 		myDeclaredTypes = Arrays.asList(theTypes);
-	}
-
-	public void setDescription(String theDescription) {
-		myDescription = theDescription;
 	}
 
 	public void setName(String name) {
