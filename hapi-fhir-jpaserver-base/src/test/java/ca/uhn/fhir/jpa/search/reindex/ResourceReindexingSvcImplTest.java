@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.search.reindex;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
@@ -24,6 +25,7 @@ import org.mockito.Mock;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -68,6 +70,8 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 	private ResourceReindexJobEntity mySingleJob;
 	@Mock
 	private ISearchParamRegistry mySearchParamRegistry;
+	@Mock
+	private TransactionStatus myTxStatus;
 
 	@Override
 	protected FhirContext getContext() {
@@ -94,6 +98,8 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		mySvc.setTxManagerForUnitTest(myTxManager);
 		mySvc.setSearchParamRegistryForUnitTest(mySearchParamRegistry);
 		mySvc.start();
+
+		when(myTxManager.getTransaction(any())).thenReturn(myTxStatus);
 	}
 
 	@Test
@@ -250,6 +256,37 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		verify(myReindexJobDao, times(1)).getReindexCount(any());
 		verify(myReindexJobDao, times(1)).setReindexCount(any(), anyInt());
 		verifyNoMoreInteractions(myReindexJobDao);
+	}
+
+	@Test
+	public void testReindexDeletedResource() {
+		mockNothingToExpunge();
+		mockSingleReindexingJob("Patient");
+		// Mock resource fetch
+		List<Long> values = Arrays.asList(0L);
+		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(myPageRequestCaptor.capture(), myTypeCaptor.capture(), myLowCaptor.capture(), myHighCaptor.capture())).thenReturn(new SliceImpl<>(values));
+		// Mock fetching resources
+		long[] updatedTimes = new long[]{
+			10 * DateUtils.MILLIS_PER_DAY
+		};
+		String[] resourceTypes = new String[]{
+			"Patient",
+		};
+		List<IBaseResource> resources = Arrays.asList(
+			new Patient().setId("Patient/0/_history/1")
+		);
+		mockWhenResourceTableFindById(updatedTimes, resourceTypes);
+		when(myDaoRegistry.getResourceDao(eq("Patient"))).thenReturn(myResourceDao);
+		when(myDaoRegistry.getResourceDao(eq(Patient.class))).thenReturn(myResourceDao);
+		when(myDaoRegistry.getResourceDao(eq("Observation"))).thenReturn(myResourceDao);
+		when(myDaoRegistry.getResourceDao(eq(Observation.class))).thenReturn(myResourceDao);
+		when(myResourceDao.read(any(), any(), anyBoolean())).thenReturn(null);
+
+
+		int count = mySvc.forceReindexingPass();
+		assertEquals(0, count);
+
+		verify(myResourceTableDao, times(1)).updateIndexStatus(eq(0L), eq(BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED));
 	}
 
 	@Test

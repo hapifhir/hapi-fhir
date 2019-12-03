@@ -904,7 +904,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				}
 
 				if (System.getProperty(UNIT_TEST_CAPTURE_STACK) != null) {
-					failureMessage += "\n" + ExceptionUtils.getStackTrace(rootCause);
+					failureMessage += "\nStack\n" + ExceptionUtils.getStackTrace(rootCause);
 				}
 
 				mySearch.setFailureMessage(failureMessage);
