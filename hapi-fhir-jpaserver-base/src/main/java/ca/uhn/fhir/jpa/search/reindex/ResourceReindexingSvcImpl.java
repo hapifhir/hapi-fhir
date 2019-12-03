@@ -142,6 +142,11 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		myContext = theContext;
 	}
 
+	@VisibleForTesting
+	void setSchedulerServiceForUnitTest(ISchedulerService theSchedulerService) {
+		mySchedulerService = theSchedulerService;
+	}
+
 	@PostConstruct
 	public void start() {
 		myTxTemplate = new TransactionTemplate(myTxManager);
