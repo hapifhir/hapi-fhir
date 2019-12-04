@@ -26,6 +26,8 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ISmartLifecyclePhase;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.util.StopWatch;
+import com.google.common.annotations.VisibleForTesting;
+import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,7 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.core.env.Environment;
 
 import javax.annotation.PostConstruct;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -65,6 +68,8 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 	private boolean myClusteredSchedulingEnabled;
 	private AtomicBoolean myStopping = new AtomicBoolean(false);
 
+	private String myDefaultGroup;
+
 	@Autowired
 	private Environment myEnvironment;
 	@Autowired
@@ -75,6 +80,11 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 	public BaseSchedulerServiceImpl() {
 		setLocalSchedulingEnabled(true);
 		setClusteredSchedulingEnabled(true);
+	}
+
+	public BaseSchedulerServiceImpl setDefaultGroup(String theDefaultGroup) {
+		myDefaultGroup = theDefaultGroup;
+		return this;
 	}
 
 	public boolean isLocalSchedulingEnabled() {
@@ -174,14 +184,32 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 
 	@Override
 	public void scheduleLocalJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
-		ourLog.info("Scheduling local job {} with interval {}", theJobDefinition.getId(), StopWatch.formatMillis(theIntervalMillis));
-		myLocalScheduler.scheduleJob(theIntervalMillis, theJobDefinition);
+		scheduleJob("local", myLocalScheduler, theIntervalMillis, theJobDefinition);
 	}
 
 	@Override
 	public void scheduleClusteredJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
-		ourLog.info("Scheduling clustered job {} with interval {}", theJobDefinition.getId(), StopWatch.formatMillis(theIntervalMillis));
-		myClusteredScheduler.scheduleJob(theIntervalMillis, theJobDefinition);
+		scheduleJob("clustered", myClusteredScheduler, theIntervalMillis, theJobDefinition);
+	}
+
+	private void scheduleJob(String theInstanceName, IHapiScheduler theScheduler, long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
+		ourLog.info("Scheduling {} job {} with interval {}", theInstanceName, theJobDefinition.getId(), StopWatch.formatMillis(theIntervalMillis));
+		if (theJobDefinition.getGroup() == null) {
+			theJobDefinition.setGroup(myDefaultGroup);
+		}
+		theScheduler.scheduleJob(theIntervalMillis, theJobDefinition);
+	}
+
+	@VisibleForTesting
+	@Override
+	public Set<JobKey> getLocalJobKeysForUnitTest() throws SchedulerException {
+		return myLocalScheduler.getJobKeysForUnitTest();
+	}
+
+	@VisibleForTesting
+	@Override
+	public Set<JobKey> getClusteredJobKeysForUnitTest() throws SchedulerException {
+		return myClusteredScheduler.getJobKeysForUnitTest();
 	}
 
 	private boolean isSchedulingDisabledForUnitTests() {

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
@@ -129,12 +130,13 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		Validate.notNull(theJobDefinition.getJobClass());
 		Validate.notBlank(theJobDefinition.getId());
 
-		JobKey jobKey = new JobKey(theJobDefinition.getId());
+		JobKey jobKey;
+
+		jobKey = new JobKey(theJobDefinition.getId(), theJobDefinition.getGroup());
 
 		JobDetailImpl jobDetail = new NonConcurrentJobDetailImpl();
 		jobDetail.setJobClass(theJobDefinition.getJobClass());
 		jobDetail.setKey(jobKey);
-		jobDetail.setName(theJobDefinition.getId());
 		jobDetail.setJobDataMap(new JobDataMap(theJobDefinition.getJobData()));
 
 		ScheduleBuilder<? extends Trigger> schedule = SimpleScheduleBuilder
@@ -156,6 +158,12 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			throw new InternalErrorException(e);
 		}
 
+	}
+
+	@VisibleForTesting
+	@Override
+	public Set<JobKey> getJobKeysForUnitTest() throws SchedulerException {
+		return myScheduler.getJobKeys(GroupMatcher.anyGroup());
 	}
 
 	private static class NonConcurrentJobDetailImpl extends JobDetailImpl {

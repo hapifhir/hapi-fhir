@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.model.sched;
 
+import org.quartz.JobKey;
 import org.quartz.SchedulerException;
+
+import java.util.Set;
 
 public interface IHapiScheduler {
 	void init() throws SchedulerException;
@@ -16,4 +19,6 @@ public interface IHapiScheduler {
 	void logStatusForUnitTest();
 
 	void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
+
+	Set<JobKey> getJobKeysForUnitTest() throws SchedulerException;
 }

@@ -21,7 +21,10 @@ package ca.uhn.fhir.jpa.model.sched;
  */
 
 import com.google.common.annotations.VisibleForTesting;
+import org.quartz.JobKey;
 import org.quartz.SchedulerException;
+
+import java.util.Set;
 
 public interface ISchedulerService {
 
@@ -43,6 +46,12 @@ public interface ISchedulerService {
 	 * @param theJobDefinition  The Job to fire
 	 */
 	void scheduleClusteredJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
+
+	@VisibleForTesting
+	Set<JobKey> getLocalJobKeysForUnitTest() throws SchedulerException;
+
+	@VisibleForTesting
+	Set<JobKey> getClusteredJobKeysForUnitTest() throws SchedulerException;
 
 	boolean isStopping();
 }

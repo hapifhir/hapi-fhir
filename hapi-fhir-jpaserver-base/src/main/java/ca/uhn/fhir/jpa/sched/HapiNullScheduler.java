@@ -2,9 +2,12 @@ package ca.uhn.fhir.jpa.sched;
 
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Set;
 
 public class HapiNullScheduler implements IHapiScheduler {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiNullScheduler.class);
@@ -42,5 +45,10 @@ public class HapiNullScheduler implements IHapiScheduler {
 	@Override
 	public void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
 		ourLog.debug("Skipping scheduling job {} since scheduling is disabled", theJobDefinition.getId());
+	}
+
+	@Override
+	public Set<JobKey> getJobKeysForUnitTest() {
+		return null;
 	}
 }

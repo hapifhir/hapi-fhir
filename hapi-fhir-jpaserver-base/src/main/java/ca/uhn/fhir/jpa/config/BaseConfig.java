@@ -83,6 +83,7 @@ public abstract class BaseConfig {
 
 	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
 	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
+	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 
 	@Autowired
 	protected Environment myEnv;
@@ -249,7 +250,7 @@ public abstract class BaseConfig {
 
 	@Bean
 	public ISchedulerService schedulerService() {
-		return new HapiSchedulerServiceImpl();
+		return new HapiSchedulerServiceImpl().setDefaultGroup(HAPI_DEFAULT_SCHEDULER_GROUP);
 	}
 
 	@Bean
