@@ -67,7 +67,6 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 	private boolean myLocalSchedulingEnabled;
 	private boolean myClusteredSchedulingEnabled;
 	private AtomicBoolean myStopping = new AtomicBoolean(false);
-
 	private String myDefaultGroup;
 
 	@Autowired
