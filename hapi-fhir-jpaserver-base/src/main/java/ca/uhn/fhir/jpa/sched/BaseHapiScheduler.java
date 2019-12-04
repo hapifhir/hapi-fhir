@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.NotNull;
 import org.quartz.*;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.StdSchedulerFactory;
@@ -31,6 +32,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 	private final Properties myProperties = new Properties();
 
 	private Scheduler myScheduler;
+	private String myInstanceName;
 
 	public BaseHapiScheduler(String theThreadNamePrefix, AutowiringSpringBeanJobFactory theSpringBeanJobFactory) {
 		myThreadNamePrefix = theThreadNamePrefix;
@@ -38,8 +40,8 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 	}
 
 
-	void setInstanceName(String theName) {
-		myProperties.setProperty(PROP_SCHED_INSTANCE_NAME, theName + "-" + nextSchedulerId());
+	void setInstanceName(String theInstanceName) {
+		myInstanceName = theInstanceName;
 	}
 
 
@@ -58,7 +60,13 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 	protected void setProperties() {
 		addProperty("org.quartz.threadPool.threadCount", "4");
-		addProperty("org.quartz.threadPool.threadNamePrefix", myThreadNamePrefix + "-" + myProperties.get(PROP_SCHED_INSTANCE_NAME));
+		myProperties.setProperty(PROP_SCHED_INSTANCE_NAME, myInstanceName + "-" + nextSchedulerId());
+		addProperty("org.quartz.threadPool.threadNamePrefix", getThreadPrefix());
+	}
+
+	@NotNull
+	private String getThreadPrefix() {
+		return myThreadNamePrefix + "-" + myInstanceName;
 	}
 
 	protected void addProperty(String key, String value) {
@@ -68,6 +76,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 	@Override
 	public void start() {
 		try {
+			ourLog.info("Starting scheduler {}", getThreadPrefix());
 			myScheduler.start();
 		} catch (SchedulerException e) {
 			ourLog.error("Failed to start up scheduler", e);
