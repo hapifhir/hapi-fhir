@@ -75,7 +75,7 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 	}
 
 	@Override
-	public String getPayloadId() {
+	public String getResourceId() {
 		return myPayloadId;
 	}
 

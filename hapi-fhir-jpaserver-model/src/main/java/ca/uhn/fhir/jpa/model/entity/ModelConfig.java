@@ -58,6 +58,7 @@ public class ModelConfig {
 	private boolean myDefaultSearchParamsCanBeOverridden = false;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private String myEmailFromAddress = "noreply@unknown.com";
+	private String myEmailDefaultSubject = "HAPI FHIR";
 	private boolean mySubscriptionMatchingEnabled = true;
 	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
 
@@ -371,6 +372,18 @@ public class ModelConfig {
 	public void setEmailFromAddress(String theEmailFromAddress) {
 		myEmailFromAddress = theEmailFromAddress;
 	}
+
+	/**
+	 * If e-mail subjects are supported, the default subject used when sending e-mails
+	 */
+	public String getEmailDefaultSubject() {
+		return myEmailDefaultSubject;
+	}
+
+	/**
+	 * If e-mail subjects are supported, the default subject used when sending e-mails
+	 */
+	public void setEmailDefaultSubject(String theEmailDefaultSubject) { myEmailDefaultSubject = theEmailDefaultSubject; }
 
 	/**
 	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".

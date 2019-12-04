@@ -22,14 +22,18 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber.email;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.mail.BodyPart;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EmailDetails {
 	private String mySubjectTemplate;
 	private String myBodyTemplate;
+	private String myBodyContentType;
 	private List<String> myTo;
 	private String myFrom;
 	private IIdType mySubscription;
+	private List<BodyPart> attachments = new ArrayList();
 
 	public String getBodyTemplate() {
 		return myBodyTemplate;
@@ -71,4 +75,9 @@ public class EmailDetails {
 		myTo = theTo;
 	}
 
+	public List<BodyPart> getAttachments() { return attachments; }
+
+	public String getBodyContentType() { return myBodyContentType; }
+
+	public void setBodyContentType(String myBodyContentType) { this.myBodyContentType = myBodyContentType; }
 }

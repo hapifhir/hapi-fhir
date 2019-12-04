@@ -41,12 +41,14 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 
 	@JsonProperty("canonicalSubscription")
 	private CanonicalSubscription mySubscription;
-	@JsonProperty("payload")
-	private String myPayloadString;
-	@JsonIgnore
-	private transient IBaseResource myPayload;
-	@JsonProperty("payloadId")
-	private String myPayloadId;
+	@JsonProperty("resource")
+	private IBaseResource myResource;
+	@JsonProperty("resourceId")
+	private String myResourceId;
+	@JsonIgnore()
+	private String myResourceString;
+	@JsonIgnore()
+	private EncodingEnum myResourceEncoding;
 	@JsonProperty("operationType")
 	private ResourceModifiedMessage.OperationTypeEnum myOperationType;
 
@@ -65,31 +67,6 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		myOperationType = theOperationType;
 	}
 
-	public IBaseResource getPayload(FhirContext theCtx) {
-		IBaseResource retVal = myPayload;
-		if (retVal == null && isNotBlank(myPayloadString)) {
-			retVal = theCtx.newJsonParser().parseResource(myPayloadString);
-			myPayload = retVal;
-		}
-		return retVal;
-	}
-
-	public String getPayloadString() {
-		if (this.myPayloadString != null) {
-			return this.myPayloadString;
-		}
-
-		return "";
-	}
-
-	public IIdType getPayloadId(FhirContext theCtx) {
-		IIdType retVal = null;
-		if (myPayloadId != null) {
-			retVal = theCtx.getVersion().newIdType().setValue(myPayloadId);
-		}
-		return retVal;
-	}
-
 	public CanonicalSubscription getSubscription() {
 		return mySubscription;
 	}
@@ -98,31 +75,44 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		mySubscription = theSubscription;
 	}
 
-	public void setPayload(FhirContext theCtx, IBaseResource thePayload, EncodingEnum theEncoding) {
-		myPayload = thePayload;
-		myPayloadString = theEncoding.newParser(theCtx).encodeResourceToString(thePayload);
-		myPayloadId = thePayload.getIdElement().toUnqualified().getValue();
-	}
+	public IBaseResource getResource() { return myResource; }
 
-	@Override
-	public String getPayloadId() {
-		return myPayloadId;
-	}
+	public void setResource(IBaseResource theResource, EncodingEnum theEncoding, FhirContext theFhirContext) {
+		myResource = theResource;
 
-	public void setPayloadId(IIdType thePayloadId) {
-		myPayloadId = null;
-		if (thePayloadId != null) {
-			myPayloadId = thePayloadId.getValue();
+		if (theEncoding != null && theFhirContext != null) {
+			String resourceString = theEncoding.newParser(theFhirContext).encodeResourceToString(theResource);
+			myResourceString = resourceString;
+			myResourceEncoding = theEncoding;
+			myResourceId = theResource.getIdElement().toUnqualified().getValue();
 		}
 	}
+
+	public String getResourceString() { return myResourceString; }
+
+	@Override
+	public String getResourceId() {
+		return this.myResourceId;
+	}
+
+	public IIdType getResourceId(FhirContext theCtx) {
+		IIdType retVal = null;
+		if (this.myResourceId != null) {
+			retVal = theCtx.getVersion().newIdType().setValue(this.myResourceId);
+		}
+		return retVal;
+	}
+
+	public EncodingEnum getResourceEncoding() { return myResourceEncoding; }
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
 			.append("mySubscription", mySubscription)
-			.append("myPayloadString", myPayloadString)
-			.append("myPayload", myPayload)
-			.append("myPayloadId", myPayloadId)
+//			.append("mySubscriptionString", mySubscriptionString)
+			.append("myPayloadString", myResourceString)
+			.append("myPayload", myResource)
+			.append("myPayloadId", myResourceId)
 			.append("myOperationType", myOperationType)
 			.toString();
 	}
@@ -132,11 +122,8 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	 */
 	public String getSubscriptionId(FhirContext theFhirContext) {
 		String retVal = null;
-		if (getSubscription() != null) {
-			IIdType idElement = getSubscription().getIdElement(theFhirContext);
-			if (idElement != null) {
-				retVal = idElement.getValue();
-			}
+		if (getSubscription() != null && getSubscription().getIdElement(theFhirContext) != null) {
+			retVal = getSubscription().getIdElement(theFhirContext).getValue();
 		}
 		return retVal;
 	}

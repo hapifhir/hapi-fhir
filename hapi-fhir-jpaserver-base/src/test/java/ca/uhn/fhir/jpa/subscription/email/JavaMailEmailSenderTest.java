@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
@@ -53,9 +54,18 @@ public class JavaMailEmailSenderTest {
 		assertEquals("to1@example.com", ((InternetAddress)messages[0].getAllRecipients()[0]).getAddress());
 		assertEquals("to2@example.com", ((InternetAddress)messages[0].getAllRecipients()[1]).getAddress());
 		assertEquals(1, messages[0].getHeader("Content-Type").length);
-		assertEquals("text/plain; charset=us-ascii", messages[0].getHeader("Content-Type")[0]);
-		String foundBody = GreenMailUtil.getBody(messages[0]);
-		assertEquals("foo", foundBody);
+		assertEquals(true, messages[0].getHeader("Content-Type")[0].startsWith("multipart/mixed; \r\n\tboundary="));
+
+		// Expect the body of the email subscription to be a multipart mime message, with one part, that is "foo"
+		assertEquals(MimeMultipart.class, messages[0].getContent().getClass());
+		MimeMultipart multipart = (MimeMultipart) messages[0].getContent();
+		assertEquals(1, multipart.getCount());
+		assertEquals(String.class, multipart.getBodyPart(0).getContent().getClass());
+
+		String content = (String) multipart.getBodyPart(0).getContent();
+		assertEquals(true, multipart.getBodyPart(0).getHeader("Content-Type") != null);
+		assertEquals("text/plain; charset=us-ascii", multipart.getBodyPart(0).getHeader("Content-Type")[0]);
+		assertEquals("foo", content);
 	}
 
 	@AfterClass

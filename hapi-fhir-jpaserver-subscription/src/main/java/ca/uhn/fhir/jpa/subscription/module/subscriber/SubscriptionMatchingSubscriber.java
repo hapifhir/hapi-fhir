@@ -11,7 +11,6 @@ import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -27,7 +26,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*-
@@ -109,7 +107,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		IIdType resourceId = theMsg.getId(myFhirContext);
-		Boolean isText = false;
 
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
 
@@ -141,19 +138,28 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				resourceId.toUnqualifiedVersionless().getValue(),
 				matchResult.isInMemory() ? "in-memory" : "by querying the repository");
 
-			IBaseResource payload = theMsg.getNewPayload(myFhirContext);
+			IBaseResource resource = theMsg.getNewPayload(myFhirContext);
 			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
-
-			EncodingEnum encoding = null;
-			if (subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
-				encoding = EncodingEnum.forContentType(subscription.getPayloadString());
-				isText = subscription.getPayloadString().equals(Constants.CT_TEXT);
-			}
-			encoding = defaultIfNull(encoding, EncodingEnum.JSON);
-
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
 
-			deliveryMsg.setPayload(myFhirContext, payload, encoding);
+			if (subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
+				String[] mainPayloadSplit = subscription.getPayloadString().split(";");
+				String mimeType = null;
+
+				if (mainPayloadSplit.length == 2) {
+					mimeType = mainPayloadSplit[0];
+				} else if (mainPayloadSplit.length == 1) {
+					mimeType = mainPayloadSplit[0];
+				}
+
+				if (mimeType != null && !mimeType.isEmpty()) {
+					EncodingEnum encoding = EncodingEnum.forContentType(mimeType);
+					deliveryMsg.setResource(resource, encoding, this.myFhirContext);
+				} else {
+					deliveryMsg.setResource(resource, null, null);
+				}
+			}
+
 			deliveryMsg.setSubscription(subscription);
 			deliveryMsg.setOperationType(theMsg.getOperationType());
 			deliveryMsg.copyAdditionalPropertiesFrom(theMsg);

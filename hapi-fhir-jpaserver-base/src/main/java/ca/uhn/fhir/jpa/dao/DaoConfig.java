@@ -1620,6 +1620,16 @@ public class DaoConfig {
 	}
 
 	/**
+	 * If e-mail subjects are supported, the default subject used when sending e-mails
+	 */
+	public String getEmailDefaultSubject() { return myModelConfig.getEmailDefaultSubject(); }
+
+	/**
+	 * If e-mail subjects are supported, the default subject used when sending e-mails
+	 */
+	public void setEmailDefaultSubject(String theEmailDefaultSubject) { myModelConfig.setEmailDefaultSubject(theEmailDefaultSubject); }
+
+	/**
 	 * If websocket subscriptions are enabled, this defines the context path that listens to them.  Default value "/websocket".
 	 */
 

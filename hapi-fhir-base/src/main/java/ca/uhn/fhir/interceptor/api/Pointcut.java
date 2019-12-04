@@ -697,6 +697,43 @@ public enum Pointcut {
 	SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
 
 	/**
+	 * Invoked immediately before the delivery of an email subscription.
+	 * <p>
+	 * This hook may make changes to the details of the email that get sent to the email server.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.email.EmailDetails</li>
+	 * </ul>
+	 * <p>
+	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>void</code> or <code>true</code>, processing will continue normally. If the method
+	 * returns <code>false</code>, processing will be aborted.
+	 * </p>
+	 */
+	SUBSCRIPTION_BEFORE_EMAIL_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.email.EmailDetails"),
+
+	/**
+	 * Invoked immediately after the delivery of an email subscription.
+	 * <p>
+	 * This hook is primarily for informative purposes. Changes to the hook parameters do not have any
+	 * effect on the subscription or the email delivered by the subscription.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.email.EmailDetails</li>
+	 * </ul>
+	 * <p>
+	 * This hook should return <code>void</code>.
+	 * </p>
+	 */
+	SUBSCRIPTION_AFTER_EMAIL_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.email.EmailDetails"),
+
+	/**
 	 * Invoked whenever a persisted resource (a resource that has just been stored in the
 	 * database via a create/update/patch/etc.) is about to be checked for whether any subscriptions
 	 * were triggered as a result of the operation.

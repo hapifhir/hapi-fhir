@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
@@ -82,7 +83,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 				}
 				break;
 			case DELETE:
-				operation = theClient.delete().resourceById(theMsg.getPayloadId(myFhirContext));
+				operation = theClient.delete().resourceById(theMsg.getResourceId(this.myFhirContext));
 				break;
 			default:
 				ourLog.warn("Ignoring delivery message of type: {}", theMsg.getOperationType());
@@ -97,7 +98,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		if (thePayloadResource != null) {
 			payloadId = thePayloadResource.getIdElement().toUnqualified().getValue();
 		}
-		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), payloadId, theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
+		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), payloadId, theSubscription.getIdElement(this.myFhirContext).toUnqualifiedVersionless().getValue());
 
 		try {
 			operation.execute();
@@ -109,10 +110,10 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	}
 
 	protected IBaseResource getAndMassagePayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription) {
-		IBaseResource payloadResource = theMsg.getPayload(myFhirContext);
+		IBaseResource payloadResource = theMsg.getResource();
 
 		if (payloadResource == null || theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
-			IIdType payloadId = theMsg.getPayloadId(myFhirContext);
+			IIdType payloadId = theMsg.getResourceId(myFhirContext);
 
 			try {
 				if (payloadId != null) {
