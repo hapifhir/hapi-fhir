@@ -50,6 +50,10 @@
 				ValueSet Precalculation sometimes failed on Oracle DBs due to an invalid SQL function. This
 				has been corrected.
 			</action>
+			<action type="fix">
+				A ConcurrentModificationException was sometimes thrown when performing a cascading delete.
+				This has been corrected.
+			</action>
 		</release>
 		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
 			<action type="add">
