@@ -80,7 +80,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 	@Test
 	public void testMigrateFrom340_NoFlyway() throws IOException, SQLException {
 
-		File location = getLocation("migrator_h2_test_340_current");
+		File location = getLocation("migrator_h2_test_340_current_noflyway");
 
 		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
 		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
