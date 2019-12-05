@@ -76,6 +76,9 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 	@Override
 	public void start() {
+		if (myScheduler == null) {
+			throw new ConfigurationException("Attempt to start uninitialized scheduler");
+		}
 		try {
 			ourLog.info("Starting scheduler {}", getThreadPrefix());
 			myScheduler.start();
@@ -87,6 +90,9 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 	@Override
 	public void shutdown() {
+		if (myScheduler == null) {
+			return;
+		}
 		try {
 			myScheduler.shutdown(true);
 		} catch (SchedulerException e) {
@@ -98,7 +104,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 	@Override
 	public boolean isStarted() {
 		try {
-			return myScheduler.isStarted();
+			return myScheduler != null && myScheduler.isStarted();
 		} catch (SchedulerException e) {
 			ourLog.error("Failed to determine scheduler status", e);
 			return false;
