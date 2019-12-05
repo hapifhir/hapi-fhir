@@ -31,34 +31,30 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-public class FlywayMigrator {
+public class FlywayMigrator extends BaseMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FlywayMigrator.class);
 
-	private DriverTypeEnum myDriverType;
 	private final String myMigrationTableName;
-	private String myConnectionUrl;
-	private String myUsername;
-	private String myPassword;
 	private List<FlywayMigration> myTasks = new ArrayList<>();
-	private boolean myDryRun;
-	private boolean myNoColumnShrink;
 
 	public FlywayMigrator(String theMigrationTableName, BasicDataSource theDataSource) {
 		this(theMigrationTableName);
-		myConnectionUrl = theDataSource.getUrl();
-		myUsername = theDataSource.getUsername();
-		myPassword = theDataSource.getPassword();
+		setConnectionUrl(theDataSource.getUrl());
+		setUsername(theDataSource.getUsername());
+		setPassword(theDataSource.getPassword());
 
 		String driverClassName = theDataSource.getDriverClassName();
 		if (driverClassName == null) {
 			ourLog.error(this.getClass().getSimpleName() + " constructed without a database driver");
 		} else {
-			myDriverType = DriverTypeEnum.fromDriverClassName(driverClassName);
-			if (myDriverType == null) {
+			DriverTypeEnum driverType = DriverTypeEnum.fromDriverClassName(driverClassName);
+			if (driverType == null) {
 				ourLog.error("Unknown driver class " + driverClassName);
 			}
+			setDriverType(driverType);
 		}
 	}
 
@@ -66,32 +62,13 @@ public class FlywayMigrator {
 		myMigrationTableName = theMigrationTableName;
 	}
 
-	public void setDriverType(DriverTypeEnum theDriverType) {
-		myDriverType = theDriverType;
-	}
-
-	public void setConnectionUrl(String theConnectionUrl) {
-		myConnectionUrl = theConnectionUrl;
-	}
-
-	public void setUsername(String theUsername) {
-		myUsername = theUsername;
-	}
-
-	public void setPassword(String thePassword) {
-		myPassword = thePassword;
-	}
-
 	public void addTask(BaseTask<?> theTask) {
 		myTasks.add(new FlywayMigration(theTask, this));
 	}
 
-	public void setDryRun(boolean theDryRun) {
-		myDryRun = theDryRun;
-	}
-
+	@Override
 	public void migrate() {
-		try (DriverTypeEnum.ConnectionProperties connectionProperties = myDriverType.newConnectionProperties(myConnectionUrl, myUsername, myPassword)) {
+		try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getConnectionUrl(), getUsername(), getPassword())) {
 			Flyway flyway = initFlyway(connectionProperties);
 			flyway.migrate();
 		} catch (Exception e) {
@@ -103,7 +80,7 @@ public class FlywayMigrator {
 		// TODO KHS Is there a way we can use datasource instead of url, username, password here
 		Flyway flyway = Flyway.configure()
 			.table(myMigrationTableName)
-			.dataSource(myConnectionUrl, myUsername, myPassword)
+			.dataSource(getConnectionUrl(), getUsername(), getPassword())
 			.baselineOnMigrate(true)
 			.javaMigrations(myTasks.toArray(new JavaMigration[0]))
 			.load();
@@ -113,45 +90,19 @@ public class FlywayMigrator {
 		return flyway;
 	}
 
+	@Override
 	public void addTasks(List<BaseTask<?>> theTasks) {
 		theTasks.forEach(this::addTask);
 	}
 
-	public void setNoColumnShrink(boolean theNoColumnShrink) {
-		myNoColumnShrink = theNoColumnShrink;
-	}
-
-	public DriverTypeEnum getDriverType() {
-		return myDriverType;
-	}
-
-	public String getConnectionUrl() {
-		return myConnectionUrl;
-	}
-
-	public String getUsername() {
-		return myUsername;
-	}
-
-	public String getPassword() {
-		return myPassword;
-	}
-
-	public boolean isDryRun() {
-		return myDryRun;
-	}
-
-	public boolean isNoColumnShrink() {
-		return myNoColumnShrink;
-	}
-
-	public MigrationInfoService getMigrationInfo() {
-		if (myDriverType == null) {
-			return null;
+	@Override
+	public Optional<MigrationInfoService> getMigrationInfo() {
+		if (getDriverType() == null) {
+			return Optional.empty();
 		}
-		try (DriverTypeEnum.ConnectionProperties connectionProperties = myDriverType.newConnectionProperties(myConnectionUrl, myUsername, myPassword)) {
+		try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getConnectionUrl(), getUsername(), getPassword())) {
 			Flyway flyway = initFlyway(connectionProperties);
-			return flyway.info();
+			return Optional.of(flyway.info());
 		}
 	}
 

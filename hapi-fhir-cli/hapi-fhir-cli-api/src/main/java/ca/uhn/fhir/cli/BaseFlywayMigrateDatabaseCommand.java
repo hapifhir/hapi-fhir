@@ -20,8 +20,11 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.migrate.BaseMigrator;
+import ca.uhn.fhir.jpa.migrate.BruteForceMigrator;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
+import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -35,10 +38,14 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
+/**
+ * NB since 2019-12-05: This class is kind of weirdly named now, since it can either use Flyway or not use Flyway
+ */
 public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends BaseCommand {
 
 
 	public static final String MIGRATE_DATABASE = "migrate-database";
+	public static final String DONT_USE_FLYWAY = "dont-use-flyway";
 	private Set<String> myFlags;
 	private String myMigrationTableName;
 
@@ -78,6 +85,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		addRequiredOption(retVal, "p", "password", "Password", "The JDBC database password");
 		addRequiredOption(retVal, "d", "driver", "Driver", "The database driver to use (Options are " + driverOptions() + ")");
 		addOptionalOption(retVal, "x", "flags", "Flags", "A comma-separated list of any specific migration flags (these flags are version specific, see migrator documentation for details)");
+		addOptionalOption(retVal, null, DONT_USE_FLYWAY,false, "If this option is set, the migrator will not use FlywayDB for migration. This setting should only be used if you are trying to migrate a legacy database platform that is not supported by FlywayDB.");
 		addOptionalOption(retVal, null, "no-column-shrink", false, "If this flag is set, the system will not attempt to reduce the length of columns. This is useful in environments with a lot of existing data, where shrinking a column can take a very long time.");
 
 		return retVal;
@@ -110,7 +118,14 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 			.filter(StringUtils::isNotBlank)
 			.collect(Collectors.toSet());
 
-		FlywayMigrator migrator = new FlywayMigrator(myMigrationTableName);
+		boolean dontUseFlyway = theCommandLine.hasOption("dont-use-flyway");
+
+		BaseMigrator migrator;
+		if (dontUseFlyway) {
+			migrator = new BruteForceMigrator();
+		} else {
+			migrator = new FlywayMigrator(myMigrationTableName);
+		}
 		migrator.setConnectionUrl(url);
 		migrator.setDriverType(driverType);
 		migrator.setUsername(username);
@@ -121,7 +136,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		migrator.migrate();
 	}
 
-	protected abstract void addTasks(FlywayMigrator theMigrator);
+	protected abstract void addTasks(BaseMigrator theMigrator);
 
 	public void setMigrationTableName(String theMigrationTableName) {
 		myMigrationTableName = theMigrationTableName;

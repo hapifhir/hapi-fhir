@@ -67,9 +67,9 @@ public class DropTableTest extends BaseTest {
 
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), (hasItems("SOMETABLE")));
 
-		assertThat(getMigrator().getMigrationInfo().pending().length, greaterThan(0));
+		assertThat(getMigrator().getMigrationInfo().get().pending().length, greaterThan(0));
 		getMigrator().migrate();
-		assertThat(getMigrator().getMigrationInfo().pending().length, equalTo(0));
+		assertThat(getMigrator().getMigrationInfo().get().pending().length, equalTo(0));
 
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItems("SOMETABLE")));
 	}
