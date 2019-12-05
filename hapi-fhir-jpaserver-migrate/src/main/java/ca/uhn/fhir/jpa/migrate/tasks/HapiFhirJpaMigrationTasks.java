@@ -357,23 +357,24 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		version.onTable("HFJ_SEARCH_PARM").dropThisTable("20190814.8");
 
-		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("20190814.9", "RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		version.onTable("HFJ_SPIDX_DATE").modifyColumn("20190814.10", "RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20190814.11", "RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		// Make some columns non-nullable that were previously nullable - These are marked as failure allowed, since
+		// SQL Server won't let us change nullability on columns with indexes pointing to them
+		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("20190814.9", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		version.onTable("HFJ_SPIDX_DATE").modifyColumn("20190814.10", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20190814.11", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
 		version.onTable("HFJ_SPIDX_STRING").addColumn("20190814.12", "HASH_IDENTITY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 		version.onTable("HFJ_SPIDX_STRING").addIndex("20190814.13", "IDX_SP_STRING_HASH_IDENT").unique(false).withColumns("HASH_IDENTITY");
-		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("20190814.14", "RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("20190814.15", "RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("20190814.14", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("20190814.15", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
 		version.onTable("HFJ_SPIDX_QUANTITY").dropColumn("20190814.16", "HASH_UNITS_AND_VALPREFIX");
 		version.onTable("HFJ_SPIDX_QUANTITY").dropColumn("20190814.17", "HASH_VALPREFIX");
-		version.onTable("HFJ_SPIDX_NUMBER").modifyColumn("20190814.18", "RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		version.onTable("HFJ_SPIDX_TOKEN").modifyColumn("20190814.19", "RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		version.onTable("HFJ_SPIDX_URI").modifyColumn("20190814.20", "RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		version.onTable("HFJ_SPIDX_URI").modifyColumn("20190814.21", "SP_URI").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 254);
-
-		version.onTable("TRM_CODESYSTEM").modifyColumn("20190814.22", "CODE_SYSTEM_URI").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
-		version.onTable("TRM_CODESYSTEM").modifyColumn("20190814.23", "CS_NAME").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
-		version.onTable("TRM_CODESYSTEM_VER").modifyColumn("20190814.24", "CS_VERSION_ID").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		version.onTable("HFJ_SPIDX_NUMBER").modifyColumn("20190814.18", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		version.onTable("HFJ_SPIDX_TOKEN").modifyColumn("20190814.19", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		version.onTable("HFJ_SPIDX_URI").modifyColumn("20190814.20", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		version.onTable("HFJ_SPIDX_URI").modifyColumn("20190814.21", "SP_URI").nullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 254);
+		version.onTable("TRM_CODESYSTEM").modifyColumn("20190814.22", "CODE_SYSTEM_URI").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		version.onTable("TRM_CODESYSTEM").modifyColumn("20190814.23", "CS_NAME").nullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		version.onTable("TRM_CODESYSTEM_VER").modifyColumn("20190814.24", "CS_VERSION_ID").nullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 	}
 
 

@@ -32,25 +32,36 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 public class SchemaMigrator {
-	private static final Logger ourLog = LoggerFactory.getLogger(SchemaMigrator.class);
 	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "FLY_HFJ_MIGRATION";
-
+	private static final Logger ourLog = LoggerFactory.getLogger(SchemaMigrator.class);
 	private final BasicDataSource myDataSource;
-	private final FlywayMigrator myMigrator;
 	private final boolean mySkipValidation;
+	private final String myMigrationTableName;
+	private final List<BaseTask<?>> myMigrationTasks;
+	private boolean myDontUseFlyway;
+	private DriverTypeEnum myDriverType;
 
+	/**
+	 * Constructor
+	 */
 	public SchemaMigrator(String theMigrationTableName, BasicDataSource theDataSource, Properties jpaProperties, List<BaseTask<?>> theMigrationTasks) {
 		myDataSource = theDataSource;
+		myMigrationTableName = theMigrationTableName;
+		myMigrationTasks = theMigrationTasks;
+
 		if (jpaProperties.containsKey(AvailableSettings.HBM2DDL_AUTO) && "update".equals(jpaProperties.getProperty(AvailableSettings.HBM2DDL_AUTO))) {
 			mySkipValidation = true;
 		} else {
 			mySkipValidation = false;
 		}
-		myMigrator = new FlywayMigrator(theMigrationTableName, theDataSource);
-		myMigrator.addTasks(theMigrationTasks);
+	}
+
+	public void setDontUseFlyway(boolean theDontUseFlyway) {
+		myDontUseFlyway = theDontUseFlyway;
 	}
 
 	public void validate() {
@@ -59,13 +70,15 @@ public class SchemaMigrator {
 			return;
 		}
 		try (Connection connection = myDataSource.getConnection()) {
-			MigrationInfoService migrationInfo = myMigrator.getMigrationInfo();
-			if (migrationInfo.pending().length > 0) {
-				throw new ConfigurationException("The database schema for " + myDataSource.getUrl() + " is out of date.  " +
-					"Current database schema version is " + getCurrentVersion(migrationInfo) + ".  Schema version required by application is " +
-					getLastVersion(migrationInfo) + ".  Please run the database migrator.");
+			Optional<MigrationInfoService> migrationInfo = newMigrator().getMigrationInfo();
+			if (migrationInfo.isPresent()) {
+				if (migrationInfo.get().pending().length > 0) {
+					throw new ConfigurationException("The database schema for " + myDataSource.getUrl() + " is out of date.  " +
+						"Current database schema version is " + getCurrentVersion(migrationInfo.get()) + ".  Schema version required by application is " +
+						getLastVersion(migrationInfo.get()) + ".  Please run the database migrator.");
+				}
+				ourLog.info("Database schema confirmed at expected version " + getCurrentVersion(migrationInfo.get()));
 			}
-			ourLog.info("Database schema confirmed at expected version " + getCurrentVersion(migrationInfo));
 		} catch (SQLException e) {
 			throw new ConfigurationException("Unable to connect to " + myDataSource.toString(), e);
 		}
@@ -76,7 +89,22 @@ public class SchemaMigrator {
 			ourLog.warn("Database running in hibernate auto-update mode.  Skipping schema migration.");
 			return;
 		}
-		myMigrator.migrate();
+		newMigrator().migrate();
+	}
+
+	private BaseMigrator newMigrator() {
+		BaseMigrator migrator;
+		if (myDontUseFlyway) {
+			migrator = new BruteForceMigrator();
+			migrator.setDriverType(myDriverType);
+			migrator.setConnectionUrl(myDataSource.getUrl());
+			migrator.setUsername(myDataSource.getUsername());
+			migrator.setPassword(myDataSource.getPassword());
+		} else {
+			migrator = new FlywayMigrator(myMigrationTableName, myDataSource);
+		}
+		migrator.addTasks(myMigrationTasks);
+		return migrator;
 	}
 
 	private String getCurrentVersion(MigrationInfoService theMigrationInfo) {
@@ -93,5 +121,9 @@ public class SchemaMigrator {
 			return pending[pending.length - 1].getVersion().toString();
 		}
 		return "unknown";
+	}
+
+	public void setDriverType(DriverTypeEnum theDriverType) {
+		myDriverType = theDriverType;
 	}
 }

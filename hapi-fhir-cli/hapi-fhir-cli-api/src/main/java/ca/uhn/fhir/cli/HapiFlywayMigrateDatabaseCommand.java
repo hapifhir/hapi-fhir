@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.migrate.BaseMigrator;
 import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
@@ -44,7 +45,7 @@ public class HapiFlywayMigrateDatabaseCommand extends BaseFlywayMigrateDatabaseC
 	}
 
 	@Override
-	protected void addTasks(FlywayMigrator theMigrator) {
+	protected void addTasks(BaseMigrator theMigrator) {
 		List<BaseTask<?>> tasks = new HapiFhirJpaMigrationTasks(getFlags()).getAllTasks(VersionEnum.values());
 		theMigrator.addTasks(tasks);
 	}
