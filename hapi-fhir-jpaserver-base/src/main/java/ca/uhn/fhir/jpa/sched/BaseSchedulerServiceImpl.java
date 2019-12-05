@@ -111,6 +111,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 
 	private IHapiScheduler createScheduler(boolean theClustered) throws SchedulerException {
 		if (!isLocalSchedulingEnabled() || isSchedulingDisabledForUnitTests()) {
+			ourLog.info("Scheduling is disabled on this server");
 			return new HapiNullScheduler();
 		}
 		IHapiScheduler retval;
