@@ -23,40 +23,57 @@ package ca.uhn.hapi.fhir.docs;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import org.hl7.fhir.r4.model.Patient;
 
 import java.io.IOException;
 
 public class Parser {
 
-public static void main(String[] args) throws DataFormatException, IOException {
-   {
-//START SNIPPET: disableStripVersions
-FhirContext ctx = FhirContext.forDstu2();
-IParser parser = ctx.newJsonParser();
+	public static void main(String[] args) throws DataFormatException, IOException {
+		{
+			//START SNIPPET: createParser
+			// Create a FHIR context
+			FhirContext ctx = FhirContext.forR4();
 
-// Disable the automatic stripping of versions from references on the parser
-parser.setStripVersionsFromReferences(false);
-//END SNIPPET: disableStripVersions
+			// Create a Patient resource to serialize
+			Patient patient = new Patient();
+			patient.addName().setFamily("Simpson").addGiven("James");
 
-//START SNIPPET: disableStripVersionsCtx
-ctx.getParserOptions().setStripVersionsFromReferences(false);
-//END SNIPPET: disableStripVersionsCtx
+			// Instantiate a new parser
+			IParser parser = ctx.newJsonParser();
 
-   }
-   
-   {
-//START SNIPPET: disableStripVersionsField
-FhirContext ctx = FhirContext.forDstu2();
-IParser parser = ctx.newJsonParser();
+			// Serialize it
+			String serialized = parser.encodeResourceToString(patient)
+			System.out.println(serialized);
+			//END SNIPPET: createParser
+		}
+		{
+			//START SNIPPET: disableStripVersions
+			FhirContext ctx = FhirContext.forR4();
+			IParser parser = ctx.newJsonParser();
 
-// Preserve versions only on these two fields (for the given parser)
-parser.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference", "Patient.managingOrganization");
+			// Disable the automatic stripping of versions from references on the parser
+			parser.setStripVersionsFromReferences(false);
+			//END SNIPPET: disableStripVersions
 
-// You can also apply this setting to the context so that it will 
-// flow to all parsers
-ctx.getParserOptions().setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference", "Patient.managingOrganization");
-//END SNIPPET: disableStripVersionsField
+			//START SNIPPET: disableStripVersionsCtx
+			ctx.getParserOptions().setStripVersionsFromReferences(false);
+			//END SNIPPET: disableStripVersionsCtx
+		}
 
-   }
-}	
+		{
+			//START SNIPPET: disableStripVersionsField
+			FhirContext ctx = FhirContext.forR4();
+			IParser parser = ctx.newJsonParser();
+
+			// Preserve versions only on these two fields (for the given parser)
+			parser.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference", "Patient.managingOrganization");
+
+			// You can also apply this setting to the context so that it will
+			// flow to all parsers
+			ctx.getParserOptions().setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference", "Patient.managingOrganization");
+			//END SNIPPET: disableStripVersionsField
+
+		}
+	}
 }

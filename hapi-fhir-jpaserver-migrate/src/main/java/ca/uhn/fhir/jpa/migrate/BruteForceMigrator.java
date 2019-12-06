@@ -42,11 +42,12 @@ public class BruteForceMigrator extends BaseMigrator {
 
 	@Override
 	public void migrate() {
+		DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getConnectionUrl(), getUsername(), getPassword());
+
 		for (BaseTask<?> next : myTasks) {
 			next.setDriverType(getDriverType());
 			next.setDryRun(isDryRun());
 			next.setNoColumnShrink(isNoColumnShrink());
-			DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getConnectionUrl(), getUsername(), getPassword());
 			next.setConnectionProperties(connectionProperties);
 
 			try {
