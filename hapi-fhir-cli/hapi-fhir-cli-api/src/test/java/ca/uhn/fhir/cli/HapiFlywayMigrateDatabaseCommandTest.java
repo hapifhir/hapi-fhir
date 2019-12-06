@@ -146,6 +146,34 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB")); // Late table
 	}
 
+	@Test
+	public void testMigrateFromEmptySchema_NoFlyway() throws IOException, SQLException {
+
+		File location = getLocation("migrator_h2_test_empty_current_noflyway");
+
+		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
+		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
+
+		ourLog.info("**********************************************");
+		ourLog.info("Starting Migration...");
+		ourLog.info("**********************************************");
+
+		String[] args = new String[]{
+			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
+			"-d", "H2_EMBEDDED",
+			"-u", url,
+			"-n", "",
+			"-p", "",
+			"--" + BaseFlywayMigrateDatabaseCommand.DONT_USE_FLYWAY
+		};
+
+		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE"));
+		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB"));
+		App.main(args);
+		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE")); // Early table
+		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB")); // Late table
+	}
+
 	@NotNull
 	private File getLocation(String theDatabaseName) throws IOException {
 		File directory = new File(DB_DIRECTORY);
