@@ -43,7 +43,7 @@ public class Parser {
 			IParser parser = ctx.newJsonParser();
 
 			// Serialize it
-			String serialized = parser.encodeResourceToString(patient)
+			String serialized = parser.encodeResourceToString(patient);
 			System.out.println(serialized);
 			//END SNIPPET: createParser
 		}
