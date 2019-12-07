@@ -93,19 +93,6 @@ public interface IParser {
 	Boolean getStripVersionsFromReferences();
 
 	/**
-	 * If set to <code>true</code> (which is the default), the Bundle.entry.fullUrl will override the Bundle.entry.resource's
-	 * resource id if the fullUrl is defined. This behavior happens when parsing the source data into a Bundle object. Set this
-	 * to <code>false</code> if this is not the desired behavior (e.g. the client code wishes to perform additional
-	 * validation checks between the fullUrl and the resource id).
-	 *
-	 * @return Returns the parser instance's configuration setting for overriding resource ids with Bundle.entry.fullUrl when
-	 *         parsing the source data into a Bundle object. This method will return <code>null</code> if no value is set, in
-	 *         which case the value from the {@link ParserOptions} will be used (default is <code>true</code>)
-	 * @see ParserOptions
-	 */
-	Boolean getOverrideResourceIdWithBundleEntryFullUrl();
-
-	/**
 	 * Is the parser in "summary mode"? See {@link #setSummaryMode(boolean)} for information
 	 * 
 	 * @see {@link #setSummaryMode(boolean)} for information

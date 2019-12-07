@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
@@ -317,12 +318,12 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IIdType id2 = myObservationDao.create(o2, mySrd).getId();
 
 		{
-			Set<Long> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2001-01-02")), null);
-			assertThat(found, hasItem(id2.getIdPartAsLong()));
+			Set<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2001-01-02")), null);
+			assertThat(ResourcePersistentId.toLongList(found), hasItem(id2.getIdPartAsLong()));
 		}
 		{
-			Set<Long> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
-			assertThat(found, not(hasItem(id2.getIdPartAsLong())));
+			Set<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
+			assertThat(ResourcePersistentId.toLongList(found), not(hasItem(id2.getIdPartAsLong())));
 		}
 	}
 
@@ -2297,7 +2298,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 				"}\n";
 		//@formatter:on
 
-		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
+		Set<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		Organization org = myFhirCtx.newJsonParser().parseResource(Organization.class, inputStr);
@@ -3592,7 +3593,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		assertThat(str.length(), greaterThan(ResourceIndexedSearchParamString.MAX_LENGTH));
 
-		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
+		Set<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
@@ -3771,7 +3772,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		String subStr1 = longStr1.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		String subStr2 = longStr2.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)), null);
+		Set<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);

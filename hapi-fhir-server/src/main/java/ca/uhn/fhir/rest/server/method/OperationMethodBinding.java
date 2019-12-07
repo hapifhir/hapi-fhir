@@ -28,6 +28,8 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -89,6 +91,14 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 		if (isBlank(myDescription)) {
 			myDescription = null;
+		}
+
+		for (Annotation[] nextParamAnnotations : theMethod.getParameterAnnotations()) {
+			for (Annotation nextParam : nextParamAnnotations) {
+				if (nextParam instanceof OptionalParam || nextParam instanceof RequiredParam) {
+					throw new ConfigurationException("Illegal method parameter annotation @" + nextParam.annotationType().getSimpleName() + " on method: " + theMethod.toString());
+				}
+			}
 		}
 
 		if (isBlank(theOperationName)) {

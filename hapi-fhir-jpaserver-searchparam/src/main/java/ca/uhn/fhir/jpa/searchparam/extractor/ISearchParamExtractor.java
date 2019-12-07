@@ -42,7 +42,7 @@ public interface ISearchParamExtractor {
 
 	SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource);
 
-	List<PathAndRef> extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef);
+	SearchParamSet<PathAndRef> extractResourceLinks(IBaseResource theResource);
 
 	String[] split(String theExpression);
 

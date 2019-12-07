@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
+import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.Test;
 
@@ -27,18 +28,16 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		public MyMigrationTasks() {
 			Builder v = forVersion(VersionEnum.V3_5_0);
 
-			Builder.BuilderWithTableName targetTable = v.addTableByColumns("TGT_TABLE", "PID");
-			targetTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+			Builder.BuilderWithTableName targetTable = v.addTableByColumns("1", "TGT_TABLE", "PID");
+			targetTable.addColumn("2", "PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 
-			Builder.BuilderAddTableByColumns fooTable = v.addTableByColumns("FOO_TABLE", "PID");
+			Builder.BuilderAddTableByColumns fooTable = v.addTableByColumns("3", "FOO_TABLE", "PID");
 			fooTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 			fooTable.addColumn("HELLO").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 			fooTable.addColumn("COL_REF").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-			fooTable.addIndex("IDX_HELLO").unique(true).withColumns("HELLO");
-			fooTable.addForeignKey("FK_REF").toColumn("COL_REF").references("TGT_TABLE", "PID");
+			fooTable.addIndex("4", "IDX_HELLO").unique(true).withColumns("HELLO");
+			fooTable.addForeignKey("5", "FK_REF").toColumn("COL_REF").references("TGT_TABLE", "PID");
 
 		}
-
-
 	}
 }

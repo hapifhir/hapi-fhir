@@ -22,10 +22,16 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IIdentifiableElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +41,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.*;
 
 import javax.annotation.Nullable;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -531,11 +543,6 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
-	public Boolean getOverrideResourceIdWithBundleEntryFullUrl() {
-		return myOverrideResourceIdWithBundleEntryFullUrl;
-	}
-
-	@Override
 	public List<Class<? extends IBaseResource>> getPreferTypes() {
 		return myPreferTypes;
 	}
@@ -705,39 +712,38 @@ public abstract class BaseParser implements IParser {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(retVal);
 		if ("Bundle".equals(def.getName())) {
 
-			BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
-			BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
-			List<IBase> entries = entryChild.getAccessor().getValues(retVal);
-			if (entries != null) {
-				for (IBase nextEntry : entries) {
-
-					/**
-					 * If Bundle.entry.fullUrl is populated, set the resource ID to that
-					 */
-					// TODO: should emit a warning and maybe notify the error handler if the resource ID doesn't match the
-					// fullUrl idPart
-					BaseRuntimeChildDefinition fullUrlChild = entryDef.getChildByName("fullUrl");
-					if (fullUrlChild == null) {
-						continue; // TODO: remove this once the data model in tinder plugin catches up to 1.2
-					}
-					if (isOverrideResourceIdWithBundleEntryFullUrl()) {
-						List<IBase> fullUrl = fullUrlChild.getAccessor().getValues(nextEntry);
-						if (fullUrl != null && !fullUrl.isEmpty()) {
-							IPrimitiveType<?> value = (IPrimitiveType<?>) fullUrl.get(0);
-							if (value.isEmpty() == false) {
-								List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
-								if (entryResources != null && entryResources.size() > 0) {
-									IBaseResource res = (IBaseResource) entryResources.get(0);
-									String versionId = res.getIdElement().getVersionIdPart();
-									res.setId(value.getValueAsString());
-									if (isNotBlank(versionId) && res.getIdElement().hasVersionIdPart() == false) {
-										res.setId(res.getIdElement().withVersion(versionId));
+			if (isOverrideResourceIdWithBundleEntryFullUrl()) {
+				BundleUtil.processEntries(myContext, (IBaseBundle) retVal, t -> {
+					String fullUrl = t.getFullUrl();
+					if (fullUrl != null) {
+						IBaseResource resource = t.getResource();
+						if (resource != null) {
+							IIdType resourceId = resource.getIdElement();
+							if (isBlank(resourceId.getValue())) {
+								resourceId.setValue(fullUrl);
+							} else {
+								if (fullUrl.startsWith("urn:") && fullUrl.endsWith(":" + resourceId.getIdPart())) {
+									resourceId.setValue(fullUrl);
+								} else {
+									IIdType fullUrlId = myContext.getVersion().newIdType();
+									fullUrlId.setValue(fullUrl);
+									if (myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+										IIdType newId = fullUrlId;
+										if (!newId.hasVersionIdPart() && resourceId.hasVersionIdPart()) {
+											newId = newId.withVersion(resourceId.getVersionIdPart());
+										}
+										resourceId.setValue(newId.getValue());
+									} else if (StringUtils.equals(fullUrlId.getIdPart(), resourceId.getIdPart())) {
+										if (fullUrlId.hasBaseUrl()) {
+											IIdType newResourceId = resourceId.withServerBase(fullUrlId.getBaseUrl(), resourceId.getResourceType());
+											resourceId.setValue(newResourceId.getValue());
+										}
 									}
 								}
 							}
 						}
 					}
-				}
+				});
 			}
 
 		}

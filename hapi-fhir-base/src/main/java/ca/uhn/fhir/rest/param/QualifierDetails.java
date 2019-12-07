@@ -42,20 +42,6 @@ public class QualifierDetails {
 					}
 				}
 			}
-			/*
-			 * This was removed Sep 9 2015, as I don't see any way it could possibly be triggered.
-			if (!theQualifierWhitelist.contains(SearchParameter.QUALIFIER_ANY_TYPE)) {
-				if (myColonQualifier != null) {
-					if (!theQualifierWhitelist.contains(myColonQualifier)) {
-						return false;
-					}
-				} else {
-					if (!theQualifierWhitelist.contains(":")) {
-						return false;
-					}
-				}
-			}
-			*/
 		}
 		if (theQualifierBlacklist != null) {
 			if (myDotQualifier != null) {

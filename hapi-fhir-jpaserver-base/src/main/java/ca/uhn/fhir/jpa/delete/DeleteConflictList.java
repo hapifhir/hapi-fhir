@@ -23,13 +23,19 @@ package ca.uhn.fhir.jpa.delete;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.util.Assert;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class DeleteConflictList implements Iterable<DeleteConflict> {
 	private final List<DeleteConflict> myList = new ArrayList<>();
 	private final Set<String> myResourceIdsMarkedForDeletion;
+	private int myRemoveModCount;
 
 	/**
 	 * Constructor
@@ -69,11 +75,49 @@ public class DeleteConflictList implements Iterable<DeleteConflict> {
 
 	@Override
 	public Iterator<DeleteConflict> iterator() {
-		return myList.iterator();
+		// Note that handlers may add items to this list, so we're using a special iterator
+		// that is ok with this. Only removals from the list should trigger a concurrent modification
+		// issue
+		return new Iterator<DeleteConflict>() {
+
+			private final int myOriginalRemoveModCont = myRemoveModCount;
+			private int myNextIndex = 0;
+			private boolean myLastOperationWasNext;
+
+			@Override
+			public boolean hasNext() {
+				checkForCoModification();
+				myLastOperationWasNext = false;
+				return myNextIndex < myList.size();
+			}
+
+			@Override
+			public DeleteConflict next() {
+				checkForCoModification();
+				myLastOperationWasNext = true;
+				return myList.get(myNextIndex++);
+			}
+
+			@Override
+			public void remove() {
+				Assert.isTrue(myLastOperationWasNext);
+				myNextIndex--;
+				myList.remove(myNextIndex);
+				myLastOperationWasNext = false;
+			}
+
+			private void checkForCoModification() {
+				Validate.isTrue(myOriginalRemoveModCont == myRemoveModCount);
+			}
+		};
 	}
 
 	public boolean removeIf(Predicate<DeleteConflict> theFilter) {
-		return myList.removeIf(theFilter);
+		boolean retVal = myList.removeIf(theFilter);
+		if (retVal) {
+			myRemoveModCount++;
+		}
+		return retVal;
 	}
 
 	public void addAll(DeleteConflictList theNewConflicts) {

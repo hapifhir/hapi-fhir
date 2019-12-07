@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
@@ -2155,6 +2156,27 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSearchResourceLinkOnCanonical() {
+
+		Questionnaire q = new Questionnaire();
+		q.setId("Q");
+		myQuestionnaireDao.update(q);
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setId("QR");
+		qr.setQuestionnaire("Questionnaire/Q");
+		String qrId = myQuestionnaireResponseDao.update(qr).getId().toUnqualifiedVersionless().getValue();
+
+		List<QuestionnaireResponse> result = toList(myQuestionnaireResponseDao
+			.search(new SearchParameterMap().setLoadSynchronous(true).add(QuestionnaireResponse.SP_QUESTIONNAIRE, new ReferenceParam("Questionnaire/Q"))));
+		assertEquals(1, result.size());
+		assertEquals(qrId, result.get(0).getIdElement().toUnqualifiedVersionless().getValue());
+
+
+	}
+
+
+	@Test
 	public void testSearchResourceLinkWithChain() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchResourceLinkWithChainXX");
@@ -3866,6 +3888,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		result = myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(ValueSet.SP_URL, new UriParam("http://hl7.org/fhir/ValueSet/FOOOOOO")));
 		assertThat(toUnqualifiedVersionlessIds(result), empty());
+
 
 	}
 

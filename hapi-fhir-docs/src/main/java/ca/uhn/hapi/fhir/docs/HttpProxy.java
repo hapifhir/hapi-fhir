@@ -37,7 +37,7 @@ public class HttpProxy {
 
    public static void main(String[] args) {
       /*
-       * This is out ot date - Just keeping
+       * This is out of date - Just keeping
        * it in case it's helpful...
        */
       final String authUser = "username"; 

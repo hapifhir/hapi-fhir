@@ -20,13 +20,14 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class DaoMethodOutcome extends MethodOutcome {
 
-	private ResourceTable myEntity;
+	private IBasePersistedResource myEntity;
 	private IBaseResource myPreviousResource;
 
 	/**
@@ -36,11 +37,11 @@ public class DaoMethodOutcome extends MethodOutcome {
 		super();
 	}
 
-	public ResourceTable getEntity() {
+	public IBasePersistedResource getEntity() {
 		return myEntity;
 	}
 
-	public DaoMethodOutcome setEntity(ResourceTable theEntity) {
+	public DaoMethodOutcome setEntity(IBasePersistedResource theEntity) {
 		myEntity = theEntity;
 		return this;
 	}

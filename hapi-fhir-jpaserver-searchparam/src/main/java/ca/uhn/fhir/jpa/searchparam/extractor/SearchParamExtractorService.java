@@ -48,27 +48,27 @@ public class SearchParamExtractorService {
 
 	public void extractFromResource(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource) {
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> strings = extractSearchParamStrings(theResource);
-		handleWarnings(theRequestDetails, strings);
+		handleWarnings(theRequestDetails, myInterceptorBroadcaster, strings);
 		theParams.myStringParams.addAll(strings);
 
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamNumber> numbers = extractSearchParamNumber(theResource);
-		handleWarnings(theRequestDetails, numbers);
+		handleWarnings(theRequestDetails, myInterceptorBroadcaster, numbers);
 		theParams.myNumberParams.addAll(numbers);
 
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantity> quantities = extractSearchParamQuantity(theResource);
-		handleWarnings(theRequestDetails, quantities);
+		handleWarnings(theRequestDetails, myInterceptorBroadcaster, quantities);
 		theParams.myQuantityParams.addAll(quantities);
 
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractSearchParamDates(theResource);
-		handleWarnings(theRequestDetails, dates);
+		handleWarnings(theRequestDetails, myInterceptorBroadcaster, dates);
 		theParams.myDateParams.addAll(dates);
 
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> uris = extractSearchParamUri(theResource);
-		handleWarnings(theRequestDetails, uris);
+		handleWarnings(theRequestDetails, myInterceptorBroadcaster, uris);
 		theParams.myUriParams.addAll(uris);
 
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamCoords> coords = extractSearchParamCoords(theResource);
-		handleWarnings(theRequestDetails, coords);
+		handleWarnings(theRequestDetails, myInterceptorBroadcaster, coords);
 		theParams.myCoordsParams.addAll(coords);
 
 		ourLog.trace("Storing date indexes: {}", theParams.myDateParams);
@@ -90,7 +90,7 @@ public class SearchParamExtractorService {
 		populateResourceTable(theParams.myTokenParams, theEntity);
 	}
 
-	void handleWarnings(RequestDetails theRequestDetails, ISearchParamExtractor.SearchParamSet<?> theSearchParamSet) {
+	static void handleWarnings(RequestDetails theRequestDetails, IInterceptorBroadcaster theInterceptorBroadcaster, ISearchParamExtractor.SearchParamSet<?> theSearchParamSet) {
 		if (theSearchParamSet.getWarnings().isEmpty()) {
 			return;
 		}
@@ -103,7 +103,7 @@ public class SearchParamExtractorService {
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 				.add(StorageProcessingMessage.class, messageHolder);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
+			JpaInterceptorBroadcaster.doCallHooks(theInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
 		}
 	}
 

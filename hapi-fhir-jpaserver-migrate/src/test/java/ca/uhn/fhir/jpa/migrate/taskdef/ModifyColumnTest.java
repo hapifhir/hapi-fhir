@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import org.flywaydb.core.internal.command.DbMigrate;
 import org.junit.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.sql.SQLException;
 
@@ -13,7 +15,7 @@ public class ModifyColumnTest extends BaseTest {
 	public void testColumnWithJdbcTypeClob() throws SQLException {
 		executeSql("create table SOMETABLE (TEXTCOL clob)");
 
-		ModifyColumnTask task = new ModifyColumnTask();
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.STRING);
@@ -36,7 +38,7 @@ public class ModifyColumnTest extends BaseTest {
 	public void testColumnAlreadyExists() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), newcol bigint)");
 
-		ModifyColumnTask task = new ModifyColumnTask();
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.STRING);
@@ -59,7 +61,7 @@ public class ModifyColumnTest extends BaseTest {
 	public void testNoShrink_SameNullable() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), newcol bigint)");
 
-		ModifyColumnTask task = new ModifyColumnTask();
+		ModifyColumnTask task = new ModifyColumnTask("1", "123456.7");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.STRING);
@@ -88,7 +90,7 @@ public class ModifyColumnTest extends BaseTest {
 		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 255), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
 
 		// PID
-		ModifyColumnTask task = new ModifyColumnTask();
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("PID");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.LONG);
@@ -96,7 +98,7 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().addTask(task);
 
 		// STRING
-		task = new ModifyColumnTask();
+		task = new ModifyColumnTask("1", "2");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.STRING);
@@ -130,7 +132,7 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().setNoColumnShrink(true);
 
 		// PID
-		ModifyColumnTask task = new ModifyColumnTask();
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("PID");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.LONG);
@@ -138,7 +140,7 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().addTask(task);
 
 		// STRING
-		task = new ModifyColumnTask();
+		task = new ModifyColumnTask("1", "2");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("DATECOL");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.DATE_TIMESTAMP);
@@ -167,7 +169,7 @@ public class ModifyColumnTest extends BaseTest {
 		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 255), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
 
 		// PID
-		ModifyColumnTask task = new ModifyColumnTask();
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("PID");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.LONG);
@@ -175,7 +177,7 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().addTask(task);
 
 		// STRING
-		task = new ModifyColumnTask();
+		task = new ModifyColumnTask("1", "2");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.STRING);
@@ -201,7 +203,7 @@ public class ModifyColumnTest extends BaseTest {
 	public void testColumnDoesntAlreadyExist() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
 
-		ModifyColumnTask task = new ModifyColumnTask();
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("SOMECOLUMN");
 		task.setDescription("Make nullable");
@@ -211,6 +213,45 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL"));
+	}
+
+	@Test
+	public void testFailureAllowed() throws SQLException {
+		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
+		executeSql("insert into SOMETABLE (TEXTCOL) values ('HELLO')");
+
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
+		task.setTableName("SOMETABLE");
+		task.setColumnName("TEXTCOL");
+		task.setColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		task.setNullable(true);
+		task.setFailureAllowed(true);
+		getMigrator().addTask(task);
+
+		getMigrator().migrate();
+		assertEquals(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL").getColumnTypeEnum());
+
+	}
+
+	@Test
+	public void testFailureNotAllowed() throws SQLException {
+		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
+		executeSql("insert into SOMETABLE (TEXTCOL) values ('HELLO')");
+
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
+		task.setTableName("SOMETABLE");
+		task.setColumnName("TEXTCOL");
+		task.setColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		task.setNullable(true);
+		getMigrator().addTask(task);
+
+		try {
+			getMigrator().migrate();
+			fail();
+		} catch (DbMigrate.FlywayMigrateException e) {
+			// expected
+		}
+
 	}
 
 }

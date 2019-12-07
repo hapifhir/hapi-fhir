@@ -22,13 +22,19 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.apache.commons.lang3.Validate;
-import org.springframework.util.Assert;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends BaseTableColumnTask<T> {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseTableColumnTypeTask.class);
+
 
 	private ColumnTypeEnum myColumnType;
 	private Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> myColumnTypeToDriverTypeToSqlType = new HashMap<>();
@@ -38,7 +44,9 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 	/**
 	 * Constructor
 	 */
-	BaseTableColumnTypeTask() {
+
+	public BaseTableColumnTypeTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.H2_EMBEDDED, "integer");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.DERBY_EMBEDDED, "integer");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.MARIADB_10_1, "integer");
@@ -137,11 +145,15 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 	}
 
 	protected String getSqlType() {
+		return getSqlType(getColumnLength());
+	}
+
+	protected String getSqlType(Long theColumnLength) {
 		String retVal = myColumnTypeToDriverTypeToSqlType.get(myColumnType).get(getDriverType());
 		Objects.requireNonNull(retVal);
 
 		if (myColumnType == ColumnTypeEnum.STRING) {
-			retVal = retVal.replace("?", Long.toString(getColumnLength()));
+			retVal = retVal.replace("?", Long.toString(theColumnLength));
 		}
 
 		return retVal;
@@ -184,4 +196,37 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 
 	}
 
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (!(theO instanceof BaseTableColumnTypeTask)) return false;
+
+		BaseTableColumnTypeTask<?> that = (BaseTableColumnTypeTask<?>) theO;
+
+		return new EqualsBuilder()
+			.appendSuper(super.equals(theO))
+			.append(getColumnTypeName(myColumnType), getColumnTypeName(that.myColumnType))
+			.append(myNullable, that.myNullable)
+			.append(myColumnLength, that.myColumnLength)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.appendSuper(super.hashCode())
+			.append(getColumnTypeName(myColumnType))
+			.append(myNullable)
+			.append(myColumnLength)
+			.toHashCode();
+	}
+
+	@Nullable
+	private Object getColumnTypeName(ColumnTypeEnum theColumnType) {
+		if (theColumnType == null) {
+			return null;
+		}
+		return myColumnType.name();
+	}
 }

@@ -165,6 +165,16 @@
 					</instructions>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<includeDependencySources>true</includeDependencySources>
+					<dependencySourceIncludes>
+						<include>ca.uhn.hapi.fhir:org.hl7.fhir.convertors</include>
+					</dependencySourceIncludes>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>

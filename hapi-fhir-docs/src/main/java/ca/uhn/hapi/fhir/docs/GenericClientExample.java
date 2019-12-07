@@ -206,7 +206,7 @@ public class GenericClientExample {
       }
        {
          // START SNIPPET: etagupdate
-         // First, let's retrive the latest version of a resource
+         // First, let's retrieve the latest version of a resource
          // from the server
          Patient patient = client.read().resource(Patient.class).withId("123").execute();
 
@@ -427,9 +427,8 @@ public class GenericClientExample {
    public static void history() {
       IGenericClient client = FhirContext.forDstu2().newRestfulGenericClient("");
       {
-         Bundle response;
          // START SNIPPET: historyDstu2
-         response = client
+			Bundle response = client
             .history()
             .onServer()
             .returnBundle(Bundle.class)
@@ -437,9 +436,8 @@ public class GenericClientExample {
          // END SNIPPET: historyDstu2
       }
       {
-         Bundle response;
          // START SNIPPET: historyFeatures
-         response = client
+			Bundle response = client
             .history()
             .onServer()
             .returnBundle(Bundle.class)

@@ -21,7 +21,7 @@ import java.util.List;
 
 /**
  * Simple validation support module that handles profile snapshot generation. This is
- * separate from other funcrtions since it needs a link to a validation support
+ * separate from other functions since it needs a link to a validation support
  * module itself, and it is useful to be able to pass a chain in.
  */
 public class SnapshotGeneratingValidationSupport implements IValidationSupport {

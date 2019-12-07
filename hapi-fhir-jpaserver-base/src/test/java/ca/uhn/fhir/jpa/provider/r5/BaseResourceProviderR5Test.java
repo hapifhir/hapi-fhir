@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR5;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -61,7 +61,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 	protected static int ourPort;
 	protected static RestfulServer ourRestServer;
 	protected static String ourServerBase;
-	protected static SearchParamRegistryR5 ourSearchParamRegistry;
+	protected static SearchParamRegistryImpl ourSearchParamRegistry;
 	private static DatabaseBackedPagingProvider ourPagingProvider;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	private static GenericWebApplicationContext ourWebApplicationContext;
@@ -164,7 +164,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
 			myValidationSupport = wac.getBean(JpaValidationSupportChainR5.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
-			ourSearchParamRegistry = wac.getBean(SearchParamRegistryR5.class);
+			ourSearchParamRegistry = wac.getBean(SearchParamRegistryImpl.class);
 			ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
 			ourSubscriptionMatcherInterceptor.start();
 

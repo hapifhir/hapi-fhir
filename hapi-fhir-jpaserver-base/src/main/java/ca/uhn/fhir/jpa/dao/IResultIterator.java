@@ -20,10 +20,12 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+
 import java.io.Closeable;
 import java.util.Iterator;
 
-public interface IResultIterator extends Iterator<Long>, Closeable {
+public interface IResultIterator extends Iterator<ResourcePersistentId>, Closeable {
 
 	int getSkippedCount();
 

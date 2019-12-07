@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,7 @@ public class SearchParamExtractorServiceTest {
 
 		when(myJpaInterceptorBroadcaster.callHooks(any(), any())).thenReturn(true);
 
-		mySvc.handleWarnings(new ServletRequestDetails(myRequestInterceptorBroadcaster), searchParamSet);
+		SearchParamExtractorService.handleWarnings(new ServletRequestDetails(myRequestInterceptorBroadcaster), myJpaInterceptorBroadcaster, searchParamSet);
 
 		verify(myJpaInterceptorBroadcaster, times(2)).callHooks(eq(Pointcut.JPA_PERFTRACE_WARNING), any());
 		verify(myRequestInterceptorBroadcaster, times(2)).callHooks(eq(Pointcut.JPA_PERFTRACE_WARNING), any());

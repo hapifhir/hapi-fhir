@@ -118,11 +118,10 @@ public class ReflectionUtil {
 	/**
 	 * Instantiate a class by no-arg constructor, throw {@link ConfigurationException} if we fail to do so
 	 */
-	@CoverageIgnore
 	public static <T> T newInstance(Class<T> theType) {
 		Validate.notNull(theType, "theType must not be null");
 		try {
-			return theType.newInstance();
+			return theType.getConstructor().newInstance();
 		} catch (Exception e) {
 			throw new ConfigurationException("Failed to instantiate " + theType.getName(), e);
 		}

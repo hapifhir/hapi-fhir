@@ -6,6 +6,55 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="4.2.0" date="TBD">
+			<action type="add">
+				The version of a few dependencies have been bumped to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+				<ul>
+					<li>Jetty (CLI): 9.4.14.v20181114 -&gt; 9.4.23.v20191118</li>
+				</ul>
+				]]>
+			</action>
+			<action type="fix" issue="1583">
+				As of FHIR R4, some fields that were previously of type reference are now of type canonical.
+				One example is QuestionnaireResponse.questionnaire. Technically this means that this field
+				should no longer contain a relative reference, but as they are sometimes used that way, HAPI
+				FHIR will now try to be permissive and will index relative link canonical fields
+				such as (Questionnaire/123) as though it actually was a local relative link. Thanks to
+				Dean Atchley for reporting and providing a test case!
+			</action>
+			<action type="fix">
+				ValueSet PreCalculation did not successfully expand valuesets when Lucene was not enabled
+				in the JPA server. This has been corrected.
+			</action>
+			<action type="change">
+				When parsing Bundle resources containing other resources, XML/JSON parsers have an option called
+				"override resource ID with bundle entry fullUrl". This option previously caused any value
+				found in Bundle.entry.fullUrl to override any value found in
+				Bundle.entry.resource.id (meaning that the parsed resource would take its ID from
+				the fullUrl even if that ID disagreed with the ID found in the resource itself. As of
+				HAPI FHIR 4.1.0 the value in Bundle.entry.fullUrl will only be used to set the parsed resource
+				ID if the resource has no ID present.
+			</action>
+			<action type="add">
+				Chained searches using the _has search parameter as the chain value are now supported by
+				the JPA server.
+			</action>
+			<action type="change">
+				Changed database migration to use flyway. This adds a new table called FLY_HFJ_MIGRATION that records all
+				database migration tasks that have already been applied.  The hapi-fhir-cli migrate tool has been changed
+				to use flyway.  Learn more about flyway here: https://flywaydb.org/.
+			</action>
+			<action type="fix" issue="1613">
+				ValueSet Precalculation sometimes failed on Oracle DBs due to an invalid SQL function. This
+				has been corrected.
+			</action>
+			<action type="fix">
+				A ConcurrentModificationException was sometimes thrown when performing a cascading delete.
+				This has been corrected.
+			</action>
+		</release>
 		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
 			<action type="add">
 				The version of a few dependencies have been bumped to the

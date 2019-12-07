@@ -34,7 +34,7 @@ To see a sample Gradle file for a working Android project using HAPI FHIR, see t
 
 # Performance
 
-On mobile devices, performance problems are particularly noticeable. This is made worse by the fact that some economy Android devices have much slower performance than modern desktop computers. See the [Client Configuration Performance](/docs/client/rest_client_http_config.html#performance) page for some tips on how to improve client performance.
+On mobile devices, performance problems are particularly noticeable. This is made worse by the fact that some economy Android devices have much slower performance than modern desktop computers. See the [Client Configuration Performance](/docs/client/client_configuration.html#performance) page for some tips on how to improve client performance.
 
 # Examples
 

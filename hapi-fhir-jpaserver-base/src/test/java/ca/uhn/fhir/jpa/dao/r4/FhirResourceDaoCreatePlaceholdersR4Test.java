@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.*;
 
@@ -43,7 +44,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 			myObservationDao.create(o, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Resource Patient/FOO not found, specified in path: Observation.subject", e.getMessage());
+			assertThat(e.getMessage(), startsWith("Resource Patient/FOO not found, specified in path: Observation.subject"));
 		}
 	}
 
@@ -98,7 +99,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 			myObservationDao.update(o, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Resource Patient/FOO not found, specified in path: Observation.subject", e.getMessage());
+			assertThat(e.getMessage(), startsWith("Resource Patient/FOO not found, specified in path: Observation.subject"));
 		}
 	}
 
