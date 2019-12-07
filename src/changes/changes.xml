@@ -54,6 +54,10 @@
 				A ConcurrentModificationException was sometimes thrown when performing a cascading delete.
 				This has been corrected.
 			</action>
+			<action type="fix" issue="1624">
+				The constructor for Verdict.java was inadvertantly made private, preventing custom
+				rules from being written. Thanks to Jafer Khan for the pull request!
+			</action>
 		</release>
 		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
 			<action type="add">
