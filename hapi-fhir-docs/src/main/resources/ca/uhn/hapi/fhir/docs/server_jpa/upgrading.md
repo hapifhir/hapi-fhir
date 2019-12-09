@@ -6,10 +6,10 @@ When upgrading the JPA server from one version of HAPI FHIR to a newer version, 
 
 Note that this feature was added in HAPI FHIR 3.5.0. It is not able to migrate from versions prior to HAPI FHIR 3.4.0. **Please make a backup of your database before running this command!**
 
-The following example shows how to use the migrator utility to migrate between two versions.
+The following example shows how to use the migrator utility to migrate to the latest version.
 
 ```bash
-./hapi-fhir-cli migrate-database -d DERBY_EMBEDDED -u "jdbc:derby:directory:target/jpaserver_derby_files;create=true" -n "" -p "" -f V3_4_0 -t V3_5_0
+./hapi-fhir-cli migrate-database -d H2_EMBEDDED -u "jdbc:derby:directory:target/jpaserver_derby_files;create=true" -n "" -p ""
 ```
 
 You may use the following command to get detailed help on the options:
@@ -21,15 +21,13 @@ You may use the following command to get detailed help on the options:
 Note the arguments:
 
 * `-d [dialect]` &ndash; This indicates the database dialect to use. See the detailed help for a list of options
-* `-f [version]` &ndash; The version to migrate from
-* `-t [version]` &ndash; The version to migrate to
 
 # Oracle Support
 
 Note that the Oracle JDBC drivers are not distributed in the Maven Central repository, so they are not included in HAPI FHIR. In order to use this command with an Oracle database, you will need to invoke the CLI as follows:
 
 ```bash
-java -cp hapi-fhir-cli.jar ca.uhn.fhir.cli.App migrate-database -d ORACLE_12C -u "[url]" -n "[username]" -p "[password]" -f V3_4_0 -t V3_5_0
+java -cp hapi-fhir-cli.jar ca.uhn.fhir.cli.App migrate-database -d ORACLE_12C -u "[url]" -n "[username]" -p "[password]"
 ```
 
 ## Migrating 3.4.0 to 3.5.0+
@@ -48,7 +46,7 @@ In order to perform a migration using this functionality, the following steps sh
 * Run the database migrator command, including the entry `-x no-migrate-350-hashes` on the command line. For example:
 
 ```
-./hapi-fhir-cli migrate-database -d DERBY_EMBEDDED -u "jdbc:derby:directory:target/jpaserver_derby_files;create=true" -n "" -p "" -f V3_4_0 -t V3_6_0 -x no-migrate-350-hashes
+./hapi-fhir-cli migrate-database -d H2_EMBEDDED -u "jdbc:h2:directory:target/jpaserver_h2_files;create=true" -n "" -p "" -x no-migrate-350-hashes
 ```
 
 * Rebuild and start your HAPI FHIR JPA server. At this point you should have a working HAPI FHIR JPA 3.6.0 server that is is still using HAPI FHIR 3.4.0 search indexes. Search hashes will be generated for any newly created or updated data but existing data will have null hashes.
@@ -66,6 +64,14 @@ SELECT * FROM HFJ_RES_REINDEX_JOB
 * Execute the migrator tool again, this time omitting the flag option, e.g.
 
 ```bash
-./hapi-fhir-cli migrate-database -d DERBY_EMBEDDED -u "jdbc:derby:directory:target/jpaserver_derby_files;create=true" -n "" -p "" -f V3_4_0 -t V3_6_0
+./hapi-fhir-cli migrate-database -d DERBY_EMBEDDED -u "jdbc:h2:directory:target/jpaserver_h2_files;create=true" -n "" -p ""
 ```
 * Rebuild, and start HAPI FHIR JPA again.
+
+# Flyway
+
+In version 4.2.0 onwards, HAPI FHIR JPA uses Flyway for schema migrations.  The "from" and "to" parameters are no longer used.  Flyway maintains a list of completed migrations in a table called `FLY_HFJ_MIGRATION`.  When you run the migration command, flyway scans the list of completed migrations in this table and compares them to the list of known migrations, and runs only the new ones.
+
+## Recovering from a failed migration
+
+Under certain unlikely scenarios, you may see the error message "Detected resolved migration not applied to database".  This means that Flyway has detected a new migration task that has an earlier version than the latest version in the Flyway table.  You can set the environment variable `OUT_OF_ORDER_MIGRATION` to allow Flyway to run migration tasks out of order.
