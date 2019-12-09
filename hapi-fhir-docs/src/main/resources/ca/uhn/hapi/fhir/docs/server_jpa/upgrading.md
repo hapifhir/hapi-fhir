@@ -70,7 +70,7 @@ SELECT * FROM HFJ_RES_REINDEX_JOB
 
 # Flyway
 
-In version 4.2.0 onwards, HAPI FHIR JPA uses Flyway for schema migrations.  The "from" and "to" parameters are no longer used.  Flyway maintains a list of completed migrations in a table called `FLY_HFJ_MIGRATION`.  When you run the migration command, flyway scans the list of completed migrations in this table and compares them to the list of known migrations, and runs only the new ones.
+As of version 4.2.0, HAPI FHIR JPA now uses Flyway for schema migrations.  The "from" and "to" parameters are no longer used.  Flyway maintains a list of completed migrations in a table called `FLY_HFJ_MIGRATION`.  When you run the migration command, flyway scans the list of completed migrations in this table and compares them to the list of known migrations, and runs only the new ones.
 
 ## Recovering from a failed migration
 
