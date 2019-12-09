@@ -27,7 +27,7 @@ public class AddTableByColumnTaskTest extends BaseTest {
 			.filter(s -> !s.startsWith("FK_REF_INDEX_"))
 			.filter(s -> !s.startsWith("PRIMARY_KEY_"))
 			.collect(Collectors.toSet());
-		assertThat(indexes, containsInAnyOrder("IDX_HELLO"));
+		assertThat(indexes, containsInAnyOrder("IDX_BONJOUR"));
 	}
 
 	private static class MyMigrationTasks extends BaseMigrationTasks<VersionEnum> {
@@ -47,6 +47,9 @@ public class AddTableByColumnTaskTest extends BaseTest {
 			fooTable.addIndex("5", "IDX_GOODBYE").unique(true).withColumnsStub("GOODBYE");
 			fooTable.dropIndexStub("6", "IDX_HELLO");
 			fooTable.addForeignKey("7", "FK_REF").toColumn("COL_REF").references("TGT_TABLE", "PID");
+
+			Builder.BuilderWithTableName renameIndexTable = v.onTable("FOO_TABLE");
+			renameIndexTable.renameIndex("8", "IDX_HELLO", "IDX_BONJOUR");
 		}
 	}
 }

@@ -162,6 +162,14 @@ public class Builder {
 			addTask(task);
 		}
 
+		public void renameIndex(String theVersion, String theOldIndexName, String theNewIndexName) {
+			RenameIndexTask task = new RenameIndexTask(myRelease, theVersion);
+			task.setOldIndexName(theOldIndexName);
+			task.setNewIndexName(theNewIndexName);
+			task.setTableName(myTableName);
+			addTask(task);
+		}
+
 		public void dropThisTable(String theVersion) {
 			DropTableTask task = new DropTableTask(myRelease, theVersion);
 			task.setTableName(myTableName);
