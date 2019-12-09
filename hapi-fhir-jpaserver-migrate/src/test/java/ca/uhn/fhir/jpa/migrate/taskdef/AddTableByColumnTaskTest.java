@@ -43,7 +43,6 @@ public class AddTableByColumnTaskTest extends BaseTest {
 			fooTable.addColumn("GOODBYE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 			fooTable.addColumn("COL_REF").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 			fooTable.addIndex("4", "IDX_HELLO").unique(true).withColumns("HELLO");
-			// FIXME KHS add doNothing() somewhere in this builder (find the sync this is using)
 			fooTable.addIndex("5", "IDX_GOODBYE").unique(true).withColumnsStub("GOODBYE");
 			fooTable.dropIndexStub("6", "IDX_HELLO");
 			fooTable.addForeignKey("7", "FK_REF").toColumn("COL_REF").references("TGT_TABLE", "PID");

@@ -381,7 +381,6 @@ public class Builder {
 			private final String myVersion;
 			private final String myColumnName;
 			private final BaseMigrationTasks.IAcceptsTasks myTaskSink;
-			private boolean myDoNothing;
 
 			public BuilderAddColumnWithName(String theRelease, String theVersion, String theColumnName, BaseMigrationTasks.IAcceptsTasks theTaskSink) {
 				myRelease = theRelease;
@@ -423,7 +422,6 @@ public class Builder {
 					}
 					myTaskSink.addTask(task);
 				}
-
 			}
 		}
 	}

@@ -36,11 +36,9 @@ import java.util.List;
 import java.util.Set;
 
 public class RenameIndexTask extends BaseTableTask<RenameIndexTask> {
-
 	private static final Logger ourLog = LoggerFactory.getLogger(RenameIndexTask.class);
 	private String myOldIndexName;
 	private String myNewIndexName;
-
 
 	public RenameIndexTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
