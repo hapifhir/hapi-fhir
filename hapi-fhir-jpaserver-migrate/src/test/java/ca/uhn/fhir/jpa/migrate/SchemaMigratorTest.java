@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.Set;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
 public class SchemaMigratorTest extends BaseTest {
@@ -20,7 +21,7 @@ public class SchemaMigratorTest extends BaseTest {
 
 	@Test
 	public void testMigrationRequired() {
-		SchemaMigrator schemaMigrator = createSchemaMigrator("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+		SchemaMigrator schemaMigrator = createTableMigrator();
 
 		try {
 			schemaMigrator.validate();
@@ -37,21 +38,38 @@ public class SchemaMigratorTest extends BaseTest {
 
 	@Test
 	public void testRepairFailedMigration() {
-		SchemaMigrator schemaMigrator = createSchemaMigrator("create fable SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+		SchemaMigrator schemaMigrator = createSchemaMigrator("SOMETABLE", "create fable SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
 		try {
 			schemaMigrator.migrate();
 			fail();
 		} catch (FlywayException e) {
 			assertEquals(org.springframework.jdbc.BadSqlGrammarException.class, e.getCause().getCause().getClass());
 		}
-		schemaMigrator = createSchemaMigrator("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+		schemaMigrator = createTableMigrator();
+		schemaMigrator.migrate();
+	}
+
+	@Test
+	public void testOutOfOrderMigration() {
+		SchemaMigrator schemaMigrator = createSchemaMigrator("SOMETABLE", "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "2");
+		schemaMigrator.migrate();
+
+		schemaMigrator = createSchemaMigrator("SOMETABLE" ,"create table SOMEOTHERTABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
+
+		try {
+			schemaMigrator.migrate();
+			fail();
+		} catch (FlywayException e) {
+			assertThat(e.getMessage(), containsString("Detected resolved migration not applied to database: 1.1"));
+		}
+		System.setProperty(FlywayMigrator.OUT_OF_ORDER_MIGRATION, "true");
 		schemaMigrator.migrate();
 	}
 
 
 	@Test
 	public void testMigrationRequiredNoFlyway() throws SQLException {
-		SchemaMigrator schemaMigrator = createSchemaMigrator("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+		SchemaMigrator schemaMigrator = createTableMigrator();
 		schemaMigrator.setDriverType(DriverTypeEnum.H2_EMBEDDED);
 		schemaMigrator.setDontUseFlyway(true);
 
@@ -69,9 +87,14 @@ public class SchemaMigratorTest extends BaseTest {
 	}
 
 	@Nonnull
-	private SchemaMigrator createSchemaMigrator(String theSql) {
-		AddTableRawSqlTask task = new AddTableRawSqlTask("1", "1");
-		task.setTableName("SOMETABLE");
+	private SchemaMigrator createTableMigrator() {
+		return createSchemaMigrator("SOMETABLE", "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
+	}
+
+	@Nonnull
+	private SchemaMigrator createSchemaMigrator(String theTableName, String theSql, String theSchemaVersion) {
+		AddTableRawSqlTask task = new AddTableRawSqlTask("1", theSchemaVersion);
+		task.setTableName(theTableName);
 		task.addSql(DriverTypeEnum.H2_EMBEDDED, theSql);
 		SchemaMigrator retval = new SchemaMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), ImmutableList.of(task));
 		retval.setDriverType(DriverTypeEnum.H2_EMBEDDED);

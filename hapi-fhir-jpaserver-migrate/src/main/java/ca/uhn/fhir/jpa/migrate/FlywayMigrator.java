@@ -33,9 +33,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class FlywayMigrator extends BaseMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FlywayMigrator.class);
+	public static final String OUT_OF_ORDER_MIGRATION = "OUT_OF_ORDER_MIGRATION";
 
 	private final String myMigrationTableName;
 	private List<FlywayMigration> myTasks = new ArrayList<>();
@@ -79,10 +82,12 @@ public class FlywayMigrator extends BaseMigrator {
 
 	private Flyway initFlyway(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
 		// TODO KHS Is there a way we can use datasource instead of url, username, password here
+		boolean outOfOrder = isNotBlank(System.getProperty(OUT_OF_ORDER_MIGRATION));
 		Flyway flyway = Flyway.configure()
 			.table(myMigrationTableName)
 			.dataSource(getConnectionUrl(), getUsername(), getPassword())
 			.baselineOnMigrate(true)
+			.outOfOrder(outOfOrder)
 			.javaMigrations(myTasks.toArray(new JavaMigration[0]))
 			.load();
 		for (FlywayMigration task : myTasks) {
