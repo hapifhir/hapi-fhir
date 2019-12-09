@@ -147,9 +147,18 @@ public class Builder {
 		}
 
 		public void dropIndex(String theVersion, String theIndexName) {
+			dropIndexOptional(false, theVersion, theIndexName);
+		}
+
+		public void dropIndexStub(String theVersion, String theIndexName) {
+			dropIndexOptional(true, theVersion, theIndexName);
+		}
+
+		private void dropIndexOptional(boolean theDoNothing, String theVersion, String theIndexName) {
 			DropIndexTask task = new DropIndexTask(myRelease, theVersion);
 			task.setIndexName(theIndexName);
 			task.setTableName(myTableName);
+			task.setDoNothing(theDoNothing);
 			addTask(task);
 		}
 
@@ -244,12 +253,21 @@ public class Builder {
 					myUnique = theUnique;
 				}
 
+				public void withColumnsStub(String... theColumnNames) {
+					withColumnsOptional(true, theColumnNames);
+				}
+
 				public void withColumns(String... theColumnNames) {
+					withColumnsOptional(false, theColumnNames);
+				}
+
+				private void withColumnsOptional(boolean theDoNothing, String... theColumnNames) {
 					AddIndexTask task = new AddIndexTask(myRelease, myVersion);
 					task.setTableName(myTableName);
 					task.setIndexName(myIndexName);
 					task.setUnique(myUnique);
 					task.setColumns(theColumnNames);
+					task.setDoNothing(theDoNothing);
 					addTask(task);
 				}
 			}
@@ -355,6 +373,7 @@ public class Builder {
 			private final String myVersion;
 			private final String myColumnName;
 			private final BaseMigrationTasks.IAcceptsTasks myTaskSink;
+			private boolean myDoNothing;
 
 			public BuilderAddColumnWithName(String theRelease, String theVersion, String theColumnName, BaseMigrationTasks.IAcceptsTasks theTaskSink) {
 				myRelease = theRelease;
@@ -396,6 +415,7 @@ public class Builder {
 					}
 					myTaskSink.addTask(task);
 				}
+
 			}
 		}
 	}

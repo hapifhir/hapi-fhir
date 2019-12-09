@@ -65,7 +65,7 @@ public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 
 		Set<String> existing = JdbcUtils.getForeignKeys(getConnectionProperties(), myParentTableName, getTableName());
 		if (!existing.contains(myConstraintName)) {

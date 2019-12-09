@@ -65,7 +65,7 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 		boolean haveOldName = columnNames.contains(myOldName.toUpperCase());
 		boolean haveNewName = columnNames.contains(myNewName.toUpperCase());

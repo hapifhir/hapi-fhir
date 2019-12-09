@@ -50,7 +50,7 @@ public class DropIdGeneratorTask extends BaseTask<DropIdGeneratorTask> {
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		String sql = null;
 

@@ -44,7 +44,7 @@ public class DropTableTask extends BaseTableTask<DropTableTask> {
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		if (!tableNames.contains(getTableName())) {
 			return;
