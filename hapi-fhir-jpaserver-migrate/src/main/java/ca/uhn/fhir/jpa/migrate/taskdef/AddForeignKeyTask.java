@@ -66,7 +66,7 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 
 		Set<String> existing = JdbcUtils.getForeignKeys(getConnectionProperties(), myForeignTableName, getTableName());
 		if (existing.contains(myConstraintName)) {

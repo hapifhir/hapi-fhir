@@ -43,7 +43,7 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 
 		JdbcUtils.ColumnType existingType;
 		boolean nullable;

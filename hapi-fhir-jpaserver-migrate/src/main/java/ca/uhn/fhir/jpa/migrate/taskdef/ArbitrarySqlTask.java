@@ -63,7 +63,7 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 		logInfo(ourLog, "Starting: {}", myDescription);
 
 		if (StringUtils.isNotBlank(myExecuteOnlyIfTableExists)) {

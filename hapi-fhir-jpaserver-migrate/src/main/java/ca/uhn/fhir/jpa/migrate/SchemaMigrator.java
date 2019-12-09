@@ -43,6 +43,7 @@ public class SchemaMigrator {
 	private final String myMigrationTableName;
 	private final List<BaseTask<?>> myMigrationTasks;
 	private boolean myDontUseFlyway;
+	private boolean myOutOfOrderPermitted;
 	private DriverTypeEnum myDriverType;
 
 	/**
@@ -62,6 +63,10 @@ public class SchemaMigrator {
 
 	public void setDontUseFlyway(boolean theDontUseFlyway) {
 		myDontUseFlyway = theDontUseFlyway;
+	}
+
+	public void setOutOfOrderPermitted(boolean theOutOfOrderPermitted) {
+		myOutOfOrderPermitted = theOutOfOrderPermitted;
 	}
 
 	public void validate() {
@@ -102,6 +107,7 @@ public class SchemaMigrator {
 			migrator.setPassword(myDataSource.getPassword());
 		} else {
 			migrator = new FlywayMigrator(myMigrationTableName, myDataSource);
+			migrator.setOutOfOrderPermitted(myOutOfOrderPermitted);
 		}
 		migrator.addTasks(myMigrationTasks);
 		return migrator;

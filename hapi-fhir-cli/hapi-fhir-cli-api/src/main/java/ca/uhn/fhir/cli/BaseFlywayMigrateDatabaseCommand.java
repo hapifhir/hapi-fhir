@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.migrate.BaseMigrator;
 import ca.uhn.fhir.jpa.migrate.BruteForceMigrator;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
-import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -45,7 +44,9 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 
 
 	public static final String MIGRATE_DATABASE = "migrate-database";
+	public static final String NO_COLUMN_SHRINK = "no-column-shrink";
 	public static final String DONT_USE_FLYWAY = "dont-use-flyway";
+	public static final String OUT_OF_ORDER_PERMITTED = "out-of-order-permitted";
 	private Set<String> myFlags;
 	private String myMigrationTableName;
 
@@ -86,7 +87,8 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		addRequiredOption(retVal, "d", "driver", "Driver", "The database driver to use (Options are " + driverOptions() + ")");
 		addOptionalOption(retVal, "x", "flags", "Flags", "A comma-separated list of any specific migration flags (these flags are version specific, see migrator documentation for details)");
 		addOptionalOption(retVal, null, DONT_USE_FLYWAY,false, "If this option is set, the migrator will not use FlywayDB for migration. This setting should only be used if you are trying to migrate a legacy database platform that is not supported by FlywayDB.");
-		addOptionalOption(retVal, null, "no-column-shrink", false, "If this flag is set, the system will not attempt to reduce the length of columns. This is useful in environments with a lot of existing data, where shrinking a column can take a very long time.");
+		addOptionalOption(retVal, null, OUT_OF_ORDER_PERMITTED,false, "If this option is set, the migrator will permit migration tasks to be run out of order.  It shouldn't be required in most cases, however may be the solution if you see the error message 'Detected resolved migration not applied to database'.");
+		addOptionalOption(retVal, null, NO_COLUMN_SHRINK, false, "If this flag is set, the system will not attempt to reduce the length of columns. This is useful in environments with a lot of existing data, where shrinking a column can take a very long time.");
 
 		return retVal;
 	}
@@ -110,7 +112,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		}
 
 		boolean dryRun = theCommandLine.hasOption("r");
-		boolean noColumnShrink = theCommandLine.hasOption("no-column-shrink");
+		boolean noColumnShrink = theCommandLine.hasOption(BaseFlywayMigrateDatabaseCommand.NO_COLUMN_SHRINK);
 
 		String flags = theCommandLine.getOptionValue("x");
 		myFlags = Arrays.stream(defaultString(flags).split(","))
@@ -118,7 +120,8 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 			.filter(StringUtils::isNotBlank)
 			.collect(Collectors.toSet());
 
-		boolean dontUseFlyway = theCommandLine.hasOption("dont-use-flyway");
+		boolean dontUseFlyway = theCommandLine.hasOption(BaseFlywayMigrateDatabaseCommand.DONT_USE_FLYWAY);
+		boolean outOfOrderPermitted = theCommandLine.hasOption(BaseFlywayMigrateDatabaseCommand.OUT_OF_ORDER_PERMITTED);
 
 		BaseMigrator migrator;
 		if (dontUseFlyway) {
@@ -132,6 +135,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		migrator.setPassword(password);
 		migrator.setDryRun(dryRun);
 		migrator.setNoColumnShrink(noColumnShrink);
+		migrator.setOutOfOrderPermitted(outOfOrderPermitted);
 		addTasks(migrator);
 		migrator.migrate();
 	}

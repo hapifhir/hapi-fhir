@@ -58,7 +58,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 	}
 
 	@Override
-	public synchronized void execute() throws SQLException {
+	public synchronized void doExecute() throws SQLException {
 		if (isDryRun()) {
 			return;
 		}

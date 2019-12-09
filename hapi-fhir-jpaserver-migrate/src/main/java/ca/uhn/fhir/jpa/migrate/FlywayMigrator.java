@@ -70,6 +70,7 @@ public class FlywayMigrator extends BaseMigrator {
 	public void migrate() {
 		try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getConnectionUrl(), getUsername(), getPassword())) {
 			Flyway flyway = initFlyway(connectionProperties);
+			flyway.repair();
 			flyway.migrate();
 		} catch (Exception e) {
 			throw e;
@@ -82,6 +83,7 @@ public class FlywayMigrator extends BaseMigrator {
 			.table(myMigrationTableName)
 			.dataSource(getConnectionUrl(), getUsername(), getPassword())
 			.baselineOnMigrate(true)
+			.outOfOrder(isOutOfOrderPermitted())
 			.javaMigrations(myTasks.toArray(new JavaMigration[0]))
 			.load();
 		for (FlywayMigration task : myTasks) {
