@@ -62,7 +62,7 @@ public class SchemaMigratorTest extends BaseTest {
 		} catch (FlywayException e) {
 			assertThat(e.getMessage(), containsString("Detected resolved migration not applied to database: 1.1"));
 		}
-		System.setProperty(FlywayMigrator.OUT_OF_ORDER_MIGRATION, "true");
+		schemaMigrator.setOutOfOrderPermitted(true);
 		schemaMigrator.migrate();
 	}
 

@@ -9,7 +9,7 @@ Note that this feature was added in HAPI FHIR 3.5.0. It is not able to migrate f
 The following example shows how to use the migrator utility to migrate to the latest version.
 
 ```bash
-./hapi-fhir-cli migrate-database -d H2_EMBEDDED -u "jdbc:derby:directory:target/jpaserver_derby_files;create=true" -n "" -p ""
+./hapi-fhir-cli migrate-database -d H2_EMBEDDED -u "jdbc:h2:directory:target/jpaserver_h2_files;create=true" -n "" -p ""
 ```
 
 You may use the following command to get detailed help on the options:
@@ -64,14 +64,10 @@ SELECT * FROM HFJ_RES_REINDEX_JOB
 * Execute the migrator tool again, this time omitting the flag option, e.g.
 
 ```bash
-./hapi-fhir-cli migrate-database -d DERBY_EMBEDDED -u "jdbc:h2:directory:target/jpaserver_h2_files;create=true" -n "" -p ""
+./hapi-fhir-cli migrate-database -d H2_EMBEDDED -u "jdbc:h2:directory:target/jpaserver_h2_files;create=true" -n "" -p ""
 ```
 * Rebuild, and start HAPI FHIR JPA again.
 
 # Flyway
 
 As of version 4.2.0, HAPI FHIR JPA now uses Flyway for schema migrations.  The "from" and "to" parameters are no longer used.  Flyway maintains a list of completed migrations in a table called `FLY_HFJ_MIGRATION`.  When you run the migration command, flyway scans the list of completed migrations in this table and compares them to the list of known migrations, and runs only the new ones.
-
-## Recovering from a failed migration
-
-Under certain unlikely scenarios, you may see the error message "Detected resolved migration not applied to database".  This means that Flyway has detected a new migration task that has an earlier version than the latest version in the Flyway table.  You can set the environment variable `OUT_OF_ORDER_MIGRATION` to allow Flyway to run migration tasks out of order.
