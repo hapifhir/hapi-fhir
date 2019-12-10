@@ -90,8 +90,6 @@ public class RenameIndexTask extends BaseTableTask<RenameIndexTask> {
 			return Collections.emptyList();
 		}
 
-		boolean isUnique = JdbcUtils.isIndexUnique(theConnectionProperties, theTableName, theOldIndexName);
-
 		List<String> sql = new ArrayList<>();
 
 		// Drop constraint
@@ -107,8 +105,7 @@ public class RenameIndexTask extends BaseTableTask<RenameIndexTask> {
 				sql.add("alter index " + theOldIndexName + " rename to " + theNewIndexName);
 				break;
 			case MSSQL_2012:
-				// FIXME KHS really?
-				sql.add("EXEC sp_rename '" + theOldIndexName + "', '" + theNewIndexName + "'; GO");
+				sql.add("EXEC sp_rename '" + theTableName + "." + theOldIndexName + "', '" + theNewIndexName + "'");
 				break;
 		}
 		return sql;
