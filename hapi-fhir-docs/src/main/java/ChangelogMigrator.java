@@ -57,6 +57,7 @@ public class ChangelogMigrator {
 		int releaseCount = 0;
 
 
+
 		Element docElement = document.getRootElement();
 		Element bodyElement = docElement.getChild("body", NS);
 		List<Element> releases = bodyElement.getChildren("release", NS);
@@ -68,6 +69,8 @@ public class ChangelogMigrator {
 			releaseCount++;
 
 			for (Element nextAction : nextRelease.getChildren("action", NS)) {
+				String type = nextAction.getAttribute("type").getValue();
+				String issue = nextAction.getAttribute("issue") != null ? nextAction.getAttribute("issue").getValue() : null;
 				StringBuilder contentBuilder = new StringBuilder();
 				for (Content nextContents : nextAction.getContent()) {
 					if (nextContents instanceof Text) {

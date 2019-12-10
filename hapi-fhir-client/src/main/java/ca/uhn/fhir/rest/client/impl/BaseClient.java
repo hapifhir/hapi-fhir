@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
+import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.client.method.HttpGetClientInvocation;
 import ca.uhn.fhir.rest.client.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.client.method.IClientResponseHandlerHandlesBinary;
@@ -137,7 +138,7 @@ public abstract class BaseClient implements IRestfulClient {
 	@Override
 	public <T extends IBaseResource> T fetchResourceFromUrl(Class<T> theResourceType, String theUrl) {
 		BaseHttpClientInvocation clientInvocation = new HttpGetClientInvocation(getFhirContext(), theUrl);
-		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theResourceType);
+		ResourceResponseHandler<T> binding = new ResourceResponseHandler<>(theResourceType);
 		return invokeClient(getFhirContext(), binding, clientInvocation, null, false, false, null, null, null, null, null);
 	}
 
@@ -274,18 +275,10 @@ public abstract class BaseClient implements IRestfulClient {
 				addToCacheControlHeader(b, Constants.CACHE_CONTROL_NO_CACHE, theCacheControlDirective.isNoCache());
 				addToCacheControlHeader(b, Constants.CACHE_CONTROL_NO_STORE, theCacheControlDirective.isNoStore());
 				if (theCacheControlDirective.getMaxResults() != null) {
-					addToCacheControlHeader(b, Constants.CACHE_CONTROL_MAX_RESULTS + "=" + Integer.toString(theCacheControlDirective.getMaxResults().intValue()), true);
+					addToCacheControlHeader(b, Constants.CACHE_CONTROL_MAX_RESULTS + "=" + theCacheControlDirective.getMaxResults().intValue(), true);
 				}
 				if (b.length() > 0) {
 					httpRequest.addHeader(Constants.HEADER_CACHE_CONTROL, b.toString());
-				}
-			}
-
-			if (theCustomHeaders != null) {
-				for (Map.Entry<String, List<String>> customHeader: theCustomHeaders.entrySet()) {
-					for (String value: customHeader.getValue()) {
-						httpRequest.addHeader(customHeader.getKey(), value);
-					}
 				}
 			}
 
@@ -295,6 +288,11 @@ public abstract class BaseClient implements IRestfulClient {
 				if (body != null) {
 					ourLog.info("Client request body: {}", body);
 				}
+			}
+
+			if (theCustomHeaders != null) {
+				AdditionalRequestHeadersInterceptor interceptor = new AdditionalRequestHeadersInterceptor(theCustomHeaders);
+				interceptor.interceptRequest(httpRequest);
 			}
 
 			HookParams requestParams = new HookParams();
@@ -458,7 +456,7 @@ public abstract class BaseClient implements IRestfulClient {
 			if (StringUtils.isNotBlank(responseString)) {
 				ourLog.info("Client response: {}\n{}", message, responseString);
 			} else {
-				ourLog.info("Client response: {}", message, responseString);
+				ourLog.info("Client response: {}", message);
 			}
 		} else {
 			ourLog.trace("FHIR response:\n{}\n{}", response, responseString);
@@ -466,7 +464,7 @@ public abstract class BaseClient implements IRestfulClient {
 	}
 
 	@Override
-	public void registerInterceptor(IClientInterceptor theInterceptor) {
+	public void registerInterceptor(Object theInterceptor) {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
 		getInterceptorService().registerInterceptor(theInterceptor);
 	}
@@ -474,14 +472,14 @@ public abstract class BaseClient implements IRestfulClient {
 	/**
 	 * This method is an internal part of the HAPI API and may change, use with caution. If you want to disable the
 	 * loading of conformance statements, use
-	 * {@link IRestfulClientFactory#setServerValidationModeEnum(ServerValidationModeEnum)}
+	 * {@link IRestfulClientFactory#setServerValidationMode(ServerValidationModeEnum)}
 	 */
 	public void setDontValidateConformance(boolean theDontValidateConformance) {
 		myDontValidateConformance = theDontValidateConformance;
 	}
 
 	@Override
-	public void unregisterInterceptor(IClientInterceptor theInterceptor) {
+	public void unregisterInterceptor(Object theInterceptor) {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
 		getInterceptorService().unregisterInterceptor(theInterceptor);
 	}
@@ -612,7 +610,7 @@ public abstract class BaseClient implements IRestfulClient {
 	static ArrayList<Class<? extends IBaseResource>> toTypeList(Class<? extends IBaseResource> thePreferResponseType) {
 		ArrayList<Class<? extends IBaseResource>> preferResponseTypes = null;
 		if (thePreferResponseType != null) {
-			preferResponseTypes = new ArrayList<Class<? extends IBaseResource>>(1);
+			preferResponseTypes = new ArrayList<>(1);
 			preferResponseTypes.add(thePreferResponseType);
 		}
 		return preferResponseTypes;

@@ -4,6 +4,9 @@ HAPI FHIR 4.0.0 introduced a new interceptor, the [ConsentInterceptor](/hapi-fhi
 
 The consent interceptor may be used to examine client requests to apply consent directives and create audit trail events. Like the AuthorizationInterceptor above, this interceptor is not a complete working solution, but instead is a framework designed to make it easier to implement local policies.
 
+* [ConsentInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/ConsentInterceptor.html)
+* [ConsentInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/ConsentInterceptor.java)
+
 The consent interceptor has several primary purposes:
 
 ** It can reject a resource from being disclosed to the user by examining it while calculating search results. This calculation is performed very early in the process of building search results, in order to ensure that in many cases the user is unaware that results have been removed.

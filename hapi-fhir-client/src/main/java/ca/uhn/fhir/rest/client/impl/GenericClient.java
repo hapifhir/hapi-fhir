@@ -431,7 +431,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding(), myPrettyPrint);
 			}
 
-			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse, mySummaryMode, mySubsetElements, myCacheControlDirective, myCustomAcceptHeaderValue, myCustomHeaderValues);
+			Z resp = invokexClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse, mySummaryMode, mySubsetElements, myCacheControlDirective, myCustomAcceptHeaderValue, myCustomHeaderValues);
 			return resp;
 		}
 

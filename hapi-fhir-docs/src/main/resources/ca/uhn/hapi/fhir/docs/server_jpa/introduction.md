@@ -4,13 +4,6 @@ The HAPI FHIR [Plain Server](/hapi-fhir/docs/server_plain/introduction.html) mod
 
 HAPI also provides a persistence module which can be used to provide a complete RESTful server implementation, backed by a database of your choosing. This module uses the [JPA 2.0](http://en.wikipedia.org/wiki/Java_Persistence_API) API to store data in a database without depending on any specific database technology.
 
-# Getting Started
-
-The recommended way to get started with HAPI's JPA server module is
-to begin with the starter project. This project can be found at the following link: [https://github.com/hapifhir/hapi-fhir-jpaserver-starter](https://github.com/hapifhir/hapi-fhir-jpaserver-starter)
-
-This project is a fully contained FHIR server, supporting all standard operations (read/create/delete/etc). It bundles an embedded instance of the <a href="http://h2database.com">H2 Java Database</a> so that the server can run without depending on any external database, but it can also be configured to use an installation of Oracle, Postgres, etc.
-
 # Configuration Options
 
 ## External/Absolute Resource References

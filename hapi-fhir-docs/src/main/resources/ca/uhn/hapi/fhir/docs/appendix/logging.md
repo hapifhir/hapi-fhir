@@ -58,7 +58,7 @@ Note that some popular libraries (e.g. Spring Framework) also use commons-loggin
 
 # Client Payload Logging
 
-To enable detailed logging of client requests and responses (what URL is being requested, what headers and payload are being received, etc.), an interceptor may be added to the client which logs each transaction. See [Logging Requests and Responses](/docs/interceptors/built_in_client_interceptors.html#req_resp_logging) for more information.
+To enable detailed logging of client requests and responses (what URL is being requested, what headers and payload are being received, etc.), an interceptor may be added to the client which logs each transaction. See [Logging Requests and Responses](/docs/interceptors/built_in_client_interceptors.html#logging_interceptor) for more information.
 
 # Server Request Logging
 
