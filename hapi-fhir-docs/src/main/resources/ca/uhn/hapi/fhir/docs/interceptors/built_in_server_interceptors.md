@@ -2,6 +2,8 @@
 
 This page describes some server interceptors that are shipped with HAPI FHIR out of the box. Of course, you are also welcome to create your own.
 
+<a name="logging_interceptor"/>
+
 # Logging: Logging Interceptor
 
 The LoggingInterceptor can be used to generate a new log line (via SLF4j) for each incoming request. LoggingInterceptor provides a flexible message format that can be used to provide a customized level detail about each incoming request.
@@ -73,7 +75,7 @@ The following example shows how to register this interceptor within a HAPI FHIR 
 
 # Security: CORS
 
-HAPI FHIR includes an interceptor which can be used to implement CORS support on your server. See [Server CORS Documentation](/docs/server/cors.html#cors_interceptor) for information on how to use this interceptor.
+HAPI FHIR includes an interceptor which can be used to implement CORS support on your server. See [Server CORS Documentation](/docs/security/cors.html#cors_interceptor) for information on how to use this interceptor.
 
 
 # Security: Authorization

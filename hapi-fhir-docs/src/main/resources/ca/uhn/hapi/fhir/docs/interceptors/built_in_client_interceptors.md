@@ -32,10 +32,10 @@ The following example shows how to configure your client to	use a specific usern
 
 # Security: HTTP Bearer Token Authorization
 
-The BearerTokenInterceptor can be used to add an `Authorization` header containing a bearer token (typically used for OIDC/OAuth2/SMART security flows) to every outgoing request.
+The BearerTokenAuthInterceptor can be used to add an `Authorization` header containing a bearer token (typically used for OIDC/OAuth2/SMART security flows) to every outgoing request.
 
-* [BearerTokenInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/interceptor/BearerTokenInterceptor.html)
-* [BearerTokenInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/BearerTokenInterceptor.java)
+* [BearerTokenAuthInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/interceptor/BearerTokenAuthInterceptor.html)
+* [BearerTokenAuthInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/BearerTokenAuthInterceptor.java)
 
 The following example shows how to configure your client to inject a bearer token authorization header into every request.
 
@@ -79,8 +79,8 @@ The following example shows how to configure your client to inject a bearer toke
 
 The GZipContentInterceptor compresses outgoing contents. With this interceptor, if the client is transmitting resources to the server (e.g. for a create, update, transaction, etc.) the content will be GZipped before transmission to the server.
 
-* [GZipContentInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/interceptor/GZipContentInterceptor.html)
-* [GZipContentInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/GZipContentInterceptor.java)
+* [GZipContentInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/apache/GZipContentInterceptor.html)
+* [GZipContentInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/apache/GZipContentInterceptor.java)
 
 The following example shows how to enable the GZipContentInterceptor.
 
@@ -92,7 +92,7 @@ The following example shows how to enable the GZipContentInterceptor.
 
 The CapturingInterceptor can be used to capture the details of the last request that was sent by the client, as well as the corresponding response that was received. 
 
-* [CapturingInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/interceptor.CapturingInterceptor.html)
+* [CapturingInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/interceptor/CapturingInterceptor.html)
 * [CapturingInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/CapturingInterceptor.java)
 
 A separate but related interceptor called ThreadLocalCapturingInterceptor also captures request/response pairs but stores these in a Java ThreadLocal so it is suitable for use in multithreaded environments.  
