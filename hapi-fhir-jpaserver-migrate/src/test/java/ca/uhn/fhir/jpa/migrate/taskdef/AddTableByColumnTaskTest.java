@@ -7,12 +7,13 @@ import ca.uhn.fhir.util.VersionEnum;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 
 public class AddTableByColumnTaskTest extends BaseTest {
-
 	@Test
 	public void testAddTable() throws SQLException {
 
@@ -21,8 +22,13 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), containsInAnyOrder("FOO_TABLE", "TGT_TABLE"));
+		Set<String> indexes = JdbcUtils.getIndexNames(getConnectionProperties(), "FOO_TABLE")
+			.stream()
+			.filter(s -> !s.startsWith("FK_REF_INDEX_"))
+			.filter(s -> !s.startsWith("PRIMARY_KEY_"))
+			.collect(Collectors.toSet());
+		assertThat(indexes, containsInAnyOrder("IDX_BONJOUR"));
 	}
-
 
 	private static class MyMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		public MyMigrationTasks() {
@@ -34,10 +40,15 @@ public class AddTableByColumnTaskTest extends BaseTest {
 			Builder.BuilderAddTableByColumns fooTable = v.addTableByColumns("3", "FOO_TABLE", "PID");
 			fooTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 			fooTable.addColumn("HELLO").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+			fooTable.addColumn("GOODBYE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 			fooTable.addColumn("COL_REF").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 			fooTable.addIndex("4", "IDX_HELLO").unique(true).withColumns("HELLO");
-			fooTable.addForeignKey("5", "FK_REF").toColumn("COL_REF").references("TGT_TABLE", "PID");
+			fooTable.addIndex("5", "IDX_GOODBYE").unique(true).withColumnsStub("GOODBYE");
+			fooTable.dropIndexStub("6", "IDX_HELLO");
+			fooTable.addForeignKey("7", "FK_REF").toColumn("COL_REF").references("TGT_TABLE", "PID");
 
+			Builder.BuilderWithTableName renameIndexTable = v.onTable("FOO_TABLE");
+			renameIndexTable.renameIndex("8", "IDX_HELLO", "IDX_BONJOUR");
 		}
 	}
 }

@@ -43,7 +43,7 @@ public class DropColumnTask extends BaseTableColumnTask<DropColumnTask> {
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 		if (!columnNames.contains(getColumnName())) {
 			logInfo(ourLog, "Column {} does not exist on table {} - No action performed", getColumnName(), getTableName());

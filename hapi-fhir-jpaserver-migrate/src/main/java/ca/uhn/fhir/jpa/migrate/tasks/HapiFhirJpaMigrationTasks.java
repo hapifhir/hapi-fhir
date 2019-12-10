@@ -63,7 +63,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder version = forVersion(VersionEnum.V4_2_0);
 	}
 
-	protected void init410() { // 20190815 - present
+	protected void init410() { // 20190815 - 20191014
 		Builder version = forVersion(VersionEnum.V4_1_0);
 
 		/*
@@ -168,12 +168,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.withColumns("VALUESET_PID", "VALUESET_ORDER");
 
 		// Account for RESTYPE_LEN column increasing from 30 to 40
-		version.onTable("HFJ_RESOURCE").modifyColumn("20191002.1", "RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
-		version.onTable("HFJ_RES_VER").modifyColumn("20191002.2", "RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
-		version.onTable("HFJ_HISTORY_TAG").modifyColumn("20191002.3", "RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
-		version.onTable("HFJ_RES_LINK").modifyColumn("20191002.4", "SOURCE_RESOURCE_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
-		version.onTable("HFJ_RES_LINK").modifyColumn("20191002.5", "TARGET_RESOURCE_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
-		version.onTable("HFJ_RES_TAG").modifyColumn("20191002.6", "RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_RESOURCE").modifyColumn("20191002.1", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_RES_VER").modifyColumn("20191002.2", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_HISTORY_TAG").modifyColumn("20191002.3", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_RES_LINK").modifyColumn("20191002.4", "SOURCE_RESOURCE_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_RES_LINK").modifyColumn("20191002.5", "TARGET_RESOURCE_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_RES_TAG").modifyColumn("20191002.6", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
 
 		// TermConceptDesignation
 		version.startSectionWithMessage("Processing table: TRM_CONCEPT_DESIG");

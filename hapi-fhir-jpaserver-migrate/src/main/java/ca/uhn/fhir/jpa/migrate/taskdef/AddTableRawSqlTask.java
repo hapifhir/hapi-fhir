@@ -58,7 +58,7 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		if (tableNames.contains(getTableName())) {
 			logInfo(ourLog, "Table {} already exists - No action performed", getTableName());

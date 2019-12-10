@@ -67,7 +67,7 @@ public class AddIndexTask extends BaseTableTask<AddIndexTask> {
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
 		if (indexNames.contains(myIndexName)) {
 			logInfo(ourLog, "Index {} already exists on table {} - No action performed", myIndexName, getTableName());

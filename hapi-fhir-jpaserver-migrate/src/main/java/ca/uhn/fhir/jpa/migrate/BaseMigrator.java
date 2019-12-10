@@ -30,6 +30,7 @@ public abstract class BaseMigrator {
 
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
+	private boolean myOutOfOrderPermitted;
 	private DriverTypeEnum myDriverType;
 	private String myConnectionUrl;
 	private String myUsername;
@@ -89,4 +90,11 @@ public abstract class BaseMigrator {
 		myPassword = thePassword;
 	}
 
+	public boolean isOutOfOrderPermitted() {
+		return myOutOfOrderPermitted;
+	}
+
+	public void setOutOfOrderPermitted(boolean theOutOfOrderPermitted) {
+		myOutOfOrderPermitted = theOutOfOrderPermitted;
+	}
 }

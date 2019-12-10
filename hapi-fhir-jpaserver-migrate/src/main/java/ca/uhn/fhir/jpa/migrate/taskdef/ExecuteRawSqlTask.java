@@ -67,7 +67,7 @@ public class ExecuteRawSqlTask extends BaseTask<ExecuteRawSqlTask> {
 	}
 
 	@Override
-	public void execute() {
+	public void doExecute() {
 		List<String> sqlStatements = myDriverToSqls.computeIfAbsent(getDriverType(), t -> new ArrayList<>());
 		sqlStatements.addAll(myDriverNeutralSqls);
 
