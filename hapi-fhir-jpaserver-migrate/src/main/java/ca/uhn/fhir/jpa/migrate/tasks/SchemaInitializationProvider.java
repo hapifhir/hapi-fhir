@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SchemaInitializationProvider implements ISchemaInitializationProvider {
+	private static final Pattern ourSqlCommentPattern = Pattern.compile("(?m)^\\s*--.*$");
 	private final String mySchemaFileClassPath;
 	private final String mySchemaExistsIndicatorTable;
 
@@ -74,6 +75,10 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 			throw new ConfigurationException("Error reading schema initialization script " + initScript, e);
 		}
 		return retval;
+	}
+
+	static String stripComments(String theSqlString) {
+		return ourSqlCommentPattern.matcher(theSqlString).replaceAll("");
 	}
 
 	private static final Pattern ourTrailingCommaPattern = Pattern.compile(",(\\s+)\\)");

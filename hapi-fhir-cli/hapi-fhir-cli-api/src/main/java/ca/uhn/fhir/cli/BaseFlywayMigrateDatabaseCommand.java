@@ -30,7 +30,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,13 +65,6 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 	@Override
 	public String getCommandName() {
 		return MIGRATE_DATABASE;
-	}
-
-	@Override
-	public List<String> provideUsageNotes() {
-		String versions = "The following versions are supported: " +
-			provideAllowedVersions().stream().map(Enum::name).collect(Collectors.joining(", "));
-		return Collections.singletonList(versions);
 	}
 
 	@Override
