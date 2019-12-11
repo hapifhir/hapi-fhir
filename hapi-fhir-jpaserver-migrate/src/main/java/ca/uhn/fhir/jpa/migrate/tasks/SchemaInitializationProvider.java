@@ -61,7 +61,9 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 				throw new ConfigurationException("Schema initialization script " + initScript + " not found on classpath");
 			}
 			// Assumes no escaped semicolons...
-			String[] statements = IOUtils.toString(sqlFileInputStream, Charsets.UTF_8).split("\\;");
+			String sqlString = IOUtils.toString(sqlFileInputStream, Charsets.UTF_8);
+			String sqlStringNoComments = stripComments(sqlString);
+			String[] statements = sqlStringNoComments.split("\\;");
 			for (String statement : statements) {
 				String cleanedStatement = clean(statement);
 				if (!isBlank(cleanedStatement)) {
