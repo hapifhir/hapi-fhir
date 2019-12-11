@@ -1,19 +1,20 @@
-# CORS
-
-<p class="doc_info_bubble">
-Note that in previous revisions of this document we recommended using the <a href="https://github.com/ebay/cors-filter">eBay CORS Filter</a>, but as of 2016 the eBay filter is no longer being maintained and contains known bugs. We now recommend against using this filter. 
-</p>
+# CORS (Cross-Origin Resource Sharing)
 			
 If you are intending to support JavaScript clients in your server application, you will generally need to enable Cross Origin Resource Sharing (CORS). There are a number of ways of supporting this, so two are shown here: 
 
 * An approach using a HAPI FHIR Server Interceptor (Requires SpringFramework)
 * An approach using a servlet Filter (Container Specific)
 
-## HAPI FHIR Server Interceptor
+<a name="cors_interceptor"/>
+
+# HAPI FHIR CORS Interceptor
 
 The HAPI FHIR server framework includes an interceptor that can be used to provide CORS functionality on your server. This mechanism is nice because it relies purely on Java configuration (no messing around with web.xml files). HAPI's interceptor is a thin wrapper around Spring Framework's CorsProcessor class, so it requires Spring to be present on your classpath.
 
 Spring is generally unlikely to conflict with other libraries so it is usually safe to add it to your classpath, but it is a fairly large library so if size is a concern you might opt to use a filter instead.
+
+* [CorsInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/CorsInterceptor.html)
+* [CorsInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/CorsInterceptor.java)
 
 The following steps outline how to enable HAPI's CorsInterceptor:
 
@@ -39,7 +40,11 @@ In your server's initialization method, create and register a CorsInterceptor:
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServletExamples.java|corsInterceptor}}
 ``` 
 
-## Add the Dependency
+# CORS Servlet Filter
+
+<p class="doc_info_bubble">
+Note that in previous revisions of HAPI FHIR documentation we recommended using the <a href="https://github.com/ebay/cors-filter">eBay CORS Filter</a>, but as of 2016 the eBay filter is no longer being maintained and contains known bugs. We now recommend against using this filter. 
+</p>
 
 The following examples show how to use the Apache Tomcat CorsFilter to enable CORS support. The filter being used (`org.apache.catalina.filters.CorsFilter`) is bundled with Apache Tomcat so if you are deploying to that server you can use the filter.
 

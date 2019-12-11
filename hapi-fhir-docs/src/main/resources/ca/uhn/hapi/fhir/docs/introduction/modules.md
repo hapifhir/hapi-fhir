@@ -2,17 +2,18 @@
 
 The following table shows the modules that make up the HAPI FHIR library.
 
-<table class="table table-condensed">
+<table class="modules-table">
     <tbody>
     <tr>
-        <td colspan="3" style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;">
+        <td colspan="3" class="modules-section-row">
             Core Libraries
         </td>
     </tr>
     <tr>
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-base</td>
         <td>
-            <a href="/hapi-fhir/apidocs/hapi-fhir-base/">JavaDoc</a>
+            <a href="/hapi-fhir/apidocs/hapi-fhir-base/">JavaDoc&nbsp;&rsaquo;</a>
+            <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-base">Sources&nbsp;&rsaquo;</a>
         </td>
         <td>
             This is the core HAPI FHIR library and is always required in order to use
@@ -20,22 +21,14 @@ The following table shows the modules that make up the HAPI FHIR library.
         </td>
     </tr>
     <tr>
-        <td style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;" colspan="3">
+        <td class="modules-section-row" colspan="3">
             Structures
-        </td>
-    </tr>
-    <tr>
-        <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-dstu (retired)</td>
-        <td>
-        </td>
-        <td>
-            This module contained FHIR DSTU1 model classes. It was retired in HAPI FHIR 3.0.0.
         </td>
     </tr>
     <tr>
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-dstu2</td>
         <td>
-            <a href="/hapi-fhir/apidocs/hapi-fhir-structures-dstu2/">JavaDoc</a>
+            <a href="/hapi-fhir/apidocs/hapi-fhir-structures-dstu2/">JavaDoc&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains FHIR DSTU2 model classes.
@@ -44,7 +37,7 @@ The following table shows the modules that make up the HAPI FHIR library.
     <tr>
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-hl7org-dstu2</td>
         <td>
-            <a href="/hapi-fhir/apidocs/hapi-fhir-structures-hl7org-dstu2/">JavaDoc</a>
+            <a href="/hapi-fhir/apidocs/hapi-fhir-structures-hl7org-dstu2/">JavaDoc&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains alternate FHIR DSTU2 model classes. The HAPI FHIR and FHIR "Java Reference
@@ -58,7 +51,7 @@ The following table shows the modules that make up the HAPI FHIR library.
     <tr>
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-dstu3</td>
         <td>
-            <a href="/hapi-fhir/apidocs/hapi-fhir-structures-dstu3/">JavaDoc</a>
+            <a href="/hapi-fhir/apidocs/hapi-fhir-structures-dstu3/">JavaDoc&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains FHIR DSTU3 model classes.
@@ -67,7 +60,7 @@ The following table shows the modules that make up the HAPI FHIR library.
     <tr>
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-r4</td>
         <td>
-            <a href="/hapi-fhir/apidocs/hapi-fhir-structures-r4/">JavaDoc</a>
+            <a href="/hapi-fhir/apidocs/hapi-fhir-structures-r4/">JavaDoc&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains FHIR R4 model classes.
@@ -76,7 +69,7 @@ The following table shows the modules that make up the HAPI FHIR library.
     <tr>
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-r5</td>
         <td>
-            <a href="/hapi-fhir/apidocs/hapi-fhir-structures-r5/">JavaDoc</a>
+            <a href="/hapi-fhir/apidocs/hapi-fhir-structures-r5/">JavaDoc&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains FHIR R5 model classes.
@@ -85,21 +78,32 @@ The following table shows the modules that make up the HAPI FHIR library.
     <tr>
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-converter</td>
         <td>
-            <a href="/hapi-fhir/apidocs/hapi-fhir-converter/">JavaDoc</a>
+            <a href="/hapi-fhir/docs/model/converter.html">Documentation&nbsp;&rsaquo;</a><br/>
+            <a href="/hapi-fhir/apidocs/hapi-fhir-converter/">JavaDoc&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains converters for converting between FHIR versions.
         </td>
     </tr>
     <tr>
-        <td style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;" colspan="3">Client
+        <td style="font-weight: bold; white-space: nowrap;"><i>hapi-fhir-structures-dstu (retired)</i></td>
+        <td>
+        </td>
+        <td>
+            This module contained FHIR DSTU1 model classes. It was retired in HAPI FHIR 3.0.0.
+        </td>
+    </tr>
+    <tr>
+        <td class="modules-section-row" colspan="3">Client
             Framework
         </td>
     </tr>
     <tr>
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-client</td>
         <td>
-            <a href="/hapi-fhir/apidocs/hapi-fhir-client/">JavaDoc</a>
+            <a href="/hapi-fhir/docs/client/">Documentation&nbsp;&rsaquo;</a><br/>
+            <a href="/hapi-fhir/apidocs/hapi-fhir-client/">JavaDoc&nbsp;&rsaquo;</a>
+            <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-client">Sources&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains the core FHIR client framework, including an
@@ -111,6 +115,7 @@ The following table shows the modules that make up the HAPI FHIR library.
     <tr>
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-client-okhttp</td>
         <td>
+            <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-client-okhttp">Sources&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains an alternate HTTP implementation based on
@@ -120,6 +125,8 @@ The following table shows the modules that make up the HAPI FHIR library.
     <tr>
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-android</td>
         <td>
+            <a href="/hapi-fhir/docs/android/">Documentation&nbsp;&rsaquo;</a>
+            <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-android/">Sources&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains the Android HAPI FHIR framework, which is a FHIR
@@ -127,13 +134,14 @@ The following table shows the modules that make up the HAPI FHIR library.
         </td>
     </tr>
     <tr>
-        <td style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;" colspan="3">
+        <td class="modules-section-row" colspan="3">
             Validation
         </td>
     </tr>
     <tr>
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-validation</td>
         <td>
+            <a href="/hapi-fhir/docs/validation/">Documentation&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains the FHIR Profile Validator, which is used to
@@ -187,12 +195,14 @@ The following table shows the modules that make up the HAPI FHIR library.
         </td>
     </tr>
     <tr>
-        <td style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;" colspan="3">Server</td>
+        <td class="modules-section-row" colspan="3">Server</td>
     </tr>
     <tr>
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-server</td>
         <td>
-            <a href="/hapi-fhir/apidocs/hapi-fhir-server/">JavaDoc</a>
+            <a href="/hapi-fhir/docs/server_plain/">Documentation&nbsp;&rsaquo;</a><br/>
+            <a href="/hapi-fhir/apidocs/hapi-fhir-server/">JavaDoc&nbsp;&rsaquo;</a>
+            <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-server/">Sources&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains the HAPI FHIR Server framework, which can be used to
@@ -202,7 +212,9 @@ The following table shows the modules that make up the HAPI FHIR library.
     <tr>
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-jpaserver-base</td>
         <td>
-            <a href="/hapi-fhir/apidocs/hapi-fhir-jpaserver-base/">JavaDoc</a>
+            <a href="/hapi-fhir/docs/server_jpa/">Documentation&nbsp;&rsaquo;</a><br/>
+            <a href="/hapi-fhir/apidocs/hapi-fhir-jpaserver-base/">JavaDoc&nbsp;&rsaquo;</a>
+            <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-jpaserver-base/">Sources&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains the HAPI FHIR "JPA Server", which is a complete
@@ -213,6 +225,8 @@ The following table shows the modules that make up the HAPI FHIR library.
     <tr>
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-testpage-overlay</td>
         <td>
+            <a href="/hapi-fhir/docs/server_plain/web_testpage_overlay.html">Documentation&nbsp;&rsaquo;</a><br/>
+            <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-testpage-overlay/">Sources&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains the web based "testpage overlay", which is the

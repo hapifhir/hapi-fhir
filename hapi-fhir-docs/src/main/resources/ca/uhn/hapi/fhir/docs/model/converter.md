@@ -1,4 +1,3 @@
-
 # HL7 FHIR Converter
 
 Beginning in HAPI FHIR 2.3, a new module called `hapi-fhir-converter` has been added to the project. This is an <b>experimental feature</b> so use it with caution!

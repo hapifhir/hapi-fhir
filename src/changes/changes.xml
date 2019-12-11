@@ -58,6 +58,17 @@
 				The constructor for Verdict.java was inadvertantly made private, preventing custom
 				rules from being written. Thanks to Jafer Khan for the pull request!
 			</action>
+			<action type="change">
+				The
+				<![CDATA[
+				<code>IRestfulClient#registerInterceptor</code>
+				and
+				<code>IRestfulClient#unregisterInterceptor</code>
+				]]>
+				methods now take Object as an argument instead of IClientInterceptor, allowing
+				client interceptors to now be migrated to the new interceptor
+				framework.
+			</action>
 		</release>
 		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
 			<action type="add">

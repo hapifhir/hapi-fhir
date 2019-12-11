@@ -26,13 +26,13 @@ HAPI is built primary using	[Apache Maven](http://maven.apache.org/). Even if yo
 
  Execute the build with the following command:
  
- ```
+ ```bash
  mvn install
  ```
  
  Note that this complete build takes a long time because of all of the unit tests being executed. At the end you should expect to see a screen resembling:
  
-``` 
+```bash
 ------------------------------------------------------------------------
 [INFO] Reactor Summary:
 [INFO] 
@@ -57,7 +57,7 @@ If the build fails to execute successfully, try the following:
 
 * The first thing to try is always a fresh clean build when things aren't working:
   
-   ```
+   ```bash
    mvn clean install
    ```
   
@@ -65,7 +65,7 @@ If the build fails to execute successfully, try the following:
 
 * If the build fails with memory issues (or mysteriously dies during unit tests), your build environment may be running out of memory. By default, the HAPI build executes unit tests in multiple parallel JVMs in order to save time. This can consume a lot of RAM and sometimes causes issues. Try executing with the following command to disable this behaviour:
 
-   ```
+   ```bash
    mvn -P ALLMODULES,NOPARALLEL install
    ```
    

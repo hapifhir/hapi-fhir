@@ -23,6 +23,7 @@ package ca.uhn.hapi.fhir.docs;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import com.google.common.collect.Sets;
 import org.hl7.fhir.r4.model.Patient;
 
 import java.io.IOException;
@@ -30,8 +31,30 @@ import java.io.IOException;
 public class Parser {
 
 	public static void main(String[] args) throws DataFormatException, IOException {
+
 		{
-			//START SNIPPET: createParser
+			//START SNIPPET: parsing
+			// Create a FHIR context
+			FhirContext ctx = FhirContext.forR4();
+
+			// The following example is a simple serialized Patient resource to parse
+			String input = "{" +
+				"\"resourceType\" : \"Patient\"," +
+				"  \"name\" : [{" +
+				"    \"family\": \"Simpson\"" +
+				"  }]" +
+				"}";
+
+			// Instantiate a new parser
+			IParser parser = ctx.newJsonParser();
+
+			// Parse it
+			Patient parsed = parser.parseResource(Patient.class, input);
+			System.out.println(parsed.getName().get(0).getFamily());
+			//END SNIPPET: parsing
+		}
+		{
+			//START SNIPPET: encoding
 			// Create a FHIR context
 			FhirContext ctx = FhirContext.forR4();
 
@@ -39,13 +62,62 @@ public class Parser {
 			Patient patient = new Patient();
 			patient.addName().setFamily("Simpson").addGiven("James");
 
-			// Instantiate a new parser
+			// Instantiate a new JSON parser
 			IParser parser = ctx.newJsonParser();
 
 			// Serialize it
 			String serialized = parser.encodeResourceToString(patient);
 			System.out.println(serialized);
-			//END SNIPPET: createParser
+
+			// Using XML instead
+			serialized = ctx.newXmlParser().encodeResourceToString(patient);
+			System.out.println(serialized);
+			//END SNIPPET: encoding
+		}
+		{
+			// Create a FHIR context
+			FhirContext ctx = FhirContext.forR4();
+			Patient patient = new Patient();
+			patient.addName().setFamily("Simpson").addGiven("James");
+
+			//START SNIPPET: encodingPretty
+			// Create a parser
+			IParser parser = ctx.newJsonParser();
+
+			// Indent the output
+			parser.setPrettyPrint(true);
+
+			// Serialize it
+			String serialized = parser.encodeResourceToString(patient);
+			System.out.println(serialized);
+
+			// You can also chain these statements together
+			ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+			//END SNIPPET: encodingPretty
+		}
+		{
+			// Create a FHIR context
+			FhirContext ctx = FhirContext.forR4();
+			Patient patient = new Patient();
+			patient.addName().setFamily("Simpson").addGiven("James");
+
+			//START SNIPPET: encodingConfig
+			// Create a parser
+			IParser parser = ctx.newJsonParser();
+
+			// Blacklist certain fields from being encoded
+			parser.setDontEncodeElements(Sets.newHashSet("Patient.identifier", "Patient.active"));
+
+			// Don't include resource narratives
+			parser.setSuppressNarratives(true);
+
+			// Use versioned references for these reference elements
+			parser.setDontStripVersionsFromReferencesAtPaths("Patient.organization");
+
+			// Serialize it
+			String serialized = parser.encodeResourceToString(patient);
+			System.out.println(serialized);
+			//END SNIPPET: encodingConfig
 		}
 		{
 			//START SNIPPET: disableStripVersions

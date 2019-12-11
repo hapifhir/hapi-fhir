@@ -139,7 +139,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * Register a new interceptor for this client. An interceptor can be used to add additional logging, or add security headers, or pre-process responses, etc.
 	 */
 	@Override
-	void registerInterceptor(IClientInterceptor theInterceptor);
+	void registerInterceptor(Object theInterceptor);
 
 	/**
 	 * Search for resources matching a given set of criteria. Searching is a very powerful
@@ -168,10 +168,10 @@ public interface IGenericClient extends IRestfulClient {
 	ITransaction transaction();
 
 	/**
-	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}
+	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(Object)}
 	 */
 	@Override
-	void unregisterInterceptor(IClientInterceptor theInterceptor);
+	void unregisterInterceptor(Object theInterceptor);
 
 	/**
 	 * Fluent method for the "update" operation, which performs a logical delete on a server resource
