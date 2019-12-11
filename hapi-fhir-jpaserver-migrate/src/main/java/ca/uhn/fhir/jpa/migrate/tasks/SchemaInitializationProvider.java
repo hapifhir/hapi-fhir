@@ -32,17 +32,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SchemaInitializationProvider implements ISchemaInitializationProvider {
-	private static final Pattern ourSqlCommentPattern = Pattern.compile("(?m)^\\s*--.*$");
-	private static final Pattern ourQuartzDeletePattern = Pattern.compile("(?m)^delete from qrtz_\\w+;$");
-	private static final Pattern ourQuartzDropPattern = Pattern.compile("(?m)^drop table qrtz_\\w+;$");
 
-	private static final Pattern ourTrailingCommaPattern = Pattern.compile(",(\\s+)\\)");
 	private final String mySchemaFileClassPath;
 	private final String mySchemaExistsIndicatorTable;
 
@@ -67,10 +61,10 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 			}
 			// Assumes no escaped semicolons...
 			String sqlString = IOUtils.toString(sqlFileInputStream, Charsets.UTF_8);
-			String sqlStringNoComments = preProcessLines(sqlString);
+			String sqlStringNoComments = preProcessSqlString(theDriverType, sqlString);
 			String[] statements = sqlStringNoComments.split("\\;");
 			for (String statement : statements) {
-				String cleanedStatement = clean(statement);
+				String cleanedStatement = preProcessSqlStatement(theDriverType, statement);
 				if (!isBlank(cleanedStatement)) {
 					retval.add(cleanedStatement);
 				}
@@ -81,21 +75,12 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 		return retval;
 	}
 
-	static String preProcessLines(String theSqlString) {
-		String pass1 = strip(ourSqlCommentPattern, theSqlString);
-		String pass2 = strip(ourQuartzDeletePattern, pass1);
-		String pass3 = strip(ourQuartzDropPattern, pass2);
-		return pass3.replaceAll("\\n+", "\n");
+	protected String preProcessSqlString(DriverTypeEnum theDriverType, String sqlString) {
+		return sqlString;
 	}
 
-	private static String strip(Pattern theStripPattern, String theSqlString) {
-		return theStripPattern.matcher(theSqlString).replaceAll("");
-	}
-
-	static String clean(String theStatement) {
-		// Remove commas before brackets.  The Quartz h2 schema has a comma before a closing bracket that fails to execute...
-		Matcher matcher = ourTrailingCommaPattern.matcher(theStatement);
-		return matcher.replaceAll("$1\\)");
+	protected String preProcessSqlStatement(DriverTypeEnum theDriverType, String sqlStatement) {
+		return sqlStatement;
 	}
 
 	@Nonnull
