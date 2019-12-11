@@ -170,10 +170,19 @@ public class Builder {
 		}
 
 		public void renameIndex(String theVersion, String theOldIndexName, String theNewIndexName) {
+			renameIndexOptional(false, theVersion, theOldIndexName, theNewIndexName);
+		}
+
+		public void renameIndexStub(String theVersion, String theOldIndexName, String theNewIndexName) {
+			renameIndexOptional(true, theVersion, theOldIndexName, theNewIndexName);
+		}
+
+		private void renameIndexOptional(boolean theDoNothing, String theVersion, String theOldIndexName, String theNewIndexName) {
 			RenameIndexTask task = new RenameIndexTask(myRelease, theVersion);
 			task.setOldIndexName(theOldIndexName);
 			task.setNewIndexName(theNewIndexName);
 			task.setTableName(myTableName);
+			task.setDoNothing(theDoNothing);
 			addTask(task);
 		}
 
