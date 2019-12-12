@@ -21,9 +21,9 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.jpa.migrate.BaseMigrator;
-import ca.uhn.fhir.jpa.migrate.BruteForceMigrator;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
+import ca.uhn.fhir.jpa.migrate.TaskOnlyMigrator;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -124,8 +124,9 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		boolean outOfOrderPermitted = theCommandLine.hasOption(BaseFlywayMigrateDatabaseCommand.OUT_OF_ORDER_PERMITTED);
 
 		BaseMigrator migrator;
-		if (dontUseFlyway) {
-			migrator = new BruteForceMigrator();
+		if (dontUseFlyway || dryRun) {
+			// Flyway dryrun is not available in community edition
+			migrator = new TaskOnlyMigrator();
 		} else {
 			migrator = new FlywayMigrator(myMigrationTableName);
 		}

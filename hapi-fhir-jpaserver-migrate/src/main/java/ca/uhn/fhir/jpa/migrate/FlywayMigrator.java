@@ -72,6 +72,10 @@ public class FlywayMigrator extends BaseMigrator {
 			Flyway flyway = initFlyway(connectionProperties);
 			flyway.repair();
 			flyway.migrate();
+			if (isDryRun()) {
+				StringBuilder statementBuilder = buildExecutedStatementsString();
+				ourLog.info("SQL that would be executed:\n\n***********************************\n{}***********************************", statementBuilder);
+			}
 		} catch (Exception e) {
 			throw e;
 		}

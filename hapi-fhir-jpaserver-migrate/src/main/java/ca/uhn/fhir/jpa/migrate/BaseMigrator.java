@@ -23,7 +23,9 @@ package ca.uhn.fhir.jpa.migrate;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.flywaydb.core.api.MigrationInfoService;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public abstract class BaseMigrator {
@@ -35,6 +37,7 @@ public abstract class BaseMigrator {
 	private String myConnectionUrl;
 	private String myUsername;
 	private String myPassword;
+	private List<BaseTask.ExecutedStatement> myExecutedStatements = new ArrayList<>();
 
 	public abstract void migrate();
 
@@ -96,5 +99,27 @@ public abstract class BaseMigrator {
 
 	public void setOutOfOrderPermitted(boolean theOutOfOrderPermitted) {
 		myOutOfOrderPermitted = theOutOfOrderPermitted;
+	}
+
+	public void addExecutedStatements(List theExecutedStatements) {
+		myExecutedStatements.addAll(theExecutedStatements);
+	}
+
+	protected StringBuilder buildExecutedStatementsString() {
+		StringBuilder statementBuilder = new StringBuilder();
+		String lastTable = null;
+		for (BaseTask.ExecutedStatement next : myExecutedStatements) {
+			if (!Objects.equals(lastTable, next.getTableName())) {
+				statementBuilder.append("\n\n-- Table: ").append(next.getTableName()).append("\n");
+				lastTable = next.getTableName();
+			}
+
+			statementBuilder.append(next.getSql()).append(";\n");
+
+			for (Object nextArg : next.getArguments()) {
+				statementBuilder.append("  -- Arg: ").append(nextArg).append("\n");
+			}
+		}
+		return statementBuilder;
 	}
 }
