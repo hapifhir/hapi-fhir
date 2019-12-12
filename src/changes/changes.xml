@@ -69,6 +69,10 @@
 				client interceptors to now be migrated to the new interceptor
 				framework.
 			</action>
+			<action type="fix" issue="1610">
+				A missing mandatory was added to the SNOMED CT CodeSystem that is uploaded when SCT is
+				uploaded to the JPA server. Thanks to Anders Havn for the pull request!
+			</action>
 		</release>
 		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
 			<action type="add">
