@@ -35,9 +35,9 @@ import java.util.Optional;
  * This class is an alternative to {@link FlywayMigrator). It doesn't use Flyway, but instead just
  * executes all tasks.
  */
-public class BruteForceMigrator extends BaseMigrator {
+public class TaskOnlyMigrator extends BaseMigrator {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(BruteForceMigrator.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(TaskOnlyMigrator.class);
 	private List<BaseTask<?>> myTasks = new ArrayList<>();
 
 	@Override
@@ -53,10 +53,16 @@ public class BruteForceMigrator extends BaseMigrator {
 			try {
 				ourLog.info("Executing task of type: {}", next.getClass().getSimpleName());
 				next.execute();
+				addExecutedStatements(next.getExecutedStatements());
 			} catch (SQLException e) {
 				throw new InternalErrorException(e);
 			}
 		}
+		if (isDryRun()) {
+			StringBuilder statementBuilder = buildExecutedStatementsString();
+			ourLog.info("SQL that would be executed:\n\n***********************************\n{}***********************************", statementBuilder);
+		}
+
 	}
 
 	@Override

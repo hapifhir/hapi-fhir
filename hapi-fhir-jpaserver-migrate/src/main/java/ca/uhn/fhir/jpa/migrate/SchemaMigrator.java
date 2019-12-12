@@ -100,7 +100,7 @@ public class SchemaMigrator {
 	private BaseMigrator newMigrator() {
 		BaseMigrator migrator;
 		if (myDontUseFlyway) {
-			migrator = new BruteForceMigrator();
+			migrator = new TaskOnlyMigrator();
 			migrator.setDriverType(myDriverType);
 			migrator.setConnectionUrl(myDataSource.getUrl());
 			migrator.setUsername(myDataSource.getUsername());
