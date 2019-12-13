@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.flywaydb.core.internal.command.DbMigrate;
 import org.junit.Test;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import java.sql.SQLException;
 
@@ -234,7 +233,7 @@ public class ModifyColumnTest extends BaseTest {
 	}
 
 	@Test
-	public void testFailureNotAllowed() throws SQLException {
+	public void testFailureNotAllowed() {
 		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
 		executeSql("insert into SOMETABLE (TEXTCOL) values ('HELLO')");
 
@@ -252,6 +251,22 @@ public class ModifyColumnTest extends BaseTest {
 			// expected
 		}
 
+	}
+
+	@Test
+	public void dontCompareLengthIfNoneSpecifiedInTask() throws SQLException {
+		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
+
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
+		task.setTableName("SOMETABLE");
+		task.setColumnName("PID");
+		task.setColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		task.setNullable(true);
+
+		JdbcUtils.ColumnType existingColumnType = JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID");
+		assertEquals(BaseTableColumnTypeTask.ColumnTypeEnum.LONG, existingColumnType.getColumnTypeEnum());
+		assertEquals(19L, existingColumnType.getLength().longValue());
+		assertTrue(existingColumnType.equals(task.getColumnType(), task.getColumnLength()));
 	}
 
 }

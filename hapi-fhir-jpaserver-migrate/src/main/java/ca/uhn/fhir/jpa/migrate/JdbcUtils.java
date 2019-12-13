@@ -113,10 +113,10 @@ public class JdbcUtils {
 			return myLength;
 		}
 
-		public boolean equals(BaseTableColumnTypeTask.ColumnTypeEnum theColumnType, Long theColumnLength) {
-			return myColumnTypeEnum == theColumnType && (myLength == null || myLength.equals(theColumnLength));
+		public boolean equals(BaseTableColumnTypeTask.ColumnTypeEnum theTaskColumnType, Long theTaskColumnLength) {
+			ourLog.debug("Comparing existing {} {} to new {} {}", myColumnTypeEnum, myLength, theTaskColumnType, theTaskColumnLength);
+			return myColumnTypeEnum == theTaskColumnType && (theTaskColumnLength == null || theTaskColumnLength.equals(myLength));
 		}
-
 	}
 
 	/**
@@ -244,6 +244,7 @@ public class JdbcUtils {
 
 					}
 
+					ourLog.debug("Unable to find column {} in table {}.", theColumnName, theTableName);
 					return null;
 
 				} catch (SQLException e) {
