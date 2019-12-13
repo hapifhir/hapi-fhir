@@ -73,6 +73,10 @@
 				A missing mandatory was added to the SNOMED CT CodeSystem that is uploaded when SCT is
 				uploaded to the JPA server. Thanks to Anders Havn for the pull request!
 			</action>
+			<action type="fix">
+				An issue with the HAPI FHIR CLI was corrected that prevented the upload of LOINC due to an error
+				regarding the properties file.
+			</action>
 		</release>
 		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
 			<action type="add">
