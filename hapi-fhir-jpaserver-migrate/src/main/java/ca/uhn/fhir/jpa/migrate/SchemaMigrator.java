@@ -34,6 +34,11 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SchemaMigrator {
 	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "FLY_HFJ_MIGRATION";
