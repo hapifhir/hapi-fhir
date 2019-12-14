@@ -27,7 +27,7 @@ The AuthorizationInterceptor works by examining the client request in order to d
 
 When authorizing a read operation, the AuthorizationInterceptor always allows client code to execute and generate a response. It then examines the response that would be returned before actually returning it to the client, and if rules do not permit that data to be shown to the client the interceptor aborts the request.
 
-Note that there are performance implications to this mechanism, since an unauthorized user can still cause the server to fetch data even if they won't get to see it. This mechanism should be comprehensive however, since it will prevent clients from using various features in FHIR (e.g. <code>_include</code> or <code>_revinclude</code>) to "trick" the server into showing them date they shouldn't be allowed to see.
+Note that there are performance implications to this mechanism, since an unauthorized user can still cause the server to fetch data even if they won't get to see it. This mechanism should be comprehensive however, since it will prevent clients from using various features in FHIR (e.g. <code>_include</code> or <code>_revinclude</code>) to "trick" the server into showing them data they shouldn't be allowed to see.
 
 See the following diagram for an example of how this works.
 
