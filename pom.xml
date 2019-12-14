@@ -100,19 +100,32 @@
 			<organization>University Health Network</organization>
 		</developer>
 		<developer>
+			<id>grahamegrieve</id>
+			<name>Grahame Grieve</name>
+			<organization>Health Intersections</organization>
+		</developer>
+		<developer>
 			<id>dmuylwyk</id>
 			<name>Diederik Muylwyk</name>
 			<organization>Smile CDR</organization>
 		</developer>
 		<developer>
+			<id>fil512</id>
+			<name>Ken Stevens</name>
+			<organization>Smile CDR</organization>
+		</developer>
+		<developer>
+			<id>yogthos</id>
 			<name>Dmitri Sotnikov</name>
 			<organization>University Health Network</organization>
 		</developer>
 		<developer>
+			<id></id>
 			<name>Lisa Wong</name>
 			<organization>University Health Network</organization>
 		</developer>
 		<developer>
+			<id>jmandel</id>
 			<name>Josh Mandel</name>
 			<organization>Boston Children's Hospital</organization>
 		</developer>
@@ -122,10 +135,12 @@
 			<organization>University Health Network</organization>
 		</developer>
 		<developer>
+			<id>t106uhn</id>
 			<name>Neal Acharya</name>
 			<organization>University Health Network</organization>
 		</developer>
 		<developer>
+			<id>davidhay25</id>
 			<name>David Hay</name>
 			<organization>Orion Health</organization>
 		</developer>
