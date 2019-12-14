@@ -44,6 +44,7 @@ public class SchemaMigrator {
 	private final List<BaseTask<?>> myMigrationTasks;
 	private boolean myDontUseFlyway;
 	private boolean myOutOfOrderPermitted;
+	private String mySkipVersions;
 	private DriverTypeEnum myDriverType;
 
 	/**
@@ -131,5 +132,25 @@ public class SchemaMigrator {
 
 	public void setDriverType(DriverTypeEnum theDriverType) {
 		myDriverType = theDriverType;
+	}
+
+	public SchemaMigrator setSkipVersions(String theSkipVersions) {
+		mySkipVersions = theSkipVersions;
+		setDoNothingOnSkippedTasks();
+		return this;
+	}
+
+	private void setDoNothingOnSkippedTasks() {
+		if (isBlank(mySkipVersions) || myMigrationTasks.isEmpty()) {
+			return;
+		}
+		Set<String> skippedVersionSet = Stream.of(mySkipVersions.split(",")).map(String::trim).collect(Collectors.toSet());
+
+		for (BaseTask task : myMigrationTasks) {
+			if (skippedVersionSet.contains(task.getFlywayVersion())) {
+				ourLog.info("Will skip {}: {}", task.getFlywayVersion(), task.getDescription());
+				task.setDoNothing(true);
+			}
+		}
 	}
 }
