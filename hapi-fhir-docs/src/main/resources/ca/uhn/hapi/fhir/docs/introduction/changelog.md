@@ -2,7 +2,7 @@
 
 <th:block th:each="version : ${changelog.versions}">
 
-# Smile CDR <th:block th:text="${version}"/> <th:block th:if="${changelog.changes.get(version).codename} != null" th:text="' (' + ${changelog.changes.get(version).codename} + ')'"/> <th:block th:if="${changelog.releaseDate} == null">(Prerelease)</th:block>
+# Smile CDR <th:block th:text="${version}"/> <th:block th:if="${changelog.changes.get(version).codename} != null" th:text="' (' + ${changelog.changes.get(version).codename} + ')'"/> <th:block th:if="${changelog.changes.get(version).releaseDate} == null">(Prerelease)</th:block>
 
 ## Release Information
 
