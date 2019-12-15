@@ -22,29 +22,32 @@
 ## Changes
 
 <table class="table">
-<tr th:each="change : ${changelog.changes.get(version)}">
-<td>
-<a th:name="'change' + ${version} + '-' + ${change.id}"></a>
-<span style="color: #129c49; font-size: 1.1em;" th:if="${change.type} == 'add'">
-<i class="fa fa-plus"></i>
-</span>
-<span style="color: #129c49; font-size: 1.1em;" th:if="${change.type} == 'change'">
-<i class="fa fa-cogs"></i>
-</span>
-<span style="color: #ee2324; font-size: 1.1em;" th:if="${change.type} == 'fix'">
-<i class="fa fa-bug"></i>
-</span>
-<span style="color: #64c2d1; font-size: 1.1em;" th:if="${change.type} == 'perf'">
-<i class="fa fa-rocket"></i>
-</span>
-<span style="color: #ee2324; font-size: 1.1em;" th:if="${change.type} == 'security'">
-<i class="fa fa-shield-alt"></i>
-</span>
-</td>
-<td>
-<th:block th:utext="${change.title}"/>
-</td>
-</tr>
+    <tr th:each="change : ${changelog.changes.get(version)}">
+        <td>
+            <a th:name="'change' + ${version} + '-' + ${change.id}"></a>
+            <span style="color: #129c49; font-size: 1.1em;" th:if="${change.type} == 'add'">
+                <i class="fa fa-plus"></i>
+            </span>
+            <span style="color: #129c49; font-size: 1.1em;" th:if="${change.type} == 'change'">
+                <i class="fa fa-cogs"></i>
+            </span>
+            <span style="color: #ee2324; font-size: 1.1em;" th:if="${change.type} == 'fix'">
+                <i class="fa fa-bug"></i>
+            </span>
+            <span style="color: #64c2d1; font-size: 1.1em;" th:if="${change.type} == 'perf'">
+                <i class="fa fa-rocket"></i>
+            </span>
+            <span style="color: #ee2324; font-size: 1.1em;" th:if="${change.type} == 'security'">
+                <i class="fa fa-shield-alt"></i>
+            </span>
+        </td>
+        <td>
+            <a th:if="${change.issue != null}" th:href="'https://github.com/jamesagnew/hapi-fhir/issues/' + ${change.issue}" th:text="'#' + ${change.issue}"></a>
+        </td>
+        <td>
+            <th:block th:utext="${change.title}"/>
+        </td>
+    </tr>
 </table>
 
 </th:block>

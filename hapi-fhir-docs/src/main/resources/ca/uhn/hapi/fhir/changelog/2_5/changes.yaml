@@ -1,0 +1,89 @@
+---
+- item:
+    type: "fix"
+    title: "This release includes significant performance enhancements for the JPA server. Most importantly, the way that searches are performed has been re-written to allow the server to perform better when the database has a large number of results in it. The following enhancements have been made: <br/><br/> <ul> <li> Searches with multiple search parameters of different datatypes (e.g. find patients by name and date of birth) were previously joined in Java code, now the join is performed by the database which is faster </li> <li> Searches which returned lots of results previously has all results streamed into memory before anything was returned to the client. This is particularly slow if you do a search for (say) \"get me all patients\" since potentially thousands or even millions of patients' IDs were loaded into memory before anything gets returned to the client. HAPI FHIR now has a multithreaded search coordinator which returns results to the client as soon as they are available </li> <li> Search results will be cached and reused (so that if a client does two searches for \"get me all patients matching FOO\" with the same FOO in short succession, we won't query the DB again but will instead reuse the cached results). Note that this can improve performance, but does mean that searches can return slightly out of date results. Essentially what this means is that the latest version of individual resources will always be returned despite this cacheing, but newly created resources that should match may not be returned until the cache expires. By default this cache has been set to one minute, which should be acceptable for most real-world usage, but this can be changed or disabled entirely. </li> <li> Updates which do not actually change the contents of the resource can optionally be prevented from creating a new version of the resource in the database </li> </ul> <br/><br/> Existing users should delete the <code>HFJ_SEARCH</code>, <code>HFJ_SEARCH_INCLUDE</code>, and <code>HFJ_SEARCH_RESULT</code> tables from your database before upgrading, as the structure of these tables has changed and old search results can not be reused."
+- item:
+    issue: "590"
+    type: "fix"
+    title: "AuthorizationInterceptor did not correctly handle paging requests (e.g. requests for the second page of results for a search operation). Thanks to Eeva Turkka for reporting!"
+- item:
+    type: "add"
+    title: "Add configuration property to DSTU3 FhirInstanceValidator to allow client code to change unknown extension handling behaviour."
+- item:
+    issue: "630"
+    type: "fix"
+    title: "Fix concurrency issues in FhirContext that were causing issues when starting a context up on Android. Thanks to GitHub issue @Jaypeg85 for the pull request!"
+- item:
+    type: "fix"
+    title: "Fix an issue in the JPA server if a resource has been previously saved containing vocabulary that is no longer valid. This only really happened if you were using a non-final version of FHIR (e.g. using DSTU3 before it was finalized) but if you were in this situation, upgrading HAPI could cause you to have old codes that no longer exist in your database. This fix prevents these from blocking you from accesing those resources."
+- item:
+    type: "add"
+    title: "CLI now defaults to DSTU3 mode if no FHIR version is specified"
+- item:
+    type: "add"
+    title: "Server and annotation-client @History annotation now allows DSTU3+ resource types in the type= property"
+- item:
+    issue: "563"
+    type: "fix"
+    title: "JSON Parser gave a very unhelpful error message (Unknown attribute 'value' found during parse) when a scalar value was found in a spot where an object is expected. This has been corrected to include much more information. Thanks to GitHub user @jasminas for reporting!"
+- item:
+    type: "add"
+    title: "DaoConfig#setInterceptors() has been un-deprecated. It was previously deprecated as we thought it was not useful, but uses have been identified so it turns out this method will live after all. Interceptors registered to this method will now be treated appropriately if they implement IServerOperationInterceptor too."
+- item:
+    type: "fix"
+    title: "JPA server did not correctly support searching on a custom search parameter whose path pointed to an extension, where the client used a chained value."
+- item:
+    type: "fix"
+    title: "Fix issue where the JSON parser sometimes did not encode DSTU3 extensions on the root of a resource which have a value of type reference."
+- item:
+    type: "add"
+    title: "Server now respects the If-Modified-Since header and will return an HTTP 304 if appropriate for read operations."
+- item:
+    type: "fix"
+    title: "JPA server did not correctly process :missing qualifier on date parameters"
+- item:
+    issue: "633"
+    type: "fix"
+    title: "AppacheHttpClient did not always respect the charset in the response Content-Type header. Thanks to Gijsbert van den Brink for the pull request!"
+- item:
+    issue: "636"
+    type: "fix"
+    title: "Fix XhtmlParser to correctly handle hexadecimal escaped literals. Thanks to Gijsbert van den Brink for the Pull Request!"
+- item:
+    type: "add"
+    title: "JPA server now has configurable properties that allow referential integrity to be disabled for both writes and deletes. This is useful in some cases where data integrity is not wanted or not possible. It can also be useful if you want to delete large amounts of interconnected data quickly. <br/><br/> A corresponding flag has been added to the CLI tool as well."
+- item:
+    type: "fix"
+    title: "JPA server did not correctly support searching on a custom search parameter whose path pointed to an extension, where the client used a chained value."
+- item:
+    type: "fix"
+    title: "Fix dependency on commons-codec 1.4 in hapi-fhir-structures-dstu3, which was preventing this library from being used on Android because Android includes an older version of commons-codec."
+- item:
+    type: "fix"
+    title: "JPA server failed to index search parameters on paths containing a decimal data type"
+- item:
+    type: "fix"
+    title: "Validator incorrectly rejected references where only an identifier was populated"
+- item:
+    issue: "649"
+    type: "fix"
+    title: "Make error handler in the client more tolerant of errors where no response has been received by the client when the error happens. Thanks to GitHub user maclema for the pull request!"
+- item:
+    type: "add"
+    title: "Add a check in JPA server that prevents completely blank tags, profiles, and security labels from being saved to the database. These were filtered out anyhow when the result was returned back to the client but they were persisted which just wasted space."
+- item:
+    issue: "664"
+    type: "fix"
+    title: "Loading the build-in profile structures (StructureDefinition, ValueSet, etc) is now done in a synchronized block in order to prevent multiple loads happening if the server processes multiple validations in parallel threads right after startup. Previously a heavy load could cause the server to run out of memory and lock up. Thanks to Karl M Davis for analysis and help fixing this!"
+- item:
+    issue: "652"
+    type: "fix"
+    title: "Fix bad ValueSet URL in DeviceRequest profile definition for STU3 which was preventing the CLI from uploading definitions correctly. Thanks to Joel Schneider for the Pull Request!"
+- item:
+    issue: "656"
+    type: "add"
+    title: "Improve handling in JPA server when doing code:above and code:below searches to use a disjunction of AND and IN in order to avoid failures under certain conditions. Thanks to Michael Lawley for the pul request!"
+- item:
+    issue: "660"
+    type: "fix"
+    title: "Fix an error where the JPA server sometimes failed occasional requests with a weird NullPointerException when running under very large concurrent loads. Thanks to Karl M. Davis for reporting, investigating, and ultimately finding a solution!"

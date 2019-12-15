@@ -1,0 +1,99 @@
+---
+- item:
+    type: "add"
+    title: "Support for DSTU2 features introduced: New resource definitions, Bundle resource, encoding changes (ID in resource bodt, meta tag)"
+- item:
+    issue: "65"
+    type: "fix"
+    title: "Fix an issue encoding extensions on primitive types in JSON. Previously the \"_value\" object would be an array even if the field it was extending was not repeatable. This is not correct according to the specification, nor can HAPI's parser parse this correctly. The encoder has been corrected, and the parser has been adjusted to be able to handle resources with extensions encoded in this way. Thanks to Mohammad Jafari for reporting!"
+- item:
+    type: "add"
+    title: "Library now checks if custom resource types can be instantiated on startup (e.g. because they don't have a no-argument constructor) in order to avoid failing later"
+- item:
+    type: "add"
+    title: "Bump a few dependency JARs to the latest versions in Maven POM: <ul> <li>SLF4j (in base module) - Bumped to 1.7.9</li> <li>Apache HTTPClient (in base module) - Bumped to 4.3.6</li> <li>Hibernate (in JPA module) - Bumped to 4.3.7</li> </ul>"
+- item:
+    issue: "67"
+    type: "fix"
+    title: "IdDt failed to recognize local identifiers containing fragments that look like real identifiers as being local identifiers even though they started with '#'. For example, a local resource reference of \"#aa/_history/aa\" would be incorrectly parsed as a non-local reference. Thanks to Mohammad Jafari for reporting!"
+- item:
+    type: "fix"
+    title: "<code>Last-Modified</code> header in server was incorrectly using FHIR date format instead of RFC-1123 format."
+- item:
+    type: "fix"
+    title: "Server create and update methods failed with an IllegalArgumentException if the method type was a custom resource definition type (instead of a built-in HAPI type). Thanks to Neal Acharya for the analysis."
+- item:
+    issue: "79"
+    type: "add"
+    title: "JPA server module now supports <code>_include</code> value of <code>*</code> . Thanks to Bill de Beaubien for reporting!"
+- item:
+    type: "fix"
+    title: "IdDt method withServerBase returned String (unlike all of the other \"withFoo\" methods on that class), and did not work correctly if the IdDt already had a server base. This has been corrected. Note that the return type for this method has been changed, so code may need to be updated."
+- item:
+    issue: "84"
+    type: "fix"
+    title: "In previous versions of HAPI, the XML parser encoded multiple contained resources in a single <code>&lt;contained&gt;&lt;/contained&gt;</code> tag, even though the FHIR specification rerquires a separate <code>&lt;contained&gt;&lt;/contained&gt;</code> tag for each resource. This has been corrected. Note that the parser will correctly parse either form (this has always been the case) so this change should not cause any breakage in HAPI based trading partners, but may cause issues if other applications have been coded to depend on the incorrect behaviour. Thanks to Mochaholic for reporting!"
+- item:
+    issue: "91"
+    type: "fix"
+    title: "Custom/user defined resource definitions which contained more than one child with no order defined failed to initialize properly. Thanks to Andy Huang for reporting and figuring out where the problem was!"
+- item:
+    type: "add"
+    title: "RESTful Client now queries the server (only once per server base URL) to ensure that the given server corresponds to the correct version of the FHIR specification, as defined by the FhirContext. This behaviour can be disabled by setting the appropriate configuration on the RestfulClientConfig. Thanks to Grahame Grieve for the suggestion!"
+- item:
+    type: "add"
+    title: "JPA module now supports deleting resource via transaction"
+- item:
+    issue: "97"
+    type: "fix"
+    title: "DateClientParam#second() incorrectly used DAY precision instead of SECOND precision. Thanks to Tom Wilson for the pull request!"
+- item:
+    issue: "100"
+    type: "fix"
+    title: "Fix issue where HAPI failed to initialize correctly if Woodstox library was not on the classpath, even if StAX API was configured to use a different provider. Thanks to James Butler for reporting and figuring out where the issue was!"
+- item:
+    issue: "101"
+    type: "fix"
+    title: "Calling BaseDateTimeDt#setValue(Date, TemporalPrecisionEnum) did not always actually respect the given precision when the value was encoded. Thanks to jacksonjesse for reporting!"
+- item:
+    issue: "103"
+    type: "fix"
+    title: "Encoders (both XML and JSON) will no longer encode contained resources if they are not referenced anywhere in the resource via a local reference. This is just a convenience for users who have parsed a resource with contained resources and want to remove some before re-encoding. Thanks to Alexander Kley for reporting!"
+- item:
+    issue: "110"
+    type: "fix"
+    title: "Add support for DSTU2 style security labels in the parser and encoder. Thanks to Mohammad Jafari for the contribution!"
+- item:
+    type: "fix"
+    title: "Server requests for Binary resources where the client has explicitly requested XML or JSON responses (either with a <code>_format</code> URL parameter, or an <code>Accept</code> request header) will be responded to using the Binary FHIR resource type instead of as Binary blobs. This is in accordance with the recommended behaviour in the FHIR specification."
+- item:
+    type: "add"
+    title: "Add new properties to RestfulServer: \"DefaultResponseEncoding\", which allows users to configure a default encoding (XML/JSON) to use if none is specified in the client request. Currently defaults to XML. Also \"DefaultPrettyPrint\", which specifies whether to pretty print responses by default. Both properties can be overridden on individual requets using the appropriate Accept header or request URL parameters."
+- item:
+    type: "add"
+    title: "Add support for quantity search params in FHIR tester UI"
+- item:
+    type: "add"
+    title: "Add support for FHIR \"extended operations\" as defined in the FHIR DSTU2 specification, for the Generic Client, Annotation Client, and Server."
+- item:
+    type: "fix"
+    title: "Observation.applies[x] and other similar search fields with multiple allowable value types were not being correctly indexed in the JPA server."
+- item:
+    issue: "122"
+    type: "fix"
+    title: "DateClientParam.before() incorrectly placed \"<=\" instead of \"<\" in the request URL. Thanks to Ryan for reporting!"
+- item:
+    issue: "77"
+    type: "add"
+    title: "Server now only automatically adds _include resources which are provided as references if the client request actually requested that specific include. See RestfulServer"
+- item:
+    issue: "120"
+    type: "fix"
+    title: "User defined resource types which contain extensions that use a bound code type (e.g. an BoundCodeDt with a custom Enum) failed to parse correctly. Thanks to baopingle for reporting and providing a test case!"
+- item:
+    type: "add"
+    title: "Sorting is now supported in the Web Testing UI (previously a button existed for sorting, but it didn't do anything)"
+- item:
+    issue: "111"
+    type: "add"
+    title: "Server will no longer include stack traces in the OperationOutcome returned to the client when an exception is thrown. A new interceptor called ExceptionHandlingInterceptor has been created which adds this functionality back if it is needed (e.g. for DEV setups). See the server interceptor documentation for more information. Thanks to Andy Huang for the suggestion!"
