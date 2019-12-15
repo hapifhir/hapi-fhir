@@ -51,6 +51,12 @@ public class MigrationTaskSkipperTest {
 	}
 
 	@Test
+	public void skipTwo() {
+		MigrationTaskSkipper.setDoNothingOnSkippedTasks(myTasks, VERSION_PREFIX + 2 + "," + VERSION_PREFIX + 3);
+		assertSkipped(myTasks, 2, 3);
+	}
+
+	@Test
 	public void skipWeirdSpacing() {
 		MigrationTaskSkipper.setDoNothingOnSkippedTasks(myTasks, "   " + VERSION_PREFIX + 2 + "     ,     " + VERSION_PREFIX + 3 + "   ");
 		assertSkipped(myTasks, 2, 3);
@@ -66,6 +72,24 @@ public class MigrationTaskSkipperTest {
 	public void startComma() {
 		MigrationTaskSkipper.setDoNothingOnSkippedTasks(myTasks, "," + VERSION_PREFIX + 2 + "," + VERSION_PREFIX + 3);
 		assertSkipped(myTasks, 2, 3);
+	}
+
+	@Test
+	public void quoted() {
+		MigrationTaskSkipper.setDoNothingOnSkippedTasks(myTasks, "\"" + VERSION_PREFIX + 2 + "," + VERSION_PREFIX + 3 + "\"");
+		assertSkipped(myTasks, 2, 3);
+	}
+
+	@Test
+	public void allQuoted() {
+		MigrationTaskSkipper.setDoNothingOnSkippedTasks(myTasks, "\"" + VERSION_PREFIX + 2 + "\",\"" + VERSION_PREFIX + 3 + "\"");
+		assertSkipped(myTasks, 2, 3);
+	}
+
+	@Test
+	public void oneQuoted() {
+		MigrationTaskSkipper.setDoNothingOnSkippedTasks(myTasks, "\"" + VERSION_PREFIX + 2 + "\"" );
+		assertSkipped(myTasks, 2);
 	}
 
 	@Test
