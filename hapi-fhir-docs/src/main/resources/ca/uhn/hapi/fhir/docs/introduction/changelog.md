@@ -2,10 +2,15 @@
 
 <th:block th:each="version : ${changelog.versions}">
 
-# Smile CDR <th:block th:text="${version}"/> <th:block th:if="${changelog.changes.get(version).codename} != null" th:text="' (' + ${changelog.changes.get(version).codename} + ')'"/>
+# Smile CDR <th:block th:text="${version}"/> <th:block th:if="${changelog.changes.get(version).codename} != null" th:text="' (' + ${changelog.changes.get(version).codename} + ')'"/> <th:block th:if="${changelog.releaseDate} == null">(Prerelease)</th:block>
 
 ## Release Information
 
+<th:block th:if="${changelog.changes.get(version).releaseDate} == null">
+Note: This version of HAPI FHIR is a SNAPSHOT (prerelease), meaning that it has
+not yet been released, but all changes and fixes listed here are available to try
+out as <a href="/docs/introduction/downloading_and_importing.html#snapshot">Snapshot Builds</a>.
+</th:block>
 <th:block th:if="${changelog.changes.get(version).releaseDate} != null">
 **Released:** <th:block th:text="${changelog.changes.get(version).releaseDate.getValueAsString()}"/>
 </th:block>
