@@ -130,7 +130,7 @@ public class ValidationResult {
 					line = next.getLocationLine().toString();
 				}
 				String col = unknown;
-				if (next.getLocationCol() != null && next.getLocationCol() != null) {
+				if (next.getLocationCol() != null && next.getLocationCol() != -1) {
 					col = next.getLocationCol().toString();
 				}
 				if (!unknown.equals(line) || !unknown.equals(col)) {
