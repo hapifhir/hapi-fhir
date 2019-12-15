@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableRawSqlTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTest;
 import com.google.common.collect.ImmutableList;
 import org.flywaydb.core.api.FlywayException;
@@ -84,10 +85,11 @@ public class SchemaMigratorTest extends BaseTest {
 		taskD.setTableName("SOMETABLE_D");
 		taskD.addSql(DriverTypeEnum.H2_EMBEDDED, "create table SOMETABLE_D (PID bigint not null, TEXTCOL varchar(255))");
 
-		SchemaMigrator schemaMigrator = new SchemaMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), ImmutableList.of(taskA, taskB, taskC, taskD));
+		ImmutableList<BaseTask> taskList = ImmutableList.of(taskA, taskB, taskC, taskD);
+		MigrationTaskSkipper.setDoNothingOnSkippedTasks(taskList, "4_1_0.20191214.2, 4_1_0.20191214.4");
+		SchemaMigrator schemaMigrator = new SchemaMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), taskList);
 		schemaMigrator.setDriverType(DriverTypeEnum.H2_EMBEDDED);
 
-		schemaMigrator.setSkipVersions("4_1_0.20191214.2, 4_1_0.20191214.4");
 		schemaMigrator.migrate();
 
 		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(getDataSource().getUrl(), getDataSource().getUsername(), getDataSource().getPassword());

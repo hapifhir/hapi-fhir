@@ -20,19 +20,16 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.migrate.BaseMigrator;
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
-import ca.uhn.fhir.jpa.migrate.TaskOnlyMigrator;
+import ca.uhn.fhir.jpa.migrate.*;
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -41,7 +38,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * NB since 2019-12-05: This class is kind of weirdly named now, since it can either use Flyway or not use Flyway
  */
 public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends BaseCommand {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseFlywayMigrateDatabaseCommand.class);
 
 	public static final String MIGRATE_DATABASE = "migrate-database";
 	public static final String NO_COLUMN_SHRINK = "no-column-shrink";
@@ -138,13 +135,18 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		migrator.setDryRun(dryRun);
 		migrator.setNoColumnShrink(noColumnShrink);
 		migrator.setOutOfOrderPermitted(outOfOrderPermitted);
-		addTasks(migrator);
+		String skipVersions = theCommandLine.getOptionValue(BaseFlywayMigrateDatabaseCommand.SKIP_VERSIONS);
+		addTasks(migrator, skipVersions);
 		migrator.migrate();
 	}
 
-	protected abstract void addTasks(BaseMigrator theMigrator);
+	protected abstract void addTasks(BaseMigrator theMigrator, String theSkippedVersions);
 
 	public void setMigrationTableName(String theMigrationTableName) {
 		myMigrationTableName = theMigrationTableName;
+	}
+
+	protected void setDoNothingOnSkippedTasks(Collection<BaseTask> theTasks, String theSkipVersions) {
+		MigrationTaskSkipper.setDoNothingOnSkippedTasks(theTasks, theSkipVersions);
 	}
 }

@@ -33,16 +33,16 @@ import java.util.Collection;
 import java.util.List;
 
 public class BaseMigrationTasks<T extends Enum> {
-	private Multimap<T, BaseTask<?>> myTasks = MultimapBuilder.hashKeys().arrayListValues().build();
+	private Multimap<T, BaseTask> myTasks = MultimapBuilder.hashKeys().arrayListValues().build();
 	MigrationVersion lastVersion;
 
 	@SuppressWarnings("unchecked")
-	public List<BaseTask<?>> getTasks(@Nonnull T theFrom, @Nonnull T theTo) {
+	public List<BaseTask> getTasks(@Nonnull T theFrom, @Nonnull T theTo) {
 		Validate.notNull(theFrom);
 		Validate.notNull(theTo);
 		Validate.isTrue(theFrom.ordinal() < theTo.ordinal(), "From version must be lower than to version");
 
-		List<BaseTask<?>> retVal = new ArrayList<>();
+		List<BaseTask> retVal = new ArrayList<>();
 		for (Object nextVersion : EnumUtils.getEnumList(theFrom.getClass())) {
 			if (((T) nextVersion).ordinal() <= theFrom.ordinal()) {
 				continue;
@@ -51,7 +51,7 @@ public class BaseMigrationTasks<T extends Enum> {
 				continue;
 			}
 
-			Collection<BaseTask<?>> nextValues = myTasks.get((T) nextVersion);
+			Collection<BaseTask> nextValues = myTasks.get((T) nextVersion);
 			if (nextValues != null) {
 				retVal.addAll(nextValues);
 			}
@@ -68,10 +68,10 @@ public class BaseMigrationTasks<T extends Enum> {
 		return new Builder(theRelease.name(), sink);
 	}
 
-	public List<BaseTask<?>> getAllTasks(T[] theVersionEnumValues) {
-		List<BaseTask<?>> retval = new ArrayList<>();
+	public List<BaseTask> getAllTasks(T[] theVersionEnumValues) {
+		List<BaseTask> retval = new ArrayList<>();
 		for (T nextVersion : theVersionEnumValues) {
-			Collection<BaseTask<?>> nextValues = myTasks.get(nextVersion);
+			Collection<BaseTask> nextValues = myTasks.get(nextVersion);
 			if (nextValues != null) {
 				validate(nextValues);
 				retval.addAll(nextValues);
@@ -81,7 +81,7 @@ public class BaseMigrationTasks<T extends Enum> {
 		return retval;
 	}
 
-	void validate(Collection<BaseTask<?>> theTasks) {
+	void validate(Collection<BaseTask> theTasks) {
 		for (BaseTask task: theTasks) {
 			task.validateVersion();
 			String version = task.getFlywayVersion();
@@ -96,6 +96,6 @@ public class BaseMigrationTasks<T extends Enum> {
 	}
 
 	public interface IAcceptsTasks {
-		void addTask(BaseTask<?> theTask);
+		void addTask(BaseTask theTask);
 	}
 }

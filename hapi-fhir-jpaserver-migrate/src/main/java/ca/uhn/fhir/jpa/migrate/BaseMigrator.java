@@ -21,14 +21,15 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import org.flywaydb.core.api.MigrationInfoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
-public abstract class BaseMigrator {
+public abstract class BaseMigrator implements IMigrator {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseMigrator.class);
 
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
@@ -38,8 +39,6 @@ public abstract class BaseMigrator {
 	private String myUsername;
 	private String myPassword;
 	private List<BaseTask.ExecutedStatement> myExecutedStatements = new ArrayList<>();
-
-	public abstract void migrate();
 
 	public boolean isDryRun() {
 		return myDryRun;
@@ -56,10 +55,6 @@ public abstract class BaseMigrator {
 	public void setNoColumnShrink(boolean theNoColumnShrink) {
 		myNoColumnShrink = theNoColumnShrink;
 	}
-
-	public abstract Optional<MigrationInfoService> getMigrationInfo();
-
-	public abstract void addTasks(List<BaseTask<?>> theMigrationTasks);
 
 	public DriverTypeEnum getDriverType() {
 		return myDriverType;

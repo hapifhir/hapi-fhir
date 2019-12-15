@@ -33,7 +33,7 @@ public class HashTest {
 
 	@Test
 	public void testCheckAllHashes() {
-		List<BaseTask<?>> tasks1 = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
+		List<BaseTask> tasks1 = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
 		Map<String, Integer> hashesByVersion = new HashMap<>();
 		for (BaseTask task : tasks1) {
 			String version = task.getFlywayVersion();
@@ -41,7 +41,7 @@ public class HashTest {
 			hashesByVersion.put(version, task.hashCode());
 		}
 
-		List<BaseTask<?>> tasks2 = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
+		List<BaseTask> tasks2 = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
 		for (BaseTask task : tasks2) {
 			String version = task.getFlywayVersion();
 			int origHash = hashesByVersion.get(version);

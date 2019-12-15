@@ -34,28 +34,22 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SchemaMigrator {
-	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "FLY_HFJ_MIGRATION";
 	private static final Logger ourLog = LoggerFactory.getLogger(SchemaMigrator.class);
+	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "FLY_HFJ_MIGRATION";
 	private final BasicDataSource myDataSource;
 	private final boolean mySkipValidation;
 	private final String myMigrationTableName;
-	private final List<BaseTask<?>> myMigrationTasks;
+	private final List<BaseTask> myMigrationTasks;
 	private boolean myDontUseFlyway;
 	private boolean myOutOfOrderPermitted;
-	private String mySkipVersions;
 	private DriverTypeEnum myDriverType;
 
 	/**
 	 * Constructor
 	 */
-	public SchemaMigrator(String theMigrationTableName, BasicDataSource theDataSource, Properties jpaProperties, List<BaseTask<?>> theMigrationTasks) {
+	public SchemaMigrator(String theMigrationTableName, BasicDataSource theDataSource, Properties jpaProperties, List<BaseTask> theMigrationTasks) {
 		myDataSource = theDataSource;
 		myMigrationTableName = theMigrationTableName;
 		myMigrationTasks = theMigrationTasks;
@@ -137,25 +131,5 @@ public class SchemaMigrator {
 
 	public void setDriverType(DriverTypeEnum theDriverType) {
 		myDriverType = theDriverType;
-	}
-
-	public SchemaMigrator setSkipVersions(String theSkipVersions) {
-		mySkipVersions = theSkipVersions;
-		setDoNothingOnSkippedTasks();
-		return this;
-	}
-
-	private void setDoNothingOnSkippedTasks() {
-		if (isBlank(mySkipVersions) || myMigrationTasks.isEmpty()) {
-			return;
-		}
-		Set<String> skippedVersionSet = Stream.of(mySkipVersions.split(",")).map(String::trim).collect(Collectors.toSet());
-
-		for (BaseTask task : myMigrationTasks) {
-			if (skippedVersionSet.contains(task.getFlywayVersion())) {
-				ourLog.info("Will skip {}: {}", task.getFlywayVersion(), task.getDescription());
-				task.setDoNothing(true);
-			}
-		}
 	}
 }
