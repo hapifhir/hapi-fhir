@@ -1,7 +1,11 @@
 ---
 - item:
     type: "add"
-    title: "The version of a few dependencies have been bumped to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Jetty (CLI): 9.4.14.v20181114 -&gt; 9.4.23.v20191118</li> </ul>"
+    title: "The version of a few dependencies have been bumped to the latest versions
+    (dependent HAPI modules listed in brackets):
+    <ul>
+    <li>Jetty (CLI): 9.4.14.v20181114 -&gt; 9.4.23.v20191118</li>
+    </ul>"
 - item:
     issue: "1583"
     type: "fix"
