@@ -21,12 +21,15 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import org.flywaydb.core.api.MigrationInfoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
-public abstract class BaseMigrator {
+public abstract class BaseMigrator implements IMigrator {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseMigrator.class);
 
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
@@ -35,8 +38,7 @@ public abstract class BaseMigrator {
 	private String myConnectionUrl;
 	private String myUsername;
 	private String myPassword;
-
-	public abstract void migrate();
+	private List<BaseTask.ExecutedStatement> myExecutedStatements = new ArrayList<>();
 
 	public boolean isDryRun() {
 		return myDryRun;
@@ -53,10 +55,6 @@ public abstract class BaseMigrator {
 	public void setNoColumnShrink(boolean theNoColumnShrink) {
 		myNoColumnShrink = theNoColumnShrink;
 	}
-
-	public abstract Optional<MigrationInfoService> getMigrationInfo();
-
-	public abstract void addTasks(List<BaseTask<?>> theMigrationTasks);
 
 	public DriverTypeEnum getDriverType() {
 		return myDriverType;
@@ -96,5 +94,27 @@ public abstract class BaseMigrator {
 
 	public void setOutOfOrderPermitted(boolean theOutOfOrderPermitted) {
 		myOutOfOrderPermitted = theOutOfOrderPermitted;
+	}
+
+	public void addExecutedStatements(List theExecutedStatements) {
+		myExecutedStatements.addAll(theExecutedStatements);
+	}
+
+	protected StringBuilder buildExecutedStatementsString() {
+		StringBuilder statementBuilder = new StringBuilder();
+		String lastTable = null;
+		for (BaseTask.ExecutedStatement next : myExecutedStatements) {
+			if (!Objects.equals(lastTable, next.getTableName())) {
+				statementBuilder.append("\n\n-- Table: ").append(next.getTableName()).append("\n");
+				lastTable = next.getTableName();
+			}
+
+			statementBuilder.append(next.getSql()).append(";\n");
+
+			for (Object nextArg : next.getArguments()) {
+				statementBuilder.append("  -- Arg: ").append(nextArg).append("\n");
+			}
+		}
+		return statementBuilder;
 	}
 }

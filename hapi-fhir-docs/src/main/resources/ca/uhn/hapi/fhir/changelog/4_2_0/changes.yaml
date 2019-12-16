@@ -1,0 +1,42 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+    (dependent HAPI modules listed in brackets):
+    <ul>
+    <li>Jetty (CLI): 9.4.14.v20181114 -&gt; 9.4.23.v20191118</li>
+    </ul>"
+- item:
+    issue: "1583"
+    type: "fix"
+    title: "As of FHIR R4, some fields that were previously of type reference are now of type canonical. One example is QuestionnaireResponse.questionnaire. Technically this means that this field should no longer contain a relative reference, but as they are sometimes used that way, HAPI FHIR will now try to be permissive and will index relative link canonical fields such as (Questionnaire/123) as though it actually was a local relative link. Thanks to Dean Atchley for reporting and providing a test case!"
+- item:
+    type: "fix"
+    title: "ValueSet PreCalculation did not successfully expand valuesets when Lucene was not enabled in the JPA server. This has been corrected."
+- item:
+    type: "change"
+    title: "When parsing Bundle resources containing other resources, XML/JSON parsers have an option called \"override resource ID with bundle entry fullUrl\". This option previously caused any value found in Bundle.entry.fullUrl to override any value found in Bundle.entry.resource.id (meaning that the parsed resource would take its ID from the fullUrl even if that ID disagreed with the ID found in the resource itself. As of HAPI FHIR 4.1.0 the value in Bundle.entry.fullUrl will only be used to set the parsed resource ID if the resource has no ID present."
+- item:
+    type: "add"
+    title: "Chained searches using the _has search parameter as the chain value are now supported by the JPA server."
+- item:
+    type: "change"
+    title: "Changed database migration to use flyway. This adds a new table called FLY_HFJ_MIGRATION that records all database migration tasks that have already been applied. The hapi-fhir-cli migrate tool has been changed to use flyway. Learn more about flyway here: https://flywaydb.org/."
+- item:
+    issue: "1613"
+    type: "fix"
+    title: "ValueSet Precalculation sometimes failed on Oracle DBs due to an invalid SQL function. This has been corrected."
+- item:
+    type: "fix"
+    title: "A ConcurrentModificationException was sometimes thrown when performing a cascading delete. This has been corrected."
+- item:
+    issue: "1624"
+    type: "fix"
+    title: "The constructor for Verdict.java was inadvertantly made private, preventing custom rules from being written. Thanks to Jafer Khan for the pull request!"
+- item:
+    type: "change"
+    title: "The <code>IRestfulClient#registerInterceptor</code> and <code>IRestfulClient#unregisterInterceptor</code> methods now take Object as an argument instead of IClientInterceptor, allowing client interceptors to now be migrated to the new interceptor framework."
+- item:
+    issue: "1610"
+    type: "fix"
+    title: "A missing mandatory was added to the SNOMED CT CodeSystem that is uploaded when SCT is uploaded to the JPA server. Thanks to Anders Havn for the pull request!"

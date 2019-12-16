@@ -62,7 +62,7 @@ public class FlywayMigrator extends BaseMigrator {
 		myMigrationTableName = theMigrationTableName;
 	}
 
-	public void addTask(BaseTask<?> theTask) {
+	public void addTask(BaseTask theTask) {
 		myTasks.add(new FlywayMigration(theTask, this));
 	}
 
@@ -72,6 +72,10 @@ public class FlywayMigrator extends BaseMigrator {
 			Flyway flyway = initFlyway(connectionProperties);
 			flyway.repair();
 			flyway.migrate();
+			if (isDryRun()) {
+				StringBuilder statementBuilder = buildExecutedStatementsString();
+				ourLog.info("SQL that would be executed:\n\n***********************************\n{}***********************************", statementBuilder);
+			}
 		} catch (Exception e) {
 			throw e;
 		}
@@ -93,7 +97,7 @@ public class FlywayMigrator extends BaseMigrator {
 	}
 
 	@Override
-	public void addTasks(List<BaseTask<?>> theTasks) {
+	public void addTasks(List<BaseTask> theTasks) {
 		theTasks.forEach(this::addTask);
 	}
 

@@ -36,12 +36,12 @@ import java.util.Optional;
 import java.util.Properties;
 
 public class SchemaMigrator {
-	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "FLY_HFJ_MIGRATION";
 	private static final Logger ourLog = LoggerFactory.getLogger(SchemaMigrator.class);
+	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "FLY_HFJ_MIGRATION";
 	private final BasicDataSource myDataSource;
 	private final boolean mySkipValidation;
 	private final String myMigrationTableName;
-	private final List<BaseTask<?>> myMigrationTasks;
+	private final List<BaseTask> myMigrationTasks;
 	private boolean myDontUseFlyway;
 	private boolean myOutOfOrderPermitted;
 	private DriverTypeEnum myDriverType;
@@ -49,7 +49,7 @@ public class SchemaMigrator {
 	/**
 	 * Constructor
 	 */
-	public SchemaMigrator(String theMigrationTableName, BasicDataSource theDataSource, Properties jpaProperties, List<BaseTask<?>> theMigrationTasks) {
+	public SchemaMigrator(String theMigrationTableName, BasicDataSource theDataSource, Properties jpaProperties, List<BaseTask> theMigrationTasks) {
 		myDataSource = theDataSource;
 		myMigrationTableName = theMigrationTableName;
 		myMigrationTasks = theMigrationTasks;
@@ -100,7 +100,7 @@ public class SchemaMigrator {
 	private BaseMigrator newMigrator() {
 		BaseMigrator migrator;
 		if (myDontUseFlyway) {
-			migrator = new BruteForceMigrator();
+			migrator = new TaskOnlyMigrator();
 			migrator.setDriverType(myDriverType);
 			migrator.setConnectionUrl(myDataSource.getUrl());
 			migrator.setUsername(myDataSource.getUsername());

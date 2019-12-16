@@ -550,6 +550,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		cs.setUrl(SCT_URI);
 		cs.setName("SNOMED CT");
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null);
 
 		return new UploadStatistics(code2concept.size(), target);

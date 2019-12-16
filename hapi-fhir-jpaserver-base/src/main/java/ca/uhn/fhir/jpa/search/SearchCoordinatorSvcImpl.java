@@ -932,7 +932,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		private void doSaveSearch() {
 
-			Search newSearch = mySearchCacheSvc.save(mySearch);
+			// This is an attempt to track down an intermittent test
+			// failure in testAsyncSearchLargeResultSetBigCountSameCoordinator
+			Object searchObj = mySearchCacheSvc.save(mySearch);
+			Search newSearch = (Search) searchObj;
 
 			// mySearchDao.save is not supposed to return null, but in unit tests
 			// it can if the mock search dao isn't set up to handle that

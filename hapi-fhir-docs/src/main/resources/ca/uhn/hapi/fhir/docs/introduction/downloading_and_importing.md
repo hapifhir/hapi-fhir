@@ -53,6 +53,8 @@ compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:${project.version}'
 compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${project.version}'
 ```
 
+<a name="snapshot"/>
+
 # Snapshot Builds
 
 The HAPI FHIR project generally releases a new full software release 4 times per year, or approximately every 3 months.

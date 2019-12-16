@@ -39,7 +39,7 @@ public class Builder {
 		return new BuilderWithTableName(myRelease, mySink, theTableName);
 	}
 
-	public void addTask(BaseTask<?> theTask) {
+	public void addTask(BaseTask theTask) {
 		mySink.addTask(theTask);
 	}
 
@@ -129,7 +129,7 @@ public class Builder {
 		}
 
 		@Override
-		public void addTask(BaseTask<?> theTask) {
+		public void addTask(BaseTask theTask) {
 			if (theTask instanceof AddColumnTask) {
 				myTask.addAddColumnTask((AddColumnTask) theTask);
 			} else {
@@ -209,7 +209,7 @@ public class Builder {
 		}
 
 		@Override
-		public void addTask(BaseTask<?> theTask) {
+		public void addTask(BaseTask theTask) {
 			((BaseTableTask<?>) theTask).setTableName(myTableName);
 			mySink.addTask(theTask);
 		}
