@@ -38,13 +38,13 @@ import java.util.Optional;
 public class TaskOnlyMigrator extends BaseMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TaskOnlyMigrator.class);
-	private List<BaseTask<?>> myTasks = new ArrayList<>();
+	private List<BaseTask> myTasks = new ArrayList<>();
 
 	@Override
 	public void migrate() {
 		DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getConnectionUrl(), getUsername(), getPassword());
 
-		for (BaseTask<?> next : myTasks) {
+		for (BaseTask next : myTasks) {
 			next.setDriverType(getDriverType());
 			next.setDryRun(isDryRun());
 			next.setNoColumnShrink(isNoColumnShrink());
@@ -71,7 +71,7 @@ public class TaskOnlyMigrator extends BaseMigrator {
 	}
 
 	@Override
-	public void addTasks(List<BaseTask<?>> theMigrationTasks) {
+	public void addTasks(List<BaseTask> theMigrationTasks) {
 		myTasks.addAll(theMigrationTasks);
 	}
 }

@@ -20,19 +20,16 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.migrate.BaseMigrator;
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
-import ca.uhn.fhir.jpa.migrate.TaskOnlyMigrator;
+import ca.uhn.fhir.jpa.migrate.*;
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -41,12 +38,13 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * NB since 2019-12-05: This class is kind of weirdly named now, since it can either use Flyway or not use Flyway
  */
 public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends BaseCommand {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseFlywayMigrateDatabaseCommand.class);
 
 	public static final String MIGRATE_DATABASE = "migrate-database";
 	public static final String NO_COLUMN_SHRINK = "no-column-shrink";
 	public static final String DONT_USE_FLYWAY = "dont-use-flyway";
 	public static final String OUT_OF_ORDER_PERMITTED = "out-of-order-permitted";
+	public static final String SKIP_VERSIONS = "skip-versions";
 	private Set<String> myFlags;
 	private String myMigrationTableName;
 
@@ -80,7 +78,6 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		Options retVal = new Options();
 
 		addOptionalOption(retVal, "r", "dry-run", false, "Log the SQL statements that would be executed but to not actually make any changes");
-
 		addRequiredOption(retVal, "u", "url", "URL", "The JDBC database URL");
 		addRequiredOption(retVal, "n", "username", "Username", "The JDBC database username");
 		addRequiredOption(retVal, "p", "password", "Password", "The JDBC database password");
@@ -89,6 +86,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		addOptionalOption(retVal, null, DONT_USE_FLYWAY,false, "If this option is set, the migrator will not use FlywayDB for migration. This setting should only be used if you are trying to migrate a legacy database platform that is not supported by FlywayDB.");
 		addOptionalOption(retVal, null, OUT_OF_ORDER_PERMITTED,false, "If this option is set, the migrator will permit migration tasks to be run out of order.  It shouldn't be required in most cases, however may be the solution if you see the error message 'Detected resolved migration not applied to database'.");
 		addOptionalOption(retVal, null, NO_COLUMN_SHRINK, false, "If this flag is set, the system will not attempt to reduce the length of columns. This is useful in environments with a lot of existing data, where shrinking a column can take a very long time.");
+		addOptionalOption(retVal, null, SKIP_VERSIONS, "Versions", "A comma separated list of schema versions to skip.  E.g. 4_1_0.20191214.2,4_1_0.20191214.4");
 
 		return retVal;
 	}
@@ -137,13 +135,18 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		migrator.setDryRun(dryRun);
 		migrator.setNoColumnShrink(noColumnShrink);
 		migrator.setOutOfOrderPermitted(outOfOrderPermitted);
-		addTasks(migrator);
+		String skipVersions = theCommandLine.getOptionValue(BaseFlywayMigrateDatabaseCommand.SKIP_VERSIONS);
+		addTasks(migrator, skipVersions);
 		migrator.migrate();
 	}
 
-	protected abstract void addTasks(BaseMigrator theMigrator);
+	protected abstract void addTasks(BaseMigrator theMigrator, String theSkippedVersions);
 
 	public void setMigrationTableName(String theMigrationTableName) {
 		myMigrationTableName = theMigrationTableName;
+	}
+
+	protected void setDoNothingOnSkippedTasks(Collection<BaseTask> theTasks, String theSkipVersions) {
+		MigrationTaskSkipper.setDoNothingOnSkippedTasks(theTasks, theSkipVersions);
 	}
 }
