@@ -19,7 +19,6 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -157,6 +156,7 @@ public class SearchCoordinatorSvcImplTest {
 
 	}
 
+	// TODO INTERMITTENT this test fails intermittently
 	@Test
 	public void testAsyncSearchLargeResultSetBigCountSameCoordinator() {
 		List<ResourcePersistentId> allResults = new ArrayList<>();

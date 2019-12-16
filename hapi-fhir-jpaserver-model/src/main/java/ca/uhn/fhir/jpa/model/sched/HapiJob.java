@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.sched;
+package ca.uhn.fhir.jpa.model.sched;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Model
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,19 +20,9 @@ package ca.uhn.fhir.jpa.sched;
  * #L%
  */
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
 
-import javax.annotation.PostConstruct;
-
-public class QuartzTableSeeder {
-
-	@Autowired
-	private LocalContainerEntityManagerFactoryBean myEntityManagerFactory;
-
-	@PostConstruct
-	public void start() {
-
-	}
-
+@DisallowConcurrentExecution
+public interface HapiJob extends Job {
 }

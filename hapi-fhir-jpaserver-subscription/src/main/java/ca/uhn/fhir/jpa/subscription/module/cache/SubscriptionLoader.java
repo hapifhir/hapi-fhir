@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  */
 
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
-import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -33,9 +33,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
-import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.PersistJobDataAfterExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +50,6 @@ import java.util.concurrent.Semaphore;
 @Service
 @Lazy
 public class SubscriptionLoader {
-	public static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
 	private static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
 	private final Object mySyncSubscriptionsLock = new Object();
@@ -90,11 +87,21 @@ public class SubscriptionLoader {
 
 
 	@PostConstruct
-	public void registerScheduledJob() {
+	public void scheduleJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(SubscriptionLoader.class.getName());
-		jobDetail.setJobClass(SubscriptionLoader.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(REFRESH_INTERVAL, false, jobDetail);
+		jobDetail.setId(getClass().getName());
+		jobDetail.setJobClass(Job.class);
+		mySchedulerService.scheduleLocalJob(DateUtils.MILLIS_PER_MINUTE, jobDetail);
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private SubscriptionLoader myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.syncSubscriptions();
+		}
 	}
 
 	@VisibleForTesting
@@ -158,22 +165,6 @@ public class SubscriptionLoader {
 	@VisibleForTesting
 	public void setSubscriptionProviderForUnitTest(ISubscriptionProvider theSubscriptionProvider) {
 		mySubscriptionProvider = theSubscriptionProvider;
-	}
-
-	@DisallowConcurrentExecution
-	@PersistJobDataAfterExecution
-	public static class SubmitJob extends FireAtIntervalJob {
-		@Autowired
-		private SubscriptionLoader myTarget;
-
-		public SubmitJob() {
-			super(REFRESH_INTERVAL);
-		}
-
-		@Override
-		protected void doExecute(JobExecutionContext theContext) {
-			myTarget.syncSubscriptions();
-		}
 	}
 }
 

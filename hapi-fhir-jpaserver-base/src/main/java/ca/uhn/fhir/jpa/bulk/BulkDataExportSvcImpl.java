@@ -25,14 +25,14 @@ import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
-import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -53,9 +53,7 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
-import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.PersistJobDataAfterExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +78,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
-	private static final long REFRESH_INTERVAL = 10 * DateUtils.MILLIS_PER_SECOND;
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImpl.class);
 	private int myReuseBulkExportForMillis = (int) (60 * DateUtils.MILLIS_PER_MINUTE);
 
@@ -313,13 +310,22 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	@PostConstruct
 	public void start() {
-		ourLog.info("Bulk export service starting with refresh interval {}", StopWatch.formatMillis(REFRESH_INTERVAL));
 		myTxTemplate = new TransactionTemplate(myTxManager);
 
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(BulkDataExportSvcImpl.class.getName());
-		jobDetail.setJobClass(BulkDataExportSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(REFRESH_INTERVAL, true, jobDetail);
+		jobDetail.setId(getClass().getName());
+		jobDetail.setJobClass(Job.class);
+		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private IBulkDataExportSvc myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.buildExportFiles();
+		}
 	}
 
 	@Transactional
@@ -468,22 +474,4 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			return null;
 		});
 	}
-
-	@DisallowConcurrentExecution
-	@PersistJobDataAfterExecution
-	public static class SubmitJob extends FireAtIntervalJob {
-		@Autowired
-		private IBulkDataExportSvc myTarget;
-
-		public SubmitJob() {
-			super(REFRESH_INTERVAL);
-		}
-
-		@Override
-		protected void doExecute(JobExecutionContext theContext) {
-			myTarget.buildExportFiles();
-		}
-	}
-
-
 }
