@@ -1,7 +1,7 @@
 ---
 - item:
     type: "fix"
-    title: "Performance has been improved for the initial FhirContext object creation by avoiding a lot of unnecessary reflection. HAPI FHIR 1.5 had a regression compared to previous releases and this has been corrected, but other improvements have been made so that this release is faster than previous releases too. <br/><br/> In addition, a new \"deferred scan\" mode has been implemented for even faster initialization on slower environments (e.g. Android). See the <a href=\"./doc_rest_client_http_config.html#performance\">performance documentation</a> for more information. <br/><br/> The following shows our benchmarks for context initialization across several versions of HAPI: <ul> <li>Version 1.4: <b>560ms</b></li> <li>Version 1.5: <b>800ms</b></li> <li>Version 1.6: <b>340ms</b></li> <li>Version 1.6 (deferred mode): <b>240ms</b></li> </ul>"
+    title: "Performance has been improved for the initial FhirContext object creation by avoiding a lot of unnecessary reflection. HAPI FHIR 1.5 had a regression compared to previous releases and this has been corrected, but other improvements have been made so that this release is faster than previous releases too. <br/><br/> In addition, a new \"deferred scan\" mode has been implemented for even faster initialization on slower environments (e.g. Android). See the performance documentation for more information. <br/><br/> The following shows our benchmarks for context initialization across several versions of HAPI: <ul> <li>Version 1.4: <b>560ms</b></li> <li>Version 1.5: <b>800ms</b></li> <li>Version 1.6: <b>340ms</b></li> <li>Version 1.6 (deferred mode): <b>240ms</b></li> </ul>"
 - item:
     type: "add"
     title: "Bump the version of a few dependencies to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Spring (JPA, Web Tester): 4.2.5 -&gt; 4.3.0</li> <li>Spring-Data (JPA): 1.9.2 -&gt; 1.10.1</li> <!--<li>Hibernate ORM (JPA): 5.1.0 -&gt; 5.2.0</li>--> <li>Hibernate Search (JPA): 5.5.2 -&gt; 5.5.3</li> <li>Jetty (CLI): 9.3.9 -&gt; 9.3.10</li> </ul>"
@@ -117,7 +117,7 @@
 - item:
     issue: "363"
     type: "add"
-    title: "JPA server can now be configured to allow external references (i.e. references that point to resources on other servers). See <a href=\"./doc_jpa.html\">JPA Documentation</a> for information on how to use this. Thanks to Naminder Soorma for the suggestion!"
+    title: "JPA server can now be configured to allow external references (i.e. references that point to resources on other servers). See JPA Documentation for information on how to use this. Thanks to Naminder Soorma for the suggestion!"
 - item:
     issue: "366"
     type: "fix"
@@ -125,7 +125,7 @@
 - item:
     issue: "364"
     type: "fix"
-    title: "Enable parsers to parse and serialize custom resources that contain custom datatypes. An example has been added which shows how to do this <a href=\"./doc_custom_structures.html\">here</a>"
+    title: "Enable parsers to parse and serialize custom resources that contain custom datatypes. An example has been added which shows how to do this in the docs."
 - item:
     type: "fix"
     title: "JSON parser was incorrectly encoding resource language attribute in JSON as an array instead of a string. Thanks to David Hay for reporting!"

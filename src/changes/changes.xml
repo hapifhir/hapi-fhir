@@ -6051,7 +6051,7 @@ Bundle bundle = client.search().forResource(Patient.class)<br/>
 			</action>
 			<action type="add">
 				Introduce
-				<![CDATA[<a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/IJpaServerInterceptor.html">IJpaServerInterceptor</a>]]>
+				IJpaServerInterceptor
 				interceptors for JPA server which can be used for more fine grained operations.
 			</action>
 			<action type="fix" issue="241">

@@ -15,7 +15,7 @@
     title: "Added options to the CLI upload-examples command which allow it to cache the downloaded content file, or use an arbitrary one. Thanks to Adam Carbone for the pull request!"
 - item:
     type: "fix"
-    title: "REST search parameters with a prefix/comparator had not been updated to use the DSTU2 style prefixes (gt2011-01-10) instead of the DSTU1 style prefixes (>2011-01-01). The client has been updated so that it uses the new prefixes if the client has a DSTU2+ context. The server has been updated so that it now supports both styles. <br/><br/> As a part of this change, a new enum called <a href=\"./apidocs/ca/uhn/fhir/rest/param/ParamPrefixEnum.html\">ParamPrefixEnum</a> has been introduced. This enum replaces the old <a href=\"./apidocs/ca/uhn/fhir/model/dstu/valueset/QuantityCompararatorEnum.html\">QuantityCompararatorEnum</a> which has a typo in its name and can not represent several new prefixes added since DSTU1."
+    title: "REST search parameters with a prefix/comparator had not been updated to use the DSTU2 style prefixes (gt2011-01-10) instead of the DSTU1 style prefixes (>2011-01-01). The client has been updated so that it uses the new prefixes if the client has a DSTU2+ context. The server has been updated so that it now supports both styles. <br/><br/> As a part of this change, a new enum called ParamPrefixEnum has been introduced. This enum replaces the old QuantityCompararatorEnum which has a typo in its name and can not represent several new prefixes added since DSTU1."
 - item:
     type: "add"
     title: "JPA server number and quantity search params now follow the rules for the use of precision in search terms outlined in the <a href=\"https://www.hl7.org/fhir/search.html\">search page</a> of the FHIR specification. For example, previously a 1% tolerance was applied for all searches (10% for approximate search). Now, a tolerance which respects the precision of the search term is used (but still 10% for approximate search)."
@@ -127,11 +127,11 @@
 - item:
     issue: "315"
     type: "add"
-    title: "Add a new method to FhirContext called <code><a href=\"./apidocs/ca/uhn/fhir/context/FhirContext.html#setDefaultTypeForProfile-java.lang.String-java.lang.Class-\">setDefaultTypeForProfile</a></code> which can be used to specify that when recources are received which declare support for specific profiles, a specific custom structures should be used instead of the default. For example, if you have created a custom Observation class for a specific profile, you could use this method to cause your custom type to be used by the parser for resources in a search bundle you receive. <br/><br/> See the documentation page on <a href=\"./doc_extensions.html\">Profiles and Extensions</a> for more information."
+    title: "Add a new method to FhirContext called <code>setDefaultTypeForProfile</code> which can be used to specify that when recources are received which declare support for specific profiles, a specific custom structures should be used instead of the default. For example, if you have created a custom Observation class for a specific profile, you could use this method to cause your custom type to be used by the parser for resources in a search bundle you receive. <br/><br/> See the documentation page on Profiles and Extensions for more information."
 - item:
     issue: "315"
     type: "fix"
-    title: "Parsing/Encoding a custom resource type which extends a base type sometimes caused the FhirContext to treat all future parses of the same resource as using the custom type even when this was not wanted. <br/><br/> Custom structures may now be explicitly declared by profile using the <code><a href=\"./apidocs/ca/uhn/fhir/context/FhirContext.html#setDefaultTypeForProfile-java.lang.String-java.lang.Class-\">setDefaultTypeForProfile</a></code> method. <br/><br/> This issue was discovered and fixed as a part of the implementation of issue #315."
+    title: "Parsing/Encoding a custom resource type which extends a base type sometimes caused the FhirContext to treat all future parses of the same resource as using the custom type even when this was not wanted. <br/><br/> Custom structures may now be explicitly declared by profile using the <code>setDefaultTypeForProfile</code> method. <br/><br/> This issue was discovered and fixed as a part of the implementation of issue #315."
 - item:
     issue: "321"
     type: "add"
@@ -141,7 +141,7 @@
     title: "JPA server now allows searching by token parameter using a system only and no code, giving a search for any tokens which match the given token with any code. Previously the expected behaviour for this search was not clear in the spec and HAPI had different behaviour from the other reference servers."
 - item:
     type: "add"
-    title: "Introduce a JAX-RS client provider which can be used instead of the default Apache HTTP Client provider to provide low level HTTP services to HAPI's REST client. See <a href=\"./doc_rest_client_alternate_provider.html\">JAX-RS &amp; Alternate HTTP Client Providers</a> for more information. <br/><br/> This is useful in cases where you have other non-FHIR REST clients using a JAX-RS provider and want to take advantage of the rest of the framework. <br/><br/> Thanks to Peter Van Houte from Agfa for the amazing work!"
+    title: "Introduce a JAX-RS client provider which can be used instead of the default Apache HTTP Client provider to provide low level HTTP services to HAPI's REST client. See JAX-RS &amp; Alternate HTTP Client Providers for more information. <br/><br/> This is useful in cases where you have other non-FHIR REST clients using a JAX-RS provider and want to take advantage of the rest of the framework. <br/><br/> Thanks to Peter Van Houte from Agfa for the amazing work!"
 - item:
     issue: "312"
     type: "fix"
