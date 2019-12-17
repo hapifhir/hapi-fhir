@@ -61,6 +61,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	protected void init420() { // 20191015 - present
 		Builder version = forVersion(VersionEnum.V4_2_0);
+
+		// TRM_CONCEPT_PROPERTY
+		version.onTable("TRM_CONCEPT_PROPERTY").addIndex("20191217.1", "IDX_CONCEPTPROP_CONCEPTPID").unique(false).withColumns("CONCEPT_PID");
 	}
 
 	protected void init410() { // 20190815 - 20191014
