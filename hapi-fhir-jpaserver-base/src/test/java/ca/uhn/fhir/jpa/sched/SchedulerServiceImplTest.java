@@ -25,7 +25,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.AopTestUtils;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
-import static org.hamcrest.Matchers.*;
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -34,10 +37,9 @@ import static org.junit.Assert.fail;
 public class SchedulerServiceImplTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SchedulerServiceImplTest.class);
-
+	private static long ourTaskDelay;
 	@Autowired
 	private ISchedulerService mySvc;
-	private static long ourTaskDelay;
 
 	@Before
 	public void before() {
@@ -79,7 +81,7 @@ public class SchedulerServiceImplTest {
 
 		ourLog.info("Fired {} times", CountingJob.ourCount);
 
-		assertThat(CountingJob.ourCount, greaterThan(3));
+		await().until(() -> (CountingJob.ourCount, greaterThan(3));
 		assertThat(CountingJob.ourCount, lessThan(20));
 	}
 
@@ -97,7 +99,7 @@ public class SchedulerServiceImplTest {
 
 		ourLog.info("Fired {} times", CountingJob.ourCount);
 
-		assertThat(CountingJob.ourCount, greaterThanOrEqualTo(1));
+		await().until(() -> (CountingJob.ourCount, greaterThanOrEqualTo(1));
 		assertThat(CountingJob.ourCount, lessThan(5));
 	}
 
@@ -115,7 +117,7 @@ public class SchedulerServiceImplTest {
 
 		ourLog.info("Fired {} times", CountingIntervalJob.ourCount);
 
-		assertThat(CountingIntervalJob.ourCount, greaterThanOrEqualTo(2));
+		await().until(() -> CountingIntervalJob.ourCount, greaterThanOrEqualTo(2));
 		assertThat(CountingIntervalJob.ourCount, lessThan(6));
 	}
 
@@ -171,8 +173,8 @@ public class SchedulerServiceImplTest {
 
 		@Override
 		public void execute(JobExecutionContext theContext) {
-				ourLog.info("Job has fired, going to sleep for {}ms", ourTaskDelay);
-				sleepAtLeast(ourTaskDelay);
+			ourLog.info("Job has fired, going to sleep for {}ms", ourTaskDelay);
+			sleepAtLeast(ourTaskDelay);
 			ourCount++;
 		}
 	}
