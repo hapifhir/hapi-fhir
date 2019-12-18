@@ -22,13 +22,13 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.MigrationInfoService;
 import org.flywaydb.core.api.migration.JavaMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,22 +40,10 @@ public class FlywayMigrator extends BaseMigrator {
 	private final String myMigrationTableName;
 	private List<FlywayMigration> myTasks = new ArrayList<>();
 
-	public FlywayMigrator(String theMigrationTableName, BasicDataSource theDataSource) {
+	public FlywayMigrator(String theMigrationTableName, DataSource theDataSource, DriverTypeEnum theDriverType) {
 		this(theMigrationTableName);
-		setConnectionUrl(theDataSource.getUrl());
-		setUsername(theDataSource.getUsername());
-		setPassword(theDataSource.getPassword());
-
-		String driverClassName = theDataSource.getDriverClassName();
-		if (driverClassName == null) {
-			ourLog.error(this.getClass().getSimpleName() + " constructed without a database driver");
-		} else {
-			DriverTypeEnum driverType = DriverTypeEnum.fromDriverClassName(driverClassName);
-			if (driverType == null) {
-				ourLog.error("Unknown driver class " + driverClassName);
-			}
-			setDriverType(driverType);
-		}
+		setDataSource(theDataSource);
+		setDriverType(theDriverType);
 	}
 
 	public FlywayMigrator(String theMigrationTableName) {
@@ -68,7 +56,7 @@ public class FlywayMigrator extends BaseMigrator {
 
 	@Override
 	public void migrate() {
-		try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getConnectionUrl(), getUsername(), getPassword())) {
+		try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource())) {
 			Flyway flyway = initFlyway(connectionProperties);
 			flyway.repair();
 			flyway.migrate();
@@ -85,7 +73,7 @@ public class FlywayMigrator extends BaseMigrator {
 		// TODO KHS Is there a way we can use datasource instead of url, username, password here
 		Flyway flyway = Flyway.configure()
 			.table(myMigrationTableName)
-			.dataSource(getConnectionUrl(), getUsername(), getPassword())
+			.dataSource(theConnectionProperties.getDataSource())
 			.baselineOnMigrate(true)
 			.outOfOrder(isOutOfOrderPermitted())
 			.javaMigrations(myTasks.toArray(new JavaMigration[0]))
@@ -106,7 +94,7 @@ public class FlywayMigrator extends BaseMigrator {
 		if (getDriverType() == null) {
 			return Optional.empty();
 		}
-		try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getConnectionUrl(), getUsername(), getPassword())) {
+		try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource())) {
 			Flyway flyway = initFlyway(connectionProperties);
 			return Optional.of(flyway.info());
 		}

@@ -21,24 +21,27 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public abstract class BaseMigrator implements IMigrator {
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseMigrator.class);
-
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
 	private boolean myOutOfOrderPermitted;
 	private DriverTypeEnum myDriverType;
-	private String myConnectionUrl;
-	private String myUsername;
-	private String myPassword;
+	private DataSource myDataSource;
 	private List<BaseTask.ExecutedStatement> myExecutedStatements = new ArrayList<>();
+
+	public DataSource getDataSource() {
+		return myDataSource;
+	}
+
+	public void setDataSource(DataSource theDataSource) {
+		myDataSource = theDataSource;
+	}
 
 	public boolean isDryRun() {
 		return myDryRun;
@@ -62,30 +65,6 @@ public abstract class BaseMigrator implements IMigrator {
 
 	public void setDriverType(DriverTypeEnum theDriverType) {
 		myDriverType = theDriverType;
-	}
-
-	public String getConnectionUrl() {
-		return myConnectionUrl;
-	}
-
-	public void setConnectionUrl(String theConnectionUrl) {
-		myConnectionUrl = theConnectionUrl;
-	}
-
-	public String getUsername() {
-		return myUsername;
-	}
-
-	public void setUsername(String theUsername) {
-		myUsername = theUsername;
-	}
-
-	public String getPassword() {
-		return myPassword;
-	}
-
-	public void setPassword(String thePassword) {
-		myPassword = thePassword;
 	}
 
 	public boolean isOutOfOrderPermitted() {

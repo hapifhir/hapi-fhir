@@ -22,13 +22,13 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.flywaydb.core.api.MigrationInfo;
 import org.flywaydb.core.api.MigrationInfoService;
 import org.hibernate.cfg.AvailableSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -38,7 +38,7 @@ import java.util.Properties;
 public class SchemaMigrator {
 	private static final Logger ourLog = LoggerFactory.getLogger(SchemaMigrator.class);
 	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "FLY_HFJ_MIGRATION";
-	private final BasicDataSource myDataSource;
+	private final DataSource myDataSource;
 	private final boolean mySkipValidation;
 	private final String myMigrationTableName;
 	private final List<BaseTask> myMigrationTasks;
@@ -49,7 +49,7 @@ public class SchemaMigrator {
 	/**
 	 * Constructor
 	 */
-	public SchemaMigrator(String theMigrationTableName, BasicDataSource theDataSource, Properties jpaProperties, List<BaseTask> theMigrationTasks) {
+	public SchemaMigrator(String theMigrationTableName, DataSource theDataSource, Properties jpaProperties, List<BaseTask> theMigrationTasks) {
 		myDataSource = theDataSource;
 		myMigrationTableName = theMigrationTableName;
 		myMigrationTasks = theMigrationTasks;
@@ -78,7 +78,9 @@ public class SchemaMigrator {
 			Optional<MigrationInfoService> migrationInfo = newMigrator().getMigrationInfo();
 			if (migrationInfo.isPresent()) {
 				if (migrationInfo.get().pending().length > 0) {
-					throw new ConfigurationException("The database schema for " + myDataSource.getUrl() + " is out of date.  " +
+
+					String url = connection.getMetaData().getURL();
+					throw new ConfigurationException("The database schema for " + url + " is out of date.  " +
 						"Current database schema version is " + getCurrentVersion(migrationInfo.get()) + ".  Schema version required by application is " +
 						getLastVersion(migrationInfo.get()) + ".  Please run the database migrator.");
 				}
@@ -102,11 +104,9 @@ public class SchemaMigrator {
 		if (myDontUseFlyway) {
 			migrator = new TaskOnlyMigrator();
 			migrator.setDriverType(myDriverType);
-			migrator.setConnectionUrl(myDataSource.getUrl());
-			migrator.setUsername(myDataSource.getUsername());
-			migrator.setPassword(myDataSource.getPassword());
+			migrator.setDataSource(myDataSource);
 		} else {
-			migrator = new FlywayMigrator(myMigrationTableName, myDataSource);
+			migrator = new FlywayMigrator(myMigrationTableName, myDataSource, myDriverType);
 			migrator.setOutOfOrderPermitted(myOutOfOrderPermitted);
 		}
 		migrator.addTasks(myMigrationTasks);
