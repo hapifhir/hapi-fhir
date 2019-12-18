@@ -22,13 +22,15 @@ package ca.uhn.fhir.rest.server.servlet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ServletSubRequestDetails extends ServletRequestDetails {
 
 	private final ServletRequestDetails myWrap;
-//	private Map<String, List<String>> myHeaders = new HashMap<>();
+	private Map<String, List<String>> myHeaders = new HashMap<>();
 
 	/**
 	 * Constructor
@@ -40,12 +42,12 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 
 		myWrap = theRequestDetails;
 
-//		if (theRequestDetails != null) {
-//			Map<String, List<String>> headers = theRequestDetails.getHeaders();
-//			for (Map.Entry<String, List<String>> next : headers.entrySet()) {
-//				myHeaders.put(next.getKey().toLowerCase(), next.getValue());
-//			}
-//		}
+		if (theRequestDetails != null) {
+			Map<String, List<String>> headers = theRequestDetails.getHeaders();
+			for (Map.Entry<String, List<String>> next : headers.entrySet()) {
+				myHeaders.put(next.getKey().toLowerCase(), next.getValue());
+			}
+		}
 	}
 
 	@Override
@@ -58,36 +60,28 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 		return myWrap.getServletResponse();
 	}
 
-//	public void addHeader(String theName, String theValue) {
-//		String lowerCase = theName.toLowerCase();
-//		List<String> list = myHeaders.get(lowerCase);
-//		if (list == null) {
-//			list = new ArrayList<>();
-//			myHeaders.put(lowerCase, list);
-//		}
-//		list.add(theValue);
-//	}
+	public void addHeader(String theName, String theValue) {
+		String lowerCase = theName.toLowerCase();
+		List<String> list = myHeaders.computeIfAbsent(lowerCase, k -> new ArrayList<>());
+		list.add(theValue);
+	}
 
 	@Override
 	public String getHeader(String theName) {
-		return myWrap.getHeader(theName);
-
-//		List<String> list = myHeaders.get(theName.toLowerCase());
-//		if (list == null || list.isEmpty()) {
-//			return null;
-//		}
-//		return list.get(0);
+		List<String> list = myHeaders.get(theName.toLowerCase());
+		if (list == null || list.isEmpty()) {
+			return null;
+		}
+		return list.get(0);
 	}
 
 	@Override
 	public List<String> getHeaders(String theName) {
-		return myWrap.getHeaders(theName);
-
-//		List<String> list = myHeaders.get(theName.toLowerCase());
-//		if (list == null || list.isEmpty()) {
-//			return null;
-//		}
-//		return list;
+		List<String> list = myHeaders.get(theName.toLowerCase());
+		if (list == null || list.isEmpty()) {
+			return null;
+		}
+		return list;
 	}
 
 	@Override
