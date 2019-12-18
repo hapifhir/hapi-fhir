@@ -1,0 +1,52 @@
+---
+- item:
+    type: "add"
+    title: "<b>BREAKING CHANGE:</b> : IdDt has been modified so that it contains a partial or complete resource identity. Previously it contained only the simple alphanumeric id of the resource (the part at the end of the \"read\" URL for that resource) but it can now contain a complete URL or even a partial URL (e.g. \"Patient/123\") and can optionally contain a version (e.g. \"Patient/123/_history/456\"). New methods have been added to this datatype which provide just the numeric portion. See the JavaDoc for more information."
+- item:
+    type: "add"
+    title: "<b>API CHANGE:</b> : Most elements in the HAPI FHIR model contain a getId() and setId() method. This method is confusing because it is only actually used for IDREF elements (which are rare) but its name makes it easy to confuse with more important identifiers. For this reason, these methods have been deprecated and replaced with get/setElementSpecificId() methods. The old methods will be removed at some point. Resource types are unchanged and retain their get/setId methods."
+- item:
+    type: "add"
+    title: "Allow use of QuantityDt as a service parameter to support the \"quantity\" type. Previously QuantityDt did not implement IQueryParameterType so it was not valid, and there was no way to support quantity search parameters on the server (e.g. Observation.value-quantity)"
+- item:
+    type: "add"
+    title: "Introduce StringParameter type which can be used as a RESTful operation search parameter type. StringParameter allows \":exact\" matches to be specified in clients, and handled in servers."
+- item:
+    type: "add"
+    title: "Parsers (XML/JSON) now support deleted entries in bundles"
+- item:
+    type: "add"
+    title: "Transaction method now supported in servers"
+- item:
+    type: "add"
+    title: "Support for Binary resources added (in servers, clients, parsers, etc.)"
+- item:
+    type: "fix"
+    title: "Support for Query resources fixed (in parser)"
+- item:
+    type: "fix"
+    title: "Nested contained resources (e.g. encoding a resource with a contained resource that itself contains a resource) now parse and encode correctly, meaning that all contained resources are placed in the \"contained\" element of the root resource, and the parser looks in the root resource for all container levels when stitching contained resources back together."
+- item:
+    type: "fix"
+    title: "Server methods with @Include parameter would sometimes fail when no _include was actually specified in query strings."
+- item:
+    type: "fix"
+    title: "Client requests for IdentifierDt types (such as Patient.identifier) did not create the correct query string if the system is null."
+- item:
+    type: "add"
+    title: "Add support for paging responses from RESTful servers."
+- item:
+    type: "fix"
+    title: "Don't fail on narrative blocks in JSON resources with only an XML declaration but no content (these are produced by the Health Intersections server)"
+- item:
+    type: "fix"
+    title: "Server now automatically compresses responses if the client indicates support"
+- item:
+    type: "fix"
+    title: "Server failed to support optional parameters when type is String and :exact qualifier is used"
+- item:
+    type: "fix"
+    title: "Read method in client correctly populated resource ID in returned object"
+- item:
+    type: "add"
+    title: "Support added for deleted-entry by/name, by/email, and comment from Tombstones spec"

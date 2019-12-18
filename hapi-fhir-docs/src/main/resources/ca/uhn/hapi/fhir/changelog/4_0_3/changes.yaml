@@ -1,0 +1,4 @@
+---
+- item:
+    type: "fix"
+    title: "This release contains no new or updated functionality, but addressed a dependency version that was left incorrectly requiring a SNAPSHOT maven build of the org.hl7.fhir.utilities module. Users who are successfully using HAPI FHIR 4.0.0 do not need to upgrade, but any users who were blocked from upgrading due to snapshot dependency issues are advised to upgrade immediately."

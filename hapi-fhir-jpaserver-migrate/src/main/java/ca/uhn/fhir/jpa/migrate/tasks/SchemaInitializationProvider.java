@@ -27,18 +27,21 @@ import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class SchemaInitializationProvider implements ISchemaInitializationProvider {
+
 	private final String mySchemaFileClassPath;
 	private final String mySchemaExistsIndicatorTable;
 
 	/**
-	 *
-	 * @param theSchemaFileClassPath pathname to script used to initialize schema
+	 * @param theSchemaFileClassPath        pathname to script used to initialize schema
 	 * @param theSchemaExistsIndicatorTable a table name we can use to determine if this schema has already been initialized
 	 */
 	public SchemaInitializationProvider(String theSchemaFileClassPath, String theSchemaExistsIndicatorTable) {
@@ -50,24 +53,39 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 	public List<String> getSqlStatements(DriverTypeEnum theDriverType) {
 		List<String> retval = new ArrayList<>();
 
-		String initScript;
-		initScript = mySchemaFileClassPath + "/" + theDriverType.getSchemaFilename();
+		String initScript = mySchemaFileClassPath + "/" + getInitScript(theDriverType);
 		try {
 			InputStream sqlFileInputStream = SchemaInitializationProvider.class.getResourceAsStream(initScript);
 			if (sqlFileInputStream == null) {
 				throw new ConfigurationException("Schema initialization script " + initScript + " not found on classpath");
 			}
 			// Assumes no escaped semicolons...
-			String[] statements = IOUtils.toString(sqlFileInputStream, Charsets.UTF_8).split("\\;");
+			String sqlString = IOUtils.toString(sqlFileInputStream, Charsets.UTF_8);
+			String sqlStringNoComments = preProcessSqlString(theDriverType, sqlString);
+			String[] statements = sqlStringNoComments.split("\\;");
 			for (String statement : statements) {
-				if (!statement.trim().isEmpty()) {
-					retval.add(statement);
+				String cleanedStatement = preProcessSqlStatement(theDriverType, statement);
+				if (!isBlank(cleanedStatement)) {
+					retval.add(cleanedStatement);
 				}
 			}
 		} catch (IOException e) {
 			throw new ConfigurationException("Error reading schema initialization script " + initScript, e);
 		}
 		return retval;
+	}
+
+	protected String preProcessSqlString(DriverTypeEnum theDriverType, String sqlString) {
+		return sqlString;
+	}
+
+	protected String preProcessSqlStatement(DriverTypeEnum theDriverType, String sqlStatement) {
+		return sqlStatement;
+	}
+
+	@Nonnull
+	protected String getInitScript(DriverTypeEnum theDriverType) {
+		return theDriverType.getSchemaFilename();
 	}
 
 	@Override
@@ -93,3 +111,4 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 		return mySchemaExistsIndicatorTable;
 	}
 }
+

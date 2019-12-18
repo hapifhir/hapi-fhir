@@ -1,16 +1,13 @@
 package ca.uhn.fhir.jpa.search.reindex;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -72,6 +69,8 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Mock
 	private TransactionStatus myTxStatus;
+	@Mock
+	private ISchedulerService mySchedulerService;
 
 	@Override
 	protected FhirContext getContext() {
@@ -97,6 +96,7 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		mySvc.setResourceTableDaoForUnitTest(myResourceTableDao);
 		mySvc.setTxManagerForUnitTest(myTxManager);
 		mySvc.setSearchParamRegistryForUnitTest(mySearchParamRegistry);
+		mySvc.setSchedulerServiceForUnitTest(mySchedulerService);
 		mySvc.start();
 
 		when(myTxManager.getTransaction(any())).thenReturn(myTxStatus);

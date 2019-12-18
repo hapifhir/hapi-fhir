@@ -48,7 +48,7 @@ public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 		DriverTypeEnum driverType = getDriverType();
 
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());

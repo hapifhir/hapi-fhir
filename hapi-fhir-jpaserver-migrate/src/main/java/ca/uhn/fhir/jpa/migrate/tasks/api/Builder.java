@@ -39,7 +39,7 @@ public class Builder {
 		return new BuilderWithTableName(myRelease, mySink, theTableName);
 	}
 
-	public void addTask(BaseTask<?> theTask) {
+	public void addTask(BaseTask theTask) {
 		mySink.addTask(theTask);
 	}
 
@@ -54,6 +54,13 @@ public class Builder {
 
 	public Builder initializeSchema(String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
 		mySink.addTask(new InitializeSchemaTask(myRelease, theVersion, theSchemaInitializationProvider));
+		return this;
+	}
+
+	public Builder initializeSchema(String theVersion, String theSchemaName, ISchemaInitializationProvider theSchemaInitializationProvider) {
+		InitializeSchemaTask task = new InitializeSchemaTask(myRelease, theVersion, theSchemaInitializationProvider);
+		task.setDescription("Initialize " + theSchemaName + " schema");
+		mySink.addTask(task);
 		return this;
 	}
 
@@ -122,7 +129,7 @@ public class Builder {
 		}
 
 		@Override
-		public void addTask(BaseTask<?> theTask) {
+		public void addTask(BaseTask theTask) {
 			if (theTask instanceof AddColumnTask) {
 				myTask.addAddColumnTask((AddColumnTask) theTask);
 			} else {
@@ -147,9 +154,35 @@ public class Builder {
 		}
 
 		public void dropIndex(String theVersion, String theIndexName) {
+			dropIndexOptional(false, theVersion, theIndexName);
+		}
+
+		public void dropIndexStub(String theVersion, String theIndexName) {
+			dropIndexOptional(true, theVersion, theIndexName);
+		}
+
+		private void dropIndexOptional(boolean theDoNothing, String theVersion, String theIndexName) {
 			DropIndexTask task = new DropIndexTask(myRelease, theVersion);
 			task.setIndexName(theIndexName);
 			task.setTableName(myTableName);
+			task.setDoNothing(theDoNothing);
+			addTask(task);
+		}
+
+		public void renameIndex(String theVersion, String theOldIndexName, String theNewIndexName) {
+			renameIndexOptional(false, theVersion, theOldIndexName, theNewIndexName);
+		}
+
+		public void renameIndexStub(String theVersion, String theOldIndexName, String theNewIndexName) {
+			renameIndexOptional(true, theVersion, theOldIndexName, theNewIndexName);
+		}
+
+		private void renameIndexOptional(boolean theDoNothing, String theVersion, String theOldIndexName, String theNewIndexName) {
+			RenameIndexTask task = new RenameIndexTask(myRelease, theVersion);
+			task.setOldIndexName(theOldIndexName);
+			task.setNewIndexName(theNewIndexName);
+			task.setTableName(myTableName);
+			task.setDoNothing(theDoNothing);
 			addTask(task);
 		}
 
@@ -176,7 +209,7 @@ public class Builder {
 		}
 
 		@Override
-		public void addTask(BaseTask<?> theTask) {
+		public void addTask(BaseTask theTask) {
 			((BaseTableTask<?>) theTask).setTableName(myTableName);
 			mySink.addTask(theTask);
 		}
@@ -244,12 +277,21 @@ public class Builder {
 					myUnique = theUnique;
 				}
 
+				public void withColumnsStub(String... theColumnNames) {
+					withColumnsOptional(true, theColumnNames);
+				}
+
 				public void withColumns(String... theColumnNames) {
+					withColumnsOptional(false, theColumnNames);
+				}
+
+				private void withColumnsOptional(boolean theDoNothing, String... theColumnNames) {
 					AddIndexTask task = new AddIndexTask(myRelease, myVersion);
 					task.setTableName(myTableName);
 					task.setIndexName(myIndexName);
 					task.setUnique(myUnique);
 					task.setColumns(theColumnNames);
+					task.setDoNothing(theDoNothing);
 					addTask(task);
 				}
 			}

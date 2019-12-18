@@ -43,7 +43,7 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 
 		JdbcUtils.ColumnType existingType;
 		boolean nullable;
@@ -61,22 +61,22 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 			throw new InternalErrorException(e);
 		}
 
-		Long columnLength = getColumnLength();
-		if (columnLength != null && isNoColumnShrink()) {
+		Long taskColumnLength = getColumnLength();
+		if (taskColumnLength != null && isNoColumnShrink()) {
 			long existingLength = existingType.getLength() != null ? existingType.getLength() : 0;
-			if (existingLength > columnLength) {
-				columnLength = existingLength;
+			if (existingLength > taskColumnLength) {
+				taskColumnLength = existingLength;
 			}
 		}
 
-		boolean alreadyOfCorrectType = existingType.equals(getColumnType(), columnLength);
+		boolean alreadyOfCorrectType = existingType.equals(getColumnType(), taskColumnLength);
 		boolean alreadyCorrectNullable = isNullable() == nullable;
 		if (alreadyOfCorrectType && alreadyCorrectNullable) {
 			logInfo(ourLog, "Column {} on table {} is already of type {} and has nullable {} - No action performed", getColumnName(), getTableName(), existingType, nullable);
 			return;
 		}
 
-		String type = getSqlType(columnLength);
+		String type = getSqlType(taskColumnLength);
 		String notNull = getSqlNotNull();
 
 		String sql = null;

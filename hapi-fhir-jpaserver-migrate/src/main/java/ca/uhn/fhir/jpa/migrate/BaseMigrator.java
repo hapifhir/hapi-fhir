@@ -21,21 +21,27 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import org.flywaydb.core.api.MigrationInfoService;
 
+import javax.sql.DataSource;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
-public abstract class BaseMigrator {
-
+public abstract class BaseMigrator implements IMigrator {
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
+	private boolean myOutOfOrderPermitted;
 	private DriverTypeEnum myDriverType;
-	private String myConnectionUrl;
-	private String myUsername;
-	private String myPassword;
+	private DataSource myDataSource;
+	private List<BaseTask.ExecutedStatement> myExecutedStatements = new ArrayList<>();
 
-	public abstract void migrate();
+	public DataSource getDataSource() {
+		return myDataSource;
+	}
+
+	public void setDataSource(DataSource theDataSource) {
+		myDataSource = theDataSource;
+	}
 
 	public boolean isDryRun() {
 		return myDryRun;
@@ -53,10 +59,6 @@ public abstract class BaseMigrator {
 		myNoColumnShrink = theNoColumnShrink;
 	}
 
-	public abstract Optional<MigrationInfoService> getMigrationInfo();
-
-	public abstract void addTasks(List<BaseTask<?>> theMigrationTasks);
-
 	public DriverTypeEnum getDriverType() {
 		return myDriverType;
 	}
@@ -65,28 +67,33 @@ public abstract class BaseMigrator {
 		myDriverType = theDriverType;
 	}
 
-	public String getConnectionUrl() {
-		return myConnectionUrl;
+	public boolean isOutOfOrderPermitted() {
+		return myOutOfOrderPermitted;
 	}
 
-	public void setConnectionUrl(String theConnectionUrl) {
-		myConnectionUrl = theConnectionUrl;
+	public void setOutOfOrderPermitted(boolean theOutOfOrderPermitted) {
+		myOutOfOrderPermitted = theOutOfOrderPermitted;
 	}
 
-	public String getUsername() {
-		return myUsername;
+	public void addExecutedStatements(List theExecutedStatements) {
+		myExecutedStatements.addAll(theExecutedStatements);
 	}
 
-	public void setUsername(String theUsername) {
-		myUsername = theUsername;
-	}
+	protected StringBuilder buildExecutedStatementsString() {
+		StringBuilder statementBuilder = new StringBuilder();
+		String lastTable = null;
+		for (BaseTask.ExecutedStatement next : myExecutedStatements) {
+			if (!Objects.equals(lastTable, next.getTableName())) {
+				statementBuilder.append("\n\n-- Table: ").append(next.getTableName()).append("\n");
+				lastTable = next.getTableName();
+			}
 
-	public String getPassword() {
-		return myPassword;
-	}
+			statementBuilder.append(next.getSql()).append(";\n");
 
-	public void setPassword(String thePassword) {
-		myPassword = thePassword;
+			for (Object nextArg : next.getArguments()) {
+				statementBuilder.append("  -- Arg: ").append(nextArg).append("\n");
+			}
+		}
+		return statementBuilder;
 	}
-
 }

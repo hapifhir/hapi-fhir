@@ -25,7 +25,6 @@ import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -47,6 +46,7 @@ public abstract class BaseTask<T extends BaseTask> {
 	private String myDescription;
 	private int myChangesCount;
 	private boolean myDryRun;
+	private boolean myDoNothing;
 	private List<ExecutedStatement> myExecutedStatements = new ArrayList<>();
 	private boolean myNoColumnShrink;
 	private boolean myFailureAllowed;
@@ -155,7 +155,15 @@ public abstract class BaseTask<T extends BaseTask> {
 		return getConnectionProperties().newJdbcTemplate();
 	}
 
-	public abstract void execute() throws SQLException;
+	public void execute() throws SQLException {
+		if (myDoNothing) {
+			ourLog.info("Skipping stubbed task: {}", getDescription());
+			return;
+		}
+		doExecute();
+	}
+
+	public abstract void doExecute() throws SQLException;
 
 	public void setFailureAllowed(boolean theFailureAllowed) {
 		myFailureAllowed = theFailureAllowed;
@@ -178,6 +186,15 @@ public abstract class BaseTask<T extends BaseTask> {
 		if (!matcher.matches()) {
 			throw new IllegalStateException("The version " + mySchemaVersion + " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
 		}
+	}
+
+	public boolean isDoNothing() {
+		return myDoNothing;
+	}
+
+	public BaseTask<T> setDoNothing(boolean theDoNothing) {
+		myDoNothing = theDoNothing;
+		return this;
 	}
 
 	public static class ExecutedStatement {

@@ -1,0 +1,96 @@
+---
+- item:
+    type: "add"
+    title: "Add server interceptor framework, and new interceptor for logging incoming requests."
+- item:
+    type: "add"
+    title: "Add server validation framework for validating resources against the FHIR schemas and schematrons"
+- item:
+    type: "fix"
+    title: "Tester UI created double _format and _pretty param entries in searches. Thanks to Gered King of University Health Network for reporting!"
+- item:
+    issue: "4"
+    type: "fix"
+    title: "Create method was incorrectly returning an HTTP 204 on sucessful completion, but should be returning an HTTP 200 per the FHIR specification. Thanks to wanghaisheng for reporting!"
+- item:
+    type: "fix"
+    title: "FHIR Tester UI now correctly sends UTF-8 charset in responses so that message payloads containing non US-ASCII characters will correctly display in the browser"
+- item:
+    type: "fix"
+    title: "JSON parser was incorrectly encoding extensions on composite elements outside the element itself (as is done correctly for non-composite elements) instead of inside of them. Thanks to David Hay of Orion for reporting this!"
+- item:
+    type: "add"
+    title: "Contained/included resource instances received by a client are now automatically added to any ResourceReferenceDt instancea in other resources which reference them."
+- item:
+    type: "add"
+    title: "Add documentation on how to use eBay CORS Filter to support Cross Origin Resource Sharing (CORS) to server. CORS support that was built in to the server itself has been removed, as it did not work correctly (and was reinventing a wheel that others have done a great job inventing). Thanks to Peter Bernhardt of Relay Health for all the assistance in testing this!"
+- item:
+    type: "fix"
+    title: "IResource interface did not expose the getLanguage/setLanguage methods from BaseResource, so the resource language was difficult to access."
+- item:
+    type: "fix"
+    title: "JSON Parser now gives a more friendly error message if it tries to parse JSON with invalid use of single quotes"
+- item:
+    type: "add"
+    title: "Transaction server method is now allowed to return an OperationOutcome in addition to the incoming resources. The public test server now does this in order to return status information about the transaction processing."
+- item:
+    type: "add"
+    title: "Update method in the server can now flag (via a field on the MethodOutcome object being returned) that the result was actually a creation, and Create method can indicate that it was actually an update. This has no effect other than to switch between the HTTP 200 and HTTP 201 status codes on the response, but this may be useful in some circumstances."
+- item:
+    type: "fix"
+    title: "Annotation client search methods with a specific resource type (e.g. <code>List&lt;Patient&gt;</code> search()) won't return any resources that aren't of the correct type that are received in a response bundle (generally these are referenced resources, so they are populated in the reference fields instead). Thanks to Tahura Chaudhry of University Health Network for the unit test!"
+- item:
+    type: "add"
+    title: "Added narrative generator template for OperationOutcome resource"
+- item:
+    type: "fix"
+    title: "Date/time types did not correctly parse values in the format \"yyyymmdd\" (although the FHIR-defined format is \"yyyy-mm-dd\" anyhow, and this is correctly handled). Thanks to Jeffrey Ting of Systems Made Simple for reporting!"
+- item:
+    type: "fix"
+    title: "Server search method for an unnamed query gets called if the client requests a named query with the same parameter list. Thanks to Neal Acharya of University Health Network for reporting!"
+- item:
+    type: "fix"
+    title: "Category header (for tags) is correctly read in client for \"read\" operation"
+- item:
+    type: "add"
+    title: "Transaction method in server can now have parameter type Bundle instead of <code>List&lt;IBaseResource&gt;</code>"
+- item:
+    type: "add"
+    title: "HAPI parsers now use field access to get/set values instead of method accessors and mutators. This should give a small performance boost."
+- item:
+    type: "fix"
+    title: "JSON parser encodes resource references incorrectly, using the name \"resource\" instead of the name \"reference\" for the actual reference. Thanks to Ricky Nguyen for reporting and tracking down the issue!"
+- item:
+    type: "fix"
+    title: "Rename NotImpementedException to NotImplementedException (to correct typo)"
+- item:
+    type: "fix"
+    title: "Server setUseBrowserFriendlyContentType setting also respected for errors (e.g. OperationOutcome with 4xx/5xx status)"
+- item:
+    type: "fix"
+    title: "Fix performance issue in date/time datatypes where pattern matchers were not static"
+- item:
+    type: "fix"
+    title: "Server now gives a more helpful error message if a @Read method has a search parameter (which is invalid, but previously lead to a very unhelpful error message). Thanks to Tahura Chaudhry of UHN for reporting!"
+- item:
+    type: "fix"
+    title: "Resource of type \"List\" failed to parse from a bundle correctly. Thanks to David Hay of Orion Health for reporting!"
+- item:
+    type: "fix"
+    title: "QuantityParam correctly encodes approximate (~) prefix to values"
+- item:
+    issue: "14"
+    type: "fix"
+    title: "If a server defines a method with parameter \"_id\", incoming search requests for that method may get delegated to the wrong method. Thanks to Neal Acharya for reporting!"
+- item:
+    type: "add"
+    title: "SecurityEvent.Object structural element has been renamed to SecurityEvent.ObjectElement to avoid conflicting names with the java Object class. Thanks to Laurie Macdougall-Sookraj of UHN for reporting!"
+- item:
+    type: "fix"
+    title: "Text/narrative blocks that were created with a non-empty namespace prefix (e.g. <xhtml:div xmlns:xhtml=\"...\">...</xhtml:div>) failed to encode correctly (prefix was missing in encoded resource)"
+- item:
+    type: "fix"
+    title: "Resource references previously encoded their children (display and reference) in the wrong order so references with both would fail schema validation."
+- item:
+    type: "add"
+    title: "SecurityEvent resource's enums now use friendly enum names instead of the unfriendly numeric code values. Thanks to Laurie MacDougall-Sookraj of UHN for the suggestion!"

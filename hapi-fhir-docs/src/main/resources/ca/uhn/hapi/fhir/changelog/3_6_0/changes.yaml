@@ -1,0 +1,97 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Karaf (OSGi): 4.1.4 -&gt; 4.1.6</li> <li>Commons-Compress (JPA): 1.14 -&gt; 1.18</li> <li>Jackson (JPA): 2.9.2 -&gt; 2.9.7</li> </ul>"
+- item:
+    type: "fix"
+    title: "A bug in the JPA migration tasks from 3.4.0 to 3.5.0 caused a failure if the HFJ_SEARCH_PARM table did not exist. This table existed in previous versions of HAPI FHIR but was dropped in 3.5.0, meaning that migrations would fail if the database was created using a snapshot version of 3.5.0."
+- item:
+    type: "fix"
+    title: "Automatic ID generation for contained resources (in cases where the user hasn't manually specified an ID) has been streamlined to generate more predictable IDs in some cases."
+- item:
+    type: "fix"
+    title: "An issue in the HAPI FHIR CLI database migrator command has been resolved, where some database drivers did not automatically register and had to be manually added to the classpath."
+- item:
+    type: "add"
+    title: "The module which deletes stale searches has been modified so that it deletes very large searches (searches with 10000+ results in the query cache) in smaller batches, in order to avoid having very long running delete operations occupying database connections for a long time or timing out."
+- item:
+    type: "fix"
+    title: "When invoking an operation using the fluent client on an instance, the operation would accidentally invoke against the server if the provided ID did not include a type. This has been corrected so that an IllegalArgumentException is now thrown."
+- item:
+    type: "add"
+    title: "A new operation has been added to the JPA server called <code>$trigger-subscription</code> . This can be used to cause a transaction to redeliver a resource that previously triggered. See <a href=\"https://smilecdr.com/docs/current/fhir_repository/subscription.html#manually-triggering-subscriptions\">this link</a> for a description of how this feature works. Note that you must add the SubscriptionRetriggeringProvider as shown in the sample project."
+- item:
+    type: "add"
+    title: "When operating in R4 mode, the HAPI FHIR server will now populate Bundle.entry.response for history and search results, which is did not previously do."
+- item:
+    type: "add"
+    title: "The JPA database migrator tool has been enhanced so that it now supports migrations from HAPI FHIR 3.3.0 to HAPI FHIR 3.4.0 / 3.5.0+ as well."
+- item:
+    type: "fix"
+    title: "When using the HAPI FHIR CLI, user-prompted passwords were not correctly encoded, meaning that the \"--basic-auth PROMPT\" action was not usable. This has been corrected."
+- item:
+    type: "add"
+    title: "The JPA server SearchCoordinator has been refactored to make searches more efficient: When a search is performed, the SearchCoordinator loads multiple pages of results even if the user has only requested a small number. This is done in order to prevent needing to re-run the search for every page of results that is loaded. In previous versions of HAPI FHIR, when a search was made the SearchCoordinator would prefetch as many results as the user could possibly request across all pages (even if this meant prefetching thousands or millions of resources). As of this version, a new option has been added to DaoConfig that specifies how many resources to prefetch. This can have a significant impact on performance for servers with a large number of resources, where users often only want the first page of results. See <code>DatConfig#setSearchPreFetchThresholds()</code> for configuration of this feature."
+- item:
+    type: "add"
+    title: "When performing a JPA server using a date parameter, if a time is not specified in the query URL, the date range is expanded slightly to include all possible timezones where the date that could apply. This makes the search slightly more inclusive, which errs on the side of caution."
+- item:
+    type: "fix"
+    title: "A bug was fixed in the JPA server $expunge operation where a database connection could sometimes be opened and not returned to the pool immediately, leading to pool starvation if the operation was called many times in a row."
+- item:
+    type: "add"
+    title: "A new setting has been added to the JPA server DaoConfig that causes the server to keep certain searches \"warm\" in the cache. This means that the search will be performed periodically in the background in order to keep a reasonably fresh copy of the results in the query cache."
+- item:
+    type: "fix"
+    title: "When using the testpage overlay to delete a resource, currently a crash can occur if an unqualified ID is placed in the ID text box. This has been corrected."
+- item:
+    type: "fix"
+    title: "AuthorizationInterceptor did not allow FHIR batch operations when the transaction() permission is granted. This has been corrected so that transaction() allows both batch and transaction requests to proceed."
+- item:
+    type: "add"
+    title: "The JPA server now automatically supplies several appropriate hibernate performance settings as long as the JPA EntityManagerFactory was created using HAPI FHIR's built-in method for creating it. <br/><br/> Existing JPA projects should consider using <code>super.entityManagerFactory()</code> as shown in <a href=\"https://github.com/hapifhir/hapi-fhir-jpaserver-starter/blob/master/src/main/java/ca/uhn/fhir/jpa/demo/FhirServerConfig.java#L62\">the example project</a> if they are not already."
+- item:
+    type: "add"
+    title: "The FhirTerser <code>getValues(...)</code> methods have been overloaded. The terser can now be used to create a null-valued element where none exists. Additionally, the terser can now add a null-valued extension where one or more such extensions already exist. These changes allow better population of FHIR elements provided an arbitrary FHIR path."
+- item:
+    type: "fix"
+    title: "The FhirTerser <code>getValues(...)</code> methods were not properly handling modifier extensions for verions of FHIR prior to DSTU3. This has been corrected."
+- item:
+    type: "fix"
+    title: "When updating resources in the JPA server, a bug caused index table entries to be refreshed sometimes even though the index value hadn't changed. This issue did not cause incorrect search results but had an effect on write performance. This has been corrected."
+- item:
+    type: "add"
+    title: "The @Operation annotation used to declare operations on the Plain Server now has a wildcard constant which may be used for the operation name. This allows you to create a server that supports operations that are not known to the server when it starts up. This is generally not advisable but can be useful for some circumstances."
+- item:
+    type: "add"
+    title: "When using an @Operation method in the Plain Server, it is now possible to use a parameter annotated with @ResourceParam to receive the Parameters (or other) resource supplied by the client as the request body."
+- item:
+    type: "add"
+    title: "The JPA server version migrator tool now runs in a multithreaded way, allowing it to upgrade th database faster when migration tasks require data updates."
+- item:
+    type: "fix"
+    title: "A bug in the JPA server was fixed: When a resource was previously deleted, a transaction could not be posted that both restored the deleted resource but also contained references to the now-restored resource."
+- item:
+    type: "fix"
+    title: "The $expunge operation could sometimes fail to delete resources if a resource to be deleted had recently been returned in a search result. This has been corrected."
+- item:
+    type: "add"
+    title: "A new setting has been added to the JPA Server DopConfig that controls the behaviour when a client-assigned ID is encountered (i.e. the client performs an HTTP PUT to a resource ID that doesn't already exist on the server). It is now possible to disallow this action, to only allow alphanumeric IDs (the default and only option previously) or allow any IDs including alphanumeric."
+- item:
+    issue: "1103"
+    type: "add"
+    title: "It is now possible to use your own IMessageResolver instance in the narrative generator. Thanks to Ruth Alkema for the pull request!"
+- item:
+    issue: "1071"
+    type: "fix"
+    title: "When restful reponses tried to return multiple instances of the same response header, some instances were discarded. Thanks to Volker Schmidt for the pull request!"
+- item:
+    type: "add"
+    title: "The REST client now allows for configurable behaviour as to whether a <code>_format</code> parameter should be included in requests."
+- item:
+    type: "add"
+    title: "JPA server R4 SearchParameter custom expression validation is now done using the actual FHIRPath evaluator, meaning it is more rigorous in what it can find."
+- item:
+    issue: "1047"
+    type: "fix"
+    title: "A NullPointerException in DateRangeParam when a client URL conrtained a malformed date was corrected. Thanks Heinz-Dieter Conradi for the Pull Request!"

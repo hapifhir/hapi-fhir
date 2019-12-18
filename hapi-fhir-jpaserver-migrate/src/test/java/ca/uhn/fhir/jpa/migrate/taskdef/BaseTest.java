@@ -42,7 +42,7 @@ public class BaseTest {
 		myDataSource.setUsername("SA");
 		myDataSource.setPassword("SA");
 		myDataSource.setDriverClassName(DriverTypeEnum.H2_EMBEDDED.getDriverClassName());
-		myMigrator = new FlywayMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, myDataSource);
+		myMigrator = new FlywayMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
 	}
 
 	protected BasicDataSource getDataSource() {

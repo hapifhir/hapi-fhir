@@ -1,8 +1,11 @@
 # Authorization Interceptor
 
-HAPI FHIR 1.5 introduced a new interceptor: [AuthorizationInterceptor](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.html).
+HAPI FHIR 1.5 introduced a new interceptor: [AuthorizationInterceptor](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.html).
 
 This interceptor can help with the complicated task of determining whether a user has the appropriate permission to perform a given task on a FHIR server. This is done by declaring a set of rules that can selectively allow (whitelist) and/or selectively block (blacklist) requests.
+
+* [AuthorizationInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.html)
+* [AuthorizationInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.java)
 
 <p class="helpInfoCalloutBox">
     AuthorizationInterceptor has been well tested, but it is impossible to predict every scenario and environment in which HAPI FHIR will be used. Use with caution, and do lots of testing! We welcome feedback and suggestions on this feature. Please get in touch if you'd like to help test, have suggestions, etc.
@@ -24,7 +27,7 @@ The AuthorizationInterceptor works by examining the client request in order to d
 
 When authorizing a read operation, the AuthorizationInterceptor always allows client code to execute and generate a response. It then examines the response that would be returned before actually returning it to the client, and if rules do not permit that data to be shown to the client the interceptor aborts the request.
 
-Note that there are performance implications to this mechanism, since an unauthorized user can still cause the server to fetch data even if they won't get to see it. This mechanism should be comprehensive however, since it will prevent clients from using various features in FHIR (e.g. <code>_include</code> or <code>_revinclude</code>) to "trick" the server into showing them date they shouldn't be allowed to see.
+Note that there are performance implications to this mechanism, since an unauthorized user can still cause the server to fetch data even if they won't get to see it. This mechanism should be comprehensive however, since it will prevent clients from using various features in FHIR (e.g. <code>_include</code> or <code>_revinclude</code>) to "trick" the server into showing them data they shouldn't be allowed to see.
 
 See the following diagram for an example of how this works.
 

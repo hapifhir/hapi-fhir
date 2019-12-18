@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
-import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
@@ -55,9 +55,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.PersistJobDataAfterExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +75,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
 public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc {
-	public static final long SCHEDULE_DELAY = DateUtils.MILLIS_PER_SECOND;
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTriggeringProvider.class);
 	private static final int DEFAULT_MAX_SUBMIT = 10000;
 	private final List<SubscriptionTriggeringJobDetails> myActiveJobs = new ArrayList<>();
@@ -157,14 +154,6 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		value.setValueAsString("Subscription triggering job submitted as JOB ID: " + jobDetails.myJobId);
 		ParametersUtil.addParameterToParameters(myFhirContext, retVal, "information", value);
 		return retVal;
-	}
-
-	@PostConstruct
-	public void registerScheduledJob() {
-		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(SubscriptionTriggeringSvcImpl.class.getName());
-		jobDetail.setJobClass(SubscriptionTriggeringSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(SCHEDULE_DELAY, false, jobDetail);
 	}
 
 	@Override
@@ -356,6 +345,11 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 	@PostConstruct
 	public void start() {
+		createExecutorService();
+		scheduleJob();
+	}
+
+	private void createExecutorService() {
 		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1000);
 		BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
 			.namingPattern("SubscriptionTriggering-%d")
@@ -386,21 +380,21 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			executorQueue,
 			threadFactory,
 			rejectedExecutionHandler);
-
 	}
 
-	@DisallowConcurrentExecution
-	@PersistJobDataAfterExecution
-	public static class SubmitJob extends FireAtIntervalJob {
+	private void scheduleJob() {
+		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(getClass().getName());
+		jobDetail.setJobClass(Job.class);
+		mySchedulerService.scheduleLocalJob(DateUtils.MILLIS_PER_SECOND, jobDetail);
+	}
+
+	public static class Job implements HapiJob {
 		@Autowired
 		private ISubscriptionTriggeringSvc myTarget;
 
-		public SubmitJob() {
-			super(SCHEDULE_DELAY);
-		}
-
 		@Override
-		protected void doExecute(JobExecutionContext theContext) {
+		public void execute(JobExecutionContext theContext) {
 			myTarget.runDeliveryPass();
 		}
 	}

@@ -100,19 +100,32 @@
 			<organization>University Health Network</organization>
 		</developer>
 		<developer>
+			<id>grahamegrieve</id>
+			<name>Grahame Grieve</name>
+			<organization>Health Intersections</organization>
+		</developer>
+		<developer>
 			<id>dmuylwyk</id>
 			<name>Diederik Muylwyk</name>
 			<organization>Smile CDR</organization>
 		</developer>
 		<developer>
+			<id>fil512</id>
+			<name>Ken Stevens</name>
+			<organization>Smile CDR</organization>
+		</developer>
+		<developer>
+			<id>yogthos</id>
 			<name>Dmitri Sotnikov</name>
 			<organization>University Health Network</organization>
 		</developer>
 		<developer>
+			<id></id>
 			<name>Lisa Wong</name>
 			<organization>University Health Network</organization>
 		</developer>
 		<developer>
+			<id>jmandel</id>
 			<name>Josh Mandel</name>
 			<organization>Boston Children's Hospital</organization>
 		</developer>
@@ -122,10 +135,12 @@
 			<organization>University Health Network</organization>
 		</developer>
 		<developer>
+			<id>t106uhn</id>
 			<name>Neal Acharya</name>
 			<organization>University Health Network</organization>
 		</developer>
 		<developer>
+			<id>davidhay25</id>
 			<name>David Hay</name>
 			<organization>Orion Health</organization>
 		</developer>
@@ -608,7 +623,7 @@
 		<commons_lang3_version>3.9</commons_lang3_version>
 		<derby_version>10.14.2.0</derby_version>
 		<!--<derby_version>10.15.1.3</derby_version>-->
-		<error_prone_annotations_version>2.3.3</error_prone_annotations_version>
+		<error_prone_annotations_version>2.3.4</error_prone_annotations_version>
 		<error_prone_core_version>2.3.3</error_prone_core_version>
 		<guava_version>28.0-jre</guava_version>
 		<gson_version>2.8.5</gson_version>
@@ -620,7 +635,7 @@
 		<!-- 9.4.17 seems to have issues -->
 		<jetty_version>9.4.24.v20191120</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
-		<flyway_version>6.0.8</flyway_version>
+		<flyway_version>6.1.0</flyway_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
 		<hibernate_version>5.4.6.Final</hibernate_version>
 		<!-- Update lucene version when you update hibernate-search version -->
@@ -1293,7 +1308,7 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>3.1.0</version>
+				<version>3.2.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
@@ -1635,7 +1650,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.0.0-M3</version>
+					<version>3.0.0-M4</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1689,7 +1704,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<version>1.16</version>
+					<version>1.18</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -2243,6 +2258,21 @@
 						<phase>site-deploy</phase>
 						<goals>
 							<goal>publish-scm</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<dumpOnExit>true</dumpOnExit>
+				</configuration>
+				<executions>
+					<execution>
+						<id>default-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
 						</goals>
 					</execution>
 				</executions>

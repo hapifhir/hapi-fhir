@@ -20,20 +20,19 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.migrate.BaseMigrator;
-import ca.uhn.fhir.jpa.migrate.BruteForceMigrator;
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
-import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
+import ca.uhn.fhir.jpa.migrate.*;
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -42,10 +41,13 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * NB since 2019-12-05: This class is kind of weirdly named now, since it can either use Flyway or not use Flyway
  */
 public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends BaseCommand {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseFlywayMigrateDatabaseCommand.class);
 
 	public static final String MIGRATE_DATABASE = "migrate-database";
+	public static final String NO_COLUMN_SHRINK = "no-column-shrink";
 	public static final String DONT_USE_FLYWAY = "dont-use-flyway";
+	public static final String OUT_OF_ORDER_PERMITTED = "out-of-order-permitted";
+	public static final String SKIP_VERSIONS = "skip-versions";
 	private Set<String> myFlags;
 	private String myMigrationTableName;
 
@@ -68,25 +70,19 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 	}
 
 	@Override
-	public List<String> provideUsageNotes() {
-		String versions = "The following versions are supported: " +
-			provideAllowedVersions().stream().map(Enum::name).collect(Collectors.joining(", "));
-		return Collections.singletonList(versions);
-	}
-
-	@Override
 	public Options getOptions() {
 		Options retVal = new Options();
 
 		addOptionalOption(retVal, "r", "dry-run", false, "Log the SQL statements that would be executed but to not actually make any changes");
-
 		addRequiredOption(retVal, "u", "url", "URL", "The JDBC database URL");
 		addRequiredOption(retVal, "n", "username", "Username", "The JDBC database username");
 		addRequiredOption(retVal, "p", "password", "Password", "The JDBC database password");
 		addRequiredOption(retVal, "d", "driver", "Driver", "The database driver to use (Options are " + driverOptions() + ")");
 		addOptionalOption(retVal, "x", "flags", "Flags", "A comma-separated list of any specific migration flags (these flags are version specific, see migrator documentation for details)");
 		addOptionalOption(retVal, null, DONT_USE_FLYWAY,false, "If this option is set, the migrator will not use FlywayDB for migration. This setting should only be used if you are trying to migrate a legacy database platform that is not supported by FlywayDB.");
-		addOptionalOption(retVal, null, "no-column-shrink", false, "If this flag is set, the system will not attempt to reduce the length of columns. This is useful in environments with a lot of existing data, where shrinking a column can take a very long time.");
+		addOptionalOption(retVal, null, OUT_OF_ORDER_PERMITTED,false, "If this option is set, the migrator will permit migration tasks to be run out of order.  It shouldn't be required in most cases, however may be the solution if you see the error message 'Detected resolved migration not applied to database'.");
+		addOptionalOption(retVal, null, NO_COLUMN_SHRINK, false, "If this flag is set, the system will not attempt to reduce the length of columns. This is useful in environments with a lot of existing data, where shrinking a column can take a very long time.");
+		addOptionalOption(retVal, null, SKIP_VERSIONS, "Versions", "A comma separated list of schema versions to skip.  E.g. 4_1_0.20191214.2,4_1_0.20191214.4");
 
 		return retVal;
 	}
@@ -110,7 +106,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		}
 
 		boolean dryRun = theCommandLine.hasOption("r");
-		boolean noColumnShrink = theCommandLine.hasOption("no-column-shrink");
+		boolean noColumnShrink = theCommandLine.hasOption(BaseFlywayMigrateDatabaseCommand.NO_COLUMN_SHRINK);
 
 		String flags = theCommandLine.getOptionValue("x");
 		myFlags = Arrays.stream(defaultString(flags).split(","))
@@ -118,27 +114,36 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 			.filter(StringUtils::isNotBlank)
 			.collect(Collectors.toSet());
 
-		boolean dontUseFlyway = theCommandLine.hasOption("dont-use-flyway");
+		boolean dontUseFlyway = theCommandLine.hasOption(BaseFlywayMigrateDatabaseCommand.DONT_USE_FLYWAY);
+		boolean outOfOrderPermitted = theCommandLine.hasOption(BaseFlywayMigrateDatabaseCommand.OUT_OF_ORDER_PERMITTED);
 
 		BaseMigrator migrator;
-		if (dontUseFlyway) {
-			migrator = new BruteForceMigrator();
+		if (dontUseFlyway || dryRun) {
+			// Flyway dryrun is not available in community edition
+			migrator = new TaskOnlyMigrator();
 		} else {
 			migrator = new FlywayMigrator(myMigrationTableName);
 		}
-		migrator.setConnectionUrl(url);
+
+		DriverTypeEnum.ConnectionProperties connectionProperties = driverType.newConnectionProperties(url, username, password);
+
+		migrator.setDataSource(connectionProperties.getDataSource());
 		migrator.setDriverType(driverType);
-		migrator.setUsername(username);
-		migrator.setPassword(password);
 		migrator.setDryRun(dryRun);
 		migrator.setNoColumnShrink(noColumnShrink);
-		addTasks(migrator);
+		migrator.setOutOfOrderPermitted(outOfOrderPermitted);
+		String skipVersions = theCommandLine.getOptionValue(BaseFlywayMigrateDatabaseCommand.SKIP_VERSIONS);
+		addTasks(migrator, skipVersions);
 		migrator.migrate();
 	}
 
-	protected abstract void addTasks(BaseMigrator theMigrator);
+	protected abstract void addTasks(BaseMigrator theMigrator, String theSkippedVersions);
 
 	public void setMigrationTableName(String theMigrationTableName) {
 		myMigrationTableName = theMigrationTableName;
+	}
+
+	protected void setDoNothingOnSkippedTasks(Collection<BaseTask> theTasks, String theSkipVersions) {
+		MigrationTaskSkipper.setDoNothingOnSkippedTasks(theTasks, theSkipVersions);
 	}
 }

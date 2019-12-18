@@ -32,7 +32,6 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.BeforeClass;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -75,7 +74,6 @@ public class RestfulServerRule implements TestRule {
 		myHttpClient.close();
 	}
 
-	@BeforeClass
 	private void startServer() throws Exception {
 		myServer = new Server(0);
 

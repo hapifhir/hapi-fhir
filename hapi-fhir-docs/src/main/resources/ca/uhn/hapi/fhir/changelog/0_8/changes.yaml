@@ -1,0 +1,120 @@
+---
+- item:
+    type: "add"
+    title: "<b>API CHANGE:</b> The \"FHIR structures\" for DSTU1 (the classes which model the resources and composite datatypes) have been moved out of the core JAR into their own JAR, in order to allow support for DEV resources, and DSTU2 resources when thast version is finalized. See the DSTU2 page for more information."
+- item:
+    type: "fix"
+    title: "<b>Deprecated API Removal</b>: The following classes (which were deprocated previously) have now been removed: <ul> <li><b>ISecurityManager</b>: If you are using this class, the same functionality is available through the more general purpose server interceptor capabilities.</li> <li><b>CodingListParam</b>: This class was made redundant by the TokenOrListParam class, which can be used in its place.</li> </ul>"
+- item:
+    type: "add"
+    title: "<b>API Change</b>: The IResource#getResourceMetadata() method has been changed from returning <code>Map&lt;ResourceMetadataKeyEnum&lt;?&gt;, Object&gt;</code> to returning a new type called <code>ResourceMetadataMap</code>. This new type implements <code>Map&lt;ResourceMetadataKeyEnum&lt;?&gt;, Object&gt;</code> itself, so this change should not break existing code, but may require a clean build in order to run correctly."
+- item:
+    issue: "38"
+    type: "add"
+    title: "Profile generation on the server was not working due to IdDt being incorrectly used. Thanks to Bill de Beaubien for the pull request!"
+- item:
+    issue: "42"
+    type: "add"
+    title: "Profiles did not generate correctly if a resource definition class had a defined extension which was of a composite type. Thanks to Bill de Beaubien for the pull request!"
+- item:
+    issue: "44"
+    type: "add"
+    title: "Remove unnecessary IOException from narrative generator API. Thanks to Petro Mykhailysyn for the pull request!"
+- item:
+    issue: "48"
+    type: "add"
+    title: "Introduced a new <code>@ProvidesResources</code> annotation which can be added to resource provider and servers to allow them to declare additional resource classes they are able to serve. This is useful if you have a server which can serve up multiple classes for the same resource type (e.g. a server that sometimes returns a default Patient, but sometimes uses a custom subclass). Thanks to Bill de Beaubien for the pull request!"
+- item:
+    issue: "49"
+    type: "add"
+    title: "Introduced a new <code>@Destroy</code> annotation which can be added to a resource provider method. This method will be called by the server when it is being closed/destroyed (e.g. when the application is being undeployed, the container is being shut down, etc.) Thanks to Bill de Beaubien for the pull request!"
+- item:
+    type: "add"
+    title: "Add a new method handleException to the server interceptor framework which allows interceptors to be notified of any exceptions and runtime errors within server methods. Interceptors may optionally also override the default error handling behaviour of the RestfulServer."
+- item:
+    type: "add"
+    title: "Add constants to BaseResource for the \"_id\" search parameter which all resources should support."
+- item:
+    type: "fix"
+    title: "DateRangeParam parameters on the server now return correct <code>getLowerBoundAsInstant()</code> and <code>getUpperBoundAsInstant()</code> values if a single unqualified value is passed in. For example, if a query containing <code>&birthdate=2012-10-01</code> is received, previously these two methods would both return the same value, but with this fix <code>getUpperBoundAsInstant()</code> now returns the instant at 23:59:59.9999."
+- item:
+    type: "fix"
+    title: "Resource fields with a type of \"*\" (or Any) sometimes failed to parse if a value type of \"code\" was used. Thanks to Bill de Beaubien for reporting!"
+- item:
+    type: "add"
+    title: "Remove dependency on JAXB libraries, which were used to parse and encode dates and times (even in the JSON parser). JAXB is built in to most JDKs but the version bundled with IBM's JDK is flaky and resulted in a number of problems when deploying to Websphere."
+- item:
+    issue: "50"
+    type: "fix"
+    title: "Primitive datatypes now preserve their original string value when parsing resources, as well as containing the \"parsed value\". For instance, a DecimalDt field value of <code>1.0000</code> will be parsed into the corresponding decimal value, but will also retain the original value with the corresponding level of precision. This allows vadliator rules to be applied to original values as received \"over the wire\", such as well formatted but invalid dates, e.g. \"2001-15-01\". Thanks to Joe Athman for reporting and helping to come up with a fix!"
+- item:
+    type: "add"
+    title: "When using Generic Client, if performing a create or update operation using a String as the resource body, the client will auto-detect the FHIR encoding style and send an appropriate Content-Type header."
+- item:
+    issue: "52"
+    type: "fix"
+    title: "JPA module (and public HAPI-FHIR test server) were unable to process resource types where at least one search parameter has no path specified. These now correctly save (although the server does not yet process these params, and it should). Thanks to GitHub user shvoidlee for reporting and help with analysis!"
+- item:
+    type: "fix"
+    title: "Generic/Fluent Client \"create\" and \"update\" method requests were not setting a content type header"
+- item:
+    issue: "53"
+    type: "add"
+    title: "DateDt left precision value as null in the constructor DateDt(Date) ."
+- item:
+    type: "fix"
+    title: "RESTful server now doesn't overwrite resource IDs if they are absolute. In other words, if a server's Resource Provider returns a resource with ID \"Patient/123\" it will be translated to \"[base url]/Patient/123\" but if the RP returns ID \"http://foo/Patient/123\" the ID will be returned exactly as is. Thanks to Bill de Beaubien for the suggestion!"
+- item:
+    issue: "55"
+    type: "fix"
+    title: "JPA module Transaction operation was not correctly replacing logical IDs beginning with \"cid:\" with server assigned IDs, as required by the specification."
+- item:
+    type: "fix"
+    title: "FhirTerser did not visit or find children in contained resources when searching a resource. This caused server implementations to not always return contained resources when they are included with a resource being returned."
+- item:
+    type: "add"
+    title: "Add a method String IResource#getResourceName() which returns the name of the resource in question (e.g. \"Patient\", or \"Observation\"). This is intended as a convenience to users."
+- item:
+    type: "fix"
+    title: "Do not strip version from resource references in resources returned from server search methods. Thanks to Bill de Beaubien for reporting!"
+- item:
+    issue: "54"
+    type: "fix"
+    title: "Correct an issue with the validator where changes to the underlying OperationOutcome produced by a validation cycle cause the validation results to be incorrect."
+- item:
+    type: "fix"
+    title: "Client interceptors registered to an interface based client instance were applied to other client instances for the same client interface as well. (Issue did not affect generic/fluent clients)"
+- item:
+    issue: "57"
+    type: "fix"
+    title: "DateDt, DateTimeDt and types InstantDt types now do not throw an exception if they are used to parse a value with the wrong level of precision for the given type but do throw an exception if the wrong level of precision is passed into their constructors. <br/><br/> This means that HAPI FHIR can now successfully parse resources from external sources that have the wrong level of precision, but will generate a validation error if the resource is validated. Thanks to Alexander Kley for the suggestion!"
+- item:
+    type: "fix"
+    title: "Encoding a Binary resource without a content type set should not result in a NullPointerException. Thanks to Alexander Kley for reporting!"
+- item:
+    type: "add"
+    title: "Server gives a more helpful error message if multiple IResourceProvider implementations are provided for the same resource type. Thanks to wanghaisheng for the idea!"
+- item:
+    issue: "61"
+    type: "add"
+    title: "Bring DSTU1 resource definitions up to version 0.0.82-2929 <br/> Bring DEV resource definitions up to 0.4.0-3775 <br/> Thanks to crinacimpian for reporting!"
+- item:
+    issue: "62"
+    type: "add"
+    title: "JPA server did not correctly process _include requests if included resources were present with a non-numeric identifier. Thanks to Bill de Beaubien for reporting!"
+- item:
+    issue: "60"
+    type: "fix"
+    title: "Client requests which include a resource/bundle body (e.g. create, update, transaction) were not including a charset in the content type header, leading to servers incorrectly assuming ISO-8859/1. Thanks to shvoidlee for reporting!"
+- item:
+    issue: "59"
+    type: "fix"
+    title: "Clean up the way that Profile resources are automatically exported by the server for custom resource profile classes. See the @ResourceDef JavaDoc for information on how this works."
+- item:
+    issue: "73"
+    type: "add"
+    title: "Add convenience methods to TokenOrListParam to test whether any of a set of tokens match the given requested list."
+- item:
+    issue: "86"
+    type: "add"
+    title: "Add a protected method to RestfulServer which allows developers to implement their own method for determining which part of the request URL is the FHIR request path (useful if you are embedding the RestulServer inside of another web framework). Thanks to Harsha Kumara for the pull request!"

@@ -2658,7 +2658,7 @@ public class GenericClientDstu2Test {
 		}
 
 		@Override
-		public void registerInterceptor(IClientInterceptor theInterceptor) {
+		public void registerInterceptor(Object theInterceptor) {
 			// nothing
 		}
 
@@ -2673,7 +2673,7 @@ public class GenericClientDstu2Test {
 		}
 
 		@Override
-		public void unregisterInterceptor(IClientInterceptor theInterceptor) {
+		public void unregisterInterceptor(Object theInterceptor) {
 			// nothing
 		}
 

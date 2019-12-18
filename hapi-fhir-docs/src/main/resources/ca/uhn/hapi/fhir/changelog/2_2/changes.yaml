@@ -1,0 +1,146 @@
+---
+- item:
+    type: "add"
+    title: "Bump the version of a few dependencies to the latest versions (dependent HAPI modules listed in brackets): <ul> <!--<li>spring (JPA): 4.3.1 -&gt; 4.3.4</li>--> <li>Derby (CLI): 10.12.1.1 -&gt; 10.13.1.1</li> <li>Jetty (CLI): 9.3.10.v20160621 -&gt; 9.3.14.v20161028</li> <li>JAnsi (CLI): 1.13 -&gt; 1.14</li> <li>Phloc Commons (SCH Validator): 4.4.5 -&gt; 4.4.6</li> </ul>"
+- item:
+    type: "fix"
+    title: "Fix issue in AuthorizationIntetceptor where transactions are blocked even when they should not be"
+- item:
+    type: "fix"
+    title: "Fix regression in HAPI FHIR 2.1 JPA server where some search parameters on metadata resources did not appear (e.g. \"StructureDefinition.url\"). Thanks to David Hay for reporting!"
+- item:
+    type: "add"
+    title: "Add ability to JPA server for disabling stale search expiry. This is useful if you are deploying the server to a cluster."
+- item:
+    issue: "495"
+    type: "fix"
+    title: "RestfulServer with no explicitly set FhirContext fails to detect the presents of DSTU3 structures. Thanks to GitHub user @vijayt27 for reporting!"
+- item:
+    type: "add"
+    title: "As the <a href=\"https://github.com/eBay/cors-filter\">eBay CORS interceptor</a> project has gone dormant, we have introduced a new HAPI server interceptor which can be used to implement CORS support instead of using the previously recommended Servlet Filter. All server examples as well as the CLI have been switched to use this new interceptor. See the CORS Documentation for more information."
+- item:
+    issue: "480"
+    type: "fix"
+    title: "Make the parser configurable so that when parsing an invalid empty value (e.g. <code>{\"status\":\"\"}</code> ) the parser will either throw a meaningful exception or log a warning depending on the configured error handler."
+- item:
+    issue: "276"
+    type: "fix"
+    title: "Fix issue when serializing resources that have contained resources which are referred to from multiple places. Sometimes when serializing these resources the contained resource section would contain duplicates. Thanks to Hugo Soares and Stefan Evinance for reporting and providing a test case!"
+- item:
+    issue: "518"
+    type: "add"
+    title: "Allow client to gracefully handle running in DSTU3 mode but with a structures JAR that does not contain a CapabilityStatement resource. Thanks to Michael Lawley for the pull request!"
+- item:
+    type: "fix"
+    title: "Fix a crash in JPA server when searching using an _include if _include targets are external references (and therefore can't be loaded by the server). Thanks to Hannes Ulrich for reporting!"
+- item:
+    type: "fix"
+    title: "HAPI FHIR CLI failed to delete a file when uploading example resources while running under Windows."
+- item:
+    issue: "521"
+    type: "fix"
+    title: "Server should reject update if the resource body does not contain an ID, or the ID does not match the request URL. Thanks to Jim Steel for reporting!"
+- item:
+    issue: "500"
+    type: "fix"
+    title: "Web Testing UI's next and previous buttons for paging through paged results did not work after the migration to using Thymeleaf 3. Thanks to GitHub user @gsureshkumar for reporting!"
+- item:
+    issue: "525"
+    type: "add"
+    title: "When parsing invalid enum values in STU3, report errors through the parserErrorHandler, not by throwing an exception. Thanks to Michael Lawley for the pull request!"
+- item:
+    issue: "516"
+    type: "add"
+    title: "When parsing DSTU3 resources with enumerated types that contain invalid values, the parser will now invoke the parserErrorHandler. For example, when parsing <code>{\"resourceType\":\"Patient\", \"gender\":\"foo\"}</code> the previous behaviour was to throw an InvalidArgumentException. Now, the parserErrorHandler is invoked. In addition, thw LenientErrorHandler has been modified so that this one case will result in a DataFormatException. This has the effect that servers which receive an invalid enum velue will return an HTTP 400 instead of an HTTP 500. Thanks to Jim Steel for reporting!"
+- item:
+    issue: "520"
+    type: "add"
+    title: "DSTU3 context now pulls the FHIR version from the actual model classes. Thanks to Michael Lawley for the pull request!"
+- item:
+    type: "add"
+    title: "Enhancements to the tinder-plugin's generic template features of the <i>generate-multi-files</i> and <i>generate-single-file</i> Maven goals as well as the Ant <i>hapi-tinder</i> task. <ul> <li>Provides the full Tinder data model by adding composites, valuesets, and profiles to resourcesw.</li> <li>Supports generating files for resources, composites, valuesets, and profiles</li> <li>Supports Velocimacro files outside the tinder-plugin JAR</li> <li>Provides filename prefix as well as suffix properties</li> <li>Can specify any of the Velocity configuration parameters such as <i>macro.provide.scope.control</i> which allows safe macro recursion</li> <li>Templates can now drill down into the referenced children for a ResourceBlockCopy</li> <li>Normalization of properties across all three generic tasks</li> </ul>"
+- item:
+    issue: "523"
+    type: "fix"
+    title: "Fix ordering of validator property handling when an element has a name that is similar to a shorter name[x] style name. Thanks to CarthageKing for the pull request!"
+- item:
+    issue: "510"
+    type: "add"
+    title: "Add a docker configuration to the hapi-fhir-jpaservr-example module. Thanks to Gijsbert van den Brink for the pull request!"
+- item:
+    issue: "507"
+    type: "add"
+    title: "Add utility constructors to MoneyDt. Thanks to James Ren for the contribution!"
+- item:
+    issue: "528"
+    type: "fix"
+    title: "AuthorizationInterceptor was failing to allow read requests to pass when a rule authorized those resources by compartment. Thanks to GitHub user @mattiuusitalo for reporting and supplying a test case!"
+- item:
+    type: "fix"
+    title: "Correct a typo in client <code>IHttpRequest</code> class: \"bufferEntitity\" should be \"bufferEntity\"."
+- item:
+    type: "add"
+    title: "ErrorHandler is now called (resulting in a warning by default, but can also be an exception) when arsing JSON if the resource ID is not a JSON string, or an object is found where an array is expected (e.g. repeating field). Thanks to Jenni Syed of Cerner for providing a test case!"
+- item:
+    type: "fix"
+    title: "Fix Web Testing UI to be able to handle STU3 servers which return CapabilityStatement instead of the previously used \"Conformance\" resource"
+- item:
+    type: "fix"
+    title: "CLI example uploader couldn't find STU3 examples after CI server was moved to build.fhir.org"
+- item:
+    type: "fix"
+    title: "Fix issue in JPA subscription module that prevented purging stale subscriptions when many were present on Postgres"
+- item:
+    issue: "532"
+    type: "fix"
+    title: "Server interceptor methods were being called twice unnecessarily by the JPA server, and the DaoConfig interceptor registration framework was not actually useful. Thanks to GitHub user @mattiuusitalo for reporting!"
+- item:
+    issue: "503"
+    type: "fix"
+    title: "AuthorizationInterceptor on JPA server did not correctly apply rules on deleting resources in a specific compartment because the resource metadata was stripped by the JPA server before the interceptor could see it. Thanks to Eeva Turkka for reporting!"
+- item:
+    issue: "519"
+    type: "fix"
+    title: "JPA server exported CapabilityStatement includes double entries for the _id parameter and uses the wrong type (string instead of token). Thanks to Robert Lichtenberger for reporting!"
+- item:
+    issue: "504"
+    type: "add"
+    title: "Custom resource types which extend Binary must not have declared extensions since this is invalid in FHIR (and HAPI would just ignore them anyhow). Thanks to Thomas S Berg for reporting!"
+- item:
+    type: "add"
+    title: "Standard HAPI zip/tar distributions did not include the project sources and JavaDoc JARs. Thanks to Keith Boone for pointing this out!"
+- item:
+    type: "fix"
+    title: "Server AuthorizationInterceptor always rejects history operation at the type level even if rules should allow it."
+- item:
+    type: "fix"
+    title: "JPA server terminology service was not correctly validating or expanding codes in SNOMED CT or LOINC code systems. Thanks to David Hay for reporting!"
+- item:
+    issue: "539"
+    type: "fix"
+    title: "Attempting to search for an invalid resource type (e.g. GET base/FooResource) should return an HTTP 404 and not a 400, per the HTTP spec. Thanks to GitHub user @CarthageKing for the pull request!"
+- item:
+    issue: "544"
+    type: "fix"
+    title: "When parsing a Bundle containing placeholder fullUrls and references (e.g. \"urn:uuid:0000-0000\") the resource reference targets did not get populated with the given resources. Note that as a part of this change, <code>IdType</code> and <code>IdDt</code> have been modified so that when parsing a placeholder ID, the complete placeholder including the \"urn:uuid:\" or \"urn:oid:\" prefix will be placed into the ID part. Previously, the prefix was treated as the base URL, which led to strange behaviour like the placeholder being treated as a real IDs. Thanks to GitHub user @jodue for reporting!"
+- item:
+    type: "add"
+    title: "Declared extensions with multiple type() options listed in the @Child annotation caused a crash on startup. Now this is supported."
+- item:
+    type: "add"
+    title: "STU3 XHTML parser for narrative choked if the narrative contained an <code>&amp;rsquot;</code> entity string."
+- item:
+    issue: "538"
+    type: "fix"
+    title: "When parsing a quantity parameter on the server with a value and units but no system (e.g. <code>GET [base]/Observation?value=5.4||mg</code> ) the unit was incorrectly treated as the system. Thanks to @CarthageKing for the pull request!"
+- item:
+    issue: "533"
+    type: "fix"
+    title: "Correct a typo in the JPA ValueSet ResourceProvider which prevented successful operation under Spring 4.3. Thanks to Robbert van Waveren for the pull request!"
+- item:
+    type: "remove"
+    title: "Deprecate the method <code>ICompositeElement#getAllPopulatedChildElementsOfType(Class)</code> as it is no longer used by HAPI and is just an annoying step in creating custom structures. Thanks to Allan Bro Hansen for pointing this out."
+- item:
+    issue: "547"
+    type: "fix"
+    title: "CapturingInterceptor did not buffer the response meaning that in many circumstances it did not actually capture the response. Thanks to Jenny Syed of Cerner for the pull request and contribution!"

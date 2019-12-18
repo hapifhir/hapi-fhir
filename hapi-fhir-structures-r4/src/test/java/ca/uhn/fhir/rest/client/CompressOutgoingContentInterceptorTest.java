@@ -41,7 +41,7 @@ public class CompressOutgoingContentInterceptorTest {
 
 
 	@Test
-	public void testCreate() throws Exception {
+	public void testCreate() {
 		ourClient.registerInterceptor(new GZipContentInterceptor());
 
 		Patient p = new Patient();

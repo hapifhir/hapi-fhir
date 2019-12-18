@@ -70,13 +70,14 @@ public class FlywayMigration implements JavaMigration {
 	}
 
 	@Override
-	public void migrate(Context theContext) throws Exception {
+	public void migrate(Context theContext) {
 		myTask.setDriverType(myFlywayMigrator.getDriverType());
 		myTask.setDryRun(myFlywayMigrator.isDryRun());
 		myTask.setNoColumnShrink(myFlywayMigrator.isNoColumnShrink());
 		myTask.setConnectionProperties(myConnectionProperties);
 		try {
 			myTask.execute();
+			myFlywayMigrator.addExecutedStatements(myTask.getExecutedStatements());
 		} catch (SQLException e) {
 			String description = myTask.getDescription();
 			if (isBlank(description)) {

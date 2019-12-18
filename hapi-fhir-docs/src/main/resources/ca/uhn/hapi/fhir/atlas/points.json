@@ -275,6 +275,36 @@
 			"lat": 14.6914,
 			"lon": 120.9686,
 			"added": "2019-11-25"
+		},
+		{
+			"title": "Software Interoperability Lab for Asia",
+			"description": "SIL-A maintains a suite of tools used to promote interoperability and medical informatics across Asia.",
+			"link": "http://sil-asia.org/",
+			"city": "Manila, Philippines",
+			"lat": 14.6914,
+			"lon": 120.9686,
+			"added": "2019-11-25"
+		},
+		{
+			"title": "Lifen",
+			"description": "Lifen is a messaging platform to simplify data exchange between medical professionals, patients and EHRs systems",
+			"link": "https://www.lifen.fr",
+			"city": "Paris",
+			"lat": 48.8647,
+			"lon": 2.349014,
+			"added": "2019-11-22"
+		},
+		{
+			"title": "Aksara Digital Indonesia, PT.",
+			"description": "SaaS ERP for Healthcare Services",
+			"link": "https://ehealth.co.id",
+			"contactName": "Ibrohim Kholilul Islam",
+			"contactEmail": "ibrohim@ehealth.co.id",
+			"city": "Bandung, Indonesia",
+			"lat": -6.914744,
+			"lon": 107.609810,
+			"added": "2019-11-22"
 		}
+
 	]
 }

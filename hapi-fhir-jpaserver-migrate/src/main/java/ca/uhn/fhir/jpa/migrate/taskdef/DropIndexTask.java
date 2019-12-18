@@ -53,7 +53,7 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
 
 		if (!indexNames.contains(myIndexName)) {
