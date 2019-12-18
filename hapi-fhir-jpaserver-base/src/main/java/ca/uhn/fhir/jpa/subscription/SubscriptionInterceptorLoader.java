@@ -57,15 +57,17 @@ public class SubscriptionInterceptorLoader {
 	public void registerInterceptors() {
 		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes = myDaoConfig.getSupportedSubscriptionTypes();
 
-		if (!supportedSubscriptionTypes.isEmpty()) {
+		if (supportedSubscriptionTypes.isEmpty()) {
+			ourLog.info("Subscriptions are disabled on this server.  Subscriptions will not be activated and incoming resources will not be matched against subscriptions.");
+		} else {
 			loadSubscriptions();
 			ourLog.info("Registering subscription activating interceptor");
 			myInterceptorRegistry.registerInterceptor(mySubscriptionActivatingInterceptor);
-		}
-		if (myDaoConfig.isSubscriptionMatchingEnabled()) {
-			mySubscriptionMatcherInterceptor.start();
-			ourLog.info("Registering subscription matcher interceptor");
-			myInterceptorRegistry.registerInterceptor(mySubscriptionMatcherInterceptor);
+			if (myDaoConfig.isSubscriptionMatchingEnabled()) {
+				mySubscriptionMatcherInterceptor.start();
+				ourLog.info("Registering subscription matcher interceptor");
+				myInterceptorRegistry.registerInterceptor(mySubscriptionMatcherInterceptor);
+			}
 		}
 	}
 
