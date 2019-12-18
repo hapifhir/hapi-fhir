@@ -20,8 +20,8 @@ package ca.uhn.fhir.rest.server.servlet;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +48,16 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 //		}
 	}
 
+	@Override
+	public HttpServletRequest getServletRequest() {
+		return myWrap.getServletRequest();
+	}
+
+	@Override
+	public HttpServletResponse getServletResponse() {
+		return myWrap.getServletResponse();
+	}
+
 //	public void addHeader(String theName, String theValue) {
 //		String lowerCase = theName.toLowerCase();
 //		List<String> list = myHeaders.get(lowerCase);
@@ -57,7 +67,7 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 //		}
 //		list.add(theValue);
 //	}
-	
+
 	@Override
 	public String getHeader(String theName) {
 		return myWrap.getHeader(theName);
