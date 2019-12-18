@@ -70,7 +70,6 @@ public class FlywayMigrator extends BaseMigrator {
 	}
 
 	private Flyway initFlyway(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
-		// TODO KHS Is there a way we can use datasource instead of url, username, password here
 		Flyway flyway = Flyway.configure()
 			.table(myMigrationTableName)
 			.dataSource(theConnectionProperties.getDataSource())
