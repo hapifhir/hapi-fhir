@@ -42,7 +42,7 @@ public class TaskOnlyMigrator extends BaseMigrator {
 
 	@Override
 	public void migrate() {
-		DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getConnectionUrl(), getUsername(), getPassword());
+		DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource());
 
 		for (BaseTask next : myTasks) {
 			next.setDriverType(getDriverType());

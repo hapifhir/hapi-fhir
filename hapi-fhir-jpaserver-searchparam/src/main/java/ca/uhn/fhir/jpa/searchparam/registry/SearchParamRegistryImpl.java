@@ -272,7 +272,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 			int overriddenCount = 0;
 			List<IBaseResource> allSearchParams = allSearchParamsBp.getResources(0, size);
 			for (IBaseResource nextResource : allSearchParams) {
-				IBaseResource nextSp = (IBaseResource) nextResource;
+				IBaseResource nextSp = nextResource;
 				if (nextSp == null) {
 					continue;
 				}
@@ -327,7 +327,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 			populateActiveSearchParams(activeSearchParams);
 
 			myLastRefresh = System.currentTimeMillis();
-			ourLog.info("Refreshed search parameter cache in {}ms", sw.getMillis());
+			ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
 			return myActiveSearchParams.size();
 		} else {
 			return 0;

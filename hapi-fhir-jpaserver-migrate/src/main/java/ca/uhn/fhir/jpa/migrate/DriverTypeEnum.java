@@ -14,8 +14,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
-import java.sql.Driver;
 import java.sql.SQLException;
 
 /*-
@@ -110,13 +110,6 @@ public enum DriverTypeEnum {
 
 	public ConnectionProperties newConnectionProperties(String theUrl, String theUsername, String thePassword) {
 
-		Driver driver;
-		try {
-			driver = (Driver) Class.forName(myDriverClassName).newInstance();
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-			throw new InternalErrorException("Unable to find driver class: " + myDriverClassName, e);
-		}
-
 		BasicDataSource dataSource = new BasicDataSource(){
 			@Override
 			public Connection getConnection() throws SQLException {
@@ -129,8 +122,19 @@ public enum DriverTypeEnum {
 		dataSource.setUsername(theUsername);
 		dataSource.setPassword(thePassword);
 
+		return newConnectionProperties(dataSource);
+	}
+
+	@Nonnull
+	public ConnectionProperties newConnectionProperties(DataSource theDataSource) {
+		try {
+			Class.forName(myDriverClassName).getConstructor().newInstance();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+			throw new InternalErrorException("Unable to find driver class: " + myDriverClassName, e);
+		}
+
 		DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
-		transactionManager.setDataSource(dataSource);
+		transactionManager.setDataSource(theDataSource);
 		transactionManager.afterPropertiesSet();
 
 		TransactionTemplate txTemplate = new TransactionTemplate();
@@ -138,7 +142,7 @@ public enum DriverTypeEnum {
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		txTemplate.afterPropertiesSet();
 
-		return new ConnectionProperties(dataSource, txTemplate, this);
+		return new ConnectionProperties(theDataSource, txTemplate, this);
 	}
 
 	public static class ConnectionProperties implements AutoCloseable {
