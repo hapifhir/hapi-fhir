@@ -124,10 +124,11 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		} else {
 			migrator = new FlywayMigrator(myMigrationTableName);
 		}
-		migrator.setConnectionUrl(url);
+
+		DriverTypeEnum.ConnectionProperties connectionProperties = driverType.newConnectionProperties(url, username, password);
+
+		migrator.setDataSource(connectionProperties.getDataSource());
 		migrator.setDriverType(driverType);
-		migrator.setUsername(username);
-		migrator.setPassword(password);
 		migrator.setDryRun(dryRun);
 		migrator.setNoColumnShrink(noColumnShrink);
 		migrator.setOutOfOrderPermitted(outOfOrderPermitted);
