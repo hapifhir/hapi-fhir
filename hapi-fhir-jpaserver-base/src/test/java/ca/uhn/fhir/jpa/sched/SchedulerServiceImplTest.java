@@ -81,7 +81,7 @@ public class SchedulerServiceImplTest {
 
 		ourLog.info("Fired {} times", CountingJob.ourCount);
 
-		await().until(() -> (CountingJob.ourCount, greaterThan(3));
+		await().until(() -> CountingJob.ourCount, greaterThan(3));
 		assertThat(CountingJob.ourCount, lessThan(20));
 	}
 
@@ -99,7 +99,7 @@ public class SchedulerServiceImplTest {
 
 		ourLog.info("Fired {} times", CountingJob.ourCount);
 
-		await().until(() -> (CountingJob.ourCount, greaterThanOrEqualTo(1));
+		await().until(() -> CountingJob.ourCount, greaterThanOrEqualTo(1));
 		assertThat(CountingJob.ourCount, lessThan(5));
 	}
 
