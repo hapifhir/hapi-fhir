@@ -1,15 +1,20 @@
 package org.hl7.fhir.r4.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
+import org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -143,7 +148,7 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 
 	@Override
 	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		return new ArrayList<StructureDefinition>(myStructureDefinitions.values());
+		return new ArrayList<>(myStructureDefinitions.values());
 	}
 
 	@Override
@@ -179,7 +184,12 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 
 	@Override
 	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
-		return false;
+		return myCodeSystems.containsKey(theSystem);
+	}
+
+	@Override
+	public boolean isValueSetSupported(FhirContext theContext, String theValueSetUrl) {
+		return myValueSets.containsKey(theValueSetUrl);
 	}
 
 	@Override
@@ -189,6 +199,28 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 
 	@Override
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+		ValueSet vs;
+		if (isNotBlank(theValueSetUrl)) {
+			vs = myValueSets.get(theValueSetUrl);
+			if (vs == null) {
+				return null;
+			}
+		} else {
+			vs = new ValueSet();
+			vs.getCompose().addInclude().setSystem(theCodeSystem);
+		}
+
+		ValueSetExpanderSimple expander = new ValueSetExpanderSimple(new HapiWorkerContext(theContext, this));
+		ValueSetExpander.ValueSetExpansionOutcome expansion = expander.expand(vs, new Parameters());
+		for (ValueSet.ValueSetExpansionContainsComponent nextExpansionCode : expansion.getValueset().getExpansion().getContains()) {
+
+			if (theCode.equals(nextExpansionCode.getCode())) {
+				if (Constants.codeSystemNotNeeded(theCodeSystem) || nextExpansionCode.getSystem().equals(theCodeSystem)) {
+					return new CodeValidationResult(new CodeSystem.ConceptDefinitionComponent(new CodeType(theCode)));
+				}
+			}
+		}
+
 		return null;
 	}
 

@@ -228,7 +228,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public ValidationResult validateCode(TerminologyServiceOptions theOptions, String code, ValueSet vs) {
-    return validateCode(theOptions, null, code, null, vs);
+    return validateCode(theOptions, Constants.CODESYSTEM_VALIDATE_NOT_NEEDED, code, null, vs);
   }
 
   @Override
