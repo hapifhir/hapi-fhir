@@ -40,3 +40,10 @@
     issue: "1610"
     type: "fix"
     title: "A missing mandatory was added to the SNOMED CT CodeSystem that is uploaded when SCT is uploaded to the JPA server. Thanks to Anders Havn for the pull request!"
+- item:
+   issue: 1643
+   type: fix
+   title: "When validating resources containing custom valuesets defined in PrePopulatedValidationSupport
+      outside of the JPA server, sometimes code systems could not be found resulting in false negative
+      errors."
+
