@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -11,6 +12,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
@@ -18,9 +20,12 @@ import org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -32,6 +37,7 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 	private Map<String, CodeSystem> myCodeSystems;
 	private Map<String, StructureDefinition> myStructureDefinitions;
 	private Map<String, ValueSet> myValueSets;
+	private DefaultProfileValidationSupport myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
 
 	/**
 	 * Constructor
@@ -134,7 +140,43 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 
 	@Override
 	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
-		return null;
+		ValueSetExpander.ValueSetExpansionOutcome retVal = new ValueSetExpander.ValueSetExpansionOutcome(new ValueSet());
+
+		Set<String> wantCodes = new HashSet<>();
+		for (ValueSet.ConceptReferenceComponent next : theInclude.getConcept()) {
+			wantCodes.add(next.getCode());
+		}
+
+		CodeSystem system = fetchCodeSystem(theContext, theInclude.getSystem());
+		if (system != null) {
+			List<CodeSystem.ConceptDefinitionComponent> concepts = system.getConcept();
+			addConcepts(theInclude, retVal.getValueset().getExpansion(), wantCodes, concepts);
+		}
+
+		for (UriType next : theInclude.getValueSet()) {
+			ValueSet vs = myValueSets.get(defaultString(next.getValueAsString()));
+			if (vs != null) {
+				for (ConceptSetComponent nextInclude : vs.getCompose().getInclude()) {
+					ValueSetExpander.ValueSetExpansionOutcome contents = expandValueSet(theContext, nextInclude);
+					retVal.getValueset().getExpansion().getContains().addAll(contents.getValueset().getExpansion().getContains());
+				}
+			}
+		}
+
+		return retVal;
+	}
+
+	private void addConcepts(ConceptSetComponent theInclude, ValueSet.ValueSetExpansionComponent theRetVal, Set<String> theWantCodes, List<CodeSystem.ConceptDefinitionComponent> theConcepts) {
+		for (CodeSystem.ConceptDefinitionComponent next : theConcepts) {
+			if (theWantCodes.isEmpty() || theWantCodes.contains(next.getCode())) {
+				theRetVal
+					.addContains()
+					.setSystem(theInclude.getSystem())
+					.setCode(next.getCode())
+					.setDisplay(next.getDisplay());
+			}
+			addConcepts(theInclude, theRetVal, theWantCodes, next.getConcept());
+		}
 	}
 
 	@Override
@@ -210,7 +252,8 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 			vs.getCompose().addInclude().setSystem(theCodeSystem);
 		}
 
-		ValueSetExpanderSimple expander = new ValueSetExpanderSimple(new HapiWorkerContext(theContext, this));
+		IValidationSupport support = new ValidationSupportChain(this, myDefaultProfileValidationSupport);
+		ValueSetExpanderSimple expander = new ValueSetExpanderSimple(new HapiWorkerContext(theContext, support));
 		ValueSetExpander.ValueSetExpansionOutcome expansion = expander.expand(vs, new Parameters());
 		for (ValueSet.ValueSetExpansionContainsComponent nextExpansionCode : expansion.getValueset().getExpansion().getContains()) {
 

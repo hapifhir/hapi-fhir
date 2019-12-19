@@ -53,14 +53,27 @@ public class HapiWorkerContextTest extends BaseTest {
 		HapiWorkerContext workerCtx = new HapiWorkerContext(ctx, validationSupportChain);
 
 		ValueSet vs = new ValueSet();
-		vs.setUrl("http://hl7.org/fhir/ValueSet/fm-status");
+		IWorkerContext.ValidationResult outcome;
 
+		// Built-in Codes
+
+		vs.setUrl("http://hl7.org/fhir/ValueSet/fm-status");
 		IWorkerContext.ValidationResult outcome = workerCtx.validateCode(new TerminologyServiceOptions(), "active", vs);
 		assertEquals(outcome.getMessage(), true, outcome.isOk());
 
 		outcome = workerCtx.validateCode(new TerminologyServiceOptions(), "active2", vs);
 		assertEquals(outcome.getMessage(), false, outcome.isOk());
 		assertEquals("Unknown code[active2] in system[(none)]", outcome.getMessage());
+
+		// PrePopulated codes
+
+		vs.setUrl("http://hl7.org/fhir/us/core/ValueSet/birthsex");
+		outcome = workerCtx.validateCode(new TerminologyServiceOptions(), "F", vs);
+		assertEquals(outcome.getMessage(), true, outcome.isOk());
+
+		outcome = workerCtx.validateCode(new TerminologyServiceOptions(), "F2", vs);
+		assertEquals(outcome.getMessage(), false, outcome.isOk());
+		assertEquals("Unknown code[F2] in system[(none)]", outcome.getMessage());
 
 	}
 
