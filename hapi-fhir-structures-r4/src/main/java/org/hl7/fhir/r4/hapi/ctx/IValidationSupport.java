@@ -76,6 +76,17 @@ public interface IValidationSupport
   boolean isCodeSystemSupported(FhirContext theContext, String theSystem);
 
   /**
+   * Returns <code>true</code> if the given valueset can be validated by the given
+   * validation support module
+   *
+   * @param theContext The FHIR context
+   * @param theValueSetUrl The URL
+   */
+  default boolean isValueSetSupported(FhirContext theContext, String theValueSetUrl) {
+    return false;
+  }
+
+  /**
    * Generate a snapshot from the given differential profile.
    *
    * @return Returns null if this module does not know how to handle this request
