@@ -547,16 +547,20 @@ public class SearchBuilder implements ISearchBuilder {
 		List<ResourcePersistentId> targetPids = myIdHelperService.translateForcedIdToPids(targetIds, theRequest);
 		if (!targetPids.isEmpty()) {
 			ourLog.debug("Searching for resource link with target PIDs: {}", targetPids);
-			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, join);
-			Predicate pidPredicate = join.get("myTargetResourcePid").in(ResourcePersistentId.toLongList(targetPids));
+			Predicate pathPredicate = ((operation == null) || (operation == SearchFilterParser.CompareOperation.eq)) ? createResourceLinkPathPredicate(theResourceName, theParamName, join)
+				: createResourceLinkPathPredicate(theResourceName, theParamName, join).not();
+			Predicate pidPredicate = ((operation == null) || (operation == SearchFilterParser.CompareOperation.eq)) ? join.get("myTargetResourcePid").in(targetPids)
+				: join.get("myTargetResourcePid").in(targetPids).not();
 			codePredicates.add(myBuilder.and(pathPredicate, pidPredicate));
 		}
 
 		// Resources by fully qualified URL
 		if (!targetQualifiedUrls.isEmpty()) {
 			ourLog.debug("Searching for resource link with target URLs: {}", targetQualifiedUrls);
-			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, join);
-			Predicate pidPredicate = join.get("myTargetResourceUrl").in(targetQualifiedUrls);
+			Predicate pathPredicate = ((operation == null) || (operation == SearchFilterParser.CompareOperation.eq)) ? createResourceLinkPathPredicate(theResourceName, theParamName, join)
+				: createResourceLinkPathPredicate(theResourceName, theParamName, join).not();
+			Predicate pidPredicate = ((operation == null) || (operation == SearchFilterParser.CompareOperation.eq)) ? join.get("myTargetResourceUrl").in(targetQualifiedUrls)
+				: join.get("myTargetResourceUrl").in(targetQualifiedUrls).not();
 			codePredicates.add(myBuilder.and(pathPredicate, pidPredicate));
 		}
 
@@ -1466,29 +1470,9 @@ public class SearchBuilder implements ISearchBuilder {
 														  BigDecimal theValue,
 														  final Expression<BigDecimal> thePath,
 														  String invalidMessageName) {
-		return createPredicateNumeric(theResourceName,
-			theParamName,
-			theFrom,
-			builder,
-			theParam,
-			thePrefix,
-			theValue,
-			thePath,
-			invalidMessageName,
-			null);
-	}
-
-	private Predicate createPredicateNumeric(String theResourceName,
-														  String theParamName,
-														  From<?, ? extends BaseResourceIndexedSearchParam> theFrom,
-														  CriteriaBuilder builder,
-														  IQueryParameterType theParam,
-														  ParamPrefixEnum thePrefix,
-														  BigDecimal theValue,
-														  final Expression<BigDecimal> thePath,
-														  String invalidMessageName,
-														  SearchFilterParser.CompareOperation operation) {
 		Predicate num;
+		// Per discussions with Grahame Grieve and James Agnew on 11/13/19, modified logic for EQUAL and NOT_EQUAL operators below so as to
+		//   use exact value matching.  The "fuzz amount" matching is still used with the APPROXIMATE operator.
 		switch (thePrefix) {
 			case GREATERTHAN:
 				num = builder.gt(thePath, theValue);
@@ -1502,25 +1486,22 @@ public class SearchBuilder implements ISearchBuilder {
 			case LESSTHAN_OR_EQUALS:
 				num = builder.le(thePath, theValue);
 				break;
-			case APPROXIMATE:
 			case EQUAL:
+				num = builder.equal(thePath, theValue);
+				break;
 			case NOT_EQUAL:
+				num = builder.notEqual(thePath, theValue);
+				break;
+			case APPROXIMATE:
 				BigDecimal mul = calculateFuzzAmount(thePrefix, theValue);
 				BigDecimal low = theValue.subtract(mul, MathContext.DECIMAL64);
 				BigDecimal high = theValue.add(mul, MathContext.DECIMAL64);
 				Predicate lowPred;
 				Predicate highPred;
-				if (thePrefix != ParamPrefixEnum.NOT_EQUAL) {
-					lowPred = builder.ge(thePath.as(BigDecimal.class), low);
-					highPred = builder.le(thePath.as(BigDecimal.class), high);
-					num = builder.and(lowPred, highPred);
-					ourLog.trace("Searching for {} <= val <= {}", low, high);
-				} else {
-					// Prefix was "ne", so reverse it!
-					lowPred = builder.lt(thePath.as(BigDecimal.class), low);
-					highPred = builder.gt(thePath.as(BigDecimal.class), high);
-					num = builder.or(lowPred, highPred);
-				}
+				lowPred = builder.ge(thePath.as(BigDecimal.class), low);
+				highPred = builder.le(thePath.as(BigDecimal.class), high);
+				num = builder.and(lowPred, highPred);
+				ourLog.trace("Searching for {} <= val <= {}", low, high);
 				break;
 			case ENDS_BEFORE:
 			case STARTS_AFTER:
@@ -1720,35 +1701,39 @@ public class SearchBuilder implements ISearchBuilder {
 
 		boolean exactMatch = theParameter instanceof StringParam && ((StringParam) theParameter).isExact();
 		if (exactMatch) {
-
 			// Exact match
-
 			Long hash = ResourceIndexedSearchParamString.calculateHashExact(theResourceName, theParamName, rawSearchTerm);
 			return theBuilder.equal(theFrom.get("myHashExact").as(Long.class), hash);
-
 		} else {
-
 			// Normalized Match
-
 			String normalizedString = StringNormalizer.normalizeString(rawSearchTerm);
 			String likeExpression;
-			if (theParameter instanceof StringParam &&
-				((StringParam) theParameter).isContains() &&
-				myDaoConfig.isAllowContainsSearches()) {
+			if ((theParameter instanceof StringParam) &&
+				(((((StringParam) theParameter).isContains()) &&
+					(myCallingDao.getConfig().isAllowContainsSearches())) ||
+					(operation == SearchFilterParser.CompareOperation.co))) {
 				likeExpression = createLeftAndRightMatchLikeExpression(normalizedString);
+			} else if ((operation != SearchFilterParser.CompareOperation.ne) &&
+					(operation != SearchFilterParser.CompareOperation.gt) &&
+					(operation != SearchFilterParser.CompareOperation.lt) &&
+					(operation != SearchFilterParser.CompareOperation.ge) &&
+					(operation != SearchFilterParser.CompareOperation.le)) {
+				if (operation == SearchFilterParser.CompareOperation.ew) {
+					likeExpression = createRightMatchLikeExpression(normalizedString);
+				} else {
+					likeExpression = createLeftMatchLikeExpression(normalizedString);
+				}
 			} else {
-				likeExpression = createLeftMatchLikeExpression(normalizedString);
+				likeExpression = normalizedString;
 			}
 
 			Predicate predicate;
 			if ((operation == null) ||
 				(operation == SearchFilterParser.CompareOperation.sw) ||
-				(operation == SearchFilterParser.CompareOperation.ew)) {
-
-				Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
-				Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
+				(operation == SearchFilterParser.CompareOperation.ew) ||
+				(operation == SearchFilterParser.CompareOperation.co)) {
 				Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
-				predicate = theBuilder.and(hashCode, singleCode);
+				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
 			} else if (operation == SearchFilterParser.CompareOperation.eq) {
 				Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
 				Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
