@@ -46,4 +46,8 @@
    title: "When validating resources containing custom valuesets defined in PrePopulatedValidationSupport
       outside of the JPA server, sometimes code systems could not be found resulting in false negative
       errors."
-
+- item:
+   issue: 1588
+   type: add
+   title: "Support for several new operators has been added to the `_filter` support in the JPA server. Thanks
+      to Anthony Sute for the Pull Request!
