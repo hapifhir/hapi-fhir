@@ -12,7 +12,73 @@ The following example shows how to post a transaction with two resources, where 
  
 This code creates the following transaction bundle:
 
-<!-- FIXME: switch to JSON -->
+**JSON**:
+
+```json
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:3bc44de3-069d-442d-829b-f3ef68cae371",
+      "resource": {
+        "resourceType": "Patient",
+        "identifier": [
+          {
+            "system": "http://acme.org/mrns",
+            "value": "12345"
+          }
+        ],
+        "name": [
+          {
+            "family": "Jameson",
+            "given": [
+              "J",
+              "Jonah"
+            ]
+          }
+        ],
+        "gender": "male"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Patient",
+        "ifNoneExist": "identifier=http://acme.org/mrns|12345"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "789-8",
+              "display": "Erythrocytes [#/volume] in Blood by Automated count"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:3bc44de3-069d-442d-829b-f3ef68cae371"
+        },
+        "valueQuantity": {
+          "value": 4.12,
+          "unit": "10 trillion/L",
+          "system": "http://unitsofmeasure.org",
+          "code": "10*12/L"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    }
+  ]
+}
+```
+
+**XML**:
 
 ```xml
 <Bundle xmlns="http://hl7.org/fhir">
