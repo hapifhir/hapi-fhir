@@ -36,7 +36,7 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 	private static final Logger ourLog = LoggerFactory.getLogger(AddTableByColumnTask.class);
 
 	private List<AddColumnTask> myAddColumnTasks = new ArrayList<>();
-	private String myPkColumn;
+	private List<String> myPkColumns;
 
 	public AddTableByColumnTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -53,8 +53,8 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 		myAddColumnTasks.add(theTask);
 	}
 
-	public void setPkColumn(String thePkColumn) {
-		myPkColumn = thePkColumn;
+	public void setPkColumns(List<String> thePkColumns) {
+		myPkColumns = thePkColumns;
 	}
 
 	@Override
@@ -82,7 +82,12 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 		}
 
 		sb.append(" PRIMARY KEY (");
-		sb.append(myPkColumn);
+		for (int i = 0; i < myPkColumns.size(); i++) {
+			if (i > 0) {
+				sb.append(", ");
+			}
+			sb.append(myPkColumns.get(i));
+		}
 		sb.append(")");
 
 		sb.append(" ) ");
@@ -115,7 +120,7 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 		return new EqualsBuilder()
 			.appendSuper(super.equals(theO))
 			.append(myAddColumnTasks, that.myAddColumnTasks)
-			.append(myPkColumn, that.myPkColumn)
+			.append(myPkColumns, that.myPkColumns)
 			.isEquals();
 	}
 
@@ -124,7 +129,7 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 		return new HashCodeBuilder(17, 37)
 			.appendSuper(super.hashCode())
 			.append(myAddColumnTasks)
-			.append(myPkColumn)
+			.append(myPkColumns)
 			.toHashCode();
 	}
 }

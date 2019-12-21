@@ -25,6 +25,9 @@ import ca.uhn.fhir.jpa.migrate.taskdef.*;
 import org.apache.commons.lang3.Validate;
 import org.intellij.lang.annotations.Language;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Builder {
 
 	private final String myRelease;
@@ -76,8 +79,8 @@ public class Builder {
 		return this;
 	}
 
-	public BuilderAddTableByColumns addTableByColumns(String theVersion, String theTableName, String thePkColumnName) {
-		return new BuilderAddTableByColumns(myRelease, theVersion, mySink, theTableName, thePkColumnName);
+	public BuilderAddTableByColumns addTableByColumns(String theVersion, String theTableName, String... thePkColumnNames) {
+		return new BuilderAddTableByColumns(myRelease, theVersion, mySink, theTableName, Arrays.asList(thePkColumnNames));
 	}
 
 	public void addIdGenerator(String theVersion, String theGeneratorName) {
@@ -115,12 +118,12 @@ public class Builder {
 		private final String myVersion;
 		private final AddTableByColumnTask myTask;
 
-		public BuilderAddTableByColumns(String theRelease, String theVersion, BaseMigrationTasks.IAcceptsTasks theSink, String theTableName, String thePkColumnName) {
+		public BuilderAddTableByColumns(String theRelease, String theVersion, BaseMigrationTasks.IAcceptsTasks theSink, String theTableName, List<String> thePkColumnNames) {
 			super(theRelease, theSink, theTableName);
 			myVersion = theVersion;
 			myTask = new AddTableByColumnTask(myRelease, theVersion);
 			myTask.setTableName(theTableName);
-			myTask.setPkColumn(thePkColumnName);
+			myTask.setPkColumns(thePkColumnNames);
 			theSink.addTask(myTask);
 		}
 
