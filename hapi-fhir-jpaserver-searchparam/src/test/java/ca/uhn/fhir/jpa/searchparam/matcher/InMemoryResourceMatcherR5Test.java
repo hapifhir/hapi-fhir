@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -66,6 +67,11 @@ public class InMemoryResourceMatcherR5Test {
 		@Bean
 		FhirContext fhirContext() {
 			return FhirContext.forR5();
+		}
+
+		@Bean
+		ModelConfig modelConfig() {
+			return new ModelConfig();
 		}
 	}
 
