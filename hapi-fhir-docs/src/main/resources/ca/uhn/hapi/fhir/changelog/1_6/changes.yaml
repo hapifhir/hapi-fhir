@@ -1,0 +1,220 @@
+---
+- item:
+    type: "fix"
+    title: "Performance has been improved for the initial FhirContext object creation by avoiding a lot of unnecessary reflection. HAPI FHIR 1.5 had a regression compared to previous releases and this has been corrected, but other improvements have been made so that this release is faster than previous releases too. <br/><br/> In addition, a new \"deferred scan\" mode has been implemented for even faster initialization on slower environments (e.g. Android). See the performance documentation for more information. <br/><br/> The following shows our benchmarks for context initialization across several versions of HAPI: <ul> <li>Version 1.4: <b>560ms</b></li> <li>Version 1.5: <b>800ms</b></li> <li>Version 1.6: <b>340ms</b></li> <li>Version 1.6 (deferred mode): <b>240ms</b></li> </ul>"
+- item:
+    type: "add"
+    title: "Bump the version of a few dependencies to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Spring (JPA, Web Tester): 4.2.5 -&gt; 4.3.0</li> <li>Spring-Data (JPA): 1.9.2 -&gt; 1.10.1</li> <!--<li>Hibernate ORM (JPA): 5.1.0 -&gt; 5.2.0</li>--> <li>Hibernate Search (JPA): 5.5.2 -&gt; 5.5.3</li> <li>Jetty (CLI): 9.3.9 -&gt; 9.3.10</li> </ul>"
+- item:
+    type: "remove"
+    title: "Remove some clases that were deprecated over a year ago and have suitable replacements: <ul> <li>QualifiedDateParam has been removed, but DateParam may be used instead</li> <li>PathSpecification has been removedm but Include may be used instead</li> </ul>"
+- item:
+    issue: "345"
+    type: "fix"
+    title: "ResponseValidatingInterceptor threw an InternalErrorException (HTTP 500) for operations that do not return any content (e.g. delete). Thanks to Mohammad Jafari for reporting!"
+- item:
+    issue: "342"
+    type: "fix"
+    title: "REST server now throws an HTTP 400 instead of an HTTP 500 if an operation which takes a FHIR resource in the request body (e.g. create, update) contains invalid content that the parser is unable to parse. Thanks to Jim Steel for the suggestion!"
+- item:
+    type: "add"
+    title: "Deprecate fluent client search operations without an explicit declaration of the bundle type being used. This also means that in a client <code>.search()</code> operation, the <code>.returnBundle(Bundle.class)</code> needs to be the last statement before <code>.execute()</code>"
+- item:
+    issue: "346"
+    type: "add"
+    title: "Server now respects the parameter <code>_format=application/xml+fhir\"</code> which is technically invalid since the + should be escaped, but is likely to be used. Also, a parameter of <code>_format=html</code> can now be used, which forces SyntaxHighlightingInterceptor to use HTML even if the headers wouldn't otherwise trigger it. Thanks to Jim Steel for reporting!"
+- item:
+    type: "fix"
+    title: "Improve performance when parsing large bundles by fixing a loop over all of the entries inthe bundle to stitch together cross-references, which was happening once per entry instead of once overall. Thanks to Erick on the HAPI FHIR Google Group for noticing that this was an issue!"
+- item:
+    type: "remove"
+    title: "JSON parser no longer allows the resource ID to be specified in an element called \"_id\" (the correct one is \"id\"). Previously _id was allowed because some early FHIR examples used that form, but this was never actually valid so it is now being removed."
+- item:
+    type: "add"
+    title: "JPA server now allows \"forced IDs\" (ids containing non-numeric, client assigned IDs) to use the same logical ID part on different resource types. E.g. A server may now have both Patient/foo and Obervation/foo on the same server. <br/><br/> Note that existing databases will need to modify index \"IDX_FORCEDID\" as it is no longer unique, and perform a reindexing pass."
+- item:
+    issue: "350"
+    type: "fix"
+    title: "When serializing/encoding custom types which replace exsting choice fields by fixing the choice to a single type, the parser would forget that the field was a choice and would use the wrong name (e.g. \"abatement\" instead of \"abatementDateType\"). Thanks to Yaroslav Kovbas for reporting and providing a unit test!"
+- item:
+    type: "fix"
+    title: "JPA server transactions sometimes created an incorrect resource reference if a resource being saved contained references that had a display value but not an actual reference. Thanks to David Hay for reporting!"
+- item:
+    issue: "352"
+    type: "add"
+    title: "When performing a REST Client create or update with <code>Prefer: return=representation</code> set, if the server does not honour the Prefer header, the client will automatically fetch the resource before returning. Thanks to Ewout Kramer for the idea!"
+- item:
+    issue: "354"
+    type: "add"
+    title: "DSTU3 structures now have <code>setFoo(List)</code> and <code>setGetFooFirstRep()</code> methods, bringing them back to parity with the HAPI DSTU2 structures. Thanks to Rahul Somasunderam and Claude Nanjo for the suggestions!"
+- item:
+    type: "add"
+    title: "JPA server has now been refactored to use the new FluentPath search parameter definitions for DSTU3 resources."
+- item:
+    type: "add"
+    title: "RequestValidatingInterceptor and ResponseValidatingInterceptor both have new method <code>setIgnoreValidatorExceptions</code> which causes validator exceptions to be ignored, rather than causing processing to be aborted."
+- item:
+    type: "add"
+    title: "LoggingInterceptor on server has a new parameter <code>${requestBodyFhir}</code> which logs the entire request body."
+- item:
+    issue: "355"
+    type: "add"
+    title: "JAX-RS server module now supports DSTU3 resources (previously it only supported DSTU2). Thanks to Phillip Warner for implementing this, and providing a pull request!"
+- item:
+    issue: "356"
+    type: "fix"
+    title: "Generated conformance statements for DSTU3 servers did not properly reference their OperationDefinitions. Thanks to Phillip Warner for implementing this, and providing a pull request!"
+- item:
+    issue: "359"
+    type: "fix"
+    title: "Properly handle null arrays when parsing JSON resources. Thanks to Subhro for fixing this and providing a pull request!"
+- item:
+    type: "fix"
+    title: "STU3 validator failed to validate codes where the code was a child code within the code system that contained it (i.e. not a top level code). Thanks to Jon Zammit for reporting!"
+- item:
+    issue: "361"
+    type: "fix"
+    title: "Restore the setType method in the DSTU1 Bundle class, as it was accidentally commented out. Thanks to GitHub user @Virdulys for the pull request!"
+- item:
+    type: "add"
+    title: "JPA server now supports composite search parameters where the type of the composite parameter is a quantity (e.g. Observation:component-code-component-value-quantity)"
+- item:
+    type: "remove"
+    title: "Remove the Remittance resource from DSTU2 structures, as it is not a real resource and was causing issues with interoperability with the .NET client."
+- item:
+    type: "fix"
+    title: "CLI tool cache feature (-c) for upload-example task sometimes failed to write cache file and exited with an exception."
+- item:
+    type: "fix"
+    title: "Fix error message in web testing UI when loading pages in a search result for STU3 endpoints."
+- item:
+    type: "fix"
+    title: "When encoding JSON resource, the parser will now always ensure that XHTML narrative content has an XHTML namespace declaration on the first DIV tag. This was preventing validation for some resources using the official validator rules."
+- item:
+    type: "fix"
+    title: "Server failed to invoke operations when the name was escaped (%24execute instead of $execute). Thanks to Michael Lawley for reporting!"
+- item:
+    type: "fix"
+    title: "JPA server transactions containing a bundle that has multiple entries trying to delete the same resource caused a 500 internal error"
+- item:
+    type: "fix"
+    title: "JPA module failed to index search parameters that mapped to a Timing datatype, e.g. CarePlan:activitydate"
+- item:
+    type: "add"
+    title: "Add a new option to the CLI run-server command called <code>--lowmem</code> . This option disables some features (e.g. fulltext search) in order to allow the server to start in memory-constrained environments (e.g Raspberry Pi)"
+- item:
+    type: "add"
+    title: "When updating a resource via an update operation on the server, if the ID of the resource is not present in the resource body but is present on the URL, this will now be treated as a warning instead of as a failure in order to be a bit more tolerant of errors. If the ID is present in the body but does not agree with the ID in the URL this remains an error."
+- item:
+    type: "fix"
+    title: "Server / JPA server date range search params (e.g. Encounter:date) now treat a single date with no comparator (or the eq comparator) as requiring that the value be completely contained by the range specified. Thanks to Chris Moesel for the suggestion."
+- item:
+    type: "fix"
+    title: "In server, if a parameter was annotated with the @Count annotation, the count would not appear in the self/prev/next links and would not actually be applied to the search results by the server. Thanks to Jim Steele for letting us know!"
+- item:
+    type: "fix"
+    title: "Conditional update on server failed to process if the conditional URL did not have any search parameters that did not start with an underscore. E.g. \"Patient?_id=1\" failed even though this is a valid conditional reference."
+- item:
+    issue: "363"
+    type: "add"
+    title: "JPA server can now be configured to allow external references (i.e. references that point to resources on other servers). See JPA Documentation for information on how to use this. Thanks to Naminder Soorma for the suggestion!"
+- item:
+    issue: "366"
+    type: "fix"
+    title: "When posting a resource to a server that contains an invalid value in a boolean field (e.g. Patient with an active value of \"1\") the server should return an HTTP 400, not an HTTP 500. Thanks to Jim Steel for reporting!"
+- item:
+    issue: "364"
+    type: "fix"
+    title: "Enable parsers to parse and serialize custom resources that contain custom datatypes. An example has been added which shows how to do this in the docs."
+- item:
+    type: "fix"
+    title: "JSON parser was incorrectly encoding resource language attribute in JSON as an array instead of a string. Thanks to David Hay for reporting!"
+- item:
+    issue: "367"
+    type: "add"
+    title: "SÃ©bastien RiviÃ¨re contributed an excellent pull request which adds a number of enhancements to JAX-RS module: <ul> <li>Enable the conditional update and delete</li> <li>Creation of a bundle provider, and support of the @Transaction</li> <li>Bug fix on the exceptions handling as some exceptions throw outside bean context were not intercept.</li> <li>Add the possibility to have the stacktrace in the jaxrsException</li> </ul>"
+- item:
+    issue: "369"
+    type: "fix"
+    title: "FhirTerser.cloneInto method failed to clone correctly if the source had any extensions. Thanks to GitHub user @Virdulys for submitting and providing a test case!"
+- item:
+    type: "add"
+    title: "Update DSTU2 InstanceValidator to latest version from upstream"
+- item:
+    type: "fix"
+    title: "Web Testing UI was not able to correctly post an STU3 transaction"
+- item:
+    type: "fix"
+    title: "DateTime parser incorrectly parsed times where more than 3 digits of precision were provided on the seconds after the decimal point"
+- item:
+    type: "add"
+    title: "Improve error messages when the $validate operation is called but no resource is actually supplied to validate"
+- item:
+    type: "remove"
+    title: "DSTU2+ servers no longer return the Category header, as this has been removed from the FHIR specification (and tags are now available in the resource body so the header was duplication/wasted bandwidth)"
+- item:
+    issue: "374"
+    type: "fix"
+    title: "Create and Update operations in server did not include ETag or Last-Modified headers even though the spec says they should. Thanks to Jim Steel for reporting!"
+- item:
+    issue: "371"
+    type: "fix"
+    title: "Update STU3 client and server to use the new sort parameter style (param1,-param2,param). Thanks to GitHub user @euz1e4r for reporting!"
+- item:
+    type: "fix"
+    title: "QuantityClientParam#withUnit(String) put the unit into the system part of the parameter value"
+- item:
+    type: "fix"
+    title: "Fluent client searches with date parameters were not correctly using new prefix style (e.g. gt) instead of old one (e.g. >)"
+- item:
+    issue: "370"
+    type: "fix"
+    title: "Some built-in v3 code systems for STU3 resources were missing certain codes, which caused false failures when validating resources. Thanks to GitHub user @Xoude for reporting!"
+- item:
+    issue: "365"
+    type: "fix"
+    title: "Some methods on DSTU2 model structures have JavaDocs that incorrectly claim that the method will not return null when in fact it can. Thanks to Rick Riemer for reporting!"
+- item:
+    type: "add"
+    title: "ResponseHighlightingInterceptor has been modified based on consensus on Zulip with Grahame that requests that have a parameter of <code>_format=json</code> or <code>_format=xml</code> will output raw FHIR content instead of HTML highlighting the content as they previously did. HTML content can now be forced via the (previously existing) <code>_format=html</code> or via the two newly added values <code>_format=html/json</code> and <code>_format=html/xml</code> . Because of this change, the custom <code>_raw=true</code> mode has been deprecated and will be removed at some point."
+- item:
+    issue: "267"
+    type: "fix"
+    title: "Operation definitions (e.g. for $everything operation) in the generated server conformance statement should not include the $ prefix in the operation name or code. Thanks to Dion McMurtrie for reporting!"
+- item:
+    issue: "378"
+    type: "fix"
+    title: "Server generated OperationDefinition resources did not validate due to some missing elements (kind, status, etc.). Thanks to Michael Lawley for reporting!"
+- item:
+    issue: "379"
+    type: "fix"
+    title: "Operations that are defined on multiple resource provider types with the same name (e.g. \"$everything\") are now automatically exposed by the server as separate OperationDefinition resources per resource type. Thanks to Michael Lawley for reporting!"
+- item:
+    issue: "380"
+    type: "fix"
+    title: "OperationDefinition resources generated automatically by the server for operations that are defined within resource/plain providers incorrectly stated that the maximum cardinality was \"*\" for non-collection types with no explicit maximum stated, which is not the behaviour that the JavaDoc on the @OperationParam annotation describes. Thanks to Michael Lawley for reporting!"
+- item:
+    type: "fix"
+    title: "Server parameters annotated with <code>@Since</code> or <code>@Count</code> which are of a FHIR type such as IntegerDt or DateTimeType will now be set to null if the client's URL does not contain this parameter. Previously they would be populated with an empty instance of the FHIR type, which was inconsistent with the way other server parameters worked."
+- item:
+    type: "add"
+    title: "Server now supports the _at parameter (including multiple repetitions) for history operation"
+- item:
+    type: "add"
+    title: "AuthorizationInterceptor can now allow or deny requests to extended operations (e.g. $everything)"
+- item:
+    type: "fix"
+    title: "DecimalType used BigDecimal constructor instead of valueOf method to create a BigDecimal from a double, resulting in weird floating point conversions. Thanks to Craig McClendon for reporting!"
+- item:
+    issue: "394"
+    type: "fix"
+    title: "Remove the depdendency on a method from commons-lang3 3.3 which was causing issues on some Android phones which come with an older version of this library bundled. Thanks to Paolo Perliti for reporting!"
+- item:
+    type: "fix"
+    title: "Parser is now better able to handle encoding fields which have been populated with a class that extends the expected class"
+- item:
+    type: "fix"
+    title: "When declaring a child with <code>order=Child.REPLACE_PARENT</code> the serialized form still put the element at the end of the resource instead of in the correct order"
+- item:
+    type: "fix"
+    title: "Fix STU3 JPA resource providers to allow validate operation at instance level"

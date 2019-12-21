@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Fri, Nov 1, 2019 09:29+1100 for FHIR v4.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="ResearchSubject" type="ResearchSubject">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A physical entity which is the primary unit of operational and/or administrative interest in a study.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="ResearchSubject">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A physical entity which is the primary unit of operational and/or administrative interest in a study.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifiers assigned to this research subject for a study.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="status" minOccurs="1" maxOccurs="1" type="ResearchSubjectStatus">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The current state of the subject.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="period" minOccurs="0" maxOccurs="1" type="Period">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The dates the subject began and ended their participation in the study.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="study" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Reference to the study the subject is participating in.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="individual" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The record of the person or animal who is involved in the study.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="assignedArm" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The name of the arm in the study the subject is expected to follow as part of this study.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="actualArm" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The name of the arm in the study the subject actually followed as part of this study.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="consent" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A record of the patient's informed agreement to participate in the study.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ResearchSubjectStatus-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="candidate">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Candidate</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="eligible">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Eligible</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="follow-up">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Follow-up</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ineligible">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Ineligible</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="not-registered">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Not Registered</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="off-study">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Off-study</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="on-study">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">On-study</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="on-study-intervention">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">On-study-intervention</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="on-study-observation">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">On-study-observation</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="pending-on-study">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Pending on-study</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="potential-candidate">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Potential Candidate</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="screening">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Screening</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="withdrawn">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Withdrawn</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ResearchSubjectStatus">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Indicates the progression of a study subject through a study.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="ResearchSubjectStatus-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

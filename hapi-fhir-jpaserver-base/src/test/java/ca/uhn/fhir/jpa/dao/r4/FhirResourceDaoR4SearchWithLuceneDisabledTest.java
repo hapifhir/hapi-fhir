@@ -10,6 +10,8 @@ import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -116,6 +118,8 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	private IResourceReindexingSvc myResourceReindexingSvc;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
+	@Autowired
+	private ITermReadSvc myTermSvc;
 
 	@Before
 	@Transactional()
@@ -191,6 +195,36 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	}
 
 	@Test
+		public void testExpandValueSet() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://fooCS");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("CODEA");
+		cs.addConcept().setCode("CODEB");
+		myCodeSystemDao.create(cs);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://fooVS");
+		vs.getCompose()
+			.addInclude()
+			.setSystem("http://fooCS")
+			.addConcept(new ValueSet.ConceptReferenceComponent().setCode("CODEA"));
+
+		// Explicit expand
+		ValueSet outcome = myValueSetDao.expand(vs, null);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("CODEA", outcome.getExpansion().getContains().get(0).getCode());
+
+		// Deferred expand
+		IIdType id = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		outcome = myValueSetDao.expand(id, null, mySrd);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("CODEA", outcome.getExpansion().getContains().get(0).getCode());
+	}
+
+
+	@Test
 	public void testSearchByCodeIn() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://fooCS");
@@ -206,6 +240,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 			.setSystem("http://fooCS")
 			.addConcept(new ValueSet.ConceptReferenceComponent().setCode("CODEA"));
 		myValueSetDao.create(vs);
+
 
 		Observation obs = new Observation();
 		obs.getCode().addCoding().setSystem("http://fooCS").setCode("CODEA");
@@ -250,7 +285,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
-		assertEquals(4, expansion.getExpansion().getContains().size());
+		assertEquals(6, expansion.getExpansion().getContains().size());
 
 	}
 

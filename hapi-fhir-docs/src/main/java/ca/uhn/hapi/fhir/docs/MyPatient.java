@@ -84,7 +84,7 @@ public class MyPatient extends Patient {
 	 * Accessors and mutators follow
 	 * 
 	 * IMPORTANT:
-	 * Each extension is required to have an getter/accessor and a stter/mutator. 
+	 * Each extension is required to have an getter/accessor and a setter/mutator.
 	 * You are highly recommended to create getters which create instances if they
 	 * do not already exist, since this is how the rest of the HAPI FHIR API works. 
 	 ********/

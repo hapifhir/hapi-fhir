@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +39,16 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 	private Map<DriverTypeEnum, List<String>> myDriverToSqls = new HashMap<>();
 	private List<String> myDriverNeutralSqls = new ArrayList<>();
 
+	public AddTableRawSqlTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
+
+	@Override
+	public void validate() {
+		super.validate();
+		setDescription("Add table using raw sql");
+	}
+
 	public void addSql(DriverTypeEnum theDriverType, @Language("SQL") String theSql) {
 		Validate.notNull(theDriverType);
 		Validate.notBlank(theSql);
@@ -46,17 +58,17 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		if (tableNames.contains(getTableName())) {
-			ourLog.info("Table {} already exists - No action performed", getTableName());
+			logInfo(ourLog, "Table {} already exists - No action performed", getTableName());
 			return;
 		}
 
 		List<String> sqlStatements = myDriverToSqls.computeIfAbsent(getDriverType(), t -> new ArrayList<>());
 		sqlStatements.addAll(myDriverNeutralSqls);
 
-		ourLog.info("Going to create table {} using {} SQL statements", getTableName(), sqlStatements.size());
+		logInfo(ourLog, "Going to create table {} using {} SQL statements", getTableName(), sqlStatements.size());
 		getConnectionProperties().getTxTemplate().execute(t -> {
 
 			JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
@@ -72,5 +84,27 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 	public void addSql(String theSql) {
 		Validate.notBlank("theSql must not be null", theSql);
 		myDriverNeutralSqls.add(theSql);
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		AddTableRawSqlTask that = (AddTableRawSqlTask) theO;
+
+		return new EqualsBuilder()
+			.appendSuper(super.equals(theO))
+			.append(myDriverNeutralSqls, that.myDriverNeutralSqls)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.appendSuper(super.hashCode())
+			.append(myDriverNeutralSqls)
+			.toHashCode();
 	}
 }

@@ -1,0 +1,141 @@
+---
+- item:
+    type: "add"
+    title: "Bump the version of a few dependencies to the latest versions: <ul> <li>Phloc-commons (for schematron validation) 4.3.5 -> 4.3.6</li> <li>Apache HttpClient 4.3.6 -> 4.4</li> <li>Woodstox 4.4.0 -> 4.4.1</li> <li>SLF4j 1.7.9 -> 1.7.10</li> <li>Spring (used in hapi-fhir-jpaserver-base module) 4.1.3.RELEASE -> 4.1.5.RELEASE</li> </ul>"
+- item:
+    type: "add"
+    title: "Add support for \"profile\" and \"tag\" elements in the resource Meta block when parsing DSTU2 structures."
+- item:
+    issue: "113"
+    type: "fix"
+    title: "When a user manually creates the list of contained resources in a resource, the encoder fails to encode any resources that don't have a '#' at the start of their ID. This is unintuitive, so we now assume that '123' means '#123'. Thanks to myungchoi for reporting and providing a test case!"
+- item:
+    type: "add"
+    title: "Add methods for setting the default encoding (XML/JSON) and oretty print behaviour in the Fluent Client. Thanks to Stackoverflow user ewall for the idea."
+- item:
+    issue: "129"
+    type: "fix"
+    title: "JPA Server did not mark a resource as \"no longer deleted\" if it was updated after being deleted. Thanks to Elliott Lavy and Lloyd McKenzie for reporting!"
+- item:
+    issue: "128"
+    type: "fix"
+    title: "Fix regression in 0.9 - Server responds with an HTTP 500 and a NullPointerException instead of an HTTP 400 and a useful error message if the client requests an unknown resource type"
+- item:
+    type: "add"
+    title: "Add support for <code>_revinclude</code> parameter in client, server, and JPA."
+- item:
+    type: "add"
+    title: "Include constants on resources (such as <code>Observation.INCLUDE_VALUE_STRING</code> ) have been switched in the DSTU2 structures to use the new syntax required in DSTU2: [resource name]:[search param NAME] insead of the DSTU1 style [resource name].[search param PATH]"
+- item:
+    issue: "124"
+    type: "add"
+    title: "When encoding resources, the parser will now convert any resource references to versionless references automatically (i.e. it will omit the version part automatically if one is present in the reference) since references between resources must be versionless. Additionally, references in server responses will omit the server base URL part of the reference if the base matches the base for the server giving the response."
+- item:
+    issue: "130"
+    type: "fix"
+    title: "Narrative generator incorrectly sets the Resource.text.status to 'generated' even if the given resource type does not have a template (and therefore no narrative is actually generated). Thanks to Bill de Beaubien for reporting!"
+- item:
+    type: "fix"
+    title: "Searching in JPA server with no search parameter returns deleted resources when it should exclude them."
+- item:
+    issue: "135"
+    type: "add"
+    title: "Remove Eclipse and IntelliJ artifacts (.project, *.iml, etc) from version control. Thanks to Doug Martin for the suggestion!"
+- item:
+    type: "add"
+    title: "REST server methods may now have a parameter of type NarrativeModeEnum which will be populated with the value of the _narrative URL parameter if one was supplied. Annotation client methods may also include a parameter of this type, and it will be used to populate this parameter on the request URL if it is not null. Thanks to Neal Acharya for the idea!"
+- item:
+    type: "add"
+    title: "Android JAR now includes servlet-API classes, as the project will not work without them. Thanks"
+- item:
+    issue: "116"
+    type: "fix"
+    title: "Requested _include values are preserved across paging links when the server returns multiple pages. Thanks to Bill de Beaubien for reporting!"
+- item:
+    issue: "138"
+    type: "add"
+    title: "Add new server address strategy \"ApacheProxyAddressStrategy\" which uses headers \"x-forwarded-host\" and \"x-forwarded-proto\" to determine the server's address. This is useful if you are deploying a HAPI FHIR server behind an Apache proxy (e.g. for load balancing or other reasons). Thanks to Bill de Beaubien for contributing!"
+- item:
+    issue: "143"
+    type: "fix"
+    title: "Resource references between separate resources found in a single bundle did not get populated with the actual resource when parsing a DSTU2 style bundle. Thanks to Nick Peterson for reporting and figuring out why none of our unit tests were actually catching the problem!"
+- item:
+    issue: "146"
+    type: "fix"
+    title: "JSON encoder did not encode contained resources when encoding a DSTU2 style bundle. Thanks to Mohammad Jafari and baopingle for all of their help in tracking this issue down and developing useful unit tests to demonstrate it."
+- item:
+    type: "add"
+    title: "Client now supports invoking transcation using a DSTU2-style Bundle resource as the input."
+- item:
+    issue: "147"
+    type: "fix"
+    title: "JPA Server $everything operation could sometimes include a duplicate copy of the main focus resource if it was referred to in a deep chain. Thanks to David Hay for reporting!"
+- item:
+    issue: "148"
+    type: "add"
+    title: "JPA Server $everything operation now allows a _count parameter"
+- item:
+    issue: "139"
+    type: "fix"
+    title: "JPA server failed to index resources containing ContactPointDt elements with populated values (e.g. Patient.telecom). Thanks to Mohammad Jafari for reporting!"
+- item:
+    type: "add"
+    title: "Add a new configuration method on the parsers, <code>setStripVersionsFromReferences(boolean)</code> which configures the parser to preserve versions in resource reference links when encoding. By default, these are removed."
+- item:
+    issue: "155"
+    type: "fix"
+    title: "Terser's IModelVisitor now supplies to the path to the element. This is an API change, but I don't think there are many users of the IModelVisitor yet. Please let us know if this is a big hardship and we can find an alternate way of making this change."
+- item:
+    type: "fix"
+    title: "Prevent server from returning a Content-Location header for search response when using the DSTU2 bundle format"
+- item:
+    type: "fix"
+    title: "JPA server (uhnfhirtest.uhn.ca) sometimes included an empty \"text\" element in Bundles being returned."
+- item:
+    issue: "162"
+    type: "add"
+    title: "Add a framework for the Web Tester UI to allow its internal FHIR client to be configured (e.g. to add an authorization interceptor so that it adds credentials to client requests it makes). Thanks to Harsha Kumara for the suggestion!"
+- item:
+    issue: "163"
+    type: "fix"
+    title: "Fix regression in early 1.0 builds where resource type sometimes does not get populated in a resource ID when the resource is parsed. Thanks to Nick Peterson for reporting, and for providing a test case!"
+- item:
+    type: "add"
+    title: "Allow fluent/generic client users to execute a transaction using a raw string (containing a bundle resource) as input instead of a Bundle resource class instance."
+- item:
+    type: "fix"
+    title: "Disable date validation in the web tester UI, so that it is possible to enter partial dates, or dates without times, or even test out invalid date options."
+- item:
+    issue: "36"
+    type: "fix"
+    title: "Make BaseElement#getUndeclaredExtensions() and BaseElement#getUndeclaredExtensions() return a mutable list so that it is possible to delete extensions from a resource instance."
+- item:
+    issue: "168"
+    type: "fix"
+    title: "Server conformance statement check in clients (this is the check where the first time a given FhirContext is used to access a given server base URL, it will first check the server's Conformance statement to ensure that it supports the correct version of FHIR) now uses any registered client interceptors. In addition, IGenericClient now has a method \"forceConformanceCheck()\" which manually triggers this check. Thanks to Doug Martin for reporting and suggesting!"
+- item:
+    issue: "167"
+    type: "add"
+    title: "Rename the Spring Bean definition for the JPA server EntityManager from \"myEntityManagerFactory\" to just \"entityManagerFactory\" as this is the default bean name expected in other parts of the Spring framework. Thanks to Mohammad Jafari for the suggestion!"
+- item:
+    issue: "164"
+    type: "add"
+    title: "Improve error message when a user tries to perform a create/update with an invalid or missing Content-Type header. Thanks to wanghaisheng for reporting! (This was actually a three part bug, so the following two fixes also reference this bug number)"
+- item:
+    issue: "164"
+    type: "add"
+    title: "Add support for :missing qualifier in generic/fluent client."
+- item:
+    issue: "164"
+    type: "add"
+    title: "Add support for :missing qualifier in JPA server."
+- item:
+    type: "add"
+    title: "Add a new configuration method on the parsers, <code>setStripVersionsFromReferences(boolean)</code> which configures the parser to preserve versions in resource reference links when encoding. By default, these are removed."
+- item:
+    issue: "171"
+    type: "add"
+    title: "Add an exception for RESTful clients/servers to represent the HTTP 403 Forbidden status code. Thanks to Joel Costigliola for the patch!"
+- item:
+    type: "fix"
+    title: "Transaction server operations incorrectly used the \"Accept\" header instead of the \"Content-Type\" header to determine the POST request encoding. Thanks to Rene Spronk for providing a test case!"

@@ -1,0 +1,325 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>SLF4j (All): 1.7.25 -&gt; 1.7.28</li> <li>Spring (JPA): 5.1.8.Final -&gt; 5.2.0.Final</li> <li>Hibernate Core (JPA): 5.4.2.Final -&gt; 5.4.6.Final</li> <li>Hibernate Search (JPA): 5.11.1.Final -&gt; 5.11.3.Final</li> <li>Jackson Databind (JPA): 2.9.9 -&gt; 2.9.10 (CVE-2019-16335, CVE-2019-14540)</li> <li>Commons-DBCP2 (JPA): 2.6.0 -&gt; 2.7.0</li> <li>Postgresql JDBC Driver (JPA): 42.2.6.jre7 -&gt; 42.2.8</li> <li>MSSQL JDBC Driver (JPA): 7.0.0.jre8 -&gt; 7.4.1.jre8</li> <li>Spring Boot (Boot): 2.1.1 -&gt; 2.2.0</li> <li>Phloc Schematron (Validator): 5.0.4 -&gt; 5.2.0</li> <li>Phloc Commons (Validator): 9.1.1 -&gt; 9.3.8</li> </ul>"
+- item:
+    type: "add"
+    title: "<b>New Feature</b>: The JPA server now saves and supports searching on <code>Resource.meta.source</code> via the <code>_source</code> search parameter. The server automatically appends the Request ID as a hash value on the URI as well in order to provide request level tracking. Searches can use either the source URI, the request ID, or both."
+- item:
+    type: "add"
+    title: "<b>New Feature</b>: Support for the FHIR Bulk Data Export specification has been added to the JPA server. See the <a href=\"http://hl7.org/fhir/uv/bulkdata/\">specification</a> for information on how this works. Note that only system level export is currently supported but others will follow."
+- item:
+    type: "add"
+    title: "<b>New Feature</b>: Support for ElasticSearch has been added to the JPA server directly (i.e. without needing a separate module) and a new class called \"ElasticsearchHibernatePropertiesBuilder\" has been added to facilitate the creation of relevant properties. Instructions have been added to the hapi-fhir-jpaserver-starter project to get started with Elasticsearch. It is likely we will switch our default recommendation to Elastic in the future."
+- item:
+    type: "fix"
+    title: "<b>New Feature</b>: A new set of operations have been added to the JPA server that allow CodeSystem deltas to be uploaded. A CodeSystem Delta consists of a set of codes and relationships that are added or removed incrementally to the live CodeSystem without requiring a downtime or a complete upload of the contents. Deltas may be specified using either a custom CSV format or a partial CodeSystem resource. <br/> In addition, the HAPI FHIR CLI <code>upload-terminology</code> command has been modified to support this new functionality."
+- item:
+    type: "fix"
+    title: "<b>New Feature</b>: When using Externalized Binary Storage in the JPA server, the system will now automatically externalize Binary and Attachment payloads, meaning that these will automatically not be stored in the RDBMS."
+- item:
+    type: "fix"
+    title: "<b>Model Update</b>: The DSTU3 structures have been upgraded to the new 3.0.2 (Technical Correction) release.<br/> The R4 structures have been upgraded to the new 4.0.1 (Technical Correction) release.<br/> The R5 structure have been upgraded to the current (October) snapshot."
+- item:
+    issue: "1489"
+    type: "add"
+    title: "<b>Performance Improvement</b>: A significant performance improvement was made to the parsers (particularly the Json Parser) when serializing resources. This work yields improvements of 20-50% in raw encode speed when encoding large resources. Thanks to David Maplesden for the pull request!"
+- item:
+    issue: "1489"
+    type: "add"
+    title: "<b>Performance Improvement</b>: When running inside a JPA server, The DSTU3+ validator now performs code validations by directly testing ValueSet membership against a pre-calculated copy of the ValueSet, instead of first expanding the ValueSet and then examining the expanded contents. This can yield a significant improvement in validation speed in many cases."
+- item:
+    issue: "1357"
+    type: "add"
+    title: "The email Subscription deliverer now respects the payload property of the subscription when deciding how to encode the resource being sent. Thanks to Sean McIlvenna for the pull request!"
+- item:
+    type: "fix"
+    title: "When using the _filter search parameter, string comparisons using the \"eq\" operator were incorrectly performing a partial match. This has been corrected. Thanks to Marc Sandberg for pointing this out!"
+- item:
+    type: "add"
+    title: "When using the AuthorizationInterceptor with a rule to allow all reads by resource type, the server will now reject requests for other resource types earlier in the processing cycle. Thanks to Anders Havn for the suggestion!"
+- item:
+    type: "fix"
+    title: "Reference search parameters did not work via the _filter parameter"
+- item:
+    type: "fix"
+    title: "Transaction entries with a resource URL starting with a leading slash (e.g. <code>/Organization?identifier=foo</code> instead of <code>Organization?identifier=foo</code> did not work. These are now supported."
+- item:
+    type: "fix"
+    title: "SubscriptionDstu2Config incorrectly pointed to a DSTU3 configuration file. This has been corrected."
+- item:
+    type: "fix"
+    title: "When using the VersionedApiConverterInterceptor, GraphQL responses failed with an HTTP 500 error."
+- item:
+    type: "fix"
+    title: "Cascading deletes now correctly handle circular references. Previously this failed with an HTTP 500 error."
+- item:
+    type: "fix"
+    title: "The informational message returned in an OperationOutcome when a delete failed due to cascades not being enabled contained an incorrect example. This has been corrected."
+- item:
+    type: "fix"
+    title: "In some cases, deleting a CodeSystem resource would fail because the underlying codes were not correctly deleted from the terminology service tables. This is fixed."
+- item:
+    type: "change"
+    title: "Two foreign keys have been dropped from the HFJ_SEARCH_RESULT table used by the FHIR search query cache. These constraints did not add value and caused unneccessary contention when used under high load."
+- item:
+    type: "change"
+    title: "An inefficient regex expression in UrlUtil was replaced with a much more efficient hand-written checker. This regex was causing a noticable performance drop when feeding large numbers of transactions into the JPA server at the same time (i.e. when loading Synthea data)."
+- item:
+    type: "fix"
+    title: "The FHIRPath engine used to parse search parameters in the JPA R4/R5 server is now reused across requests, as it is somewhat expensive to create and is thread safe."
+- item:
+    type: "add"
+    title: "It is now possible to submit a PATCH request as a part of a FHIR transaction in DSTU3 (previously this was only supported in R4+). This is not officially part of the DSTU3 spec, but it can now be performed by leaving the Bundle.entry.request.method blank in DSTU3 transactions and setting the request payload as a Binary resource containing a valid patch."
+- item:
+    type: "change"
+    title: "The HAPI FHIR CLI server now uses H2 as its database platform instead of Derby. Note that this means that data in any existing installations will need to be re-uploaded to the new database platform."
+- item:
+    issue: "1443"
+    type: "add"
+    title: "LOINC concepts now include multiaxial hierarchical properties (e.g. <code>parent</code> and <code>child</code> , which identify parent and child concepts."
+- item:
+    issue: "1445"
+    type: "add"
+    title: "When loading LOINC terminology, a new ValueSet is automatically created with a single include element that identifies the LOINC CodeSystem in <code>ValueSet.compose.include.system</code> . This ValueSet includes all LOINC codes."
+- item:
+    issue: "1461"
+    type: "add"
+    title: "A note has been added to the downloads page explaning the removal of the hapi-fhir-utilities module. Thanks to Andrew Fitzgerald for the PR!"
+- item:
+    type: "change"
+    title: "REST servers will no longer try to guess the content type for HTTP requests where a body is provided but no Content-Type header is included. These requests are invalid, and will now result in an HTTP 400. This change corrects an error where some interceptors (notably the RequestValidatingInterceptor, but not including any HAPI FHIR security interceptors) could be bypassed if a Content Type was not included."
+- item:
+    type: "fix"
+    title: "The GraphQL provider did not wrap the respone in a \"data\" element as described in the FHIR specification. This has been corrected."
+- item:
+    type: "add"
+    title: "Added support for comparing resource dates to the current time via a new variable %now. E.g. Procedure?date=gt%now would match future procedures."
+- item:
+    type: "add"
+    title: "Add support for in-memory matching on date comparisons ge,gt,eq,lt,le."
+- item:
+    type: "fix"
+    title: "When using the Consent Service and denying a resource via the \"Will See Resource\" method, the resource ID and version were still returned to the user. This has been corrected so that no details about the resource are leaked."
+- item:
+    type: "fix"
+    title: "Fix a failure in FhirTerser#visit when fields in model classes being visited contain custom subclasses of the expected type."
+- item:
+    type: "fix"
+    title: "Updating an existing CodeSystem resource with a content mode of COMPLETE did not cause the terminology service to accurately reflect the new CodeSystem URL and/or concepts. This is now corrected."
+- item:
+    type: "add"
+    title: "The JPA server now uses the Quartz scheduling library as a lob scheduling mechanism"
+- item:
+    type: "change"
+    title: "The Testpage Overlay has been upgraded to use FontAwesome 5.x, and now supports being deployed to a servlet path other than \"/\"."
+- item:
+    issue: "1495"
+    type: "fix"
+    title: "A NullPointerException when using the AuthorizationInterceptor RuleBuilder to build a conditional rule with a custom tester has been corrected. Thanks to Tue Toft Nørgård for reporting!"
+- item:
+    issue: "1494"
+    type: "fix"
+    title: "The R4+ client and server modules did not recognize the new <code>_include:iterate</code> syntax that replaces the previous <code>_include:recurse</code> syntax. Both are now supported on all servers in order to avoid breaking backwards compatibility, with the new syntax now being emitted in R4+ clients."
+- item:
+    type: "change"
+    title: "The hapi-fhir-jaxrs-server module now lists dependencies on structures JARs as optional dependencies, in order to avoid automatically importing all versions. This means that implementers of JAX-RS servers may now need to add an explicit dependency on one or more structures JARs to their own project."
+- item:
+    issue: "1482"
+    type: "fix"
+    title: "The LOINC terminology distribution includes multiple copies of the same files. Uploading LOINC terminology resulted in some ValueSets with duplicate codes. This has been corrected by specifying a path with each filename."
+- item:
+    type: "fix"
+    title: "A corner case bug in the JPA server was solved: When performing a search that contained chained reference searches where the value contained slashes (e.g. <code>Observation?derived-from:DocumentReference.contenttype=application/vnd.mfer</code> ) the server could fail to load later pages in the search results."
+- item:
+    type: "add"
+    title: "A new flag has been added to the JPA migrator tool that causes the migrator to not try to reduce the length of existing columns in the schema."
+- item:
+    issue: "1483"
+    type: "fix"
+    title: "Some resource IDs and URLs for LOINC ValueSets and ConceptMaps were inconsistently populated by the terminology uploader. This has been corrected."
+- item:
+    type: "fix"
+    title: "When a resource was updated with a meta.source containing a request id, the meta.source was getting appended with the new request id, resulting in an ever growing source.meta value. E.g. after the first update, it looks like \"#9f0a901387128111#5f37835ee38a89e2\" when it should only be \"#5f37835ee38a89e2\". This has been corrected."
+- item:
+    issue: "1421"
+    type: "fix"
+    title: "The Plain Server method selector was incorrectly allowing client requests with _include statements to be handled by method implementations that did not have any <code>@IncludeParam</code> defined. This is now corrected. Thanks to Tuomo Ala-Vannesluoma for reporting and providing a test case!"
+- item:
+    issue: "1366"
+    type: "add"
+    title: "The ValueSet operation <code>$expand</code> has been optimized for large ValueSets. ValueSets are now persistence-backed by the terminology tables, which are populated by a scheduled pre-expansion process. A ValueSet previously stored in an existing FHIR repository will need to be re-created or updated to make it a candidate for pre-expansion. ValueSets that have yet to be pre-expanded will continue to be expanded in-memory."
+- item:
+    issue: "1431"
+    type: "add"
+    title: "The ValueSet operation <code>$validate-code</code> has been optimized for large ValueSets. Codes in ValueSets that have yet to be pre-expanded will continue to be validated in-memory."
+- item:
+    issue: "1447"
+    type: "add"
+    title: "LOINC filenames for terminology upload are now configurable using the <code>loincupload.properties</code> file."
+- item:
+    issue: "1451"
+    type: "add"
+    title: "Support for the LOINC <code>EXTERNAL_COPYRIGHT_NOTICE</code> property and <code>copyright</code> filter has been added."
+- item:
+    issue: "1453"
+    type: "add"
+    title: "Support for the LOINC <code>parent</code> and <code>child</code> filters has been added. Both filters can be used with either of the <code>=</code> or <code>in</code> operators."
+- item:
+    issue: "1454"
+    type: "add"
+    title: "Support for the LOINC <code>ancestor</code> and <code>descendant</code> filters has been added. The <code>descendant</code> filter can be used with either of the <code>=</code> or <code>in</code> operators. At present, the <code>ancestor</code> filter can only be used with the <code>=</code> operator."
+- item:
+    issue: "1512"
+    type: "add"
+    title: "Support for the LOINC <code>ancestor</code> filter with the <code>in</code> operator has been added."
+- item:
+    type: "fix"
+    title: "The JPA server failed to find codes defined in not-present codesystems in some cases, and reported that the CodeSystem did not exist. This has been corrected."
+- item:
+    type: "remove"
+    title: "The method <code>IVersionSpecificBundleFactory#initializeBundleFromResourceList</code> has been deprecated, as it provided duplicate functionality to other methods and had an outdated argument list based on the Bundle needs in DSTU1. We are not aware of any public use of this API, please let us know if this deprecation causes any issues."
+- item:
+    issue: "1517"
+    type: "add"
+    title: "Support for concept property values with a length exceeding 500 characters has been added in the terminology tables. In particular, this was added to facilitate the LOINC EXTERNAL_COPYRIGHT_NOTICE property, for which values can be quite long."
+- item:
+    type: "add"
+    title: "The AuthorizationInterceptor has been enhanced so that a user can be authorized to perform create operations specifically, without authorizing all write operations. Also, conditional creates can now be authorized even if they are happening inside a FHIR transaction."
+- item:
+    issue: "402"
+    type: "fix"
+    title: "When encoding a Composition resource in XML, the section narrative blocks were incorrectly replaced by the main resource narrative. Thanks to Mirjam Baltus for reporting!"
+- item:
+    issue: "1473"
+    type: "fix"
+    title: "AN issue with date pickers not working in the hapi-fhir-testpage-overlay project has been fixed. Thanks to GitHub user @jaferkhan for the pull request!"
+- item:
+    type: "add"
+    title: "A docker compose script for the hapi-fhir-jpaserver-starter project was added. Thanks to Long Nguyen for the pull request!"
+- item:
+    issue: "1476"
+    type: "add"
+    title: "A number of overridden methods in the HAPI FHIR codebase did not have the @Override annotation. Thanks to Clayton Bodendein for cleaning this up!"
+- item:
+    issue: "1373"
+    type: "add"
+    title: "Plain server resource providers were not correctly matching methods that had the _id search parameter if a client performed a request using a modifier such as :not or :exact. Thanks to Petro Mykhailyshyn for the pull request!"
+- item:
+    type: "fix"
+    title: "The JPA server contained a restriction on the columns used to hold a resource's type name that was too short to hold the longest name from the final R4 definitions. This has been corrected to account for names up to 40 characters long."
+- item:
+    type: "fix"
+    title: "The subscription triggering operation was not able to handle commas within search URLs being used to trigger resources for subscription checking. This has been corrected."
+- item:
+    type: "fix"
+    title: "In some cases where resources were recently expunged, null entries could be passed to JPA interceptors registered against the STORAGE_PRESHOW_RESOURCES hook."
+- item:
+    type: "fix"
+    title: "In issue was fixed in the JPA server where a previously failed search would be reused, immediately returning an error rather than retrying the search."
+- item:
+    type: "fix"
+    title: "The JPA server did not correctly process _has queries where the linked search parameter was the _id parameter."
+- item:
+    type: "remove"
+    title: "HTTP PUT (resource update) operations will no longer allow the version to be specified in a Content-Location header. This behaviour was allowed in DSTU1 and was never removed from HAPI even though it hasn't been permitted in the spec for a very long time. Hopefully this change will not impact anyone!"
+- item:
+    issue: "1529"
+    type: "fix"
+    title: "HAPI FHIR allows transactions in DSTU3 to contain a JSON/XML Patch in a Binary resource without specifying a verb in Bundle.entry.request.method, since the valueset defined in DSTU3 for that field does not include the PATCH verb. The AuthorizationInterceptor however did not understand this and would reject these requests. This is now corrected."
+- item:
+    issue: "1530"
+    type: "fix"
+    title: "A potential XXE vulnerability in the validator was corrected. The XML parser used for validating XML payloads (i.e. FHIR resources) will no longer read from DTD declarations."
+- item:
+    type: "add"
+    title: "Auto generated transaction IDs will now use both upper- and lowercase letters for more uniqueness in the same amount of space."
+- item:
+    type: "fix"
+    title: "Paging requests that are incorrectly executed at the type level were interpreted by the plain server as search requests with no search parameters, leading to confusing search results. These will now result in an HTTP 400 error with a meaningful error message."
+- item:
+    type: "change"
+    title: "The <code>IValidationSupport#validateCode(...)</code> method has been modified to add an additional parameter (String theValueSetUrl). Most users will be unaffected by this change as HAPI FHIR provides a number of built-in implementations of this interface, but any direct user implementations of this interface will need to add the new parameter."
+- item:
+    issue: "1541"
+    type: "add"
+    title: "The server CapabilityStatement (/metadata) endpoint now respects the Cache-Control header. Thanks to Jens Villadsen for the pull request!"
+- item:
+    type: "add"
+    title: "The @Metadata annotation now has an attribute that can be used to control the cache timeout"
+- item:
+    issue: "1544"
+    type: "fix"
+    title: "QuestionnaireResponse validation in the JPA server was not able to load Questionnaire resources that were referenced using a canonical URI instead of a local reference. Thanks to Vu Vuong for reporting!"
+- item:
+    issue: "848"
+    type: "fix"
+    title: "When validating JSON payloads, the JSON structure was parsed by Gson instead of passing the raw JSON to the validator. This meant that the validator was unable to catch certain structural errors that are ignored by Gson. Thanks to Michael Lawley for reporting!"
+- item:
+    issue: "1546"
+    type: "fix"
+    title: "The JPA server exposed a number of duplicate entries in the CapabilityStatement's list of supported _include values for a given resource. Thanks to Jens Villadsen for reporting!"
+- item:
+    issue: "1481"
+    type: "fix"
+    title: "An unintended dependency from hapi-fhir-base on Jetty was introduced in HAPI FHIR 4.0.0. This has been removed."
+- item:
+    type: "fix"
+    title: "The JPA migrator tool was not able to correctly drop tables containing foreign key references in some cases. This has been corrected."
+- item:
+    issue: "1547"
+    type: "fix"
+    title: "An issue was fixed where the JPA server would occasionally fail to save a resource because it contained a string containing characters that change length when normalized. Thanks to Tuomo Ala-Vannesluoma for the pull request!"
+- item:
+    type: "add"
+    title: "Validation errors will now include details about the line number where the issue was found"
+- item:
+    type: "change"
+    title: "The hapi-fhir-testpage-overlay project now uses WebJars for importing JavaScript dependency libraries. This reduces our Git repository size and should make it easier to stay up-to-date."
+- item:
+    type: "fix"
+    title: "In the (fairly unlikely) circumstance that a JPA server was called with a parameter where the parameter name referenced a custom search parameter with an invalid chain attached, and the value was missing entirely (e.g. <code>ProcedureRequest?someCustomParameter.BAD_NAME=</code> , the server would ignore this parameter instead of incorrectly returning an error. This has been corrected."
+- item:
+    issue: "1526"
+    type: "fix"
+    title: "Several issues with HAPI FHIR's annotation scanner that prevented use with Kotlin based resource providers have been corrected. Thanks to Jelmer ter Wal for the pull request!"
+- item:
+    type: "change"
+    title: "The JPA server in DST2 mode previously automatically validated submitted QuestionnaireResponse resource against their corresponding Questionnaires and rejected non-conformant QuestionnaireResponse resources from being stored. This was in contrast to every other version where the RequestValidatingInterceptor has to be registered in order to achieve this specific behaviour. This behaviour has been removed from the JPA server, and the same interceptor must be used for QR validation in the DSTU2 JPA server as in all other versions of FHIR."
+- item:
+    type: "change"
+    title: "DSTU2.1 profile validation now uses the same R5 validation as all other versions of FHIR."
+- item:
+    type: "add"
+    title: "A new built-in server interceptor called <code>CaptureResourceSourceFromHeaderInterceptor</code> has been added. This interceptor can be used to capture an incoming source system URI in an HTTP Request Header and automatically place it in <code>Resource.meta.source</code>"
+- item:
+    type: "remove"
+    title: "The @ProvidesResources annotation has been removed from HAPI FHIR, as it was not documented and did not do anything useful. Please get in touch if this causes any issues."
+- item:
+    type: "fix"
+    title: "Search parameters of type URI did not work in the hapi-fhir-testpage-overlay. This has been corrected."
+- item:
+    issue: "1568"
+    type: "fix"
+    title: "JPA servers accidentally stripped the type attribute from the server-exported CapabilityStatement when search parameters of type \"special\" were found. This has been corrected."
+- item:
+    type: "fix"
+    title: "When running the JPA server without Lucene indexing enabled and performing ValueSet expansion, the server would incorrectly ignore inclusion rules that specified a system but no codes (i.e. include the whole system). This has been corrected."
+- item:
+    issue: "1538"
+    type: "fix"
+    title: "The hapi-fhir-testpage-overlay has been updated to support R5 endpoints. Thanks to Dazhi Jiao for the pull request!"
+- item:
+    issue: "1088"
+    type: "add"
+    title: "The CapabilityStatement generator will now determine supported profiles by navigating the complete hierarchy of supported resource types, instead of just using the root resource for each type. Thanks to Stig Døssing for the pull request!"
+- item:
+    type: "fix"
+    title: "A NullPointerException in the XML Parser was fixed when serializing a resource containing an extension on a primitive datatype that was missing a URL declaration."
+- item:
+    type: "fix"
+    title: "When using the _filter search parameter in the JPA server with an untyped resource ID, the filter could bring in search results of the wrong type. Thanks to Anthony Sute for the Pull Request and Jens Villadsen for reporting!"
+- item:
+    issue: "1300"
+    type: "fix"
+    title: "In some cases where where a single search parameter matches the same resource many times with different distinct values (e.g. a search by Patient:name where there are hundreds of patients having hundreds of distinct names each) the Search Coordinator would end up in an infinite loop and never return all of the possible results. Thanks to @imranmoezkhan for reporting, and to Tim Shaffer for providing a reproducible test case!"

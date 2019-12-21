@@ -282,9 +282,7 @@ public final class ResourceIndexedSearchParams {
 		} else {
 			ForcedId forcedId = target.getForcedId();
 			if (forcedId != null) {
-				// TODO KHS is forcedId.getForcedId().equals(theReference.getIdPart() also valid?
-				return forcedId.getForcedId().equals(theReference.getValue()) ||
-					forcedId.getForcedId().equals(theReference.getIdPart());
+				return forcedId.getForcedId().equals(theReference.getValue());
 			} else {
 				return false;
 			}

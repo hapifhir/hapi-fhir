@@ -34,7 +34,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isAnyBlank;
+import static org.apache.commons.lang3.StringUtils.isNoneBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetConceptAccumulator.class);
@@ -71,8 +73,10 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	@Override
 	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations) {
 		TermValueSetConcept concept = saveConcept(theSystem, theCode, theDisplay);
-		for (TermConceptDesignation designation : theDesignations) {
-			saveConceptDesignation(concept, designation);
+		if (theDesignations != null) {
+			for (TermConceptDesignation designation : theDesignations) {
+				saveConceptDesignation(concept, designation);
+			}
 		}
 	}
 

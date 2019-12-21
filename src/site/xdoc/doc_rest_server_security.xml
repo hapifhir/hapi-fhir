@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
+	<!-- This content is migrated -->
+
 	<properties>
 		<title>Server Security</title>
 	</properties>
@@ -92,7 +94,7 @@
 			
 			<p>
 				HAPI FHIR 1.5 introduced a new interceptor, the
-				<a href="./apidocs-server/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.html">AuthorizationInterceptor</a>.
+				<a href="/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.html">AuthorizationInterceptor</a>.
 			</p>
 			<p>
 				This interceptor can help with the complicated task of determining whether a user
@@ -313,7 +315,7 @@
 
 			<p>
 				HAPI FHIR 3.7.0 introduced a new interceptor, the
-				<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/auth/SearchNarrowingInterceptor.html">SearchNarrowingInterceptor</a>.
+				<a href="./apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/auth/SearchNarrowingInterceptor.html">SearchNarrowingInterceptor</a>.
 			</p>
 			<p>
 				This interceptor is designed to be used in conjunction with AuthorizationInterceptor. It

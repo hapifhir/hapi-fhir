@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.thymeleaf.util.StringUtils;
 
 import java.util.Locale;
@@ -28,6 +30,10 @@ import java.util.Locale;
 public abstract class BaseTableColumnTask<T extends BaseTableTask> extends BaseTableTask<T> {
 
 	private String myColumnName;
+
+	public BaseTableColumnTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
 	@SuppressWarnings("unchecked")
 	public T setColumnName(String theColumnName) {
@@ -46,5 +52,25 @@ public abstract class BaseTableColumnTask<T extends BaseTableTask> extends BaseT
 		Validate.notBlank(myColumnName, "Column name not specified");
 	}
 
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
 
+		if (!(theO instanceof BaseTableColumnTask)) return false;
+
+		BaseTableColumnTask<?> that = (BaseTableColumnTask<?>) theO;
+
+		return new EqualsBuilder()
+			.appendSuper(super.equals(theO))
+			.append(myColumnName, that.myColumnName)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.appendSuper(super.hashCode())
+			.append(myColumnName)
+			.toHashCode();
+	}
 }

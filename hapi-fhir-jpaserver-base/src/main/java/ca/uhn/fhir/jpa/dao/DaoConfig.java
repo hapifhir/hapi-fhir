@@ -67,7 +67,8 @@ public class DaoConfig {
 	 * <li>message</li>
 	 * </ul>
 	 */
-	private static final Set<String> DEFAULT_BUNDLE_TYPES_ALLOWED_FOR_STORAGE = Collections.unmodifiableSet(new TreeSet<>(Sets.newHashSet(
+	@SuppressWarnings("WeakerAccess")
+	public static final Set<String> DEFAULT_BUNDLE_TYPES_ALLOWED_FOR_STORAGE = Collections.unmodifiableSet(new TreeSet<>(Sets.newHashSet(
 		Bundle.BundleType.COLLECTION.toCode(),
 		Bundle.BundleType.DOCUMENT.toCode(),
 		Bundle.BundleType.MESSAGE.toCode()

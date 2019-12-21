@@ -23,34 +23,41 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropIndexTask.class);
 	private String myIndexName;
 
+	public DropIndexTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
+
 	@Override
 	public void validate() {
 		super.validate();
 		Validate.notBlank(myIndexName, "The index name must not be blank");
 
-		if (getDescription() == null) {
-			setDescription("Drop index " + myIndexName + " on table " + getTableName());
-		}
+		setDescription("Drop index " + myIndexName + " from table " + getTableName());
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
 
 		if (!indexNames.contains(myIndexName)) {
-			ourLog.info("Index {} does not exist on table {} - No action needed", myIndexName, getTableName());
+			logInfo(ourLog, "Index {} does not exist on table {} - No action needed", myIndexName, getTableName());
 			return;
 		}
 
@@ -59,7 +66,7 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 
 		List<String> sqls = createDropIndexSql(getConnectionProperties(), getTableName(), myIndexName, getDriverType());
 		if (!sqls.isEmpty()) {
-			ourLog.info("Dropping {} index {} on table {}", uniquenessString, myIndexName, getTableName());
+			logInfo(ourLog, "Dropping {} index {} on table {}", uniquenessString, myIndexName, getTableName());
 		}
 		for (@Language("SQL") String sql : sqls) {
 			executeSql(getTableName(), sql);
@@ -122,5 +129,27 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 			}
 		}
 		return sql;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		DropIndexTask that = (DropIndexTask) theO;
+
+		return new EqualsBuilder()
+			.appendSuper(super.equals(theO))
+			.append(myIndexName, that.myIndexName)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.appendSuper(super.hashCode())
+			.append(myIndexName)
+			.toHashCode();
 	}
 }

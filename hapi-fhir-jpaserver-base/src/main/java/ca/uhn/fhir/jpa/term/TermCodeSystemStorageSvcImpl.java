@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.*;
@@ -34,6 +35,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -113,11 +115,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private IResourceTableDao myResourceTableDao;
 
 	@Override
-	public Long getValueSetResourcePid(IIdType theIdType) {
+	public ResourcePersistentId getValueSetResourcePid(IIdType theIdType) {
 		return getValueSetResourcePid(theIdType, null);
 	}
 
-	private Long getValueSetResourcePid(IIdType theIdType, RequestDetails theRequestDetails) {
+	private ResourcePersistentId getValueSetResourcePid(IIdType theIdType, RequestDetails theRequestDetails) {
 		return myIdHelperService.translateForcedIdToPid(theIdType, theRequestDetails);
 	}
 
@@ -143,7 +145,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		CodeSystem codeSystem = myTerminologySvc.getCodeSystemFromContext(theSystem);
 		if (codeSystem.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
-			throw new InvalidRequestException("CodeSystem with url[" + theSystem + "] can not apply a delta - wrong content mode: " + codeSystem.getContent());
+			throw new InvalidRequestException("CodeSystem with url[" + Constants.codeSystemWithDefaultDescription(theSystem) + "] can not apply a delta - wrong content mode: " + codeSystem.getContent());
 		}
 
 		Validate.notNull(cs);
@@ -314,7 +316,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.COMPLETE || theCodeSystem.getContent() == null || theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", theResourceEntity.getIdDt().getValue(), theCodeSystem.getContentElement().getValueAsString());
 
-				Long codeSystemResourcePid = getCodeSystemResourcePid(theCodeSystem.getIdElement());
+				ResourcePersistentId codeSystemResourcePid = getCodeSystemResourcePid(theCodeSystem.getIdElement());
 
 				/*
 				 * If this is a not-present codesystem, we don't want to store a new version if one
@@ -348,8 +350,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
 
 		IIdType csId = myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(theCodeSystemResource);
-		Long codeSystemResourcePid = myIdHelperService.translateForcedIdToPid(csId, theRequest);
-		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid);
+		ResourcePersistentId codeSystemResourcePid = myIdHelperService.translateForcedIdToPid(csId, theRequest);
+		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid.getIdAsLong());
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
 
@@ -365,14 +367,14 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
+	public void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
 		ourLog.debug("Storing code system");
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theCodeSystemVersion.getResource() != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
 		// Grab the existing versions so we can delete them later
-		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourcePid);
+		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourcePid.getIdAsLong());
 
 		/*
 		 * For now we always delete old versions. At some point it would be nice to allow configuration to keep old versions.
@@ -597,11 +599,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	}
 
-	private Long getCodeSystemResourcePid(IIdType theIdType) {
+	private ResourcePersistentId getCodeSystemResourcePid(IIdType theIdType) {
 		return getCodeSystemResourcePid(theIdType, null);
 	}
 
-	private Long getCodeSystemResourcePid(IIdType theIdType, RequestDetails theRequestDetails) {
+	private ResourcePersistentId getCodeSystemResourcePid(IIdType theIdType, RequestDetails theRequestDetails) {
 		return myIdHelperService.translateForcedIdToPid(theIdType, theRequestDetails);
 	}
 
@@ -675,10 +677,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Nonnull
-	private TermCodeSystem getOrCreateTermCodeSystem(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, ResourceTable theCodeSystemResourceTable) {
+	private TermCodeSystem getOrCreateTermCodeSystem(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, ResourceTable theCodeSystemResourceTable) {
 		TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
 		if (codeSystem == null) {
-			codeSystem = myCodeSystemDao.findByResourcePid(theCodeSystemResourcePid);
+			codeSystem = myCodeSystemDao.findByResourcePid(theCodeSystemResourcePid.getIdAsLong());
 			if (codeSystem == null) {
 				codeSystem = new TermCodeSystem();
 			}

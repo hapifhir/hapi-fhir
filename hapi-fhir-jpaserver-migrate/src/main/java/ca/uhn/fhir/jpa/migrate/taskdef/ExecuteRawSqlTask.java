@@ -22,17 +22,27 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ExecuteRawSqlTask extends BaseTask<ExecuteRawSqlTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ExecuteRawSqlTask.class);
 	private Map<DriverTypeEnum, List<String>> myDriverToSqls = new HashMap<>();
 	private List<String> myDriverNeutralSqls = new ArrayList<>();
+
+	public ExecuteRawSqlTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+		setDescription("Execute raw sql");
+	}
 
 	public ExecuteRawSqlTask addSql(DriverTypeEnum theDriverType, @Language("SQL") String theSql) {
 		Validate.notNull(theDriverType);
@@ -57,15 +67,35 @@ public class ExecuteRawSqlTask extends BaseTask<ExecuteRawSqlTask> {
 	}
 
 	@Override
-	public void execute() {
+	public void doExecute() {
 		List<String> sqlStatements = myDriverToSqls.computeIfAbsent(getDriverType(), t -> new ArrayList<>());
 		sqlStatements.addAll(myDriverNeutralSqls);
 
-		ourLog.info("Going to execute {} SQL statements", sqlStatements.size());
+		logInfo(ourLog, "Going to execute {} SQL statements", sqlStatements.size());
 
 		for (String nextSql : sqlStatements) {
 			executeSql(null, nextSql);
 		}
 
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (!(theO instanceof ExecuteRawSqlTask)) return false;
+
+		ExecuteRawSqlTask that = (ExecuteRawSqlTask) theO;
+
+		return new EqualsBuilder()
+			.append(myDriverNeutralSqls, that.myDriverNeutralSqls)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(myDriverNeutralSqls)
+			.toHashCode();
 	}
 }

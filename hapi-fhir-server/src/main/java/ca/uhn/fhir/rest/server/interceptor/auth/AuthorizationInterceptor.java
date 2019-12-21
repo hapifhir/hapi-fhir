@@ -423,7 +423,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		private final IAuthRule myDecidingRule;
 		private final PolicyEnum myDecision;
 
-		Verdict(PolicyEnum theDecision, IAuthRule theDecidingRule) {
+		public Verdict(PolicyEnum theDecision, IAuthRule theDecidingRule) {
 			Validate.notNull(theDecision);
 
 			myDecision = theDecision;

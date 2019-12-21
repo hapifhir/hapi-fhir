@@ -56,8 +56,8 @@ public class ClientInvocationHandlerFactory {
 
 			myMethodToLambda.put(theClientType.getMethod("setEncoding", EncodingEnum.class), new SetEncodingLambda());
 			myMethodToLambda.put(theClientType.getMethod("setPrettyPrint", Boolean.class), new SetPrettyPrintLambda());
-			myMethodToLambda.put(theClientType.getMethod("registerInterceptor", IClientInterceptor.class), new RegisterInterceptorLambda());
-			myMethodToLambda.put(theClientType.getMethod("unregisterInterceptor", IClientInterceptor.class), new UnregisterInterceptorLambda());
+			myMethodToLambda.put(theClientType.getMethod("registerInterceptor", Object.class), new RegisterInterceptorLambda());
+			myMethodToLambda.put(theClientType.getMethod("unregisterInterceptor", Object.class), new UnregisterInterceptorLambda());
 			myMethodToLambda.put(theClientType.getMethod("setSummary", SummaryEnum.class), new SetSummaryLambda());
 			myMethodToLambda.put(theClientType.getMethod("fetchResourceFromUrl", Class.class, String.class), new FetchResourceFromUrlLambda());
 

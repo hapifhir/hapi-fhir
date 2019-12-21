@@ -6,7 +6,79 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="4.1.0" date="TBD" description="Igloo">
+		<release version="4.2.0" date="TBD">
+			<action type="add">
+				The version of a few dependencies have been bumped to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+				<ul>
+					<li>Jetty (CLI): 9.4.14.v20181114 -&gt; 9.4.23.v20191118</li>
+				</ul>
+				]]>
+			</action>
+			<action type="fix" issue="1583">
+				As of FHIR R4, some fields that were previously of type reference are now of type canonical.
+				One example is QuestionnaireResponse.questionnaire. Technically this means that this field
+				should no longer contain a relative reference, but as they are sometimes used that way, HAPI
+				FHIR will now try to be permissive and will index relative link canonical fields
+				such as (Questionnaire/123) as though it actually was a local relative link. Thanks to
+				Dean Atchley for reporting and providing a test case!
+			</action>
+			<action type="fix">
+				ValueSet PreCalculation did not successfully expand valuesets when Lucene was not enabled
+				in the JPA server. This has been corrected.
+			</action>
+			<action type="change">
+				When parsing Bundle resources containing other resources, XML/JSON parsers have an option called
+				"override resource ID with bundle entry fullUrl". This option previously caused any value
+				found in Bundle.entry.fullUrl to override any value found in
+				Bundle.entry.resource.id (meaning that the parsed resource would take its ID from
+				the fullUrl even if that ID disagreed with the ID found in the resource itself. As of
+				HAPI FHIR 4.1.0 the value in Bundle.entry.fullUrl will only be used to set the parsed resource
+				ID if the resource has no ID present.
+			</action>
+			<action type="add">
+				Chained searches using the _has search parameter as the chain value are now supported by
+				the JPA server.
+			</action>
+			<action type="change">
+				Changed database migration to use flyway. This adds a new table called FLY_HFJ_MIGRATION that records all
+				database migration tasks that have already been applied.  The hapi-fhir-cli migrate tool has been changed
+				to use flyway.  Learn more about flyway here: https://flywaydb.org/.
+			</action>
+			<action type="fix" issue="1613">
+				ValueSet Precalculation sometimes failed on Oracle DBs due to an invalid SQL function. This
+				has been corrected.
+			</action>
+			<action type="fix">
+				A ConcurrentModificationException was sometimes thrown when performing a cascading delete.
+				This has been corrected.
+			</action>
+			<action type="fix" issue="1624">
+				The constructor for Verdict.java was inadvertantly made private, preventing custom
+				rules from being written. Thanks to Jafer Khan for the pull request!
+			</action>
+			<action type="change">
+				The
+				<![CDATA[
+				<code>IRestfulClient#registerInterceptor</code>
+				and
+				<code>IRestfulClient#unregisterInterceptor</code>
+				]]>
+				methods now take Object as an argument instead of IClientInterceptor, allowing
+				client interceptors to now be migrated to the new interceptor
+				framework.
+			</action>
+			<action type="fix" issue="1610">
+				A missing mandatory was added to the SNOMED CT CodeSystem that is uploaded when SCT is
+				uploaded to the JPA server. Thanks to Anders Havn for the pull request!
+			</action>
+			<action type="fix">
+				An issue with the HAPI FHIR CLI was corrected that prevented the upload of LOINC due to an error
+				regarding the properties file.
+			</action>
+		</release>
+		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
 			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
@@ -21,6 +93,8 @@
 					<li>Postgresql JDBC Driver (JPA): 42.2.6.jre7 -&gt; 42.2.8</li>
 					<li>MSSQL JDBC Driver (JPA): 7.0.0.jre8 -&gt; 7.4.1.jre8</li>
 					<li>Spring Boot (Boot): 2.1.1 -&gt; 2.2.0</li>
+					<li>Phloc Schematron (Validator): 5.0.4 -&gt; 5.2.0</li>
+					<li>Phloc Commons (Validator): 9.1.1 -&gt; 9.3.8</li>
 				</ul>
 				]]>
 			</action>
@@ -81,9 +155,10 @@
 			</action>
 			<action type="fix">
 				<![CDATA[
-				<b>New Feature</b>:
-				The R4 structures have been upgraded to the new 4.0.1 (Technical Correction) release, and the
-				R5 structure have been upgraded to the current (October) snapshot.
+				<b>Model Update</b>:
+				The DSTU3 structures have been upgraded to the new 3.0.2 (Technical Correction) release.<br/>
+				The R4 structures have been upgraded to the new 4.0.1 (Technical Correction) release.<br/>
+				The R5 structure have been upgraded to the current (October) snapshot.
 				]]>
 			</action>
 			<action type="add" issue="1489">
@@ -249,7 +324,7 @@
 				resulted in some ValueSets with duplicate codes. This has been corrected by specifying a path with each
 				filename.
 			</action>
-			<action>
+			<action type="fix">
 				A corner case bug in the JPA server was solved: When performing a search that contained chained reference searches
 				where the value contained slashes (e.g.
 				<![CDATA[<code>Observation?derived-from:DocumentReference.contenttype=application/vnd.mfer</code>]]>)
@@ -1773,7 +1848,7 @@
 				to a new version (previously this was a manual process involving running scripts and
 				reindexing everything).
 				<![CDATA[
-				<br/><br>
+				<br/><br/>
 				See the
 				<a href="http://hapifhir.io/doc_cli.html#migrate-database">command documentation</a>
 				for more information on how to use this tool. Please post in the HAPI FHIR
@@ -1845,7 +1920,7 @@
 				<![CDATA[<code>setFlags(flags)</code>]]>
 				can be used to maintain the previous behaviour.
 			</action>
-			<action type="974">
+			<action type="add">
 				JPA server loading logic has been improved to enhance performance when
 				loading a large number of results in a page, or when loading multiple
 				search results with tags. Thanks to Frank Tao for the pull request!
@@ -2137,7 +2212,7 @@
 				is recommended to invoke the following SQL statement on their
 				database in order to reindex all data in a background job:
 				<![CDATA[<br/>]]>
-				<![CDATA[<pre>update HFJ_RESOURCE set SP_INDEX_STATUS = null;</pre>]]>
+				<![CDATA[<code>update HFJ_RESOURCE set SP_INDEX_STATUS = null;</code>]]>
 				<![CDATA[<br/>]]>
 				Note that if you do this reindex now, you will not have any downtime while
 				you upgrade to HAPI FHIR 3.5.0. If you need to perform the reindex at the
@@ -2146,8 +2221,8 @@
 				<![CDATA[<br/>]]>
 				In addition, the following schema changes should be made while upgrading:
 				<![CDATA[<br/>]]>
-				<![CDATA[<pre>update table TRM_CODESYSTEM_VER drop column RES_VERSION_ID;
-alter table TRM_CODESYSTEM_VER drop constraint IDX_CSV_RESOURCEPID_AND_VER</pre>]]>
+				<![CDATA[<code>update table TRM_CODESYSTEM_VER drop column RES_VERSION_ID;</code><br/>
+				<code>alter table TRM_CODESYSTEM_VER drop constraint IDX_CSV_RESOURCEPID_AND_VER</code><br/>]]>
 			</action>
 			<action type="add">
 				R4 structures have been updated to the latest definitions
@@ -2412,23 +2487,23 @@ alter table TRM_CODESYSTEM_VER drop constraint IDX_CSV_RESOURCEPID_AND_VER</pre>
 				columns have been
 				<![CDATA[<b>dropped</b>]]>
 				from the
-				<![CDATA[<code>HFJ_RESOURCE]]>
+				<![CDATA[<code>HFJ_RESOURCE</code>]]>
 				table, and the
 				<![CDATA[<code>RES_TEXT</code> and <code>RES_ENCODING</code>]]>
 				columns have been
 				<![CDATA[<b>made NULLABLE</b>]]>
 				on the
-				<![CDATA[<code>HFJ_RES_VER]]>
+				<![CDATA[<code>HFJ_RES_VER</code>]]>
 				table.
 				<![CDATA[<br/><br/>]]>
 				The following migration script may be used to apply these changes to
 				your database. Naturally you should back your database up prior to
 				making this change.
-				<![CDATA[
-				<pre>ALTER TABLE hfj_resource DROP COLUMN res_text;
-ALTER TABLE hfj_resource DROP COLUMN res_encoding;
-ALTER TABLE hfj_res_ver ALTER COLUMN res_encoding DROP NOT NULL;
-ALTER TABLE hfj_res_ver ALTER COLUMN res_text DROP NOT NULL;</pre>
+				<![CDATA[<br/>
+				<code>ALTER TABLE hfj_resource DROP COLUMN res_text;</code><br/>
+				<code>ALTER TABLE hfj_resource DROP COLUMN res_encoding;</code><br/>
+				<code>ALTER TABLE hfj_res_ver ALTER COLUMN res_encoding DROP NOT NULL;</code><br/>
+				<code>ALTER TABLE hfj_res_ver ALTER COLUMN res_text DROP NOT NULL;</code><br/>
 				]]>
 			</action>
 			<action type="fix">
@@ -2498,7 +2573,7 @@ ALTER TABLE hfj_res_ver ALTER COLUMN res_text DROP NOT NULL;</pre>
 			<action type="add">
 				A new method overload has been added to IServerInterceptor:
 				<![CDATA[
-				<code>outgoingResponse(RequestDetails, ResponseDetails, HttpServletRequest, HttpServletResponse)
+				<code>outgoingResponse(RequestDetails, ResponseDetails, HttpServletRequest, HttpServletResponse)</code>
 				]]>. This new method allows an interceptor to completely replace
 				the resource being returned with a different resource instance, or
 				to modify the HTTP Status Code being returned. All other "outgoingResponse"
@@ -2743,7 +2818,7 @@ ALTER TABLE hfj_res_ver ALTER COLUMN res_text DROP NOT NULL;</pre>
 			</action>
 			<action type="add">
 				A new method has been added to RequestDetails called
-				<![CDATA[<code>setRequestContents()]]> which can be used
+				<![CDATA[<code>setRequestContents()</code>]]> which can be used
 				by interceptors to modify the request body before it
 				is parsed by the server.
 			</action>
@@ -3132,22 +3207,20 @@ ALTER TABLE hfj_res_ver ALTER COLUMN res_text DROP NOT NULL;</pre>
 				HAPI FHIR client must now always include a Bundle return type in search calls. For example,
 				the following call would have worked previously:
 				<![CDATA[
-				<pre>
-Bundle bundle = client.search().forResource(Patient.class)
-	.where(new TokenClientParam("gender").exactly().code("unknown"))
-   .prettyPrint()
-   .execute();
-				</pre>
+				<br/>
+Bundle bundle = client.search().forResource(Patient.class)<br/>
+	.where(new TokenClientParam("gender").exactly().code("unknown"))<br/>
+   .prettyPrint()<br/>
+   .execute();<br/><br/>
 				]]>
 				This now needs an explicit returnBundle statement, as follows:
 				<![CDATA[
-				<pre>
-Bundle bundle = client.search().forResource(Patient.class)
-	.where(new TokenClientParam("gender").exactly().code("unknown"))
-   .prettyPrint()
-   .returnBundle(Bundle.class)
-   .execute();
-				</pre>
+				<br/>
+Bundle bundle = client.search().forResource(Patient.class)<br/>
+	.where(new TokenClientParam("gender").exactly().code("unknown"))<br/>
+   .prettyPrint()<br/>
+   .returnBundle(Bundle.class)<br/>
+   .execute();<br/>
 				]]>
 			</action>
 			<action type="add">
@@ -3899,7 +3972,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 				the unit was incorrectly treated as the system. Thanks to
 				@CarthageKing for the pull request!
 			</action>
-			<action type="533">
+			<action type="fix" issue="533">
 				Correct a typo in the JPA ValueSet ResourceProvider which prevented
 				successful operation under Spring 4.3. Thanks to
 				Robbert van Waveren for the pull request!
@@ -4249,7 +4322,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 				the unit was incorrectly treated as the system. Thanks to
 				@CarthageKing for the pull request!
 			</action>
-			<action type="533">
+			<action type="fix" issue="533">
 				Correct a typo in the JPA ValueSet ResourceProvider which prevented
 				successful operation under Spring 4.3. Thanks to
 				Robbert van Waveren for the pull request!
@@ -5978,7 +6051,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 			</action>
 			<action type="add">
 				Introduce
-				<![CDATA[<a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/IJpaServerInterceptor.html">IJpaServerInterceptor</a>]]>
+				IJpaServerInterceptor
 				interceptors for JPA server which can be used for more fine grained operations.
 			</action>
 			<action type="fix" issue="241">
@@ -6062,15 +6135,15 @@ Bundle bundle = client.search().forResource(Patient.class)
 				XmlParser and JsonParser in DSTU2 mode should not encode empty
 				tags in resource. Thanks to Bill De Beaubien for reporting!
 			</action>
-			<action>
+			<action type="fix">
 				OperationDefinitions generated by server did not properly document
 				their return parameters or the type of their input parameters.
 			</action>
-			<action>
+			<action type="fix">
 				Operations in server generated conformance statement should only
 				appear once per name, since the name needs to be unique.
 			</action>
-			<action>
+			<action type="fix">
 				Resources and datatypes are now serializable. This is an
 				experimental feature which hasn't yet been extensively tested. Please test and give us your feedback!
 			</action>
@@ -6758,16 +6831,16 @@ Bundle bundle = client.search().forResource(Patient.class)
 			</action>
 			<action type="fix">
 				<![CDATA[
-					<b>Deprocated API Removal</b>: The following classes (which were deprocated previously)
+					<b>Deprecated API Removal</b>: The following classes (which were deprocated previously)
 					have now been removed:
 					<ul>
 						<li><b>ISecurityManager</b>: If you are using this class, the same functionality
 						is available through the more general purpose
 						<a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_server_interceptor.html">server interceptor</a>
-						capabilities.
+						capabilities.</li>
 						<li><b>CodingListParam</b>: This class was made redundant by the
 						<a href="http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/rest/param/TokenOrListParam.html">TokenOrListParam</a>
-						class, which can be used in its place.
+						class, which can be used in its place.</li>
 					</ul>
 				]]>
 			</action>
@@ -7062,7 +7135,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 				toString() method on TokenParam was incorrectly showing the system as the value.
 				Thanks to Bill de Beaubien for reporting!
 			</action>
-			<action type="update">
+			<action type="add">
 				Documentation on contained resources contained a typo and did not actually produce contained resources.
 				Thanks
 				to David Hay of Orion Health for reporting!
@@ -7083,8 +7156,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 				Petro Mykhailysyn for the pull request!
 			</action>
 		</release>
-		<release version="0.6" date="2014-09-08"
-					description="This release brings a number of new features and bug fixes!">
+		<release version="0.6" date="2014-09-08">
 			<!-- 
 			<action type="add">
 				Allow generic client	... OAUTH
@@ -7146,7 +7218,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 				response, but this may be useful in some circumstances.
 			</action>
 			<action type="fix" dev="tahurac">
-				Annotation client search methods with a specific resource type (e.g. List&lt;Patient&gt; search())
+				Annotation client search methods with a specific resource type (e.g. <![CDATA[<code>List&lt;Patient&gt;</code>]]> search())
 				won't return any resources that aren't of the correct type that are received in a response
 				bundle (generally these are referenced resources, so they are populated in the reference fields instead).
 				Thanks to Tahura Chaudhry of University Health Network for the unit test!
@@ -7168,7 +7240,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 			</action>
 			<action type="add">
 				Transaction method in server can now have parameter type Bundle instead of
-				List&lt;IResource&gt;
+				<![CDATA[<code>List&lt;IBaseResource&gt;</code>]]>
 			</action>
 			<action type="add">
 				HAPI parsers now use field access to get/set values instead of method accessors and mutators.
@@ -7378,8 +7450,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 				Support added for deleted-entry by/name, by/email, and comment from Tombstones spec
 			</action>
 		</release>
-		<release version="0.3" date="2014-05-12"
-					description="This release corrects lots of bugs and introduces the fluent client mode">
+		<release version="0.3" date="2014-05-12">
 		</release>
 		<release version="0.2" date="2014-04-23">
 		</release>

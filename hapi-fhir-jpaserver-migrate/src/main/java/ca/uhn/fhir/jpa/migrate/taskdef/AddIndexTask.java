@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.util.StringUtils;
@@ -39,6 +41,10 @@ public class AddIndexTask extends BaseTableTask<AddIndexTask> {
 	private List<String> myColumns;
 	private Boolean myUnique;
 
+	public AddIndexTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
+
 	public void setIndexName(String theIndexName) {
 		myIndexName = StringUtils.toUpperCase(theIndexName, Locale.US);
 	}
@@ -55,19 +61,20 @@ public class AddIndexTask extends BaseTableTask<AddIndexTask> {
 	public void validate() {
 		super.validate();
 		Validate.notBlank(myIndexName, "Index name not specified");
-		Validate.isTrue(myColumns.size() > 0, "Columns not specified");
+		Validate.isTrue(myColumns.size() > 0, "Columns not specified for AddIndexTask " + myIndexName + " on table " + getTableName());
 		Validate.notNull(myUnique, "Uniqueness not specified");
+		setDescription("Add " + myIndexName + " index to table " + getTableName());
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
 		if (indexNames.contains(myIndexName)) {
-			ourLog.info("Index {} already exists on table {} - No action performed", myIndexName, getTableName());
+			logInfo(ourLog, "Index {} already exists on table {} - No action performed", myIndexName, getTableName());
 			return;
 		}
 
-		ourLog.info("Going to add a {} index named {} on table {} for columns {}", (myUnique ? "UNIQUE" : "NON-UNIQUE"), myIndexName, getTableName(), myColumns);
+		logInfo(ourLog, "Going to add a {} index named {} on table {} for columns {}", (myUnique ? "UNIQUE" : "NON-UNIQUE"), myIndexName, getTableName(), myColumns);
 
 		String unique = myUnique ? "unique " : "";
 		String columns = String.join(", ", myColumns);
@@ -87,5 +94,31 @@ public class AddIndexTask extends BaseTableTask<AddIndexTask> {
 
 	public void setColumns(String... theColumns) {
 		setColumns(Arrays.asList(theColumns));
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		AddIndexTask that = (AddIndexTask) theO;
+
+		return new EqualsBuilder()
+			.appendSuper(super.equals(theO))
+			.append(myIndexName, that.myIndexName)
+			.append(myColumns, that.myColumns)
+			.append(myUnique, that.myUnique)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.appendSuper(super.hashCode())
+			.append(myIndexName)
+			.append(myColumns)
+			.append(myUnique)
+			.toHashCode();
 	}
 }

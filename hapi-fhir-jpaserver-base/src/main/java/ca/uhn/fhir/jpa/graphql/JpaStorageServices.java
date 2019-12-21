@@ -42,6 +42,7 @@ import org.hl7.fhir.utilities.graphql.Value;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implements IGraphQLStorageServices {
@@ -144,5 +145,11 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 	@Override
 	public IBaseBundle search(Object theAppInfo, String theType, List<Argument> theSearchParams) throws FHIRException {
 		throw new NotImplementedOperationException("Not yet able to handle this GraphQL request");
+	}
+
+	@Nullable
+	@Override
+	protected String getResourceName() {
+		return null;
 	}
 }

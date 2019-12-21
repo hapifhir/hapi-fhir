@@ -1,6 +1,7 @@
 package org.hl7.fhir.instance.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu2.model.*;
@@ -157,6 +158,10 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	@Override
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+		if (Constants.codeSystemNotNeeded(theCodeSystem)) {
+			return null;
+		}
+
 		ValueSet vs = fetchCodeSystem(theContext, theCodeSystem);
 		if (vs != null) {
 			for (ValueSet.ConceptDefinitionComponent nextConcept : vs.getCodeSystem().getConcept()) {

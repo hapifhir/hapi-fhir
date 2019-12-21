@@ -124,15 +124,18 @@ public class ValidationResult {
 			IBase issue = OperationOutcomeUtil.addIssue(myCtx, theOperationOutcome, severity, next.getMessage(), location, Constants.OO_INFOSTATUS_PROCESSING);
 			
 			if (next.getLocationLine() != null || next.getLocationCol() != null) {
-				String line = "(unknown)";
-				if (next.getLocationLine() != null) {
+				String unknown = "(unknown)";
+				String line = unknown;
+				if (next.getLocationLine() != null && next.getLocationLine() != -1) {
 					line = next.getLocationLine().toString();
 				}
-				String col = "(unknown)";
-				if (next.getLocationCol() != null) {
+				String col = unknown;
+				if (next.getLocationCol() != null && next.getLocationCol() != -1) {
 					col = next.getLocationCol().toString();
 				}
-				OperationOutcomeUtil.addLocationToIssue(myCtx, issue, "Line " + line + ", Col " + col);
+				if (!unknown.equals(line) || !unknown.equals(col)) {
+					OperationOutcomeUtil.addLocationToIssue(myCtx, issue, "Line " + line + ", Col " + col);
+				}
 			}
 		}
 

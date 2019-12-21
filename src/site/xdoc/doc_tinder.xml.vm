@@ -6,6 +6,8 @@
 		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
 	</properties>
 
+	<!-- This content should not be migrated -->
+
 	<body>
 
 		<section name="Tinder">

@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,17 +38,19 @@ public class DropIdGeneratorTask extends BaseTask<DropIdGeneratorTask> {
 	private static final Logger ourLog = LoggerFactory.getLogger(DropIdGeneratorTask.class);
 	private final String myGeneratorName;
 
-	public DropIdGeneratorTask(String theGeneratorName) {
+	public DropIdGeneratorTask(String theProductVersion, String theSchemaVersion, String theGeneratorName) {
+		super(theProductVersion, theSchemaVersion);
 		myGeneratorName = theGeneratorName;
 	}
 
 	@Override
 	public void validate() {
 		Validate.notBlank(myGeneratorName);
+		setDescription("Drop id generator " + myGeneratorName);
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		String sql = null;
 
@@ -89,7 +93,7 @@ public class DropIdGeneratorTask extends BaseTask<DropIdGeneratorTask> {
 				.collect(Collectors.toSet());
 			ourLog.debug("Currently have sequences: {}", sequenceNames);
 			if (!sequenceNames.contains(myGeneratorName.toLowerCase())) {
-				ourLog.info("Sequence {} does not exist - No action performed", myGeneratorName);
+				logInfo(ourLog, "Sequence {} does not exist - No action performed", myGeneratorName);
 				return;
 			}
 
@@ -98,4 +102,23 @@ public class DropIdGeneratorTask extends BaseTask<DropIdGeneratorTask> {
 
 	}
 
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (!(theO instanceof DropIdGeneratorTask)) return false;
+
+		DropIdGeneratorTask that = (DropIdGeneratorTask) theO;
+
+		return new EqualsBuilder()
+			.append(myGeneratorName, that.myGeneratorName)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(myGeneratorName)
+			.toHashCode();
+	}
 }

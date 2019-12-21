@@ -27,5 +27,5 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 public interface ISearchParamProvider {
 	IBundleProvider search(SearchParameterMap theParams);
 
-	<SP extends IBaseResource> int refreshCache(BaseSearchParamRegistry<SP> theSPBaseSearchParamRegistry, long theRefreshInterval);
+	int refreshCache(SearchParamRegistryImpl theSearchParamRegistry, long theRefreshInterval);
 }

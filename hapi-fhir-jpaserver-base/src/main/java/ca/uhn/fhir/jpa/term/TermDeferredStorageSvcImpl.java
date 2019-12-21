@@ -25,7 +25,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -53,7 +53,6 @@ import java.util.List;
 
 public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
-	private static final int SCHEDULE_INTERVAL_MILLIS = 5000;
 	private static final Logger ourLog = LoggerFactory.getLogger(TermDeferredStorageSvcImpl.class);
 	@Autowired
 	protected ITermConceptDao myConceptDao;
@@ -260,13 +259,24 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	@PostConstruct
-	public void registerScheduledJob() {
+	public void scheduleJob() {
+		// TODO KHS what does this mean?
 		// Register scheduled job to save deferred concepts
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
-		jobDefinition.setId(BaseTermReadSvcImpl.class.getName() + "_saveDeferred");
-		jobDefinition.setJobClass(SaveDeferredJob.class);
-		mySchedulerService.scheduleFixedDelay(SCHEDULE_INTERVAL_MILLIS, false, jobDefinition);
+		jobDefinition.setId(this.getClass().getName());
+		jobDefinition.setJobClass(Job.class);
+		mySchedulerService.scheduleLocalJob(5000, jobDefinition);
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private ITermDeferredStorageSvc myTerminologySvc;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTerminologySvc.saveDeferred();
+		}
 	}
 
 	@VisibleForTesting
@@ -288,23 +298,4 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	void setConceptDaoForUnitTest(ITermConceptDao theConceptDao) {
 		myConceptDao = theConceptDao;
 	}
-
-	public static class SaveDeferredJob extends FireAtIntervalJob {
-
-		@Autowired
-		private ITermDeferredStorageSvc myTerminologySvc;
-
-		/**
-		 * Constructor
-		 */
-		public SaveDeferredJob() {
-			super(SCHEDULE_INTERVAL_MILLIS);
-		}
-
-		@Override
-		protected void doExecute(JobExecutionContext theContext) {
-			myTerminologySvc.saveDeferred();
-		}
-	}
-
 }

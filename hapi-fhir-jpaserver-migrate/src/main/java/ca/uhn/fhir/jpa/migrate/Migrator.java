@@ -79,7 +79,7 @@ public class Migrator {
 
 		myConnectionProperties = myDriverType.newConnectionProperties(myConnectionUrl, myUsername, myPassword);
 		try {
-			for (BaseTask<?> next : myTasks) {
+			for (BaseTask next : myTasks) {
 				next.setDriverType(myDriverType);
 				next.setConnectionProperties(myConnectionProperties);
 				next.setDryRun(myDryRun);
@@ -125,7 +125,7 @@ public class Migrator {
 
 	}
 
-	public void addTasks(List<BaseTask<?>> theTasks) {
+	public void addTasks(List<BaseTask> theTasks) {
 		theTasks.forEach(this::addTask);
 	}
 

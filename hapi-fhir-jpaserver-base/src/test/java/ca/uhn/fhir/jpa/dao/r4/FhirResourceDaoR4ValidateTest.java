@@ -114,7 +114,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://foo").setCode("CODE3").setDisplay("Display 3");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "Code http://foo/CODE3 was not validated because the code system is not present", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = http://foo#CODE3)", oo.getIssueFirstRep().getDiagnostics());
 
 		// Code that exists but isn't in the valueset
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -195,7 +195,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://foo").setCode("CODE3").setDisplay("Display 3");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "Code http://foo/CODE3 was not validated because the code system is not present", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = http://foo#CODE3)", oo.getIssueFirstRep().getDiagnostics());
 
 		// Code that exists but isn't in the valueset
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -634,11 +634,15 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		{
 			String resource = loadResource("/r4/uscore/patient-resource-good.json");
 			IBaseResource parsedResource = myFhirCtx.newJsonParser().parseResource(resource);
-			MethodOutcome outcome = myPatientDao.validate((Patient) parsedResource, null, resource, null, null, null, mySrd);
-			OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
-			String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
-			ourLog.info("Outcome:\n{}", encoded);
-			assertThat(encoded, containsString("No issues detected"));
+			try {
+				MethodOutcome outcome = myPatientDao.validate((Patient) parsedResource, null, resource, null, null, null, mySrd);
+				OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+				String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+				ourLog.info("Outcome:\n{}", encoded);
+				assertThat(encoded, containsString("No issues detected"));
+			} catch (PreconditionFailedException e) {
+				fail(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			}
 		}
 		{
 			String resource = loadResource("/r4/uscore/observation-resource-good.json");
@@ -728,6 +732,21 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		MethodOutcome validationOutcome = myQuestionnaireResponseDao.validate(qa, null, null, null, null, null, null);
 		OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
 		assertEquals("The questionnaire \"Questionnaire/DOES_NOT_EXIST\" could not be resolved, so no validation can be performed against the base questionnaire", oo.getIssueFirstRep().getDiagnostics());
+	}
+
+
+	@Test
+	public void testValidateCodeInUnknownCodeSystemWithRequiredBinding() throws IOException {
+		Condition condition = loadResourceFromClasspath(Condition.class, "/r4/code-in-unknown-system-with-required-binding.xml");
+
+		try {
+			myConditionDao.validate(condition, null, null, null, null, null, null);
+			fail();
+		} catch (PreconditionFailedException e) {
+			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+			assertThat(oo.getIssueFirstRep().getDiagnostics(), containsString("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/condition-clinical"));
+		}
 	}
 
 

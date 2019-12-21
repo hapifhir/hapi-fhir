@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +38,10 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 	private String myConstraintName;
 	private String myForeignTableName;
 	private String myForeignColumnName;
+
+	public AddForeignKeyTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
 	public void setConstraintName(String theConstraintName) {
 		myConstraintName = theConstraintName;
@@ -56,14 +62,15 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 		Validate.isTrue(isNotBlank(myConstraintName));
 		Validate.isTrue(isNotBlank(myForeignTableName));
 		Validate.isTrue(isNotBlank(myForeignColumnName));
+		setDescription("Add foreign key " + myConstraintName + " from column " + getColumnName() + " of table " + getTableName() + " to column " + myForeignColumnName + " of table " + myForeignTableName);
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 
 		Set<String> existing = JdbcUtils.getForeignKeys(getConnectionProperties(), myForeignTableName, getTableName());
 		if (existing.contains(myConstraintName)) {
-			ourLog.info("Already have constraint named {} - No action performed", myConstraintName);
+			logInfo(ourLog, "Already have constraint named {} - No action performed", myConstraintName);
 			return;
 		}
 
@@ -97,4 +104,29 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 
 	}
 
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		AddForeignKeyTask that = (AddForeignKeyTask) theO;
+
+		return new EqualsBuilder()
+			.appendSuper(super.equals(theO))
+			.append(myConstraintName, that.myConstraintName)
+			.append(myForeignTableName, that.myForeignTableName)
+			.append(myForeignColumnName, that.myForeignColumnName)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.appendSuper(super.hashCode())
+			.append(myConstraintName)
+			.append(myForeignTableName)
+			.append(myForeignColumnName)
+			.toHashCode();
+	}
 }

@@ -212,6 +212,11 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	}
 
 	@Override
+	public boolean isValueSetSupported(FhirContext theContext, String theValueSetUrl) {
+		return myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSetUrl) != null;
+	}
+
+	@Override
 	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
 		return null;
 	}

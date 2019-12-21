@@ -679,7 +679,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 				throw new InternalErrorException(e);
 			}
 
-			org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult result = myWrap.validateCode(null, code, null, convertedVs);
+			org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult result = myWrap.validateCode(Constants.CODESYSTEM_VALIDATE_NOT_NEEDED, code, null, convertedVs);
 			return convertValidationResult(result);
 		}
 
