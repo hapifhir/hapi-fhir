@@ -6,6 +6,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -206,6 +207,10 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	public DateRangeParam setLowerBound(DateParam theLowerBound) {
 		validateAndSet(theLowerBound, myUpperBound);
 		return this;
+	}
+
+	public boolean isDateWithinRange(Date theDate) {
+		throw new NotImplementedException("Implement this!");
 	}
 
 	/**

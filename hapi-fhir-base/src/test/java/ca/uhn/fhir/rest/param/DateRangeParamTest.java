@@ -1,18 +1,18 @@
 package ca.uhn.fhir.rest.param;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
-
+import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
 public class DateRangeParamTest {
@@ -21,6 +21,11 @@ public class DateRangeParamTest {
 	@Before
 	public void initMockContext() {
 		fhirContext = Mockito.mock(FhirContext.class);
+	}
+
+	@Test
+	public void testIsDateWithinRange() {
+		throw new NotImplementedException("Implement this!");
 	}
 
 	/** Can happen e.g. when the query parameter for {@code _lastUpdated} is left empty. */
