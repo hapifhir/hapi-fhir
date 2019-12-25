@@ -13,7 +13,7 @@ The validator can be manually invoked at any time by creating a validator and co
 ```
 
 <div class="doc_info_bubble">
-    Note that in earlier releases of HAPI FHIR it was common to register different kinds of validator modules (such as [Schema/Schematron](./schema_validator.html)) because the FHIR Instance Validator module described below was not mature. This is no longer the case, and it is generally recommended to use the FHIR Instance Validator. 
+    Note that in earlier releases of HAPI FHIR it was common to register different kinds of validator modules (such as <a href="./schema_validator.html">Schema/Schematron</a>) because the FHIR Instance Validator module described below was not mature. This is no longer the case, and it is generally recommended to use the FHIR Instance Validator. 
 </div>
 
 # FHIR Conformance Packages
@@ -22,9 +22,9 @@ There are a few key concepts worth explaining before getting into how validation
 
 Conformance Resources:
 
-* [StructureDefinition](http://hl7.org/fhir/structuredefinition.html) &ndash; Contains definitions of the valid fields in a given resource, including details about their datatypes, min/max cardinalities, valid values, and other rules about what content is valid and what is not. StructureDefinition resources are also used to express derivative profiles (e.g. a description of a constraint on a FHIR resource for a specfic purpose) as well as to describe extensions. 
+* [StructureDefinition](http://hl7.org/fhir/structuredefinition.html) &ndash; Contains definitions of the valid fields in a given resource, including details about their datatypes, min/max cardinalities, valid values, and other rules about what content is valid and what is not. StructureDefinition resources are also used to express derivative profiles (e.g. a description of a constraint on a FHIR resource for a specific purpose) as well as to describe extensions. 
 
-* [CodeSystem](http://hl7.org/fhir/codesystem.html) &ndash; Contains definiitions of codes and vocabularies that can be used in FHIR resources, or even outside of FHIR resources.
+* [CodeSystem](http://hl7.org/fhir/codesystem.html) &ndash; Contains definitions of codes and vocabularies that can be used in FHIR resources, or even outside of FHIR resources.
 
 * [ValueSet](http://hl7.org/fhir/valueset.html) &ndash; Contains lists of codes drawn from one or more CodeSystems that are suitable for use in a specific field in a FHIR resource.  
 
@@ -33,7 +33,7 @@ Conformance Resources:
 
 HAPI has very complete support for validation against FHIR conformance resources. 
 
-This functionality is proviided by the HAPI FHIR "reference validator", which is able
+This functionality is provided by the HAPI FHIR "reference validator", which is able
 to check a resource for conformance to FHIR profiles.
 
 The FHIR instance validator is very powerful. It will use terminology services to validate codes, StructureDefinitions to validate semantics, and uses a customized XML/JSON parser in order to provide descriptive error messages.
@@ -59,7 +59,7 @@ definitions provided either by HL7 or by the user.
 
 To execute the validator, you simply create an instance of [FhirInstanceValidator](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/r4/hapi/validation/FhirInstanceValidator.html) and register it to new validator, as shown in the example below.
 
-Note that the example below uses the official FHIR StructureDefintions and ValueSets
+Note that the example below uses the official FHIR StructureDefinitions and ValueSets
 to validate the resource. It will not work unless you include the
 **hapi-fhir-validation-resources-[version].jar** module/JAR on your classpath.
 
@@ -69,7 +69,7 @@ to validate the resource. It will not work unless you include the
 
 # Supplying Your Own Definitions 
 
-The FhirInstanceValidator relies on an implementation of an interface called [IValidationSupport](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/IValidationSupport.html) interface to load StructureDefinitions, validate codes, etx.
+The FhirInstanceValidator relies on an implementation of an interface called [IValidationSupport](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/IValidationSupport.html) interface to load StructureDefinitions, validate codes, etc.
 
 By default, an implementation of this interface called [DefaultProfileValidationSupport](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/DefaultProfileValidationSupport.html) is used. This implementation simply uses the built-in official FHIR definitions to validate against (and in many cases, this is good enough).
  
@@ -79,9 +79,9 @@ However, if you have needs beyond simply validating against the core FHIR specif
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ValidatorExamples.java|validateSupplyProfiles}}
 ```
 
-# Buiilt-In Validation Support Classes
+# Built-In Validation Support Classes
 
-There are a several implementations of the [IValidationSupport](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/IValidationSupport.html) interface built into HAPI FHIR that can be used, typically in a chain.
+There are several implementations of the [IValidationSupport](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/IValidationSupport.html) interface built into HAPI FHIR that can be used, typically in a chain.
 
 * [**DefaultProfileValidationSupport**](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/DefaultProfileValidationSupport.html) - Supplies the built-in FHIR core structure definitions, including both structures and vocabulary.
 
@@ -93,7 +93,7 @@ There are a several implementations of the [IValidationSupport](/hapi-fhir/apido
 
 * [**CachingValidationSupport**](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/r4/hapi/validation/CachingValidationSupport.html) - Caches results of calls to a wrapped service implementation for a period of time. This class can be a significant help in terms of performance if you are loading conformance resources or performing terminology operations from a database or disk.
 
-* [**SnapshotGeneratingValidationSupport**](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/r4/hapi/validation/SnapshotGeneratingValidationSupport.html) - Generates StructureDefinition snapshots as needed. This should be added to your chain if you are working wiith differential StructueDefinitions that do not include the snapshot view.
+* [**SnapshotGeneratingValidationSupport**](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/r4/hapi/validation/SnapshotGeneratingValidationSupport.html) - Generates StructureDefinition snapshots as needed. This should be added to your chain if you are working with differential StructureDefinitions that do not include the snapshot view.
 
 
 

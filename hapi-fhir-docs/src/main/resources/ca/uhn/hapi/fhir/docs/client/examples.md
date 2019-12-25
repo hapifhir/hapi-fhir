@@ -161,11 +161,12 @@ The server responds with the following response. Note that the ID of the already
          <lastModified value="2015-10-29T07:33:28.047-04:00"/>
       </response>
    </entry>
-</Bundle>```
+</Bundle>
+```
 
 # Fetch all Pages of a Bundle
 
-This following example shows how to load all pages of a bundle by fetching each page one-after-the-other and then joining the resuts.
+This following example shows how to load all pages of a bundle by fetching each page one-after-the-other and then joining the results.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/BundleFetcher.java|loadAll}}

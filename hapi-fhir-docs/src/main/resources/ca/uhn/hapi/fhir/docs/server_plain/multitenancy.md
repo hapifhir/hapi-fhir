@@ -1,4 +1,4 @@
-# Multitenency
+# Multitenancy
 
 If you wish to allow a single endpoint to support multiple tenants, you may supply the server with a multitenancy provider.
 
