@@ -31,9 +31,6 @@ import java.util.UUID;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
-@TestPropertySource(properties = {
-	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
-})
 public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImplR4Test.class);

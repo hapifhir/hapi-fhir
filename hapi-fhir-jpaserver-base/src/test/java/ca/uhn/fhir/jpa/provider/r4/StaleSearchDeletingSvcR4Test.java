@@ -35,11 +35,6 @@ import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-@TestPropertySource(properties = {
-	// Since scheduled tasks can cause searches, which messes up the
-	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
-	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
-})
 public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcR4Test.class);

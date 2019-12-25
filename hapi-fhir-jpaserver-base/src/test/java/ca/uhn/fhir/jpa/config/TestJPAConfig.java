@@ -35,11 +35,6 @@ public class TestJPAConfig {
 		return retVal;
 	}
 
-	@Bean
-	public UnregisterScheduledProcessor unregisterScheduledProcessor(Environment theEnv) {
-		return new UnregisterScheduledProcessor(theEnv);
-	}
-
 	@Lazy
 	@Bean
 	public SubscriptionTestUtil subscriptionTestUtil() {
