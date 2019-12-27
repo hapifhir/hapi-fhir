@@ -150,7 +150,7 @@ List<Extension> resourceExts = patient.getExtensionsByUrl("http://fooextensions.
 // Get all non-modifier extensions regardless of URL
 List<Extension> nonModExts = patient.getExtension();
 
-//Get all non-modifier extensions regardless of URL
+// Get all modifier extensions regardless of URL
 List<Extension> modExts = patient.getModifierExtension();
 //END SNIPPET: parseExtension
 

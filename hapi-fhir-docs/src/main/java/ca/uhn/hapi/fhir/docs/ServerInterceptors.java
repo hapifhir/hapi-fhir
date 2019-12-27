@@ -74,7 +74,7 @@ List<ExtensionDt> resourceExts = patient.getUndeclaredExtensionsByUrl("http://fo
 // Get all non-modifier extensions regardless of URL
 List<ExtensionDt> nonModExts = patient.getUndeclaredExtensions();
 
-//Get all non-modifier extensions regardless of URL
+// Get all modifier extensions regardless of URL
 List<ExtensionDt> modExts = patient.getUndeclaredModifierExtensions();
 //END SNIPPET: parseExtension
 
