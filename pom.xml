@@ -601,7 +601,7 @@
 		<fhir_core_version>4.1.7-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
-		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx1024m</surefire_jvm_args>
+		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
@@ -1313,7 +1313,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.2.8</version>
+				<version>42.2.9</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>

@@ -21,9 +21,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
-@TestPropertySource(properties = {
-	"scheduling_disabled=true"
-})
 public abstract class BaseTermR4Test extends BaseJpaR4Test {
 
 	IIdType myExtensionalCsId;

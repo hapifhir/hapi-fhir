@@ -1771,8 +1771,12 @@ public class SearchBuilder implements ISearchBuilder {
 
 			Predicate predicate;
 			if ((operation == null) ||
-				(operation == SearchFilterParser.CompareOperation.sw) ||
-				(operation == SearchFilterParser.CompareOperation.ew) ||
+				(operation == SearchFilterParser.CompareOperation.sw)) {
+				Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
+				Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
+				Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
+				predicate = theBuilder.and(hashCode, singleCode);
+			} else if ((operation == SearchFilterParser.CompareOperation.ew) ||
 				(operation == SearchFilterParser.CompareOperation.co)) {
 				Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
 				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);

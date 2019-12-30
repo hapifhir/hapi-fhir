@@ -304,6 +304,28 @@
 			"lat": -6.914744,
 			"lon": 107.609810,
 			"added": "2019-11-22"
+		},
+		{
+			"title": "Ivido",
+			"description": "Revolutionary personal healthcare environment",
+			"link": "https://ivido.nl/",
+			"contactName": "Jari Maijenburg",
+			"contactEmail": "info@ivido.nl",
+			"city": "The Hague, The Netherlands",
+			"lat": 52.070499,
+			"lon": 4.300700,
+			"added": "2019-12-18"
+		},
+		{
+			"title": "CDSS for EHR",
+			"description": "\"Hospital Italiano de Buenos Aires\", founded in 1853, is a non-profit civil association dedicated to general and highly complex medicine.",
+			"link": null,
+			"contactName": "Natalia Pérez López",
+			"contactEmail": "natalia.perez@hospitalitaliano.org.ar",
+			"city": "Buenos Aires, Argentina",
+			"lat": -34.603683,
+			"lon": -58.381557,
+			"added": "2019-12-27"
 		}
 
 	]

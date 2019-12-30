@@ -50,4 +50,9 @@
    issue: 1588
    type: add
    title: "Support for several new operators has been added to the `_filter` support in the JPA server. Thanks
-      to Anthony Sute for the Pull Request!
+      to Anthony Sute for the Pull Request!"
+- item:
+   issue: 1650
+   type: fix
+   title: Several misleading comments in documentation code snippets were fixed. Thanks to
+      Jafer Khan for the pull request!
