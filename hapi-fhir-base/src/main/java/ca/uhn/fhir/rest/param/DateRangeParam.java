@@ -215,6 +215,15 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * This lower bound is assumed to have a <code>ge</code>
 	 * (greater than or equals) modifier.
 	 * </p>
+	 * <p>
+	 * Note: An operation can take a DateRangeParam. If only a single date is provided,
+	 * it will still result in a DateRangeParam where the lower and upper bounds
+	 * are the same value. As such, even though the prefixes for the lower and
+	 * upper bounds default to <code>ge</code> and <code>le</code> respectively,
+	 * the resulting prefix is effectively <code>eq</code> where only a single
+	 * date is provided - as required by the FHIR specificiation (i.e. "If no
+	 * prefix is present, the prefix <code>eq</code> is assumed").
+	 * </p>
 	 */
 	public DateRangeParam setLowerBound(String theLowerBound) {
 		setLowerBound(new DateParam(GREATERTHAN_OR_EQUALS, theLowerBound));
@@ -297,6 +306,15 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * <p>
 	 * This upper bound is assumed to have a <code>le</code>
 	 * (less than or equals) modifier.
+	 * </p>
+	 * <p>
+	 * Note: An operation can take a DateRangeParam. If only a single date is provided,
+	 * it will still result in a DateRangeParam where the lower and upper bounds
+	 * are the same value. As such, even though the prefixes for the lower and
+	 * upper bounds default to <code>ge</code> and <code>le</code> respectively,
+	 * the resulting prefix is effectively <code>eq</code> where only a single
+	 * date is provided - as required by the FHIR specificiation (i.e. "If no
+	 * prefix is present, the prefix <code>eq</code> is assumed").
 	 * </p>
 	 */
 	public DateRangeParam setUpperBound(String theUpperBound) {
@@ -618,6 +636,15 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		return b.toString();
 	}
 
+	/**
+	 * Note: An operation can take a DateRangeParam. If only a single date is provided,
+	 * it will still result in a DateRangeParam where the lower and upper bounds
+	 * are the same value. As such, even though the prefixes for the lower and
+	 * upper bounds default to <code>ge</code> and <code>le</code> respectively,
+	 * the resulting prefix is effectively <code>eq</code> where only a single
+	 * date is provided - as required by the FHIR specificiation (i.e. "If no
+	 * prefix is present, the prefix <code>eq</code> is assumed").
+	 */
 	private void validateAndSet(DateParam lowerBound, DateParam upperBound) {
 		if (hasBound(lowerBound) && hasBound(upperBound)) {
 			if (lowerBound.getValue().getTime() > upperBound.getValue().getTime()) {
