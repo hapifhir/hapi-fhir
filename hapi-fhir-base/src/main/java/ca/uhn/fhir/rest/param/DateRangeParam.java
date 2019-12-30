@@ -388,6 +388,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		return Objects.hash(myLowerBound, myUpperBound);
 	}
 
+	// FIXME: DM 2019-12-30 - We're matching exactly but need to account for intervals (see issue #1652).
 	public boolean isDateWithinRange(Date theDate) {
 		boolean retVal = false;
 
