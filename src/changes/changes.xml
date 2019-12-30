@@ -77,6 +77,16 @@
 				An issue with the HAPI FHIR CLI was corrected that prevented the upload of LOINC due to an error
 				regarding the properties file.
 			</action>
+			<action type="add" issue="1645">
+				The following utility methods have been added:
+				<![CDATA[
+				<ul>
+					<li><code>DateRangeParam#isDateWithinRange(Date theDate)</code></li>
+					<li><code>DateRangeParam#isDateWithinLowerBound(Date theDate)</code></li>
+					<li><code>DateRangeParam#isDateWithinUpperBound(Date theDate)</code></li>
+				</ul>
+				]]>
+			</action>
 		</release>
 		<release version="4.1.0" date="2019-11-13" description="Jitterbug">
 			<action type="add">
