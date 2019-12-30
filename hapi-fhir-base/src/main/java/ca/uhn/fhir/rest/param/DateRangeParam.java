@@ -215,6 +215,15 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * This lower bound is assumed to have a <code>ge</code>
 	 * (greater than or equals) modifier.
 	 * </p>
+	 * <p>
+	 * Note: An operation can take a DateRangeParam. If only a single date is provided,
+	 * it will still result in a DateRangeParam where the lower and upper bounds
+	 * are the same value. As such, even though the prefixes for the lower and
+	 * upper bounds default to <code>ge</code> and <code>le</code> respectively,
+	 * the resulting prefix is effectively <code>eq</code> where only a single
+	 * date is provided - as required by the FHIR specificiation (i.e. "If no
+	 * prefix is present, the prefix <code>eq</code> is assumed").
+	 * </p>
 	 */
 	public DateRangeParam setLowerBound(String theLowerBound) {
 		setLowerBound(new DateParam(GREATERTHAN_OR_EQUALS, theLowerBound));
@@ -281,7 +290,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case LESSTHAN_OR_EQUALS:
 				case ENDS_BEFORE:
 				case NOT_EQUAL:
-					throw new IllegalStateException("Unvalid lower bound comparator: " + myLowerBound.getPrefix());
+					throw new IllegalStateException("Invalid lower bound comparator: " + myLowerBound.getPrefix());
 			}
 		}
 		return retVal;
@@ -297,6 +306,15 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * <p>
 	 * This upper bound is assumed to have a <code>le</code>
 	 * (less than or equals) modifier.
+	 * </p>
+	 * <p>
+	 * Note: An operation can take a DateRangeParam. If only a single date is provided,
+	 * it will still result in a DateRangeParam where the lower and upper bounds
+	 * are the same value. As such, even though the prefixes for the lower and
+	 * upper bounds default to <code>ge</code> and <code>le</code> respectively,
+	 * the resulting prefix is effectively <code>eq</code> where only a single
+	 * date is provided - as required by the FHIR specificiation (i.e. "If no
+	 * prefix is present, the prefix <code>eq</code> is assumed").
 	 * </p>
 	 */
 	public DateRangeParam setUpperBound(String theUpperBound) {
@@ -339,7 +357,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case APPROXIMATE:
 				case NOT_EQUAL:
 				case STARTS_AFTER:
-					throw new IllegalStateException("Unvalid upper bound comparator: " + myUpperBound.getPrefix());
+					throw new IllegalStateException("Invalid upper bound comparator: " + myUpperBound.getPrefix());
 			}
 		}
 		return retVal;
@@ -368,6 +386,104 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	@Override
 	public int hashCode() {
 		return Objects.hash(myLowerBound, myUpperBound);
+	}
+
+	public boolean isDateWithinRange(Date theDate) {
+		boolean retVal = false;
+
+		if (theDate == null) {
+			throw new NullPointerException("theDate can not be null");
+		}
+
+		boolean hasLowerBound = hasBound(myLowerBound);
+		boolean hasUpperBound = hasBound(myUpperBound);
+		boolean hasLowerAndUpperBounds = hasLowerBound && hasUpperBound && (myLowerBound.getValue().getTime() != myUpperBound.getValue().getTime());
+
+		if (hasLowerAndUpperBounds) {
+			retVal = isDateWithinLowerAndUpperBounds(theDate);
+		} else if (hasLowerBound) {
+			retVal = isDateWithinLowerBound(theDate);
+		} else if (hasUpperBound) {
+			retVal = isDateWithinUpperBound(theDate);
+		}
+
+		return retVal;
+	}
+
+	private boolean isDateWithinLowerAndUpperBounds(Date theDate) {
+		return isDateWithinLowerBound(theDate, true) && isDateWithinUpperBound(theDate, true);
+	}
+
+	public boolean isDateWithinLowerBound(Date theDate) {
+		return isDateWithinLowerBound(theDate, false);
+	}
+
+	private boolean isDateWithinLowerBound(Date theDate, boolean theIsRange) {
+		boolean retVal = false;
+
+		if (theDate == null) {
+			throw new NullPointerException("theDate can not be null");
+		}
+
+		if (hasBound(myLowerBound)) {
+			long lowerBound = myLowerBound.getValue().getTime();
+			switch (myLowerBound.getPrefix()) {
+				case GREATERTHAN:
+				case STARTS_AFTER:
+					retVal = theDate.getTime() > lowerBound;
+					break;
+				case EQUAL:
+					if (theIsRange) {
+						retVal = theDate.getTime() >= lowerBound;
+					} else {
+						retVal = theDate.getTime() == lowerBound;
+					}
+					break;
+				case GREATERTHAN_OR_EQUALS:
+					retVal = theDate.getTime() >= lowerBound;
+					break;
+				default:
+					throw new IllegalStateException("Invalid lower bound comparator: " + myLowerBound.getPrefix());
+			}
+		}
+
+		return retVal;
+	}
+
+	public boolean isDateWithinUpperBound(Date theDate) {
+		return isDateWithinUpperBound(theDate, false);
+	}
+
+	private boolean isDateWithinUpperBound(Date theDate, boolean theIsRange) {
+		boolean retVal = false;
+
+		if (theDate == null) {
+			throw new NullPointerException("theDate can not be null");
+		}
+
+		if (hasBound(myUpperBound)) {
+			long upperBound = myUpperBound.getValue().getTime();
+			switch (myUpperBound.getPrefix()) {
+				case LESSTHAN:
+				case ENDS_BEFORE:
+					retVal = theDate.getTime() < upperBound;
+					break;
+				case EQUAL:
+					if (theIsRange) {
+						retVal = theDate.getTime() <= upperBound;
+					} else {
+						retVal = theDate.getTime() == upperBound;
+					}
+					break;
+				case LESSTHAN_OR_EQUALS:
+					retVal = theDate.getTime() <= upperBound;
+					break;
+				default:
+					throw new IllegalStateException("Invalid upper bound comparator: " + myUpperBound.getPrefix());
+			}
+		}
+
+		return retVal;
 	}
 
 	public boolean isEmpty() {
@@ -520,6 +636,15 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		return b.toString();
 	}
 
+	/**
+	 * Note: An operation can take a DateRangeParam. If only a single date is provided,
+	 * it will still result in a DateRangeParam where the lower and upper bounds
+	 * are the same value. As such, even though the prefixes for the lower and
+	 * upper bounds default to <code>ge</code> and <code>le</code> respectively,
+	 * the resulting prefix is effectively <code>eq</code> where only a single
+	 * date is provided - as required by the FHIR specificiation (i.e. "If no
+	 * prefix is present, the prefix <code>eq</code> is assumed").
+	 */
 	private void validateAndSet(DateParam lowerBound, DateParam upperBound) {
 		if (hasBound(lowerBound) && hasBound(upperBound)) {
 			if (lowerBound.getValue().getTime() > upperBound.getValue().getTime()) {
