@@ -388,104 +388,6 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		return Objects.hash(myLowerBound, myUpperBound);
 	}
 
-	public boolean isDateWithinRange(Date theDate) {
-		boolean retVal = false;
-
-		if (theDate == null) {
-			throw new NullPointerException("theDate can not be null");
-		}
-
-		boolean hasLowerBound = hasBound(myLowerBound);
-		boolean hasUpperBound = hasBound(myUpperBound);
-		boolean hasLowerAndUpperBounds = hasLowerBound && hasUpperBound && (myLowerBound.getValue().getTime() != myUpperBound.getValue().getTime());
-
-		if (hasLowerAndUpperBounds) {
-			retVal = isDateWithinLowerAndUpperBounds(theDate);
-		} else if (hasLowerBound) {
-			retVal = isDateWithinLowerBound(theDate);
-		} else if (hasUpperBound) {
-			retVal = isDateWithinUpperBound(theDate);
-		}
-
-		return retVal;
-	}
-
-	private boolean isDateWithinLowerAndUpperBounds(Date theDate) {
-		return isDateWithinLowerBound(theDate, true) && isDateWithinUpperBound(theDate, true);
-	}
-
-	public boolean isDateWithinLowerBound(Date theDate) {
-		return isDateWithinLowerBound(theDate, false);
-	}
-
-	private boolean isDateWithinLowerBound(Date theDate, boolean theIsRange) {
-		boolean retVal = false;
-
-		if (theDate == null) {
-			throw new NullPointerException("theDate can not be null");
-		}
-
-		if (hasBound(myLowerBound)) {
-			long lowerBound = myLowerBound.getValue().getTime();
-			switch (myLowerBound.getPrefix()) {
-				case GREATERTHAN:
-				case STARTS_AFTER:
-					retVal = theDate.getTime() > lowerBound;
-					break;
-				case EQUAL:
-					if (theIsRange) {
-						retVal = theDate.getTime() >= lowerBound;
-					} else {
-						retVal = theDate.getTime() == lowerBound;
-					}
-					break;
-				case GREATERTHAN_OR_EQUALS:
-					retVal = theDate.getTime() >= lowerBound;
-					break;
-				default:
-					throw new IllegalStateException("Invalid lower bound comparator: " + myLowerBound.getPrefix());
-			}
-		}
-
-		return retVal;
-	}
-
-	public boolean isDateWithinUpperBound(Date theDate) {
-		return isDateWithinUpperBound(theDate, false);
-	}
-
-	private boolean isDateWithinUpperBound(Date theDate, boolean theIsRange) {
-		boolean retVal = false;
-
-		if (theDate == null) {
-			throw new NullPointerException("theDate can not be null");
-		}
-
-		if (hasBound(myUpperBound)) {
-			long upperBound = myUpperBound.getValue().getTime();
-			switch (myUpperBound.getPrefix()) {
-				case LESSTHAN:
-				case ENDS_BEFORE:
-					retVal = theDate.getTime() < upperBound;
-					break;
-				case EQUAL:
-					if (theIsRange) {
-						retVal = theDate.getTime() <= upperBound;
-					} else {
-						retVal = theDate.getTime() == upperBound;
-					}
-					break;
-				case LESSTHAN_OR_EQUALS:
-					retVal = theDate.getTime() <= upperBound;
-					break;
-				default:
-					throw new IllegalStateException("Invalid upper bound comparator: " + myUpperBound.getPrefix());
-			}
-		}
-
-		return retVal;
-	}
-
 	public boolean isEmpty() {
 		return (getLowerBoundAsInstant() == null) && (getUpperBoundAsInstant() == null);
 	}
@@ -583,7 +485,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				continue;
 			}
 			if (paramList.size() > 1) {
-				throw new InvalidRequestException("DateRange parameter does not suppport OR queries");
+				throw new InvalidRequestException("DateRange parameter does not support OR queries");
 			}
 			String param = paramList.get(0);
 
