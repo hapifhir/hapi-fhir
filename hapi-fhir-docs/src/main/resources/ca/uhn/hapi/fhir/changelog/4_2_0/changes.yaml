@@ -56,12 +56,3 @@
    type: "fix"
    title: "Several misleading comments in documentation code snippets were fixed. Thanks to
       Jafer Khan for the pull request!"
-- item:
-     issue: "1645"
-     type: "add"
-     title: "The following utility methods have been added:
-            <ul>
-               <li><code>DateRangeParam#isDateWithinRange(Date theDate)</code></li>
-               <li><code>DateRangeParam#isDateWithinLowerBound(Date theDate)</code></li>
-               <li><code>DateRangeParam#isDateWithinUpperBound(Date theDate)</code></li>
-            </ul>"
