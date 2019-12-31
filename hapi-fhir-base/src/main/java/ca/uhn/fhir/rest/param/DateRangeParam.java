@@ -485,7 +485,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				continue;
 			}
 			if (paramList.size() > 1) {
-				throw new InvalidRequestException("DateRange parameter does not suppport OR queries");
+				throw new InvalidRequestException("DateRange parameter does not support OR queries");
 			}
 			String param = paramList.get(0);
 
