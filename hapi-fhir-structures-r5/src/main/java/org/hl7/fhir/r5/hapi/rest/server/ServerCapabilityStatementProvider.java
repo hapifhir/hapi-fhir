@@ -1,5 +1,6 @@
 package org.hl7.fhir.r5.hapi.rest.server;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -14,30 +15,50 @@ import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.method.*;
-import ca.uhn.fhir.rest.server.method.SearchParameter;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IParameter;
+import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
+import ca.uhn.fhir.rest.server.method.OperationParameter;
+import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.util.BaseServerCapabilityStatementProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.*;
-import org.hl7.fhir.r5.model.CapabilityStatement.*;
+import org.hl7.fhir.r5.model.CapabilityStatement;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.ConditionalDeleteStatus;
+import org.hl7.fhir.r5.model.CapabilityStatement.ResourceInteractionComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.SystemRestfulInteraction;
+import org.hl7.fhir.r5.model.CapabilityStatement.TypeRestfulInteraction;
+import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.OperationDefinition;
 import org.hl7.fhir.r5.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.r5.model.OperationDefinition.OperationKind;
-import org.hl7.fhir.r5.model.OperationDefinition.OperationParameterUse;
+import org.hl7.fhir.r5.model.ResourceType;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import ca.uhn.fhir.context.FhirContext;
 
 /*
  * #%L
@@ -160,7 +181,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
       .setUrl(serverBase)
       .setDescription(configuration.getImplementationDescription());
 
-    retVal.setKind(CapabilityStatementKind.INSTANCE);
+    retVal.setKind(Enumerations.CapabilityStatementKind.INSTANCE);
     retVal.getSoftware().setName(configuration.getServerName());
     retVal.getSoftware().setVersion(configuration.getServerVersion());
     retVal.addFormat(Constants.CT_FHIR_XML_NEW);
@@ -168,7 +189,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     retVal.setStatus(PublicationStatus.ACTIVE);
 
     CapabilityStatementRestComponent rest = retVal.addRest();
-    rest.setMode(RestfulCapabilityMode.SERVER);
+    rest.setMode(Enumerations.RestfulCapabilityMode.SERVER);
 
     Set<SystemRestfulInteraction> systemOps = new HashSet<>();
     Set<String> operationNames = new HashSet<>();
@@ -442,8 +463,8 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
             continue;
           }
           OperationDefinitionParameterComponent param = op.addParameter();
-          param.setUse(OperationParameterUse.IN);
-          param.setType("string");
+          param.setUse(Enumerations.OperationParameterUse.IN);
+          param.setType(Enumerations.FHIRAllTypes.STRING);
           param.getSearchTypeElement().setValueAsString(nextParam.getParamType().getCode());
           param.setMin(nextParam.isRequired() ? 1 : 0);
           param.setMax("1");
@@ -511,9 +532,9 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
           if (!inParams.add(nextParam.getName())) {
             continue;
           }
-          param.setUse(OperationParameterUse.IN);
+          param.setUse(Enumerations.OperationParameterUse.IN);
           if (nextParam.getParamType() != null) {
-            param.setType(nextParam.getParamType());
+            param.setType(Enumerations.FHIRAllTypes.fromCode(nextParam.getParamType()));
           }
           if (nextParam.getSearchParamType() != null) {
             param.getSearchTypeElement().setValueAsString(nextParam.getSearchParamType());
@@ -529,9 +550,9 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
           continue;
         }
         OperationDefinitionParameterComponent param = op.addParameter();
-        param.setUse(OperationParameterUse.OUT);
+        param.setUse(Enumerations.OperationParameterUse.OUT);
         if (nextParam.getType() != null) {
-          param.setType(nextParam.getType());
+          param.setType(Enumerations.FHIRAllTypes.fromCode(nextParam.getType()));
         }
         param.setMin(nextParam.getMin());
         param.setMax(nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax()));

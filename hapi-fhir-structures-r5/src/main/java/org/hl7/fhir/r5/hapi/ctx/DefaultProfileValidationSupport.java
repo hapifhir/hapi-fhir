@@ -314,7 +314,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 						.filter(t -> (Constants.codeSystemNotNeeded(theCodeSystem) || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
 						.findFirst();
 					if (haveMatch.isPresent()) {
-						return new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(theCode)));
+						return new CodeValidationResult(new ConceptDefinitionComponent(theCode));
 					}
 				}
 			} catch (Exception e) {
