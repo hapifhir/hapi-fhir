@@ -83,7 +83,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		} else if (IBaseResource.class.isAssignableFrom(methodReturnType)) {
 
-			if ((Modifier.isAbstract(methodReturnType.getModifiers()) == false && theContext.getResourceDefinition((Class<? extends IBaseResource>) methodReturnType).isBundle()) || IBaseBundle.class.isAssignableFrom(methodReturnType)) {
+			if ( IBaseBundle.class.isAssignableFrom(methodReturnType)) {
 				myMethodReturnType = MethodReturnTypeEnum.BUNDLE_RESOURCE;
 			} else {
 				myMethodReturnType = MethodReturnTypeEnum.RESOURCE;
