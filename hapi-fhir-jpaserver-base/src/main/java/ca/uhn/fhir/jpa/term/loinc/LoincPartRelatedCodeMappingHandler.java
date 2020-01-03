@@ -89,7 +89,7 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 				equivalence = Enumerations.ConceptMapEquivalence.WIDER;
 				break;
 			default:
-				throw new InternalErrorException("Unknown MapType '" + mapType + "' for PartNumber: " + partNumber);
+				throw new InternalErrorException("Unknown equivalence '" + mapType + "' for PartNumber: " + partNumber);
 		}
 
 		String loincPartMapId;
