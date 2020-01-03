@@ -326,6 +326,15 @@
 			"lat": -34.603683,
 			"lon": -58.381557,
 			"added": "2019-12-27"
+		},
+		{
+			"title": "German Society for Wound Healing and Wound Treatment",
+			"description": "Establishment of regional registers based on HAPI FHIR for the global exchange of health data/eHealth Ressort of the DGfW e.V.: As the eHealth department of the DGfW e.V. we are looking for partners with whom we can jointly develop projects based on open standards for the national and global exchange of health information in the field of chronic wound care. In this context, we rely on open standards such as HAPI FHIR. In one of our latest projects \"EsmAiL\" we use HAPI FHIR together with the synaptor medical collaboration platform.",
+			"contactName": "Falk Huneke",
+			"link": "http://www.dgfw.de/akneinversa.html",
+			"city": "Germany",
+			"lat": 51.165691,
+			"lon": 10.451526
 		}
 
 	]
