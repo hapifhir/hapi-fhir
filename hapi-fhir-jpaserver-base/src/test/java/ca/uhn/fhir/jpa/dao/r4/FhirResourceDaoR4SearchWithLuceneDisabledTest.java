@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -230,6 +231,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 
 
 	@Test
+	@Ignore
 	public void testExpandValueSetWithFilter() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://fooCS");
