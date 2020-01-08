@@ -56,3 +56,8 @@
    type: fix
    title: Several misleading comments in documentation code snippets were fixed. Thanks to
       Jafer Khan for the pull request!
+- item:
+   issue: 1658
+   type: fix
+   title: "When parsing HTML Narratives, the `lang` attribute was stripped from the outer DIV tag if present. Thanks to 
+      Sean McIlvenna for reporting!"

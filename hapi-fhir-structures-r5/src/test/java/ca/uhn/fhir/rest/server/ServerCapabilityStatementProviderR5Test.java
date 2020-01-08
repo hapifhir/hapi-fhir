@@ -286,9 +286,9 @@ public class ServerCapabilityStatementProviderR5Test {
 			assertThat(types, containsInAnyOrder("Patient"));
 			assertEquals(2, opDef.getParameter().size());
 			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
-			assertEquals("date", opDef.getParameter().get(0).getType());
+			assertEquals("date", opDef.getParameter().get(0).getType().toCode());
 			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
-			assertEquals("Patient", opDef.getParameter().get(1).getType());
+			assertEquals("Patient", opDef.getParameter().get(1).getType().toCode());
 		}
 		{
 			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Encounter-i-someOp"), createRequestDetails(rs));
@@ -301,9 +301,9 @@ public class ServerCapabilityStatementProviderR5Test {
 			assertThat(types, containsInAnyOrder("Encounter"));
 			assertEquals(2, opDef.getParameter().size());
 			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
-			assertEquals("date", opDef.getParameter().get(0).getType());
+			assertEquals("date", opDef.getParameter().get(0).getType().toCode());
 			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
-			assertEquals("Encounter", opDef.getParameter().get(1).getType());
+			assertEquals("Encounter", opDef.getParameter().get(1).getType().toCode());
 		}
 		{
 			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-validate"), createRequestDetails(rs));
@@ -316,7 +316,7 @@ public class ServerCapabilityStatementProviderR5Test {
 			assertThat(types, containsInAnyOrder("Patient"));
 			assertEquals(1, opDef.getParameter().size());
 			assertEquals("resource", opDef.getParameter().get(0).getName());
-			assertEquals("Patient", opDef.getParameter().get(0).getType());
+			assertEquals("Patient", opDef.getParameter().get(0).getType().toCode());
 		}
 	}
 
@@ -693,7 +693,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		assertThat(parameters.size(), is(1));
 		OperationDefinitionParameterComponent param = parameters.get(0);
 		assertThat(param.getName(), is(NamedQueryPlainProvider.SP_QUANTITY));
-		assertThat(param.getType(), is("string"));
+		assertThat(param.getType().toCode(), is("string"));
 		assertThat(param.getSearchTypeElement().asStringValue(), is(RestSearchParameterTypeEnum.QUANTITY.getCode()));
 		assertThat(param.getMin(), is(1));
 		assertThat(param.getMax(), is("1"));
@@ -731,7 +731,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		assertThat(parameters.size(), is(1));
 		OperationDefinitionParameterComponent param = parameters.get(0);
 		assertThat(param.getName(), is(NamedQueryResourceProvider.SP_PARAM));
-		assertThat(param.getType(), is("string"));
+		assertThat(param.getType().toCode(), is("string"));
 		assertThat(param.getSearchTypeElement().asStringValue(), is(RestSearchParameterTypeEnum.STRING.getCode()));
 		assertThat(param.getMin(), is(0));
 		assertThat(param.getMax(), is("1"));

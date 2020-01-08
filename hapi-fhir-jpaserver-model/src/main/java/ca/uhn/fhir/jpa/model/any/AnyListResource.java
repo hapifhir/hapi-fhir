@@ -298,7 +298,7 @@ public class AnyListResource {
 
 	private boolean removeItemR5(String theReferenceId) {
 		boolean removed = false;
-		for (org.hl7.fhir.r5.model.ListResource.ListEntryComponent entry : getR5().getEntry()) {
+		for (org.hl7.fhir.r5.model.ListResource.ListResourceEntryComponent entry : getR5().getEntry()) {
 			if (theReferenceId.equals(entry.getItem().getReference()) && !entry.getDeleted()) {
 				entry.setDeleted(true);
 				removed = true;
