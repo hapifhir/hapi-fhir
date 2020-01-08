@@ -723,10 +723,10 @@ public class XmlParser extends BaseParser {
 						} else {
 							theEventWriter.writeStartElement(se.getName().getPrefix(), se.getName().getLocalPart(), se.getName().getNamespaceURI());
 						}
-						for (Iterator<?> attrIter = se.getAttributes(); attrIter.hasNext(); ) {
-							Attribute next = (Attribute) attrIter.next();
-							theEventWriter.writeAttribute(next.getName().getLocalPart(), next.getValue());
-						}
+					}
+					for (Iterator<?> attrIter = se.getAttributes(); attrIter.hasNext(); ) {
+						Attribute next = (Attribute) attrIter.next();
+						theEventWriter.writeAttribute(next.getName().getLocalPart(), next.getValue());
 					}
 					break;
 				case XMLStreamConstants.DTD:

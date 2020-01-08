@@ -22,7 +22,14 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IMutator;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IIdentifiableElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
@@ -31,7 +38,11 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
-import ca.uhn.fhir.util.*;
+import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.IModelVisitor;
+import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.XmlUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -39,9 +50,17 @@ import org.hl7.fhir.instance.model.api.*;
 
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 class ParserState<T> {
 
@@ -54,6 +73,7 @@ class ParserState<T> {
 	private T myObject;
 	private IBase myPreviousElement;
 	private BaseState myState;
+	private List<IBaseReference> myReferences = new ArrayList<>();
 
 	private ParserState(IParser theParser, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
 		myParser = theParser;
@@ -130,7 +150,6 @@ class ParserState<T> {
 		}
 	}
 
-
 	public void string(String theData) {
 		myState.string(theData);
 	}
@@ -143,6 +162,50 @@ class ParserState<T> {
 		if (myState != null) {
 			myState.xmlEvent(theNextEvent);
 		}
+	}
+
+	public IBase newInstance(RuntimeChildDeclaredExtensionDefinition theDefinition) {
+		return theDefinition.newInstance();
+	}
+
+	public ICompositeType newCompositeInstance(BaseRuntimeChildDefinition theChild, BaseRuntimeElementCompositeDefinition<?> theCompositeTarget) {
+		ICompositeType retVal = (ICompositeType) theCompositeTarget.newInstance(theChild.getInstanceConstructorArguments());
+		if (retVal instanceof IBaseReference) {
+			myReferences.add((IBaseReference) retVal);
+		}
+		return retVal;
+	}
+
+	public ICompositeType newCompositeTypeInstance(BaseRuntimeElementCompositeDefinition<?> theCompositeTarget) {
+		ICompositeType retVal = (ICompositeType) theCompositeTarget.newInstance();
+		if (retVal instanceof IBaseReference) {
+			myReferences.add((IBaseReference) retVal);
+		}
+		return retVal;
+	}
+
+	public IPrimitiveType<?> newPrimitiveInstance(RuntimeChildDeclaredExtensionDefinition theDefinition, RuntimePrimitiveDatatypeDefinition thePrimitiveTarget) {
+		return thePrimitiveTarget.newInstance(theDefinition.getInstanceConstructorArguments());
+	}
+
+	public IPrimitiveType<?> getPrimitiveInstance(BaseRuntimeChildDefinition theChild, RuntimePrimitiveDatatypeDefinition thePrimitiveTarget) {
+		return thePrimitiveTarget.newInstance(theChild.getInstanceConstructorArguments());
+	}
+
+	public IBaseXhtml newInstance(RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition theXhtmlTarget) {
+		return theXhtmlTarget.newInstance();
+	}
+
+	public XhtmlDt newInstance(RuntimePrimitiveDatatypeNarrativeDefinition theXhtmlTarget) {
+		return theXhtmlTarget.newInstance();
+	}
+
+	public IPrimitiveType<?> newInstance(RuntimePrimitiveDatatypeDefinition thePrimitiveTarget) {
+		return thePrimitiveTarget.newInstance();
+	}
+
+	public IBaseResource newInstance(RuntimeResourceDefinition theDef) {
+		return theDef.newInstance();
 	}
 
 	private abstract class BaseState {
@@ -374,7 +437,7 @@ class ParserState<T> {
 			switch (target.getChildType()) {
 				case COMPOSITE_DATATYPE: {
 					BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
-					ICompositeType newChildInstance = (ICompositeType) compositeTarget.newInstance(myDefinition.getInstanceConstructorArguments());
+					ICompositeType newChildInstance = newCompositeInstance(myDefinition, compositeTarget);
 					myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
 					ElementCompositeState newState = new ElementCompositeState(myPreResourceState, theLocalPart, compositeTarget, newChildInstance);
 					push(newState);
@@ -383,7 +446,7 @@ class ParserState<T> {
 				case ID_DATATYPE:
 				case PRIMITIVE_DATATYPE: {
 					RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
-					IPrimitiveType<?> newChildInstance = primitiveTarget.newInstance(myDefinition.getInstanceConstructorArguments());
+					IPrimitiveType<?> newChildInstance = newPrimitiveInstance(myDefinition, primitiveTarget);
 					myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
 					PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
 					push(newState);
@@ -404,7 +467,7 @@ class ParserState<T> {
 			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getChildExtensionForUrl(theUrlAttr);
 			if (declaredExtension != null) {
 				if (myChildInstance == null) {
-					myChildInstance = myDefinition.newInstance();
+					myChildInstance = newInstance(myDefinition);
 					myDefinition.getMutator().addValue(myParentInstance, myChildInstance);
 				}
 				BaseState newState = new DeclaredExtensionState(getPreResourceState(), declaredExtension, myChildInstance);
@@ -413,6 +476,7 @@ class ParserState<T> {
 				super.enteringNewElementExtension(theElement, theUrlAttr, theIsModifier, baseServerUrl);
 			}
 		}
+
 
 		@Override
 		protected IBase getCurrentElement() {
@@ -501,7 +565,7 @@ class ParserState<T> {
 			switch (target.getChildType()) {
 				case COMPOSITE_DATATYPE: {
 					BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
-					ICompositeType newChildInstance = (ICompositeType) compositeTarget.newInstance(child.getInstanceConstructorArguments());
+					ICompositeType newChildInstance = newCompositeInstance(child, compositeTarget);
 					child.getMutator().addValue(myInstance, newChildInstance);
 					ParserState<T>.ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), theChildName, compositeTarget, newChildInstance);
 					push(newState);
@@ -511,7 +575,7 @@ class ParserState<T> {
 				case PRIMITIVE_DATATYPE: {
 					RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
 					IPrimitiveType<?> newChildInstance;
-					newChildInstance = primitiveTarget.newInstance(child.getInstanceConstructorArguments());
+					newChildInstance = getPrimitiveInstance(child, primitiveTarget);
 					child.getMutator().addValue(myInstance, newChildInstance);
 					PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
 					push(newState);
@@ -527,7 +591,7 @@ class ParserState<T> {
 				}
 				case PRIMITIVE_XHTML: {
 					RuntimePrimitiveDatatypeNarrativeDefinition xhtmlTarget = (RuntimePrimitiveDatatypeNarrativeDefinition) target;
-					XhtmlDt newDt = xhtmlTarget.newInstance();
+					XhtmlDt newDt = newInstance(xhtmlTarget);
 					child.getMutator().addValue(myInstance, newDt);
 					XhtmlState state = new XhtmlState(getPreResourceState(), newDt, true);
 					push(state);
@@ -535,7 +599,7 @@ class ParserState<T> {
 				}
 				case PRIMITIVE_XHTML_HL7ORG: {
 					RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition xhtmlTarget = (RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition) target;
-					IBaseXhtml newDt = xhtmlTarget.newInstance();
+					IBaseXhtml newDt = newInstance(xhtmlTarget);
 					child.getMutator().addValue(myInstance, newDt);
 					XhtmlStateHl7Org state = new XhtmlStateHl7Org(getPreResourceState(), newDt);
 					push(state);
@@ -669,7 +733,7 @@ class ParserState<T> {
 				switch (target.getChildType()) {
 					case COMPOSITE_DATATYPE: {
 						BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
-						ICompositeType newChildInstance = (ICompositeType) compositeTarget.newInstance();
+						ICompositeType newChildInstance = newCompositeTypeInstance(compositeTarget);
 						myExtension.setValue(newChildInstance);
 						ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), theLocalPart, compositeTarget, newChildInstance);
 						push(newState);
@@ -678,7 +742,7 @@ class ParserState<T> {
 					case ID_DATATYPE:
 					case PRIMITIVE_DATATYPE: {
 						RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
-						IPrimitiveType<?> newChildInstance = primitiveTarget.newInstance();
+						IPrimitiveType<?> newChildInstance = newInstance(primitiveTarget);
 						myExtension.setValue(newChildInstance);
 						PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
 						push(newState);
@@ -905,7 +969,7 @@ class ParserState<T> {
 			if (!definition.getName().equals(theLocalPart) && definition.getName().equalsIgnoreCase(theLocalPart)) {
 				throw new DataFormatException("Unknown resource type '" + theLocalPart + "': Resource names are case sensitive, found similar name: '" + definition.getName() + "'");
 			}
-			myInstance = def.newInstance();
+			myInstance = newInstance(def);
 
 			if (myInstance instanceof IResource) {
 				push(new ResourceStateHapi(getRootPreResourceState(), def, (IResource) myInstance));
@@ -1007,7 +1071,7 @@ class ParserState<T> {
 				}
 
 				for (IBaseResource next : resources) {
-					List<IBaseReference> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IBaseReference.class);
+					List<IBaseReference> refs = myReferences;
 					for (IBaseReference nextRef : refs) {
 						if (nextRef.isEmpty() == false && nextRef.getReferenceElement() != null) {
 							IIdType unqualifiedVersionless = nextRef.getReferenceElement().toUnqualifiedVersionless();
@@ -1035,43 +1099,21 @@ class ParserState<T> {
 		}
 
 		void weaveContainedResources() {
-			FhirTerser terser = myContext.newTerser();
-			terser.visit(myInstance, new IModelVisitor() {
-
-				@Override
-				public void acceptElement(IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition,
-												  BaseRuntimeElementDefinition<?> theDefinition) {
-					if (theElement instanceof BaseResourceReferenceDt) {
-						BaseResourceReferenceDt nextRef = (BaseResourceReferenceDt) theElement;
-						String ref = nextRef.getReference().getValue();
-						if (isNotBlank(ref)) {
-							if (ref.startsWith("#")) {
-								IResource target = (IResource) myContainedResources.get(ref);
-								if (target != null) {
-									ourLog.debug("Resource contains local ref {} in field {}", ref, thePathToElement);
-									nextRef.setResource(target);
-								} else {
-									myErrorHandler.unknownReference(null, ref);
-								}
-							}
-						}
-					} else if (theElement instanceof IBaseReference) {
-						IBaseReference nextRef = (IBaseReference) theElement;
-						String ref = nextRef.getReferenceElement().getValue();
-						if (isNotBlank(ref)) {
-							if (ref.startsWith("#")) {
-								IBaseResource target = myContainedResources.get(ref);
-								if (target != null) {
-									ourLog.debug("Resource contains local ref {} in field {}", ref, thePathToElement);
-									nextRef.setResource(target);
-								} else {
-									myErrorHandler.unknownReference(null, ref);
-								}
-							}
+			for (IBaseReference nextRef : myReferences) {
+				String ref = nextRef.getReferenceElement().getValue();
+				if (isNotBlank(ref)) {
+					if (ref.startsWith("#")) {
+						IBaseResource target = myContainedResources.get(ref);
+						if (target != null) {
+							ourLog.debug("Resource contains local ref {}", ref);
+							nextRef.setResource(target);
+						} else {
+							myErrorHandler.unknownReference(null, ref);
 						}
 					}
 				}
-			});
+			}
+
 		}
 
 		@Override
