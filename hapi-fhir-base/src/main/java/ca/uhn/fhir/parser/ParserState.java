@@ -31,7 +31,6 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -40,7 +39,6 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.IModelVisitor;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.XmlUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -73,6 +71,7 @@ class ParserState<T> {
 	private T myObject;
 	private IBase myPreviousElement;
 	private BaseState myState;
+	private List<IBaseResource> myResources = new ArrayList<>();
 	private List<IBaseReference> myReferences = new ArrayList<>();
 
 	private ParserState(IParser theParser, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
@@ -205,7 +204,13 @@ class ParserState<T> {
 	}
 
 	public IBaseResource newInstance(RuntimeResourceDefinition theDef) {
-		return theDef.newInstance();
+		IBaseResource retVal = theDef.newInstance();
+		myResources.add(retVal);
+		return retVal;
+	}
+
+	public IBase newInstance(RuntimeResourceBlockDefinition theBlockTarget) {
+		return theBlockTarget.newInstance();
 	}
 
 	private abstract class BaseState {
@@ -583,7 +588,7 @@ class ParserState<T> {
 				}
 				case RESOURCE_BLOCK: {
 					RuntimeResourceBlockDefinition blockTarget = (RuntimeResourceBlockDefinition) target;
-					IBase newBlockInstance = blockTarget.newInstance();
+					IBase newBlockInstance = newInstance(blockTarget);
 					child.getMutator().addValue(myInstance, newBlockInstance);
 					ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), theChildName, blockTarget, newBlockInstance);
 					push(newState);
@@ -1060,8 +1065,7 @@ class ParserState<T> {
 				/*
 				 * Stitch together resource references
 				 */
-				List<IBaseResource> resources = t.getAllPopulatedChildElementsOfType(myInstance, IBaseResource.class);
-				for (IBaseResource next : resources) {
+				for (IBaseResource next : myResources) {
 					IIdType id = next.getIdElement();
 					if (id != null && id.isEmpty() == false) {
 						String resName = myContext.getResourceDefinition(next).getName();
@@ -1070,15 +1074,12 @@ class ParserState<T> {
 					}
 				}
 
-				for (IBaseResource next : resources) {
-					List<IBaseReference> refs = myReferences;
-					for (IBaseReference nextRef : refs) {
-						if (nextRef.isEmpty() == false && nextRef.getReferenceElement() != null) {
-							IIdType unqualifiedVersionless = nextRef.getReferenceElement().toUnqualifiedVersionless();
-							IBaseResource target = idToResource.get(unqualifiedVersionless.getValueAsString());
-							if (target != null) {
-								nextRef.setResource(target);
-							}
+				for (IBaseReference nextRef : myReferences) {
+					if (nextRef.isEmpty() == false && nextRef.getReferenceElement() != null) {
+						IIdType unqualifiedVersionless = nextRef.getReferenceElement().toUnqualifiedVersionless();
+						IBaseResource target = idToResource.get(unqualifiedVersionless.getValueAsString());
+						if (target != null) {
+							nextRef.setResource(target);
 						}
 					}
 				}
