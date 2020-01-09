@@ -31,6 +31,8 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 
 public abstract class BaseRuntimeChildDefinition {
 
+	private BaseRuntimeChildDefinition myReplacedParentDefinition;
+
 	public abstract IAccessor getAccessor();
 
 	public abstract BaseRuntimeElementDefinition<?> getChildByName(String theName);
@@ -64,6 +66,14 @@ public abstract class BaseRuntimeChildDefinition {
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + "[" + getElementName() + "]";
+	}
+
+	public BaseRuntimeChildDefinition getReplacedParentDefinition() {
+		return myReplacedParentDefinition;
+	}
+
+	public void setReplacedParentDefinition(BaseRuntimeChildDefinition myReplacedParentDefinition) {
+		this.myReplacedParentDefinition = myReplacedParentDefinition;
 	}
 
 	public interface IAccessor {
