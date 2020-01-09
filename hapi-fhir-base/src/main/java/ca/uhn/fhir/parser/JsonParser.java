@@ -44,7 +44,6 @@ import org.hl7.fhir.instance.model.api.*;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.*;
 
