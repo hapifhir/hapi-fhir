@@ -707,6 +707,12 @@ public class XmlParser extends BaseParser {
 							theEventWriter.writeStartElement(prefix, se.getName().getLocalPart(), namespaceURI);
 							theEventWriter.writeNamespace(prefix, namespaceURI);
 						}
+						for (Iterator<Attribute> iter= se.getAttributes(); iter.hasNext(); ) {
+							Attribute next = iter.next();
+							if ("lang".equals(next.getName().getLocalPart())) {
+								theEventWriter.writeAttribute("", "", next.getName().getLocalPart(), next.getValue());
+							}
+						}
 						firstElement = false;
 					} else {
 						if (isBlank(se.getName().getPrefix())) {

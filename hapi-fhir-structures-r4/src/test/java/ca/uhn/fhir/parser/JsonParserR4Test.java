@@ -34,7 +34,7 @@ public class JsonParserR4Test extends BaseTest {
 
 	private Bundle createBundleWithPatient() {
 		Bundle b = new Bundle();
-		b.setId("	BUNDLEID");
+		b.setId("BUNDLEID");
 		b.getMeta().addProfile("http://FOO");
 
 		Patient p = new Patient();

@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r5.BaseResourceProviderR5Test;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -21,7 +22,6 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.codesystems.SubscriptionChannelType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
@@ -142,8 +142,8 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 		Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
 		channel.getType().addCoding()
-			.setSystem(SubscriptionChannelType.RESTHOOK.getSystem())
-			.setCode(SubscriptionChannelType.RESTHOOK.toCode());
+			.setSystem(CanonicalSubscriptionChannelType.RESTHOOK.getSystem())
+			.setCode(CanonicalSubscriptionChannelType.RESTHOOK.toCode());
 		channel.getPayload().setContentType(thePayload);
 		channel.setEndpoint(ourListenerServerBase);
 		return subscription;

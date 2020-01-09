@@ -848,7 +848,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	@Test(expected = UnprocessableEntityException.class)
 	public void testInvalidProvenanceParam() {
 		String payload = "application/fhir+json";
-		String criteriabad = "Provenance?activity=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
+		String criteriabad = "Provenance?foo=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
 		Subscription subscription = newSubscription(criteriabad, payload);
 		ourClient.create().resource(subscription).execute();
 	}

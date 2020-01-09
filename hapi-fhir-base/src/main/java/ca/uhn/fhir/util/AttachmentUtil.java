@@ -85,6 +85,8 @@ public class AttachmentUtil {
 		BaseRuntimeChildDefinition entryChild = getChild(theContext, theAttachment, "size");
 		if (theLength == null) {
 			entryChild.getMutator().setValue(theAttachment, null);
+		} else if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R5)){
+			entryChild.getMutator().setValue(theAttachment, newPrimitive(theContext, "integer64", (long)theLength));
 		} else {
 			entryChild.getMutator().setValue(theAttachment, newPrimitive(theContext, "unsignedInt", theLength));
 		}
