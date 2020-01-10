@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.term.loinc;
  */
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -40,16 +40,13 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 
 	public static final String LOINC_SCT_PART_MAP_ID = "loinc-parts-to-snomed-ct";
 	public static final String LOINC_SCT_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-snomed-ct";
-	private static final String LOINC_SCT_PART_MAP_NAME = "LOINC Part Map to SNOMED CT";
-
 	public static final String LOINC_TERM_TO_RPID_PART_MAP_ID = "loinc-to-rpids";
 	public static final String LOINC_TERM_TO_RPID_PART_MAP_URI = "http://loinc.org/cm/loinc-to-rpids";
 	public static final String LOINC_TERM_TO_RPID_PART_MAP_NAME = "LOINC Terms to RadLex RPIDs";
-
 	public static final String LOINC_PART_TO_RID_PART_MAP_ID = "loinc-part-to-rids";
 	public static final String LOINC_PART_TO_RID_PART_MAP_URI = "http://loinc.org/cm/loinc-part-to-rids";
 	public static final String LOINC_PART_TO_RID_PART_MAP_NAME = "LOINC Parts to RadLex RIDs";
-
+	private static final String LOINC_SCT_PART_MAP_NAME = "LOINC Part Map to SNOMED CT";
 	private static final String LOINC_RXNORM_PART_MAP_ID = "loinc-parts-to-rxnorm";
 	private static final String LOINC_RXNORM_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-rxnorm";
 	private static final String LOINC_RXNORM_PART_MAP_NAME = "LOINC Part Map to RxNORM";
@@ -69,32 +66,30 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 
 		String partNumber = trim(theRecord.get("PartNumber"));
 		String partName = trim(theRecord.get("PartName"));
-		String partTypeName = trim(theRecord.get("PartTypeName"));
 		String extCodeId = trim(theRecord.get("ExtCodeId"));
 		// TODO: use hex code for ascii 160
 		extCodeId = extCodeId.replace(" ", "");
 		String extCodeDisplayName = trim(theRecord.get("ExtCodeDisplayName"));
 		String extCodeSystem = trim(theRecord.get("ExtCodeSystem"));
-		String mapType = trim(theRecord.get("MapType"));
-		String contentOrigin = trim(theRecord.get("ContentOrigin"));
+		String mapType = trim(theRecord.get("Equivalence"));
 		String extCodeSystemVersion = trim(theRecord.get("ExtCodeSystemVersion"));
 		String extCodeSystemCopyrightNotice = trim(theRecord.get("ExtCodeSystemCopyrightNotice"));
 
 		Enumerations.ConceptMapEquivalence equivalence;
 		switch (trim(defaultString(mapType))) {
 			case "":
-			case "Exact":
+			case "equivalent":
 				// 'equal' is more exact than 'equivalent' in the equivalence codes
 				equivalence = Enumerations.ConceptMapEquivalence.EQUAL;
 				break;
-			case "LOINC broader":
+			case "narrower":
 				equivalence = Enumerations.ConceptMapEquivalence.NARROWER;
 				break;
-			case "LOINC narrower":
+			case "wider":
 				equivalence = Enumerations.ConceptMapEquivalence.WIDER;
 				break;
 			default:
-				throw new InternalErrorException("Unknown MapType '" + mapType + "' for PartNumber: " + partNumber);
+				throw new InternalErrorException("Unknown equivalence '" + mapType + "' for PartNumber: " + partNumber);
 		}
 
 		String loincPartMapId;

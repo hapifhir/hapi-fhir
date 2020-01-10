@@ -41,23 +41,32 @@
     type: "fix"
     title: "A missing mandatory was added to the SNOMED CT CodeSystem that is uploaded when SCT is uploaded to the JPA server. Thanks to Anders Havn for the pull request!"
 - item:
-   issue: 1643
-   type: fix
+   issue: "1643"
+   type: "fix"
    title: "When validating resources containing custom valuesets defined in PrePopulatedValidationSupport
       outside of the JPA server, sometimes code systems could not be found resulting in false negative
       errors."
 - item:
-   issue: 1588
-   type: add
+   issue: "1588"
+   type: "add"
    title: "Support for several new operators has been added to the `_filter` support in the JPA server. Thanks
       to Anthony Sute for the Pull Request!"
 - item:
-   issue: 1650
-   type: fix
-   title: Several misleading comments in documentation code snippets were fixed. Thanks to
-      Jafer Khan for the pull request!
+   issue: "1650"
+   type: "fix"
+   title: "Several misleading comments in documentation code snippets were fixed. Thanks to
+      Jafer Khan for the pull request!"
 - item:
-   issue: 1658
-   type: fix
-   title: "When parsing HTML Narratives, the `lang` attribute was stripped from the outer DIV tag if present. Thanks to 
-      Sean McIlvenna for reporting!"
+   issue: "1603"
+   type: "fix"
+   title: "The client threw a NullPointerException in some circumstances when it received an HTTP 201 No Content response from the server. This has been corrected. Thanks to Petro Mykhailysyn for the pull request!"
+- item:
+   issue: "1649"
+   type: "add"
+   title: "Support for LOINC 2.67 file format changes has been added to the JPA Server LOINC uploader. Thanks to Dan Vreeman for reporting!"
+- item:
+   issue: "1658"
+   type: "fix"
+   title: "When parsing HTML Narratives, the `lang` attribute was stripped from the outer DIV tag if present. Thanks to
+Sean McIlvenna for reporting!"
+

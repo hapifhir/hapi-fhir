@@ -79,7 +79,7 @@ However, if you have needs beyond simply validating against the core FHIR specif
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ValidatorExamples.java|validateSupplyProfiles}}
 ```
 
-# Buiilt-In Validation Support Classes
+# Built-In Validation Support Classes
 
 There are a several implementations of the [IValidationSupport](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/ctx/IValidationSupport.html) interface built into HAPI FHIR that can be used, typically in a chain.
 

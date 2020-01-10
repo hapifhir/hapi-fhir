@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.stresstest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.StopWatch;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +13,8 @@ import java.io.IOException;
 
 public class StressTestParserTest extends BaseTest {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(StressTestParserTest.class);
+
 	@Test
 	public void test() throws IOException {
 		FhirContext ctx = FhirContext.forR4();
@@ -18,13 +22,33 @@ public class StressTestParserTest extends BaseTest {
 
 		String json = ctx.newJsonParser().encodeResourceToString(ctx.newXmlParser().parseResource(input));
 
-		StopWatch sw = new StopWatch();
-		for (int i = 0; i < 1000; i++) {
-//			ctx.newXmlParser().parseResource(input);
-			ctx.newJsonParser().parseResource(json);
+		StopWatch sw = null;
+		int loops = 100;
 
-			ourLog.info("Parsed {} times - {}ms/pass", i, sw.getMillisPerOperation(i));
+		for (int i = 0; i < loops; i++) {
+			ctx.newXmlParser().parseResource(input);
+			if (i < 50) {
+				ourLog.info("Parsed XML {} times", i);
+				continue;
+			} else if (i == 50) {
+				sw = new StopWatch();
+				continue;
+			}
+			ourLog.info("Parsed XML {} times - {}ms/pass", i, sw.getMillisPerOperation(i - 50));
 		}
+
+		for (int i = 0; i < loops; i++) {
+			Bundle parsed = (Bundle) ctx.newJsonParser().parseResource(json);
+			if (i < 50) {
+				ourLog.info("Parsed JSON with {} entries {} times", parsed.getEntry().size(), i);
+				continue;
+			} else if (i == 50) {
+				sw = new StopWatch();
+				continue;
+			}
+			ourLog.info("Parsed JSON {} times - {}ms/pass", i, sw.getMillisPerOperation(i - 50));
+		}
+
+
 	}
-	private static final Logger ourLog = LoggerFactory.getLogger(StressTestParserTest.class);
 }
