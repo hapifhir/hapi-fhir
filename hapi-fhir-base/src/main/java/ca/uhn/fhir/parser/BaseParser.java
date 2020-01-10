@@ -1198,14 +1198,15 @@ public abstract class BaseParser implements IParser {
 
 		public boolean shouldBeEncoded(boolean theContainedResource) {
 			boolean retVal = true;
+			String elementName = myDef != null ? myDef.getElementName() : "";
 			if (myEncodeElements != null) {
 				retVal = checkIfParentShouldBeEncodedAndBuildPath();
 			}
 			if (retVal && myDontEncodeElements != null) {
 				retVal = !checkIfParentShouldNotBeEncodedAndBuildPath();
 			}
-			if (theContainedResource) {
-				retVal = !notEncodeForContainedResource.contains(myDef.getElementName());
+			if (theContainedResource && myDef != null) {
+				retVal = !notEncodeForContainedResource.contains(elementName);
 			}
 			if (retVal && isSummaryMode() && (getDef() == null || !getDef().isSummary())) {
 				String resourceName = myEncodeContext.getLeafResourceName();
@@ -1215,7 +1216,7 @@ public abstract class BaseParser implements IParser {
 				// https://github.com/smart-on-fhir/Swift-FHIR/issues/26
 				// for example.
 				if (("Conformance".equals(resourceName) || "CapabilityStatement".equals(resourceName)) &&
-					("extension".equals(myDef.getElementName()) || "extension".equals(myEncodeContext.getLeafElementName())
+					("extension".equals(elementName) || "extension".equals(myEncodeContext.getLeafElementName())
 					)) {
 					// skip
 				} else {
