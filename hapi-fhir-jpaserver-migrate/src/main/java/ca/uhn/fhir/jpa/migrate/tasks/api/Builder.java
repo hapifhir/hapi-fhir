@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -427,11 +427,11 @@ public class Builder {
 					myNullable = theNullable;
 				}
 
-				public void type(AddColumnTask.ColumnTypeEnum theColumnType) {
-					type(theColumnType, null);
+				public BuilderAddColumnComplete type(AddColumnTask.ColumnTypeEnum theColumnType) {
+					return type(theColumnType, null);
 				}
 
-				public void type(AddColumnTask.ColumnTypeEnum theColumnType, Integer theLength) {
+				public BuilderAddColumnComplete type(AddColumnTask.ColumnTypeEnum theColumnType, Integer theLength) {
 					AddColumnTask task = new AddColumnTask(myRelease, myVersion);
 					task.setColumnName(myColumnName);
 					task.setNullable(myNullable);
@@ -440,6 +440,22 @@ public class Builder {
 						task.setColumnLength(theLength);
 					}
 					myTaskSink.addTask(task);
+
+					return new BuilderAddColumnComplete(task);
+				}
+
+				public class BuilderAddColumnComplete {
+
+					private final AddColumnTask myTask;
+
+					public BuilderAddColumnComplete(AddColumnTask theTask) {
+						myTask = theTask;
+					}
+
+					public BuilderAddColumnComplete failureAllowed() {
+						myTask.setFailureAllowed(true);
+						return this;
+					}
 				}
 			}
 		}
