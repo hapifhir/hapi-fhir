@@ -495,7 +495,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					if (inArray) {
 						theEventWriter.endArray();
 					}
-					if (nextChild.getMax() > 1 || nextChild.getMax() == Child.MAX_UNLIMITED) {
+					BaseRuntimeChildDefinition replacedParentDefinition = nextChild.getReplacedParentDefinition();
+					if (isMultipleCardinality(nextChild.getMax()) || (replacedParentDefinition != null && isMultipleCardinality(replacedParentDefinition.getMax()))) {
 						beginArray(theEventWriter, nextChildSpecificName);
 						inArray = true;
 						encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, null, theContainedResource, nextChildElem, force, theEncodeContext);
@@ -587,6 +588,10 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				}
 			}
 		}
+	}
+
+	private boolean isMultipleCardinality(int maxCardinality) {
+		return maxCardinality > 1 || maxCardinality == Child.MAX_UNLIMITED;
 	}
 
 	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theNextValue, JsonLikeWriter theEventWriter, boolean theContainedResource, 																	  CompositeChildElement theParent, EncodeContext theEncodeContext) throws IOException, DataFormatException {

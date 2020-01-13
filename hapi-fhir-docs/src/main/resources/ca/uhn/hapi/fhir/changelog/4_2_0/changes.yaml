@@ -69,4 +69,9 @@
    type: "fix"
    title: "When parsing HTML Narratives, the `lang` attribute was stripped from the outer DIV tag if present. Thanks to
 Sean McIlvenna for reporting!"
-
+- item:
+   issue: "1655"
+   type: "fix"
+   title: "When using a custom structure that changes the cardinality from 0..* to 0..1, the Parser was encoding
+       a plain field instead of an array (as required by the FHIR specification). Thanks to 
+       Petro Mykhailysyn for the pull request!"

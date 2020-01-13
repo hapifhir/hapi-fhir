@@ -3,15 +3,14 @@ package ca.uhn.fhir.parser;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.composite.*;
 import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.valueset.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
+import ca.uhn.fhir.parser.testprofile.CommunicationProfile;
+import ca.uhn.fhir.parser.testprofile.PatientProfile;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.TestUtil;
 import ch.qos.logback.classic.Level;
@@ -1079,6 +1078,52 @@ public class JsonParserDstu2Test {
 			assertThat(out, not(containsString("address")));
 			assertThat(out, not(containsString("meta")));
 		}
+	}
+
+	/**
+	 * When max cardinality in profile is changed to 1 output JSON should still contain an array.
+    * http://hl7.org/fhir/profiling.html#cardinality
+	 */
+	@Test
+	public void testEncodePatientProfileWithChangedCardinalityFromManyToOne() {
+		PatientProfile patient = new PatientProfile();
+		patient.myIdentifier = Collections.singletonList(new IdentifierDt("http://test-system", "test-code"));
+
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
+		ourLog.info(encoded);
+
+		assertThat(encoded, containsString("\"identifier\":[{\"system\":\"http://test-system\",\"value\":\"test-code\"}]"));
+	}
+
+	/**
+	 * When max cardinality in profile is changed to 1 output JSON should still contain an array.
+	 * http://hl7.org/fhir/profiling.html#cardinality
+	 */
+	@Test
+	public void testEncodePatientProfileWithChangedCardinalityFromManyToOneAsList() {
+		PatientProfile patient = new PatientProfile();
+		patient.myName =  new HumanNameDt().setText("Testname");
+
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
+		ourLog.info(encoded);
+
+		assertThat(encoded, containsString("\"name\":[{\"text\":\"Testname\"}]"));
+	}
+
+	/**
+	 * When max cardinality in profile is changed to 1 output JSON should still contain an array.
+	 * http://hl7.org/fhir/profiling.html#cardinality
+	 */
+	@Test
+	public void testEncodeCommunicationProfileWithChangedCardinalityFromManyToOneAsList() {
+		CommunicationProfile communication = new CommunicationProfile();
+		communication.myPayload = new CommunicationProfile._Payload();
+		communication.myPayload.myContent = new StringDt("testContent");
+
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(communication);
+		ourLog.info(encoded);
+
+		assertThat(encoded, containsString("\"payload\":[{\"contentString\":\"testContent\"}]"));
 	}
 
 	@Test
