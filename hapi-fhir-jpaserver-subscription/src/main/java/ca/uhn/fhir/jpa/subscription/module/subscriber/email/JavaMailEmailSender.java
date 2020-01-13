@@ -41,6 +41,7 @@ import javax.mail.internet.MimeMessage;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -53,6 +54,7 @@ public class JavaMailEmailSender implements IEmailSender {
 	private JavaMailSenderImpl mySender;
 	private String mySmtpServerUsername;
 	private String mySmtpServerPassword;
+	private final Properties myJavaMailProperties = new Properties();
 
 	public String getSmtpServerHostname() {
 		return mySmtpServerHostname;
@@ -90,6 +92,38 @@ public class JavaMailEmailSender implements IEmailSender {
 
 	public void setSmtpServerUsername(String theSmtpServerUsername) {
 		mySmtpServerUsername = theSmtpServerUsername;
+	}
+
+	/**
+	 * Set the "mail.smtp.auth" Java Mail Property
+	 */
+
+	public void setAuth(Boolean theAuth) {
+		myJavaMailProperties.setProperty("mail.smtp.auth", theAuth.toString());
+	}
+
+	/**
+	 * Set the "mail.smtp.starttls.enable" Java Mail Property
+	 */
+
+	public void setStartTlsEnable(Boolean theStartTlsEnable) {
+		myJavaMailProperties.setProperty("mail.smtp.starttls.enable", theStartTlsEnable.toString());
+	}
+
+	/**
+	 * Set the "mail.smtp.starttls.required" Java Mail Property
+	 */
+
+	public void setStartTlsRequired(Boolean theStartTlsRequired) {
+		myJavaMailProperties.setProperty("mail.smtp.starttls.required", theStartTlsRequired.toString());
+	}
+
+	/**
+	 * Set the "mail.smtp.quitwait" Java Mail Property
+	 */
+
+	public void setQuitWait(Boolean theQuitWait) {
+		myJavaMailProperties.setProperty("mail.smtp.quitwait", theQuitWait.toString());
 	}
 
 	@Override
@@ -144,6 +178,7 @@ public class JavaMailEmailSender implements IEmailSender {
 		mySender.setUsername(getSmtpServerUsername());
 		mySender.setPassword(getSmtpServerPassword());
 		mySender.setDefaultEncoding(Constants.CHARSET_UTF8.name());
+		mySender.setJavaMailProperties(myJavaMailProperties);
 	}
 
 	private static String toTrimmedCommaSeparatedString(List<String> theTo) {
