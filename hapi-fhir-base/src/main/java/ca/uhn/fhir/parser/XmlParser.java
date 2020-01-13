@@ -181,9 +181,6 @@ public class XmlParser extends BaseParser {
 								heldComments.clear();
 							}
 							parserState.endingElement();
-//						if (parserState.isComplete()) {
-//							return parserState.getObject();
-//						}
 							break;
 						}
 						case XMLStreamConstants.CHARACTERS: {

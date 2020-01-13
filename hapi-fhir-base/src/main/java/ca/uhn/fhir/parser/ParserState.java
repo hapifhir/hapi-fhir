@@ -71,8 +71,8 @@ class ParserState<T> {
 	private T myObject;
 	private IBase myPreviousElement;
 	private BaseState myState;
-	private List<IBaseResource> myResources = new ArrayList<>();
-	private List<IBaseReference> myReferences = new ArrayList<>();
+	private List<IBaseResource> myGlobalResources = new ArrayList<>();
+	private List<IBaseReference> myGlobalReferences = new ArrayList<>();
 
 	private ParserState(IParser theParser, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
 		myParser = theParser;
@@ -167,18 +167,22 @@ class ParserState<T> {
 		return theDefinition.newInstance();
 	}
 
-	public ICompositeType newCompositeInstance(BaseRuntimeChildDefinition theChild, BaseRuntimeElementCompositeDefinition<?> theCompositeTarget) {
+	public ICompositeType newCompositeInstance(PreResourceState thePreResourceState, BaseRuntimeChildDefinition theChild, BaseRuntimeElementCompositeDefinition<?> theCompositeTarget) {
 		ICompositeType retVal = (ICompositeType) theCompositeTarget.newInstance(theChild.getInstanceConstructorArguments());
 		if (retVal instanceof IBaseReference) {
-			myReferences.add((IBaseReference) retVal);
+			IBaseReference ref = (IBaseReference) retVal;
+			myGlobalReferences.add(ref);
+			thePreResourceState.getLocalReferences().add(ref);
 		}
 		return retVal;
 	}
 
-	public ICompositeType newCompositeTypeInstance(BaseRuntimeElementCompositeDefinition<?> theCompositeTarget) {
+	public ICompositeType newCompositeTypeInstance(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theCompositeTarget) {
 		ICompositeType retVal = (ICompositeType) theCompositeTarget.newInstance();
 		if (retVal instanceof IBaseReference) {
-			myReferences.add((IBaseReference) retVal);
+			IBaseReference ref = (IBaseReference) retVal;
+			myGlobalReferences.add(ref);
+			thePreResourceState.getLocalReferences().add(ref);
 		}
 		return retVal;
 	}
@@ -205,7 +209,7 @@ class ParserState<T> {
 
 	public IBaseResource newInstance(RuntimeResourceDefinition theDef) {
 		IBaseResource retVal = theDef.newInstance();
-		myResources.add(retVal);
+		myGlobalResources.add(retVal);
 		return retVal;
 	}
 
@@ -324,7 +328,7 @@ class ParserState<T> {
 	private class ContainedResourcesStateHapi extends PreResourceState {
 
 		public ContainedResourcesStateHapi(PreResourceState thePreResourcesState) {
-			super(thePreResourcesState, ((IResource) thePreResourcesState.myInstance).getStructureFhirVersionEnum());
+			super(thePreResourcesState, thePreResourcesState.myInstance.getStructureFhirVersionEnum());
 		}
 
 		@Override
@@ -358,7 +362,6 @@ class ParserState<T> {
 			@SuppressWarnings("unchecked")
 			List<IResource> containedResources = (List<IResource>) preResCurrentElement.getContained().getContainedResources();
 			containedResources.add(res);
-
 		}
 
 	}
@@ -442,7 +445,7 @@ class ParserState<T> {
 			switch (target.getChildType()) {
 				case COMPOSITE_DATATYPE: {
 					BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
-					ICompositeType newChildInstance = newCompositeInstance(myDefinition, compositeTarget);
+					ICompositeType newChildInstance = newCompositeInstance(getPreResourceState(), myDefinition, compositeTarget);
 					myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
 					ElementCompositeState newState = new ElementCompositeState(myPreResourceState, theLocalPart, compositeTarget, newChildInstance);
 					push(newState);
@@ -570,7 +573,7 @@ class ParserState<T> {
 			switch (target.getChildType()) {
 				case COMPOSITE_DATATYPE: {
 					BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
-					ICompositeType newChildInstance = newCompositeInstance(child, compositeTarget);
+					ICompositeType newChildInstance = newCompositeInstance(getPreResourceState(), child, compositeTarget);
 					child.getMutator().addValue(myInstance, newChildInstance);
 					ParserState<T>.ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), theChildName, compositeTarget, newChildInstance);
 					push(newState);
@@ -738,7 +741,7 @@ class ParserState<T> {
 				switch (target.getChildType()) {
 					case COMPOSITE_DATATYPE: {
 						BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
-						ICompositeType newChildInstance = newCompositeTypeInstance(compositeTarget);
+						ICompositeType newChildInstance = newCompositeTypeInstance(getPreResourceState(), compositeTarget);
 						myExtension.setValue(newChildInstance);
 						ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), theLocalPart, compositeTarget, newChildInstance);
 						push(newState);
@@ -916,10 +919,10 @@ class ParserState<T> {
 	private abstract class PreResourceState extends BaseState {
 
 		private Map<String, IBaseResource> myContainedResources;
+		private List<IBaseReference> myLocalReferences = new ArrayList<>();
 		private IBaseResource myInstance;
 		private FhirVersionEnum myParentVersion;
 		private Class<? extends IBaseResource> myResourceType;
-
 		PreResourceState(Class<? extends IBaseResource> theResourceType) {
 			super(null);
 			myResourceType = theResourceType;
@@ -936,6 +939,10 @@ class ParserState<T> {
 			Validate.notNull(theParentVersion);
 			myParentVersion = theParentVersion;
 			myContainedResources = thePreResourcesState.getContainedResources();
+		}
+
+		public List<IBaseReference> getLocalReferences() {
+			return myLocalReferences;
 		}
 
 		@Override
@@ -977,7 +984,7 @@ class ParserState<T> {
 			myInstance = newInstance(def);
 
 			if (myInstance instanceof IResource) {
-				push(new ResourceStateHapi(getRootPreResourceState(), def, (IResource) myInstance));
+				push(new ResourceStateHapi(getRootPreResourceState(), def, (IResource) myInstance, myContainedResources));
 			} else {
 				push(new ResourceStateHl7Org(getRootPreResourceState(), def, myInstance));
 			}
@@ -1065,7 +1072,7 @@ class ParserState<T> {
 				/*
 				 * Stitch together resource references
 				 */
-				for (IBaseResource next : myResources) {
+				for (IBaseResource next : myGlobalResources) {
 					IIdType id = next.getIdElement();
 					if (id != null && id.isEmpty() == false) {
 						String resName = myContext.getResourceDefinition(next).getName();
@@ -1074,7 +1081,7 @@ class ParserState<T> {
 					}
 				}
 
-				for (IBaseReference nextRef : myReferences) {
+				for (IBaseReference nextRef : myGlobalReferences) {
 					if (nextRef.isEmpty() == false && nextRef.getReferenceElement() != null) {
 						IIdType unqualifiedVersionless = nextRef.getReferenceElement().toUnqualifiedVersionless();
 						IBaseResource target = idToResource.get(unqualifiedVersionless.getValueAsString());
@@ -1100,7 +1107,7 @@ class ParserState<T> {
 		}
 
 		void weaveContainedResources() {
-			for (IBaseReference nextRef : myReferences) {
+			for (IBaseReference nextRef : myLocalReferences) {
 				String ref = nextRef.getReferenceElement().getValue();
 				if (isNotBlank(ref)) {
 					if (ref.startsWith("#")) {
@@ -1327,7 +1334,7 @@ class ParserState<T> {
 
 		private IResource myInstance;
 
-		public ResourceStateHapi(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IResource theInstance) {
+		public ResourceStateHapi(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IResource theInstance, Map<String, IBaseResource> theContainedResources) {
 			super(thePreResourceState, theDef.getName(), theDef, theInstance);
 			myInstance = theInstance;
 		}
