@@ -333,7 +333,7 @@ public class ResourceValidatorDstu3Test {
 		TestPatientFor327 patient = new TestPatientFor327();
 		patient.setBirthDate(new Date());
 		patient.setId("123");
-		patient.getText().setDivAsString("<div>FOO</div>");
+		patient.getText().setDivAsString("<div lang=\"en\">FOO</div>");
 		patient.getText().setStatus(NarrativeStatus.GENERATED);
 		patient.getLanguageElement().setValue("en");
 		patient.addExtension().setUrl("http://foo").setValue(new StringType("MOD"));
@@ -478,7 +478,7 @@ public class ResourceValidatorDstu3Test {
 		private static final long serialVersionUID = 1L;
 
 		@Child(name = "testCondition")
-		@ca.uhn.fhir.model.api.annotation.Extension(url = "testCondition", definedLocally = true, isModifier = false)
+		@ca.uhn.fhir.model.api.annotation.Extension(url = "http://testCondition", definedLocally = true, isModifier = false)
 		private List<Reference> testConditions = null;
 
 		public List<Reference> getConditions() {

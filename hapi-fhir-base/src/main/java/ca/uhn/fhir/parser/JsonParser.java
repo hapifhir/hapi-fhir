@@ -233,11 +233,19 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				}
 
 				// check for the common case first - String value types
-				if (value.getValue() instanceof String) {
+				Object valueObj = value.getValue();
+				if (valueObj instanceof String) {
 					if (theChildName != null) {
 						theEventWriter.write(theChildName, valueStr);
 					} else {
 						theEventWriter.write(valueStr);
+					}
+					break;
+				} else if (valueObj instanceof Long) {
+					if (theChildName != null) {
+						theEventWriter.write(theChildName, (long)valueObj);
+					} else {
+						theEventWriter.write((long)valueObj);
 					}
 					break;
 				}

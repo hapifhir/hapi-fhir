@@ -1356,7 +1356,7 @@ public class GenericJaxRsClientDstu3Test {
 				.execute();
 			fail();
 		} catch (InvalidResponseException e) {
-			assertThat(e.getMessage(), containsString("Unable to Parse HTML - node"));
+			assertThat(e.getMessage(), containsString("Unable to Parse HTML"));
 		}
 		//@formatter:on
 	}

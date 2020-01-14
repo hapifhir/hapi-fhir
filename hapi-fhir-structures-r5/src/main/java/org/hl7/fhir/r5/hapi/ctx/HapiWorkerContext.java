@@ -24,11 +24,15 @@ import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.r5.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.hl7.fhir.utilities.validation.ValidationOptions;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -144,15 +148,9 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		}
 	}
 
-	@Override
-	public Set<String> typeTails() {
-		return new HashSet<>(Arrays.asList("Integer", "UnsignedInt", "PositiveInt", "Decimal", "DateTime", "Date", "Time", "Instant", "String", "Uri", "Oid", "Uuid", "Id", "Boolean", "Code",
-			"Markdown", "Base64Binary", "Coding", "CodeableConcept", "Attachment", "Identifier", "Quantity", "SampledData", "Range", "Period", "Ratio", "HumanName", "Address", "ContactPoint",
-			"Timing", "Reference", "Annotation", "Signature", "Meta"));
-	}
 
 	@Override
-	public ValidationResult validateCode(TerminologyServiceOptions theOptions, CodeableConcept theCode, ValueSet theVs) {
+	public ValidationResult validateCode(ValidationOptions theOptions, CodeableConcept theCode, ValueSet theVs) {
 		for (Coding next : theCode.getCoding()) {
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
 			if (retVal.isOk()) {
@@ -164,7 +162,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	}
 
 	@Override
-	public ValidationResult validateCode(TerminologyServiceOptions theOptions, Coding theCode, ValueSet theVs) {
+	public ValidationResult validateCode(ValidationOptions theOptions, Coding theCode, ValueSet theVs) {
 		String system = theCode.getSystem();
 		String code = theCode.getCode();
 		String display = theCode.getDisplay();
@@ -172,7 +170,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	}
 
 	@Override
-	public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay) {
+	public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay) {
 		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, null);
 		if (result == null) {
 			return null;
@@ -181,12 +179,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	}
 
 	@Override
-	public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay, ConceptSetComponent theVsi) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
+	public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
 
 		/*
 		 * The following valueset is a special case, since the BCP codesystem is very difficult to expand
@@ -227,18 +220,23 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 
 	@Override
-	public ValidationResult validateCode(TerminologyServiceOptions theOptions, String code, ValueSet vs) {
+	public ValidationResult validateCode(ValidationOptions theOptions, String code, ValueSet vs) {
 		return validateCode(theOptions, null, code, null, vs);
 	}
 
 	@Override
 	@CoverageIgnore
-	public List<MetadataResource> allConformanceResources() {
+	public List<CanonicalResource> allConformanceResources() {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void generateSnapshot(StructureDefinition p) throws FHIRException {
+
+	}
+
+	@Override
+	public void generateSnapshot(StructureDefinition mr, boolean ifLogical) {
 
 	}
 
@@ -398,6 +396,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	@Override
 	public String getLinkForUrl(String corePath, String url) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Map<String, byte[]> getBinaries() {
+		return null;
 	}
 
 }
