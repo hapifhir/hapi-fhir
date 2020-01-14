@@ -42,6 +42,9 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	@JoinColumn(name="RES_VER_PID", referencedColumnName="PID", nullable=false, foreignKey=@ForeignKey(name="FK_HISTORYTAG_HISTORY"))
 	private ResourceHistoryTable myResourceHistory;
 
+	@Column(name="RES_VER_PID", insertable = false, updatable = false, nullable = false)
+	private Long myResourceHistoryPid;
+
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable=false)
 	private String myResourceType;
 

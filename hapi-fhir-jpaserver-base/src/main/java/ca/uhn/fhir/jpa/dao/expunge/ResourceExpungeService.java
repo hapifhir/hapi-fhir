@@ -50,7 +50,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Service
 class ResourceExpungeService implements IResourceExpungeService {
@@ -151,7 +150,7 @@ class ResourceExpungeService implements IResourceExpungeService {
 			myResourceHistoryProvenanceTableDao.deleteByPid(version.getProvenance().getId());
 		}
 
-		myResourceHistoryTagDao.deleteByPid(version.getTags().stream().map(t->t.getId()).collect(Collectors.toList()));
+		myResourceHistoryTagDao.deleteByPid(version.getId());
 		myResourceHistoryTableDao.deleteByPid(version.getId());
 
 		theRemainingCount.decrementAndGet();
