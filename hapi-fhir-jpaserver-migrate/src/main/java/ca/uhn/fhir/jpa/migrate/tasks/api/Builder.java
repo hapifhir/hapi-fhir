@@ -56,7 +56,17 @@ public class Builder {
 	}
 
 	public Builder initializeSchema(String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
-		mySink.addTask(new InitializeSchemaTask(myRelease, theVersion, theSchemaInitializationProvider));
+		return initializeSchemaOptional(false, theVersion, theSchemaInitializationProvider);
+	}
+
+	public Builder initializeSchemaStub(String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
+		return initializeSchemaOptional(true, theVersion, theSchemaInitializationProvider);
+	}
+
+	public Builder initializeSchemaOptional(boolean theDoNothing, String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
+		InitializeSchemaTask task = new InitializeSchemaTask(myRelease, theVersion, theSchemaInitializationProvider);
+		task.setDoNothing(theDoNothing);
+		mySink.addTask(task);
 		return this;
 	}
 
