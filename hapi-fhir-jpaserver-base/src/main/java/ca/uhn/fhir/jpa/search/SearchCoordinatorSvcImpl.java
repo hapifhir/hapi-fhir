@@ -97,6 +97,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
 	public static final String UNIT_TEST_CAPTURE_STACK = "unit_test_capture_stack";
+	public static final Integer INTEGER_0 = Integer.valueOf(0);
 	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
 	@Autowired
 	private FhirContext myContext;
@@ -957,7 +958,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 *
 			 * before doing anything else.
 			 */
-			boolean wantOnlyCount = SummaryEnum.COUNT.equals(myParams.getSummaryMode());
+			boolean wantOnlyCount =
+				SummaryEnum.COUNT.equals(myParams.getSummaryMode())
+				| INTEGER_0.equals(myParams.getCount());
 			boolean wantCount =
 				wantOnlyCount ||
 					SearchTotalModeEnum.ACCURATE.equals(myParams.getSearchTotalMode()) ||
