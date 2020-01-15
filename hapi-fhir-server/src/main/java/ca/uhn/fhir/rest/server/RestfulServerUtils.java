@@ -130,7 +130,7 @@ public class RestfulServerUtils {
 
 		// _elements
 		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequestDetails, false);
-		if (elements != null && summaryMode != null && !summaryMode.equals(Collections.singleton(SummaryEnum.FALSE))) {
+		if (elements != null && !summaryMode.equals(Collections.singleton(SummaryEnum.FALSE))) {
 			throw new InvalidRequestException("Cannot combine the " + Constants.PARAM_SUMMARY + " and " + Constants.PARAM_ELEMENTS + " parameters");
 		}
 
@@ -510,6 +510,7 @@ public class RestfulServerUtils {
 		return retVal;
 	}
 
+	@Nonnull
 	public static Set<SummaryEnum> determineSummaryMode(RequestDetails theRequest) {
 		Map<String, String[]> requestParams = theRequest.getParameters();
 
