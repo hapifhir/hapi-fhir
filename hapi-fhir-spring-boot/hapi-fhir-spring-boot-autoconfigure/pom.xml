@@ -113,7 +113,6 @@
 		</dependency>
 	</dependencies>
 
-	<!--
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -126,7 +125,6 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	-->
 
 	<build>
 		<plugins>
