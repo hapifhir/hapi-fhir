@@ -131,7 +131,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Observation observation = new Observation();
 		observation.getIdentifierFirstRep().setSystem("foo").setValue("1");
 		observation.getCode().addCoding().setCode(code).setSystem("SNOMED-CT");
-		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.setStatus(Enumerations.ObservationStatus.FINAL);
 		observation.getSubject().setReference(patient.getId());
 		bundle.addEntry().setResource(observation).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
 
@@ -160,7 +160,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Observation observation = new Observation();
 		observation.getIdentifierFirstRep().setSystem("foo").setValue("1");
 		observation.getCode().addCoding().setCode(code).setSystem("SNOMED-CT");
-		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.setStatus(Enumerations.ObservationStatus.FINAL);
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle.addEntry().setResource(observation).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
@@ -187,7 +187,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		observation.setId(obs.getId());
 		observation.getIdentifierFirstRep().setSystem("foo").setValue("2");
 		observation.getCode().addCoding().setCode(code).setSystem("SNOMED-CT");
-		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.setStatus(Enumerations.ObservationStatus.FINAL);
 		bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle.addEntry().setResource(observation).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl(obs.getIdElement().toUnqualifiedVersionless().getValue());
@@ -220,7 +220,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 			Observation observation = new Observation();
 			observation.getIdentifierFirstRep().setSystem("foo").setValue("ID" + i);
 			observation.getCode().addCoding().setCode(code).setSystem("SNOMED-CT");
-			observation.setStatus(Observation.ObservationStatus.FINAL);
+			observation.setStatus(Enumerations.ObservationStatus.FINAL);
 			myObservationDao.create(observation);
 		}
 
@@ -669,7 +669,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		CodeableConcept codeableConcept = new CodeableConcept()
 			.addCoding(new Coding().setCode(code).setSystem("SNOMED-CT"));
 		observation.setCode(codeableConcept);
-		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.setStatus(Enumerations.ObservationStatus.FINAL);
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("foo").setValue("bar2");
@@ -848,7 +848,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	@Test(expected = UnprocessableEntityException.class)
 	public void testInvalidProvenanceParam() {
 		String payload = "application/fhir+json";
-		String criteriabad = "Provenance?activity=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
+		String criteriabad = "Provenance?foo=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
 		Subscription subscription = newSubscription(criteriabad, payload);
 		ourClient.create().resource(subscription).execute();
 	}

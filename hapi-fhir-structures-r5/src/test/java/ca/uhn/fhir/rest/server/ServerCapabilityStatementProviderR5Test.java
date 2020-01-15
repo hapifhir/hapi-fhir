@@ -3,13 +3,19 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
@@ -21,25 +27,40 @@ import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.hapi.rest.server.ServerCapabilityStatementProvider;
 import org.hl7.fhir.r5.model.*;
-import org.hl7.fhir.r5.model.CapabilityStatement.*;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceOperationComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.ConditionalDeleteStatus;
+import org.hl7.fhir.r5.model.CapabilityStatement.SystemRestfulInteraction;
+import org.hl7.fhir.r5.model.CapabilityStatement.TypeRestfulInteraction;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.r5.model.OperationDefinition.OperationKind;
-import org.hl7.fhir.r5.model.OperationDefinition.OperationParameterUse;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 public class ServerCapabilityStatementProviderR5Test {
 
@@ -265,9 +286,9 @@ public class ServerCapabilityStatementProviderR5Test {
 			assertThat(types, containsInAnyOrder("Patient"));
 			assertEquals(2, opDef.getParameter().size());
 			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
-			assertEquals("date", opDef.getParameter().get(0).getType());
+			assertEquals("date", opDef.getParameter().get(0).getType().toCode());
 			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
-			assertEquals("Patient", opDef.getParameter().get(1).getType());
+			assertEquals("Patient", opDef.getParameter().get(1).getType().toCode());
 		}
 		{
 			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Encounter-i-someOp"), createRequestDetails(rs));
@@ -280,9 +301,9 @@ public class ServerCapabilityStatementProviderR5Test {
 			assertThat(types, containsInAnyOrder("Encounter"));
 			assertEquals(2, opDef.getParameter().size());
 			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
-			assertEquals("date", opDef.getParameter().get(0).getType());
+			assertEquals("date", opDef.getParameter().get(0).getType().toCode());
 			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
-			assertEquals("Encounter", opDef.getParameter().get(1).getType());
+			assertEquals("Encounter", opDef.getParameter().get(1).getType().toCode());
 		}
 		{
 			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-validate"), createRequestDetails(rs));
@@ -295,7 +316,7 @@ public class ServerCapabilityStatementProviderR5Test {
 			assertThat(types, containsInAnyOrder("Patient"));
 			assertEquals(1, opDef.getParameter().size());
 			assertEquals("resource", opDef.getParameter().get(0).getName());
-			assertEquals("Patient", opDef.getParameter().get(0).getType());
+			assertEquals("Patient", opDef.getParameter().get(0).getType().toCode());
 		}
 	}
 
@@ -672,11 +693,11 @@ public class ServerCapabilityStatementProviderR5Test {
 		assertThat(parameters.size(), is(1));
 		OperationDefinitionParameterComponent param = parameters.get(0);
 		assertThat(param.getName(), is(NamedQueryPlainProvider.SP_QUANTITY));
-		assertThat(param.getType(), is("string"));
+		assertThat(param.getType().toCode(), is("string"));
 		assertThat(param.getSearchTypeElement().asStringValue(), is(RestSearchParameterTypeEnum.QUANTITY.getCode()));
 		assertThat(param.getMin(), is(1));
 		assertThat(param.getMax(), is("1"));
-		assertThat(param.getUse(), is(OperationParameterUse.IN));
+		assertThat(param.getUse(), is(Enumerations.OperationParameterUse.IN));
 	}
 
 	@Test
@@ -710,11 +731,11 @@ public class ServerCapabilityStatementProviderR5Test {
 		assertThat(parameters.size(), is(1));
 		OperationDefinitionParameterComponent param = parameters.get(0);
 		assertThat(param.getName(), is(NamedQueryResourceProvider.SP_PARAM));
-		assertThat(param.getType(), is("string"));
+		assertThat(param.getType().toCode(), is("string"));
 		assertThat(param.getSearchTypeElement().asStringValue(), is(RestSearchParameterTypeEnum.STRING.getCode()));
 		assertThat(param.getMin(), is(0));
 		assertThat(param.getMax(), is("1"));
-		assertThat(param.getUse(), is(OperationParameterUse.IN));
+		assertThat(param.getUse(), is(Enumerations.OperationParameterUse.IN));
 
 		CapabilityStatementRestResourceComponent patientResource = restComponent.getResource().stream()
 				.filter(r -> patientResourceName.equals(r.getType()))

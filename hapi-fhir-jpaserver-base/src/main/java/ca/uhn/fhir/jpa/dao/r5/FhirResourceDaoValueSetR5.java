@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,15 +38,18 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r5.model.IntegerType;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetFilterComponent;
-import org.hl7.fhir.r5.model.ValueSet.FilterOperator;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Collections;
 import java.util.Date;
@@ -172,7 +175,7 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 			ConceptSetComponent include = source.getCompose().addInclude();
 			ConceptSetFilterComponent filter = include.addFilter();
 			filter.setProperty("display");
-			filter.setOp(FilterOperator.EQUAL);
+			filter.setOp(Enumerations.FilterOperator.EQUAL);
 			filter.setValue(theFilter);
 		}
 
@@ -207,7 +210,7 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 			ConceptSetComponent include = source.getCompose().addInclude();
 			ConceptSetFilterComponent filter = include.addFilter();
 			filter.setProperty("display");
-			filter.setOp(FilterOperator.EQUAL);
+			filter.setOp(Enumerations.FilterOperator.EQUAL);
 			filter.setValue(theFilter);
 		}
 
@@ -289,7 +292,7 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 	private void addFilterIfPresent(String theFilter, ConceptSetComponent include) {
 		if (ElementUtil.isEmpty(include.getConcept())) {
 			if (isNotBlank(theFilter)) {
-				include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue(theFilter);
+				include.addFilter().setProperty("display").setOp(Enumerations.FilterOperator.EQUAL).setValue(theFilter);
 			}
 		}
 	}

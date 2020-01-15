@@ -4,7 +4,7 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -703,6 +703,12 @@ public class XmlParser extends BaseParser {
 							String namespaceURI = se.getName().getNamespaceURI();
 							theEventWriter.writeStartElement(prefix, se.getName().getLocalPart(), namespaceURI);
 							theEventWriter.writeNamespace(prefix, namespaceURI);
+						}
+						for (Iterator<Attribute> iter= se.getAttributes(); iter.hasNext(); ) {
+							Attribute next = iter.next();
+							if ("lang".equals(next.getName().getLocalPart())) {
+								theEventWriter.writeAttribute("", "", next.getName().getLocalPart(), next.getValue());
+							}
 						}
 						firstElement = false;
 					} else {

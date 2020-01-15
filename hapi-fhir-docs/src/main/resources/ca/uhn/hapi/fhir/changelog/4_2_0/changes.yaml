@@ -70,3 +70,14 @@
    title: "A significant performance improvement was added to the Json and XML parsers when parsing large Bundle
       resources. Throughput for parsing these resources has been improved by roughly 50%. Thanks to Rok Bertoncelj
       and Bogdan Solga for providing analysis and insight that triggered this change."
+- item:
+   issue: "1658"
+   type: "fix"
+   title: "When parsing HTML Narratives, the `lang` attribute was stripped from the outer DIV tag if present. Thanks to
+Sean McIlvenna for reporting!"
+- item:
+   issue: "1655"
+   type: "fix"
+   title: "When using a custom structure that changes the cardinality from 0..* to 0..1, the Parser was encoding
+       a plain field instead of an array (as required by the FHIR specification). Thanks to 
+       Petro Mykhailysyn for the pull request!"
