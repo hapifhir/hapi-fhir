@@ -32,6 +32,7 @@ import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.json.*;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
+import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
 import com.google.gson.Gson;
@@ -148,7 +149,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	private JsonLikeWriter createJsonWriter(Writer theWriter) {
-		JsonLikeStructure jsonStructure = new GsonStructure();
+		JsonLikeStructure jsonStructure = new JacksonStructure();
 		JsonLikeWriter retVal = jsonStructure.getJsonLikeWriter(theWriter);
 		return retVal;
 	}
