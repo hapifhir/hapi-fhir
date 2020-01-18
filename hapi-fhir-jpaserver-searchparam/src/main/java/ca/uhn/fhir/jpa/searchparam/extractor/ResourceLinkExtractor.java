@@ -39,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -73,8 +72,8 @@ public class ResourceLinkExtractor {
 	}
 
 	private void extractResourceLinks(ResourceIndexedSearchParams theParams, ResourceTable theEntity, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, RuntimeSearchParam theRuntimeSearchParam, PathAndRef thePathAndRef, boolean theFailOnInvalidReference, RequestDetails theRequest) {
-		IBaseReference nextObject = thePathAndRef.getRef();
-		IIdType nextId = nextObject.getReferenceElement();
+		IBaseReference nextReference = thePathAndRef.getRef();
+		IIdType nextId = nextReference.getReferenceElement();
 		String path = thePathAndRef.getPath();
 
 		/*
@@ -82,8 +81,8 @@ public class ResourceLinkExtractor {
 		 * programmatically with a Bundle (not through the FHIR REST API)
 		 * but Smile does this
 		 */
-		if (nextId.isEmpty() && nextObject.getResource() != null) {
-			nextId = nextObject.getResource().getIdElement();
+		if (nextId.isEmpty() && nextReference.getResource() != null) {
+			nextId = nextReference.getResource().getIdElement();
 		}
 
 		theParams.myPopulatedResourceLinkParameters.add(thePathAndRef.getSearchParamName());
@@ -152,15 +151,15 @@ public class ResourceLinkExtractor {
 		}
 
 		theResourceLinkResolver.validateTypeOrThrowException(type);
-		ResourceLink resourceLink = createResourceLink(theEntity, theUpdateTime, theResourceLinkResolver, theRuntimeSearchParam, path, thePathAndRef, nextId, typeString, type, id, theRequest);
+		ResourceLink resourceLink = createResourceLink(theEntity, theUpdateTime, theResourceLinkResolver, theRuntimeSearchParam, path, thePathAndRef, nextId, typeString, type, nextReference, theRequest);
 		if (resourceLink == null) {
 			return;
 		}
 		theParams.myLinks.add(resourceLink);
 	}
 
-	private ResourceLink createResourceLink(ResourceTable theEntity, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, String theId, RequestDetails theRequest) {
-		ResourceTable targetResource = theResourceLinkResolver.findTargetResource(nextSpDef, theNextPathsUnsplit, theNextId, theTypeString, theType, theId, theRequest);
+	private ResourceLink createResourceLink(ResourceTable theEntity, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
+		ResourceTable targetResource = theResourceLinkResolver.findTargetResource(nextSpDef, theNextPathsUnsplit, theNextId, theTypeString, theType, theReference, theRequest);
 
 		if (targetResource == null) {
 			return null;
@@ -169,7 +168,4 @@ public class ResourceLinkExtractor {
 		return new ResourceLink(nextPathAndRef.getPath(), theEntity, targetResource, theUpdateTime);
 	}
 
-	private String toResourceName(Class<? extends IBaseResource> theResourceType) {
-		return myContext.getResourceDefinition(theResourceType).getName();
-	}
 }

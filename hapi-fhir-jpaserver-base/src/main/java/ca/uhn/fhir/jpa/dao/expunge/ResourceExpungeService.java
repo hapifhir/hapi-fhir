@@ -159,7 +159,7 @@ class ResourceExpungeService implements IResourceExpungeService {
 	private void callHooks(RequestDetails theRequestDetails, AtomicInteger theRemainingCount, ResourceHistoryTable theVersion, IdDt theId) {
 		final AtomicInteger counter = new AtomicInteger();
 		if (JpaInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, myInterceptorBroadcaster, theRequestDetails)) {
-			IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theId.getResourceType());
+			IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theId.getResourceType());
 			IBaseResource resource = resourceDao.toResource(theVersion, false);
 			HookParams params = new HookParams()
 				.add(AtomicInteger.class, counter)
