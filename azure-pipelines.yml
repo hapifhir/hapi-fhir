@@ -15,9 +15,9 @@ jobs:
     timeoutInMinutes: 360
     container: maven:3-jdk-11
     steps:
-      - task: CacheBeta@0
+      - task: Cache@2
         inputs:
-          key: maven
+          key: pom.xml
           path: $(MAVEN_CACHE_FOLDER)
       - task: Maven@3
         env:
