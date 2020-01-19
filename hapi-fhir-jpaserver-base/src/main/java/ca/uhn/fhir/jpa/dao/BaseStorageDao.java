@@ -53,6 +53,7 @@ import java.util.Set;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.OO_SEVERITY_ERROR;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.OO_SEVERITY_INFO;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -95,7 +96,8 @@ public abstract class BaseStorageDao {
 		if ("Bundle".equals(type)) {
 			Set<String> allowedBundleTypes = getConfig().getBundleTypesAllowedForStorage();
 			String bundleType = BundleUtil.getBundleType(getContext(), (IBaseBundle) theResource);
-			if (isBlank(bundleType) || !allowedBundleTypes.contains(bundleType)) {
+			bundleType = defaultString(bundleType);
+			if (!allowedBundleTypes.contains(bundleType)) {
 				String message = "Unable to store a Bundle resource on this server with a Bundle.type value of: " + (isNotBlank(bundleType) ? bundleType : "(missing)");
 				throw new UnprocessableEntityException(message);
 			}
