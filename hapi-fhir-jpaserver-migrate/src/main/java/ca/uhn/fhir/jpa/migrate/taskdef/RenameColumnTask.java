@@ -146,8 +146,6 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 
 		return new EqualsBuilder()
 			.appendSuper(super.equals(theO))
-			.append(myIsOkayIfNeitherColumnExists, that.myIsOkayIfNeitherColumnExists)
-			.append(myDeleteTargetColumnFirstIfBothExist, that.myDeleteTargetColumnFirstIfBothExist)
 			.append(myOldName, that.myOldName)
 			.append(myNewName, that.myNewName)
 			.isEquals();
@@ -159,8 +157,6 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 			.appendSuper(super.hashCode())
 			.append(myOldName)
 			.append(myNewName)
-			.append(myIsOkayIfNeitherColumnExists)
-			.append(myDeleteTargetColumnFirstIfBothExist)
 			.toHashCode();
 	}
 }
