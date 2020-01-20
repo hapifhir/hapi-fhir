@@ -540,7 +540,7 @@ public class SearchBuilder implements ISearchBuilder {
 					 * Handle non-chained search, e.g. Patient?organization=Organization/123
 					 */
 
-					IIdType dt = new IdDt(ref.getBaseUrl(), ref.getResourceType(), ref.getIdPart(), null);
+					IIdType dt = new IdDt(ref.getValue());
 
 					if (dt.hasBaseUrl()) {
 						if (myDaoConfig.getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())) {
