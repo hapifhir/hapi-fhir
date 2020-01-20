@@ -21,6 +21,7 @@ jobs:
           key: pom.xml
           path: $(MAVEN_CACHE_FOLDER)
       - task: Bash@3
+        inputs:
           targetType: 'inline'
           script: mkdir -p $(MAVEN_CACHE_FOLDER)
       - task: Maven@3
