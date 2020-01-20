@@ -143,7 +143,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		when(myMockSupport.isCodeSystemSupported(nullable(FhirContext.class), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
 			public Boolean answer(InvocationOnMock theInvocation) {
-				boolean retVal = myValidSystems.contains(theInvocation.getArguments()[1]);
+				boolean retVal = myValidSystems.contains(theInvocation.getArgument(1, String.class));
 				ourLog.debug("isCodeSystemSupported({}) : {}", new Object[]{theInvocation.getArguments()[1], retVal});
 				return retVal;
 			}
