@@ -23,7 +23,7 @@ jobs:
       - task: Bash@3
         inputs:
           targetType: 'inline'
-          script: mkdir -p $(MAVEN_CACHE_FOLDER); ls -al $(MAVEN_CACHE_FOLDER)
+          script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
       - task: Maven@3
         env:
           JAVA_HOME_11_X64: /usr/local/openjdk-11
