@@ -1,8 +1,8 @@
 # HAPI FHIR Build Pipeline
 
 variables:
-  #MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
-  MAVEN_CACHE_FOLDER: $(Agent.TempDirectory)/.m2/repository
+  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+  #MAVEN_CACHE_FOLDER: $(Agent.TempDirectory)/.m2/repository
   MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
 
 trigger:
@@ -20,6 +20,9 @@ jobs:
         inputs:
           key: pom.xml
           path: $(MAVEN_CACHE_FOLDER)
+      - task: Bash@3
+          targetType: 'inline'
+          script: mkdir -p $(MAVEN_CACHE_FOLDER)
       - task: Maven@3
         env:
           JAVA_HOME_11_X64: /usr/local/openjdk-11
