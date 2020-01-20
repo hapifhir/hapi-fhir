@@ -34,4 +34,9 @@ public interface IBaseReference extends ICompositeType {
 	IBase setDisplay(String theValue);
 
 	IPrimitiveType<String> getDisplayElement();
+
+	default boolean hasIdentifier() {
+		return false;
+	}
+	
 }
