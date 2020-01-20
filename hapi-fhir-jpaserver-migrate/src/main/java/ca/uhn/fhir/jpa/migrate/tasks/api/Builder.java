@@ -50,9 +50,10 @@ public class Builder {
 		return new BuilderAddTableRawSql(theVersion, theTableName);
 	}
 
-	public Builder executeRawSql(String theVersion, @Language("SQL") String theSql) {
-		mySink.addTask(new ExecuteRawSqlTask(myRelease, theVersion).addSql(theSql));
-		return this;
+	public BuilderCompleteTask executeRawSql(String theVersion, @Language("SQL") String theSql) {
+		ExecuteRawSqlTask task = new ExecuteRawSqlTask(myRelease, theVersion).addSql(theSql);
+		mySink.addTask(task);
+		return new BuilderCompleteTask(task);
 	}
 
 	public Builder initializeSchema(String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
@@ -71,6 +72,7 @@ public class Builder {
 		mySink.addTask(new ExecuteRawSqlTask(myRelease, theVersion).addSql(theDriver, theSql));
 		return this;
 	}
+
 
 	// Flyway doesn't support these kinds of migrations
 	@Deprecated
@@ -395,7 +397,7 @@ public class Builder {
 			}
 		}
 
-		public static class BuilderAddColumnWithName {
+		public class BuilderAddColumnWithName {
 			private final String myRelease;
 			private final String myVersion;
 			private final String myColumnName;
@@ -427,11 +429,11 @@ public class Builder {
 					myNullable = theNullable;
 				}
 
-				public BuilderAddColumnComplete type(AddColumnTask.ColumnTypeEnum theColumnType) {
+				public BuilderCompleteTask type(AddColumnTask.ColumnTypeEnum theColumnType) {
 					return type(theColumnType, null);
 				}
 
-				public BuilderAddColumnComplete type(AddColumnTask.ColumnTypeEnum theColumnType, Integer theLength) {
+				public BuilderCompleteTask type(AddColumnTask.ColumnTypeEnum theColumnType, Integer theLength) {
 					AddColumnTask task = new AddColumnTask(myRelease, myVersion);
 					task.setColumnName(myColumnName);
 					task.setNullable(myNullable);
@@ -441,23 +443,25 @@ public class Builder {
 					}
 					myTaskSink.addTask(task);
 
-					return new BuilderAddColumnComplete(task);
+					return new BuilderCompleteTask(task);
 				}
 
-				public class BuilderAddColumnComplete {
-
-					private final AddColumnTask myTask;
-
-					public BuilderAddColumnComplete(AddColumnTask theTask) {
-						myTask = theTask;
-					}
-
-					public BuilderAddColumnComplete failureAllowed() {
-						myTask.setFailureAllowed(true);
-						return this;
-					}
-				}
 			}
+		}
+	}
+
+
+	public static class BuilderCompleteTask {
+
+		private final BaseTask<?> myTask;
+
+		public BuilderCompleteTask(BaseTask<?> theTask) {
+			myTask = theTask;
+		}
+
+		public BuilderCompleteTask failureAllowed() {
+			myTask.setFailureAllowed(true);
+			return this;
 		}
 	}
 
