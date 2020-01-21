@@ -1292,16 +1292,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private Predicate addPredicateCoords(String theResourceName,
 													 String theParamName,
 													 List<? extends IQueryParameterType> theList) {
-		return addPredicateCoords(theResourceName,
-			theParamName,
-			theList,
-			null);
-	}
-
-	private Predicate addPredicateCoords(String theResourceName,
-													 String theParamName,
-													 List<? extends IQueryParameterType> theList,
-													 SearchFilterParser.CompareOperation operation) {
 		Join<ResourceTable, ResourceIndexedSearchParamCoords> join = createJoin(JoinEnum.COORDS, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
@@ -1316,8 +1306,8 @@ public class SearchBuilder implements ISearchBuilder {
 				theResourceName,
 				theParamName,
 				myBuilder,
-				join,
-				operation);
+				join
+			);
 			codePredicates.add(singleCode);
 		}
 
@@ -2082,24 +2072,14 @@ public class SearchBuilder implements ISearchBuilder {
 														 String theResourceName,
 														 String theParamName,
 														 CriteriaBuilder theBuilder,
-														 From<?, ResourceIndexedSearchParamCoords> theFrom,
-														 SearchFilterParser.CompareOperation operation) {
-		// FIXME KHS
-
+														 From<?, ResourceIndexedSearchParamCoords> theFrom) {
 		String latitudeValue;
 		String longitudeValue;
-		BigDecimal valueValue;
-
-		// FIXME KHS test
-		if (operation != null) {
-			throw new IllegalArgumentException("Operators not supported for Coordinate searches: " + operation.toString());
-		}
 
 		if (theParam instanceof TokenParam) {
 			TokenParam param = (TokenParam) theParam;
 			String value = param.getValue();
 			String[] parts = value.split(":");
-			// FIXME KHS test
 			if (parts.length != 2) {
 				throw new IllegalArgumentException("Invalid position format '" + value + "'.  Required format is 'latitude:longitude'");
 			}
@@ -2119,7 +2099,6 @@ public class SearchBuilder implements ISearchBuilder {
 			latitudePredicate = theBuilder.equal(theFrom.get("myLatitude"), latitudeValue);
 			longitudePredicate = theBuilder.equal(theFrom.get("myLongitude"), longitudeValue);
 		} else {
-			// FIXME KHS suppress hash
 			Double distance = distanceParam.getValue().doubleValue();
 			if (distance < 0.0) {
 				throw new IllegalArgumentException("Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distance + "' must be >= 0.0");
@@ -2287,8 +2266,6 @@ public class SearchBuilder implements ISearchBuilder {
 		 * Now perform the search
 		 */
 		final TypedQuery<Long> query = myEntityManager.createQuery(outerQuery);
-
-		// FIXME KHS query
 
 		if (theMaximumResults != null) {
 			query.setMaxResults(theMaximumResults);
