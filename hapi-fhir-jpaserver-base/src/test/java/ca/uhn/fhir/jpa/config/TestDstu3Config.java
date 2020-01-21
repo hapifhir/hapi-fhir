@@ -83,7 +83,8 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 		};
 		retVal.setDriver(new org.h2.Driver());
-		retVal.setUrl("jdbc:h2:mem:testdb_dstu3");
+		// FIXME KHS
+		retVal.setUrl("jdbc:h2:file:./target/testdb_dstu3");
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");

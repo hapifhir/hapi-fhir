@@ -3474,7 +3474,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		double longitude = 2000.0;
 		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
-		IIdType locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless();
+		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Location.SP_NEAR, new TokenParam(latitude + ":" + longitude));

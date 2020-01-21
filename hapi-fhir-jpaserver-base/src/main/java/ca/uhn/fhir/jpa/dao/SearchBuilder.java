@@ -66,6 +66,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
+import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -467,6 +468,12 @@ public class SearchBuilder implements ISearchBuilder {
 														String theParamName,
 														List<? extends IQueryParameterType> theList,
 														SearchFilterParser.CompareOperation operation) {
+
+		// FIXME KHS
+		if ("Location".equals(theResourceName) && Location.SP_NEAR_DISTANCE.equals(theParamName)) {
+			return null;
+		}
+
 		Join<ResourceTable, ResourceIndexedSearchParamQuantity> join = createJoin(JoinEnum.QUANTITY, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
@@ -1288,6 +1295,43 @@ public class SearchBuilder implements ISearchBuilder {
 		return outerPredicate;
 	}
 
+	private Predicate addPredicateCoords(String theResourceName,
+													 String theParamName,
+													 List<? extends IQueryParameterType> theList) {
+		return addPredicateCoords(theResourceName,
+			theParamName,
+			theList,
+			null);
+	}
+
+	private Predicate addPredicateCoords(String theResourceName,
+													 String theParamName,
+													 List<? extends IQueryParameterType> theList,
+													 SearchFilterParser.CompareOperation operation) {
+		Join<ResourceTable, ResourceIndexedSearchParamCoords> join = createJoin(JoinEnum.COORDS, theParamName);
+
+		if (theList.get(0).getMissing() != null) {
+			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
+			return null;
+		}
+
+		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		for (IQueryParameterType nextOr : theList) {
+
+			Predicate singleCode = createPredicateCoords(nextOr,
+				theResourceName,
+				theParamName,
+				myBuilder,
+				join,
+				operation);
+			codePredicates.add(singleCode);
+		}
+
+		Predicate retVal = myBuilder.or(toArray(codePredicates));
+		myPredicates.add(retVal);
+		return retVal;
+	}
+
 	private Predicate combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, Predicate thePredicate) {
 		if (myDontUseHashesForSearch) {
 			Predicate resourceTypePredicate = myBuilder.equal(theFrom.get("myResourceType"), theResourceName);
@@ -1366,6 +1410,9 @@ public class SearchBuilder implements ISearchBuilder {
 				break;
 			case TOKEN:
 				join = myResourceTableRoot.join("myParamsToken", JoinType.LEFT);
+				break;
+			case COORDS:
+				join = myResourceTableRoot.join("myParamsCoords", JoinType.LEFT);
 				break;
 		}
 
@@ -2037,6 +2084,52 @@ public class SearchBuilder implements ISearchBuilder {
 		return myBuilder.equal(theExpression, theCode);
 	}
 
+	private Predicate createPredicateCoords(IQueryParameterType theParam,
+														 String theResourceName,
+														 String theParamName,
+														 CriteriaBuilder theBuilder,
+														 From<?, ResourceIndexedSearchParamCoords> theFrom,
+														 SearchFilterParser.CompareOperation operation) {
+		// FIXME KHS
+
+		String latitudeValue;
+		String longitudeValue;
+		BigDecimal valueValue;
+
+		// FIXME KHS test
+		if (operation != null) {
+			throw new IllegalArgumentException("Operators not supported for Coordinate searches: " + operation.toString());
+		}
+
+		if (theParam instanceof TokenParam) {
+			TokenParam param = (TokenParam) theParam;
+			String value = param.getValue();
+			String[] parts = value.split(":");
+			// FIXME KHS test
+			if (parts.length != 2) {
+				throw new IllegalArgumentException("Invalid position format '" + value + "'.  Required format is 'latitude:longitude'");
+			}
+			latitudeValue = parts[0];
+			longitudeValue = parts[1];
+		} else {
+			throw new IllegalArgumentException("Invalid position type: " + theParam.getClass());
+		}
+
+		Predicate latitude = null;
+		if (!isBlank(latitudeValue)) {
+			latitude = theBuilder.equal(theFrom.get("myLatitude"), latitudeValue);
+		}
+
+		Predicate longitude = null;
+		if (!isBlank(longitudeValue)) {
+			longitude = theBuilder.equal(theFrom.get("myLongitude"), longitudeValue);
+		}
+
+		Predicate singleCode = theBuilder.and(latitude, longitude);
+
+		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
+	}
+
 	@Override
 	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest) {
 		myParams = theParams;
@@ -2186,6 +2279,8 @@ public class SearchBuilder implements ISearchBuilder {
 		 */
 		final TypedQuery<Long> query = myEntityManager.createQuery(outerQuery);
 
+		// FIXME KHS query
+
 		if (theMaximumResults != null) {
 			query.setMaxResults(theMaximumResults);
 		}
@@ -2196,6 +2291,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private Predicate createResourceLinkPathPredicate(String theResourceName, String theParamName, From<?, ? extends ResourceLink> from) {
 		return createResourceLinkPathPredicate(myContext, theParamName, from, theResourceName);
 	}
+
 
 	/**
 	 * @return Returns {@literal true} if any search parameter sorts were found, or false if
@@ -2955,7 +3051,11 @@ public class SearchBuilder implements ISearchBuilder {
 							break;
 						case TOKEN:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								addPredicateToken(theResourceName, theParamName, nextAnd);
+								if ("Location.position".equals(nextParamDef.getPath())) {
+									addPredicateCoords(theResourceName, theParamName, nextAnd);
+								} else {
+									addPredicateToken(theResourceName, theParamName, nextAnd);
+								}
 							}
 							break;
 						case NUMBER:
@@ -3129,7 +3229,8 @@ public class SearchBuilder implements ISearchBuilder {
 		REFERENCE,
 		STRING,
 		TOKEN,
-		URI
+		URI,
+		COORDS
 
 	}
 
