@@ -3473,7 +3473,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testNearSearchExact() {
+	public void testNearSearchDistanceNoDistance() {
 		Location loc = new Location();
 		double latitude = 1000.0;
 		double longitude = 2000.0;
@@ -3481,9 +3481,30 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		loc.setPosition(position);
 		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
 
-		SearchParameterMap map = new SearchParameterMap();
-		map.add(Location.SP_NEAR, new TokenParam(latitude + ":" + longitude));
-		map.add(Location.SP_NEAR_DISTANCE, new QuantityParam(0L));
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
+			"Location?" +
+				Location.SP_NEAR + "=" + latitude + ":" + longitude,
+			myFhirCtx.getResourceDefinition("Location"));
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
+		assertThat(ids, contains(locId));
+	}
+
+	@Test
+	public void testNearSearchDistanceZero() {
+		Location loc = new Location();
+		double latitude = 1000.0;
+		double longitude = 2000.0;
+		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		loc.setPosition(position);
+		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
+			"Location?" +
+				Location.SP_NEAR + "=" + latitude + ":" + longitude +
+				"&" +
+				Location.SP_NEAR_DISTANCE + "=0||",
+			myFhirCtx.getResourceDefinition("Location"));
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 		assertThat(ids, contains(locId));

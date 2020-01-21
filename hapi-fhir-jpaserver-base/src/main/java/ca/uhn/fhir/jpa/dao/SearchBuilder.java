@@ -468,12 +468,6 @@ public class SearchBuilder implements ISearchBuilder {
 														String theParamName,
 														List<? extends IQueryParameterType> theList,
 														SearchFilterParser.CompareOperation operation) {
-
-		// FIXME KHS
-		if ("Location".equals(theResourceName) && Location.SP_NEAR_DISTANCE.equals(theParamName)) {
-			return null;
-		}
-
 		Join<ResourceTable, ResourceIndexedSearchParamQuantity> join = createJoin(JoinEnum.QUANTITY, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
@@ -2121,7 +2115,7 @@ public class SearchBuilder implements ISearchBuilder {
 		QuantityParam distanceParam = myParams.getNearDistanceParam();
 		Predicate latitudePredicate;
 		Predicate longitudePredicate;
-		if (distanceParam == null) {
+		if (distanceParam == null || distanceParam.getValue().doubleValue() == 0.0) {
 			latitudePredicate = theBuilder.equal(theFrom.get("myLatitude"), latitudeValue);
 			longitudePredicate = theBuilder.equal(theFrom.get("myLongitude"), longitudeValue);
 		} else {
