@@ -31,7 +31,7 @@ import java.util.List;
 public interface IResourceHistoryTagDao extends JpaRepository<ResourceHistoryTag, Long> {
 
 	@Modifying
-	@Query("DELETE FROM ResourceHistoryTag t WHERE t.myId IN :pids")
-	void deleteByPid(@Param("pids") List<Long> thePids);
+	@Query("DELETE FROM ResourceHistoryTag t WHERE t.myResourceHistoryPid = :historyPid")
+	void deleteByPid(@Param("historyPid") Long theResourceHistoryTablePid);
 
 }

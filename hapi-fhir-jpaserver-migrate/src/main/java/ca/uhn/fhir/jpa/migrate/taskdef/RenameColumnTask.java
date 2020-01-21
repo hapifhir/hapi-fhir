@@ -159,8 +159,6 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 			.appendSuper(super.hashCode())
 			.append(myOldName)
 			.append(myNewName)
-			.append(myIsOkayIfNeitherColumnExists)
-			.append(myDeleteTargetColumnFirstIfBothExist)
 			.toHashCode();
 	}
 }

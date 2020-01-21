@@ -37,5 +37,5 @@ public interface IResourceTagDao extends JpaRepository<ResourceTag, Long> {
 	Collection<ResourceTag> findByResourceIds(@Param("pids") Collection<Long> pids);
 
 	@Modifying
-	@Query("delete from ResourceTag t WHERE t.myResourceId = :resid")
-	void deleteByResourceId(@Param("resid") Long theResourcePid);}
+	@Query("delete from ResourceTag t WHERE t.myResourceId = :resId")
+	void deleteByResourceId(@Param("resId") Long theResourcePid);}

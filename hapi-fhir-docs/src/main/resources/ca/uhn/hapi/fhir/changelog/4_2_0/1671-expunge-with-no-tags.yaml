@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1671
+title: When performing the $expunge operation in the JPA server, the operation sometimes failed if a
+   resource being expunged had historical versions that did not contain any tags. This has been corrected.

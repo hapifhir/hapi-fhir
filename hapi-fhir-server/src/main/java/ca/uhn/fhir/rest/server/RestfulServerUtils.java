@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.method.ElementsParameter;
@@ -129,7 +130,7 @@ public class RestfulServerUtils {
 
 		// _elements
 		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequestDetails, false);
-		if (elements != null && summaryMode != null && !summaryMode.equals(Collections.singleton(SummaryEnum.FALSE))) {
+		if (elements != null && !summaryMode.equals(Collections.singleton(SummaryEnum.FALSE))) {
 			throw new InvalidRequestException("Cannot combine the " + Constants.PARAM_SUMMARY + " and " + Constants.PARAM_ELEMENTS + " parameters");
 		}
 
@@ -139,17 +140,24 @@ public class RestfulServerUtils {
 			parser.setDontEncodeElements(elementsExclude);
 		}
 
-		if (summaryMode != null) {
-			if (summaryMode.contains(SummaryEnum.COUNT) && summaryMode.size() == 1) {
-				parser.setEncodeElements(Collections.singleton("Bundle.total"));
-			} else if (summaryMode.contains(SummaryEnum.TEXT) && summaryMode.size() == 1) {
-				parser.setEncodeElements(TEXT_ENCODE_ELEMENTS);
-				parser.setEncodeElementsAppliesToChildResourcesOnly(true);
-			} else {
-				parser.setSuppressNarratives(summaryMode.contains(SummaryEnum.DATA));
-				parser.setSummaryMode(summaryMode.contains(SummaryEnum.TRUE));
+		boolean summaryModeCount = summaryMode.contains(SummaryEnum.COUNT) && summaryMode.size() == 1;
+		if (!summaryModeCount) {
+			String[] countParam = theRequestDetails.getParameters().get(Constants.PARAM_COUNT);
+			if (countParam != null && countParam.length > 0) {
+				summaryModeCount = "0".equalsIgnoreCase(countParam[0]);
 			}
 		}
+
+		if (summaryModeCount) {
+			parser.setEncodeElements(Collections.singleton("Bundle.total"));
+		} else if (summaryMode.contains(SummaryEnum.TEXT) && summaryMode.size() == 1) {
+			parser.setEncodeElements(TEXT_ENCODE_ELEMENTS);
+			parser.setEncodeElementsAppliesToChildResourcesOnly(true);
+		} else {
+			parser.setSuppressNarratives(summaryMode.contains(SummaryEnum.DATA));
+			parser.setSummaryMode(summaryMode.contains(SummaryEnum.TRUE));
+		}
+
 		if (elements != null && elements.size() > 0) {
 			String elementsAppliesTo = "*";
 			if (isNotBlank(theRequestDetails.getResourceName())) {
@@ -502,6 +510,7 @@ public class RestfulServerUtils {
 		return retVal;
 	}
 
+	@Nonnull
 	public static Set<SummaryEnum> determineSummaryMode(RequestDetails theRequest) {
 		Map<String, String[]> requestParams = theRequest.getParameters();
 

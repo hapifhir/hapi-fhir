@@ -134,13 +134,15 @@ import static org.apache.commons.lang3.StringUtils.trim;
 @Scope("prototype")
 public class SearchBuilder implements ISearchBuilder {
 
-	private static final List<ResourcePersistentId> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBuilder.class);
 	/**
 	 * See loadResourcesByPid
 	 * for an explanation of why we use the constant 800
 	 */
-	private static final int MAXIMUM_PAGE_SIZE = 800;
+	// NB: keep public
+	public static final int MAXIMUM_PAGE_SIZE = 800;
+
+	private static final List<ResourcePersistentId> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBuilder.class);
 	private static ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
 	private final boolean myDontUseHashesForSearch;
 	private final DaoConfig myDaoConfig;
