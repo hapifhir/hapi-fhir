@@ -275,8 +275,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				case "Consent.source":
 					// Consent#source-identifier has a path that isn't typed - This is a one-off to deal with that
 					return;
+					// FIXME KHS
 				case "Location.position":
-					ourLog.warn("Position search not currently supported, not indexing location");
+					addCoords_Position(resourceTypeName, params, searchParam, value);
 					return;
 				case "StructureDefinition.context":
 					// TODO: implement this
@@ -336,19 +337,19 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.URI);
 	}
 
-	@Override
-	public SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource) {
-		IExtractor<ResourceIndexedSearchParamCoords> extractor = (params, searchParam, value, path) -> {
-			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
-				String resourceType = toRootTypeName(theResource);
-				addCoords_Position(resourceType, params, searchParam, value);
-			} else {
-				addUnexpectedDatatypeWarning(params, searchParam, value);
-			}
-		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.TOKEN);
-	}
+//	@Override
+//	public SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource) {
+//		IExtractor<ResourceIndexedSearchParamCoords> extractor = (params, searchParam, value, path) -> {
+//			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
+//				String resourceType = toRootTypeName(theResource);
+//				addCoords_Position(resourceType, params, searchParam, value);
+//			} else {
+//				addUnexpectedDatatypeWarning(params, searchParam, value);
+//			}
+//		};
+//
+//		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.TOKEN);
+//	}
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
@@ -723,7 +724,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	// FIXME KHS split this class up
-	private void addCoords_Position(String theResourceType, SearchParamSet<ResourceIndexedSearchParamCoords> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
+	private void addCoords_Position(String theResourceType, SearchParamSet<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		BigDecimal latitude = null;
 		BigDecimal longitude = null;
 		if (theValue instanceof Location.LocationPositionComponent) {

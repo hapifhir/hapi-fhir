@@ -3468,7 +3468,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testNearSearch() {
+	public void testNearSearchExact() {
 		Location loc = new Location();
 		double latitude = 1000.0;
 		double longitude = 2000.0;
@@ -3478,7 +3478,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Location.SP_NEAR, new TokenParam(latitude + ":" + longitude));
-		map.add(Location.SP_NEAR_DISTANCE, new QuantityParam(10L));
+		map.add(Location.SP_NEAR_DISTANCE, new QuantityParam(0L));
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 		assertThat(ids, contains(locId));

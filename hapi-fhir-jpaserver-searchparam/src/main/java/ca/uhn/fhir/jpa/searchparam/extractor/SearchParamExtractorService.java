@@ -67,15 +67,17 @@ public class SearchParamExtractorService {
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, uris);
 		theParams.myUriParams.addAll(uris);
 
-		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamCoords> coords = extractSearchParamCoords(theResource);
-		handleWarnings(theRequestDetails, myInterceptorBroadcaster, coords);
-		theParams.myCoordsParams.addAll(coords);
+//		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamCoords> coords = extractSearchParamCoords(theResource);
+//		handleWarnings(theRequestDetails, myInterceptorBroadcaster, coords);
+//		theParams.myCoordsParams.addAll(coords);
 
 		ourLog.trace("Storing date indexes: {}", theParams.myDateParams);
 
 		for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theResource)) {
 			if (next instanceof ResourceIndexedSearchParamToken) {
 				theParams.myTokenParams.add((ResourceIndexedSearchParamToken) next);
+			} else if (next instanceof ResourceIndexedSearchParamCoords) {
+				theParams.myCoordsParams.add((ResourceIndexedSearchParamCoords) next);
 			} else {
 				theParams.myStringParams.add((ResourceIndexedSearchParamString) next);
 			}
@@ -113,9 +115,9 @@ public class SearchParamExtractorService {
 		}
 	}
 
-	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamCoords(theResource);
-	}
+//	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource) {
+//		return mySearchParamExtractor.extractSearchParamCoords(theResource);
+//	}
 
 	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
 		return mySearchParamExtractor.extractSearchParamDates(theResource);

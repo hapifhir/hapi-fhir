@@ -197,9 +197,9 @@ public class SearchParamExtractorDstu3Test {
 
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
-		Set<ResourceIndexedSearchParamCoords> coords = extractor.extractSearchParamCoords(loc);
+		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> coords = extractor.extractSearchParamTokens(loc);
 		assertEquals(1, coords.size());
-		ResourceIndexedSearchParamCoords coord = coords.iterator().next();
+		ResourceIndexedSearchParamCoords coord = (ResourceIndexedSearchParamCoords) coords.iterator().next();
 		assertEquals(latitude, coord.getLatitude(), 0.0);
 		assertEquals(longitude, coord.getLongitude(), 0.0);
 	}
