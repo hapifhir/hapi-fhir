@@ -5,6 +5,7 @@
     (dependent HAPI modules listed in brackets):
     <ul>
     <li>Jetty (CLI): 9.4.14.v20181114 -&gt; 9.4.23.v20191118</li>
+    <li>Spring (JPA, Testpage): 5.2.1 -&gt; 5.2.3 (addresses CVE-2020-5398 and CVE-2020-5397)</li>
     </ul>"
 - item:
     issue: "1583"
