@@ -185,6 +185,24 @@ public class SearchParamExtractorDstu3Test {
 		}
 	}
 
+	@Test
+	public void testParamCoords() {
+		Location loc = new Location();
+		double latitude = 1000.0;
+		double longitude = 2000.0;
+		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		loc.setPosition(position);
+
+		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
+
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		extractor.start();
+		Set<ResourceIndexedSearchParamCoords> coords = extractor.extractSearchParamCoords(loc);
+		assertEquals(1, coords.size());
+		ResourceIndexedSearchParamCoords coord = coords.iterator().next();
+		assertEquals(latitude, coord.getLatitude(), 0.0);
+		assertEquals(longitude, coord.getLongitude(), 0.0);
+	}
 
 	private static class MySearchParamRegistry implements ISearchParamRegistry {
 

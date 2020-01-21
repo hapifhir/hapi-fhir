@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.ObjectUtils;
+import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
@@ -337,7 +338,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource) {
-		return new SearchParamSet<>();
+		IExtractor<ResourceIndexedSearchParamCoords> extractor = (params, searchParam, value, path) -> {
+			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
+				String resourceType = toRootTypeName(theResource);
+				addCoords_Position(resourceType, params, searchParam, value);
+			} else {
+				addUnexpectedDatatypeWarning(params, searchParam, value);
+			}
+		};
+
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.TOKEN);
 	}
 
 	@Override
@@ -403,10 +413,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	public SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
 
 		IExtractor<ResourceIndexedSearchParamQuantity> extractor = (params, searchParam, value, path) -> {
-			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
-				ourLog.warn("Position search not currently supported, not indexing location");
-				return;
-			}
+			// FIXME KHS
+//			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
+//				ourLog.warn("Position search not currently supported, not indexing location");
+//				return;
+//			}
 
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
@@ -709,6 +720,22 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			theParams.add(nextEntity);
 		}
 
+	}
+
+	// FIXME KHS split this class up
+	private void addCoords_Position(String theResourceType, SearchParamSet<ResourceIndexedSearchParamCoords> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
+		BigDecimal latitude = null;
+		BigDecimal longitude = null;
+		if (theValue instanceof Location.LocationPositionComponent) {
+			Location.LocationPositionComponent value = (Location.LocationPositionComponent) theValue;
+			latitude = value.getLatitude();
+			longitude = value.getLongitude();
+		}
+		// KHS we only accept coordinates when both are present
+		if (latitude != null && longitude != null) {
+			ResourceIndexedSearchParamCoords nextEntity = new ResourceIndexedSearchParamCoords(theResourceType, theSearchParam.getName(), latitude.doubleValue(), longitude.doubleValue());
+			theParams.add(nextEntity);
+		}
 	}
 
 	private void addString_HumanName(String theResourceType, Set<ResourceIndexedSearchParamString> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {

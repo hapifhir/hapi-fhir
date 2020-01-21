@@ -3467,6 +3467,23 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		assertThat(ids.toString(), ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
 	}
 
+	@Test
+	public void testNearSearch() {
+		Location loc = new Location();
+		double latitude = 1000.0;
+		double longitude = 2000.0;
+		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		loc.setPosition(position);
+		IIdType locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Location.SP_NEAR, new TokenParam(latitude + ":" + longitude));
+		map.add(Location.SP_NEAR_DISTANCE, new QuantityParam(10L));
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
+		assertThat(ids, contains(locId));
+	}
+
 	private String toStringMultiline(List<?> theResults) {
 		StringBuilder b = new StringBuilder();
 		for (Object next : theResults) {
