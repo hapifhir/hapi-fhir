@@ -1,8 +1,6 @@
 package ca.uhn.fhir.parser.json.jackson;
 
 import ca.uhn.fhir.parser.json.JsonLikeWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -13,8 +11,6 @@ import java.util.List;
 
 public class JacksonWriter extends JsonLikeWriter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JacksonWriter.class);
-
     private JacksonSerializer jacksonSerializer;
     private enum BlockType {
         NONE, OBJECT, ARRAY
@@ -23,18 +19,17 @@ public class JacksonWriter extends JsonLikeWriter {
     private BlockType blockType = BlockType.NONE;
     private List<BlockType> blocks = new LinkedList<>();
 
-    public JacksonWriter (Writer writer) {
+    public JacksonWriter(Writer writer) {
         jacksonSerializer = new JacksonSerializer(writer);
         setWriter(writer);
     }
 
-    public JacksonWriter () {}
+    public JacksonWriter() {}
 
     @Override
     public JsonLikeWriter init() {
         blockType = BlockType.NONE;
         blocks.clear();
-        LOGGER.info("[init] Initializing");
         return this;
     }
 
@@ -54,7 +49,6 @@ public class JacksonWriter extends JsonLikeWriter {
         blocks.add(blockType);
         blockType = BlockType.OBJECT;
         jacksonSerializer.writeStartObject();
-        LOGGER.info("[beginObject] Begining the object");
         return this;
     }
 
@@ -70,8 +64,6 @@ public class JacksonWriter extends JsonLikeWriter {
     public JsonLikeWriter beginObject(String name) throws IOException {
         blocks.add(blockType);
         blockType = BlockType.OBJECT;
-        LOGGER.info("[beginObject] Writing the object '{}'", name);
-        jacksonSerializer.writeStartObject();
         jacksonSerializer.writeStartObject(name);
         return this;
     }
@@ -182,16 +174,15 @@ public class JacksonWriter extends JsonLikeWriter {
 
     @Override
     public JsonLikeWriter endObject() throws IOException {
-        if (blockType == BlockType.NONE) {
-            LOGGER.error("JacksonWriter.endObject(); called with no active JSON document");
+        if (blockType != BlockType.OBJECT) {
+            jacksonSerializer.endArray();
         } else {
-            if (blockType != BlockType.OBJECT) {
-                LOGGER.error("JacksonWriter.endObject(); called outside a JSON object. (Use endArray() instead?)");
-                jacksonSerializer.endArray();
-            } else {
-                jacksonSerializer.endObject();
-            }
-            blockType = blocks.remove(blocks.size() - 1);
+            jacksonSerializer.endObject();
+        }
+        blockType = blocks.remove(blocks.size() - 1);
+
+        if (blockType == BlockType.NONE) {
+            jacksonSerializer.flush();
         }
 
         return this;
@@ -199,16 +190,15 @@ public class JacksonWriter extends JsonLikeWriter {
 
     @Override
     public JsonLikeWriter endArray() throws IOException {
-        if (blockType == BlockType.NONE) {
-            LOGGER.error("JacksonWriter.endArray(); called with no active JSON document");
+        if (blockType == BlockType.OBJECT) {
+            jacksonSerializer.endObject();
         } else {
-            if (blockType != BlockType.ARRAY) {
-                LOGGER.error("JacksonWriter.endArray(); called outside a JSON array. (Use endObject() instead?)");
-                jacksonSerializer.endObject();
-            } else {
-                jacksonSerializer.endArray();
-            }
-            blockType = blocks.remove(blocks.size() - 1);
+            jacksonSerializer.endArray();
+        }
+        blockType = blocks.remove(blocks.size() - 1);
+
+        if (blockType == BlockType.NONE) {
+            jacksonSerializer.flush();
         }
 
         return this;
@@ -216,15 +206,15 @@ public class JacksonWriter extends JsonLikeWriter {
 
     @Override
     public JsonLikeWriter endBlock() throws IOException {
-        if (blockType == BlockType.NONE) {
-            LOGGER.error("JacksonWriter.endBlock(); called with no active JSON document");
+        if (blockType == BlockType.ARRAY) {
+            jacksonSerializer.endArray();
         } else {
-            if (blockType == BlockType.ARRAY) {
-                jacksonSerializer.endArray();
-            } else {
-                jacksonSerializer.endObject();
-            }
-            blockType = blocks.remove(blocks.size() - 1);
+            jacksonSerializer.endObject();
+        }
+        blockType = blocks.remove(blocks.size() - 1);
+
+        if (blockType == BlockType.NONE) {
+            jacksonSerializer.flush();
         }
 
         return this;

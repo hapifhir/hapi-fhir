@@ -4,15 +4,11 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Writer;
 
 public class JacksonSerializer extends StdSerializer<Object> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JacksonSerializer.class);
 
     private JsonGenerator jsonGenerator;
 
@@ -28,7 +24,6 @@ public class JacksonSerializer extends StdSerializer<Object> {
     @Override
     public void serialize(Object resource, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
             throws IOException {
-        LOGGER.info("Serializing the object...");
         jsonGenerator.writeStartObject();
         jsonGenerator.writeObject(resource);
         jsonGenerator.writeEndObject();
@@ -39,7 +34,7 @@ public class JacksonSerializer extends StdSerializer<Object> {
     }
 
     public void writeStartObject(String name) throws IOException {
-        jsonGenerator.writeStartObject(name);
+        jsonGenerator.writeObjectFieldStart(name);
     }
 
     public void writeStartArray() throws IOException {
@@ -74,8 +69,7 @@ public class JacksonSerializer extends StdSerializer<Object> {
         jsonGenerator.writeEndArray();
     }
 
-    public void endBlock() throws IOException {
-        jsonGenerator.writeEndObject();
-        //jsonGenerator.close();
+    public void flush() throws IOException {
+        jsonGenerator.close();
     }
 }
