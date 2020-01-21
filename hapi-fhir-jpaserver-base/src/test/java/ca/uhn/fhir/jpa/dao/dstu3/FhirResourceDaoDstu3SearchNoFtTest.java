@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -35,6 +36,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -55,6 +57,9 @@ import static org.mockito.Mockito.mock;
 @SuppressWarnings("unchecked")
 public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3SearchNoFtTest.class);
+
+	@Autowired
+	MatchUrlService myMatchUrlService;
 
 	@Before
 	public void beforeDisableResultReuse() {
@@ -3494,10 +3499,17 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		loc.setPosition(position);
 		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
 
-		SearchParameterMap map = new SearchParameterMap();
-		map.add(Location.SP_NEAR, new TokenParam((latitude + offset) + ":" + (longitude - offset)));
-		QuantityParam distance = new QuantityParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, offset * 2, "http://unitsofmeasure.org", "km");
-		map.add(Location.SP_NEAR_DISTANCE, distance);
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
+			"Location?" +
+			Location.SP_NEAR + "=" + (latitude + offset) + ":" + (longitude - offset) +
+			"&" +
+			Location.SP_NEAR_DISTANCE + "=" + (offset * 2) + "|http://unitsofmeasure.org|km", myFhirCtx.getResourceDefinition("Location"));
+
+		// FIXME KHS
+//		new SearchParameterMap();
+//		map.add(Location.SP_NEAR, new TokenParam());
+//		QuantityParam distance = new QuantityParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, );
+//		map.add(Location.SP_NEAR_DISTANCE, distance);
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 		assertThat(ids, contains(locId));

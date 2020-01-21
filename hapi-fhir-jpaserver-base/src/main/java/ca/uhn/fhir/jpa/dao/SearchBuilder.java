@@ -2770,6 +2770,8 @@ public class SearchBuilder implements ISearchBuilder {
 				myParams.isAllParametersHaveNoModifier();
 		if (couldBeEligibleForCompositeUniqueSpProcessing) {
 
+			// FIXME KHS method
+
 			// Since we're going to remove elements below
 			theParams.values().forEach(nextAndList -> ensureSubListsAreWritable(nextAndList));
 
@@ -2845,7 +2847,6 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 	}
-
 
 	private <T> void ensureSubListsAreWritable(List<List<T>> theListOfLists) {
 		for (int i = 0; i < theListOfLists.size(); i++) {
