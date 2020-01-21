@@ -655,4 +655,8 @@ public class SearchParameterMap implements Serializable {
 	public List<List<IQueryParameterType>> remove(String theName) {
 		return mySearchParameterMap.remove(theName);
 	}
+
+	public int size() {
+		return mySearchParameterMap.size();
+	}
 }

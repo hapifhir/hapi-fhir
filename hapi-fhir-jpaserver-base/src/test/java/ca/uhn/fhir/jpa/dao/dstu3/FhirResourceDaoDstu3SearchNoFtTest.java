@@ -3490,7 +3490,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testNearSearchNear() {
+	public void testNearSearchApproximate() {
 		Location loc = new Location();
 		double latitude = 1000.0;
 		double longitude = 2000.0;

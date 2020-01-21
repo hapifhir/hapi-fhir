@@ -53,8 +53,8 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 	}
 
 	@Test
-	public void testPullOutNearDistance() {
-		Double kmDistance = 123.4;
+	public void testParseNearDistance() {
+		double kmDistance = 123.4;
 
 		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
 			"Location?" +
@@ -63,8 +63,9 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 				Location.SP_NEAR_DISTANCE + "=" + kmDistance + "|http://unitsofmeasure.org|km", ourCtx.getResourceDefinition("Location"));
 
 		QuantityParam nearDistanceParam = map.getNearDistanceParam();
+		assertEquals(1, map.size());
 		assertNotNull(nearDistanceParam);
-		// FIXME KHS assert
+		assertEquals(kmDistance, nearDistanceParam.getValue().doubleValue(), 0.0);
 	}
 
 	@Override
