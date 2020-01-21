@@ -3505,12 +3505,6 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			"&" +
 			Location.SP_NEAR_DISTANCE + "=" + (offset * 2) + "|http://unitsofmeasure.org|km", myFhirCtx.getResourceDefinition("Location"));
 
-		// FIXME KHS
-//		new SearchParameterMap();
-//		map.add(Location.SP_NEAR, new TokenParam());
-//		QuantityParam distance = new QuantityParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, );
-//		map.add(Location.SP_NEAR_DISTANCE, distance);
-
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 		assertThat(ids, contains(locId));
 	}

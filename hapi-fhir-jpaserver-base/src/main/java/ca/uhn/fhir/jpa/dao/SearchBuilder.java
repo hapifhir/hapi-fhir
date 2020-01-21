@@ -2111,22 +2111,37 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 			latitudeValue = parts[0];
 			longitudeValue = parts[1];
+			if (isBlank(latitudeValue) || isBlank(longitudeValue)) {
+				throw new IllegalArgumentException("Invalid position format '" + value + "'.  Both latitude and longitude must be provided.");
+			}
 		} else {
 			throw new IllegalArgumentException("Invalid position type: " + theParam.getClass());
 		}
 
-		Predicate latitude = null;
-		if (!isBlank(latitudeValue)) {
-			latitude = theBuilder.equal(theFrom.get("myLatitude"), latitudeValue);
+		QuantityParam distanceParam = myParams.getNearDistanceParam();
+		Predicate latitudePredicate;
+		Predicate longitudePredicate;
+		if (distanceParam == null) {
+			latitudePredicate = theBuilder.equal(theFrom.get("myLatitude"), latitudeValue);
+			longitudePredicate = theBuilder.equal(theFrom.get("myLongitude"), longitudeValue);
+		} else {
+			// FIXME KHS suppress hash
+			Double distance = distanceParam.getValue().doubleValue();
+			if (distance < 0.0) {
+				throw new IllegalArgumentException("Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distance + "' must be >= 0.0");
+			}
+			Double latitude = Double.valueOf(latitudeValue);
+			latitudePredicate = theBuilder.and(
+				theBuilder.greaterThanOrEqualTo(theFrom.get("myLatitude"), latitude - distance),
+				theBuilder.lessThanOrEqualTo(theFrom.get("myLatitude"), latitude + distance)
+			);
+			Double longitude = Double.valueOf(longitudeValue);
+			longitudePredicate = theBuilder.and(
+				theBuilder.greaterThanOrEqualTo(theFrom.get("myLongitude"), longitude - distance),
+				theBuilder.lessThanOrEqualTo(theFrom.get("myLongitude"), longitude + distance)
+			);
 		}
-
-		Predicate longitude = null;
-		if (!isBlank(longitudeValue)) {
-			longitude = theBuilder.equal(theFrom.get("myLongitude"), longitudeValue);
-		}
-
-		Predicate singleCode = theBuilder.and(latitude, longitude);
-
+		Predicate singleCode = theBuilder.and(latitudePredicate, longitudePredicate);
 		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
 	}
 
