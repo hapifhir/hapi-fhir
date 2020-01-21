@@ -275,7 +275,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				case "Consent.source":
 					// Consent#source-identifier has a path that isn't typed - This is a one-off to deal with that
 					return;
-					// FIXME KHS
 				case "Location.position":
 					addCoords_Position(resourceTypeName, params, searchParam, value);
 					return;
@@ -414,12 +413,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	public SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
 
 		IExtractor<ResourceIndexedSearchParamQuantity> extractor = (params, searchParam, value, path) -> {
-			// FIXME KHS
-//			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
-//				ourLog.warn("Position search not currently supported, not indexing location");
-//				return;
-//			}
-
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
 			switch (nextType) {
@@ -723,7 +716,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	}
 
-	// FIXME KHS split this class up
 	private void addCoords_Position(String theResourceType, SearchParamSet<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		BigDecimal latitude = null;
 		BigDecimal longitude = null;

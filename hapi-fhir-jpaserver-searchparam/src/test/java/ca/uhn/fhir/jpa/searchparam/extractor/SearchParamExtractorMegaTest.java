@@ -178,11 +178,6 @@ public class SearchParamExtractorMegaTest {
 
 		ISearchParamExtractor.SearchParamSet<?> set;
 
-		// FIXME KHS
-//		set = theExtractor.extractSearchParamCoords(resource);
-//		assertEquals(0, set.getWarnings().size());
-//		theIndexesCounter.addAndGet(set.size());
-
 		set = theExtractor.extractSearchParamDates(resource);
 		assertEquals(0, set.getWarnings().size());
 		theIndexesCounter.addAndGet(set.size());

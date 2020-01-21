@@ -118,7 +118,6 @@ public class MatchUrlService {
 				paramMap.add(nextParamName, param);
 			} else if (Location.SP_NEAR_DISTANCE.equals(nextParamName)) {
 				QuantityAndListParam nearDistanceAndListParam = (QuantityAndListParam) ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.QUANTITY, nextParamName, paramList);
-				// FIXME KHS
 				paramMap.setNearDistanceParam(nearDistanceAndListParam);
 			} else if (nextParamName.startsWith("_")) {
 				// ignore these since they aren't search params (e.g. _sort)

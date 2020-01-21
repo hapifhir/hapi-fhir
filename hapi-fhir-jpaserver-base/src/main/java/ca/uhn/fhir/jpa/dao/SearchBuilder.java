@@ -2755,74 +2755,7 @@ public class SearchBuilder implements ISearchBuilder {
 				myParams.getEverythingMode() == null &&
 				myParams.isAllParametersHaveNoModifier();
 		if (couldBeEligibleForCompositeUniqueSpProcessing) {
-
-			// FIXME KHS method
-
-			// Since we're going to remove elements below
-			theParams.values().forEach(nextAndList -> ensureSubListsAreWritable(nextAndList));
-
-			List<JpaRuntimeSearchParam> activeUniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(myResourceName, theParams.keySet());
-			if (activeUniqueSearchParams.size() > 0) {
-
-				StringBuilder sb = new StringBuilder();
-				sb.append(myResourceName);
-				sb.append("?");
-
-				boolean first = true;
-
-				ArrayList<String> keys = new ArrayList<>(theParams.keySet());
-				Collections.sort(keys);
-				for (String nextParamName : keys) {
-					List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
-
-					nextParamName = UrlUtil.escapeUrlParam(nextParamName);
-					if (nextValues.get(0).size() != 1) {
-						sb = null;
-						break;
-					}
-
-					// Reference params are only eligible for using a composite index if they
-					// are qualified
-					RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
-					if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-						ReferenceParam param = (ReferenceParam) nextValues.get(0).get(0);
-						if (isBlank(param.getResourceType())) {
-							sb = null;
-							break;
-						}
-					}
-
-					List<? extends IQueryParameterType> nextAnd = nextValues.remove(0);
-					IQueryParameterType nextOr = nextAnd.remove(0);
-					String nextOrValue = nextOr.getValueAsQueryToken(myContext);
-					nextOrValue = UrlUtil.escapeUrlParam(nextOrValue);
-
-					if (first) {
-						first = false;
-					} else {
-						sb.append('&');
-					}
-
-					sb.append(nextParamName).append('=').append(nextOrValue);
-
-				}
-
-				if (sb != null) {
-					String indexString = sb.toString();
-					ourLog.debug("Checking for unique index for query: {}", indexString);
-
-					// Interceptor broadcast: JPA_PERFTRACE_INFO
-					StorageProcessingMessage msg = new StorageProcessingMessage()
-						.setMessage("Using unique index for query for search: " + indexString);
-					HookParams params = new HookParams()
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest)
-						.add(StorageProcessingMessage.class, msg);
-					JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
-
-					addPredicateCompositeStringUnique(theParams, indexString);
-				}
-			}
+			attemptCompositeUniqueSpProcessing(theParams, theRequest);
 		}
 
 		// Handle each parameter
@@ -2832,6 +2765,74 @@ public class SearchBuilder implements ISearchBuilder {
 			searchForIdsWithAndOr(myResourceName, nextParamName, andOrParams, theRequest);
 		}
 
+	}
+
+	private void attemptCompositeUniqueSpProcessing(@Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
+		// Since we're going to remove elements below
+		theParams.values().forEach(nextAndList -> ensureSubListsAreWritable(nextAndList));
+
+		List<JpaRuntimeSearchParam> activeUniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(myResourceName, theParams.keySet());
+		if (activeUniqueSearchParams.size() > 0) {
+
+			StringBuilder sb = new StringBuilder();
+			sb.append(myResourceName);
+			sb.append("?");
+
+			boolean first = true;
+
+			ArrayList<String> keys = new ArrayList<>(theParams.keySet());
+			Collections.sort(keys);
+			for (String nextParamName : keys) {
+				List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
+
+				nextParamName = UrlUtil.escapeUrlParam(nextParamName);
+				if (nextValues.get(0).size() != 1) {
+					sb = null;
+					break;
+				}
+
+				// Reference params are only eligible for using a composite index if they
+				// are qualified
+				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+				if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+					ReferenceParam param = (ReferenceParam) nextValues.get(0).get(0);
+					if (isBlank(param.getResourceType())) {
+						sb = null;
+						break;
+					}
+				}
+
+				List<? extends IQueryParameterType> nextAnd = nextValues.remove(0);
+				IQueryParameterType nextOr = nextAnd.remove(0);
+				String nextOrValue = nextOr.getValueAsQueryToken(myContext);
+				nextOrValue = UrlUtil.escapeUrlParam(nextOrValue);
+
+				if (first) {
+					first = false;
+				} else {
+					sb.append('&');
+				}
+
+				sb.append(nextParamName).append('=').append(nextOrValue);
+
+			}
+
+			if (sb != null) {
+				String indexString = sb.toString();
+				ourLog.debug("Checking for unique index for query: {}", indexString);
+
+				// Interceptor broadcast: JPA_PERFTRACE_INFO
+				StorageProcessingMessage msg = new StorageProcessingMessage()
+					.setMessage("Using unique index for query for search: " + indexString);
+				HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(StorageProcessingMessage.class, msg);
+				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+
+				addPredicateCompositeStringUnique(theParams, indexString);
+			}
+		}
 	}
 
 	private <T> void ensureSubListsAreWritable(List<List<T>> theListOfLists) {
