@@ -82,6 +82,7 @@ public class ValidatorWrapper {
 		v.setNoTerminologyChecks(myNoTerminologyChecks);
 		v.setErrorForUnknownProfiles(myErrorForUnknownProfiles);
 		v.getExtensionDomains().addAll(myExtensionDomains);
+		v.setAllowXsiLocation(true);
 
 		List<ValidationMessage> messages = new ArrayList<>();
 

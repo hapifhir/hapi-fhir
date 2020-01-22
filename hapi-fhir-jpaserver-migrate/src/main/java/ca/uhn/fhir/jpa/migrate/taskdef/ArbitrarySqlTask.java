@@ -187,7 +187,6 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
 			.append(myTableName)
-			.append(myExecuteOnlyIfTableExists)
 			.toHashCode();
 	}
 }
