@@ -4222,7 +4222,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids.size(), is(0));
 		}
-
 	}
 
 	private String toStringMultiline(List<?> theResults) {
