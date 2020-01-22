@@ -2123,6 +2123,7 @@ public class SearchBuilder implements ISearchBuilder {
 		} else if (distance < 0.0) {
 			throw new IllegalArgumentException("Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distance + "' must be >= 0.0");
 		} else {
+			// FIXME KHS scale distance based on lat/long
 			Double latitude = Double.valueOf(latitudeValue);
 			latitudePredicate = theBuilder.and(
 				theBuilder.greaterThanOrEqualTo(theFrom.get("myLatitude"), latitude - distance),
