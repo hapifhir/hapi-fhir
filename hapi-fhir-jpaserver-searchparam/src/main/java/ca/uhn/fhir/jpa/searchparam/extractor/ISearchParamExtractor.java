@@ -40,6 +40,8 @@ public interface ISearchParamExtractor {
 
 	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource);
 
+	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource);
+
 	SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource);
 
 	SearchParamSet<PathAndRef> extractResourceLinks(IBaseResource theResource);

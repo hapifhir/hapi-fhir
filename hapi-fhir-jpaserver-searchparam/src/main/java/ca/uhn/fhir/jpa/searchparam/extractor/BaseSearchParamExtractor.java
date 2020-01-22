@@ -43,7 +43,6 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.ObjectUtils;
-import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
@@ -52,7 +51,6 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -309,6 +307,21 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.TOKEN);
 	}
+
+	@Override
+	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource) {
+
+		String resourceTypeName = toRootTypeName(theResource);
+
+		IExtractor<BaseResourceIndexedSearchParam> extractor = (params, searchParam, value, path) -> {
+			if ("Location.position".equals(path)) {
+					addCoords_Position(resourceTypeName, params, searchParam, value);
+			}
+		};
+
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.SPECIAL);
+	}
+
 
 	private void addUnexpectedDatatypeWarning(SearchParamSet<?> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		theParams.addWarning("Search param " + theSearchParam.getName() + " is of unexpected datatype: " + theValue.getClass());
@@ -719,12 +732,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private void addCoords_Position(String theResourceType, SearchParamSet<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		BigDecimal latitude = null;
 		BigDecimal longitude = null;
-		if (theValue instanceof Location.LocationPositionComponent) {
-			Location.LocationPositionComponent value = (Location.LocationPositionComponent) theValue;
+
+		if (theValue instanceof org.hl7.fhir.dstu3.model.Location.LocationPositionComponent) {
+			org.hl7.fhir.dstu3.model.Location.LocationPositionComponent value = (org.hl7.fhir.dstu3.model.Location.LocationPositionComponent) theValue;
+			latitude = value.getLatitude();
+			longitude = value.getLongitude();
+		} else if (theValue instanceof org.hl7.fhir.r4.model.Location.LocationPositionComponent) {
+			org.hl7.fhir.r4.model.Location.LocationPositionComponent value = (org.hl7.fhir.r4.model.Location.LocationPositionComponent) theValue;
 			latitude = value.getLatitude();
 			longitude = value.getLongitude();
 		}
-		// KHS we only accept coordinates when both are present
+		// We only accept coordinates when both are present
 		if (latitude != null && longitude != null) {
 			ResourceIndexedSearchParamCoords nextEntity = new ResourceIndexedSearchParamCoords(theResourceType, theSearchParam.getName(), latitude.doubleValue(), longitude.doubleValue());
 			theParams.add(nextEntity);

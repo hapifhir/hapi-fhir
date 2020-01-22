@@ -2075,8 +2075,9 @@ public class SearchBuilder implements ISearchBuilder {
 														 From<?, ResourceIndexedSearchParamCoords> theFrom) {
 		String latitudeValue;
 		String longitudeValue;
+		Double distance = 0.0;
 
-		if (theParam instanceof TokenParam) {
+		if (theParam instanceof TokenParam) { // DSTU3
 			TokenParam param = (TokenParam) theParam;
 			String value = param.getValue();
 			String[] parts = value.split(":");
@@ -2088,21 +2089,40 @@ public class SearchBuilder implements ISearchBuilder {
 			if (isBlank(latitudeValue) || isBlank(longitudeValue)) {
 				throw new IllegalArgumentException("Invalid position format '" + value + "'.  Both latitude and longitude must be provided.");
 			}
+			QuantityParam distanceParam = myParams.getNearDistanceParam();
+			if (distanceParam != null) {
+				distance = distanceParam.getValue().doubleValue();
+			}
+		} else if (theParam instanceof SpecialParam) { // R4
+			SpecialParam param = (SpecialParam) theParam;
+			String value = param.getValue();
+			String[] parts = value.split("\\|");
+			if (parts.length < 2 || parts.length > 4) {
+				throw new IllegalArgumentException("Invalid position format '" + value + "'.  Required format is 'latitude|longitude' or 'latitude|longitude|distance' or 'latitude|longitude|distance|units'");
+			}
+			latitudeValue = parts[0];
+			longitudeValue = parts[1];
+			if (isBlank(latitudeValue) || isBlank(longitudeValue)) {
+				throw new IllegalArgumentException("Invalid position format '" + value + "'.  Both latitude and longitude must be provided.");
+			}
+			if (parts.length >= 3) {
+				String distanceString = parts[2];
+				if (!isBlank(distanceString)) {
+					distance = Double.valueOf(distanceString);
+				}
+			}
 		} else {
 			throw new IllegalArgumentException("Invalid position type: " + theParam.getClass());
 		}
 
-		QuantityParam distanceParam = myParams.getNearDistanceParam();
 		Predicate latitudePredicate;
 		Predicate longitudePredicate;
-		if (distanceParam == null || distanceParam.getValue().doubleValue() == 0.0) {
+		if (distance == 0.0) {
 			latitudePredicate = theBuilder.equal(theFrom.get("myLatitude"), latitudeValue);
 			longitudePredicate = theBuilder.equal(theFrom.get("myLongitude"), longitudeValue);
+		} else if (distance < 0.0) {
+			throw new IllegalArgumentException("Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distance + "' must be >= 0.0");
 		} else {
-			Double distance = distanceParam.getValue().doubleValue();
-			if (distance < 0.0) {
-				throw new IllegalArgumentException("Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distance + "' must be >= 0.0");
-			}
 			Double latitude = Double.valueOf(latitudeValue);
 			latitudePredicate = theBuilder.and(
 				theBuilder.greaterThanOrEqualTo(theFrom.get("myLatitude"), latitude - distance),
@@ -3063,7 +3083,11 @@ public class SearchBuilder implements ISearchBuilder {
 							break;
 						case HAS:
 						case SPECIAL:
-							// should not happen
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								if ("Location.position".equals(nextParamDef.getPath())) {
+									addPredicateCoords(theResourceName, theParamName, nextAnd);
+								}
+							}
 							break;
 					}
 				} else {

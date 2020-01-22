@@ -83,6 +83,12 @@ public class SearchParamExtractorService {
 			}
 		}
 
+		for (BaseResourceIndexedSearchParam next : extractSearchParamSpecial(theResource)) {
+			if (next instanceof ResourceIndexedSearchParamCoords) {
+				theParams.myCoordsParams.add((ResourceIndexedSearchParamCoords) next);
+			}
+		}
+
 		populateResourceTable(theParams.myStringParams, theEntity);
 		populateResourceTable(theParams.myNumberParams, theEntity);
 		populateResourceTable(theParams.myQuantityParams, theEntity);
@@ -137,6 +143,10 @@ public class SearchParamExtractorService {
 
 	private ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
 		return mySearchParamExtractor.extractSearchParamTokens(theResource);
+	}
+
+	private ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamSpecial(theResource);
 	}
 
 	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
