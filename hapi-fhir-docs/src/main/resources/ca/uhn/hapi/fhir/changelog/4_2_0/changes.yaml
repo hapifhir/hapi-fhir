@@ -5,6 +5,7 @@
     (dependent HAPI modules listed in brackets):
     <ul>
     <li>Jetty (CLI): 9.4.14.v20181114 -&gt; 9.4.23.v20191118</li>
+    <li>Spring (JPA, Testpage): 5.2.1 -&gt; 5.2.3 (addresses CVE-2020-5398 and CVE-2020-5397)</li>
     </ul>"
 - item:
     issue: "1583"
@@ -64,6 +65,12 @@
    issue: "1649"
    type: "add"
    title: "Support for LOINC 2.67 file format changes has been added to the JPA Server LOINC uploader. Thanks to Dan Vreeman for reporting!"
+- item:
+   issue: "1660"
+   type: "perf"
+   title: "A significant performance improvement was added to the Json and XML parsers when parsing large Bundle
+      resources. Throughput for parsing these resources has been improved by roughly 50%. Thanks to Rok Bertoncelj
+      and Bogdan Solga for providing analysis and insight that triggered this change."
 - item:
    issue: "1658"
    type: "fix"
