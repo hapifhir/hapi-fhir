@@ -20,15 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
-import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -51,18 +43,8 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.jpa.util.BaseIterator;
-import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
-import ca.uhn.fhir.jpa.util.SqlQueryList;
-import ca.uhn.fhir.model.api.IPrimitiveDatatype;
-import ca.uhn.fhir.model.api.IQueryParameterAnd;
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.jpa.util.*;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
@@ -71,11 +53,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.QualifiedParamList;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.*;
@@ -99,6 +77,7 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.hibernate.query.criteria.internal.predicate.BooleanStaticAssertionPredicate;
+import org.hibernate.search.spatial.impl.Point;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -121,11 +100,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * The SearchBuilder is responsible for actually forming the SQL query that handles
@@ -2075,7 +2050,7 @@ public class SearchBuilder implements ISearchBuilder {
 														 From<?, ResourceIndexedSearchParamCoords> theFrom) {
 		String latitudeValue;
 		String longitudeValue;
-		Double distance = 0.0;
+		Double distanceKm = 0.0;
 
 		if (theParam instanceof TokenParam) { // DSTU3
 			TokenParam param = (TokenParam) theParam;
@@ -2091,7 +2066,7 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 			QuantityParam distanceParam = myParams.getNearDistanceParam();
 			if (distanceParam != null) {
-				distance = distanceParam.getValue().doubleValue();
+				distanceKm = distanceParam.getValue().doubleValue();
 			}
 		} else if (theParam instanceof SpecialParam) { // R4
 			SpecialParam param = (SpecialParam) theParam;
@@ -2108,7 +2083,7 @@ public class SearchBuilder implements ISearchBuilder {
 			if (parts.length >= 3) {
 				String distanceString = parts[2];
 				if (!isBlank(distanceString)) {
-					distance = Double.valueOf(distanceString);
+					distanceKm = Double.valueOf(distanceString);
 				}
 			}
 		} else {
@@ -2117,22 +2092,27 @@ public class SearchBuilder implements ISearchBuilder {
 
 		Predicate latitudePredicate;
 		Predicate longitudePredicate;
-		if (distance == 0.0) {
+		if (distanceKm == 0.0) {
 			latitudePredicate = theBuilder.equal(theFrom.get("myLatitude"), latitudeValue);
 			longitudePredicate = theBuilder.equal(theFrom.get("myLongitude"), longitudeValue);
-		} else if (distance < 0.0) {
-			throw new IllegalArgumentException("Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distance + "' must be >= 0.0");
+		} else if (distanceKm < 0.0) {
+			throw new IllegalArgumentException("Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distanceKm + "' must be >= 0.0");
 		} else {
-			// FIXME KHS scale distance based on lat/long
-			Double latitude = Double.valueOf(latitudeValue);
+			Double latitudeDegrees = Double.valueOf(latitudeValue);
+			Double longitudeDegrees = Double.valueOf(longitudeValue);
+
+			Point northPoint = CoordCalculator.findTarget(latitudeDegrees, longitudeDegrees, 0.0, distanceKm);
+			Point eastPoint = CoordCalculator.findTarget(latitudeDegrees, longitudeDegrees, 90.0, distanceKm);
+			Point southPoint = CoordCalculator.findTarget(latitudeDegrees, longitudeDegrees, 180.0, distanceKm);
+			Point westPoint = CoordCalculator.findTarget(latitudeDegrees, longitudeDegrees, 270.0, distanceKm);
+
 			latitudePredicate = theBuilder.and(
-				theBuilder.greaterThanOrEqualTo(theFrom.get("myLatitude"), latitude - distance),
-				theBuilder.lessThanOrEqualTo(theFrom.get("myLatitude"), latitude + distance)
+				theBuilder.greaterThanOrEqualTo(theFrom.get("myLatitude"), southPoint.getLatitude()),
+				theBuilder.lessThanOrEqualTo(theFrom.get("myLatitude"), northPoint.getLatitude())
 			);
-			Double longitude = Double.valueOf(longitudeValue);
 			longitudePredicate = theBuilder.and(
-				theBuilder.greaterThanOrEqualTo(theFrom.get("myLongitude"), longitude - distance),
-				theBuilder.lessThanOrEqualTo(theFrom.get("myLongitude"), longitude + distance)
+				theBuilder.greaterThanOrEqualTo(theFrom.get("myLongitude"), westPoint.getLongitude()),
+				theBuilder.lessThanOrEqualTo(theFrom.get("myLongitude"), eastPoint.getLongitude())
 			);
 		}
 		Predicate singleCode = theBuilder.and(latitudePredicate, longitudePredicate);

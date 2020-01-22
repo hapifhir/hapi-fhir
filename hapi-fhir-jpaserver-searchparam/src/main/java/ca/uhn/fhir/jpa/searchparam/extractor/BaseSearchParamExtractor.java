@@ -315,7 +315,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		IExtractor<BaseResourceIndexedSearchParam> extractor = (params, searchParam, value, path) -> {
 			if ("Location.position".equals(path)) {
-					addCoords_Position(resourceTypeName, params, searchParam, value);
+				addCoords_Position(resourceTypeName, params, searchParam, value);
 			}
 		};
 
@@ -739,6 +739,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			longitude = value.getLongitude();
 		} else if (theValue instanceof org.hl7.fhir.r4.model.Location.LocationPositionComponent) {
 			org.hl7.fhir.r4.model.Location.LocationPositionComponent value = (org.hl7.fhir.r4.model.Location.LocationPositionComponent) theValue;
+			latitude = value.getLatitude();
+			longitude = value.getLongitude();
+		} else if (theValue instanceof org.hl7.fhir.r5.model.Location.LocationPositionComponent) {
+			org.hl7.fhir.r5.model.Location.LocationPositionComponent value = (org.hl7.fhir.r5.model.Location.LocationPositionComponent) theValue;
 			latitude = value.getLatitude();
 			longitude = value.getLongitude();
 		}

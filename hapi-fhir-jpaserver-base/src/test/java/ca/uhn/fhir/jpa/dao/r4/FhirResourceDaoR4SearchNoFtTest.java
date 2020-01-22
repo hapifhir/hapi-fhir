@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.jpa.util.CoordCalculatorTest;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -4146,8 +4147,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testNearSearchDistanceNoDistance() {
 		Location loc = new Location();
-		double latitude = 1000.0;
-		double longitude = 2000.0;
+		double latitude = CoordCalculatorTest.LATITUDE_CHIN;
+		double longitude = CoordCalculatorTest.LATITUDE_CHIN;
 		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
 		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
@@ -4164,8 +4165,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testNearSearchDistanceZero() {
 		Location loc = new Location();
-		double latitude = 1000.0;
-		double longitude = 2000.0;
+		double latitude = CoordCalculatorTest.LATITUDE_CHIN;
+		double longitude = CoordCalculatorTest.LATITUDE_CHIN;
 		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
 		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
@@ -4192,36 +4193,36 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testNearSearchApproximate() {
 		Location loc = new Location();
-		double latitude = 1000.0;
-		double longitude = 2000.0;
+		double latitude = CoordCalculatorTest.LATITUDE_UHN;
+		double longitude = CoordCalculatorTest.LONGITUDE_UHN;
 		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
 		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
 
 		{ // In the box
-			double offset = 50.0;
+			double bigEnoughDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN * 2;
 			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
 				"Location?" +
-					Location.SP_NEAR + "=" + (latitude + offset) + "|" +
-					(longitude - offset) + "|" +
-					(offset * 2) + "|km",
-				myFhirCtx.getResourceDefinition("Location"));
+					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + "|"
+					+ CoordCalculatorTest.LONGITUDE_CHIN + "|" +
+					bigEnoughDistance, myFhirCtx.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids, contains(locId));
 		}
 		{ // Outside the box
-			double offset = 50.0;
+			double tooSmallDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN / 2;
+
 			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
 				"Location?" +
-					Location.SP_NEAR + "=" + (latitude + offset) + "|" +
-					(longitude - offset) + "|" +
-					(offset / 2) + "|km",
-				myFhirCtx.getResourceDefinition("Location"));
+					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + "|"
+					+ CoordCalculatorTest.LONGITUDE_CHIN + "|" +
+					tooSmallDistance, myFhirCtx.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids.size(), is(0));
 		}
+
 	}
 
 	private String toStringMultiline(List<?> theResults) {

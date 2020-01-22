@@ -1,20 +1,28 @@
 package ca.uhn.fhir.jpa.util;
 
+import org.hibernate.search.spatial.impl.Point;
 import org.junit.Test;
-import org.springframework.data.geo.Point;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class CoordCalculatorTest {
-	@Test
-	public void testCoordCalculator() {
-		double latitude = 52.20472;
-		double longitude = 0.14056;
-		double bearing = 1.57;
-		double distance = 15.0;
+	private final Logger ourLog = LoggerFactory.getLogger(CoordCalculatorTest.class);
+	// CHIN and UHN coordinates from Google Maps
+	// Distance and bearing from https://www.movable-type.co.uk/scripts/latlong.html
+	public static final double LATITUDE_CHIN = 43.65513;
+	public static final double LONGITUDE_CHIN = -79.4170007;
+	public static final double LATITUDE_UHN = 43.656765;
+	public static final double LONGITUDE_UHN = -79.3987645;
+	public static final double DISTANCE_KM_CHIN_TO_UHN = 1.478;
+	public static final double BEARING_CHIN_TO_UHN = 82 + (55.0 / 60) + (46.0 / 3600);
 
-		Point result = CoordCalculator.findTarget(latitude, longitude, bearing, distance);
-		assertEquals(52.20444, result.getX(), 0.00001);
-		assertEquals(0.36056, result.getX(), 0.00001);
+	@Test
+	public void testCHINToUHN() {
+		Point result = CoordCalculator.findTarget(LATITUDE_CHIN, LONGITUDE_CHIN, BEARING_CHIN_TO_UHN, DISTANCE_KM_CHIN_TO_UHN);
+
+		assertEquals(LATITUDE_UHN, result.getLatitude(), 0.0001);
+		assertEquals(LONGITUDE_UHN, result.getLatitude(), 0.0001);
 	}
 }
