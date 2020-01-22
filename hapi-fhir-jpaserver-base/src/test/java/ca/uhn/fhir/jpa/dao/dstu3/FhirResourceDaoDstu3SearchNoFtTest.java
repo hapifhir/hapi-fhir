@@ -3520,15 +3520,29 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		loc.setPosition(position);
 		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
 
-		double offset = 50.0;
-		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-			"Location?" +
-			Location.SP_NEAR + "=" + (latitude + offset) + ":" + (longitude - offset) +
-			"&" +
-			Location.SP_NEAR_DISTANCE + "=" + (offset * 2) + "|http://unitsofmeasure.org|km", myFhirCtx.getResourceDefinition("Location"));
+		{ // In the box
+			double offset = 50.0;
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
+				"Location?" +
+					Location.SP_NEAR + "=" + (latitude + offset) + ":" + (longitude - offset) +
+					"&" +
+					Location.SP_NEAR_DISTANCE + "=" + (offset * 2) + "|http://unitsofmeasure.org|km", myFhirCtx.getResourceDefinition("Location"));
 
-		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-		assertThat(ids, contains(locId));
+			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
+			assertThat(ids, contains(locId));
+		}
+		{ // Outside the box
+			double offset = 50.0;
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
+				"Location?" +
+					Location.SP_NEAR + "=" + (latitude + offset) + ":" + (longitude - offset) +
+					"&" +
+					Location.SP_NEAR_DISTANCE + "=" + (offset / 2) + "|http://unitsofmeasure.org|km", myFhirCtx.getResourceDefinition("Location"));
+
+			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
+			assertThat(ids.size(), is(0));
+		}
+
 	}
 
 	@Test
