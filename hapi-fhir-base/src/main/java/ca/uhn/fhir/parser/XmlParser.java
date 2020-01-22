@@ -181,9 +181,6 @@ public class XmlParser extends BaseParser {
 								heldComments.clear();
 							}
 							parserState.endingElement();
-//						if (parserState.isComplete()) {
-//							return parserState.getObject();
-//						}
 							break;
 						}
 						case XMLStreamConstants.CHARACTERS: {
@@ -707,12 +704,12 @@ public class XmlParser extends BaseParser {
 							theEventWriter.writeStartElement(prefix, se.getName().getLocalPart(), namespaceURI);
 							theEventWriter.writeNamespace(prefix, namespaceURI);
 						}
-						for (Iterator<Attribute> iter= se.getAttributes(); iter.hasNext(); ) {
-							Attribute next = iter.next();
-							if ("lang".equals(next.getName().getLocalPart())) {
-								theEventWriter.writeAttribute("", "", next.getName().getLocalPart(), next.getValue());
-							}
-						}
+//						for (Iterator<Attribute> iter= se.getAttributes(); iter.hasNext(); ) {
+//							Attribute next = iter.next();
+//							if ("lang".equals(next.getName().getLocalPart())) {
+//								theEventWriter.writeAttribute("", "", next.getName().getLocalPart(), next.getValue());
+//							}
+//						}
 						firstElement = false;
 					} else {
 						if (isBlank(se.getName().getPrefix())) {
@@ -729,10 +726,10 @@ public class XmlParser extends BaseParser {
 						} else {
 							theEventWriter.writeStartElement(se.getName().getPrefix(), se.getName().getLocalPart(), se.getName().getNamespaceURI());
 						}
-						for (Iterator<?> attrIter = se.getAttributes(); attrIter.hasNext(); ) {
-							Attribute next = (Attribute) attrIter.next();
-							theEventWriter.writeAttribute(next.getName().getLocalPart(), next.getValue());
-						}
+					}
+					for (Iterator<?> attrIter = se.getAttributes(); attrIter.hasNext(); ) {
+						Attribute next = (Attribute) attrIter.next();
+						theEventWriter.writeAttribute(next.getName().getLocalPart(), next.getValue());
 					}
 					break;
 				case XMLStreamConstants.DTD:
