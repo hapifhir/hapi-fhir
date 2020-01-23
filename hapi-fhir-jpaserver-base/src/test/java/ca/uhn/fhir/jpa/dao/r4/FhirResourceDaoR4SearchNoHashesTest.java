@@ -1821,8 +1821,10 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", patientId01, patientId02, obsId01, obsId02, drId01);
 
+		myCaptureQueriesListener.clear();
 		List<Observation> result = toList(myObservationDao
 			.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "urn:system|testSearchResourceLinkWithChain01"))));
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 		assertEquals(1, result.size());
 		assertEquals(obsId01.getIdPart(), result.get(0).getIdElement().getIdPart());
 

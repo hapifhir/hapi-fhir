@@ -364,8 +364,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 	Subquery<Long> createLinkSubquery(boolean theFoundChainMatch, String theChain, String theSubResourceName, List<IQueryParameterType> theOrValues, RequestDetails theRequest) {
 		Subquery<Long> subQ = myQueryRoot.subquery(Long.class);
-		Root<ResourceTable> subQfrom = subQ.from(ResourceTable.class);
-		subQ.select(subQfrom.get("myId").as(Long.class));
+		subQ.select(myQueryRoot.get("myId").as(Long.class));
 
 		List<List<IQueryParameterType>> andOrParams = new ArrayList<>();
 		andOrParams.add(theOrValues);
@@ -584,22 +583,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			} else {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
 			}
-		}
-//		else if ((searchParam.getName().equals(Constants.PARAM_TAG)) ||
-//			(searchParam.equals(Constants.PARAM_SECURITY))) {
-//			TokenParam param = new TokenParam();
-//			param.setValueAsQueryToken(null,
-//				null,
-//				null,
-//				((SearchFilterParser.FilterParameter) theFilter).getValue());
-//			return addPredicateTag(Collections.singletonList(Collections.singletonList(param)),
-//				searchParam.getName());
-//		}
-//		else if (searchParam.equals(Constants.PARAM_PROFILE)) {
-//			addPredicateTag(Collections.singletonList(Collections.singletonList(new UriParam(((SearchFilterParser.FilterParameter) theFilter).getValue()))),
-//				searchParam.getName());
-//		}
-		else {
+		} else {
 			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
 			if (typeEnum == RestSearchParameterTypeEnum.URI) {
 				return myPredicateBuilder.addPredicateUri(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new UriParam(theFilter.getValue())), theFilter.getOperation());
