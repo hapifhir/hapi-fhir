@@ -15,6 +15,10 @@ public abstract class PredicateBuilderFactory {
 	@Lookup
 	public abstract PredicateBuilderQuantity newPredicateBuilderQuantity(SearchBuilder theSearchBuilder);
 	@Lookup
+	public abstract PredicateBuilderReference newPredicateBuilderReference(SearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder);
+	@Lookup
+	public abstract PredicateBuilderResourceId newPredicateBuilderResourceId(SearchBuilder theSearchBuilder);
+	@Lookup
 	public abstract PredicateBuilderString newPredicateBuilderString(SearchBuilder theSearchBuilder);
 	@Lookup
 	public abstract PredicateBuilderTag newPredicateBuilderTag(SearchBuilder theSearchBuilder);

@@ -1,10 +1,7 @@
 package ca.uhn.fhir.jpa.dao.predicate;
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
-import ca.uhn.fhir.jpa.dao.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;

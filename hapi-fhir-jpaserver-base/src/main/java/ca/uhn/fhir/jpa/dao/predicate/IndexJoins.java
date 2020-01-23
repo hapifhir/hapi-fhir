@@ -19,6 +19,6 @@ public class IndexJoins {
 	}
 
 	public Join<?,?> get(SearchBuilderJoinKey theKey) {
-		myIndexJoins.get(theKey);
+		return myIndexJoins.get(theKey);
 	}
 }
