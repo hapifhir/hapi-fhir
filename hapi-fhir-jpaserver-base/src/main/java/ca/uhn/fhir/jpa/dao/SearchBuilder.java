@@ -148,11 +148,6 @@ public class SearchBuilder implements ISearchBuilder {
 		myDontUseHashesForSearch = myDaoConfig.getDisableHashBasedSearches();
 	}
 
-	@PostConstruct
-	public void postConstruct() {
-		myPredicateBuilder = new PredicateBuilder(this, myPredicateBuilderFactory);
-	}
-
 	@Override
 	public void setMaxResultsToFetch(Integer theMaxResultsToFetch) {
 		myMaxResultsToFetch = theMaxResultsToFetch;
@@ -192,9 +187,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	@Override
 	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest) {
-		myParams = theParams;
-		myBuilder = myEntityManager.getCriteriaBuilder();
-		mySearchUuid = theSearchUuid;
+		init(theParams, theSearchUuid);
 
 		TypedQuery<Long> query = createQuery(null, null, true, theRequest);
 		return new CountQueryIterator(query);
@@ -210,15 +203,20 @@ public class SearchBuilder implements ISearchBuilder {
 
 	@Override
 	public IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
-		myParams = theParams;
-		myBuilder = myEntityManager.getCriteriaBuilder();
-		mySearchUuid = theSearchRuntimeDetails.getSearchUuid();
+		init(theParams, theSearchRuntimeDetails.getSearchUuid());
 
 		if (myPidSet == null) {
 			myPidSet = new HashSet<>();
 		}
 
 		return new QueryIterator(theSearchRuntimeDetails, theRequest);
+	}
+
+	private void init(SearchParameterMap theParams, String theTheSearchUuid) {
+		myParams = theParams;
+		myBuilder = myEntityManager.getCriteriaBuilder();
+		mySearchUuid = theTheSearchUuid;
+		myPredicateBuilder = new PredicateBuilder(this, myPredicateBuilderFactory);
 	}
 
 	private TypedQuery<Long> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest) {
