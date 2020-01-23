@@ -317,7 +317,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	@Override
-	protected DaoConfig getConfig() {
+	public DaoConfig getConfig() {
 		return myConfig;
 	}
 
