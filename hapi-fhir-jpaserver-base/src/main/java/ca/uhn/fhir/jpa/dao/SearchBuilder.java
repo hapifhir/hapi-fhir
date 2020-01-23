@@ -933,10 +933,6 @@ public class SearchBuilder implements ISearchBuilder {
 		return myPredicateBuilder;
 	}
 
-	public enum HandlerTypeEnum {
-		UNIQUE_INDEX, STANDARD_QUERY
-	}
-
 	public class IncludesIterator extends BaseIterator<ResourcePersistentId> implements Iterator<ResourcePersistentId> {
 
 		private final RequestDetails myRequest;
