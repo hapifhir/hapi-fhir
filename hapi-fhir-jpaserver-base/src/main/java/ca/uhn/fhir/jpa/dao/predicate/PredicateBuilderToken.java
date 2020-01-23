@@ -31,7 +31,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderToken extends BasePredicateBuilder {
+class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBuilder {
 	@Autowired
 	private ITermReadSvc myTerminologySvc;
 	@Autowired
@@ -43,10 +43,11 @@ class PredicateBuilderToken extends BasePredicateBuilder {
 		myPredicateBuilder = thePredicateBuilder;
 	}
 
-	Predicate addPredicateToken(String theResourceName,
-										 String theParamName,
-										 List<? extends IQueryParameterType> theList,
-										 SearchFilterParser.CompareOperation operation) {
+	@Override
+	public Predicate addPredicate(String theResourceName,
+											String theParamName,
+											List<? extends IQueryParameterType> theList,
+											SearchFilterParser.CompareOperation operation) {
 
 		if (theList.get(0).getMissing() != null) {
 			Join<ResourceTable, ResourceIndexedSearchParamToken> join = createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);
@@ -178,19 +179,19 @@ class PredicateBuilderToken extends BasePredicateBuilder {
 		// System only
 		List<VersionIndependentConcept> systemOnlyCodes = sortedCodesList.stream().filter(t -> isBlank(t.getCode())).collect(Collectors.toList());
 		if (!systemOnlyCodes.isEmpty()) {
-			retVal.add(addPredicateToken(theResourceName, theParamName, theBuilder, theFrom, systemOnlyCodes, modifier, SearchBuilderTokenModeEnum.SYSTEM_ONLY));
+			retVal.add(addPredicate(theResourceName, theParamName, theBuilder, theFrom, systemOnlyCodes, modifier, SearchBuilderTokenModeEnum.SYSTEM_ONLY));
 		}
 
 		// Code only
 		List<VersionIndependentConcept> codeOnlyCodes = sortedCodesList.stream().filter(t -> t.getSystem() == null).collect(Collectors.toList());
 		if (!codeOnlyCodes.isEmpty()) {
-			retVal.add(addPredicateToken(theResourceName, theParamName, theBuilder, theFrom, codeOnlyCodes, modifier, SearchBuilderTokenModeEnum.VALUE_ONLY));
+			retVal.add(addPredicate(theResourceName, theParamName, theBuilder, theFrom, codeOnlyCodes, modifier, SearchBuilderTokenModeEnum.VALUE_ONLY));
 		}
 
 		// System and code
 		List<VersionIndependentConcept> systemAndCodeCodes = sortedCodesList.stream().filter(t -> isNotBlank(t.getCode()) && t.getSystem() != null).collect(Collectors.toList());
 		if (!systemAndCodeCodes.isEmpty()) {
-			retVal.add(addPredicateToken(theResourceName, theParamName, theBuilder, theFrom, systemAndCodeCodes, modifier, SearchBuilderTokenModeEnum.SYSTEM_AND_VALUE));
+			retVal.add(addPredicate(theResourceName, theParamName, theBuilder, theFrom, systemAndCodeCodes, modifier, SearchBuilderTokenModeEnum.SYSTEM_AND_VALUE));
 		}
 
 		return retVal;
@@ -240,7 +241,7 @@ class PredicateBuilderToken extends BasePredicateBuilder {
 		}
 	}
 
-	private Predicate addPredicateToken(String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamToken> theFrom, List<VersionIndependentConcept> theTokens, TokenParamModifier theModifier, SearchBuilderTokenModeEnum theTokenMode) {
+	private Predicate addPredicate(String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamToken> theFrom, List<VersionIndependentConcept> theTokens, TokenParamModifier theModifier, SearchBuilderTokenModeEnum theTokenMode) {
 		if (myDontUseHashesForSearch) {
 			final Path<String> systemExpression = theFrom.get("mySystem");
 			final Path<String> valueExpression = theFrom.get("myValue");

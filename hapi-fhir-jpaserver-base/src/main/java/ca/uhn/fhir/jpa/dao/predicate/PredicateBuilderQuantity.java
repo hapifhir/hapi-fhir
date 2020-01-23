@@ -21,16 +21,18 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderQuantity extends BasePredicateBuilder {
+class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicateBuilder {
 
 	PredicateBuilderQuantity(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
-	Predicate addPredicateQuantity(String theResourceName,
-											 String theParamName,
-											 List<? extends IQueryParameterType> theList,
-											 SearchFilterParser.CompareOperation operation) {
+	@Override
+	public Predicate addPredicate(String theResourceName,
+											String theParamName,
+											List<? extends IQueryParameterType> theList,
+											SearchFilterParser.CompareOperation operation) {
+
 		Join<ResourceTable, ResourceIndexedSearchParamQuantity> join = createJoin(SearchBuilderJoinEnum.QUANTITY, theParamName);
 
 		if (theList.get(0).getMissing() != null) {

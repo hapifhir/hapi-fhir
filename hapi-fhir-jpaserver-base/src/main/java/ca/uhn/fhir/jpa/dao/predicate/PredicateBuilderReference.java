@@ -59,11 +59,12 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	/**
 	 * Add reference predicate to the current search
 	 */
-	Predicate addPredicateReference(String theResourceName,
-											  String theParamName,
-											  List<? extends IQueryParameterType> theList,
-											  SearchFilterParser.CompareOperation operation,
-											  RequestDetails theRequest) {
+
+	public Predicate addPredicate(String theResourceName,
+											 String theParamName,
+											 List<? extends IQueryParameterType> theList,
+											 SearchFilterParser.CompareOperation operation,
+											 RequestDetails theRequest) {
 
 		assert theParamName.contains(".") == false;
 
@@ -438,7 +439,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 							break;
 						case REFERENCE:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								addPredicateReference(theResourceName, theParamName, nextAnd, null, theRequest);
+								addPredicate(theResourceName, theParamName, nextAnd, null, theRequest);
 							}
 							break;
 						case STRING:
@@ -597,7 +598,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				String chain = (theFilter.getParamPath().getNext() != null) ? theFilter.getParamPath().getNext().toString() : null;
 				String value = theFilter.getValue();
 				ReferenceParam referenceParam = new ReferenceParam(resourceType, chain, value);
-				return addPredicateReference(theResourceName, paramName, Collections.singletonList(referenceParam), operation, theRequest);
+				return addPredicate(theResourceName, paramName, Collections.singletonList(referenceParam), operation, theRequest);
 			} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
 				return myPredicateBuilder.addPredicateQuantity(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new QuantityParam(theFilter.getValue())), theFilter.getOperation());
 			} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
@@ -786,7 +787,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				orValues.addAll(next.getValuesAsQueryTokens());
 			}
 
-			Subquery<Long> subQ = myPredicateBuilder.createLinkSubquery(true, parameterName, targetResourceType, orValues, theRequest);
+			Subquery<Long> subQ = myPredicateBuilder.createLinkSubquery(parameterName, targetResourceType, orValues, theRequest);
 
 			Join<ResourceTable, ResourceLink> join = myQueryRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
 			Predicate pathPredicate = myPredicateBuilder.createResourceLinkPathPredicate(targetResourceType, paramReference, join);

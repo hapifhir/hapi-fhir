@@ -23,17 +23,18 @@ import java.util.List;
 
 @Component
 @Scope("prototype")
-public class PredicateBuilderDate extends BasePredicateBuilder {
+public class PredicateBuilderDate extends BasePredicateBuilder implements IPredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderDate.class);
 
 	PredicateBuilderDate(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
-	public Predicate addPredicateDate(String theResourceName,
-												 String theParamName,
-												 List<? extends IQueryParameterType> theList,
-												 SearchFilterParser.CompareOperation operation) {
+	@Override
+	public Predicate addPredicate(String theResourceName,
+											String theParamName,
+											List<? extends IQueryParameterType> theList,
+											SearchFilterParser.CompareOperation operation) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamDate> join = createJoin(SearchBuilderJoinEnum.DATE, theParamName);
 

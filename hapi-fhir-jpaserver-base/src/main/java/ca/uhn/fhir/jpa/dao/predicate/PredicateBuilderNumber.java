@@ -20,17 +20,18 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderNumber extends BasePredicateBuilder {
+class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderNumber.class);
 
 	PredicateBuilderNumber(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
-	public Predicate addPredicateNumber(String theResourceName,
-													String theParamName,
-													List<? extends IQueryParameterType> theList,
-													SearchFilterParser.CompareOperation operation) {
+	@Override
+	public Predicate addPredicate(String theResourceName,
+											String theParamName,
+											List<? extends IQueryParameterType> theList,
+											SearchFilterParser.CompareOperation operation) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamNumber> join = createJoin(SearchBuilderJoinEnum.NUMBER, theParamName);
 

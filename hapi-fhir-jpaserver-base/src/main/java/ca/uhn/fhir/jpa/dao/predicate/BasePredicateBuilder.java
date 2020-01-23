@@ -39,7 +39,6 @@ abstract class BasePredicateBuilder {
 	final String myResourceName;
 	final SearchParameterMap myParams;
 
-	// FIXME KHS autowire with lookup
 	BasePredicateBuilder(SearchBuilder theSearchBuilder) {
 		myCallingDao = theSearchBuilder.getCallingDao();
 		myBuilder = theSearchBuilder.getBuilder();

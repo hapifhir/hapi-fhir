@@ -22,7 +22,7 @@ import java.util.List;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderUri extends BasePredicateBuilder {
+class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderUri.class);
 	@Autowired
 	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
@@ -31,10 +31,11 @@ class PredicateBuilderUri extends BasePredicateBuilder {
 		super(theSearchBuilder);
 	}
 
-	Predicate addPredicateUri(String theResourceName,
-									  String theParamName,
-									  List<? extends IQueryParameterType> theList,
-									  SearchFilterParser.CompareOperation operation) {
+	@Override
+	public Predicate addPredicate(String theResourceName,
+											String theParamName,
+											List<? extends IQueryParameterType> theList,
+											SearchFilterParser.CompareOperation operation) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamUri> join = createJoin(SearchBuilderJoinEnum.URI, theParamName);
 

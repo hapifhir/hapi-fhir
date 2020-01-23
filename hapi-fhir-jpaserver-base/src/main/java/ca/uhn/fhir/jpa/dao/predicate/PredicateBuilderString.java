@@ -22,16 +22,17 @@ import java.util.List;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderString extends BasePredicateBuilder {
+class PredicateBuilderString extends BasePredicateBuilder implements IPredicateBuilder {
 
 	PredicateBuilderString(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
-	Predicate addPredicateString(String theResourceName,
-										  String theParamName,
-										  List<? extends IQueryParameterType> theList,
-										  SearchFilterParser.CompareOperation operation) {
+	@Override
+	public Predicate addPredicate(String theResourceName,
+											String theParamName,
+											List<? extends IQueryParameterType> theList,
+											SearchFilterParser.CompareOperation operation) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamString> join = createJoin(SearchBuilderJoinEnum.STRING, theParamName);
 

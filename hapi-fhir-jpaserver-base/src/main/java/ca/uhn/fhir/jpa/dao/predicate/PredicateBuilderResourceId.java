@@ -37,9 +37,10 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 		super(theSearchBuilder);
 	}
 
+	@Nullable
 	Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
 
-		Predicate nextPredicate = createPredicateResourceId(myQueryRoot.getRoot(), theResourceName, theValues, theOperation, theRequest);
+		Predicate nextPredicate = createPredicate(myQueryRoot.getRoot(), theResourceName, theValues, theOperation, theRequest);
 
 		if (nextPredicate != null) {
 			myQueryRoot.addPredicate(nextPredicate);
@@ -50,7 +51,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 	}
 
 	@Nullable
-	private Predicate createPredicateResourceId(Root<ResourceTable> theRoot, String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
+	private Predicate createPredicate(Root<ResourceTable> theRoot, String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
 		Predicate nextPredicate = null;
 
 		Set<ResourcePersistentId> allOrPids = null;

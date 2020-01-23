@@ -28,7 +28,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Component
 @Scope("prototype")
-public class PredicateBuilderCoords extends BasePredicateBuilder {
+public class PredicateBuilderCoords extends BasePredicateBuilder implements IPredicateBuilder {
 
 	PredicateBuilderCoords(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
@@ -89,8 +89,8 @@ public class PredicateBuilderCoords extends BasePredicateBuilder {
 		} else if (distanceKm < 0.0) {
 			throw new IllegalArgumentException("Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distanceKm + "' must be >= 0.0");
 		} else {
-			Double latitudeDegrees = Double.valueOf(latitudeValue);
-			Double longitudeDegrees = Double.valueOf(longitudeValue);
+			double latitudeDegrees = Double.parseDouble(latitudeValue);
+			double longitudeDegrees = Double.parseDouble(longitudeValue);
 
 			Point northPoint = CoordCalculator.findTarget(latitudeDegrees, longitudeDegrees, 0.0, distanceKm);
 			Point eastPoint = CoordCalculator.findTarget(latitudeDegrees, longitudeDegrees, 90.0, distanceKm);
@@ -110,9 +110,11 @@ public class PredicateBuilderCoords extends BasePredicateBuilder {
 		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
 	}
 
-	public Predicate addPredicateCoords(String theResourceName,
-													String theParamName,
-													List<? extends IQueryParameterType> theList) {
+	@Override
+	public Predicate addPredicate(String theResourceName,
+											String theParamName,
+											List<? extends IQueryParameterType> theList,
+											SearchFilterParser.CompareOperation theOperation) {
 		Join<ResourceTable, ResourceIndexedSearchParamCoords> join = createJoin(SearchBuilderJoinEnum.COORDS, theParamName);
 
 		if (theList.get(0).getMissing() != null) {

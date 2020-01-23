@@ -61,29 +61,6 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 			}
 		}
 
-		/*
-		 * We have a parameter of ResourceType?_tag:not=foo This means match resources that don't have the given tag(s)
-		 */
-		if (notTags.isEmpty() == false) {
-			// CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			// CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-			// Root<ResourceTable> from = cq.from(ResourceTable.class);
-			// cq.select(from.get("myId").as(Long.class));
-			//
-			// Subquery<Long> subQ = cq.subquery(Long.class);
-			// Root<ResourceTag> subQfrom = subQ.from(ResourceTag.class);
-			// subQ.select(subQfrom.get("myResourceId").as(Long.class));
-			// Predicate subQname = builder.equal(subQfrom.get("myParamName"), theParamName);
-			// Predicate subQtype = builder.equal(subQfrom.get("myResourceType"), myResourceName);
-			// subQ.where(builder.and(subQtype, subQname));
-			//
-			// List<Predicate> predicates = new ArrayList<Predicate>();
-			// predicates.add(builder.not(builder.in(from.get("myId")).value(subQ)));
-			// predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
-			// predicates.add(builder.isNull(from.get("myDeleted")));
-			// createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
-		}
-
 		for (List<? extends IQueryParameterType> nextAndParams : theList) {
 			boolean haveTags = false;
 			for (IQueryParameterType nextParamUncasted : nextAndParams) {
