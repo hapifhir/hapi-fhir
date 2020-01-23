@@ -929,6 +929,10 @@ public class SearchBuilder implements ISearchBuilder {
 		return myCallingDao;
 	}
 
+	public PredicateBuilder getPredicateBuilder() {
+		return myPredicateBuilder;
+	}
+
 	public enum HandlerTypeEnum {
 		UNIQUE_INDEX, STANDARD_QUERY
 	}

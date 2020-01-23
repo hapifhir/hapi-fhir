@@ -371,7 +371,7 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 		 * and predicate list down and put new ones at the top of the
 		 * stack and run a subquery
 		 */
-		// FIXME KHS group these into a single class
+
 		Root<ResourceTable> stackRoot = myResourceTableRoot;
 		ArrayList<Predicate> stackPredicates = myPredicates;
 		IndexJoins stackIndexJoins = myIndexJoins;
@@ -410,7 +410,8 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 				break;
 
 			case IAnyResource.SP_RES_LANGUAGE:
-				addPredicateLanguage(theAndOrParams);
+				addPredicateLanguage(theAndOrParams,
+					null);
 				break;
 
 			case Constants.PARAM_HAS:
@@ -420,7 +421,7 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 			case Constants.PARAM_TAG:
 			case Constants.PARAM_PROFILE:
 			case Constants.PARAM_SECURITY:
-				addPredicateTag(theAndOrParams, theParamName);
+				myPredicateBuilder.addPredicateTag(theAndOrParams, theParamName);
 				break;
 
 			case Constants.PARAM_SOURCE:
@@ -434,36 +435,36 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 					switch (nextParamDef.getParamType()) {
 						case DATE:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								addPredicateDate(theResourceName, theParamName, nextAnd);
+								myPredicateBuilder.addPredicateDate(theResourceName, theParamName, nextAnd, null);
 							}
 							break;
 						case QUANTITY:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								addPredicateQuantity(theResourceName, theParamName, nextAnd);
+								myPredicateBuilder.addPredicateQuantity(theResourceName, theParamName, nextAnd, null);
 							}
 							break;
 						case REFERENCE:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								addPredicateReference(theResourceName, theParamName, nextAnd, theRequest);
+								addPredicateReference(theResourceName, theParamName, nextAnd, null, theRequest);
 							}
 							break;
 						case STRING:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								addPredicateString(theResourceName, theParamName, nextAnd);
+								myPredicateBuilder.addPredicateString(theResourceName, theParamName, nextAnd, SearchFilterParser.CompareOperation.sw);
 							}
 							break;
 						case TOKEN:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 								if ("Location.position".equals(nextParamDef.getPath())) {
-									addPredicateCoords(theResourceName, theParamName, nextAnd);
+									myPredicateBuilder.addPredicateCoords(theResourceName, theParamName, nextAnd);
 								} else {
-									addPredicateToken(theResourceName, theParamName, nextAnd);
+									myPredicateBuilder.addPredicateToken(theResourceName, theParamName, nextAnd, null);
 								}
 							}
 							break;
 						case NUMBER:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								addPredicateNumber(theResourceName, theParamName, nextAnd);
+								myPredicateBuilder.addPredicateNumber(theResourceName, theParamName, nextAnd, null);
 							}
 							break;
 						case COMPOSITE:
@@ -473,14 +474,14 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 							break;
 						case URI:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								addPredicateUri(theResourceName, theParamName, nextAnd);
+								myPredicateBuilder.addPredicateUri(theResourceName, theParamName, nextAnd, SearchFilterParser.CompareOperation.eq);
 							}
 							break;
 						case HAS:
 						case SPECIAL:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 								if ("Location.position".equals(nextParamDef.getPath())) {
-									addPredicateCoords(theResourceName, theParamName, nextAnd);
+									myPredicateBuilder.addPredicateCoords(theResourceName, theParamName, nextAnd);
 								}
 							}
 							break;
@@ -603,25 +604,13 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 		else {
 			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
 			if (typeEnum == RestSearchParameterTypeEnum.URI) {
-				return addPredicateUri(theResourceName,
-					theFilter.getParamPath().getName(),
-					Collections.singletonList(new UriParam(theFilter.getValue())),
-					theFilter.getOperation());
+				return myPredicateBuilder.addPredicateUri(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new UriParam(theFilter.getValue())), theFilter.getOperation());
 			} else if (typeEnum == RestSearchParameterTypeEnum.STRING) {
-				return addPredicateString(theResourceName,
-					theFilter.getParamPath().getName(),
-					Collections.singletonList(new StringParam(theFilter.getValue())),
-					theFilter.getOperation());
+				return myPredicateBuilder.addPredicateString(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new StringParam(theFilter.getValue())), theFilter.getOperation());
 			} else if (typeEnum == RestSearchParameterTypeEnum.DATE) {
-				return addPredicateDate(theResourceName,
-					theFilter.getParamPath().getName(),
-					Collections.singletonList(new DateParam(theFilter.getValue())),
-					theFilter.getOperation());
+				return myPredicateBuilder.addPredicateDate(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new DateParam(theFilter.getValue())), theFilter.getOperation());
 			} else if (typeEnum == RestSearchParameterTypeEnum.NUMBER) {
-				return addPredicateNumber(theResourceName,
-					theFilter.getParamPath().getName(),
-					Collections.singletonList(new NumberParam(theFilter.getValue())),
-					theFilter.getOperation());
+				return myPredicateBuilder.addPredicateNumber(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new NumberParam(theFilter.getValue())), theFilter.getOperation());
 			} else if (typeEnum == RestSearchParameterTypeEnum.REFERENCE) {
 				String paramName = theFilter.getParamPath().getName();
 				SearchFilterParser.CompareOperation operation = theFilter.getOperation();
@@ -631,10 +620,7 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 				ReferenceParam referenceParam = new ReferenceParam(resourceType, chain, value);
 				return addPredicateReference(theResourceName, paramName, Collections.singletonList(referenceParam), operation, theRequest);
 			} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
-				return addPredicateQuantity(theResourceName,
-					theFilter.getParamPath().getName(),
-					Collections.singletonList(new QuantityParam(theFilter.getValue())),
-					theFilter.getOperation());
+				return myPredicateBuilder.addPredicateQuantity(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new QuantityParam(theFilter.getValue())), theFilter.getOperation());
 			} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
 				throw new InvalidRequestException("Composite search parameters not currently supported with _filter clauses");
 			} else if (typeEnum == RestSearchParameterTypeEnum.TOKEN) {
@@ -643,10 +629,7 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 					null,
 					null,
 					theFilter.getValue());
-				return addPredicateToken(theResourceName,
-					theFilter.getParamPath().getName(),
-					Collections.singletonList(param),
-					theFilter.getOperation());
+				return myPredicateBuilder.addPredicateToken(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(param), theFilter.getOperation());
 			}
 		}
 		return null;
@@ -696,72 +679,6 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 
 		qp.setValueAsQueryToken(myContext, theParam.getName(), theQualifier, theValueAsQueryToken);
 		return qp;
-	}
-
-	private void addPredicateCoords(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd) {
-		// FIXME KHS consolidate these predicate builders (e.g. all these mathods should have the same name)
-		myPredicateBuilder.addPredicateCoords(theResourceName, theParamName, theNextAnd);
-	}
-
-	private void addPredicateDate(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd) {
-		myPredicateBuilder.addPredicateDate(theResourceName, theParamName, theNextAnd, null);
-	}
-
-	private Predicate addPredicateDate(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation) {
-		return myPredicateBuilder.addPredicateDate(theResourceName, theParamName, theNextAnd, theOperation);
-	}
-
-	private void addPredicateNumber(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd) {
-		myPredicateBuilder.addPredicateNumber(theResourceName, theParamName, theNextAnd, null);
-	}
-
-	private Predicate addPredicateNumber(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation) {
-		return myPredicateBuilder.addPredicateNumber(theResourceName, theParamName, theNextAnd, theOperation);
-	}
-
-	private void addPredicateQuantity(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd) {
-		myPredicateBuilder.addPredicateQuantity(theResourceName, theParamName, theNextAnd, null);
-	}
-
-	private Predicate addPredicateQuantity(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation) {
-		return myPredicateBuilder.addPredicateQuantity(theResourceName, theParamName, theNextAnd, theOperation);
-	}
-
-	private Predicate addPredicateReference(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, RequestDetails theRequest) {
-		return addPredicateReference(theResourceName, theParamName, theList, null, theRequest);
-	}
-
-	private void addPredicateString(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd) {
-		myPredicateBuilder.addPredicateString(theResourceName, theParamName, theNextAnd, SearchFilterParser.CompareOperation.sw);
-	}
-
-	private Predicate addPredicateString(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation) {
-		return myPredicateBuilder.addPredicateString(theResourceName, theParamName, theNextAnd, theOperation);
-	}
-
-	private void addPredicateTag(List<List<IQueryParameterType>> theAndOrParams, String theParamName) {
-		myPredicateBuilder.addPredicateTag(theAndOrParams, theParamName);
-	}
-
-	private void addPredicateToken(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd) {
-		myPredicateBuilder.addPredicateToken(theResourceName, theParamName, theNextAnd, null);
-	}
-
-	private Predicate addPredicateToken(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation) {
-		return myPredicateBuilder.addPredicateToken(theResourceName, theParamName, theNextAnd, theOperation);
-	}
-
-	private void addPredicateUri(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd) {
-		myPredicateBuilder.addPredicateUri(theResourceName, theParamName, theNextAnd, SearchFilterParser.CompareOperation.eq);
-	}
-
-	private Predicate addPredicateUri(String theResourceName, String theName, List<? extends IQueryParameterType> theSingletonList, SearchFilterParser.CompareOperation theOperation) {
-		return myPredicateBuilder.addPredicateUri(theResourceName, theName, theSingletonList, theOperation);
-	}
-
-	private Predicate addPredicateLanguage(List<List<IQueryParameterType>> theList) {
-		return addPredicateLanguage(theList,
-			null);
 	}
 
 	private Predicate addPredicateLanguage(List<List<IQueryParameterType>> theList,

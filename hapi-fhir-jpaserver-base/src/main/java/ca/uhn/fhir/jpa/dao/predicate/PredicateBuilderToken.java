@@ -32,11 +32,11 @@ public class PredicateBuilderToken extends BasePredicateBuilder {
 	private ITermReadSvc myTerminologySvc;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
-	private final PredicateBuilderString myPredicateBuilderString;
+	private final PredicateBuilder myPredicateBuilder;
 
 	PredicateBuilderToken(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
-		myPredicateBuilderString = theSearchBuilder.getPredicateBuilderString();
+		myPredicateBuilder = theSearchBuilder.getPredicateBuilder();
 	}
 
 	public Predicate addPredicateToken(String theResourceName,
@@ -57,7 +57,7 @@ public class PredicateBuilderToken extends BasePredicateBuilder {
 			if (nextOr instanceof TokenParam) {
 				TokenParam id = (TokenParam) nextOr;
 				if (id.isText()) {
-					myPredicateBuilderString.addPredicateString(theResourceName, theParamName, theList);
+					myPredicateBuilder.addPredicateString(theResourceName, theParamName, theList);
 					break;
 				}
 			}

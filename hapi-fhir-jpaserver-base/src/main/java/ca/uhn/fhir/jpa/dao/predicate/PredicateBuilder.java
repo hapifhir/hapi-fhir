@@ -68,7 +68,7 @@ public class PredicateBuilder {
 		return myPredicateBuilderReference.addPredicateReference(theResourceName, theParamName, theList, null, theRequest);
 	}
 
-	private void addPredicateString(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd) {
+	void addPredicateString(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd) {
 		myPredicateBuilderString.addPredicateString(theResourceName, theParamName, theNextAnd, SearchFilterParser.CompareOperation.sw);
 	}
 
