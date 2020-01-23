@@ -911,10 +911,6 @@ public class SearchBuilder implements ISearchBuilder {
 		return myCallingDao;
 	}
 
-	public PredicateBuilder getPredicateBuilder() {
-		return myPredicateBuilder;
-	}
-
 	public class IncludesIterator extends BaseIterator<ResourcePersistentId> implements Iterator<ResourcePersistentId> {
 
 		private final RequestDetails myRequest;

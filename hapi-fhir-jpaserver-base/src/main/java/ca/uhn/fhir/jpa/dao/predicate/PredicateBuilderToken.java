@@ -38,9 +38,9 @@ class PredicateBuilderToken extends BasePredicateBuilder {
 	private ISearchParamRegistry mySearchParamRegistry;
 	private final PredicateBuilder myPredicateBuilder;
 
-	PredicateBuilderToken(SearchBuilder theSearchBuilder) {
+	PredicateBuilderToken(SearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder) {
 		super(theSearchBuilder);
-		myPredicateBuilder = theSearchBuilder.getPredicateBuilder();
+		myPredicateBuilder = thePredicateBuilder;
 	}
 
 	Predicate addPredicateToken(String theResourceName,

@@ -23,7 +23,7 @@ public abstract class PredicateBuilderFactory {
 	@Lookup
 	public abstract PredicateBuilderTag newPredicateBuilderTag(SearchBuilder theSearchBuilder);
 	@Lookup
-	public abstract PredicateBuilderToken newPredicateBuilderToken(SearchBuilder theSearchBuilder);
+	public abstract PredicateBuilderToken newPredicateBuilderToken(SearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder);
 	@Lookup
 	public abstract PredicateBuilderUri newPredicateBuilderUri(SearchBuilder theSearchBuilder);
 }
