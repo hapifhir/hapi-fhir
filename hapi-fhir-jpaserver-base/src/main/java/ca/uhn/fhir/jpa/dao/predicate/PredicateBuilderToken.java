@@ -19,6 +19,8 @@ import com.google.common.collect.Sets;
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.hibernate.query.criteria.internal.predicate.BooleanStaticAssertionPredicate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.*;
 import java.util.*;
@@ -27,7 +29,9 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class PredicateBuilderToken extends BasePredicateBuilder {
+@Component
+@Scope("prototype")
+class PredicateBuilderToken extends BasePredicateBuilder {
 	@Autowired
 	private ITermReadSvc myTerminologySvc;
 	@Autowired
@@ -39,10 +43,10 @@ public class PredicateBuilderToken extends BasePredicateBuilder {
 		myPredicateBuilder = theSearchBuilder.getPredicateBuilder();
 	}
 
-	public Predicate addPredicateToken(String theResourceName,
-												  String theParamName,
-												  List<? extends IQueryParameterType> theList,
-												  SearchFilterParser.CompareOperation operation) {
+	Predicate addPredicateToken(String theResourceName,
+										 String theParamName,
+										 List<? extends IQueryParameterType> theList,
+										 SearchFilterParser.CompareOperation operation) {
 
 		if (theList.get(0).getMissing() != null) {
 			Join<ResourceTable, ResourceIndexedSearchParamToken> join = createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);

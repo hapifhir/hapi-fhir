@@ -8,6 +8,8 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.*;
 import java.math.BigDecimal;
@@ -17,16 +19,18 @@ import java.util.List;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class PredicateBuilderQuantity extends BasePredicateBuilder {
+@Component
+@Scope("prototype")
+class PredicateBuilderQuantity extends BasePredicateBuilder {
 
 	PredicateBuilderQuantity(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
-	public Predicate addPredicateQuantity(String theResourceName,
-													  String theParamName,
-													  List<? extends IQueryParameterType> theList,
-													  SearchFilterParser.CompareOperation operation) {
+	Predicate addPredicateQuantity(String theResourceName,
+											 String theParamName,
+											 List<? extends IQueryParameterType> theList,
+											 SearchFilterParser.CompareOperation operation) {
 		Join<ResourceTable, ResourceIndexedSearchParamQuantity> join = createJoin(SearchBuilderJoinEnum.QUANTITY, theParamName);
 
 		if (theList.get(0).getMissing() != null) {

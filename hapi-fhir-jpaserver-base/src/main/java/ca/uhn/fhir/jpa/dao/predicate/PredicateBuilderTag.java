@@ -18,20 +18,24 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.*;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class PredicateBuilderTag extends BasePredicateBuilder {
+@Component
+@Scope("prototype")
+class PredicateBuilderTag extends BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderTag.class);
 
 	PredicateBuilderTag(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
-	public void addPredicateTag(List<List<IQueryParameterType>> theList, String theParamName) {
+	void addPredicateTag(List<List<IQueryParameterType>> theList, String theParamName) {
 		TagTypeEnum tagType;
 		if (Constants.PARAM_TAG.equals(theParamName)) {
 			tagType = TagTypeEnum.TAG;

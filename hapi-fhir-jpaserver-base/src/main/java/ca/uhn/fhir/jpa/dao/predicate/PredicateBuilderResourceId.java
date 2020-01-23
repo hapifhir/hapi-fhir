@@ -11,6 +11,8 @@ import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.Predicate;
@@ -23,7 +25,9 @@ import java.util.Set;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class PredicateBuilderResourceId extends BasePredicateBuilder {
+@Component
+@Scope("prototype")
+class PredicateBuilderResourceId extends BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderResourceId.class);
 
 	@Autowired

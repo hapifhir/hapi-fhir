@@ -11,6 +11,8 @@ import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
@@ -18,7 +20,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class PredicateBuilderUri extends BasePredicateBuilder {
+@Component
+@Scope("prototype")
+class PredicateBuilderUri extends BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderUri.class);
 	@Autowired
 	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
@@ -27,10 +31,10 @@ public class PredicateBuilderUri extends BasePredicateBuilder {
 		super(theSearchBuilder);
 	}
 
-	public Predicate addPredicateUri(String theResourceName,
-												String theParamName,
-												List<? extends IQueryParameterType> theList,
-												SearchFilterParser.CompareOperation operation) {
+	Predicate addPredicateUri(String theResourceName,
+									  String theParamName,
+									  List<? extends IQueryParameterType> theList,
+									  SearchFilterParser.CompareOperation operation) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamUri> join = createJoin(SearchBuilderJoinEnum.URI, theParamName);
 

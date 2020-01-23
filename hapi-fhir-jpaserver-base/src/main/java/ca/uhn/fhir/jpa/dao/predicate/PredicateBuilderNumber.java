@@ -8,6 +8,8 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.*;
 import java.math.BigDecimal;
@@ -16,7 +18,9 @@ import java.util.List;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
-public class PredicateBuilderNumber extends BasePredicateBuilder {
+@Component
+@Scope("prototype")
+class PredicateBuilderNumber extends BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderNumber.class);
 
 	PredicateBuilderNumber(SearchBuilder theSearchBuilder) {

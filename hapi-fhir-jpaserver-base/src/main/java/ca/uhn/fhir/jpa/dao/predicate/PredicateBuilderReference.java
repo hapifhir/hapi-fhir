@@ -28,6 +28,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.*;
 import java.util.*;
@@ -35,7 +37,9 @@ import java.util.*;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class PredicateBuilderReference extends BasePredicateBuilder {
+@Component
+@Scope("prototype")
+class PredicateBuilderReference extends BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderReference.class);
 
 	@Autowired
@@ -55,11 +59,11 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 	/**
 	 * Add reference predicate to the current search
 	 */
-	public Predicate addPredicateReference(String theResourceName,
-														String theParamName,
-														List<? extends IQueryParameterType> theList,
-														SearchFilterParser.CompareOperation operation,
-														RequestDetails theRequest) {
+	Predicate addPredicateReference(String theResourceName,
+											  String theParamName,
+											  List<? extends IQueryParameterType> theList,
+											  SearchFilterParser.CompareOperation operation,
+											  RequestDetails theRequest) {
 
 		assert theParamName.contains(".") == false;
 

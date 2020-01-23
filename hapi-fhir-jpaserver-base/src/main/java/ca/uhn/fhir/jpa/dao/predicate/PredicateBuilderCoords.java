@@ -13,6 +13,8 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.SpecialParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.search.spatial.impl.Point;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
@@ -24,6 +26,8 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+@Component
+@Scope("prototype")
 public class PredicateBuilderCoords extends BasePredicateBuilder {
 
 	PredicateBuilderCoords(SearchBuilder theSearchBuilder) {

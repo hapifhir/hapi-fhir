@@ -10,6 +10,8 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
@@ -18,16 +20,18 @@ import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PredicateBuilderString extends BasePredicateBuilder {
+@Component
+@Scope("prototype")
+class PredicateBuilderString extends BasePredicateBuilder {
 
 	PredicateBuilderString(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
-	public Predicate addPredicateString(String theResourceName,
-													String theParamName,
-													List<? extends IQueryParameterType> theList,
-													SearchFilterParser.CompareOperation operation) {
+	Predicate addPredicateString(String theResourceName,
+										  String theParamName,
+										  List<? extends IQueryParameterType> theList,
+										  SearchFilterParser.CompareOperation operation) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamString> join = createJoin(SearchBuilderJoinEnum.STRING, theParamName);
 
