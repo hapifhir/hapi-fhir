@@ -34,9 +34,7 @@ abstract class BasePredicateBuilder {
 	boolean myDontUseHashesForSearch;
 	final BaseHapiFhirDao<?> myCallingDao;
 	final CriteriaBuilder myBuilder;
-	final Root<ResourceTable> myResourceTableRoot;
-	final IndexJoins myIndexJoins;
-	final ArrayList<Predicate> myPredicates;
+	final QueryRoot myQueryRoot;
 	final Class<? extends IBaseResource> myResourceType;
 	final String myResourceName;
 	final AbstractQuery<Long> myResourceTableQuery;
@@ -46,9 +44,7 @@ abstract class BasePredicateBuilder {
 	BasePredicateBuilder(SearchBuilder theSearchBuilder) {
 		myCallingDao = theSearchBuilder.getCallingDao();
 		myBuilder = theSearchBuilder.getBuilder();
-		myResourceTableRoot = theSearchBuilder.getResourceTableRoot();
-		myIndexJoins = theSearchBuilder.getIndexJoins();
-		myPredicates = theSearchBuilder.getPredicates();
+		myQueryRoot = theSearchBuilder.getQueryRoot();
 		myResourceType = theSearchBuilder.getResourceType();
 		myResourceName = theSearchBuilder.getResourceName();
 		myResourceTableQuery = theSearchBuilder.getResourceTableQuery();
@@ -65,59 +61,59 @@ abstract class BasePredicateBuilder {
 		Join<ResourceTable, ResourceIndexedSearchParamDate> join = null;
 		switch (theType) {
 			case DATE:
-				join = myResourceTableRoot.join("myParamsDate", JoinType.LEFT);
+				join = myQueryRoot.join("myParamsDate", JoinType.LEFT);
 				break;
 			case NUMBER:
-				join = myResourceTableRoot.join("myParamsNumber", JoinType.LEFT);
+				join = myQueryRoot.join("myParamsNumber", JoinType.LEFT);
 				break;
 			case QUANTITY:
-				join = myResourceTableRoot.join("myParamsQuantity", JoinType.LEFT);
+				join = myQueryRoot.join("myParamsQuantity", JoinType.LEFT);
 				break;
 			case REFERENCE:
-				join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
+				join = myQueryRoot.join("myResourceLinks", JoinType.LEFT);
 				break;
 			case STRING:
-				join = myResourceTableRoot.join("myParamsString", JoinType.LEFT);
+				join = myQueryRoot.join("myParamsString", JoinType.LEFT);
 				break;
 			case URI:
-				join = myResourceTableRoot.join("myParamsUri", JoinType.LEFT);
+				join = myQueryRoot.join("myParamsUri", JoinType.LEFT);
 				break;
 			case TOKEN:
-				join = myResourceTableRoot.join("myParamsToken", JoinType.LEFT);
+				join = myQueryRoot.join("myParamsToken", JoinType.LEFT);
 				break;
 			case COORDS:
-				join = myResourceTableRoot.join("myParamsCoords", JoinType.LEFT);
+				join = myQueryRoot.join("myParamsCoords", JoinType.LEFT);
 				break;
 		}
 
 		SearchBuilderJoinKey key = new SearchBuilderJoinKey(theSearchParameterName, theType);
-		myIndexJoins.put(key, join);
+		myQueryRoot.putIndex(key, join);
 
 		return (Join<ResourceTable, T>) join;
 	}
 
 	void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing) {
 //		if (myDontUseHashesForSearch) {
-//			Join<ResourceTable, SearchParamPresent> paramPresentJoin = myResourceTableRoot.join("mySearchParamPresents", JoinType.LEFT);
+//			Join<ResourceTable, SearchParamPresent> paramPresentJoin = myQueryRoot.join("mySearchParamPresents", JoinType.LEFT);
 //			Join<Object, Object> paramJoin = paramPresentJoin.join("mySearchParam", JoinType.LEFT);
 //
-//			myPredicates.add(myBuilder.equal(paramJoin.get("myResourceName"), theResourceName));
-//			myPredicates.add(myBuilder.equal(paramJoin.get("myParamName"), theParamName));
-//			myPredicates.add(myBuilder.equal(paramPresentJoin.get("myPresent"), !theMissing));
+//			myQueryRoot.addPredicate(myBuilder.equal(paramJoin.get("myResourceName"), theResourceName));
+//			myQueryRoot.addPredicate(myBuilder.equal(paramJoin.get("myParamName"), theParamName));
+//			myQueryRoot.addPredicate(myBuilder.equal(paramPresentJoin.get("myPresent"), !theMissing));
 //		}
 
-		Join<ResourceTable, SearchParamPresent> paramPresentJoin = myResourceTableRoot.join("mySearchParamPresents", JoinType.LEFT);
+		Join<ResourceTable, SearchParamPresent> paramPresentJoin = myQueryRoot.join("mySearchParamPresents", JoinType.LEFT);
 
 		Expression<Long> hashPresence = paramPresentJoin.get("myHashPresence").as(Long.class);
 		Long hash = SearchParamPresent.calculateHashPresence(theResourceName, theParamName, !theMissing);
-		myPredicates.add(myBuilder.equal(hashPresence, hash));
+		myQueryRoot.addPredicate(myBuilder.equal(hashPresence, hash));
 	}
 
 	void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing, Join<ResourceTable, ? extends BaseResourceIndexedSearchParam> theJoin) {
 
-		myPredicates.add(myBuilder.equal(theJoin.get("myResourceType"), theResourceName));
-		myPredicates.add(myBuilder.equal(theJoin.get("myParamName"), theParamName));
-		myPredicates.add(myBuilder.equal(theJoin.get("myMissing"), theMissing));
+		myQueryRoot.addPredicate(myBuilder.equal(theJoin.get("myResourceType"), theResourceName));
+		myQueryRoot.addPredicate(myBuilder.equal(theJoin.get("myParamName"), theParamName));
+		myQueryRoot.addPredicate(myBuilder.equal(theJoin.get("myMissing"), theMissing));
 	}
 
 	Predicate combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, Predicate thePredicate) {
@@ -132,7 +128,6 @@ abstract class BasePredicateBuilder {
 		Predicate hashIdentityPredicate = myBuilder.equal(theFrom.get("myHashIdentity"), hashIdentity);
 		return myBuilder.and(hashIdentityPredicate, thePredicate);
 	}
-
 
 	Predicate createPredicateNumeric(String theResourceName,
 														  String theParamName,
@@ -166,7 +161,7 @@ abstract class BasePredicateBuilder {
 				num = builder.notEqual(thePath, theValue);
 				break;
 			case APPROXIMATE:
-				BigDecimal mul = calculateFuzzAmount(thePrefix, theValue);
+				BigDecimal mul = FuzzCalculator.calculateFuzzAmount(thePrefix, theValue);
 				BigDecimal low = theValue.subtract(mul, MathContext.DECIMAL64);
 				BigDecimal high = theValue.add(mul, MathContext.DECIMAL64);
 				Predicate lowPred;
@@ -187,28 +182,6 @@ abstract class BasePredicateBuilder {
 			return num;
 		}
 		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, num);
-	}
-
-	/**
-	 * Figures out the tolerance for a search. For example, if the user is searching for <code>4.00</code>, this method
-	 * returns <code>0.005</code> because we shold actually match values which are
-	 * <code>4 (+/-) 0.005</code> according to the FHIR specs.
-	 */
-	static BigDecimal calculateFuzzAmount(ParamPrefixEnum cmpValue, BigDecimal theValue) {
-		if (cmpValue == ParamPrefixEnum.APPROXIMATE) {
-			return theValue.multiply(new BigDecimal(0.1));
-		} else {
-			String plainString = theValue.toPlainString();
-			int dotIdx = plainString.indexOf('.');
-			if (dotIdx == -1) {
-				return new BigDecimal(0.5);
-			}
-
-			int precision = plainString.length() - (dotIdx);
-			double mul = Math.pow(10, -precision);
-			double val = mul * 5.0d;
-			return new BigDecimal(val);
-		}
 	}
 
 	static String createLeftAndRightMatchLikeExpression(String likeExpression) {

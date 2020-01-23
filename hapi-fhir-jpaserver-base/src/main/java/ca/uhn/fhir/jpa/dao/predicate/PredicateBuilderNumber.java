@@ -78,7 +78,7 @@ public class PredicateBuilderNumber extends BasePredicateBuilder {
 		}
 
 		Predicate predicate = myBuilder.or(toArray(codePredicates));
-		myPredicates.add(predicate);
+		myQueryRoot.addPredicate(predicate);
 		return predicate;
 	}
 }

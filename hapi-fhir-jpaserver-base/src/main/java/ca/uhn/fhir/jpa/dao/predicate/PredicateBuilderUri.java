@@ -140,7 +140,7 @@ public class PredicateBuilderUri extends BasePredicateBuilder {
 		 */
 		if (codePredicates.isEmpty()) {
 			Predicate predicate = myBuilder.isNull(join.get("myMissing").as(String.class));
-			myPredicates.add(predicate);
+			myQueryRoot.addPredicate(predicate);
 			return null;
 		}
 
@@ -150,7 +150,7 @@ public class PredicateBuilderUri extends BasePredicateBuilder {
 			theParamName,
 			join,
 			orPredicate);
-		myPredicates.add(outerPredicate);
+		myQueryRoot.addPredicate(outerPredicate);
 		return outerPredicate;
 	}
 }

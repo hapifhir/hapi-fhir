@@ -129,7 +129,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder {
 		}
 
 		Predicate retVal = myBuilder.or(toArray(codePredicates));
-		myPredicates.add(retVal);
+		myQueryRoot.addPredicate(retVal);
 		return retVal;
 	}
 }

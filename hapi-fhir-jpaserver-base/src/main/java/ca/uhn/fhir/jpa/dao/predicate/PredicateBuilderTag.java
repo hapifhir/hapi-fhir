@@ -135,7 +135,13 @@ public class PredicateBuilderTag extends BasePredicateBuilder {
 				Root<ResourceTag> subQfrom = subQ.from(ResourceTag.class);
 				subQ.select(subQfrom.get("myResourceId").as(Long.class));
 
-				myPredicates.add(myBuilder.not(myBuilder.in(myResourceTableRoot.get("myId")).value(subQ)));
+				myQueryRoot.addPredicate(
+					myBuilder.not(
+						myBuilder.in(
+							myQueryRoot.get("myId")
+						).value(subQ)
+					)
+				);
 
 				Subquery<Long> defJoin = subQ.subquery(Long.class);
 				Root<TagDefinition> defJoinFrom = defJoin.from(TagDefinition.class);
@@ -149,11 +155,11 @@ public class PredicateBuilderTag extends BasePredicateBuilder {
 				continue;
 			}
 
-			Join<ResourceTable, ResourceTag> tagJoin = myResourceTableRoot.join("myTags", JoinType.LEFT);
+			Join<ResourceTable, ResourceTag> tagJoin = myQueryRoot.join("myTags", JoinType.LEFT);
 			From<ResourceTag, TagDefinition> defJoin = tagJoin.join("myTag");
 
 			Predicate tagListPredicate = createPredicateTagList(defJoin, myBuilder, tagType, tokens);
-			myPredicates.add(tagListPredicate);
+			myQueryRoot.addPredicate(tagListPredicate);
 
 		}
 

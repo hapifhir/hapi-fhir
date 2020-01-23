@@ -35,10 +35,10 @@ public class PredicateBuilderResourceId extends BasePredicateBuilder {
 
 	Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
 
-		Predicate nextPredicate = createPredicateResourceId(myResourceTableRoot, theResourceName, theValues, theOperation, theRequest);
+		Predicate nextPredicate = createPredicateResourceId(myQueryRoot.getRoot(), theResourceName, theValues, theOperation, theRequest);
 
 		if (nextPredicate != null) {
-			myPredicates.add(nextPredicate);
+			myQueryRoot.addPredicate(nextPredicate);
 			return nextPredicate;
 		}
 
@@ -96,12 +96,12 @@ public class PredicateBuilderResourceId extends BasePredicateBuilder {
 				default:
 				case eq:
 					codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)));
-					codePredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), theResourceName));
+					codePredicates.add(myBuilder.equal(myQueryRoot.get("myResourceType"), theResourceName));
 					nextPredicate = myBuilder.and(toArray(codePredicates));
 					break;
 				case ne:
 					codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)).not());
-					codePredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), theResourceName));
+					codePredicates.add(myBuilder.equal(myQueryRoot.get("myResourceType"), theResourceName));
 					nextPredicate = myBuilder.and(toArray(codePredicates));
 					break;
 			}

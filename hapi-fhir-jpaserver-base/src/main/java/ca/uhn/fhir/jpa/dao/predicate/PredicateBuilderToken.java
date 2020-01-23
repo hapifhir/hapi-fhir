@@ -75,7 +75,7 @@ public class PredicateBuilderToken extends BasePredicateBuilder {
 		codePredicates.addAll(singleCode);
 
 		Predicate spPredicate = myBuilder.or(toArray(codePredicates));
-		myPredicates.add(spPredicate);
+		myQueryRoot.addPredicate(spPredicate);
 		return spPredicate;
 	}
 

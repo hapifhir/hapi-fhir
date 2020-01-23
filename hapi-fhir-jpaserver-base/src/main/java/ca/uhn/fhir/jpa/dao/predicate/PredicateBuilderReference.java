@@ -161,13 +161,13 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 
 		if (codePredicates.size() > 0) {
 			Predicate predicate = myBuilder.or(toArray(codePredicates));
-			myPredicates.add(predicate);
+			myQueryRoot.addPredicate(predicate);
 			return predicate;
 		} else {
 			// Add a predicate that will never match
 			Predicate pidPredicate = join.get("myTargetResourcePid").in(-1L);
-			myPredicates.clear();
-			myPredicates.add(pidPredicate);
+			myQueryRoot.clearPredicates();
+			myQueryRoot.addPredicate(pidPredicate);
 			return pidPredicate;
 		}
 	}
@@ -305,7 +305,7 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		Predicate predicate = myBuilder.or(toArray(theCodePredicates));
-		myPredicates.add(predicate);
+		myQueryRoot.addPredicate(predicate);
 		return predicate;
 	}
 
@@ -372,29 +372,22 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 		 * stack and run a subquery
 		 */
 
-		Root<ResourceTable> stackRoot = myResourceTableRoot;
-		ArrayList<Predicate> stackPredicates = myPredicates;
-		IndexJoins stackIndexJoins = myIndexJoins;
-
-		myResourceTableRoot = subQfrom;
-		myPredicates = Lists.newArrayList();
-		myIndexJoins = new IndexJoins();
+		myQueryRoot.push(subQfrom);
+		// FIXME KHS stack in all predicates
 
 		// Create the subquery predicates
-		myPredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), theSubResourceName));
-		myPredicates.add(myBuilder.isNull(myResourceTableRoot.get("myDeleted")));
+		myQueryRoot.addPredicate(myBuilder.equal(myQueryRoot.get("myResourceType"), theSubResourceName));
+		myQueryRoot.addPredicate(myBuilder.isNull(myQueryRoot.get("myDeleted")));
 
 		if (theFoundChainMatch) {
 			searchForIdsWithAndOr(theSubResourceName, theChain, andOrParams, theRequest);
-			subQ.where(toArray(myPredicates));
+			subQ.where(myQueryRoot.getPredicateArray());
 		}
 
 		/*
 		 * Pop the old query root and predicate list back
 		 */
-		myResourceTableRoot = stackRoot;
-		myPredicates = stackPredicates;
-		myIndexJoins = stackIndexJoins;
+		myQueryRoot.pop();
 		return subQ;
 	}
 
@@ -508,12 +501,13 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 								// TODO: we clear the predicates below because the filter builds up
 								// its own collection of predicates. It'd probably be good at some
 								// point to do something more fancy...
-								ArrayList<Predicate> holdPredicates = new ArrayList<>(myPredicates);
+								// FIXME KHS
+								ArrayList<Predicate> holdPredicates = new ArrayList<>(myQueryRoot.getPredicates());
 
 								Predicate filterPredicate = processFilter(filter, theResourceName, theRequest);
-								myPredicates.clear();
-								myPredicates.addAll(holdPredicates);
-								myPredicates.add(filterPredicate);
+								myQueryRoot.clearPredicates();
+								myQueryRoot.addPredicates(holdPredicates);
+								myQueryRoot.addPredicate(filterPredicate);
 							}
 						}
 
@@ -705,13 +699,13 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 			Predicate predicate = null;
 			if ((operation == null) ||
 				(operation == SearchFilterParser.CompareOperation.eq)) {
-				predicate = myResourceTableRoot.get("myLanguage").as(String.class).in(values);
+				predicate = myQueryRoot.get("myLanguage").as(String.class).in(values);
 			} else if (operation == SearchFilterParser.CompareOperation.ne) {
-				predicate = myResourceTableRoot.get("myLanguage").as(String.class).in(values).not();
+				predicate = myQueryRoot.get("myLanguage").as(String.class).in(values).not();
 			} else {
 				throw new InvalidRequestException("Unsupported operator specified in language query, only \"eq\" and \"ne\" are supported");
 			}
-			myPredicates.add(predicate);
+			myQueryRoot.addPredicate(predicate);
 			if (operation != null) {
 				return predicate;
 			}
@@ -732,7 +726,7 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 			throw new InvalidRequestException(msg);
 		}
 
-		Join<ResourceTable, ResourceHistoryProvenanceEntity> join = myResourceTableRoot.join("myProvenance", JoinType.LEFT);
+		Join<ResourceTable, ResourceHistoryProvenanceEntity> join = myQueryRoot.join("myProvenance", JoinType.LEFT);
 
 		List<Predicate> codePredicates = new ArrayList<>();
 
@@ -752,7 +746,7 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		Predicate retVal = myBuilder.or(toArray(codePredicates));
-		myPredicates.add(retVal);
+		myQueryRoot.addPredicate(retVal);
 		return retVal;
 	}
 
@@ -809,11 +803,11 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 
 			Subquery<Long> subQ = myPredicateBuilder.createLinkSubquery(true, parameterName, targetResourceType, orValues, theRequest);
 
-			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
+			Join<ResourceTable, ResourceLink> join = myQueryRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
 			Predicate pathPredicate = myPredicateBuilder.createResourceLinkPathPredicate(targetResourceType, paramReference, join);
 			Predicate pidPredicate = join.get("mySourceResourcePid").in(subQ);
 			Predicate andPredicate = myBuilder.and(pathPredicate, pidPredicate);
-			myPredicates.add(andPredicate);
+			myQueryRoot.addPredicate(andPredicate);
 		}
 	}
 
@@ -828,11 +822,11 @@ public class PredicateBuilderReference extends BasePredicateBuilder {
 
 		RuntimeSearchParam left = theParamDef.getCompositeOf().get(0);
 		IQueryParameterType leftValue = cp.getLeftValue();
-		myPredicates.add(createCompositeParamPart(theResourceName, myResourceTableRoot, left, leftValue));
+		myQueryRoot.addPredicate(createCompositeParamPart(theResourceName, myQueryRoot.getRoot(), left, leftValue));
 
 		RuntimeSearchParam right = theParamDef.getCompositeOf().get(1);
 		IQueryParameterType rightValue = cp.getRightValue();
-		myPredicates.add(createCompositeParamPart(theResourceName, myResourceTableRoot, right, rightValue));
+		myQueryRoot.addPredicate(createCompositeParamPart(theResourceName, myQueryRoot.getRoot(), right, rightValue));
 
 	}
 

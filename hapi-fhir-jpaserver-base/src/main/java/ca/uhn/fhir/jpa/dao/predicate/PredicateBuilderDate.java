@@ -52,11 +52,9 @@ public class PredicateBuilderDate extends BasePredicateBuilder {
 		}
 
 		Predicate orPredicates = myBuilder.or(toArray(codePredicates));
-		myPredicates.add(orPredicates);
+		myQueryRoot.addPredicate(orPredicates);
 		return orPredicates;
 	}
-
-
 
 	public Predicate createPredicateDate(IQueryParameterType theParam,
 													 String theResourceName,
