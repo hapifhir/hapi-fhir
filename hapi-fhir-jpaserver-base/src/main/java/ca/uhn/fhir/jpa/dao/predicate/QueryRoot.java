@@ -10,8 +10,8 @@ import java.util.Stack;
 public class QueryRoot {
 	private final Stack<QueryRootEntry> myQueryRootStack = new Stack<>();
 
-	public void push(Root<ResourceTable> theResourceTableRoot) {
-		myQueryRootStack.push(new QueryRootEntry(theResourceTableRoot));
+	public void push(AbstractQuery<Long> theResourceTableQuery) {
+		myQueryRootStack.push(new QueryRootEntry(theResourceTableQuery));
 	}
 
 	private QueryRootEntry top() {
@@ -61,5 +61,13 @@ public class QueryRoot {
 	// FIXME KHS don't leak
 	List<Predicate> getPredicates() {
 		return top().getPredicates();
+	}
+
+	public void where(Predicate theAnd) {
+		top().where(theAnd);
+	}
+
+	<T> Subquery<T> subquery(Class<T> theClass) {
+		return top().subquery(theClass);
 	}
 }

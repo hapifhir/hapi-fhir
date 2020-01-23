@@ -8,12 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class QueryRootEntry {
+	private final AbstractQuery<Long> myResourceTableQuery;
 	private final Root<ResourceTable> myResourceTableRoot;
 	private final ArrayList<Predicate> myPredicates = new ArrayList<>();
 	private final IndexJoins myIndexJoins = new IndexJoins();
 
-	public QueryRootEntry(Root<ResourceTable> theResourceTableRoot) {
-		myResourceTableRoot = theResourceTableRoot;
+	public QueryRootEntry(AbstractQuery<Long> theResourceTableQuery) {
+		myResourceTableQuery = theResourceTableQuery;
+		myResourceTableRoot = theResourceTableQuery.from(ResourceTable.class);
 	}
 
 	public Root<ResourceTable>  getRoot() {
@@ -55,5 +57,13 @@ public class QueryRootEntry {
 	// FIXME KHS don't leak
 	List<Predicate> getPredicates() {
 		return myPredicates;
+	}
+
+	public void where(Predicate theAnd) {
+		myResourceTableQuery.where(theAnd);
+	}
+
+	<T> Subquery<T> subquery(Class<T> theClass) {
+		return myResourceTableQuery.subquery(theClass);
 	}
 }

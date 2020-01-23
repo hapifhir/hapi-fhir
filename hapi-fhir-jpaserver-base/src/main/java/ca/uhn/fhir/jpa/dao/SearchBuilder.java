@@ -129,7 +129,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private BaseHapiFhirDao<?> myCallingDao;
 	private SearchParameterMap myParams;
 	private String myResourceName;
-	private AbstractQuery<Long> myResourceTableQuery;
 	private Class<? extends IBaseResource> myResourceType;
 	private String mySearchUuid;
 	private int myFetchSize;
@@ -231,8 +230,7 @@ public class SearchBuilder implements ISearchBuilder {
 			assert !theCount;
 
 			outerQuery = myBuilder.createQuery(Long.class);
-			myResourceTableQuery = outerQuery;
-			myQueryRoot.push(myResourceTableQuery.from(ResourceTable.class));
+			myQueryRoot.push(outerQuery);
 			if (theCount) {
 				outerQuery.multiselect(myBuilder.countDistinct(myQueryRoot.getRoot()));
 			} else {
@@ -249,8 +247,7 @@ public class SearchBuilder implements ISearchBuilder {
 		} else {
 
 			outerQuery = myBuilder.createQuery(Long.class);
-			myResourceTableQuery = outerQuery;
-			myQueryRoot.push(myResourceTableQuery.from(ResourceTable.class));
+			myQueryRoot.push(outerQuery);
 			if (theCount) {
 				outerQuery.multiselect(myBuilder.countDistinct(myQueryRoot.getRoot()));
 			} else {
@@ -327,7 +324,7 @@ public class SearchBuilder implements ISearchBuilder {
 		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(lu, myBuilder, myQueryRoot.getRoot());
 		myQueryRoot.addPredicates(lastUpdatedPredicates);
 
-		myResourceTableQuery.where(myBuilder.and(myQueryRoot.getPredicateArray()));
+		myQueryRoot.where(myBuilder.and(myQueryRoot.getPredicateArray()));
 
 		/*
 		 * Now perform the search
@@ -893,10 +890,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 	public QueryRoot getQueryRoot() {
 		return myQueryRoot;
-	}
-
-	public AbstractQuery<Long> getResourceTableQuery() {
-		return myResourceTableQuery;
 	}
 
 	public Class<? extends IBaseResource> getResourceType() {

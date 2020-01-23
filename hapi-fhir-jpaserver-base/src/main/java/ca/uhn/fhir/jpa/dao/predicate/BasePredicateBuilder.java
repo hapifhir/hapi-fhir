@@ -37,7 +37,6 @@ abstract class BasePredicateBuilder {
 	final QueryRoot myQueryRoot;
 	final Class<? extends IBaseResource> myResourceType;
 	final String myResourceName;
-	final AbstractQuery<Long> myResourceTableQuery;
 	final SearchParameterMap myParams;
 
 	// FIXME KHS autowire with lookup
@@ -47,7 +46,6 @@ abstract class BasePredicateBuilder {
 		myQueryRoot = theSearchBuilder.getQueryRoot();
 		myResourceType = theSearchBuilder.getResourceType();
 		myResourceName = theSearchBuilder.getResourceName();
-		myResourceTableQuery = theSearchBuilder.getResourceTableQuery();
 		myParams = theSearchBuilder.getParams();
 	}
 

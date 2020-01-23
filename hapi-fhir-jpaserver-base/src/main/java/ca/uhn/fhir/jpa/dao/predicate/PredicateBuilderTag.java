@@ -135,7 +135,7 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 			if (paramInverted) {
 				ourLog.debug("Searching for _tag:not");
 
-				Subquery<Long> subQ = myResourceTableQuery.subquery(Long.class);
+				Subquery<Long> subQ = myQueryRoot.subquery(Long.class);
 				Root<ResourceTag> subQfrom = subQ.from(ResourceTag.class);
 				subQ.select(subQfrom.get("myResourceId").as(Long.class));
 
