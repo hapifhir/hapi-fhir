@@ -9,6 +9,7 @@ import java.util.Stack;
 
 public class QueryRoot {
 	private final Stack<QueryRootEntry> myQueryRootStack = new Stack<>();
+	private boolean myHasIndexJoins;
 
 	public void push(AbstractQuery<Long> theResourceTableQuery) {
 		myQueryRootStack.push(new QueryRootEntry(theResourceTableQuery));
@@ -51,6 +52,7 @@ public class QueryRoot {
 	}
 
 	void putIndex(SearchBuilderJoinKey theKey, Join<ResourceTable, ResourceIndexedSearchParamDate> theJoin) {
+		myHasIndexJoins = true;
 		top().putIndex(theKey, theJoin);
 	}
 
@@ -69,5 +71,13 @@ public class QueryRoot {
 
 	<T> Subquery<T> subquery(Class<T> theClass) {
 		return top().subquery(theClass);
+	}
+
+	public boolean hasIndexJoins() {
+		return myHasIndexJoins;
+	}
+
+	public void setHasIndexJoins(boolean theHasIndexJoins) {
+		myHasIndexJoins = true;
 	}
 }

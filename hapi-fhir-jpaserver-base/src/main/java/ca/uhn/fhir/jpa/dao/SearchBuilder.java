@@ -75,7 +75,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -134,7 +133,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private int myFetchSize;
 	private Integer myMaxResultsToFetch;
 	private Set<ResourcePersistentId> myPidSet;
-	private boolean myHaveIndexJoins = false;
 	private PredicateBuilder myPredicateBuilder;
 	private final QueryRoot myQueryRoot = new QueryRoot();
 
@@ -312,7 +310,7 @@ public class SearchBuilder implements ISearchBuilder {
 		 * If we have any joins to index tables, we get this behaviour already guaranteed so we don't
 		 * need an explicit predicate for it.
 		 */
-		if (!myHaveIndexJoins) {
+		if (!myQueryRoot.hasIndexJoins()) {
 			if (myParams.getEverythingMode() == null) {
 				myQueryRoot.addPredicate(myBuilder.equal(myQueryRoot.get("myResourceType"), myResourceName));
 			}
@@ -847,11 +845,10 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private void addPredicateCompositeStringUnique(@Nonnull SearchParameterMap theParams, String theIndexdString) {
-		myHaveIndexJoins = true;
-
+	private void addPredicateCompositeStringUnique(@Nonnull SearchParameterMap theParams, String theIndexedString) {
+		myQueryRoot.setHasIndexJoins(true);
 		Join<ResourceTable, ResourceIndexedCompositeStringUnique> join = myQueryRoot.join("myParamsCompositeStringUnique", JoinType.LEFT);
-		Predicate predicate = myBuilder.equal(join.get("myIndexString"), theIndexdString);
+		Predicate predicate = myBuilder.equal(join.get("myIndexString"), theIndexedString);
 		myQueryRoot.addPredicate(predicate);
 
 		// Remove any empty parameters remaining after this

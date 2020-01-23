@@ -14,10 +14,6 @@ public class IndexJoins {
 		myIndexJoins.put(theKey, theJoin);
 	}
 
-	public boolean haveIndexJoins() {
-		return !myIndexJoins.isEmpty();
-	}
-
 	public Join<?,?> get(SearchBuilderJoinKey theKey) {
 		return myIndexJoins.get(theKey);
 	}

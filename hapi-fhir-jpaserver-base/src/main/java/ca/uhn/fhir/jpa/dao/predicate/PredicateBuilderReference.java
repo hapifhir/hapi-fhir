@@ -364,19 +364,16 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 	Subquery<Long> createLinkSubquery(boolean theFoundChainMatch, String theChain, String theSubResourceName, List<IQueryParameterType> theOrValues, RequestDetails theRequest) {
 		Subquery<Long> subQ = myQueryRoot.subquery(Long.class);
-		subQ.select(myQueryRoot.get("myId").as(Long.class));
-
-		List<List<IQueryParameterType>> andOrParams = new ArrayList<>();
-		andOrParams.add(theOrValues);
-
 		/*
 		 * We're doing a chain call, so push the current query root
 		 * and predicate list down and put new ones at the top of the
 		 * stack and run a subquery
 		 */
-
 		myQueryRoot.push(subQ);
-		// FIXME KHS stack in all predicates
+		subQ.select(myQueryRoot.get("myId").as(Long.class));
+
+		List<List<IQueryParameterType>> andOrParams = new ArrayList<>();
+		andOrParams.add(theOrValues);
 
 		// Create the subquery predicates
 		myQueryRoot.addPredicate(myBuilder.equal(myQueryRoot.get("myResourceType"), theSubResourceName));
