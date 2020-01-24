@@ -45,8 +45,12 @@ import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.CacheMode;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
+import org.hibernate.stat.NaturalIdStatistics;
+import org.hibernate.stat.Statistics;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -166,10 +170,17 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			TypedQuery<TermConcept> typedQuery = myEntityManager.createQuery(query.select(root));
 			org.hibernate.query.Query<TermConcept> hibernateQuery = (org.hibernate.query.Query<TermConcept>) typedQuery;
 			ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+			int count = 0;
 			try (ScrollableResultsIterator<TermConcept> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults)) {
 				while (scrollableResultsIterator.hasNext()) {
 					TermConcept next = scrollableResultsIterator.next();
 					codeToConceptPid.put(next.getCode(), next.getId());
+
+					// We don't want to keep the loaded entities in the L1 cache because they can take up a loooot of memory
+					if (count % 100 == 0) {
+						myEntityManager.clear();
+					}
+					count++;
 				}
 			}
 			ourLog.info("Loaded {} concepts in {}", codeToConceptPid.size(), sw.toString());
@@ -199,6 +210,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 					String childCode = next.getChild().getCode();
 					parentCodeToChildCodes.put(parentCode, childCode);
 					childCodeToParentCodes.put(childCode, parentCode);
+
+					// We don't want to keep the loaded entities in the L1 cache because they can take up a loooot of memory
+					if (count % 100 == 0) {
+						myEntityManager.clear();
+					}
+
 					count++;
 				}
 			}
