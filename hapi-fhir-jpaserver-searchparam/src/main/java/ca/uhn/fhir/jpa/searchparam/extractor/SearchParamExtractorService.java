@@ -121,10 +121,6 @@ public class SearchParamExtractorService {
 		}
 	}
 
-//	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource) {
-//		return mySearchParamExtractor.extractSearchParamCoords(theResource);
-//	}
-
 	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
 		return mySearchParamExtractor.extractSearchParamDates(theResource);
 	}

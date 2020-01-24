@@ -19,7 +19,7 @@ public class QueryRootEntry {
 		myResourceTableRoot = theResourceTableQuery.from(ResourceTable.class);
 	}
 
-	public Root<ResourceTable>  getRoot() {
+	public Root<ResourceTable> getRoot() {
 		return myResourceTableRoot;
 	}
 
