@@ -319,20 +319,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.URI);
 	}
 
-//	@Override
-//	public SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource) {
-//		IExtractor<ResourceIndexedSearchParamCoords> extractor = (params, searchParam, value, path) -> {
-//			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
-//				String resourceType = toRootTypeName(theResource);
-//				addCoords_Position(resourceType, params, searchParam, value);
-//			} else {
-//				addUnexpectedDatatypeWarning(params, searchParam, value);
-//			}
-//		};
-//
-//		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.TOKEN);
-//	}
-
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamDate> extractor = (params, searchParam, value, path) -> {
@@ -396,6 +382,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	public SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
 
 		IExtractor<ResourceIndexedSearchParamQuantity> extractor = (params, searchParam, value, path) -> {
+			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
+				return;
+			}
+
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
 			switch (nextType) {

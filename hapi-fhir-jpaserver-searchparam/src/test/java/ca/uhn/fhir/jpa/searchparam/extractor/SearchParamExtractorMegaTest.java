@@ -191,7 +191,7 @@ public class SearchParamExtractorMegaTest {
 		theIndexesCounter.addAndGet(set.size());
 
 		set = theExtractor.extractSearchParamQuantity(resource);
-		assertEquals(0, set.getWarnings().size());
+		assertEquals(String.join("\n", set.getWarnings()), 0, set.getWarnings().size());
 		theIndexesCounter.addAndGet(set.size());
 
 		set = theExtractor.extractSearchParamTokens(resource);
