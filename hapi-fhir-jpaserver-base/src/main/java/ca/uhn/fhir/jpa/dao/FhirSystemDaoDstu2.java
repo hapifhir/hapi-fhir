@@ -582,7 +582,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		}
 		IFhirResourceDao<? extends IBaseResource> dao = null;
 		if (resType != null) {
-			dao = getDao(resType.getImplementingClass());
+			dao = this.myDaoRegistry.getResourceDaoOrNull(resType.getImplementingClass());
 		}
 		if (dao == null) {
 			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);

@@ -43,9 +43,6 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 
 	ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails);
 
-	@SuppressWarnings("unchecked")
-	<R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType);
-
 	Map<String, Long> getResourceCounts();
 
 	/**
