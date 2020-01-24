@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.dao.predicate;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
@@ -27,7 +30,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.*;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Component
 @Scope("prototype")

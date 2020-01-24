@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.dao.predicate;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -20,7 +17,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
-
 import java.util.ArrayList;
 import java.util.List;
 

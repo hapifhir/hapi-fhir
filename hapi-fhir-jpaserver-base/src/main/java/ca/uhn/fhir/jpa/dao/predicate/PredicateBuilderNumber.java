@@ -11,7 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;

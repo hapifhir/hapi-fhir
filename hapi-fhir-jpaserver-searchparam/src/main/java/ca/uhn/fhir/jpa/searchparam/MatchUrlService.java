@@ -33,7 +33,6 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
-import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;

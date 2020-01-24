@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -25,8 +24,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.contains;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class SearchParamExtractorDstu3Test {
 

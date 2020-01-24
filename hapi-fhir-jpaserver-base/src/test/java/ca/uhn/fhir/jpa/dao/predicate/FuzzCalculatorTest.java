@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.predicate;
 
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderTest;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import org.junit.Test;
@@ -11,7 +10,8 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class FuzzCalculatorTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilderTest.class);

@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.util.CoordCalculatorTest;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;

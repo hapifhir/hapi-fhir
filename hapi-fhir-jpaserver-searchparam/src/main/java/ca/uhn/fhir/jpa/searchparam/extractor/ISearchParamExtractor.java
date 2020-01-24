@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 
 /*
  * #%L

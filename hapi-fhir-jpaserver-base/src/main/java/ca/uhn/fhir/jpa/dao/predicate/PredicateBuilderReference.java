@@ -1,7 +1,10 @@
 package ca.uhn.fhir.jpa.dao.predicate;
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.*;
@@ -35,7 +38,6 @@ import javax.persistence.criteria.*;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.*;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 @Scope("prototype")
@@ -61,10 +63,10 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	 */
 
 	public Predicate addPredicate(String theResourceName,
-											 String theParamName,
-											 List<? extends IQueryParameterType> theList,
-											 SearchFilterParser.CompareOperation operation,
-											 RequestDetails theRequest) {
+											String theParamName,
+											List<? extends IQueryParameterType> theList,
+											SearchFilterParser.CompareOperation operation,
+											RequestDetails theRequest) {
 
 		assert theParamName.contains(".") == false;
 

@@ -21,7 +21,6 @@ import javax.annotation.PostConstruct;
 import javax.persistence.criteria.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.ArrayList;
 import java.util.List;
 
 abstract class BasePredicateBuilder {
