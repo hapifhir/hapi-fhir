@@ -18,4 +18,8 @@ public class SearchBox {
 	public Point getNorthEast() {
 		return myNorthEast;
 	}
+
+	public boolean crossesAntiMeridian() {
+		return myNorthEast.getLongitude() < mySouthWest.getLongitude();
+	}
 }

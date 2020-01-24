@@ -18,6 +18,12 @@ public class CoordCalculatorTest {
 	public static final double DISTANCE_KM_CHIN_TO_UHN = 1.478;
 	public static final double BEARING_CHIN_TO_UHN = 82 + (55.0 / 60) + (46.0 / 3600);
 
+	// A Fiji island near the anti-meridian
+	public static final double LATITUDE_TAVEUNI = -16.8488893;
+	public static final double LONGITIDE_TAVEUNI = 179.889793;
+	// enough distance from point to cross anti-meridian
+	public static final double DISTANCE_TAVEUNI = 100.0;
+
 	@Test
 	public void testCHINToUHN() {
 		Point result = CoordCalculator.findTarget(LATITUDE_CHIN, LONGITUDE_CHIN, BEARING_CHIN_TO_UHN, DISTANCE_KM_CHIN_TO_UHN);
@@ -51,15 +57,14 @@ public class CoordCalculatorTest {
 
 	@Test
 	public void testOnAntiMeridian() {
-		double antiMeridianLongitide = 180.0;
-		SearchBox box = CoordCalculator.getBox(LATITUDE_CHIN, antiMeridianLongitide, 1.0);
-		double expectedLatitudeDelta = 0.0090;
-		assertEquals(LATITUDE_CHIN - expectedLatitudeDelta, box.getSouthWest().getLatitude(), 0.0001);
-		assertEquals(LATITUDE_CHIN + expectedLatitudeDelta, box.getNorthEast().getLatitude(), 0.0001);
-		double expectedLongitudeDelta = 0.012414;
-		assertEquals(antiMeridianLongitide - expectedLongitudeDelta, box.getSouthWest().getLongitude(), 0.0001);
+		SearchBox box = CoordCalculator.getBox(LATITUDE_TAVEUNI, LONGITIDE_TAVEUNI, 100.0);
+		double expectedLatitudeDelta = 0.90;
+		assertEquals(LATITUDE_TAVEUNI - expectedLatitudeDelta, box.getSouthWest().getLatitude(), 0.01);
+		assertEquals(LATITUDE_TAVEUNI + expectedLatitudeDelta, box.getNorthEast().getLatitude(), 0.01);
+		double expectedLongitudeDelta = 0.94;
+		assertEquals(LONGITIDE_TAVEUNI - expectedLongitudeDelta, box.getSouthWest().getLongitude(), 0.01);
 		// This case wraps
-		assertEquals(antiMeridianLongitide + expectedLongitudeDelta - 360.0, box.getNorthEast().getLongitude(), 0.0001);
+		assertEquals(LONGITIDE_TAVEUNI + expectedLongitudeDelta - 360.0, box.getNorthEast().getLongitude(), 0.01);
 	}
 
 }

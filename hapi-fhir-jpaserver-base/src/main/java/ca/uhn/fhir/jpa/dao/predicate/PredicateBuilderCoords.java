@@ -10,6 +10,7 @@ import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.SpecialParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -94,22 +95,32 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 			double longitudeDegrees = Double.parseDouble(longitudeValue);
 
 			SearchBox box = CoordCalculator.getBox(latitudeDegrees, longitudeDegrees, distanceKm);
-
-		// FIXME KHS
-			ourLog.info("Searching for {} =< latitude <= {}", box.getSouthWest().getLatitude(), box.getNorthEast().getLatitude());
-			latitudePredicate = theBuilder.and(
-				theBuilder.greaterThanOrEqualTo(theFrom.get("myLatitude"), box.getSouthWest().getLatitude()),
-				theBuilder.lessThanOrEqualTo(theFrom.get("myLatitude"), box.getNorthEast().getLatitude())
-			);
-			// FIXME KHS
-			ourLog.info("Searching for {} =< longitude <= {}", box.getSouthWest().getLongitude(), box.getNorthEast().getLongitude());
-			longitudePredicate = theBuilder.and(
-				theBuilder.greaterThanOrEqualTo(theFrom.get("myLongitude"), box.getSouthWest().getLongitude()),
-				theBuilder.lessThanOrEqualTo(theFrom.get("myLongitude"), box.getNorthEast().getLongitude())
-			);
+			latitudePredicate = latitudePredicateFromBox(theBuilder, theFrom, box);
+			longitudePredicate = longitudePredicateFromBox(theBuilder, theFrom, box);
 		}
 		Predicate singleCode = theBuilder.and(latitudePredicate, longitudePredicate);
 		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
+	}
+
+	private Predicate latitudePredicateFromBox(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamCoords> theFrom, SearchBox theBox) {
+		return theBuilder.and(
+			theBuilder.greaterThanOrEqualTo(theFrom.get("myLatitude"), theBox.getSouthWest().getLatitude()),
+			theBuilder.lessThanOrEqualTo(theFrom.get("myLatitude"), theBox.getNorthEast().getLatitude())
+		);
+	}
+
+	@VisibleForTesting
+	Predicate longitudePredicateFromBox(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamCoords> theFrom, SearchBox theBox) {
+		if (theBox.crossesAntiMeridian()) {
+			return theBuilder.or(
+				theBuilder.greaterThanOrEqualTo(theFrom.get("myLongitude"), theBox.getNorthEast().getLongitude()),
+				theBuilder.lessThanOrEqualTo(theFrom.get("myLongitude"), theBox.getSouthWest().getLongitude())
+			);
+		}
+		return theBuilder.and(
+			theBuilder.greaterThanOrEqualTo(theFrom.get("myLongitude"), theBox.getSouthWest().getLongitude()),
+			theBuilder.lessThanOrEqualTo(theFrom.get("myLongitude"), theBox.getNorthEast().getLongitude())
+		);
 	}
 
 	@Override

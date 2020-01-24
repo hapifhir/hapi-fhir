@@ -10,8 +10,8 @@ public class CoordCalculator {
 	// Source: https://stackoverflow.com/questions/7222382/get-lat-long-given-current-point-distance-and-bearing
 	static Point findTarget(double theLatitudeDegrees, double theLongitudeDegrees, double theBearingDegrees, double theDistanceKm) {
 
-		double latitudeRadians = Math.toRadians(theLatitudeDegrees);
-		double longitudeRadians = Math.toRadians(theLongitudeDegrees);
+		double latitudeRadians = Math.toRadians(Point.normalizeLatitude(theLatitudeDegrees));
+		double longitudeRadians = Math.toRadians(Point.normalizeLongitude(theLongitudeDegrees));
 		double bearingRadians = Math.toRadians(theBearingDegrees);
 		double distanceRadians = theDistanceKm / RADIUS_EARTH_KM;
 

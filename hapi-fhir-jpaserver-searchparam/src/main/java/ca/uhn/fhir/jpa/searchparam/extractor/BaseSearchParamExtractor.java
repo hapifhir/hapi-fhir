@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.ObjectUtils;
+import org.hibernate.search.spatial.impl.Point;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -708,7 +709,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 		// We only accept coordinates when both are present
 		if (latitude != null && longitude != null) {
-			ResourceIndexedSearchParamCoords nextEntity = new ResourceIndexedSearchParamCoords(theResourceType, theSearchParam.getName(), latitude.doubleValue(), longitude.doubleValue());
+			double normalizedLatitude = Point.normalizeLatitude(latitude.doubleValue());
+			double normalizedLongitude = Point.normalizeLongitude(longitude.doubleValue());
+			ResourceIndexedSearchParamCoords nextEntity = new ResourceIndexedSearchParamCoords(theResourceType, theSearchParam.getName(), normalizedLatitude, normalizedLongitude);
 			theParams.add(nextEntity);
 		}
 	}

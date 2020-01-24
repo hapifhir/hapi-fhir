@@ -4195,6 +4195,28 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testNearSearchApproximateNearAntiMeridian() {
+		Location loc = new Location();
+		double latitude = CoordCalculatorTest.LATITUDE_TAVEUNI;
+		double longitude = CoordCalculatorTest.LONGITIDE_TAVEUNI;
+		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		loc.setPosition(position);
+		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
+
+		{ // We match even when the box crosses the anti-meridian
+			double bigEnoughDistance = CoordCalculatorTest.DISTANCE_TAVEUNI;
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
+				"Location?" +
+					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_TAVEUNI + "|"
+					+ CoordCalculatorTest.LONGITIDE_TAVEUNI + "|" +
+					bigEnoughDistance, myFhirCtx.getResourceDefinition("Location"));
+
+			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
+			assertThat(ids, contains(locId));
+		}
+	}
+
 	private String toStringMultiline(List<?> theResults) {
 		StringBuilder b = new StringBuilder();
 		for (Object next : theResults) {
