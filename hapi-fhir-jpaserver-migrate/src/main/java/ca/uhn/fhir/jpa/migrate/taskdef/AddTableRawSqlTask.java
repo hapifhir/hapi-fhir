@@ -101,10 +101,8 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myDriverNeutralSqls)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+			super.generateHashCode(theBuilder);
+			theBuilder.append(myDriverNeutralSqls);
 	}
 }

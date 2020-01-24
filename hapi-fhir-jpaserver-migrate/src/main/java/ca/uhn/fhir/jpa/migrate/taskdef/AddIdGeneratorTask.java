@@ -88,9 +88,9 @@ public class AddIdGeneratorTask extends BaseTask<AddIdGeneratorTask> {
 		if (isNotBlank(sql)) {
 			Set<String> sequenceNames =
 				JdbcUtils.getSequenceNames(getConnectionProperties())
-				.stream()
-				.map(String::toLowerCase)
-				.collect(Collectors.toSet());
+					.stream()
+					.map(String::toLowerCase)
+					.collect(Collectors.toSet());
 			ourLog.debug("Currently have sequences: {}", sequenceNames);
 			if (sequenceNames.contains(myGeneratorName.toLowerCase())) {
 				logInfo(ourLog, "Sequence {} already exists - No action performed", myGeneratorName);
@@ -116,9 +116,7 @@ public class AddIdGeneratorTask extends BaseTask<AddIdGeneratorTask> {
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myGeneratorName)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		theBuilder.append(myGeneratorName);
 	}
 }

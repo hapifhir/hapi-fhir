@@ -152,11 +152,9 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myOldName)
-			.append(myNewName)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myOldName);
+		theBuilder.append(myNewName);
 	}
 }

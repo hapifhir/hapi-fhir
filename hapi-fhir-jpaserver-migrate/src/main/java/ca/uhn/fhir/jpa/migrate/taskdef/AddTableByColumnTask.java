@@ -125,11 +125,10 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myAddColumnTasks)
-			.append(myPkColumns)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myAddColumnTasks);
+		theBuilder.append(myPkColumns);
+		theBuilder.toHashCode();
 	}
 }

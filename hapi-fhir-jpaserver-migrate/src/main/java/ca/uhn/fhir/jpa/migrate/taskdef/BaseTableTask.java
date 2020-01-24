@@ -48,9 +48,13 @@ public abstract class BaseTableTask<T extends BaseTableTask> extends BaseTask {
 
 	@Override
 	public boolean equals(Object theO) {
-		if (this == theO) return true;
+		if (this == theO) {
+			return true;
+		}
 
-		if (!(theO instanceof BaseTableTask)) return false;
+		if (!(theO instanceof BaseTableTask)) {
+			return false;
+		}
 
 		BaseTableTask<?> that = (BaseTableTask<?>) theO;
 
@@ -60,9 +64,7 @@ public abstract class BaseTableTask<T extends BaseTableTask> extends BaseTask {
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myTableName)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		theBuilder.append(myTableName);
 	}
 }

@@ -81,9 +81,13 @@ public class ExecuteRawSqlTask extends BaseTask<ExecuteRawSqlTask> {
 
 	@Override
 	public boolean equals(Object theO) {
-		if (this == theO) return true;
+		if (this == theO) {
+			return true;
+		}
 
-		if (!(theO instanceof ExecuteRawSqlTask)) return false;
+		if (!(theO instanceof ExecuteRawSqlTask)) {
+			return false;
+		}
 
 		ExecuteRawSqlTask that = (ExecuteRawSqlTask) theO;
 
@@ -93,9 +97,8 @@ public class ExecuteRawSqlTask extends BaseTask<ExecuteRawSqlTask> {
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myDriverNeutralSqls)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		theBuilder.append(myDriverNeutralSqls);
+		theBuilder.append(myDriverToSqls);
 	}
 }

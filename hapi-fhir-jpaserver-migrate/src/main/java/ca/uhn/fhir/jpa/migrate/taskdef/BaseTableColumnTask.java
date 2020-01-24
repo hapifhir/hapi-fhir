@@ -67,10 +67,8 @@ public abstract class BaseTableColumnTask<T extends BaseTableTask> extends BaseT
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myColumnName)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myColumnName);
 	}
 }
