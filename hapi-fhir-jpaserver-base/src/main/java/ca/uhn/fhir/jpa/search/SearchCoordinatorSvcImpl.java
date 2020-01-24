@@ -565,6 +565,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
+	@VisibleForTesting
+	public void setSearchBuilderFactoryForUnitTest(SearchBuilderFactory theSearchBuilderFactory) {
+		mySearchBuilderFactory = theSearchBuilderFactory;
+	}
+
 	/**
 	 * A search task is a Callable task that runs in
 	 * a thread pool to handle an individual search. One instance

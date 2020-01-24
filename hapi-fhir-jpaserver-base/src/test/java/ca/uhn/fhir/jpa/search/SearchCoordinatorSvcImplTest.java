@@ -93,6 +93,7 @@ public class SearchCoordinatorSvcImplTest {
 		mySvc.setSearchCacheServicesForUnitTest(mySearchCacheSvc, mySearchResultCacheSvc);
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 		mySvc.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
+		mySvc.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 
 		DaoConfig daoConfig = new DaoConfig();
 		mySvc.setDaoConfigForUnitTest(daoConfig);

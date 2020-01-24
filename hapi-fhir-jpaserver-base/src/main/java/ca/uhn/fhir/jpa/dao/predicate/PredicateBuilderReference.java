@@ -1,10 +1,7 @@
 package ca.uhn.fhir.jpa.dao.predicate;
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.*;
@@ -50,6 +47,8 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	MatchUrlService myMatchUrlService;
+	@Autowired
+	DaoRegistry myDaoRegistry;
 
 	private final PredicateBuilder myPredicateBuilder;
 
@@ -263,7 +262,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			RuntimeResourceDefinition typeDef = myContext.getResourceDefinition(nextType);
 			String subResourceName = typeDef.getName();
 
-			IFhirResourceDao<?> dao = myCallingDao.getDao(nextType);
+			IDao dao = myDaoRegistry.getResourceDao(nextType);
 			if (dao == null) {
 				ourLog.debug("Don't have a DAO for type {}", nextType.getSimpleName());
 				continue;

@@ -75,6 +75,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -102,8 +103,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private static final List<ResourcePersistentId> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 	private static ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
-	private final boolean myDontUseHashesForSearch;
-	private final DaoConfig myDaoConfig;
+	@Autowired
+	private DaoConfig myDaoConfig;
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
@@ -125,7 +126,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private List<ResourcePersistentId> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
-	private BaseHapiFhirDao<?> myCallingDao;
+	private IDao myCallingDao;
 	private SearchParameterMap myParams;
 	private String mySearchUuid;
 	private int myFetchSize;
@@ -139,12 +140,10 @@ public class SearchBuilder implements ISearchBuilder {
 	/**
 	 * Constructor
 	 */
-	SearchBuilder(BaseHapiFhirDao<?> theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+	SearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		myCallingDao = theDao;
-		myDaoConfig = theDao.getConfig();
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
-		myDontUseHashesForSearch = myDaoConfig.getDisableHashBasedSearches();
 	}
 
 	@Override
@@ -435,7 +434,7 @@ public class SearchBuilder implements ISearchBuilder {
 			if (param.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 				theQueryRoot.addPredicate(join.get("mySourcePath").as(String.class).in(param.getPathsSplit()));
 			} else {
-				if (myDontUseHashesForSearch) {
+				if (myDaoConfig.getDisableHashBasedSearches()) {
 					Predicate joinParam1 = theBuilder.equal(join.get("myParamName"), theSort.getParamName());
 					theQueryRoot.addPredicate(joinParam1);
 				} else {
@@ -892,8 +891,13 @@ public class SearchBuilder implements ISearchBuilder {
 		return myResourceName;
 	}
 
-	public BaseHapiFhirDao<?> getCallingDao() {
+	public IDao getCallingDao() {
 		return myCallingDao;
+	}
+
+	@VisibleForTesting
+	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
 	}
 
 	public class IncludesIterator extends BaseIterator<ResourcePersistentId> implements Iterator<ResourcePersistentId> {

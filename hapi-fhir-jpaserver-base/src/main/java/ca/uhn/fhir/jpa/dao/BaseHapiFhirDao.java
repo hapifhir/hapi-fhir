@@ -327,6 +327,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 	}
 
+	// FIXME KHS remove this method
 	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
 		return myDaoRegistry.getResourceDaoOrNull(theType);
 	}

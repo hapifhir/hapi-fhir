@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.predicate;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -10,6 +12,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +26,8 @@ import java.util.List;
 @Component
 @Scope("prototype")
 class PredicateBuilderString extends BasePredicateBuilder implements IPredicateBuilder {
+	@Autowired
+	DaoConfig myDaoConfig;
 
 	PredicateBuilderString(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
@@ -139,7 +144,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 			String likeExpression;
 			if ((theParameter instanceof StringParam) &&
 				(((((StringParam) theParameter).isContains()) &&
-					(myCallingDao.getConfig().isAllowContainsSearches())) ||
+					(myDaoConfig.isAllowContainsSearches())) ||
 					(operation == SearchFilterParser.CompareOperation.co))) {
 				likeExpression = createLeftAndRightMatchLikeExpression(normalizedString);
 			} else if ((operation != SearchFilterParser.CompareOperation.ne) &&
