@@ -23,6 +23,43 @@ public class CoordCalculatorTest {
 		Point result = CoordCalculator.findTarget(LATITUDE_CHIN, LONGITUDE_CHIN, BEARING_CHIN_TO_UHN, DISTANCE_KM_CHIN_TO_UHN);
 
 		assertEquals(LATITUDE_UHN, result.getLatitude(), 0.0001);
-		assertEquals(LONGITUDE_UHN, result.getLatitude(), 0.0001);
+		assertEquals(LONGITUDE_UHN, result.getLongitude(), 0.0001);
 	}
+
+	@Test
+	public void testBox() {
+		SearchBox box = CoordCalculator.getBox(LATITUDE_CHIN, LONGITUDE_CHIN, 1.0);
+		double expectedLatitudeDelta = 0.0090;
+		assertEquals(LATITUDE_CHIN - expectedLatitudeDelta, box.getSouthWest().getLatitude(), 0.0001);
+		assertEquals(LATITUDE_CHIN + expectedLatitudeDelta, box.getNorthEast().getLatitude(), 0.0001);
+		double expectedLongitudeDelta = 0.012414;
+		assertEquals(LONGITUDE_CHIN - expectedLongitudeDelta, box.getSouthWest().getLongitude(), 0.0001);
+		assertEquals(LONGITUDE_CHIN + expectedLongitudeDelta, box.getNorthEast().getLongitude(), 0.0001);
+	}
+
+	@Test
+	public void testOnPrimeMeridian() {
+		double meridianLongitide = 0.0;
+		SearchBox box = CoordCalculator.getBox(LATITUDE_CHIN, meridianLongitide, 1.0);
+		double expectedLatitudeDelta = 0.0090;
+		assertEquals(LATITUDE_CHIN - expectedLatitudeDelta, box.getSouthWest().getLatitude(), 0.0001);
+		assertEquals(LATITUDE_CHIN + expectedLatitudeDelta, box.getNorthEast().getLatitude(), 0.0001);
+		double expectedLongitudeDelta = 0.012414;
+		assertEquals(meridianLongitide - expectedLongitudeDelta, box.getSouthWest().getLongitude(), 0.0001);
+		assertEquals(meridianLongitide + expectedLongitudeDelta, box.getNorthEast().getLongitude(), 0.0001);
+	}
+
+	@Test
+	public void testOnAntiMeridian() {
+		double antiMeridianLongitide = 180.0;
+		SearchBox box = CoordCalculator.getBox(LATITUDE_CHIN, antiMeridianLongitide, 1.0);
+		double expectedLatitudeDelta = 0.0090;
+		assertEquals(LATITUDE_CHIN - expectedLatitudeDelta, box.getSouthWest().getLatitude(), 0.0001);
+		assertEquals(LATITUDE_CHIN + expectedLatitudeDelta, box.getNorthEast().getLatitude(), 0.0001);
+		double expectedLongitudeDelta = 0.012414;
+		assertEquals(antiMeridianLongitide - expectedLongitudeDelta, box.getSouthWest().getLongitude(), 0.0001);
+		// This case wraps
+		assertEquals(antiMeridianLongitide + expectedLongitudeDelta - 360.0, box.getNorthEast().getLongitude(), 0.0001);
+	}
+
 }

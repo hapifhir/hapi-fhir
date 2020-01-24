@@ -4,12 +4,14 @@ import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.CoordCalculator;
+import ca.uhn.fhir.jpa.util.SearchBox;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.SpecialParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.hibernate.search.spatial.impl.Point;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +27,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Component
 @Scope("prototype")
 public class PredicateBuilderCoords extends BasePredicateBuilder implements IPredicateBuilder {
+	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderCoords.class);
 
 	PredicateBuilderCoords(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
@@ -84,22 +87,25 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 			longitudePredicate = theBuilder.equal(theFrom.get("myLongitude"), longitudeValue);
 		} else if (distanceKm < 0.0) {
 			throw new IllegalArgumentException("Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distanceKm + "' must be >= 0.0");
+		} else if (distanceKm > CoordCalculator.MAX_SUPPORTED_DISTANCE_KM) {
+			throw new IllegalArgumentException("Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distanceKm + "' must be <= " + CoordCalculator.MAX_SUPPORTED_DISTANCE_KM);
 		} else {
 			double latitudeDegrees = Double.parseDouble(latitudeValue);
 			double longitudeDegrees = Double.parseDouble(longitudeValue);
 
-			Point northPoint = CoordCalculator.findTarget(latitudeDegrees, longitudeDegrees, 0.0, distanceKm);
-			Point eastPoint = CoordCalculator.findTarget(latitudeDegrees, longitudeDegrees, 90.0, distanceKm);
-			Point southPoint = CoordCalculator.findTarget(latitudeDegrees, longitudeDegrees, 180.0, distanceKm);
-			Point westPoint = CoordCalculator.findTarget(latitudeDegrees, longitudeDegrees, 270.0, distanceKm);
+			SearchBox box = CoordCalculator.getBox(latitudeDegrees, longitudeDegrees, distanceKm);
 
+		// FIXME KHS
+			ourLog.info("Searching for {} =< latitude <= {}", box.getSouthWest().getLatitude(), box.getNorthEast().getLatitude());
 			latitudePredicate = theBuilder.and(
-				theBuilder.greaterThanOrEqualTo(theFrom.get("myLatitude"), southPoint.getLatitude()),
-				theBuilder.lessThanOrEqualTo(theFrom.get("myLatitude"), northPoint.getLatitude())
+				theBuilder.greaterThanOrEqualTo(theFrom.get("myLatitude"), box.getSouthWest().getLatitude()),
+				theBuilder.lessThanOrEqualTo(theFrom.get("myLatitude"), box.getNorthEast().getLatitude())
 			);
+			// FIXME KHS
+			ourLog.info("Searching for {} =< longitude <= {}", box.getSouthWest().getLongitude(), box.getNorthEast().getLongitude());
 			longitudePredicate = theBuilder.and(
-				theBuilder.greaterThanOrEqualTo(theFrom.get("myLongitude"), westPoint.getLongitude()),
-				theBuilder.lessThanOrEqualTo(theFrom.get("myLongitude"), eastPoint.getLongitude())
+				theBuilder.greaterThanOrEqualTo(theFrom.get("myLongitude"), box.getSouthWest().getLongitude()),
+				theBuilder.lessThanOrEqualTo(theFrom.get("myLongitude"), box.getNorthEast().getLongitude())
 			);
 		}
 		Predicate singleCode = theBuilder.and(latitudePredicate, longitudePredicate);

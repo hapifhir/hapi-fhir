@@ -67,10 +67,6 @@ public class SearchParamExtractorService {
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, uris);
 		theParams.myUriParams.addAll(uris);
 
-//		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamCoords> coords = extractSearchParamCoords(theResource);
-//		handleWarnings(theRequestDetails, myInterceptorBroadcaster, coords);
-//		theParams.myCoordsParams.addAll(coords);
-
 		ourLog.trace("Storing date indexes: {}", theParams.myDateParams);
 
 		for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theResource)) {
