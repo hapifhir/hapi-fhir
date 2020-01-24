@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;

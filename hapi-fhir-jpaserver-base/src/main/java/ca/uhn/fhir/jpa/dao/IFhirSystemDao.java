@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nullable;
 import java.util.Date;
