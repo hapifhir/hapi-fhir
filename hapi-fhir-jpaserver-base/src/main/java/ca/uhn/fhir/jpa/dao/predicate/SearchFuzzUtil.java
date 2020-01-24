@@ -4,7 +4,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 
 import java.math.BigDecimal;
 
-public interface FuzzCalculator {
+public interface SearchFuzzUtil {
 	/**
 	 * Figures out the tolerance for a search. For example, if the user is searching for <code>4.00</code>, this method
 	 * returns <code>0.005</code> because we shold actually match values which are

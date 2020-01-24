@@ -13,13 +13,13 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-public class FuzzCalculatorTest {
+public class SearchFuzzUtilTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilderTest.class);
 
 	@Test
 	public void testCalculateMultiplierEqualNoDecimal() {
 		BigDecimal in = new BigDecimal("200");
-		BigDecimal out = FuzzCalculator.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
+		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
 		assertEquals("0.5", out.toPlainString());
 	}
@@ -27,7 +27,7 @@ public class FuzzCalculatorTest {
 	@Test
 	public void testCalculateMultiplierEqualDecimalPrecision200_() {
 		BigDecimal in = new BigDecimal("200.");
-		BigDecimal out = FuzzCalculator.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
+		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
 		assertEquals("0.5", out.toPlainString());
 	}
@@ -35,7 +35,7 @@ public class FuzzCalculatorTest {
 	@Test
 	public void testCalculateMultiplierEqualDecimalPrecision123_010() {
 		BigDecimal in = new BigDecimal("123.010");
-		BigDecimal out = FuzzCalculator.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
+		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
 		assertThat(out.toPlainString(), startsWith("0.0005"));
 
@@ -47,7 +47,7 @@ public class FuzzCalculatorTest {
 	@Test
 	public void testCalculateMultiplierEqualDecimalPrecision200_0() {
 		BigDecimal in = new BigDecimal("200.0");
-		BigDecimal out = FuzzCalculator.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
+		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
 		assertThat(out.toPlainString(), startsWith("0.05000000"));
 	}
@@ -55,7 +55,7 @@ public class FuzzCalculatorTest {
 	@Test
 	public void testCalculateMultiplierEqualDecimalPrecision200_3() {
 		BigDecimal in = new BigDecimal("200.3");
-		BigDecimal out = FuzzCalculator.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
+		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
 		assertThat(out.toPlainString(), startsWith("0.05000000"));
 	}
@@ -63,7 +63,7 @@ public class FuzzCalculatorTest {
 	@Test
 	public void testCalculateMultiplierEqualDecimalPrecision200_300() {
 		BigDecimal in = new BigDecimal("200.300");
-		BigDecimal out = FuzzCalculator.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
+		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
 		assertThat(out.toPlainString(), startsWith("0.0005000000"));
 	}
@@ -71,7 +71,7 @@ public class FuzzCalculatorTest {
 	@Test
 	public void testCalculateMultiplierEqualDecimalPrecision200_30000000() {
 		BigDecimal in = new BigDecimal("200.30000000");
-		BigDecimal out = FuzzCalculator.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
+		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
 		assertThat(out.toPlainString(), startsWith("0.000000005000000"));
 	}
@@ -79,7 +79,7 @@ public class FuzzCalculatorTest {
 	@Test
 	public void testCalculateMultiplierEqualDecimalPrecision200_300000001() {
 		BigDecimal in = new BigDecimal("200.300000001");
-		BigDecimal out = FuzzCalculator.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
+		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
 		assertThat(out.toPlainString(), startsWith("0.0000000005000000"));
 	}
@@ -87,7 +87,7 @@ public class FuzzCalculatorTest {
 	@Test
 	public void testCalculateMultiplierApprox() {
 		BigDecimal in = new BigDecimal("200");
-		BigDecimal out = FuzzCalculator.calculateFuzzAmount(ParamPrefixEnum.APPROXIMATE, in);
+		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.APPROXIMATE, in);
 		ourLog.info(out.toPlainString());
 		assertThat(out.toPlainString(), startsWith("20.000"));
 	}

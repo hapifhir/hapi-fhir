@@ -126,14 +126,14 @@ abstract class BasePredicateBuilder {
 	}
 
 	Predicate createPredicateNumeric(String theResourceName,
-														  String theParamName,
-														  From<?, ? extends BaseResourceIndexedSearchParam> theFrom,
-														  CriteriaBuilder builder,
-														  IQueryParameterType theParam,
-														  ParamPrefixEnum thePrefix,
-														  BigDecimal theValue,
-														  final Expression<BigDecimal> thePath,
-														  String invalidMessageName) {
+												String theParamName,
+												From<?, ? extends BaseResourceIndexedSearchParam> theFrom,
+												CriteriaBuilder builder,
+												IQueryParameterType theParam,
+												ParamPrefixEnum thePrefix,
+												BigDecimal theValue,
+												final Expression<BigDecimal> thePath,
+												String invalidMessageName) {
 		Predicate num;
 		// Per discussions with Grahame Grieve and James Agnew on 11/13/19, modified logic for EQUAL and NOT_EQUAL operators below so as to
 		//   use exact value matching.  The "fuzz amount" matching is still used with the APPROXIMATE operator.
@@ -157,7 +157,7 @@ abstract class BasePredicateBuilder {
 				num = builder.notEqual(thePath, theValue);
 				break;
 			case APPROXIMATE:
-				BigDecimal mul = FuzzCalculator.calculateFuzzAmount(thePrefix, theValue);
+				BigDecimal mul = SearchFuzzUtil.calculateFuzzAmount(thePrefix, theValue);
 				BigDecimal low = theValue.subtract(mul, MathContext.DECIMAL64);
 				BigDecimal high = theValue.add(mul, MathContext.DECIMAL64);
 				Predicate lowPred;
