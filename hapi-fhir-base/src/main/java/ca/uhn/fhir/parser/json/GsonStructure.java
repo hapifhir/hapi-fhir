@@ -22,15 +22,10 @@ package ca.uhn.fhir.parser.json;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.AbstractSet;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import ca.uhn.fhir.parser.DataFormatException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -39,6 +34,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
+
+import ca.uhn.fhir.parser.DataFormatException;
 
 public class GsonStructure implements JsonLikeStructure {
 
@@ -324,56 +321,5 @@ public class GsonStructure implements JsonLikeStructure {
 			}
 			return super.getAsBoolean();
 		}
-	}
-	
-	private static class EntryOrderedSet<T> extends AbstractSet<T> {
-		private transient ArrayList<T> data = null;
-		
-		public EntryOrderedSet (int initialCapacity) {
-			data = new ArrayList<T>(initialCapacity);
-		}
-		@SuppressWarnings("unused")
-		public EntryOrderedSet () {
-			data = new ArrayList<T>();
-		}
-		
-		@Override
-		public int size() {
-			return data.size();
-		}
-
-		@Override
-		public boolean contains(Object o) {
-			return data.contains(o);
-		}
-
-		@SuppressWarnings("unused")  // not really.. just not here
-		public T get(int index) {
-			return data.get(index);
-		}
-		
-		@Override
-		public boolean add(T element) {
-			if (data.contains(element)) {
-				return false;
-			}
-			return data.add(element);
-		}
-		
-		@Override
-		public boolean remove(Object o) {
-			return data.remove(o);
-		}
-
-		@Override
-		public void clear() {
-			data.clear();
-		}
-		
-		@Override
-		public Iterator<T> iterator() {
-			return data.iterator();
-		}
-		
 	}
 }

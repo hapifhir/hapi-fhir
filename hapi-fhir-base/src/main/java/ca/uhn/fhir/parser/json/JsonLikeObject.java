@@ -1,5 +1,8 @@
 package ca.uhn.fhir.parser.json;
 
+import java.util.AbstractSet;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Set;
 
 /*
@@ -69,4 +72,56 @@ public abstract class JsonLikeObject extends JsonLikeValue {
 		}
 		return result;
 	}
+	
+	protected static class EntryOrderedSet<T> extends AbstractSet<T> {
+		private transient ArrayList<T> data = null;
+		
+		public EntryOrderedSet (int initialCapacity) {
+			data = new ArrayList<T>(initialCapacity);
+		}
+		@SuppressWarnings("unused")
+		public EntryOrderedSet () {
+			data = new ArrayList<T>();
+		}
+		
+		@Override
+		public int size() {
+			return data.size();
+		}
+
+		@Override
+		public boolean contains(Object o) {
+			return data.contains(o);
+		}
+
+		@SuppressWarnings("unused")  // not really.. just not here
+		public T get(int index) {
+			return data.get(index);
+		}
+		
+		@Override
+		public boolean add(T element) {
+			if (data.contains(element)) {
+				return false;
+			}
+			return data.add(element);
+		}
+		
+		@Override
+		public boolean remove(Object o) {
+			return data.remove(o);
+		}
+
+		@Override
+		public void clear() {
+			data.clear();
+		}
+		
+		@Override
+		public Iterator<T> iterator() {
+			return data.iterator();
+		}
+		
+	}
+	
 }
