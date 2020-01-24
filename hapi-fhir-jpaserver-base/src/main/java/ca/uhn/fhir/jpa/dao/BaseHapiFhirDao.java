@@ -401,7 +401,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		search = mySearchCacheSvc.save(search);
 
-		return new PersistedJpaBundleProvider(theRequest, search.getUuid(), this);
+		return new PersistedJpaBundleProvider(theRequest, search.getUuid(), this, mySearchBuilderFactory);
 	}
 
 	void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
@@ -433,12 +433,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	public boolean isLogicalReference(IIdType theId) {
 		return LogicalReferenceHelper.isLogicalReference(myConfig.getModelConfig(), theId);
-	}
-
-	// TODO KHS inject a searchBuilderFactory into callers of this method and delete this method
-	@Override
-	public SearchBuilder newSearchBuilder(String theResourceName, Class<? extends IBaseResource> theResourceType) {
-		return mySearchBuilderFactory.newSearchBuilder(this, theResourceName, theResourceType);
 	}
 
 	public void notifyInterceptors(RestOperationTypeEnum theOperationType, ActionRequestDetails theRequestDetails) {

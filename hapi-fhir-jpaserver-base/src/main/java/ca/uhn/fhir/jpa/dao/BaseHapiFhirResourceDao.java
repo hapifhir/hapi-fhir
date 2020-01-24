@@ -91,6 +91,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private MatchResourceUrlService myMatchResourceUrlService;
 	@Autowired
 	private IResourceReindexingSvc myResourceReindexingSvc;
+	@Autowired
+	private SearchBuilderFactory mySearchBuilderFactory;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
 	private IInstanceValidatorModule myInstanceValidator;
 	private String myResourceName;
 	private Class<T> myResourceType;
@@ -1093,7 +1098,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
 
-		SearchBuilder builder = newSearchBuilder(getResourceName(), getResourceType());
+		ISearchBuilder builder = mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
 
 		// FIXME: fail if too many results
 

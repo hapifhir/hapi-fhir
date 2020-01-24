@@ -48,8 +48,6 @@ public interface IDao {
 	 */
 	void injectDependenciesIntoBundleProvider(PersistedJpaBundleProvider theProvider);
 
-	ISearchBuilder newSearchBuilder(String theResourceName, Class<? extends IBaseResource> theResourceType);
-
 	IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation);
 
 	<R extends IBaseResource> R toResource(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<ResourceTag> theTagList, boolean theForHistoryOperation);

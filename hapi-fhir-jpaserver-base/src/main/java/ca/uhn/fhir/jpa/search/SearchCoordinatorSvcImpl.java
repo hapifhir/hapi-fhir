@@ -121,6 +121,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IPagingProvider myPagingProvider;
+	@Autowired
+	private SearchBuilderFactory mySearchBuilderFactory;
 
 	private int mySyncSize = DEFAULT_SYNC_SIZE;
 	/**
@@ -280,13 +282,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@Override
-	public IBundleProvider registerSearch(final IDao theCallingDao, final SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, RequestDetails theRequestDetails) {
+	public IBundleProvider registerSearch(final IFhirResourceDao theCallingDao, final SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, RequestDetails theRequestDetails) {
 		final String searchUuid = UUID.randomUUID().toString();
 
 		ourLog.debug("Registering new search {}", searchUuid);
 
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
-		final ISearchBuilder sb = theCallingDao.newSearchBuilder(theResourceType, resourceTypeClass);
+		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theCallingDao, theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
 
 		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);
@@ -368,7 +370,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		myIdToSearchTask.put(search.getUuid(), task);
 		myExecutor.submit(task);
 
-		PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, theCallingDao, task, theSb, myManagedTxManager, theRequestDetails);
+		PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, theCallingDao, mySearchBuilderFactory, task, theSb, myManagedTxManager, theRequestDetails);
 		populateBundleProvider(retVal);
 
 		ourLog.debug("Search initial phase completed in {}ms", w.getMillis());
@@ -406,7 +408,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			mySearchCacheSvc.updateSearchLastReturned(searchToUse, new Date());
 
-			PersistedJpaBundleProvider retVal = new PersistedJpaBundleProvider(theRequestDetails, searchToUse.getUuid(), theCallingDao);
+			PersistedJpaBundleProvider retVal = new PersistedJpaBundleProvider(theRequestDetails, searchToUse.getUuid(), theCallingDao, mySearchBuilderFactory);
 			retVal.setCacheHit(true);
 			populateBundleProvider(retVal);
 
@@ -649,7 +651,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		private ISearchBuilder newSearchBuilder() {
 			Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(myResourceType).getImplementingClass();
-			ISearchBuilder sb = myCallingDao.newSearchBuilder(myResourceType, resourceTypeClass);
+			ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(myCallingDao, myResourceType, resourceTypeClass);
 
 			return sb;
 		}
