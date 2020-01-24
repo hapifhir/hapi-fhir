@@ -48,7 +48,7 @@ public interface IDao {
 	 */
 	void injectDependenciesIntoBundleProvider(PersistedJpaBundleProvider theProvider);
 
-	ISearchBuilder newSearchBuilder();
+	ISearchBuilder newSearchBuilder(String theResourceName, Class<? extends IBaseResource> theResourceType);
 
 	IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation);
 

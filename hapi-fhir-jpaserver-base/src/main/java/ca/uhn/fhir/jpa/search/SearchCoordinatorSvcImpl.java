@@ -286,8 +286,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		ourLog.debug("Registering new search {}", searchUuid);
 
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
-		final ISearchBuilder sb = theCallingDao.newSearchBuilder();
-		sb.setType(resourceTypeClass, theResourceType);
+		final ISearchBuilder sb = theCallingDao.newSearchBuilder(theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
 
 		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);
@@ -645,8 +644,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		private ISearchBuilder newSearchBuilder() {
 			Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(myResourceType).getImplementingClass();
-			ISearchBuilder sb = myCallingDao.newSearchBuilder();
-			sb.setType(resourceTypeClass, myResourceType);
+			ISearchBuilder sb = myCallingDao.newSearchBuilder(myResourceType, resourceTypeClass);
 
 			return sb;
 		}

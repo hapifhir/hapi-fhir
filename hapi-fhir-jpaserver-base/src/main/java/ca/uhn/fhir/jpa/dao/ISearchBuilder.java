@@ -54,8 +54,6 @@ public interface ISearchBuilder {
 	 */
 	void setFetchSize(int theFetchSize);
 
-	void setType(Class<? extends IBaseResource> theResourceType, String theResourceName);
-
 	void setPreviouslyAddedResourcePids(List<ResourcePersistentId> thePreviouslyAddedResourcePids);
 
 }

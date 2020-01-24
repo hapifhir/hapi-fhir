@@ -213,9 +213,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 			ourLog.info("Bulk export assembling export of type {} for job {}", nextType, theJobUuid);
 
-			ISearchBuilder sb = dao.newSearchBuilder();
 			Class<? extends IBaseResource> nextTypeClass = myContext.getResourceDefinition(nextType).getImplementingClass();
-			sb.setType(nextTypeClass, nextType);
+			ISearchBuilder sb = dao.newSearchBuilder(nextType, nextTypeClass);
 
 			SearchParameterMap map = new SearchParameterMap();
 			map.setLoadSynchronous(true);
@@ -225,8 +224,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 			IResultIterator resultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, theJobUuid), null);
 			storeResultsToFiles(nextCollection, sb, resultIterator, jobResourceCounter, jobStopwatch);
-
-
 		}
 
 		job.setStatus(BulkJobStatusEnum.COMPLETE);

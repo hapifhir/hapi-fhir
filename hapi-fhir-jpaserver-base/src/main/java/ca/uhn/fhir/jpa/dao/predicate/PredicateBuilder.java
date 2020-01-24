@@ -36,7 +36,7 @@ public class PredicateBuilder {
 	}
 
 	void addPredicateCoords(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd) {
-		myPredicateBuilderCoords.addPredicate(theResourceName, theParamName, theNextAnd);
+		myPredicateBuilderCoords.addPredicate(theResourceName, theParamName, theNextAnd, null);
 	}
 
 	Predicate addPredicateDate(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation) {

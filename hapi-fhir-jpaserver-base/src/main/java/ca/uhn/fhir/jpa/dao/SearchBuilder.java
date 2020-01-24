@@ -127,21 +127,23 @@ public class SearchBuilder implements ISearchBuilder {
 	private CriteriaBuilder myBuilder;
 	private BaseHapiFhirDao<?> myCallingDao;
 	private SearchParameterMap myParams;
-	private String myResourceName;
-	private Class<? extends IBaseResource> myResourceType;
 	private String mySearchUuid;
 	private int myFetchSize;
 	private Integer myMaxResultsToFetch;
 	private Set<ResourcePersistentId> myPidSet;
 	private PredicateBuilder myPredicateBuilder;
 	private final QueryRoot myQueryRoot = new QueryRoot();
+	private final String myResourceName;
+	private final Class<? extends IBaseResource> myResourceType;
 
 	/**
 	 * Constructor
 	 */
-	SearchBuilder(BaseHapiFhirDao<?> theDao) {
+	SearchBuilder(BaseHapiFhirDao<?> theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		myCallingDao = theDao;
 		myDaoConfig = theDao.getConfig();
+		myResourceName = theResourceName;
+		myResourceType = theResourceType;
 		myDontUseHashesForSearch = myDaoConfig.getDisableHashBasedSearches();
 	}
 
@@ -858,13 +860,6 @@ public class SearchBuilder implements ISearchBuilder {
 	@Override
 	public void setFetchSize(int theFetchSize) {
 		myFetchSize = theFetchSize;
-	}
-
-	// FIXME KHS move this into constructor and make these final
-	@Override
-	public void setType(Class<? extends IBaseResource> theResourceType, String theResourceName) {
-		myResourceType = theResourceType;
-		myResourceName = theResourceName;
 	}
 
 	@VisibleForTesting

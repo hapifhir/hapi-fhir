@@ -170,11 +170,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			// No resources to fetch (e.g. we did a _summary=count search)
 			return Collections.emptyList();
 		}
-		final ISearchBuilder sb = myDao.newSearchBuilder();
-
 		String resourceName = mySearchEntity.getResourceType();
 		Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(resourceName).getImplementingClass();
-		sb.setType(resourceType, resourceName);
+		final ISearchBuilder sb = myDao.newSearchBuilder(resourceName, resourceType);
 
 		final List<ResourcePersistentId> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest);
 

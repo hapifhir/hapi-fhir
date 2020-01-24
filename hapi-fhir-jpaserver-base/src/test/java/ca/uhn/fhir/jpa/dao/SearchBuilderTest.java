@@ -28,7 +28,7 @@ public class SearchBuilderTest {
 	public void testIncludeIterator() {
 		BaseHapiFhirDao<?> mockDao = mock(BaseHapiFhirDao.class);
 		when(mockDao.getConfig()).thenReturn(new DaoConfig());
-		SearchBuilder searchBuilder = new SearchBuilder(mockDao);
+		SearchBuilder searchBuilder = new SearchBuilder(mockDao, null, null);
 
 		searchBuilder.setParamsForUnitTest(new SearchParameterMap());
 		EntityManager mockEntityManager = mock(EntityManager.class);

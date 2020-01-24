@@ -502,7 +502,6 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 								// TODO: we clear the predicates below because the filter builds up
 								// its own collection of predicates. It'd probably be good at some
 								// point to do something more fancy...
-								// FIXME KHS
 								ArrayList<Predicate> holdPredicates = new ArrayList<>(myQueryRoot.getPredicates());
 
 								Predicate filterPredicate = processFilter(filter, theResourceName, theRequest);

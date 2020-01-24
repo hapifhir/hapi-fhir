@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class QueryRootEntry {
@@ -54,9 +55,8 @@ public class QueryRootEntry {
 		myPredicates.clear();
 	}
 
-	// FIXME KHS don't leak
 	List<Predicate> getPredicates() {
-		return myPredicates;
+		return Collections.unmodifiableList(myPredicates);
 	}
 
 	public void where(Predicate theAnd) {

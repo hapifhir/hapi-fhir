@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 
 import javax.persistence.criteria.*;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -60,7 +61,6 @@ public class QueryRoot {
 		top().clearPredicates();
 	}
 
-	// FIXME KHS don't leak
 	List<Predicate> getPredicates() {
 		return top().getPredicates();
 	}

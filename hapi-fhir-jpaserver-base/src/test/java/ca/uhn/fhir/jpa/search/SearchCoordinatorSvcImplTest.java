@@ -77,7 +77,7 @@ public class SearchCoordinatorSvcImplTest {
 	@After
 	public void after() {
 		System.clearProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK);
-		verify(myCallingDao, atMost(myExpectedNumberOfSearchBuildersCreated)).newSearchBuilder();
+		verify(myCallingDao, atMost(myExpectedNumberOfSearchBuildersCreated)).newSearchBuilder(any(), any());
 	}
 
 	@Before
@@ -97,7 +97,7 @@ public class SearchCoordinatorSvcImplTest {
 		DaoConfig daoConfig = new DaoConfig();
 		mySvc.setDaoConfigForUnitTest(daoConfig);
 
-		when(myCallingDao.newSearchBuilder()).thenReturn(mySearchBuilder);
+		when(myCallingDao.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
 

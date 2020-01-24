@@ -456,8 +456,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	// TODO KHS inject a searchBuilderFactory into callers of this method and delete this method
 	@Override
-	public SearchBuilder newSearchBuilder() {
-		return mySearchBuilderFactory.newSearchBuilder(this);
+	public SearchBuilder newSearchBuilder(String theResourceName, Class<? extends IBaseResource> theResourceType) {
+		return mySearchBuilderFactory.newSearchBuilder(this, theResourceName, theResourceType);
 	}
 
 	public void notifyInterceptors(RestOperationTypeEnum theOperationType, ActionRequestDetails theRequestDetails) {

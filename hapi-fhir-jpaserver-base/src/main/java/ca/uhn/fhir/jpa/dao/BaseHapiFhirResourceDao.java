@@ -1126,8 +1126,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
 
-		SearchBuilder builder = newSearchBuilder();
-		builder.setType(getResourceType(), getResourceName());
+		SearchBuilder builder = newSearchBuilder(getResourceName(), getResourceType());
 
 		// FIXME: fail if too many results
 
