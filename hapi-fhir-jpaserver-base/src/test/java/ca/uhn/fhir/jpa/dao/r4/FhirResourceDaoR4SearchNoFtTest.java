@@ -4215,6 +4215,17 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids, contains(locId));
 		}
+		{ // We don't match outside a box that crosses the anti-meridian
+			double tooSmallDistance = CoordCalculatorTest.DISTANCE_TAVEUNI;
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
+				"Location?" +
+					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + "|"
+					+ CoordCalculatorTest.LONGITUDE_CHIN + "|" +
+					tooSmallDistance, myFhirCtx.getResourceDefinition("Location"));
+
+			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
+			assertThat(ids.size(), is(0));
+		}
 	}
 
 	private String toStringMultiline(List<?> theResults) {
