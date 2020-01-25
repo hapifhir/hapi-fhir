@@ -181,21 +181,6 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		return this;
 	}
 
-
-	public enum ColumnTypeEnum {
-
-		LONG,
-		STRING,
-		DATE_TIMESTAMP,
-		BOOLEAN,
-		FLOAT,
-		INT,
-		BLOB,
-		CLOB
-		;
-
-	}
-
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
@@ -213,13 +198,11 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(getColumnTypeName(myColumnType))
-			.append(myNullable)
-			.append(myColumnLength)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(getColumnTypeName(myColumnType));
+		theBuilder.append(myNullable);
+		theBuilder.append(myColumnLength);
 	}
 
 	@Nullable
@@ -228,5 +211,19 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 			return null;
 		}
 		return myColumnType.name();
+	}
+
+
+	public enum ColumnTypeEnum {
+
+		LONG,
+		STRING,
+		DATE_TIMESTAMP,
+		BOOLEAN,
+		FLOAT,
+		INT,
+		BLOB,
+		CLOB;
+
 	}
 }

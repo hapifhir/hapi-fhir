@@ -121,12 +121,10 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myConstraintName)
-			.append(myForeignTableName)
-			.append(myForeignColumnName)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myConstraintName);
+		theBuilder.append(myForeignTableName);
+		theBuilder.append(myForeignColumnName);
 	}
 }
