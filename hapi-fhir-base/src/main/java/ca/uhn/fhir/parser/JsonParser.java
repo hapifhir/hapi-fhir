@@ -34,8 +34,6 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.WordUtils;
@@ -61,6 +59,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 	private FhirContext myContext;
 	private boolean myPrettyPrint;
+	private JsonLikeProviderFactory myProviderFactory;
+	private static final Class<? extends JsonLikeProviderFactory> DEFAULT_PROVIDER_FACTORY_CLASS = GsonProviderFactory.class;
 
 	/**
 	 * Do not use this constructor, the recommended way to obtain a new instance of the JSON parser is to invoke
@@ -148,8 +148,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	private JsonLikeWriter createJsonWriter(Writer theWriter) {
-		JsonLikeStructure jsonStructure = new GsonStructure();
-		JsonLikeWriter retVal = jsonStructure.getJsonLikeWriter(theWriter);
+		JsonLikeWriter retVal = getJsonLikeProviderFactory().createJsonLikeWriter(theWriter);
 		return retVal;
 	}
 
@@ -172,11 +171,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 	@Override
 	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {
-		JsonLikeStructure jsonStructure = new GsonStructure();
-		jsonStructure.load(theReader);
-
+		JsonLikeStructure jsonStructure = getJsonLikeProviderFactory().createJsonLikeStructure(theReader);
 		T retVal = doParseResource(theResourceType, jsonStructure);
-
 		return retVal;
 	}
 
@@ -594,7 +590,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		return maxCardinality > 1 || maxCardinality == Child.MAX_UNLIMITED;
 	}
 
-	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theNextValue, JsonLikeWriter theEventWriter, boolean theContainedResource, 																	  CompositeChildElement theParent, EncodeContext theEncodeContext) throws IOException, DataFormatException {
+	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theNextValue, JsonLikeWriter theEventWriter, boolean theContainedResource,
+			CompositeChildElement theParent, EncodeContext theEncodeContext) throws IOException, DataFormatException {
 
 		writeCommentsPreAndPost(theNextValue, theEventWriter);
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theNextValue, theEventWriter, theContainedResource, theParent, theEncodeContext);
@@ -890,6 +887,18 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	@Override
 	public EncodingEnum getEncoding() {
 		return EncodingEnum.JSON;
+	}
+
+	@Override
+	public JsonLikeProviderFactory getJsonLikeProviderFactory() {
+		if (null == myProviderFactory) {
+			try {
+				myProviderFactory = DEFAULT_PROVIDER_FACTORY_CLASS.newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new ConfigurationException("Unable to create insstance of Json Provider Factory. class="+DEFAULT_PROVIDER_FACTORY_CLASS.getName(), e);
+			}
+		}
+		return myProviderFactory;
 	}
 
 	private JsonLikeArray grabJsonArray(JsonLikeObject theObject, String nextName, String thePosition) {
@@ -1273,6 +1282,12 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	@Override
+	public IJsonLikeParser setJsonLikeProviderFactory(JsonLikeProviderFactory theProviderFactory) {
+		myProviderFactory = theProviderFactory;
+		return this;
+	}
+
+	@Override
 	public IParser setPrettyPrint(boolean thePrettyPrint) {
 		myPrettyPrint = thePrettyPrint;
 		return this;
@@ -1376,10 +1391,10 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 	}
 
-	public static Gson newGson() {
-		Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-		return gson;
-	}
+//	public static Gson newGson() {
+//		Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+//		return gson;
+//	}
 
 	private static void write(JsonLikeWriter theWriter, String theName, String theValue) throws IOException {
 		theWriter.write(theName, theValue);

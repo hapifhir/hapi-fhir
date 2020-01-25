@@ -26,6 +26,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.parser.json.JsonLikeProviderFactory;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import ca.uhn.fhir.parser.json.JsonLikeWriter;
 
@@ -67,4 +68,14 @@ public interface IJsonLikeParser extends IParser {
 	 */
 	IBaseResource parseResource(JsonLikeStructure theJsonLikeStructure) throws DataFormatException;
 
+	/**
+	 * Hook the {@code JsonParser} up with the factory that gives access
+	 * to the external JSON Provider's serialization/deserialization functions
+	 * 
+	 * @param factory an implementation of {@code JsonLikeProviderFactory} that
+	 *                gives access to the serialization/deserialization functions
+	 *                of the particular external JSON Provider
+	 */
+	IJsonLikeParser setJsonLikeProviderFactory (JsonLikeProviderFactory factory);
+	JsonLikeProviderFactory getJsonLikeProviderFactory (); 
 }

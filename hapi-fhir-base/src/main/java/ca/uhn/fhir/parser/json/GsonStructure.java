@@ -113,21 +113,6 @@ public class GsonStructure implements JsonLikeStructure {
 		}
 	}
 
-	@Override
-	public JsonLikeWriter getJsonLikeWriter (Writer writer) {
-		if (null == jsonLikeWriter) {
-			jsonLikeWriter = new GsonWriter(writer);
-		}
-		return jsonLikeWriter;
-	}
-
-	@Override
-	public JsonLikeWriter getJsonLikeWriter () {
-		if (null == jsonLikeWriter) {
-			jsonLikeWriter = new GsonWriter();
-		}
-		return jsonLikeWriter;
-	}
 
 	@Override
 	public JsonLikeObject getRootObject() throws DataFormatException {

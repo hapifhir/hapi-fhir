@@ -47,6 +47,4 @@ public interface JsonLikeStructure {
 	public void load (Reader theReader, boolean allowArray) throws DataFormatException;
 	public JsonLikeObject getRootObject () throws DataFormatException;
 	public JsonLikeArray getRootArray () throws DataFormatException;
-	public JsonLikeWriter getJsonLikeWriter ();
-	public JsonLikeWriter getJsonLikeWriter (Writer writer);
 }
