@@ -83,6 +83,9 @@ Sean McIlvenna for reporting!"
        a plain field instead of an array (as required by the FHIR specification). Thanks to 
        Petro Mykhailysyn for the pull request!"
 - item:
+   type: "fix"
+   title: "A meomery leak was resolved in the JPA terminology service delta upload operations."
+- item:
      type: "add"
      title: "Searching Location.position by latitude, longitude and distance for DSTU3, R4 and R5 is now supported using a simple 'box' search.
      Locations falling within a box with length and width of 2 * distance, centred on specified latitude,longitude are matched.  If no distance
