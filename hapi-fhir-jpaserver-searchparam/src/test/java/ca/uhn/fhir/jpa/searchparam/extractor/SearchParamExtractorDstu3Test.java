@@ -187,8 +187,8 @@ public class SearchParamExtractorDstu3Test {
 	@Test
 	public void testParamCoords() {
 		Location loc = new Location();
-		double latitude = 1000.0;
-		double longitude = 2000.0;
+		double latitude = 40.0;
+		double longitude = 80.0;
 		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
 
