@@ -16,3 +16,9 @@ https://localhost:8000/Practitioner?_has:PractitionerRole:practitioner:service.t
 ### Location.position "near"
 
 Searching on Location.Position using `near` currently uses a box search, not a radius search.  A box search is a square centred on the provided coordinates with the shortest distance to the edge of the square equal to the distance provided; this means the box search will match more locations than a radius search in the corners.  Currently, distance is assumed to be in km and any provided units are ignored.  Distance must be between 0.0km and 10,000km.
+
+### _filter
+
+The special `_filter` is only partially implemented.
+
+
