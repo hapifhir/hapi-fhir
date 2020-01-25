@@ -626,7 +626,6 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 		assertNotMatched(patient, badCriteria4);
 	}
 
-	// FIXME KHS fix this test
 	@Test
 	public void testLocationPositionNotSupported() {
 		Location loc = new Location();
@@ -641,6 +640,6 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 				"&" +
 				Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + "|http://unitsofmeasure.org|km";
 
-		assertMatched(loc, badCriteria);
+		assertUnsupported(loc, badCriteria);
 	}
 }

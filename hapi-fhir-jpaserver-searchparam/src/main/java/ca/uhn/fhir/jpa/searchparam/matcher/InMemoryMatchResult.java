@@ -26,8 +26,9 @@ public class InMemoryMatchResult {
 	public static final String CHAIN = "Chained parameters are not supported";
 	public static final String PARAM = "Parameter not supported";
 	public static final String QUALIFIER = "Qualified parameter not supported";
+    public static final String LOCATION_NEAR = "Location.position near not supported";
 
-	private final boolean myMatch;
+    private final boolean myMatch;
 	private final boolean mySupported;
 	private final String myUnsupportedParameter;
 	private final String myUnsupportedReason;
