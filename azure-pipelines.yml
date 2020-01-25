@@ -17,7 +17,7 @@ jobs:
     steps:
       - task: CacheBeta@0
         inputs:
-          key: maven
+          key: 'maven | "$(Agent.OS)" | ./pom.xml'
           path: $(MAVEN_CACHE_FOLDER)
       - task: Maven@3
         env:
