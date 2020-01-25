@@ -33,7 +33,15 @@ import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CustomTerminologySet {
@@ -142,6 +150,12 @@ public class CustomTerminologySet {
 		validateNoCycleOrThrowInvalidRequest(theCodes, next.getChildCodes());
 	}
 
+	public Set<String> getRootConceptCodes() {
+		return getRootConcepts()
+			.stream()
+			.map(t -> t.getCode())
+			.collect(Collectors.toSet());
+	}
 
 	@Nonnull
 	public static CustomTerminologySet load(LoadedFileDescriptors theDescriptors, boolean theFlat) {
@@ -178,7 +192,7 @@ public class CustomTerminologySet {
 				}
 
 				// Sort children so they appear in the same order as they did in the concepts.csv file
-				nextConcept.getChildren().sort((o1,o2)->{
+				nextConcept.getChildren().sort((o1, o2) -> {
 					String code1 = o1.getChild().getCode();
 					String code2 = o2.getChild().getCode();
 					int order1 = codesInOrder.get(code1);

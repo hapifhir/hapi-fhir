@@ -146,11 +146,13 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		assertEquals(3, outcome.getUpdatedConceptCount());
 
 		delta = new CustomTerminologySet();
-		delta.addUnanchoredChildConcept("RootB", "ChildAA", "Child AA");
+		delta.addRootConcept("RootB", "Root B")
+			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAA").setDisplay("Child AA");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertEquals(1, outcome.getUpdatedConceptCount());
 		assertHierarchyContains(
 			"RootA seq=1",
+			" ChildAA seq=1",
 			"RootB seq=2",
 			" ChildAA seq=1"
 		);
@@ -166,17 +168,50 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		myCodeSystemDao.create(cs);
 
-		CodeSystem delta = new CodeSystem();
-		delta
-			.addConcept()
-			.setCode("codeA")
-			.setDisplay("displayA");
 		try {
 			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", new CustomTerminologySet());
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("can not apply a delta - wrong content mode"));
 		}
+
+	}
+
+	@Test
+	public void testAddChildToExistingChild() {
+		CustomTerminologySet set;
+
+		// Create not-present
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myCodeSystemDao.create(cs);
+
+		// Add parent with 1 child
+		set = new CustomTerminologySet();
+		set.addRootConcept("ParentA", "Parent A")
+		.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildA").setDisplay("Child A");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", set);
+
+		// Check so far
+		assertHierarchyContains(
+			"ParentA seq=1",
+			" ChildA seq=1"
+		);
+
+		// Add sub-child to existing child
+		ourLog.info("*** Adding child to existing child");
+		set = new CustomTerminologySet();
+		set.addRootConcept("ChildA", "Child A")
+			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAA").setDisplay("Child AA");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", set);
+
+		// Check so far
+		assertHierarchyContains(
+			"ParentA seq=1",
+			" ChildA seq=1",
+			"  ChildAA seq=1"
+		);
 
 	}
 
@@ -280,7 +315,9 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		// Move a single child code to a new spot and make sure the hierarchy comes along
 		// for the ride..
 		delta = new CustomTerminologySet();
-		delta.addUnanchoredChildConcept("CodeB", "CodeAA", "Code AA");
+		delta
+			.addRootConcept("CodeB", "Code B")
+			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeAA").setDisplay("Code AA");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertEquals(3, outcome.getUpdatedConceptCount());
 		assertHierarchyContains(
