@@ -43,7 +43,6 @@ public class GsonStructure implements JsonLikeStructure {
 	private ROOT_TYPE rootType = null;
 	private JsonElement nativeRoot = null;
 	private JsonLikeValue jsonLikeRoot = null;
-	private GsonWriter jsonLikeWriter = null;
 	
 	public GsonStructure() {
 		super();
@@ -56,11 +55,6 @@ public class GsonStructure implements JsonLikeStructure {
 	public void setNativeArray (JsonArray json) {
 		this.rootType = ROOT_TYPE.ARRAY;
 		this.nativeRoot = json;
-	}
-
-	@Override
-	public JsonLikeStructure getInstance() {
-		return new GsonStructure();
 	}
 
 	@Override

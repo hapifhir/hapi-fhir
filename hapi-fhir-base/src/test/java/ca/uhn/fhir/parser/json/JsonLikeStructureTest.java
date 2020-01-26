@@ -70,8 +70,8 @@ public class JsonLikeStructureTest {
 	@Test
 	public void testJsonAndDataTypes() {
 		StringReader reader = new StringReader(TEST_JSONTYPES_DATA);
-		JsonLikeStructure jsonStructure = new GsonStructure();
-		jsonStructure.load(reader);
+		JsonLikeProviderFactory providerFactory = new GsonProviderFactory();
+		JsonLikeStructure jsonStructure = providerFactory.createJsonLikeStructure(reader);
 		
 		JsonLikeObject rootObject = jsonStructure.getRootObject();
 		

@@ -31,6 +31,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.json.GsonStructure;
 import ca.uhn.fhir.parser.json.JsonLikeArray;
 import ca.uhn.fhir.parser.json.JsonLikeObject;
+import ca.uhn.fhir.parser.json.JsonLikeProviderFactory;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import ca.uhn.fhir.parser.json.JsonLikeValue;
 import ca.uhn.fhir.parser.json.JsonLikeWriter;
@@ -159,6 +160,21 @@ public class JsonLikeParserTest {
 	}
 	
 	
+	public static class JsonLikeMapProviderFactory implements JsonLikeProviderFactory {
+
+		@Override
+		public JsonLikeStructure createJsonLikeStructure(Reader input) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public JsonLikeWriter createJsonLikeWriter(Writer output) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+	}
 	
 	public static class JsonLikeMapWriter extends JsonLikeWriter {
 
@@ -493,7 +509,6 @@ public class JsonLikeParserTest {
 
 		private Map<String,Object> nativeObject;
 		private JsonLikeObject jsonLikeObject = null;
-		private JsonLikeMapWriter jsonLikeWriter = null;
 		
 		public JsonLikeMapStructure() {
 			super();
@@ -508,23 +523,6 @@ public class JsonLikeParserTest {
 			this.nativeObject = json;
 		}
 
-		@Override
-		public JsonLikeStructure getInstance() {
-			return new JsonLikeMapStructure();
-		}
-
-		@Override
-		public JsonLikeWriter getJsonLikeWriter (Writer ignored) {
-			return getJsonLikeWriter();
-		}
-		
-		@Override
-		public JsonLikeWriter getJsonLikeWriter () {
-			if (null == jsonLikeWriter) {
-				jsonLikeWriter = new JsonLikeMapWriter();
-			}
-			return jsonLikeWriter;
-		}
 
 		@Override
 		public void load(Reader reader) throws DataFormatException {

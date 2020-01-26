@@ -20,7 +20,6 @@
 package ca.uhn.fhir.parser.json;
 
 import java.io.Reader;
-import java.io.Writer;
 
 import ca.uhn.fhir.parser.DataFormatException;
 
@@ -33,7 +32,6 @@ import ca.uhn.fhir.parser.DataFormatException;
  * @author Bill.Denton
  */
 public interface JsonLikeStructure {
-	public JsonLikeStructure getInstance();
 	
 	/**
 	 * Parse the JSON document into the Json-like structure
