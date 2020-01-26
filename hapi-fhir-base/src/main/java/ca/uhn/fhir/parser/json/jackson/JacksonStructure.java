@@ -86,9 +86,9 @@ public class JacksonStructure implements JsonLikeStructure {
             }
 
             if (nextInt == '{') {
-                setNativeObject(OBJECT_MAPPER.readValue(pbr, ObjectNode.class));
+                setNativeObject((ObjectNode) OBJECT_MAPPER.readTree(pbr));
             } else {
-                setNativeArray(OBJECT_MAPPER.readValue(pbr, ArrayNode.class));
+                setNativeArray((ArrayNode) OBJECT_MAPPER.readTree(pbr));
             }
         } catch (Exception e) {
             if (e.getMessage().startsWith("Unexpected char 39")) {
