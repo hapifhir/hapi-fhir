@@ -1,6 +1,8 @@
 package ca.uhn.fhir.parser.json.jackson;
 
 import ca.uhn.fhir.parser.json.JsonLikeWriter;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -11,16 +13,22 @@ import java.util.List;
 
 public class JacksonWriter extends JsonLikeWriter {
 
-    private JacksonSerializer jacksonSerializer;
+    private JsonGenerator jsonGenerator;
+
     private enum BlockType {
         NONE, OBJECT, ARRAY
     }
 
     private BlockType blockType = BlockType.NONE;
-    private List<BlockType> blocks = new LinkedList<>();
+    private final List<BlockType> blocks = new LinkedList<>();
 
     public JacksonWriter(Writer writer) {
-        jacksonSerializer = new JacksonSerializer(writer);
+        try {
+            this.jsonGenerator = new JsonFactory().createGenerator(writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         setWriter(writer);
     }
 
@@ -35,7 +43,7 @@ public class JacksonWriter extends JsonLikeWriter {
 
     @Override
     public JsonLikeWriter flush() throws IOException {
-        getWriter().flush();
+        //getWriter().flush();
         return this;
     }
 
@@ -48,7 +56,7 @@ public class JacksonWriter extends JsonLikeWriter {
     public JsonLikeWriter beginObject() throws IOException {
         blocks.add(blockType);
         blockType = BlockType.OBJECT;
-        jacksonSerializer.writeStartObject();
+        jsonGenerator.writeStartObject();
         return this;
     }
 
@@ -56,7 +64,7 @@ public class JacksonWriter extends JsonLikeWriter {
     public JsonLikeWriter beginArray() throws IOException {
         blocks.add(blockType);
         blockType = BlockType.ARRAY;
-        jacksonSerializer.writeStartArray();
+        jsonGenerator.writeStartArray();
         return this;
     }
 
@@ -64,7 +72,7 @@ public class JacksonWriter extends JsonLikeWriter {
     public JsonLikeWriter beginObject(String name) throws IOException {
         blocks.add(blockType);
         blockType = BlockType.OBJECT;
-        jacksonSerializer.writeStartObject(name);
+        jsonGenerator.writeObjectFieldStart(name);
         return this;
     }
 
@@ -72,117 +80,118 @@ public class JacksonWriter extends JsonLikeWriter {
     public JsonLikeWriter beginArray(String name) throws IOException {
         blocks.add(blockType);
         blockType = BlockType.ARRAY;
-        jacksonSerializer.writeStartArray(name);
+        jsonGenerator.writeArrayFieldStart(name);
         return this;
     }
 
     @Override
     public JsonLikeWriter write(String value) throws IOException {
-        jacksonSerializer.write(value);
+        jsonGenerator.writeObject(value);
         return this;
     }
 
     @Override
     public JsonLikeWriter write(BigInteger value) throws IOException {
-        jacksonSerializer.write(value);
+        jsonGenerator.writeObject(value);
         return this;
     }
 
     @Override
     public JsonLikeWriter write(BigDecimal value) throws IOException {
-        jacksonSerializer.write(value);
+        jsonGenerator.writeObject(value);
         return this;
     }
 
     @Override
     public JsonLikeWriter write(long value) throws IOException {
-        jacksonSerializer.write(value);
+        jsonGenerator.writeObject(value);
         return this;
     }
 
     @Override
     public JsonLikeWriter write(double value) throws IOException {
-        jacksonSerializer.write(value);
+        jsonGenerator.writeObject(value);
         return this;
     }
 
     @Override
     public JsonLikeWriter write(Boolean value) throws IOException {
-        jacksonSerializer.write(value);
+        jsonGenerator.writeObject(value);
         return this;
     }
 
     @Override
     public JsonLikeWriter write(boolean value) throws IOException {
-        jacksonSerializer.write(value);
+        jsonGenerator.writeObject(value);
         return this;
     }
 
     @Override
     public JsonLikeWriter writeNull() throws IOException {
-        jacksonSerializer.writeNull();
+        jsonGenerator.writeNull();
         return this;
     }
 
     @Override
     public JsonLikeWriter write(String name, String value) throws IOException {
-        jacksonSerializer.write(name, value);
+        jsonGenerator.writeObjectField(name, value);
         return this;
     }
 
     @Override
     public JsonLikeWriter write(String name, BigInteger value) throws IOException {
-        jacksonSerializer.write(name, value);
+        //jacksonSerializer.write(name, value);
+        jsonGenerator.writeObjectField(name, value);
         return this;
     }
 
     @Override
     public JsonLikeWriter write(String name, BigDecimal value) throws IOException {
-        jacksonSerializer.write(name, value);
+        jsonGenerator.writeObjectField(name, value);
         return this;
     }
 
     @Override
     public JsonLikeWriter write(String name, long value) throws IOException {
-        jacksonSerializer.write(name, value);
+        jsonGenerator.writeObjectField(name, value);
         return this;
     }
 
     @Override
     public JsonLikeWriter write(String name, double value) throws IOException {
-        jacksonSerializer.write(name, value);
+        jsonGenerator.writeObjectField(name, value);
         return this;
     }
 
     @Override
     public JsonLikeWriter write(String name, Boolean value) throws IOException {
-        jacksonSerializer.write(name, value);
+        jsonGenerator.writeObjectField(name, value);
         return this;
     }
 
     @Override
     public JsonLikeWriter write(String name, boolean value) throws IOException {
-        jacksonSerializer.write(name, value);
+        jsonGenerator.writeObjectField(name, value);
         return this;
     }
 
     @Override
     public JsonLikeWriter writeNull(String name) throws IOException {
-        jacksonSerializer.writeNull(name);
+        jsonGenerator.writeNullField(name);
         return this;
     }
 
     @Override
     public JsonLikeWriter endObject() throws IOException {
         if (blockType != BlockType.OBJECT) {
-            jacksonSerializer.endArray();
+            jsonGenerator.writeEndArray();
         } else {
-            jacksonSerializer.endObject();
+            jsonGenerator.writeEndObject();
         }
         blockType = blocks.remove(blocks.size() - 1);
 
         if (blockType == BlockType.NONE) {
-            jacksonSerializer.flush();
+            jsonGenerator.close();
         }
 
         return this;
@@ -191,14 +200,14 @@ public class JacksonWriter extends JsonLikeWriter {
     @Override
     public JsonLikeWriter endArray() throws IOException {
         if (blockType == BlockType.OBJECT) {
-            jacksonSerializer.endObject();
+            jsonGenerator.writeEndObject();
         } else {
-            jacksonSerializer.endArray();
+            jsonGenerator.writeEndArray();
         }
         blockType = blocks.remove(blocks.size() - 1);
 
         if (blockType == BlockType.NONE) {
-            jacksonSerializer.flush();
+            jsonGenerator.close();
         }
 
         return this;
@@ -207,14 +216,14 @@ public class JacksonWriter extends JsonLikeWriter {
     @Override
     public JsonLikeWriter endBlock() throws IOException {
         if (blockType == BlockType.ARRAY) {
-            jacksonSerializer.endArray();
+            jsonGenerator.writeEndArray();
         } else {
-            jacksonSerializer.endObject();
+            jsonGenerator.writeEndObject();
         }
         blockType = blocks.remove(blocks.size() - 1);
 
         if (blockType == BlockType.NONE) {
-            jacksonSerializer.flush();
+            jsonGenerator.close();
         }
 
         return this;

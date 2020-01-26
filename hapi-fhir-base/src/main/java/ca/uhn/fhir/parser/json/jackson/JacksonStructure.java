@@ -1,35 +1,56 @@
 package ca.uhn.fhir.parser.json.jackson;
 
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.json.*;
-import com.google.gson.*;
+import ca.uhn.fhir.parser.json.JsonLikeArray;
+import ca.uhn.fhir.parser.json.JsonLikeObject;
+import ca.uhn.fhir.parser.json.JsonLikeStructure;
+import ca.uhn.fhir.parser.json.JsonLikeValue;
+import ca.uhn.fhir.parser.json.JsonLikeWriter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.*;
+import java.util.AbstractSet;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class JacksonStructure implements JsonLikeStructure {
 
     private JacksonWriter jacksonWriter;
     private enum ROOT_TYPE {OBJECT, ARRAY};
     private ROOT_TYPE rootType = null;
-    private JsonElement nativeRoot = null;
-    private JsonLikeValue jsonLikeRoot = null;
+    private JsonNode nativeRoot = null;
+    private JsonNode jsonLikeRoot = null;
 
-    public void setNativeObject (JsonObject json) {
-        this.rootType = ROOT_TYPE.OBJECT;
-        this.nativeRoot = json;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    static {
+        OBJECT_MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
+        OBJECT_MAPPER.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
     }
 
-    public void setNativeArray (JsonArray json) {
+    public void setNativeObject (ObjectNode objectNode) {
+        this.rootType = ROOT_TYPE.OBJECT;
+        this.nativeRoot = objectNode;
+    }
+
+    public void setNativeArray (ArrayNode arrayNode) {
         this.rootType = ROOT_TYPE.ARRAY;
-        this.nativeRoot = json;
+        this.nativeRoot = arrayNode;
     }
 
     @Override
     public JsonLikeStructure getInstance() {
-        return new JacksonStructure();
+        return new ca.uhn.fhir.parser.jackson.JacksonStructure();
     }
 
     @Override
@@ -64,14 +85,10 @@ public class JacksonStructure implements JsonLikeStructure {
                 throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char)nextInt + "' (must be '{')");
             }
 
-            //TODO remove the Gson references
-            Gson gson = new GsonBuilder().disableHtmlEscaping().create();
             if (nextInt == '{') {
-                JsonObject root = gson.fromJson(pbr, JsonObject.class);
-                setNativeObject(root);
+                setNativeObject(OBJECT_MAPPER.readValue(pbr, ObjectNode.class));
             } else {
-                JsonArray root = gson.fromJson(pbr, JsonArray.class);
-                setNativeArray(root);
+                setNativeArray(OBJECT_MAPPER.readValue(pbr, ArrayNode.class));
             }
         } catch (Exception e) {
             if (e.getMessage().startsWith("Unexpected char 39")) {
@@ -83,7 +100,7 @@ public class JacksonStructure implements JsonLikeStructure {
     }
 
     @Override
-    public JsonLikeWriter getJsonLikeWriter (Writer writer) {
+    public JsonLikeWriter getJsonLikeWriter(Writer writer) {
         if (null == jacksonWriter) {
             jacksonWriter = new JacksonWriter(writer);
         }
@@ -92,7 +109,7 @@ public class JacksonStructure implements JsonLikeStructure {
     }
 
     @Override
-    public JsonLikeWriter getJsonLikeWriter () {
+    public JsonLikeWriter getJsonLikeWriter() {
         if (null == jacksonWriter) {
             jacksonWriter = new JacksonWriter();
         }
@@ -103,10 +120,12 @@ public class JacksonStructure implements JsonLikeStructure {
     public JsonLikeObject getRootObject() throws DataFormatException {
         if (rootType == ROOT_TYPE.OBJECT) {
             if (null == jsonLikeRoot) {
-                jsonLikeRoot = new GsonJsonObject((JsonObject)nativeRoot);
+                jsonLikeRoot = nativeRoot;
             }
-            return jsonLikeRoot.getAsObject();
+
+            return new JacksonJsonObject((ObjectNode) jsonLikeRoot);
         }
+
         throw new DataFormatException("Content must be a valid JSON Object. It must start with '{'.");
     }
 
@@ -114,19 +133,19 @@ public class JacksonStructure implements JsonLikeStructure {
     public JsonLikeArray getRootArray() throws DataFormatException {
         if (rootType == ROOT_TYPE.ARRAY) {
             if (null == jsonLikeRoot) {
-                jsonLikeRoot = new GsonJsonArray((JsonArray)nativeRoot);
+                jsonLikeRoot = nativeRoot;
             }
-            return jsonLikeRoot.getAsArray();
+            return new JacksonJsonArray((ArrayNode) nativeRoot);
         }
         throw new DataFormatException("Content must be a valid JSON Array. It must start with '['.");
     }
 
-    private static class GsonJsonObject extends JsonLikeObject {
-        private JsonObject nativeObject;
+    private static class JacksonJsonObject extends JsonLikeObject {
+        private final ObjectNode nativeObject;
+        private final Map<String, JsonLikeValue> jsonLikeMap = new LinkedHashMap<>();
         private Set<String> keySet = null;
-        private Map<String, JsonLikeValue> jsonLikeMap = new LinkedHashMap<String, JsonLikeValue>();
 
-        public GsonJsonObject (JsonObject json) {
+        public JacksonJsonObject(ObjectNode json) {
             this.nativeObject = json;
         }
 
@@ -138,10 +157,10 @@ public class JacksonStructure implements JsonLikeStructure {
         @Override
         public Set<String> keySet() {
             if (null == keySet) {
-                Set<Map.Entry<String, JsonElement>> entrySet = nativeObject.entrySet();
-                keySet = new EntryOrderedSet<String>(entrySet.size());
-                for (Map.Entry<String,?> entry : entrySet) {
-                    keySet.add(entry.getKey());
+                keySet = new EntryOrderedSet<>();
+
+                for (Iterator<JsonNode> iterator = nativeObject.elements(); iterator.hasNext();) {
+                    keySet.add(iterator.next().textValue());
                 }
             }
             return keySet;
@@ -153,9 +172,9 @@ public class JacksonStructure implements JsonLikeStructure {
             if (jsonLikeMap.containsKey(key)) {
                 result = jsonLikeMap.get(key);
             } else {
-                JsonElement child = nativeObject.get(key);
+                JsonNode child = nativeObject.get(key);
                 if (child != null) {
-                    result = new GsonJsonValue(child);
+                    result = new JacksonJsonValue(child);
                 }
                 jsonLikeMap.put(key, result);
             }
@@ -166,10 +185,6 @@ public class JacksonStructure implements JsonLikeStructure {
     private static class EntryOrderedSet<T> extends AbstractSet<T> {
         private transient ArrayList<T> data = null;
 
-        public EntryOrderedSet (int initialCapacity) {
-            data = new ArrayList<T>(initialCapacity);
-        }
-        @SuppressWarnings("unused")
         public EntryOrderedSet () {
             data = new ArrayList<T>();
         }
@@ -184,7 +199,6 @@ public class JacksonStructure implements JsonLikeStructure {
             return data.contains(o);
         }
 
-        @SuppressWarnings("unused")  // not really.. just not here
         public T get(int index) {
             return data.get(index);
         }
@@ -213,11 +227,11 @@ public class JacksonStructure implements JsonLikeStructure {
         }
     }
 
-    private static class GsonJsonArray extends JsonLikeArray {
-        private JsonArray nativeArray;
-        private Map<Integer, JsonLikeValue> jsonLikeMap = new LinkedHashMap<Integer, JsonLikeValue>();
+    private static class JacksonJsonArray extends JsonLikeArray {
+        private final ArrayNode nativeArray;
+        private final Map<Integer, JsonLikeValue> jsonLikeMap = new LinkedHashMap<Integer, JsonLikeValue>();
 
-        public GsonJsonArray (JsonArray json) {
+        public JacksonJsonArray(ArrayNode json) {
             this.nativeArray = json;
         }
 
@@ -238,9 +252,9 @@ public class JacksonStructure implements JsonLikeStructure {
             if (jsonLikeMap.containsKey(key)) {
                 result = jsonLikeMap.get(key);
             } else {
-                JsonElement child = nativeArray.get(index);
+                JsonNode child = nativeArray.get(index);
                 if (child != null) {
-                    result = new GsonJsonValue(child);
+                    result = new JacksonJsonValue(child);
                 }
                 jsonLikeMap.put(key, result);
             }
@@ -248,43 +262,43 @@ public class JacksonStructure implements JsonLikeStructure {
         }
     }
 
-    private static class GsonJsonValue extends JsonLikeValue {
-        private JsonElement nativeValue;
+    private static class JacksonJsonValue extends JsonLikeValue {
+        private final JsonNode nativeValue;
         private JsonLikeObject jsonLikeObject = null;
         private JsonLikeArray jsonLikeArray = null;
 
-        public GsonJsonValue (JsonElement json) {
-            this.nativeValue = json;
+        public JacksonJsonValue(JsonNode jsonNode) {
+            this.nativeValue = jsonNode;
         }
 
         @Override
         public Object getValue() {
-            if (nativeValue != null && nativeValue.isJsonPrimitive()) {
-                if (((JsonPrimitive)nativeValue).isNumber()) {
-                    return nativeValue.getAsNumber();
+            if (nativeValue != null && nativeValue.isValueNode()) {
+                if (nativeValue.isNumber()) {
+                    return nativeValue.numberValue();
                 }
 
-                if (((JsonPrimitive)nativeValue).isBoolean()) {
-                    return nativeValue.getAsBoolean();
+                if (nativeValue.isBoolean()) {
+                    return nativeValue.booleanValue();
                 }
 
-                return nativeValue.getAsString();
+                return nativeValue.asText();
             }
             return null;
         }
 
         @Override
         public ValueType getJsonType() {
-            if (null == nativeValue || nativeValue.isJsonNull()) {
+            if (null == nativeValue || nativeValue.isNull()) {
                 return ValueType.NULL;
             }
-            if (nativeValue.isJsonObject()) {
+            if (nativeValue.isObject()) {
                 return ValueType.OBJECT;
             }
-            if (nativeValue.isJsonArray()) {
+            if (nativeValue.isArray()) {
                 return ValueType.ARRAY;
             }
-            if (nativeValue.isJsonPrimitive()) {
+            if (nativeValue.isValueNode()) {
                 return ValueType.SCALAR;
             }
             return null;
@@ -292,14 +306,14 @@ public class JacksonStructure implements JsonLikeStructure {
 
         @Override
         public ScalarType getDataType() {
-            if (nativeValue != null && nativeValue.isJsonPrimitive()) {
-                if (((JsonPrimitive)nativeValue).isNumber()) {
+            if (nativeValue != null && nativeValue.isValueNode()) {
+                if (nativeValue.isNumber()) {
                     return ScalarType.NUMBER;
                 }
-                if (((JsonPrimitive)nativeValue).isString()) {
+                if (nativeValue.isTextual()) {
                     return ScalarType.STRING;
                 }
-                if (((JsonPrimitive)nativeValue).isBoolean()) {
+                if (nativeValue.isBoolean()) {
                     return ScalarType.BOOLEAN;
                 }
             }
@@ -308,9 +322,9 @@ public class JacksonStructure implements JsonLikeStructure {
 
         @Override
         public JsonLikeArray getAsArray() {
-            if (nativeValue != null && nativeValue.isJsonArray()) {
+            if (nativeValue != null && nativeValue.isArray()) {
                 if (null == jsonLikeArray) {
-                    jsonLikeArray = new GsonJsonArray((JsonArray)nativeValue);
+                    jsonLikeArray = new JacksonJsonArray((ArrayNode) nativeValue);
                 }
             }
             return jsonLikeArray;
@@ -318,9 +332,9 @@ public class JacksonStructure implements JsonLikeStructure {
 
         @Override
         public JsonLikeObject getAsObject() {
-            if (nativeValue != null && nativeValue.isJsonObject()) {
+            if (nativeValue != null && nativeValue.isObject()) {
                 if (null == jsonLikeObject) {
-                    jsonLikeObject = new GsonJsonObject((JsonObject)nativeValue);
+                    jsonLikeObject = new JacksonJsonObject((ObjectNode) nativeValue);
                 }
             }
             return jsonLikeObject;
@@ -328,18 +342,18 @@ public class JacksonStructure implements JsonLikeStructure {
 
         @Override
         public Number getAsNumber() {
-            return nativeValue != null ? nativeValue.getAsNumber() : null;
+            return nativeValue != null ? nativeValue.numberValue() : null;
         }
 
         @Override
         public String getAsString() {
-            return nativeValue != null ? nativeValue.getAsString() : null;
+            return nativeValue != null ? nativeValue.asText() : null;
         }
 
         @Override
         public boolean getAsBoolean() {
-            if (nativeValue != null && nativeValue.isJsonPrimitive() && ((JsonPrimitive)nativeValue).isBoolean()) {
-                return nativeValue.getAsBoolean();
+            if (nativeValue != null && nativeValue.isValueNode() && nativeValue.isBoolean()) {
+                return nativeValue.asBoolean();
             }
             return super.getAsBoolean();
         }
