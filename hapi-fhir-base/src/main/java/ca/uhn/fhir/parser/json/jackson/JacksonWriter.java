@@ -42,8 +42,7 @@ public class JacksonWriter extends JsonLikeWriter {
     }
 
     @Override
-    public JsonLikeWriter flush() throws IOException {
-        //getWriter().flush();
+    public JsonLikeWriter flush() {
         return this;
     }
 
@@ -140,7 +139,6 @@ public class JacksonWriter extends JsonLikeWriter {
 
     @Override
     public JsonLikeWriter write(String name, BigInteger value) throws IOException {
-        //jacksonSerializer.write(name, value);
         jsonGenerator.writeObjectField(name, value);
         return this;
     }

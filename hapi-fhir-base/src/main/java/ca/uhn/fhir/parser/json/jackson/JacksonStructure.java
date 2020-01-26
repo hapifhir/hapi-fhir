@@ -50,7 +50,7 @@ public class JacksonStructure implements JsonLikeStructure {
 
     @Override
     public JsonLikeStructure getInstance() {
-        return new ca.uhn.fhir.parser.jackson.JacksonStructure();
+        return new JacksonStructure();
     }
 
     @Override
