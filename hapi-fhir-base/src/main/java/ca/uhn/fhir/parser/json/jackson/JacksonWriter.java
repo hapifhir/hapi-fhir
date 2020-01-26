@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser.json.jackson;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.parser.json.JsonLikeWriter;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -27,6 +28,7 @@ public class JacksonWriter extends JsonLikeWriter {
             this.jsonGenerator = new JsonFactory().createGenerator(writer);
         } catch (IOException e) {
             e.printStackTrace();
+            throw new ConfigurationException(e.getMessage());
         }
 
         setWriter(writer);
