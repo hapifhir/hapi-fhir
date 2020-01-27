@@ -110,26 +110,17 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		AddTableByColumnTask that = (AddTableByColumnTask) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myAddColumnTasks, that.myAddColumnTasks)
-			.append(myPkColumns, that.myPkColumns)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<AddTableByColumnTask> theOtherObject) {
+		super.generateEquals(theBuilder, theOtherObject);
+		AddTableByColumnTask otherObject = (AddTableByColumnTask) theOtherObject;
+		theBuilder.append(myAddColumnTasks, otherObject.myAddColumnTasks);
+		theBuilder.append(myPkColumns, otherObject.myPkColumns);
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myAddColumnTasks)
-			.append(myPkColumns)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myAddColumnTasks);
+		theBuilder.append(myPkColumns);
 	}
 }
