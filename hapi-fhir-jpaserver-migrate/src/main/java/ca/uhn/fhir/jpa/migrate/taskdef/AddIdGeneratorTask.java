@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class AddIdGeneratorTask extends BaseTask<AddIdGeneratorTask> {
+public class AddIdGeneratorTask extends BaseTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddIdGeneratorTask.class);
 	private final String myGeneratorName;
@@ -103,7 +103,7 @@ public class AddIdGeneratorTask extends BaseTask<AddIdGeneratorTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<AddIdGeneratorTask> theOtherObject) {
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
 		AddIdGeneratorTask otherObject = (AddIdGeneratorTask) theOtherObject;
 		theBuilder.append(myGeneratorName, otherObject.myGeneratorName);
 	}

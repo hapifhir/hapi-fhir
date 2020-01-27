@@ -36,7 +36,7 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
+public class DropForeignKeyTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropForeignKeyTask.class);
 	private String myConstraintName;

@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-public class AddIndexTask extends BaseTableTask<AddIndexTask> {
+public class AddIndexTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddIndexTask.class);
 	private String myIndexName;
@@ -97,7 +97,7 @@ public class AddIndexTask extends BaseTableTask<AddIndexTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<AddIndexTask> theOtherObject) {
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
 		super.generateEquals(theBuilder, theOtherObject);
 
 		AddIndexTask otherObject = (AddIndexTask) theOtherObject;

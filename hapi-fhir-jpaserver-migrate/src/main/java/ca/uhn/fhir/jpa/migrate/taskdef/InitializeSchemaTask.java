@@ -32,7 +32,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
-public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
+public class InitializeSchemaTask extends BaseTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(InitializeSchemaTask.class);
 	private final ISchemaInitializationProvider mySchemaInitializationProvider;
 
@@ -68,7 +68,7 @@ public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<InitializeSchemaTask> theOtherObject) {
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
 		InitializeSchemaTask otherObject = (InitializeSchemaTask) theOtherObject;
 		theBuilder.append(mySchemaInitializationProvider, otherObject.mySchemaInitializationProvider);
 	}

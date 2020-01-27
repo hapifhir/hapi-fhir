@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 import java.util.Set;
 
-public class AddColumnTask extends BaseTableColumnTypeTask<AddColumnTask> {
+public class AddColumnTask extends BaseTableColumnTypeTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddColumnTask.class);
 
@@ -51,7 +51,7 @@ public class AddColumnTask extends BaseTableColumnTypeTask<AddColumnTask> {
 
 		String typeStatement = getTypeStatement();
 
-		String sql = "";
+		String sql;
 		switch (getDriverType()) {
 			case DERBY_EMBEDDED:
 			case MARIADB_10_1:
