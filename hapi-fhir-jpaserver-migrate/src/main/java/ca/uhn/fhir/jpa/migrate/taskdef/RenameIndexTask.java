@@ -82,10 +82,11 @@ public class RenameIndexTask extends BaseTableTask<RenameIndexTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, RenameIndexTask theOtherObject) {
-		super.generateEquals(theBuilder, theOtherObject);
-		theBuilder.append(myOldIndexName, theOtherObject.myOldIndexName);
-		theBuilder.append(myNewIndexName, theOtherObject.myNewIndexName);
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		RenameIndexTask otherObject = (RenameIndexTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(myOldIndexName, otherObject.myOldIndexName);
+		theBuilder.append(myNewIndexName, otherObject.myNewIndexName);
 	}
 
 	@Override

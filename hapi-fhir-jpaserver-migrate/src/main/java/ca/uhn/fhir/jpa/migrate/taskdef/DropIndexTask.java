@@ -79,9 +79,10 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, DropIndexTask theOtherObject) {
-		super.generateEquals(theBuilder, theOtherObject);
-		theBuilder.append(myIndexName, theOtherObject.myIndexName);
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		DropIndexTask otherObject = (DropIndexTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(myIndexName, otherObject.myIndexName);
 	}
 
 	@Override

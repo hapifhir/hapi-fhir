@@ -53,9 +53,10 @@ public abstract class BaseTableColumnTask<T extends BaseTableTask<T>> extends Ba
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTableTask theOtherObject) {
-		super.generateEquals(theBuilder, theOtherObject);
-		theBuilder.append(myColumnName, ((BaseTableColumnTask)theOtherObject).myColumnName);
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<T> theOtherObject) {
+		BaseTableColumnTask<T> otherObject = (BaseTableColumnTask<T>) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(myColumnName, otherObject.myColumnName);
 	}
 
 	@Override

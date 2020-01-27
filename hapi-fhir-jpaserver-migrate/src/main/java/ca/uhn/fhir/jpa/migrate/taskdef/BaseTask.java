@@ -221,7 +221,7 @@ public abstract class BaseTask<T extends BaseTask> {
 		return b.isEquals();
 	}
 
-	protected abstract void generateEquals(EqualsBuilder theBuilder, T theOtherObject);
+	protected abstract void generateEquals(EqualsBuilder theBuilder, BaseTask<T> theOtherObject);
 
 	public static class ExecutedStatement {
 		private final String mySql;

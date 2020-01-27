@@ -25,17 +25,12 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public abstract class BaseTableColumnTypeTask<T extends BaseTableColumnTypeTask> extends BaseTableColumnTask<T> {
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseTableColumnTypeTask.class);
-
-
+public abstract class BaseTableColumnTypeTask<T extends BaseTableColumnTypeTask<T>> extends BaseTableColumnTask<T> {
 	private ColumnTypeEnum myColumnType;
 	private Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> myColumnTypeToDriverTypeToSqlType = new HashMap<>();
 	private Boolean myNullable;
@@ -189,11 +184,12 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableColumnTypeTask>
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTableColumnTypeTask theOtherObject) {
-		super.generateEquals(theBuilder, theOtherObject);
-		theBuilder.append(getColumnTypeName(myColumnType), getColumnTypeName(theOtherObject.myColumnType));
-		theBuilder.append(myNullable, theOtherObject.myNullable);
-		theBuilder.append(myColumnLength, theOtherObject.myColumnLength);
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<T> theOtherObject) {
+		BaseTableColumnTypeTask otherObject = (BaseTableColumnTypeTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(getColumnTypeName(myColumnType), getColumnTypeName(otherObject.myColumnType));
+		theBuilder.append(myNullable, otherObject.myNullable);
+		theBuilder.append(myColumnLength, otherObject.myColumnLength);
 	}
 
 	@Nullable

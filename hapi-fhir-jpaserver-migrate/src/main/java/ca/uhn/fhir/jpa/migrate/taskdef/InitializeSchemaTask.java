@@ -68,8 +68,9 @@ public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, InitializeSchemaTask theOtherObject) {
-		theBuilder.append(mySchemaInitializationProvider, theOtherObject.mySchemaInitializationProvider);
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<InitializeSchemaTask> theOtherObject) {
+		InitializeSchemaTask otherObject = (InitializeSchemaTask) theOtherObject;
+		theBuilder.append(mySchemaInitializationProvider, otherObject.mySchemaInitializationProvider);
 	}
 
 	@Override

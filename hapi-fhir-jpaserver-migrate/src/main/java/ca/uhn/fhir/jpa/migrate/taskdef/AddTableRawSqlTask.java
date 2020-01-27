@@ -91,7 +91,7 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTableTask theOtherObject) {
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<AddTableRawSqlTask> theOtherObject) {
 		super.generateEquals(theBuilder, theOtherObject);
 		AddTableRawSqlTask otherObject = (AddTableRawSqlTask) theOtherObject;
 		theBuilder.append(myDriverNeutralSqls, otherObject.myDriverNeutralSqls);

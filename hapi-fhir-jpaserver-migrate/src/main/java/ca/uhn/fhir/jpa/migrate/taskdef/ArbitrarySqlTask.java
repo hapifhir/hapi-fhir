@@ -104,8 +104,9 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, ArbitrarySqlTask theOtherObject) {
-		theBuilder.append(myTableName, theOtherObject.myTableName);
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<ArbitrarySqlTask> theOtherObject) {
+		ArbitrarySqlTask otherObject = (ArbitrarySqlTask) theOtherObject;
+		theBuilder.append(myTableName, otherObject.myTableName);
 	}
 
 	@Override

@@ -110,7 +110,7 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTableTask theOtherObject) {
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<AddTableByColumnTask> theOtherObject) {
 		super.generateEquals(theBuilder, theOtherObject);
 		AddTableByColumnTask otherObject = (AddTableByColumnTask) theOtherObject;
 		theBuilder.append(myAddColumnTasks, otherObject.myAddColumnTasks);

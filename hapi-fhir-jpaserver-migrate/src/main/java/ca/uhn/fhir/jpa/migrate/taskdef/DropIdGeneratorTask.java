@@ -103,8 +103,9 @@ public class DropIdGeneratorTask extends BaseTask<DropIdGeneratorTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, DropIdGeneratorTask theOtherObject) {
-		theBuilder.append(myGeneratorName, theOtherObject.myGeneratorName);
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<DropIdGeneratorTask> theOtherObject) {
+		DropIdGeneratorTask otherObject = (DropIdGeneratorTask) theOtherObject;
+		theBuilder.append(myGeneratorName, otherObject.myGeneratorName);
 	}
 
 	@Override

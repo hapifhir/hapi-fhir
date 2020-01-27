@@ -113,11 +113,12 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, AddForeignKeyTask theOtherObject) {
-		super.generateEquals(theBuilder, theOtherObject);
-		theBuilder.append(myConstraintName, theOtherObject.myConstraintName);
-		theBuilder.append(myForeignTableName, theOtherObject.myForeignTableName);
-		theBuilder.append(myForeignColumnName, theOtherObject.myForeignColumnName);
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		AddForeignKeyTask otherObject = (AddForeignKeyTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(myConstraintName, otherObject.myConstraintName);
+		theBuilder.append(myForeignTableName, otherObject.myForeignTableName);
+		theBuilder.append(myForeignColumnName, otherObject.myForeignColumnName);
 	}
 
 }

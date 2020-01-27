@@ -80,9 +80,10 @@ public class ExecuteRawSqlTask extends BaseTask<ExecuteRawSqlTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, ExecuteRawSqlTask theOtherObject) {
-		theBuilder.append(myDriverNeutralSqls, theOtherObject.myDriverNeutralSqls);
-		theBuilder.append(myDriverToSqls, theOtherObject.myDriverToSqls);
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<ExecuteRawSqlTask> theOtherObject) {
+		ExecuteRawSqlTask otherObject = (ExecuteRawSqlTask) theOtherObject;
+		theBuilder.append(myDriverNeutralSqls, otherObject.myDriverNeutralSqls);
+		theBuilder.append(myDriverToSqls, otherObject.myDriverToSqls);
 	}
 
 	@Override

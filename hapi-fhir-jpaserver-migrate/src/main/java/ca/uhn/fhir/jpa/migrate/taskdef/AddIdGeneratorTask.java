@@ -103,8 +103,9 @@ public class AddIdGeneratorTask extends BaseTask<AddIdGeneratorTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, AddIdGeneratorTask theOtherObject) {
-		theBuilder.append(myGeneratorName, theOtherObject.myGeneratorName);
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<AddIdGeneratorTask> theOtherObject) {
+		AddIdGeneratorTask otherObject = (AddIdGeneratorTask) theOtherObject;
+		theBuilder.append(myGeneratorName, otherObject.myGeneratorName);
 	}
 
 	@Override
