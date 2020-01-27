@@ -68,16 +68,8 @@ public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		InitializeSchemaTask that = (InitializeSchemaTask) theO;
-
-		return new EqualsBuilder()
-			.append(mySchemaInitializationProvider, that.mySchemaInitializationProvider)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, InitializeSchemaTask theOtherObject) {
+		theBuilder.append(mySchemaInitializationProvider, theOtherObject.mySchemaInitializationProvider);
 	}
 
 	@Override

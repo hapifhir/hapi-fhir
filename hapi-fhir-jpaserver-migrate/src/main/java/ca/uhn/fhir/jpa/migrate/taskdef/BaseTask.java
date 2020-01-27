@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
@@ -206,6 +207,21 @@ public abstract class BaseTask<T extends BaseTask> {
 	}
 
 	protected abstract void generateHashCode(HashCodeBuilder theBuilder);
+
+	@Override
+	public final boolean equals(Object theObject) {
+		if (theObject == null || getClass().equals(theObject.getClass()) == false) {
+			return false;
+		}
+		@SuppressWarnings("unchecked")
+		T otherObject = (T) theObject;
+
+		EqualsBuilder b = new EqualsBuilder();
+		generateEquals(b, otherObject);
+		return b.isEquals();
+	}
+
+	protected abstract void generateEquals(EqualsBuilder theBuilder, T theOtherObject);
 
 	public static class ExecutedStatement {
 		private final String mySql;

@@ -104,21 +104,8 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) {
-			return true;
-		}
-
-		if (!(theO instanceof ArbitrarySqlTask)) {
-			return false;
-		}
-
-		ArbitrarySqlTask that = (ArbitrarySqlTask) theO;
-
-		return new EqualsBuilder()
-			.append(myTableName, that.myTableName)
-			.append(myExecuteOnlyIfTableExists, that.myExecuteOnlyIfTableExists)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, ArbitrarySqlTask theOtherObject) {
+		theBuilder.append(myTableName, theOtherObject.myTableName);
 	}
 
 	@Override

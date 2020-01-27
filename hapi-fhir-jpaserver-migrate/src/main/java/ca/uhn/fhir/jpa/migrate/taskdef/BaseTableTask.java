@@ -24,7 +24,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public abstract class BaseTableTask<T extends BaseTableTask> extends BaseTask {
+public abstract class BaseTableTask<T extends BaseTableTask> extends BaseTask<T> {
 	private String myTableName;
 
 	public BaseTableTask(String theProductVersion, String theSchemaVersion) {
@@ -47,20 +47,8 @@ public abstract class BaseTableTask<T extends BaseTableTask> extends BaseTask {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) {
-			return true;
-		}
-
-		if (!(theO instanceof BaseTableTask)) {
-			return false;
-		}
-
-		BaseTableTask<?> that = (BaseTableTask<?>) theO;
-
-		return new EqualsBuilder()
-			.append(myTableName, that.myTableName)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTableTask theOtherObject) {
+		theBuilder.append(myTableName, theOtherObject.myTableName);
 	}
 
 	@Override

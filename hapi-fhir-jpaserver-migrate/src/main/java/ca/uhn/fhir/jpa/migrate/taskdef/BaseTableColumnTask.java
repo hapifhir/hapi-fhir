@@ -27,7 +27,7 @@ import org.thymeleaf.util.StringUtils;
 
 import java.util.Locale;
 
-public abstract class BaseTableColumnTask<T extends BaseTableTask> extends BaseTableTask<T> {
+public abstract class BaseTableColumnTask<T extends BaseTableTask<T>> extends BaseTableTask<T> {
 
 	private String myColumnName;
 
@@ -53,17 +53,9 @@ public abstract class BaseTableColumnTask<T extends BaseTableTask> extends BaseT
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (!(theO instanceof BaseTableColumnTask)) return false;
-
-		BaseTableColumnTask<?> that = (BaseTableColumnTask<?>) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myColumnName, that.myColumnName)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTableTask theOtherObject) {
+		super.generateEquals(theBuilder, theOtherObject);
+		theBuilder.append(myColumnName, ((BaseTableColumnTask)theOtherObject).myColumnName);
 	}
 
 	@Override

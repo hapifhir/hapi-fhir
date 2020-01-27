@@ -80,20 +80,9 @@ public class ExecuteRawSqlTask extends BaseTask<ExecuteRawSqlTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) {
-			return true;
-		}
-
-		if (!(theO instanceof ExecuteRawSqlTask)) {
-			return false;
-		}
-
-		ExecuteRawSqlTask that = (ExecuteRawSqlTask) theO;
-
-		return new EqualsBuilder()
-			.append(myDriverNeutralSqls, that.myDriverNeutralSqls)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, ExecuteRawSqlTask theOtherObject) {
+		theBuilder.append(myDriverNeutralSqls, theOtherObject.myDriverNeutralSqls);
+		theBuilder.append(myDriverToSqls, theOtherObject.myDriverToSqls);
 	}
 
 	@Override

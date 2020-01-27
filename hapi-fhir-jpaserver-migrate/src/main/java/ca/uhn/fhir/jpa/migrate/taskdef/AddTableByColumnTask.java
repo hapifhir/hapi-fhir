@@ -110,18 +110,11 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		AddTableByColumnTask that = (AddTableByColumnTask) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myAddColumnTasks, that.myAddColumnTasks)
-			.append(myPkColumns, that.myPkColumns)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTableTask theOtherObject) {
+		super.generateEquals(theBuilder, theOtherObject);
+		AddTableByColumnTask otherObject = (AddTableByColumnTask) theOtherObject;
+		theBuilder.append(myAddColumnTasks, otherObject.myAddColumnTasks);
+		theBuilder.append(myPkColumns, otherObject.myPkColumns);
 	}
 
 	@Override
@@ -129,6 +122,5 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 		super.generateHashCode(theBuilder);
 		theBuilder.append(myAddColumnTasks);
 		theBuilder.append(myPkColumns);
-		theBuilder.toHashCode();
 	}
 }

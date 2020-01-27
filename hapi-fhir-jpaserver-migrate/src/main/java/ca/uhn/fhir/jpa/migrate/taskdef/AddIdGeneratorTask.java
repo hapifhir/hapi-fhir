@@ -103,16 +103,8 @@ public class AddIdGeneratorTask extends BaseTask<AddIdGeneratorTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (!(theO instanceof AddIdGeneratorTask)) return false;
-
-		AddIdGeneratorTask that = (AddIdGeneratorTask) theO;
-
-		return new EqualsBuilder()
-			.append(myGeneratorName, that.myGeneratorName)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, AddIdGeneratorTask theOtherObject) {
+		theBuilder.append(myGeneratorName, theOtherObject.myGeneratorName);
 	}
 
 	@Override

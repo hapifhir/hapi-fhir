@@ -82,18 +82,10 @@ public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		DropForeignKeyTask that = (DropForeignKeyTask) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myConstraintName, that.myConstraintName)
-			.append(myParentTableName, that.myParentTableName)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, DropForeignKeyTask theOtherObject) {
+		super.generateEquals(theBuilder, theOtherObject);
+		theBuilder.append(myConstraintName, theOtherObject.myConstraintName);
+		theBuilder.append(myParentTableName, theOtherObject.myParentTableName);
 	}
 
 	@Override

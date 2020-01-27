@@ -79,21 +79,9 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) {
-			return true;
-		}
-
-		if (theO == null || getClass() != theO.getClass()) {
-			return false;
-		}
-
-		DropIndexTask that = (DropIndexTask) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myIndexName, that.myIndexName)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, DropIndexTask theOtherObject) {
+		super.generateEquals(theBuilder, theOtherObject);
+		theBuilder.append(myIndexName, theOtherObject.myIndexName);
 	}
 
 	@Override

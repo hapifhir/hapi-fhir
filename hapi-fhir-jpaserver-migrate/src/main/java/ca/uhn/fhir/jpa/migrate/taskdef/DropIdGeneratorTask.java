@@ -103,16 +103,8 @@ public class DropIdGeneratorTask extends BaseTask<DropIdGeneratorTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (!(theO instanceof DropIdGeneratorTask)) return false;
-
-		DropIdGeneratorTask that = (DropIdGeneratorTask) theO;
-
-		return new EqualsBuilder()
-			.append(myGeneratorName, that.myGeneratorName)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, DropIdGeneratorTask theOtherObject) {
+		theBuilder.append(myGeneratorName, theOtherObject.myGeneratorName);
 	}
 
 	@Override
