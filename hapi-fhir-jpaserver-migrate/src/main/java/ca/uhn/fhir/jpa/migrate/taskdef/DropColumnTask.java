@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 import java.util.Set;
 
-public class DropColumnTask extends BaseTableColumnTask<DropColumnTask> {
+public class DropColumnTask extends BaseTableColumnTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropColumnTask.class);
 

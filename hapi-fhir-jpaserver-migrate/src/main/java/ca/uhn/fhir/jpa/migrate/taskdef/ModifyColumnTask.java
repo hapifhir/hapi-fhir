@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 import java.util.Set;
 
-public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> {
+public class ModifyColumnTask extends BaseTableColumnTypeTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ModifyColumnTask.class);
 
