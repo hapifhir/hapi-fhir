@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +40,11 @@ import java.util.regex.Pattern;
 
 public abstract class BaseTask<T extends BaseTask> {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseTask.class);
 	public static final String MIGRATION_VERSION_PATTERN = "\\d{8}\\.\\d+";
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseTask.class);
 	private static final Pattern versionPattern = Pattern.compile(MIGRATION_VERSION_PATTERN);
+	private final String myProductVersion;
+	private final String mySchemaVersion;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 	private DriverTypeEnum myDriverType;
 	private String myDescription;
@@ -50,8 +54,6 @@ public abstract class BaseTask<T extends BaseTask> {
 	private List<ExecutedStatement> myExecutedStatements = new ArrayList<>();
 	private boolean myNoColumnShrink;
 	private boolean myFailureAllowed;
-	private final String myProductVersion;
-	private final String mySchemaVersion;
 
 	protected BaseTask(String theProductVersion, String theSchemaVersion) {
 		myProductVersion = theProductVersion;
@@ -106,7 +108,7 @@ public abstract class BaseTask<T extends BaseTask> {
 				JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 				try {
 					int changesCount = jdbcTemplate.update(theSql, theArguments);
-				logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
+					logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
 					return changesCount;
 				} catch (DataAccessException e) {
 					if (myFailureAllowed) {
@@ -151,7 +153,7 @@ public abstract class BaseTask<T extends BaseTask> {
 		return getConnectionProperties().getTxTemplate();
 	}
 
-	public JdbcTemplate newJdbcTemnplate() {
+	public JdbcTemplate newJdbcTemplate() {
 		return getConnectionProperties().newJdbcTemplate();
 	}
 
@@ -196,6 +198,30 @@ public abstract class BaseTask<T extends BaseTask> {
 		myDoNothing = theDoNothing;
 		return this;
 	}
+
+	@Override
+	public final int hashCode() {
+		HashCodeBuilder builder = new HashCodeBuilder();
+		generateHashCode(builder);
+		return builder.hashCode();
+	}
+
+	protected abstract void generateHashCode(HashCodeBuilder theBuilder);
+
+	@Override
+	public final boolean equals(Object theObject) {
+		if (theObject == null || getClass().equals(theObject.getClass()) == false) {
+			return false;
+		}
+		@SuppressWarnings("unchecked")
+		T otherObject = (T) theObject;
+
+		EqualsBuilder b = new EqualsBuilder();
+		generateEquals(b, otherObject);
+		return b.isEquals();
+	}
+
+	protected abstract void generateEquals(EqualsBuilder theBuilder, BaseTask<T> theOtherObject);
 
 	public static class ExecutedStatement {
 		private final String mySql;
