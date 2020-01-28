@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.StringReader;
 
+import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import org.junit.Test;
 
 public class JsonLikeStructureTest {
@@ -39,7 +40,7 @@ public class JsonLikeStructureTest {
 	@Test
 	public void testStructureLoading() {
 		StringReader reader = new StringReader(TEST_STRUCTURELOADING_DATA);
-		JsonLikeStructure jsonStructure = new GsonStructure();
+		JsonLikeStructure jsonStructure = new JacksonStructure();
 		jsonStructure.load(reader);
 		
 		JsonLikeObject rootObject = jsonStructure.getRootObject();
@@ -70,7 +71,7 @@ public class JsonLikeStructureTest {
 	@Test
 	public void testJsonAndDataTypes() {
 		StringReader reader = new StringReader(TEST_JSONTYPES_DATA);
-		JsonLikeStructure jsonStructure = new GsonStructure();
+		JsonLikeStructure jsonStructure = new JacksonStructure();
 		jsonStructure.load(reader);
 		
 		JsonLikeObject rootObject = jsonStructure.getRootObject();
