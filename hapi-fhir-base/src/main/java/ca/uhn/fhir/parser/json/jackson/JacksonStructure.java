@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class JacksonStructure implements JsonLikeStructure {
 
@@ -157,12 +159,12 @@ public class JacksonStructure implements JsonLikeStructure {
         @Override
         public Set<String> keySet() {
             if (null == keySet) {
-                keySet = new EntryOrderedSet<>();
-
-                for (Iterator<JsonNode> iterator = nativeObject.elements(); iterator.hasNext();) {
-                    keySet.add(iterator.next().textValue());
-                }
+                final Iterable<Map.Entry<String, JsonNode>> iterable = nativeObject::fields;
+                keySet = StreamSupport.stream(iterable.spliterator(), false)
+                                      .map(Map.Entry::getKey)
+                                      .collect(Collectors.toCollection(EntryOrderedSet::new));
             }
+
             return keySet;
         }
 
@@ -183,10 +185,10 @@ public class JacksonStructure implements JsonLikeStructure {
     }
 
     private static class EntryOrderedSet<T> extends AbstractSet<T> {
-        private transient ArrayList<T> data = null;
+        private final transient ArrayList<T> data;
 
         public EntryOrderedSet () {
-            data = new ArrayList<T>();
+            data = new ArrayList<>();
         }
 
         @Override
