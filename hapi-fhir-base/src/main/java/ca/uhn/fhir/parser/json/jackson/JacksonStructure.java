@@ -6,10 +6,8 @@ import ca.uhn.fhir.parser.json.JsonLikeObject;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import ca.uhn.fhir.parser.json.JsonLikeValue;
 import ca.uhn.fhir.parser.json.JsonLikeWriter;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -27,18 +25,13 @@ import java.util.stream.StreamSupport;
 
 public class JacksonStructure implements JsonLikeStructure {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     private JacksonWriter jacksonWriter;
     private enum ROOT_TYPE {OBJECT, ARRAY};
     private ROOT_TYPE rootType = null;
     private JsonNode nativeRoot = null;
     private JsonNode jsonLikeRoot = null;
-
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    static {
-        OBJECT_MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
-        OBJECT_MAPPER.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
-    }
 
     public void setNativeObject (ObjectNode objectNode) {
         this.rootType = ROOT_TYPE.OBJECT;
