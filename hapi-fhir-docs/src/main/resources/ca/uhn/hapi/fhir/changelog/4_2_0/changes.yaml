@@ -83,4 +83,4 @@ Sean McIlvenna for reporting!"
        Petro Mykhailysyn for the pull request!"
 - item:
    type: "fix"
-   title: "A meomery leak was resolved in the JPA terminology service delta upload operations."
+   title: "A memory leak was resolved in the JPA terminology service delta upload operations."

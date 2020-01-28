@@ -50,8 +50,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootB", "Root B");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertHierarchyContains(
-			"RootA seq=1",
-			"RootB seq=2"
+			"RootA seq=0",
+			"RootB seq=0"
 		);
 
 		delta = new CustomTerminologySet();
@@ -59,10 +59,10 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootD", "Root D");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertHierarchyContains(
-			"RootA seq=1",
-			"RootB seq=2",
-			"RootC seq=3",
-			"RootD seq=4"
+			"RootA seq=0",
+			"RootB seq=0",
+			"RootC seq=0",
+			"RootD seq=0"
 		);
 	}
 
@@ -106,8 +106,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootB", "Root B");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertHierarchyContains(
-			"RootA seq=1",
-			"RootB seq=2"
+			"RootA seq=0",
+			"RootB seq=0"
 		);
 
 		ourLog.info("Have performed add");
@@ -123,10 +123,10 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		root.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAB").setDisplay("Child AB");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertHierarchyContains(
-			"RootA seq=1",
-			" ChildAA seq=1",
-			" ChildAB seq=2",
-			"RootB seq=2"
+			"RootA seq=0",
+			" ChildAA seq=0",
+			" ChildAB seq=1",
+			"RootB seq=0"
 		);
 	}
 
@@ -145,10 +145,10 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootB", "Root B");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertHierarchyContains(
-			"RootA seq=1",
-			" ChildAA seq=1",
-			"  ChildAAA seq=1",
-			"RootB seq=2"
+			"RootA seq=0",
+			" ChildAA seq=0",
+			"  ChildAAA seq=0",
+			"RootB seq=0"
 		);
 		assertEquals(4, outcome.getUpdatedConceptCount());
 
@@ -157,10 +157,10 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAA").setDisplay("Child AA");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertHierarchyContains(
-			"RootA seq=1",
-			"RootB seq=2",
-			" ChildAA seq=1",
-			"  ChildAAA seq=1"
+			"RootA seq=0",
+			"RootB seq=0",
+			" ChildAA seq=0",
+			"  ChildAAA seq=0"
 		);
 		assertEquals(2, outcome.getUpdatedConceptCount());
 
@@ -202,8 +202,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		// Check so far
 		assertHierarchyContains(
-			"ParentA seq=1",
-			" ChildA seq=1"
+			"ParentA seq=0",
+			" ChildA seq=0"
 		);
 
 		// Add sub-child to existing child
@@ -215,9 +215,9 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		// Check so far
 		assertHierarchyContains(
-			"ParentA seq=1",
-			" ChildA seq=1",
-			"  ChildAA seq=1"
+			"ParentA seq=0",
+			" ChildA seq=0",
+			"  ChildAA seq=0"
 		);
 
 	}
@@ -288,14 +288,14 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertEquals(8, outcome.getUpdatedConceptCount());
 		assertHierarchyContains(
-			"CodeA seq=1",
-			" CodeAA seq=1",
-			"  CodeAAA seq=1",
-			"  CodeAAB seq=2",
-			"CodeB seq=2",
-			" CodeBA seq=1",
-			"  CodeBAA seq=1",
-			"  CodeBAB seq=2"
+			"CodeA seq=0",
+			" CodeAA seq=0",
+			"  CodeAAA seq=0",
+			"  CodeAAB seq=1",
+			"CodeB seq=0",
+			" CodeBA seq=0",
+			"  CodeBAA seq=0",
+			"  CodeBAB seq=1"
 		);
 
 		// Move a single child code to a new spot and make sure the hierarchy comes along
@@ -307,14 +307,14 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
 		assertHierarchyContains(
-			"CodeA seq=1",
-			"CodeB seq=2",
-			" CodeBA seq=1",
-			"  CodeBAA seq=1",
-			"  CodeBAB seq=2",
-			" CodeAA seq=2", // <-- CodeAA got added here so it comes second
-			"  CodeAAA seq=1",
-			"  CodeAAB seq=2"
+			"CodeA seq=0",
+			"CodeB seq=0",
+			" CodeBA seq=0",
+			"  CodeBAA seq=0",
+			"  CodeBAB seq=1",
+			" CodeAA seq=0", // <-- CodeAA got added here so it comes second
+			"  CodeAAA seq=0",
+			"  CodeAAB seq=1"
 		);
 
 	}
