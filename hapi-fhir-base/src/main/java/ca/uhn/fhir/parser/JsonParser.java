@@ -173,7 +173,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 	@Override
 	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {
-		JsonLikeStructure jsonStructure = new GsonStructure();
+		JsonLikeStructure jsonStructure = new JacksonStructure();
 		jsonStructure.load(theReader);
 
 		T retVal = doParseResource(theResourceType, jsonStructure);
