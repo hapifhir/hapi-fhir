@@ -55,6 +55,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
 	private boolean errorForUnknownProfiles;
 	private List<String> myExtensionDomains = Collections.emptyList();
+	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
 
 	/**
 	 * Constructor
@@ -220,8 +221,18 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 			.setErrorForUnknownProfiles(isErrorForUnknownProfiles())
 			.setExtensionDomains(getExtensionDomains())
 			.setNoTerminologyChecks(isNoTerminologyChecks())
+			.setValidatorResourceFetcher(getValidatorResourceFetcher())
 			.validate(wrappedWorkerContext, theValidationCtx);
 	}
+
+	public IResourceValidator.IValidatorResourceFetcher getValidatorResourceFetcher() {
+		return validatorResourceFetcher;
+	}
+
+	public void setValidatorResourceFetcher(IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher) {
+		this.validatorResourceFetcher = validatorResourceFetcher;
+	}
+
 
 
 	private static class WorkerContextWrapper implements IWorkerContext {
