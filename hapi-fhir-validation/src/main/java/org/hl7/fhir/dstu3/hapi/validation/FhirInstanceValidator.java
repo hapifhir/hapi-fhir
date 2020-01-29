@@ -66,6 +66,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private StructureDefinition myStructureDefintion;
 	private IValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
+	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
 
 	private boolean errorForUnknownProfiles;
@@ -285,8 +286,17 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			.setErrorForUnknownProfiles(isErrorForUnknownProfiles())
 			.setExtensionDomains(getExtensionDomains())
 			.setNoTerminologyChecks(isNoTerminologyChecks())
+			.setValidatorResourceFetcher(getValidatorResourceFetcher())
 			.validate(wrappedWorkerContext, theValidationCtx);
 
+	}
+
+	public IResourceValidator.IValidatorResourceFetcher getValidatorResourceFetcher() {
+		return validatorResourceFetcher;
+	}
+
+	public void setValidatorResourceFetcher(IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher) {
+		this.validatorResourceFetcher = validatorResourceFetcher;
 	}
 
 
