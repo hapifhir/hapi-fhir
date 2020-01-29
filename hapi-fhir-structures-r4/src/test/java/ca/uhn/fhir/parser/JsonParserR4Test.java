@@ -79,6 +79,19 @@ public class JsonParserR4Test extends BaseTest {
 		assertThat(output, containsString("\"Questionnaire/123/_history/456\""));
 	}
 
+	@Test
+	public void testPrettyPrint() {
+		ourCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths("QuestionnaireResponse.questionnaire");
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.getQuestionnaireElement().setValueAsString("Questionnaire/123/_history/456");
+
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(qr);
+		ourLog.info(output);
+
+		assertThat(output, containsString("\n  \"resourceType\""));
+	}
+
 	/**
 	 * See #814
 	 */

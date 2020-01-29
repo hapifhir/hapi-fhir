@@ -20,27 +20,40 @@ public class StressTestParserTest extends BaseTest {
 		FhirContext ctx = FhirContext.forR4();
 		String input = loadResource("/org/hl7/fhir/r4/model/valueset/valuesets.xml");
 
-		String json = ctx.newJsonParser().encodeResourceToString(ctx.newXmlParser().parseResource(input));
+		Bundle parsed = ctx.newXmlParser().parseResource(Bundle.class, input);
+		String json = ctx.newJsonParser().encodeResourceToString(parsed);
 
 		StopWatch sw = null;
-		int loops = 100;
+		int loops = 200;
+
+//		for (int i = 0; i < loops; i++) {
+//			ctx.newXmlParser().parseResource(input);
+//			if (i < 50) {
+//				ourLog.info("Parsed XML {} times", i);
+//				continue;
+//			} else if (i == 50) {
+//				sw = new StopWatch();
+//				continue;
+//			}
+//			ourLog.info("Parsed XML {} times - {}ms/pass", i, sw.getMillisPerOperation(i - 50));
+//		}
+
+//		for (int i = 0; i < loops; i++) {
+//			Bundle parsed = (Bundle) ctx.newJsonParser().parseResource(json);
+//			if (i < 50) {
+//				ourLog.info("Parsed JSON with {} entries {} times", parsed.getEntry().size(), i);
+//				continue;
+//			} else if (i == 50) {
+//				sw = new StopWatch();
+//				continue;
+//			}
+//			ourLog.info("Parsed JSON {} times - {}ms/pass", i, sw.getMillisPerOperation(i - 50));
+//		}
 
 		for (int i = 0; i < loops; i++) {
-			ctx.newXmlParser().parseResource(input);
+			ctx.newJsonParser().encodeResourceToString(parsed);
 			if (i < 50) {
-				ourLog.info("Parsed XML {} times", i);
-				continue;
-			} else if (i == 50) {
-				sw = new StopWatch();
-				continue;
-			}
-			ourLog.info("Parsed XML {} times - {}ms/pass", i, sw.getMillisPerOperation(i - 50));
-		}
-
-		for (int i = 0; i < loops; i++) {
-			Bundle parsed = (Bundle) ctx.newJsonParser().parseResource(json);
-			if (i < 50) {
-				ourLog.info("Parsed JSON with {} entries {} times", parsed.getEntry().size(), i);
+				ourLog.info("Serialized JSON with {} entries {} times", parsed.getEntry().size(), i);
 				continue;
 			} else if (i == 50) {
 				sw = new StopWatch();
@@ -49,6 +62,6 @@ public class StressTestParserTest extends BaseTest {
 			ourLog.info("Parsed JSON {} times - {}ms/pass", i, sw.getMillisPerOperation(i - 50));
 		}
 
-
 	}
+
 }
