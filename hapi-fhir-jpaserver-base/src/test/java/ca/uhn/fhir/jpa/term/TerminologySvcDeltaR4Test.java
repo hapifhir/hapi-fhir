@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -208,6 +209,44 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		set = new CustomTerminologySet();
 		set.addRootConcept("ChildA", "Child A")
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAA").setDisplay("Child AA");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", set);
+
+		// Check so far
+		assertHierarchyContains(
+			"ParentA seq=0",
+			" ChildA seq=0",
+			"  ChildAA seq=0"
+		);
+
+	}
+
+	@Test
+	public void testAddChildWithVeryLongDescription() {
+		CustomTerminologySet set;
+
+		// Create not-present
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myCodeSystemDao.create(cs);
+
+		// Add parent with 1 child
+		set = new CustomTerminologySet();
+		set.addRootConcept("ParentA", "Parent A")
+			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildA").setDisplay("Child A");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", set);
+
+		// Check so far
+		assertHierarchyContains(
+			"ParentA seq=0",
+			" ChildA seq=0"
+		);
+
+		// Add sub-child to existing child
+		ourLog.info("*** Adding child to existing child");
+		set = new CustomTerminologySet();
+		set.addRootConcept("ChildA", "Child A")
+			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAA").setDisplay(leftPad("", 10000, 'Z'));
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", set);
 
 		// Check so far
