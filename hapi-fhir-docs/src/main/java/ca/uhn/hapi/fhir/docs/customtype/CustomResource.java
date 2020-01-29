@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs.customtype;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import java.util.List;
  * This is an example of a custom resource that also uses a custom
  * datatype.
  * 
- * Note that we are extensing DomainResource for an STU3
+ * Note that we are extending DomainResource for an STU3
  * resource. For DSTU2 it would be BaseResource. 
  */
 @ResourceDef(name = "CustomResource", profile = "http://hl7.org/fhir/profiles/custom-resource")

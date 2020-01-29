@@ -1,0 +1,52 @@
+---
+- item:
+    type: "add"
+    title: "HAPI has a number of RESTful method parameter types that have similar but not identical purposes and confusing names. A cleanup has been undertaken to clean this up. This means that a number of existing classes have been deprocated in favour of new naming schemes. <br/><br/> All annotation-based clients and all server search method parameters are now named (type)Param, for example: StringParam, TokenParam, etc. <br/><br/> All generic/fluent client method parameters are now named (type)ClientParam, for example: StringClientParam, TokenClientParam, etc. <br/><br/> All renamed classes have been retained and deprocated, so this change should not cause any issues for existing applications but those applications should be refactored to use the new parameters when possible."
+- item:
+    type: "add"
+    title: "Allow server methods to return wildcard generic types (e.g. List<? extends IResource>)"
+- item:
+    type: "add"
+    title: "Search parameters are not properly escaped and unescaped. E.g. for a token parameter such as \"&identifier=system|codepart1\\|codepart2\""
+- item:
+    type: "add"
+    title: "Add support for OPTIONS verb (which returns the server conformance statement)"
+- item:
+    type: "add"
+    title: "Add support for CORS headers in server"
+- item:
+    type: "add"
+    title: "Bump SLF4j dependency to latest version (1.7.7)"
+- item:
+    type: "add"
+    title: "Add interceptor framework for clients (annotation based and generic), and add interceptors for configurable logging, capturing requests and responses, and HTTP basic auth."
+- item:
+    type: "fix"
+    title: "Transaction client invocations with XML encoding were using the wrong content type (\"application/xml+fhir\" instead of the correct \"application/atom+xml\"). Thanks to David Hay of Orion Health for surfacing this one!"
+- item:
+    type: "add"
+    title: "Bundle entries now support a link type of \"search\". Thanks to David Hay for the suggestion!"
+- item:
+    issue: "1"
+    type: "add"
+    title: "If a client receives a non 2xx response (e.g. HTTP 500) and the response body is a text/plain message or an OperationOutcome resource, include the message in the exception message so that it will be more conveniently displayed in logs and other places. Thanks to Neal Acharya for the suggestion!"
+- item:
+    issue: "2"
+    type: "add"
+    title: "Read invocations in the client now process the \"Content-Location\" header and use it to populate the ID of the returned resource. Thanks to Neal Acharya for the suggestion!"
+- item:
+    issue: "3"
+    type: "fix"
+    title: "Fix issue where vread invocations on server incorrectly get routed to instance history method if one is defined. Thanks to Neal Acharya from UHN for surfacing this one!"
+- item:
+    type: "add"
+    title: "Binary reads on a server not include the Content-Disposition header, to prevent HTML in binary blobs from being used for nefarious purposes. See <a href=\"http://gforge.hl7.org/gf/project/fhir/tracker/?action=TrackerItemEdit&tracker_id=677&tracker_item_id=3298\">FHIR Tracker Bug 3298</a> for more information."
+- item:
+    type: "add"
+    title: "Support has been added for using an HTTP proxy for outgoing requests."
+- item:
+    type: "fix"
+    title: "Fix: Primitive extensions declared against custom resource types are encoded even if they have no value. Thanks to David Hay of Orion for reporting this!"
+- item:
+    type: "fix"
+    title: "Fix: RESTful server deployed to a location where the URL to access it contained a space (e.g. a WAR file with a space in the name) failed to work correctly. Thanks to David Hay of Orion for reporting this!"

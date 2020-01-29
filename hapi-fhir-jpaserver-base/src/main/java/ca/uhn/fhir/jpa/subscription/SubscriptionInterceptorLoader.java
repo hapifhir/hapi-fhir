@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,15 +57,17 @@ public class SubscriptionInterceptorLoader {
 	public void registerInterceptors() {
 		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes = myDaoConfig.getSupportedSubscriptionTypes();
 
-		if (!supportedSubscriptionTypes.isEmpty()) {
+		if (supportedSubscriptionTypes.isEmpty()) {
+			ourLog.info("Subscriptions are disabled on this server.  Subscriptions will not be activated and incoming resources will not be matched against subscriptions.");
+		} else {
 			loadSubscriptions();
 			ourLog.info("Registering subscription activating interceptor");
 			myInterceptorRegistry.registerInterceptor(mySubscriptionActivatingInterceptor);
-		}
-		if (myDaoConfig.isSubscriptionMatchingEnabled()) {
-			mySubscriptionMatcherInterceptor.start();
-			ourLog.info("Registering subscription matcher interceptor");
-			myInterceptorRegistry.registerInterceptor(mySubscriptionMatcherInterceptor);
+			if (myDaoConfig.isSubscriptionMatchingEnabled()) {
+				mySubscriptionMatcherInterceptor.start();
+				ourLog.info("Registering subscription matcher interceptor");
+				myInterceptorRegistry.registerInterceptor(mySubscriptionMatcherInterceptor);
+			}
 		}
 	}
 

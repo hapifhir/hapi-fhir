@@ -92,7 +92,7 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 		addToMap(theStructureDefinition, myStructureDefinitions, theStructureDefinition.getUrl());
 	}
 
-	private <T extends MetadataResource> void addToMap(T theStructureDefinition, Map<String, T> map, String theUrl) {
+	private <T extends IBaseResource> void addToMap(T theStructureDefinition, Map<String, T> map, String theUrl) {
 		if (isNotBlank(theUrl)) {
 			map.put(theUrl, theStructureDefinition);
 

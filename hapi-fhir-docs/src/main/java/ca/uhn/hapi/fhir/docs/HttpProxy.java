@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public class HttpProxy {
 
    public static void main(String[] args) {
       /*
-       * This is out ot date - Just keeping
+       * This is out of date - Just keeping
        * it in case it's helpful...
        */
       final String authUser = "username"; 

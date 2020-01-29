@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,15 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.apache.commons.lang3.Validate;
-import org.springframework.util.Assert;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends BaseTableColumnTask<T> {
-
+public abstract class BaseTableColumnTypeTask<T extends BaseTableColumnTypeTask<T>> extends BaseTableColumnTask<T> {
 	private ColumnTypeEnum myColumnType;
 	private Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> myColumnTypeToDriverTypeToSqlType = new HashMap<>();
 	private Boolean myNullable;
@@ -38,7 +39,9 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 	/**
 	 * Constructor
 	 */
-	BaseTableColumnTypeTask() {
+
+	public BaseTableColumnTypeTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.H2_EMBEDDED, "integer");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.DERBY_EMBEDDED, "integer");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.MARIADB_10_1, "integer");
@@ -108,6 +111,12 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		return myColumnType;
 	}
 
+	@SuppressWarnings("unchecked")
+	public T setColumnType(ColumnTypeEnum theColumnType) {
+		myColumnType = theColumnType;
+		return (T) this;
+	}
+
 	private void setColumnType(ColumnTypeEnum theColumnType, DriverTypeEnum theDriverType, String theColumnTypeSql) {
 		Map<DriverTypeEnum, String> columnSqlType = myColumnTypeToDriverTypeToSqlType.computeIfAbsent(theColumnType, k -> new HashMap<>());
 		if (columnSqlType.containsKey(theDriverType)) {
@@ -115,7 +124,6 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		}
 		columnSqlType.put(theDriverType, theColumnTypeSql);
 	}
-
 
 	@Override
 	public void validate() {
@@ -130,18 +138,16 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public T setColumnType(ColumnTypeEnum theColumnType) {
-		myColumnType = theColumnType;
-		return (T) this;
+	protected String getSqlType() {
+		return getSqlType(getColumnLength());
 	}
 
-	protected String getSqlType() {
+	protected String getSqlType(Long theColumnLength) {
 		String retVal = myColumnTypeToDriverTypeToSqlType.get(myColumnType).get(getDriverType());
 		Objects.requireNonNull(retVal);
 
 		if (myColumnType == ColumnTypeEnum.STRING) {
-			retVal = retVal.replace("?", Long.toString(getColumnLength()));
+			retVal = retVal.replace("?", Long.toString(theColumnLength));
 		}
 
 		return retVal;
@@ -169,6 +175,30 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		return this;
 	}
 
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(getColumnTypeName(myColumnType));
+		theBuilder.append(myNullable);
+		theBuilder.append(myColumnLength);
+	}
+
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<T> theOtherObject) {
+		BaseTableColumnTypeTask otherObject = (BaseTableColumnTypeTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(getColumnTypeName(myColumnType), getColumnTypeName(otherObject.myColumnType));
+		theBuilder.append(myNullable, otherObject.myNullable);
+		theBuilder.append(myColumnLength, otherObject.myColumnLength);
+	}
+
+	@Nullable
+	private Object getColumnTypeName(ColumnTypeEnum theColumnType) {
+		if (theColumnType == null) {
+			return null;
+		}
+		return myColumnType.name();
+	}
 
 	public enum ColumnTypeEnum {
 
@@ -179,9 +209,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		FLOAT,
 		INT,
 		BLOB,
-		CLOB
-		;
+		CLOB;
 
 	}
-
 }

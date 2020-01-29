@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
@@ -68,6 +69,8 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	@Autowired
 	@Qualifier("myFhirContextDstu2Hl7Org")
 	private FhirContext myRiCtx;
+	@Autowired
+	private FhirContext myFhirContext;
 
 	private CachingValidationSupport myValidationSupport;
 
@@ -176,14 +179,15 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	@Override
 	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest) {
 		if (theSystem != null && theSystem.startsWith("http://hl7.org/fhir/")) {
-			return Collections.singletonList((IIdType) new IdDt(theSystem));
+			return Collections.singletonList(new IdDt(theSystem));
 		}
 
 		List<IIdType> valueSetIds;
-		Set<Long> ids = searchForIds(new SearchParameterMap(ValueSet.SP_CODE, new TokenParam(theSystem, theCode)), theRequest);
+		Set<ResourcePersistentId> ids = searchForIds(new SearchParameterMap(ValueSet.SP_CODE, new TokenParam(theSystem, theCode)), theRequest);
 		valueSetIds = new ArrayList<IIdType>();
-		for (Long next : ids) {
-			valueSetIds.add(new IdDt("ValueSet", next));
+		for (ResourcePersistentId next : ids) {
+			IIdType id = myIdHelperService.translatePidIdToForcedId(myFhirContext, "ValueSet", next);
+			valueSetIds.add(id);
 		}
 		return valueSetIds;
 	}
@@ -309,10 +313,11 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		if (theId != null) {
 			valueSetIds = Collections.singletonList(theId);
 		} else if (haveIdentifierParam) {
-			Set<Long> ids = searchForIds(new SearchParameterMap(ValueSet.SP_IDENTIFIER, new TokenParam(null, theValueSetIdentifier.getValue())), theRequest);
+			Set<ResourcePersistentId> ids = searchForIds(new SearchParameterMap(ValueSet.SP_IDENTIFIER, new TokenParam(null, theValueSetIdentifier.getValue())), theRequest);
 			valueSetIds = new ArrayList<>();
-			for (Long next : ids) {
-				valueSetIds.add(new IdDt("ValueSet", next));
+			for (ResourcePersistentId next : ids) {
+				IIdType id = myIdHelperService.translatePidIdToForcedId(myFhirContext, "ValueSet", next);
+				valueSetIds.add(id);
 			}
 		} else {
 			if (theCode == null || theCode.isEmpty()) {

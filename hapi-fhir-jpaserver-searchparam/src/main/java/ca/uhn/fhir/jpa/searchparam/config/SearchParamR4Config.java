@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.config;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,6 @@ package ca.uhn.fhir.jpa.searchparam.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -42,11 +38,6 @@ public class SearchParamR4Config extends BaseSearchParamConfig {
 		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
 
 		return retVal;
-	}
-
-	@Bean
-	public ISearchParamRegistry searchParamRegistry() {
-		return new SearchParamRegistryR4();
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)

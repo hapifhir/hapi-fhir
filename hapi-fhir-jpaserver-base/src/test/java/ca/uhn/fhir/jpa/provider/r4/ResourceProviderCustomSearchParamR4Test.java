@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -37,13 +38,16 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.in;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -59,15 +63,14 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	@After
 	public void after() throws Exception {
 		super.after();
-
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
-
 	}
 
 	@Override
 	public void before() throws Exception {
 		super.before();
+		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 	}
 
 	@Override
@@ -462,63 +465,26 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		Interceptor interceptor = new Interceptor();
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		try {
-			myDaoConfig.setAllowContainsSearches(true);
-
-			// Add a custom search parameter
-			SearchParameter fooSp = new SearchParameter();
-			fooSp.addBase("Questionnaire");
-			fooSp.setCode("item-text");
-			fooSp.setName("item-text");
-			fooSp.setType(Enumerations.SearchParamType.STRING);
-			fooSp.setTitle("FOO SP");
-			fooSp.setExpression("Questionnaire.item.text | Questionnaire.item.item.text | Questionnaire.item.item.item.text");
-			fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
-			fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
-			mySearchParameterDao.create(fooSp, mySrd);
-			mySearchParamRegistry.forceRefresh();
 
 			int textIndex = 0;
 			List<Long> ids = new ArrayList<>();
 			for (int i = 0; i < 200; i++) {
 				//Lots and lots of matches
-				Questionnaire q = new Questionnaire();
-				q
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++));
-				q
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++));
-				q
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++));
-				q
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++));
-				q
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++))
-					.addItem()
-					.setText("Section " + (textIndex++));
-				ids.add(myQuestionnaireDao.create(q).getId().getIdPartAsLong());
+				Patient q = new Patient();
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				q.addIdentifier().setSystem("System_" + textIndex++).setValue("FOO");
+				ids.add(myPatientDao.create(q).getId().getIdPartAsLong());
 			}
+
+			myCaptureQueriesListener.clear();
 
 			int foundCount = 0;
 			Bundle bundle = null;
@@ -528,7 +494,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				if (bundle == null) {
 					bundle = ourClient
 						.search()
-						.byUrl(ourServerBase + "/Questionnaire?item-text=Section")
+						.byUrl(ourServerBase + "/Patient?identifier=FOO")
 						.returnBundle(Bundle.class)
 						.execute();
 				} else {
@@ -543,17 +509,42 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 			} while (bundle.getLink("next") != null);
 
+			String queries = " * " + myCaptureQueriesListener
+				.getSelectQueries()
+				.stream()
+				.map(t->t.getSql(true, false))
+				.collect(Collectors.joining("\n * "));
+
 			ourLog.info("Found: {}", found);
 
 			runInTransaction(() -> {
 
+				List currentResults = myEntityManager.createNativeQuery("select distinct resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE resourceta0_ left outer join HFJ_SPIDX_STRING myparamsst1_ on resourceta0_.RES_ID=myparamsst1_.RES_ID where myparamsst1_.HASH_NORM_PREFIX='5901791607832193956' and (myparamsst1_.SP_VALUE_NORMALIZED like 'SECTION%') limit '500'")					.getResultList();
+				List currentResources = myEntityManager.createNativeQuery("select resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE resourceta0_")					.getResultList();
+
 				List<Search> searches = mySearchEntityDao.findAll();
 				assertEquals(1, searches.size());
 				Search search = searches.get(0);
-				String message = "\nWanted: " + (ids) + "\n" +
-					"Actual: " + (actualIds) + "\n" +
-					"Found : " + (found) + "\n" +
-					search.toString();
+				String message = "\nWanted : " + (ids) + "\n" +
+					"Actual : " + (actualIds) + "\n" +
+					"Found  : " + (found) + "\n" +
+					"Current: " + currentResults + "\n" +
+					"Current: " + currentResources + "\n" +
+					search.toString() +
+					"\nQueries :\n" + queries;
+
+				for (Long next :ids) {
+					if (!actualIds.contains(next)) {
+						List<ResourceIndexedSearchParamString> indexes = myResourceIndexedSearchParamStringDao
+							.findAll()
+							.stream()
+							.filter(t->t.getResourcePid().equals(next))
+							.collect(Collectors.toList());
+						message += "\n\nResource " + next + " has prefixes:\n * " + indexes.stream().map(t->t.toString()).collect(Collectors.joining("\n * "));
+						break;
+					}
+				}
+
 				assertEquals(message, 200, search.getNumFound());
 				assertEquals(message, 200, search.getTotalCount().intValue());
 				assertEquals(message, SearchStatusEnum.FINISHED, search.getStatus());

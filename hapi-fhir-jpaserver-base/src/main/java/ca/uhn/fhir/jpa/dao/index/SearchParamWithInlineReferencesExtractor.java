@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.index;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
@@ -54,7 +54,15 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -74,16 +82,15 @@ public class SearchParamWithInlineReferencesExtractor {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	SearchParamExtractorService mySearchParamExtractorService;
+	private SearchParamExtractorService mySearchParamExtractorService;
 	@Autowired
-	ResourceLinkExtractor myResourceLinkExtractor;
+	private ResourceLinkExtractor myResourceLinkExtractor;
 	@Autowired
-	DaoResourceLinkResolver myDaoResourceLinkResolver;
+	private DaoResourceLinkResolver myDaoResourceLinkResolver;
 	@Autowired
-	DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
+	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
-
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -238,17 +245,26 @@ public class SearchParamWithInlineReferencesExtractor {
 					throw new InvalidRequestException(msg);
 				}
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
-				Set<Long> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theRequest);
+				Set<ResourcePersistentId> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theRequest);
+
+				ResourcePersistentId match;
 				if (matches.isEmpty()) {
-					String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
-					throw new ResourceNotFoundException(msg);
-				}
-				if (matches.size() > 1) {
+
+					Optional<ResourcePersistentId> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null);
+					if (placeholderOpt.isPresent()) {
+						match = placeholderOpt.get();
+					} else {
+						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
+						throw new ResourceNotFoundException(msg);
+					}
+				} else if (matches.size() > 1) {
 					String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlMultipleMatches", nextId.getValue());
 					throw new PreconditionFailedException(msg);
+				} else {
+					match = matches.iterator().next();
 				}
-				Long next = matches.iterator().next();
-				String newId = myIdHelperService.translatePidIdToForcedId(resourceTypeString, next);
+
+				String newId = myIdHelperService.translatePidIdToForcedId(resourceTypeString, match);
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
 				nextRef.setReference(newId);
 			}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -277,7 +277,7 @@ public class SearchFilterParser {
 			cursor++;
 			result.setFilter(parseOpen());
 			if (peek() != FilterLexType.fsltCloseSq) {
-				throw new FilterSyntaxException(String.format("Expected ']' at %d but found %c",
+				throw new FilterSyntaxException(String.format("Expected ']' at %d but found %s",
 					cursor,
 					peekCh()));
 			}
@@ -287,13 +287,13 @@ public class SearchFilterParser {
 		if (peek() == FilterLexType.fsltDot) {
 			cursor++;
 			if (peek() != FilterLexType.fsltName) {
-				throw new FilterSyntaxException(String.format("Unexpected Character %c at %d",
+				throw new FilterSyntaxException(String.format("Unexpected Character %s at %d",
 					peekCh(),
 					cursor));
 			}
 			result.setNext(parsePath(consumeName()));
 		} else if (result.getFilter() != null) {
-			throw new FilterSyntaxException(String.format("Expected '.' at %d but found %c",
+			throw new FilterSyntaxException(String.format("Expected '.' at %d but found %s",
 				cursor,
 				peekCh()));
 		}

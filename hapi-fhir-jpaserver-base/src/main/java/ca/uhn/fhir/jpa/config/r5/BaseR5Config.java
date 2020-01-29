@@ -10,8 +10,6 @@ import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.r5.TransactionProcessorVersionAdapterR5;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR5;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR5;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcR5;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR5;
@@ -39,7 +37,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,8 +86,8 @@ public class BaseR5Config extends BaseConfigDstu3Plus {
 	}
 
 	@Bean
-	public TransactionProcessor<Bundle, Bundle.BundleEntryComponent> transactionProcessor() {
-		return new TransactionProcessor<>();
+	public TransactionProcessor transactionProcessor() {
+		return new TransactionProcessor();
 	}
 
 	@Bean(name = GRAPHQL_PROVIDER_NAME)
@@ -140,11 +138,6 @@ public class BaseR5Config extends BaseConfigDstu3Plus {
 	@Bean(autowire = Autowire.BY_TYPE)
 	public SearchParamExtractorR5 searchParamExtractor() {
 		return new SearchParamExtractorR5();
-	}
-
-	@Bean
-	public ISearchParamRegistry searchParamRegistry() {
-		return new SearchParamRegistryR5();
 	}
 
 	@Bean(name = "mySystemDaoR5", autowire = Autowire.BY_NAME)

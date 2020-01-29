@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,20 +41,30 @@ import java.util.*;
  */
 public final class DateUtils {
 
+	/**
+	 * GMT TimeZone
+	 */
 	public static final TimeZone GMT = TimeZone.getTimeZone("GMT");
+
 	/**
 	 * Date format pattern used to parse HTTP date headers in RFC 1123 format.
 	 */
-	private static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss zzz";
+	@SuppressWarnings("WeakerAccess")
+	public static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss zzz";
+
 	/**
 	 * Date format pattern used to parse HTTP date headers in RFC 1036 format.
 	 */
-	private static final String PATTERN_RFC1036 = "EEE, dd-MMM-yy HH:mm:ss zzz";
+	@SuppressWarnings("WeakerAccess")
+	public static final String PATTERN_RFC1036 = "EEE, dd-MMM-yy HH:mm:ss zzz";
+
 	/**
 	 * Date format pattern used to parse HTTP date headers in ANSI C
 	 * {@code asctime()} format.
 	 */
-	private static final String PATTERN_ASCTIME = "EEE MMM d HH:mm:ss yyyy";
+	@SuppressWarnings("WeakerAccess")
+	public static final String PATTERN_ASCTIME = "EEE MMM d HH:mm:ss yyyy";
+
 	private static final String[] DEFAULT_PATTERNS = new String[]{
 		PATTERN_RFC1123,
 		PATTERN_RFC1036,

@@ -1,0 +1,213 @@
+---
+- item:
+    issue: "339"
+    type: "fix"
+    title: "Security Fix: XML parser was vulnerable to XXE (XML External Entity) processing, which could result in local files on disk being disclosed. See <a href=\"https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing\">this page</a> for more information. Thanks to Jim Steel for reporting!"
+- item:
+    type: "add"
+    title: "Bump the version of a few dependencies to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Hibernate (JPA, Web Tester): 5.0.7 -&gt; 5.1.0</li> <li>Spring (JPA, Web Tester): 4.2.4 -&gt; 4.2.5</li> <li>SLF4j (All): 1.7.14 -&gt; 1.7.21</li> </ul>"
+- item:
+    type: "add"
+    title: "Support comments when parsing and encoding both JSON and XML. Comments are retrieved and added to the newly created methods IBase#getFormatCommentsPre() and IBase#getFormatCommentsPost()"
+- item:
+    issue: "293"
+    type: "add"
+    title: "Added options to the CLI upload-examples command which allow it to cache the downloaded content file, or use an arbitrary one. Thanks to Adam Carbone for the pull request!"
+- item:
+    type: "fix"
+    title: "REST search parameters with a prefix/comparator had not been updated to use the DSTU2 style prefixes (gt2011-01-10) instead of the DSTU1 style prefixes (>2011-01-01). The client has been updated so that it uses the new prefixes if the client has a DSTU2+ context. The server has been updated so that it now supports both styles. <br/><br/> As a part of this change, a new enum called ParamPrefixEnum has been introduced. This enum replaces the old QuantityCompararatorEnum which has a typo in its name and can not represent several new prefixes added since DSTU1."
+- item:
+    type: "add"
+    title: "JPA server number and quantity search params now follow the rules for the use of precision in search terms outlined in the <a href=\"https://www.hl7.org/fhir/search.html\">search page</a> of the FHIR specification. For example, previously a 1% tolerance was applied for all searches (10% for approximate search). Now, a tolerance which respects the precision of the search term is used (but still 10% for approximate search)."
+- item:
+    issue: "291"
+    type: "fix"
+    title: "Fix a failure starting the REST server if a method returns an untyped List, which among other things prevented resource provider added to the server as CDI beans in a JBoss enviroment. Thanks to GitHub user fw060 (Fei) for reporting and figuring out exactly why this wasn't working!"
+- item:
+    type: "add"
+    title: "JPA server now supports :above and :below qualifiers on URI search params"
+- item:
+    type: "add"
+    title: "Add optional support (disabled by default for now) to JPA server to support inline references containing search URLs. These URLs will be resolved when a resource is being created/updated and replaced with the single matching resource. This is being used as a part of the May 2016 Connectathon for a testing scenario."
+- item:
+    type: "add"
+    title: "The server no longer adds a <code>WWW-Authenticate</code> header to the response if any resource provider code throws an <code>AuthenticationException</code> . This header is used for interactive authentication, which isn't generally appropriate for FHIR. We added code to add this header a long time ago for testing purposes and it never got removed. Please let us know if you need the ability to add this header automatically. Thanks to Lars Kristian Roland for pointing this out."
+- item:
+    type: "fix"
+    title: "In the client, the create/update operations on a Binary resource (which use the raw binary's content type as opposed to the FHIR content type) were not including any request headers (Content-Type, User-Agent, etc.) Thanks to Peter Van Houte of Agfa Healthcare for reporting!"
+- item:
+    type: "fix"
+    title: "Handling of Binary resources containing embedded FHIR resources for create/update/etc operations has been corrected per the FHIR rules outlined at <a href=\"http://hl7.org/fhir/binary.html\">Binary Resource</a> in both the client and server. <br/><br/> Essentially, if the Binary contains something that isn't FHIR (e.g. an image with an image content-type) the client will send the raw data with the image content type to the server. The server will place the content type and raw data into a Binary resource instance and pass those to the resource provider. This part was already correct previous to 1.5. <br/><br/> On the other hand, if the Binary contains a FHIR content type, the Binary is now sent by the client to the server as a Binary resource with a FHIR content-type, and the embedded FHIR content is contained in the appropriate fields. The server will pass this \"outer\" Binary resource to the resource provider code."
+- item:
+    type: "add"
+    title: "The RequestDetails and ActionRequestDetails objects which are passed to server interceptor methods and may also be used as server provider method arguments now has a new method <code>Map&lt;String, String&gt; getUserData()</code> which can be used to pass data and objects between interceptor methods to to providers. This can be useful, for instance, if an authorization interceptor wants to pass the logged in user's details to other parts of the server."
+- item:
+    issue: "297"
+    type: "fix"
+    title: "When <code>IServerInterceptor#incomingRequestPreHandled()</code> is called for a <code>@Validate</code> method, the resource was not populated in the <code>ActionRequestDetails</code> argument. Thanks to Ravi Kuchi for reporting!"
+- item:
+    issue: "298"
+    type: "fix"
+    title: "Request to server at <code>[baseUrl]/metadata</code> with an HTTP method other than GET (e.g. POST, PUT) should result in an HTTP 405. Thanks to Michael Lawley for reporting!"
+- item:
+    issue: "302"
+    type: "fix"
+    title: "Fix a server exception when trying to automatically add the profile tag to a resource which already has one or more profiles set. Thanks to Magnus Vinther for reporting!"
+- item:
+    issue: "296"
+    type: "fix"
+    title: "QuantityParam parameters being used in the RESTful server were ignoring the <code>:missing</code> qualifier. Thanks to Alexander Takacs for reporting!"
+- item:
+    issue: "299"
+    type: "fix"
+    title: "Annotation client failed with an exception if the response contained extensions on fields in the resonse Bundle (e.g. Bundle.entry.search). Thanks to GitHub user am202 for reporting!"
+- item:
+    issue: "274"
+    type: "fix"
+    title: "Primitive elements with no value but an extension were sometimes not encoded correctly in XML, and sometimes not parsed correctly in JSON. Thanks to Bill de Beaubien for reporting!"
+- item:
+    issue: "280"
+    type: "fix"
+    title: "The Web Testing UI has long had an issue where if you click on a button which navigates to a new page (e.g. search, read, etc) and then click the back button to return to the original page, the button you clicked remains disabled and can't be clicked again (on Firefox and Safari). This is now fixed. Unfortunately the fix means that the buttom will no longer show a \"loading\" spinner, but there doesn't seem to be another way of fixing this. Thanks to Mark Scrimshire for reporting!"
+- item:
+    type: "fix"
+    title: "Extensions found while parsing an object that doesn't support extensions are now reported using the IParserErrorHandler framework in the same way that other similar errors are handled. This allows the parser to be more lenient when needed."
+- item:
+    issue: "304"
+    type: "add"
+    title: "Improve error message if incorrect type is placed in a list field in the data model. Java uses generics to prevent this at compile time, but if someone is in an environment without generics this helps improve the error message at runtime. Thanks to Hugo Soares for suggesting."
+- item:
+    issue: "308"
+    type: "fix"
+    title: "Prevent an unneeded warning when parsing a resource containing a declared extension. Thanks to Matt Blanchette for reporting!"
+- item:
+    type: "fix"
+    title: "Web Tester UI did not invoke VRead even if a version ID was specified. Thanks to Poseidon for reporting!"
+- item:
+    type: "add"
+    title: "Per discussion on the FHIR implementer chat, the JPA server no longer includes _revinclude matches in the Bundle.total count, or the page size limit."
+- item:
+    type: "add"
+    title: "JPA server now persists search results to the database in a new table where they can be temporaily preserved. This makes the JPA server much more scalable, since it no longer needs to store large lists of pages in memory between search invocations. <br/><br/> Old searches are deleted after an hour by default, but this can be changed via a setting in the DaoConfig."
+- item:
+    type: "add"
+    title: "JPA servers' resource version history mechanism has been adjusted so that the history table keeps a record of all versions including the current version. This has the very helpful side effect that history no longer needs to be paged into memory as a complete set. Previously history had a hard limit of only being able to page the most recent 20000 entries. Now it has no limit."
+- item:
+    type: "fix"
+    title: "JPA server returned the wrong Bundle.type value (COLLECTION, should be SEARCHSET) for $everything operation responses. Thanks to Sonali Somase for reporting!"
+- item:
+    issue: "305"
+    type: "fix"
+    title: "REST and JPA server should reject update requests where the resource body does not contain an ID, or contains an ID which does not match the URL. Previously these were accepted (the URL ID was trusted) which is incorrect according to the FHIR specification. Thanks to GitHub user ametke for reporting! <br/><br/> As a part of this change, server error messages were also improved for requests where the URL does not contain an ID but needs to (e.g. for an update) or contains an ID but shouldn't (e.g. for a create)"
+- item:
+    type: "fix"
+    title: "When fields of type BoundCodeDt (e.g. Patient.gender) are serialized and deserialized using Java's native object serialization, the enum binder was not serialized too. This meant that values for the field in the deserialized object could not be modified. Thanks to Thomas Andersen for reporting!"
+- item:
+    issue: "313"
+    type: "fix"
+    title: "REST Server responded to HTTP OPTIONS requests with any URI as being a request for the server's Conformance statement. This is incorrect, as only a request for <code>OPTIONS [base url]</code> should be treated as such. Thanks to Michael Lawley for reporting!"
+- item:
+    type: "fix"
+    title: "REST annotation style client was not able to handle extended operations ($foo) where the response from the server was a raw resource instead of a Parameters resource. Thanks to Andrew Michael Martin for reporting!"
+- item:
+    type: "add"
+    title: "JPA server applies _lastUpdated filter inline with other searches wherever possible instead of applying this filter as a second query against the results of the first query. This should improve performance when searching against large datasets."
+- item:
+    type: "add"
+    title: "Parsers have new method <code>setDontEncodeElements</code> which can be used to force the parser to not encode certain elements in a resource when serializing. For example this can be used to omit sensitive data or skip the resource metadata."
+- item:
+    type: "add"
+    title: "JPA server database design has been adjusted so that different tables use different sequences to generate their indexes, resulting in more sequential resource IDs being assigned by the server"
+- item:
+    type: "fix"
+    title: "Server now correctly serves up Binary resources using their native content type (instead of as a FHIR resource) if the request contains an accept header containing \"application/xml\" as some browsers do."
+- item:
+    type: "add"
+    title: "DSTU2 resources now have a <code>getMeta()</code> method which returns a modifiable view of the resource metadata for convenience. This matches the equivalent method in the DSTU3 structures."
+- item:
+    issue: "315"
+    type: "add"
+    title: "Add a new method to FhirContext called <code>setDefaultTypeForProfile</code> which can be used to specify that when recources are received which declare support for specific profiles, a specific custom structures should be used instead of the default. For example, if you have created a custom Observation class for a specific profile, you could use this method to cause your custom type to be used by the parser for resources in a search bundle you receive. <br/><br/> See the documentation page on Profiles and Extensions for more information."
+- item:
+    issue: "315"
+    type: "fix"
+    title: "Parsing/Encoding a custom resource type which extends a base type sometimes caused the FhirContext to treat all future parses of the same resource as using the custom type even when this was not wanted. <br/><br/> Custom structures may now be explicitly declared by profile using the <code>setDefaultTypeForProfile</code> method. <br/><br/> This issue was discovered and fixed as a part of the implementation of issue #315."
+- item:
+    issue: "321"
+    type: "add"
+    title: "Set up the tinder plugin to work as an ant task as well as a Maven plugin, and to use external sources. Thanks to Bill Denton for the pull request!"
+- item:
+    type: "fix"
+    title: "JPA server now allows searching by token parameter using a system only and no code, giving a search for any tokens which match the given token with any code. Previously the expected behaviour for this search was not clear in the spec and HAPI had different behaviour from the other reference servers."
+- item:
+    type: "add"
+    title: "Introduce a JAX-RS client provider which can be used instead of the default Apache HTTP Client provider to provide low level HTTP services to HAPI's REST client. See JAX-RS &amp; Alternate HTTP Client Providers for more information. <br/><br/> This is useful in cases where you have other non-FHIR REST clients using a JAX-RS provider and want to take advantage of the rest of the framework. <br/><br/> Thanks to Peter Van Houte from Agfa for the amazing work!"
+- item:
+    issue: "312"
+    type: "fix"
+    title: "Parser failed with a NPE while encoding resources if the resource contained a null extension. Thanks to steve1medix for reporting!"
+- item:
+    issue: "320"
+    type: "fix"
+    title: "In generated model classes (DSTU1/2) don't use BoundCodeDt and BoundCodeableConceptDt for coded fields which use example bindings. Thanks to GitHub user Ricq for reporting!"
+- item:
+    type: "add"
+    title: "Operations methods defined using <code>@Operation</code> will now infer the maximum number of repetitions of their parameters by the type of the parameter. Previously if a default <code>max()</code> value was not specified in the <code>@OperationParam</code> annotation on a parameter, the maximum was assumed to be 1. Now, if a max value is not explicitly specified and the type of the parameter is a basic type (e.g. <code>StringDt</code>) the max will be 1. If the parameter is a collection type (e.g. <code>List&lt;StringDt&gt;</code>) the max will be *"
+- item:
+    issue: "317"
+    type: "add"
+    title: "Operation methods defined using <code>@Operation</code> may now use search parameter types, such as <code>TokenParam</code> and <code>TokenAndListParam</code> as values. Thanks to Christian Ohr for reporting!"
+- item:
+    type: "add"
+    title: "Add databases indexes to JPA module search index tables for the RES_ID column on each. This should help performance when searching over large datasets. Thanks to Emmanuel Duviviers for the suggestion!"
+- item:
+    type: "fix"
+    title: "DateTimeType should fail to parse 1974-12-25+10:00 as this is not a valid time in FHIR. Thanks to Grahame Grieve for reporting!"
+- item:
+    type: "fix"
+    title: "When parsing a Bundle resource, if the Bundle.entry.request.url contains a UUID but the resource body has no ID, the Resource.id will be populated with the ID from the Bundle.entry.request.url. This is helpful when round tripping Bundles containing UUIDs."
+- item:
+    type: "fix"
+    title: "When parsing a DSTU3 bundle, references between resources did not have the actual resource instance populated into the reference if the IDs matched as they did in DSTU1/2."
+- item:
+    issue: "326"
+    type: "fix"
+    title: "Contained resource references on DSTU3 resources were not serialized correctly when using the Json Parser. Thanks to GitHub user @fw060 for reporting and supplying a patch which corrects the issue!"
+- item:
+    issue: "325"
+    type: "fix"
+    title: "DSTU3 model classes equalsShallow and equalsDeep both did not work correctly if a field was null in one object, but contained an empty object in the other (e.g. a StringType with no actual value in it). These two should be considered equal, since they would produce the exact same wire format. <br/><br/> Thanks to GitHub user @ipropper for reporting and providing a test case!"
+- item:
+    type: "add"
+    title: "JPA server now supports searching for <code>_tag:not=[tag]</code> which enables finding resources that to not have a given tag/profile/security tag. Thanks to Lars Kristian Roland for the suggestion!"
+- item:
+    type: "fix"
+    title: "Extensions containing resource references did not get encoded correctly some of the time. Thanks to Poseidon for reporting!"
+- item:
+    type: "fix"
+    title: "Parsers (both XML and JSON) encoded the first few elements of DSTU3 structures in the wrong order: Extensions were placed before any other content, which is incorrect (several elements come first: meta, text, etc.)"
+- item:
+    type: "fix"
+    title: "In server implementations, the Bundle.entry.fullUrl was not getting correctly populated on Hl7OrgDstu2 servers. Thanks to Christian Ohr for reporting!"
+- item:
+    issue: "335"
+    type: "fix"
+    title: "Ensure that element IDs within resources (i.e. IDs on elements other than the resource itself) get serialized and parsed correctly. Previously, these didn't get serialized in a bunch of circumstances. Thanks to Vadim Peretokin for reporting and providing test cases!"
+- item:
+    type: "add"
+    title: "Improve CLI error message if the tool can't bind to the requested port. Thanks to Claude Nanjo for the suggestion!"
+- item:
+    type: "fix"
+    title: "Server param of <code>_summary=text</code> did not include mandatory elements in return as well as the text element, even though the FHIR specification required it."
+- item:
+    type: "fix"
+    title: "Remove invalid resource type \"Documentation\" from DSTU2 structures."
+- item:
+    type: "fix"
+    title: "JPA server did not respect target types for search parameters. E.g. Appointment:patient has a path of \"Appointment.participant.actor\" and a target type of \"Patient\". The search path was being correctly handled, but the target type was being ignored."
+- item:
+    type: "add"
+    title: "RestfulServer now manually parses URL parameters instead of relying on the container's parsed parameters. This is useful because many Java servlet containers (e.g. Tomcat, Glassfish) default to ISO-8859-1 encoding for URLs insetad of the UTF-8 encoding specified by FHIR."
+- item:
+    type: "add"
+    title: "ResponseHighlightingInterceptor now doesn't highlight if the request has an Origin header, since this probably denotes an AJAX request."

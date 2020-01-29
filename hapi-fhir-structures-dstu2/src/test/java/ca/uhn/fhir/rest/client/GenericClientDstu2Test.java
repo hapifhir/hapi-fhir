@@ -14,6 +14,8 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestSecurity;
+import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -22,6 +24,7 @@ import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
+import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.client.impl.BaseClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -2361,6 +2364,33 @@ public class GenericClientDstu2Test {
 	}
 
 	@Test
+	public void testTransactionHandle204NoBody() throws Exception {
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = new Bundle();
+		bundle.setType(BundleTypeEnum.TRANSACTION);
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle.Entry entry = bundle.addEntry();
+		entry.setResource(new Patient());
+		entry.getRequest().setMethod(HTTPVerbEnum.PUT);
+
+
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_204_NO_CONTENT, ""));
+		when(myHttpResponse.getEntity() ).thenReturn(null);
+
+		try {
+			client.transaction().withBundle(bundle).execute();
+			fail("Should throw an exception");
+		} catch (NonFhirResponseException e) {
+			assertEquals("status", Constants.STATUS_HTTP_204_NO_CONTENT, e.getStatusCode());
+		}
+	}
+
+	@Test
 	public void testUpdateConditional() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -2658,7 +2688,7 @@ public class GenericClientDstu2Test {
 		}
 
 		@Override
-		public void registerInterceptor(IClientInterceptor theInterceptor) {
+		public void registerInterceptor(Object theInterceptor) {
 			// nothing
 		}
 
@@ -2673,7 +2703,7 @@ public class GenericClientDstu2Test {
 		}
 
 		@Override
-		public void unregisterInterceptor(IClientInterceptor theInterceptor) {
+		public void unregisterInterceptor(Object theInterceptor) {
 			// nothing
 		}
 

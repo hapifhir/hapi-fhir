@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.sched;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,37 @@ package ca.uhn.fhir.jpa.model.sched;
  */
 
 import com.google.common.annotations.VisibleForTesting;
+import org.quartz.JobKey;
 import org.quartz.SchedulerException;
+
+import java.util.Set;
 
 public interface ISchedulerService {
 
 	@VisibleForTesting
 	void purgeAllScheduledJobsForUnitTest() throws SchedulerException;
 
-	void logStatus();
+	void logStatusForUnitTest();
 
 	/**
+	 * Only one instance of this task will fire across the whole cluster (when running in a clustered environment).
 	 * @param theIntervalMillis How many milliseconds between passes should this job run
-	 * @param theClusteredTask  If <code>true</code>, only one instance of this task will fire across the whole cluster (when running in a clustered environment). If <code>false</code>, or if not running in a clustered environment, this task will execute locally (and should execute on all nodes of the cluster)
 	 * @param theJobDefinition  The Job to fire
 	 */
-	void scheduleFixedDelay(long theIntervalMillis, boolean theClusteredTask, ScheduledJobDefinition theJobDefinition);
+	void scheduleLocalJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
+
+	/**
+	 * This task will execute locally (and should execute on all nodes of the cluster if there is a cluster)
+	 * @param theIntervalMillis How many milliseconds between passes should this job run
+	 * @param theJobDefinition  The Job to fire
+	 */
+	void scheduleClusteredJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
+
+	@VisibleForTesting
+	Set<JobKey> getLocalJobKeysForUnitTest() throws SchedulerException;
+
+	@VisibleForTesting
+	Set<JobKey> getClusteredJobKeysForUnitTest() throws SchedulerException;
 
 	boolean isStopping();
 }

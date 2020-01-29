@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
@@ -43,9 +44,9 @@ public interface ISearchBuilder {
 
 	Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest);
 
-	void loadResourcesByPid(Collection<Long> thePids, Collection<Long> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation, RequestDetails theDetails);
+	void loadResourcesByPid(Collection<ResourcePersistentId> thePids, Collection<ResourcePersistentId> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation, RequestDetails theDetails);
 
-	Set<Long> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode,
+	Set<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Set<Include> theRevIncludes, boolean theReverseMode,
 								  DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest);
 
 	/**
@@ -55,6 +56,6 @@ public interface ISearchBuilder {
 
 	void setType(Class<? extends IBaseResource> theResourceType, String theResourceName);
 
-	void setPreviouslyAddedResourcePids(List<Long> thePreviouslyAddedResourcePids);
+	void setPreviouslyAddedResourcePids(List<ResourcePersistentId> thePreviouslyAddedResourcePids);
 
 }

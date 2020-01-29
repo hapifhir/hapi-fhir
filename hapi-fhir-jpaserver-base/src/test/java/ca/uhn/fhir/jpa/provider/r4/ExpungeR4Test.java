@@ -174,10 +174,42 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		// Create then delete
 		Patient p = new Patient();
 		p.setId("TEST");
+		p.setActive(true);
+		p.addName().setFamily("FOO");
+		myPatientDao.update(p);
+
+		p.setActive(false);
+		myPatientDao.update(p);
+
+		myPatientDao.delete(new IdType("Patient/TEST"));
+
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), not(empty())));
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
+		runInTransaction(() -> assertThat(myForcedIdDao.findAll(), not(empty())));
+
+		myPatientDao.expunge(new ExpungeOptions()
+			.setExpungeDeletedResources(true)
+			.setExpungeOldVersions(true), null);
+
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myForcedIdDao.findAll(), empty()));
+
+	}
+
+	@Test
+	public void testExpungeAllVersionsWithTagsDeletesRow() {
+		// Create then delete
+		Patient p = new Patient();
+		p.setId("TEST");
 		p.getMeta().addTag().setSystem("http://foo").setCode("bar");
 		p.setActive(true);
 		p.addName().setFamily("FOO");
 		myPatientDao.update(p).getId();
+
+		p.setActive(false);
+		myPatientDao.update(p);
+
 		myPatientDao.delete(new IdType("Patient/TEST"));
 
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), not(empty())));

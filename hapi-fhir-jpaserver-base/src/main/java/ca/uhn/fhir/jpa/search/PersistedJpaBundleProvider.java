@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
@@ -165,13 +166,17 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	protected List<IBaseResource> doSearchOrEverything(final int theFromIndex, final int theToIndex) {
+		if (mySearchEntity.getTotalCount() != null && mySearchEntity.getNumFound() <= 0) {
+			// No resources to fetch (e.g. we did a _summary=count search)
+			return Collections.emptyList();
+		}
 		final ISearchBuilder sb = myDao.newSearchBuilder();
 
 		String resourceName = mySearchEntity.getResourceType();
 		Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(resourceName).getImplementingClass();
 		sb.setType(resourceType, resourceName);
 
-		final List<Long> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest);
+		final List<ResourcePersistentId> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest);
 
 		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
 		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
@@ -306,15 +311,15 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	// Note: Leave as protected, HSPC depends on this
 	@SuppressWarnings("WeakerAccess")
-	protected List<IBaseResource> toResourceList(ISearchBuilder theSearchBuilder, List<Long> thePids) {
-		Set<Long> includedPids = new HashSet<>();
+	protected List<IBaseResource> toResourceList(ISearchBuilder theSearchBuilder, List<ResourcePersistentId> thePids) {
+		Set<ResourcePersistentId> includedPids = new HashSet<>();
 
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
 			includedPids.addAll(theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated(), myUuid, myRequest));
 			includedPids.addAll(theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated(), myUuid, myRequest));
 		}
 
-		List<Long> includedPidList = new ArrayList<>(includedPids);
+		List<ResourcePersistentId> includedPidList = new ArrayList<>(includedPids);
 
 		// Execute the query and make sure we return distinct results
 		List<IBaseResource> resources = new ArrayList<>();

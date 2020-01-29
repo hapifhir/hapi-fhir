@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.IndexNonDeletedInterceptor;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -46,7 +46,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
 	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
 })
-public class ResourceTable extends BaseHasResource implements Serializable {
+public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource {
 	public static final int RESTYPE_LEN = 40;
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final int MAX_PROFILE_LENGTH = 200;
@@ -219,13 +219,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Transient
 	private transient ResourceHistoryTable myCurrentVersionEntity;
 
-	public Collection<ResourceLink> getResourceLinksAsTarget() {
-		if (myResourceLinksAsTarget == null) {
-			myResourceLinksAsTarget = new ArrayList<>();
-		}
-		return myResourceLinksAsTarget;
-	}
-
 	@Override
 	public ResourceTag addTag(TagDefinition theTag) {
 		for (ResourceTag next : getTags()) {
@@ -238,14 +231,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return tag;
 	}
 
-//	public ResourceEncodingEnum getEncoding() {
-//		Validate.notNull(myEncoding, "myEncoding is null");
-//		return myEncoding;
-//	}
-//
-//	public void setEncoding(ResourceEncodingEnum theEncoding) {
-//		myEncoding = theEncoding;
-//	}
 
 	public String getHashSha256() {
 		return myHashSha256;
@@ -288,10 +273,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 			myParamsCompositeStringUnique = new ArrayList<>();
 		}
 		return myParamsCompositeStringUnique;
-	}
-
-	public void setParamsCompositeStringUnique(Collection<ResourceIndexedCompositeStringUnique> theParamsCompositeStringUnique) {
-		myParamsCompositeStringUnique = theParamsCompositeStringUnique;
 	}
 
 	public Collection<ResourceIndexedSearchParamCoords> getParamsCoords() {
@@ -414,15 +395,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	public Long getResourceId() {
 		return getId();
 	}
-
-//	public byte[] getResource() {
-//		Validate.notNull(myEncoding, "myEncoding is null");
-//		return myResource;
-//	}
-//
-//	public void setResource(byte[] theResource) {
-//		myResource = theResource;
-//	}
 
 	public Collection<ResourceLink> getResourceLinks() {
 		if (myResourceLinks == null) {
@@ -628,5 +600,10 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	 */
 	public ResourceHistoryTable getCurrentVersionEntity() {
 		return myCurrentVersionEntity;
+	}
+
+	@Override
+	public ResourcePersistentId getPersistentId() {
+		return new ResourcePersistentId(getId());
 	}
 }

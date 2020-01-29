@@ -26,7 +26,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public class SearchParameterMap implements Serializable {
 		}
 	}
 
-		public void add(String theName, IQueryParameterOr<?> theOr) {
+	public void add(String theName, IQueryParameterOr<?> theOr) {
 		if (theOr == null) {
 			return;
 		}

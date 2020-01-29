@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.*;
@@ -160,4 +161,8 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		myResourceVersion = theVersion;
 	}
 
+	@Override
+	public ResourcePersistentId getPersistentId() {
+		return new ResourcePersistentId(myResourceId);
+	}
 }

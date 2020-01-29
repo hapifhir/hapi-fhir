@@ -30,7 +30,17 @@ public class XhtmlNodeTest {
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">It’s January again</div>", new XhtmlNode().setValue(dt.getValue()).getValueAsString());
 	}
 
-	
+	/**
+	 * See #1658
+	 */
+	@Test
+	public void testLangAttributePreserved() {
+		XhtmlNode dt = new XhtmlNode();
+		dt.setValueAsString("<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\">help i'm a bug</div>");
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\">help i'm a bug</div>", dt.getValueAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\">help i'm a bug</div>", new XhtmlNode().setValue(dt.getValue()).getValueAsString());
+	}
+
 	/**
 	 * See #443
 	 */

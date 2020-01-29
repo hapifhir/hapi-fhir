@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
+import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.CookieInterceptor;
@@ -45,7 +46,7 @@ public class ClientExamples {
    @SuppressWarnings("unused")
    public void createProxy() {
       // START SNIPPET: proxy
-      FhirContext ctx = FhirContext.forDstu2();
+      FhirContext ctx = FhirContext.forR4();
 
       // Set connections to access the network via the HTTP proxy at
       // example.com : 8888
@@ -115,7 +116,7 @@ public class ClientExamples {
    @SuppressWarnings("unused")
    public void createTimeouts() {
       // START SNIPPET: timeouts
-      FhirContext ctx = FhirContext.forDstu2();
+      FhirContext ctx = FhirContext.forR4();
 
       // Set how long to try and establish the initial TCP connection (in ms)
       ctx.getRestfulClientFactory().setConnectTimeout(20 * 1000);
@@ -132,7 +133,7 @@ public class ClientExamples {
    public void createSecurity() {
       // START SNIPPET: security
       // Create a context and get the client factory so it can be configured
-      FhirContext ctx = FhirContext.forDstu2();
+      FhirContext ctx = FhirContext.forR4();
       IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
       // Create an HTTP basic auth interceptor
@@ -140,7 +141,7 @@ public class ClientExamples {
       String password = "boobear";
       IClientInterceptor authInterceptor = new BasicAuthInterceptor(username, password);
 
-		// If you're usinf an annotation client, use this style to
+		// If you're using an annotation client, use this style to
 		// register it
       IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
 		annotationClient.registerInterceptor(authInterceptor);
@@ -155,7 +156,7 @@ public class ClientExamples {
    public void createCookie() {
       // START SNIPPET: cookie
       // Create a context and get the client factory so it can be configured
-      FhirContext ctx = FhirContext.forDstu2();
+      FhirContext ctx = FhirContext.forR4();
       IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
       // Create a cookie interceptor. This cookie will have the name "mycookie" and
@@ -171,11 +172,40 @@ public class ClientExamples {
       // END SNIPPET: cookie
    }
 
+	@SuppressWarnings("unused")
+	public void addHeaders() {
+		// START SNIPPET: addHeaders
+		// Create a context and get the client factory so it can be configured
+		FhirContext ctx = FhirContext.forR4();
+		IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
+
+		// Create a client
+		IGenericClient client = ctx.newRestfulGenericClient( "http://localhost:9999/fhir");
+
+		// Register an additional headers interceptor and add one header to it
+		AdditionalRequestHeadersInterceptor interceptor = new AdditionalRequestHeadersInterceptor();
+		interceptor.addHeaderValue("X-Message", "Help I'm a Bug");
+		client.registerInterceptor(interceptor);
+
+		IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+		client.registerInterceptor(interceptor);
+		// END SNIPPET: addHeaders
+
+		// START SNIPPET: addHeadersNoInterceptor
+		Patient p = client
+			.read()
+			.resource(Patient.class)
+			.withId(123L)
+			.withAdditionalHeader("X-Message", "Help I'm a Bug")
+			.execute();
+		// END SNIPPET: addHeadersNoInterceptor
+	}
+
    @SuppressWarnings("unused")
    public void gzip() {
       // START SNIPPET: gzip
       // Create a context and get the client factory so it can be configured
-      FhirContext ctx = FhirContext.forDstu2();
+      FhirContext ctx = FhirContext.forR4();
       IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
       // Register the interceptor with your client (either style)
@@ -188,7 +218,7 @@ public class ClientExamples {
    public void createSecurityBearer() {
       // START SNIPPET: securityBearer
       // Create a context and get the client factory so it can be configured
-      FhirContext ctx = FhirContext.forDstu2();
+      FhirContext ctx = FhirContext.forR4();
       IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
       // In reality the token would have come from an authorization server 
@@ -210,7 +240,7 @@ public class ClientExamples {
       {
          // START SNIPPET: logging
          // Create a context and get the client factory so it can be configured
-         FhirContext ctx = FhirContext.forDstu2();
+         FhirContext ctx = FhirContext.forR4();
          IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
          // Create a logging interceptor
@@ -234,7 +264,7 @@ public class ClientExamples {
       {
          // START SNIPPET: clientConfig
          // Create a client
-         FhirContext ctx = FhirContext.forDstu2();
+         FhirContext ctx = FhirContext.forR4();
          IPatientClient client = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/");
 
          // Request JSON encoding from the server (_format=json)

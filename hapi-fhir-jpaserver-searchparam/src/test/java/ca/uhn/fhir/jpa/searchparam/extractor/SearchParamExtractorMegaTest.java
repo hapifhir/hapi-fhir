@@ -163,6 +163,7 @@ public class SearchParamExtractorMegaTest {
 			case "instant":
 				leaf.setValueAsString("2019-10-10T11:11:11Z");
 				break;
+			case "integer64":
 			case "integer":
 			case "decimal":
 				leaf.setValueAsString("1");

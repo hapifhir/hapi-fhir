@@ -9,19 +9,17 @@ HAPI FHIR is based on the same principle, but applied to the Java implementation
 
 # Getting Started
 
-To get started with HAPI FHIR, first download a copy and add it	to your project. See the [Download Page](./download.html) for instructions.
+To get started with HAPI FHIR, first download a copy and add it	to your project. See [Downloading and Importing](./downloading_and_importing.html) for instructions.
 
 ## A Note on FHIR Versions
 
 Before discussing HAPI itself, a quick word about FHIR versions. FHIR is not yet a finalized "1.0" standard. It is currently in the DSTU phase, which means that it is changing in subtle and non-subtle ways between releases. Before trying to use FHIR, you will need to determine which version of FHIR you want to support in your application. Typically this would be the latest version, but if you are looking to interact with an application which already exists, you will probably want to implement the same version implemented by that application.
 
-See the	[note on DSTU2 support](doc_dstu2.html) for more information on supporting multiple versions of FHIR.
-
 ## Introducing the FHIR Context
 
-HAPI defines model classes for every resource type and datatype defined by the FHIR specification. For example, here is the [Patient](../apidocs/hapi-fhir-structures-r4/ca/uhn/fhir/model/r4/resource/Patient.html) resource specification. If you browse the JavaDoc you will see getters and setters for the various properties that make up a Patient resource.
+HAPI defines model classes for every resource type and datatype defined by the FHIR specification. For example, here is the [Patient](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/model/Patient.html) resource specification. If you browse the JavaDoc you will see getters and setters for the various properties that make up a Patient resource.
 
-We will come back to how to interact with these objects in a moment, but first we need to create a [FhirContext](../apidocs/hapi-fhir-base/ca/uhn/fhir/context/FhirContext.html). FhirContext is the starting point to using HAPI, and acts as a factory for most other parts of the API as well as a runtime cache of information that HAPI needs to operate. Users of the JAXB API may find this class to be similar in purpose to	the	[JAXBContext](http://docs.oracle.com/javaee/5/api/javax/xml/bind/JAXBContext.html) class from that API.
+We will come back to how to interact with these objects in a moment, but first we need to create a [FhirContext](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/FhirContext.html). FhirContext is the starting point to using HAPI, and acts as a factory for most other parts of the API as well as a runtime cache of information that HAPI needs to operate. Users of the JAXB API may find this class to be similar in purpose to	the	[JAXBContext](http://docs.oracle.com/javaee/5/api/javax/xml/bind/JAXBContext.html) class from that API.
 
 Creating a FhirContext is as simple as instantiating one. A FhirContext instance is	specific to a given version of the FHIR specification, so it is recommended that you use one of the factory methods indicating the FHIR version you wish to support in your application, as shown in the following snippet:
 
@@ -31,7 +29,7 @@ Creating a FhirContext is as simple as instantiating one. A FhirContext instance
 
 ## Parsing a resource from a String
 
-This [Parser instance](../apidocs/hapi-fhir-base/ca/uhn/fhir/parser/IParser.html) can then be used to parse messages. Note that you may use the context to create as many parsers are you want.
+This [Parser instance](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/parser/IParser.html) can then be used to parse messages. Note that you may use the context to create as many parsers are you want.
 
 **Performance tip:** The FhirContext is an expensive object to create, so you should try to create it once and keep it around during the life of your application. Parsers, on the other hand, are very lightweight and do not need to be reused.
 

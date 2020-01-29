@@ -1,25 +1,33 @@
 package ca.uhn.fhir.context;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
-
-import java.util.*;
-
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,61 +52,22 @@ public class RuntimeSearchParam {
 	private final RestSearchParameterTypeEnum myParamType;
 	private final String myPath;
 	private final Set<String> myTargets;
-
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("base", myBase)
-			.append("name", myName)
-			.append("path", myPath)
-			.append("id", myId)
-			.append("uri", myUri)
-			.toString();
-	}
-
 	private final Set<String> myProvidesMembershipInCompartments;
 	private final RuntimeSearchParamStatusEnum myStatus;
 	private final String myUri;
+	private final Map<String, List<IBaseExtension<?, ?>>> myExtensions = new HashMap<>();
 
-	public IIdType getId() {
-		return myId;
-	}
-
-	public String getUri() {
-		return myUri;
-	}
-
+	/**
+	 * Constructor
+	 */
 	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
 									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
 		this(theId, theUri, theName, theDescription, thePath, theParamType, theCompositeOf, theProvidesMembershipInCompartments, theTargets, theStatus, null);
 	}
 
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		RuntimeSearchParam that = (RuntimeSearchParam) theO;
-
-		return new EqualsBuilder()
-			.append(getId(), that.getId())
-			.append(getName(), that.getName())
-			.append(getPath(), that.getPath())
-			.append(getUri(), that.getUri())
-			.isEquals();
-	}
-
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(getId())
-			.append(getName())
-			.append(getPath())
-			.append(getUri())
-			.toHashCode();
-	}
-
+	/**
+	 * Constructor
+	 */
 	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
 									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, Collection<String> theBase) {
 		super();
@@ -136,6 +105,77 @@ public class RuntimeSearchParam {
 		}
 	}
 
+	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
+		this(null, null, theName, theDescription, thePath, theParamType, null, theProvidesMembershipInCompartments, theTargets, theStatus);
+	}
+
+	/**
+	 * Retrieve user data - This can be used to store any application-specific data
+	 *
+	 * @return
+	 */
+	public List<IBaseExtension<?, ?>> getExtensions(String theKey) {
+		List<IBaseExtension<?, ?>> retVal = myExtensions.get(theKey);
+		if (retVal != null) {
+			retVal = Collections.unmodifiableList(retVal);
+		}
+		return retVal;
+	}
+
+	/**
+	 * Sets user data - This can be used to store any application-specific data
+	 */
+	public RuntimeSearchParam addExtension(String theKey, IBaseExtension theValue) {
+		List<IBaseExtension<?, ?>> valuesList = myExtensions.computeIfAbsent(theKey, k -> new ArrayList<>());
+		valuesList.add(theValue);
+		return this;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("base", myBase)
+			.append("name", myName)
+			.append("path", myPath)
+			.append("id", myId)
+			.append("uri", myUri)
+			.toString();
+	}
+
+	public IIdType getId() {
+		return myId;
+	}
+
+	public String getUri() {
+		return myUri;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		RuntimeSearchParam that = (RuntimeSearchParam) theO;
+
+		return new EqualsBuilder()
+			.append(getId(), that.getId())
+			.append(getName(), that.getName())
+			.append(getPath(), that.getPath())
+			.append(getUri(), that.getUri())
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(getId())
+			.append(getName())
+			.append(getPath())
+			.append(getUri())
+			.toHashCode();
+	}
+
 	public Set<String> getBase() {
 		return myBase;
 	}
@@ -151,10 +191,6 @@ public class RuntimeSearchParam {
 
 	public RuntimeSearchParamStatusEnum getStatus() {
 		return myStatus;
-	}
-
-	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
-		this(null, null, theName, theDescription, thePath, theParamType, null, theProvidesMembershipInCompartments, theTargets, theStatus);
 	}
 
 	public List<RuntimeSearchParam> getCompositeOf() {
@@ -206,5 +242,5 @@ public class RuntimeSearchParam {
 		RETIRED,
 		UNKNOWN
 	}
-	
+
 }

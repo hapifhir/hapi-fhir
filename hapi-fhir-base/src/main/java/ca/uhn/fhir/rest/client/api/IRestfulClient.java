@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public interface IRestfulClient {
 	 * <code>getInterceptorService().registerInterceptor(theInterceptor)</code>
 	 * </p>
 	 */
-	void registerInterceptor(IClientInterceptor theInterceptor);
+	void registerInterceptor(Object theInterceptor);
 
 	/**
 	 * Specifies that the client should request that the server respond with "pretty printing"
@@ -115,13 +115,13 @@ public interface IRestfulClient {
 	void setSummary(SummaryEnum theSummary);
 
 	/**
-	 * Remove an interceptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}.
+	 * Remove an interceptor that was previously registered using {@link IRestfulClient#registerInterceptor(Object)}.
 	 * <p>
 	 * This is a convenience method for performing the following call:
 	 * <code>getInterceptorService().unregisterInterceptor(theInterceptor)</code>
 	 * </p>
 	 */
-	void unregisterInterceptor(IClientInterceptor theInterceptor);
+	void unregisterInterceptor(Object theInterceptor);
 
 	/**
 	 * Configures what style of _format parameter should be used in requests

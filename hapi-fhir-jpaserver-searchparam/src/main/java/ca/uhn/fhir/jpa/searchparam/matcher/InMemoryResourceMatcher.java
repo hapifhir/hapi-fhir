@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,14 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
@@ -55,6 +57,8 @@ public class InMemoryResourceMatcher {
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	ModelConfig myModelConfig;
 	@Autowired
 	FhirContext myFhirContext;
 
@@ -212,7 +216,27 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean matchParams(String theResourceName, String theParamName, RuntimeSearchParam paramDef, List<? extends IQueryParameterType> theNextAnd, ResourceIndexedSearchParams theSearchParams) {
+		if (paramDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+			stripBaseUrlsFromReferenceParams(theNextAnd);
+		}
 		return theNextAnd.stream().anyMatch(token -> theSearchParams.matchParam(theResourceName, theParamName, paramDef, token));
+	}
+
+	private void stripBaseUrlsFromReferenceParams(List<? extends IQueryParameterType> theNextAnd) {
+		if (myModelConfig.getTreatBaseUrlsAsLocal().isEmpty()) {
+			return;
+		}
+
+		for (IQueryParameterType param : theNextAnd) {
+			ReferenceParam ref = (ReferenceParam) param;
+			IIdType dt = new IdDt(ref.getBaseUrl(), ref.getResourceType(), ref.getIdPart(), null);
+
+			if (dt.hasBaseUrl()) {
+				if (myModelConfig.getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())) {
+					ref.setValue(dt.toUnqualified().getValue());
+				}
+			}
+		}
 	}
 
 	private boolean hasChain(List<List<IQueryParameterType>> theAndOrParams) {

@@ -1,5 +1,6 @@
 package ca.uhn.fhirtest.interceptor;
 
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -13,7 +14,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -55,7 +55,15 @@ public class AnalyticsInterceptor extends InterceptorAdapter {
 		}
 	}
 
-	public static class SubmitJob implements Job {
+	@PostConstruct
+	public void start() {
+		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(getClass().getName());
+		jobDetail.setJobClass(Job.class);
+		mySchedulerService.scheduleLocalJob(5000, jobDetail);
+	}
+
+	public static class Job implements HapiJob {
 		@Autowired
 		private AnalyticsInterceptor myAnalyticsInterceptor;
 
@@ -63,14 +71,6 @@ public class AnalyticsInterceptor extends InterceptorAdapter {
 		public void execute(JobExecutionContext theContext) {
 			myAnalyticsInterceptor.flush();
 		}
-	}
-
-	@PostConstruct
-	public void start() {
-		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(getClass().getName());
-		jobDetail.setJobClass(SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(5000, false, jobDetail);
 	}
 
 	@PreDestroy

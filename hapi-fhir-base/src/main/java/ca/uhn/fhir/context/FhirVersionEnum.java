@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,7 +190,7 @@ public enum FhirVersionEnum {
 				Class<?> c = Class.forName("org.hl7.fhir.dstu3.model.Constants");
 				myVersion = (String) c.getDeclaredField("VERSION").get(null);
 			} catch (Exception e) {
-				myVersion = "3.0.1";
+				myVersion = "3.0.2";
 			}
 		}
 
@@ -210,7 +210,7 @@ public enum FhirVersionEnum {
 				Class<?> c = Class.forName("org.hl7.fhir.r4.model.Constants");
 				myVersion = (String) c.getDeclaredField("VERSION").get(null);
 			} catch (Exception e) {
-				myVersion = "4.0.0";
+				myVersion = "4.0.2";
 			}
 		}
 

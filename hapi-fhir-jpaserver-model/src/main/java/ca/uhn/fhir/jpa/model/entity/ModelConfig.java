@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,13 @@ public class ModelConfig {
 	private String myEmailFromAddress = "noreply@unknown.com";
 	private boolean mySubscriptionMatchingEnabled = true;
 	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
+
+	/**
+	 * Constructor
+	 */
+	public ModelConfig() {
+		super();
+	}
 
 	/**
 	 * If set to {@code true} the default search params (i.e. the search parameters that are

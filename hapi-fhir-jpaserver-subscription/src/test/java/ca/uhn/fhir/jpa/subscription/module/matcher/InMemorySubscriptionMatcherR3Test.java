@@ -1,18 +1,23 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.MedicationRequestCategory;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -21,6 +26,8 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 	@Autowired
 	SearchParamMatcher mySearchParamMatcher;
+	@Autowired
+	ModelConfig myModelConfig;
 
 	private void assertUnsupported(IBaseResource resource, String criteria) {
 		assertFalse(mySearchParamMatcher.match(criteria, resource, null).supported());
@@ -48,6 +55,10 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 		assertEquals(theSubscriptionMatchingStrategy, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
 	}
 
+	@After
+	public void after() {
+		myModelConfig.setTreatBaseUrlsAsLocal(new ModelConfig().getTreatBaseUrlsAsLocal());
+	}
 
 	/**
 	 * Technically this is an invalid reference in most cases, but this shouldn't choke
@@ -579,5 +590,36 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 		observation.getCode().addCoding().setCode("look ma no system");
 
 		assertNotMatched(observation, criteria);
+	}
+
+	@Test
+	public void testExternalReferenceMatches() {
+		String goodReference = "http://example.com/base/Organization/FOO";
+		String goodCriteria = "Patient?organization=" + UrlUtil.escapeUrlParam(goodReference);
+
+		String badReference1 = "http://example.com/bad/Organization/FOO";
+		String badCriteria1 = "Patient?organization=" + UrlUtil.escapeUrlParam(badReference1);
+
+		String badReference2 = "http://example.org/base/Organization/FOO";
+		String badCriteria2 = "Patient?organization=" + UrlUtil.escapeUrlParam(badReference2);
+
+		String badReference3 = "https://example.com/base/Organization/FOO";
+		String badCriteria3 = "Patient?organization=" + UrlUtil.escapeUrlParam(badReference3);
+
+		String badReference4 = "http://example.com/base/Organization/GOO";
+		String badCriteria4 = "Patient?organization=" + UrlUtil.escapeUrlParam(badReference4);
+
+		Set<String> urls = new HashSet<>();
+		urls.add("http://example.com/base/");
+		myModelConfig.setTreatBaseUrlsAsLocal(urls);
+
+		Patient patient = new Patient();
+		patient.getManagingOrganization().setReference("Organization/FOO");
+
+		assertMatched(patient, goodCriteria);
+		assertNotMatched(patient, badCriteria1);
+		assertNotMatched(patient, badCriteria2);
+		assertNotMatched(patient, badCriteria3);
+		assertNotMatched(patient, badCriteria4);
 	}
 }

@@ -1,17 +1,24 @@
 package org.hl7.fhir.instance.hapi.validation;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.XmlUtil;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
-import ca.uhn.fhir.validation.IValidatorModule;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -20,13 +27,18 @@ import org.fhir.ucum.UcumService;
 import org.hl7.fhir.converter.NullVersionConverterAdvisor50;
 import org.hl7.fhir.convertors.VersionConvertorAdvisor50;
 import org.hl7.fhir.convertors.VersionConvertor_10_50;
-import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.dstu2.model.CodeableConcept;
+import org.hl7.fhir.dstu2.model.Coding;
+import org.hl7.fhir.dstu2.model.Questionnaire;
+import org.hl7.fhir.dstu2.model.StructureDefinition;
+import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.formats.IParser;
 import org.hl7.fhir.r5.formats.ParserType;
+import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
@@ -36,10 +48,10 @@ import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel;
 import org.hl7.fhir.r5.utils.IResourceValidator.IdStatus;
 import org.hl7.fhir.r5.validation.InstanceValidator;
-import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -48,7 +60,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -488,7 +505,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
-		public List<org.hl7.fhir.r5.model.MetadataResource> allConformanceResources() {
+		public List<CanonicalResource> allConformanceResources() {
 			throw new UnsupportedOperationException();
 		}
 
@@ -498,8 +515,18 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
+		public void generateSnapshot(org.hl7.fhir.r5.model.StructureDefinition theStructureDefinition, boolean theB) {
+
+		}
+
+		@Override
 		public String getLinkForUrl(String corePath, String url) {
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Map<String, byte[]> getBinaries() {
+			return null;
 		}
 
 		@Override
@@ -787,18 +814,13 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
-		public Set<String> typeTails() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public ValidationResult validateCode(TerminologyServiceOptions theOptions, String system, String code, String display) {
+		public ValidationResult validateCode(ValidationOptions theOptions, String system, String code, String display) {
 			org.hl7.fhir.dstu2.utils.IWorkerContext.ValidationResult result = myWrap.validateCode(system, code, display);
 			return convertValidationResult(result);
 		}
 
 		@Override
-		public ValidationResult validateCode(TerminologyServiceOptions theOptions, String system, String code, String display, org.hl7.fhir.r5.model.ValueSet vs) {
+		public ValidationResult validateCode(ValidationOptions theOptions, String system, String code, String display, org.hl7.fhir.r5.model.ValueSet vs) {
 			ValueSet convertedVs = null;
 
 			try {
@@ -814,7 +836,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
-		public ValidationResult validateCode(TerminologyServiceOptions theOptions, String code, org.hl7.fhir.r5.model.ValueSet vs) {
+		public ValidationResult validateCode(ValidationOptions theOptions, String code, org.hl7.fhir.r5.model.ValueSet vs) {
 			ValueSet convertedVs = null;
 			try {
 				if (vs != null) {
@@ -830,7 +852,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
-		public ValidationResult validateCode(TerminologyServiceOptions theOptions, org.hl7.fhir.r5.model.Coding code, org.hl7.fhir.r5.model.ValueSet vs) {
+		public ValidationResult validateCode(ValidationOptions theOptions, org.hl7.fhir.r5.model.Coding code, org.hl7.fhir.r5.model.ValueSet vs) {
 			Coding convertedCode = null;
 			ValueSet convertedVs = null;
 
@@ -850,7 +872,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
-		public ValidationResult validateCode(TerminologyServiceOptions theOptions, org.hl7.fhir.r5.model.CodeableConcept code, org.hl7.fhir.r5.model.ValueSet vs) {
+		public ValidationResult validateCode(ValidationOptions theOptions, org.hl7.fhir.r5.model.CodeableConcept code, org.hl7.fhir.r5.model.ValueSet vs) {
 			CodeableConcept convertedCode = null;
 			ValueSet convertedVs = null;
 
@@ -866,21 +888,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			}
 
 			org.hl7.fhir.dstu2.utils.IWorkerContext.ValidationResult result = myWrap.validateCode(convertedCode, convertedVs);
-			return convertValidationResult(result);
-		}
-
-		@Override
-		public ValidationResult validateCode(TerminologyServiceOptions theOptions, String system, String code, String display, org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent vsi) {
-			ValueSet.ConceptSetComponent conceptSetComponent = null;
-			if (vsi != null) {
-				try {
-					conceptSetComponent = new VersionConvertor_10_50(myAdvisor).convertConceptSetComponent(vsi);
-				} catch (FHIRException e) {
-					throw new InternalErrorException(e);
-				}
-			}
-
-			org.hl7.fhir.dstu2.utils.IWorkerContext.ValidationResult result = myWrap.validateCode(system, code, display, conceptSetComponent);
 			return convertValidationResult(result);
 		}
 

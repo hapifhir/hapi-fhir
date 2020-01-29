@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,9 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -77,7 +79,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
-import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -221,23 +222,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		return retVal;
 	}
 
-	@PostConstruct
-	public void buildTranslationCaches() {
-		Long timeout = myDaoConfig.getTranslationCachesExpireAfterWriteInMinutes();
-
-		myTranslationCache =
-			Caffeine.newBuilder()
-				.maximumSize(10000)
-				.expireAfterWrite(timeout, TimeUnit.MINUTES)
-				.build();
-
-		myTranslationWithReverseCache =
-			Caffeine.newBuilder()
-				.maximumSize(10000)
-				.expireAfterWrite(timeout, TimeUnit.MINUTES)
-				.build();
-	}
-
 	/**
 	 * This method is present only for unit tests, do not call from client code
 	 */
@@ -338,8 +322,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 		Optional<TermValueSet> optionalTermValueSet;
 		if (theValueSetToExpand.hasId()) {
-			Long valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSetToExpand.getIdElement());
-			optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid);
+			ResourcePersistentId valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSetToExpand.getIdElement());
+			optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong());
 		} else if (theValueSetToExpand.hasUrl()) {
 			optionalTermValueSet = myValueSetDao.findByUrl(theValueSetToExpand.getUrl());
 		} else {
@@ -1088,9 +1072,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 	private void expandWithoutHibernateSearch(IValueSetConceptAccumulator theValueSetCodeAccumulator, TermCodeSystemVersion theVersion, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, String theSystem, boolean theAdd, AtomicInteger theCodeCounter) {
 		ourLog.trace("Hibernate search is not enabled");
+
 		if (theValueSetCodeAccumulator instanceof ValueSetExpansionComponentWithConceptAccumulator) {
 			Validate.isTrue(((ValueSetExpansionComponentWithConceptAccumulator) theValueSetCodeAccumulator).getParameter().isEmpty(), "Can not expand ValueSet with parameters - Hibernate Search is not enabled on this server.");
 		}
+		
 		Validate.isTrue(theInclude.getFilter().isEmpty(), "Can not expand ValueSet with filters - Hibernate Search is not enabled on this server.");
 		Validate.isTrue(isNotBlank(theSystem), "Can not expand ValueSet without explicit system - Hibernate Search is not enabled on this server.");
 
@@ -1113,8 +1099,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 	@Override
 	public boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet) {
-		Long valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSet.getIdElement());
-		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid);
+		ResourcePersistentId valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSet.getIdElement());
+		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong());
 
 		if (!optionalTermValueSet.isPresent()) {
 			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory code validation. {}", getValueSetInfo(theValueSet));
@@ -1136,14 +1122,14 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Coding theCoding, CodeableConcept theCodeableConcept) {
 
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet.hasId(), "ValueSet.id is required");
-		Long valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSet.getIdElement());
+		ResourcePersistentId valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSet.getIdElement());
 
 		List<TermValueSetConcept> concepts = new ArrayList<>();
 		if (isNotBlank(theCode)) {
-			if (isNotBlank(theSystem)) {
+			if (Constants.codeSystemNotNeeded(theSystem)) {
+				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(valueSetResourcePid.getIdAsLong(), theCode));
+			} else if (isNotBlank(theSystem)) {
 				concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, theSystem, theCode));
-			} if (Constants.codeSystemNotNeeded(theSystem)) {
-				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(valueSetResourcePid, theCode));
 			}
 		} else if (theCoding != null) {
 			if (theCoding.hasSystem() && theCoding.hasCode()) {
@@ -1173,9 +1159,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		return null;
 	}
 
-	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(Long theResourcePid, String theSystem, String theCode) {
+	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(ResourcePersistentId theResourcePid, String theSystem, String theCode) {
 		List<TermValueSetConcept> retVal = new ArrayList<>();
-		Optional<TermValueSetConcept> optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCode(theResourcePid, theSystem, theCode);
+		Optional<TermValueSetConcept> optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCode(theResourcePid.getIdAsLong(), theSystem, theCode);
 		optionalTermValueSetConcept.ifPresent(retVal::add);
 		return retVal;
 	}
@@ -1315,16 +1301,44 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		RuleBasedTransactionAttribute rules = new RuleBasedTransactionAttribute();
 		rules.getRollbackRules().add(new NoRollbackRuleAttribute(ExpansionTooCostlyException.class));
 		myTxTemplate = new TransactionTemplate(myTransactionManager, rules);
+		buildTranslationCaches();
+		scheduleJob();
 	}
 
-	@PostConstruct
-	public void registerScheduledJob() {
+	private void buildTranslationCaches() {
+		Long timeout = myDaoConfig.getTranslationCachesExpireAfterWriteInMinutes();
+
+		myTranslationCache =
+			Caffeine.newBuilder()
+				.maximumSize(10000)
+				.expireAfterWrite(timeout, TimeUnit.MINUTES)
+				.build();
+
+		myTranslationWithReverseCache =
+			Caffeine.newBuilder()
+				.maximumSize(10000)
+				.expireAfterWrite(timeout, TimeUnit.MINUTES)
+				.build();
+	}
+
+	public void scheduleJob() {
+		// TODO KHS what does this mean?
 		// Register scheduled job to pre-expand ValueSets
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition vsJobDefinition = new ScheduledJobDefinition();
-		vsJobDefinition.setId(BaseTermReadSvcImpl.class.getName() + "_preExpandValueSets");
-		vsJobDefinition.setJobClass(PreExpandValueSetsJob.class);
-		mySchedulerService.scheduleFixedDelay(10 * DateUtils.MILLIS_PER_MINUTE, true, vsJobDefinition);
+		vsJobDefinition.setId(getClass().getName());
+		vsJobDefinition.setJobClass(Job.class);
+		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_MINUTE, vsJobDefinition);
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private ITermReadSvc myTerminologySvc;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTerminologySvc.preExpandDeferredValueSetsToTerminologyTables();
+		}
 	}
 
 	@Override
@@ -1823,8 +1837,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 						if (isNotBlank(targetCode) && isNotBlank(targetCodeSystem)) {
 							for (Iterator<TermConceptMapGroupElementTarget> iter = nextElement.getConceptMapGroupElementTargets().iterator(); iter.hasNext(); ) {
 								TermConceptMapGroupElementTarget next = iter.next();
-								if (targetCodeSystem.equals(next.getSystem())) {
-									if (targetCode.equals(next.getCode())) {
+								if (StringUtils.equals(targetCodeSystem, next.getSystem())) {
+									if (StringUtils.equals(targetCode, next.getCode())) {
 										continue;
 									}
 								}
@@ -1878,17 +1892,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 			.stream()
 			.filter(t -> (Constants.codeSystemNotNeeded(theCodeSystem) || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
 			.findFirst();
-	}
-
-	public static class PreExpandValueSetsJob implements Job {
-
-		@Autowired
-		private ITermReadSvc myTerminologySvc;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTerminologySvc.preExpandDeferredValueSetsToTerminologyTables();
-		}
 	}
 
 	static List<TermConcept> toPersistedConcepts(List<CodeSystem.ConceptDefinitionComponent> theConcept, TermCodeSystemVersion theCodeSystemVersion) {

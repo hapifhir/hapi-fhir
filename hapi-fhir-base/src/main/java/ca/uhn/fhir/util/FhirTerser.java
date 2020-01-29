@@ -23,7 +23,7 @@ import static org.apache.commons.lang3.StringUtils.*;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,7 +160,7 @@ public class FhirTerser {
 	public <T extends IBase> List<T> getAllPopulatedChildElementsOfType(IBaseResource theResource, final Class<T> theType) {
 		final ArrayList<T> retVal = new ArrayList<>();
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		visit(new IdentityHashMap<>(), theResource, theResource, null, null, def, new IModelVisitor() {
+		visit(newMap(), theResource, theResource, null, null, def, new IModelVisitor() {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void acceptElement(IBaseResource theOuterResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
@@ -179,7 +179,7 @@ public class FhirTerser {
 	public List<ResourceReferenceInfo> getAllResourceReferences(final IBaseResource theResource) {
 		final ArrayList<ResourceReferenceInfo> retVal = new ArrayList<>();
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		visit(new IdentityHashMap<>(), theResource, theResource, null, null, def, new IModelVisitor() {
+		visit(newMap(), theResource, theResource, null, null, def, new IModelVisitor() {
 			@Override
 			public void acceptElement(IBaseResource theOuterResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
 				if (theElement == null || theElement.isEmpty()) {
@@ -793,7 +793,11 @@ public class FhirTerser {
 	 */
 	public void visit(IBaseResource theResource, IModelVisitor theVisitor) {
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		visit(new IdentityHashMap<>(), theResource, theResource, null, null, def, theVisitor);
+		visit(newMap(), theResource, theResource, null, null, def, theVisitor);
+	}
+
+	public Map<Object, Object> newMap() {
+		return new IdentityHashMap<>();
 	}
 
 	/**
@@ -814,7 +818,7 @@ public class FhirTerser {
 		visit(theResource, null, def, theVisitor, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 	}
 
-	private void visit(IdentityHashMap<Object, Object> theStack, IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition,
+	private void visit(Map<Object, Object> theStack, IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition,
 							 BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor theCallback) {
 		List<String> pathToElement = addNameToList(thePathToElement, theChildDefinition);
 

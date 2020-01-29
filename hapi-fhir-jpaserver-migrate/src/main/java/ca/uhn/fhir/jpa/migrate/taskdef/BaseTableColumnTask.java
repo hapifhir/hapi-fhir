@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,19 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.thymeleaf.util.StringUtils;
 
 import java.util.Locale;
 
-public abstract class BaseTableColumnTask<T extends BaseTableTask> extends BaseTableTask<T> {
+public abstract class BaseTableColumnTask<T extends BaseTableTask<T>> extends BaseTableTask<T> {
 
 	private String myColumnName;
+
+	public BaseTableColumnTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
 	@SuppressWarnings("unchecked")
 	public T setColumnName(String theColumnName) {
@@ -46,5 +52,16 @@ public abstract class BaseTableColumnTask<T extends BaseTableTask> extends BaseT
 		Validate.notBlank(myColumnName, "Column name not specified");
 	}
 
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<T> theOtherObject) {
+		BaseTableColumnTask<T> otherObject = (BaseTableColumnTask<T>) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(myColumnName, otherObject.myColumnName);
+	}
 
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myColumnName);
+	}
 }

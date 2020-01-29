@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,16 +32,25 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ModifyColumnTask.class);
 
+	public ModifyColumnTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void validate() {
+		super.validate();
+		setDescription("Modify column " + getColumnName() + " on table " + getTableName());
+	}
+
+	@Override
+	public void doExecute() throws SQLException {
 
 		JdbcUtils.ColumnType existingType;
 		boolean nullable;
 
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 		if (!columnNames.contains(getColumnName())) {
-			ourLog.info("Column {} doesn't exist on table {} - No action performed", getColumnName(), getTableName());
+			logInfo(ourLog, "Column {} doesn't exist on table {} - No action performed", getColumnName(), getTableName());
 			return;
 		}
 
@@ -52,21 +61,22 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 			throw new InternalErrorException(e);
 		}
 
-		if (getColumnLength() != null && isNoColumnShrink()) {
+		Long taskColumnLength = getColumnLength();
+		if (taskColumnLength != null && isNoColumnShrink()) {
 			long existingLength = existingType.getLength() != null ? existingType.getLength() : 0;
-			if (existingLength > getColumnLength()) {
-				setColumnLength(existingLength);
+			if (existingLength > taskColumnLength) {
+				taskColumnLength = existingLength;
 			}
 		}
 
-		boolean alreadyOfCorrectType = existingType.equals(getColumnType(), getColumnLength());
+		boolean alreadyOfCorrectType = existingType.equals(getColumnType(), taskColumnLength);
 		boolean alreadyCorrectNullable = isNullable() == nullable;
 		if (alreadyOfCorrectType && alreadyCorrectNullable) {
-			ourLog.info("Column {} on table {} is already of type {} and has nullable {} - No action performed", getColumnName(), getTableName(), existingType, nullable);
+			logInfo(ourLog, "Column {} on table {} is already of type {} and has nullable {} - No action performed", getColumnName(), getTableName(), existingType, nullable);
 			return;
 		}
 
-		String type = getSqlType();
+		String type = getSqlType(taskColumnLength);
 		String notNull = getSqlNotNull();
 
 		String sql = null;
@@ -119,13 +129,13 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 				throw new IllegalStateException("Dont know how to handle " + getDriverType());
 		}
 
-		ourLog.info("Updating column {} on table {} to type {}", getColumnName(), getTableName(), type);
+		logInfo(ourLog, "Updating column {} on table {} to type {}", getColumnName(), getTableName(), type);
 		if (sql != null) {
 			executeSql(getTableName(), sql);
 		}
 
 		if (sqlNotNull != null) {
-			ourLog.info("Updating column {} on table {} to not null", getColumnName(), getTableName());
+			logInfo(ourLog, "Updating column {} on table {} to not null", getColumnName(), getTableName());
 			executeSql(getTableName(), sqlNotNull);
 		}
 	}

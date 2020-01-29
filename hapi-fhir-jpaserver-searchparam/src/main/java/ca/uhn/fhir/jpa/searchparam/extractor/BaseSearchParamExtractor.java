@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,22 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -30,21 +44,37 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
 	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
@@ -112,6 +142,71 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		myContext = theCtx;
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
+
+	@Override
+	public SearchParamSet<PathAndRef> extractResourceLinks(IBaseResource theResource) {
+		IExtractor<PathAndRef> extractor = (params, searchParam, value, path) -> {
+			if (value instanceof IBaseResource) {
+				return;
+			}
+
+			String nextType = toRootTypeName(value);
+			switch (nextType) {
+				case "uri":
+				case "canonical":
+					String typeName = toTypeName(value);
+
+					// Canonical has a root type of "uri"
+					if ("canonical".equals(typeName)) {
+						IPrimitiveType<?> valuePrimitive = (IPrimitiveType<?>) value;
+						IBaseReference fakeReference = (IBaseReference) myContext.getElementDefinition("Reference").newInstance();
+						fakeReference.setReference(valuePrimitive.getValueAsString());
+
+						/*
+						 * See #1583
+						 * Technically canonical fields should not allow local references (e.g.
+						 * Questionnaire/123) but it seems reasonable for us to interpret a canonical
+						 * containing a local reference for what it is, and allow people to seaerch
+						 * based on that.
+						 */
+						IIdType parsed = fakeReference.getReferenceElement();
+						if (parsed.hasIdPart() && parsed.hasResourceType() && !parsed.isAbsolute()) {
+							PathAndRef ref = new PathAndRef(searchParam.getName(), path, fakeReference);
+							params.add(ref);
+							break;
+						}
+					}
+
+					params.addWarning("Ignoring canonical reference (indexing canonical is not yet supported)");
+					break;
+				case "reference":
+				case "Reference":
+					IBaseReference valueRef = (IBaseReference) value;
+
+					IIdType nextId = valueRef.getReferenceElement();
+					if (nextId.isEmpty() && valueRef.getResource() != null) {
+						nextId = valueRef.getResource().getIdElement();
+					}
+
+					if (nextId == null ||
+						nextId.isEmpty() ||
+						nextId.getValue().startsWith("#") ||
+						nextId.getValue().startsWith("urn:")) {
+						return;
+					}
+
+					PathAndRef ref = new PathAndRef(searchParam.getName(), path, valueRef);
+					params.add(ref);
+					break;
+				default:
+					addUnexpectedDatatypeWarning(params, searchParam, value);
+					break;
+			}
+		};
+
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.REFERENCE);
+	}
+
 
 	@Override
 	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
@@ -214,8 +309,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.TOKEN);
 	}
 
-	private void addUnexpectedDatatypeWarning(SearchParamSet<? extends BaseResourceIndexedSearchParam> params, RuntimeSearchParam searchParam, IBase value) {
-		params.addWarning("Search param " + searchParam.getName() + " is of unexpected datatype: " + value.getClass());
+	private void addUnexpectedDatatypeWarning(SearchParamSet<?> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
+		theParams.addWarning("Search param " + theSearchParam.getName() + " is of unexpected datatype: " + theValue.getClass());
 	}
 
 	@Override
@@ -370,24 +465,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		};
 
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.STRING);
-	}
-
-	@Override
-	public List<PathAndRef> extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef) {
-		ArrayList<PathAndRef> retVal = new ArrayList<>();
-
-		String[] nextPathsSplit = split(theNextSpDef.getPath());
-		for (String path : nextPathsSplit) {
-			path = path.trim();
-			if (isNotBlank(path)) {
-
-				for (Object next : extractValues(path, theResource)) {
-					retVal.add(new PathAndRef(path, next));
-				}
-			}
-		}
-
-		return retVal;
 	}
 
 	/**
@@ -701,7 +778,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 
-	private <T extends BaseResourceIndexedSearchParam> SearchParamSet<T> extractSearchParams(IBaseResource theResource, IExtractor<T> theExtractor, RestSearchParameterTypeEnum theSearchParamType) {
+	private <T> SearchParamSet<T> extractSearchParams(IBaseResource theResource, IExtractor<T> theExtractor, RestSearchParameterTypeEnum theSearchParamType) {
 		SearchParamSet<T> retVal = new SearchParamSet<>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
@@ -710,16 +787,20 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				continue;
 			}
 
-			String nextPath = nextSpDef.getPath();
-			if (isBlank(nextPath)) {
+			String nextPathUnsplit = nextSpDef.getPath();
+			if (isBlank(nextPathUnsplit)) {
 				continue;
 			}
 
-			for (IBase nextObject : extractValues(nextPath, theResource)) {
-				if (nextObject != null) {
-					String typeName = toRootTypeName(nextObject);
-					if (!myIgnoredForSearchDatatypes.contains(typeName)) {
-						theExtractor.extract(retVal, nextSpDef, nextObject, nextPath);
+			String[] splitPaths = split(nextPathUnsplit);
+			for (String nextPath : splitPaths) {
+				nextPath = trim(nextPath);
+				for (IBase nextObject : extractValues(nextPath, theResource)) {
+					if (nextObject != null) {
+						String typeName = toRootTypeName(nextObject);
+						if (!myIgnoredForSearchDatatypes.contains(typeName)) {
+							theExtractor.extract(retVal, nextSpDef, nextObject, nextPath);
+						}
 					}
 				}
 			}
@@ -731,6 +812,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		BaseRuntimeElementDefinition<?> elementDefinition = getContext().getElementDefinition(nextObject.getClass());
 		BaseRuntimeElementDefinition<?> rootParentDefinition = elementDefinition.getRootParentDefinition();
 		return rootParentDefinition.getName();
+	}
+
+	private String toTypeName(IBase nextObject) {
+		BaseRuntimeElementDefinition<?> elementDefinition = getContext().getElementDefinition(nextObject.getClass());
+		return elementDefinition.getName();
 	}
 
 	@SuppressWarnings("unchecked")

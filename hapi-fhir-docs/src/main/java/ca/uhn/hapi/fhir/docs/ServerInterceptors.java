@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ List<ExtensionDt> resourceExts = patient.getUndeclaredExtensionsByUrl("http://fo
 // Get all non-modifier extensions regardless of URL
 List<ExtensionDt> nonModExts = patient.getUndeclaredExtensions();
 
-//Get all non-modifier extensions regardless of URL
+// Get all modifier extensions regardless of URL
 List<ExtensionDt> modExts = patient.getUndeclaredModifierExtensions();
 //END SNIPPET: parseExtension
 

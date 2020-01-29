@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,22 +33,20 @@ public interface IPagingProvider {
 	int getMaximumPageSize();
 
 	/**
-	 * Retrieve a result list by ID
-	 * <p>
-	 * Note that the <code>theRequest</code> parameter was added to this
+	 * Retrieve a result list by Search ID
+	 *
+	 * @since 4.0.0 - Note that the <code>theRequest</code> parameter was added to this
 	 * method in HAPI FHIR 4.0.0. Existing implementations may choose to
 	 * add this parameter and not use it if needed.
-	 * </p>
 	 */
 	IBundleProvider retrieveResultList(@Nullable RequestDetails theRequestDetails, @Nonnull String theSearchId);
 
 	/**
-	 * Retrieve a result list by ID
-	 * <p>
-	 * Note that the <code>theRequest</code> parameter was added to this
+	 * Retrieve a result list by Search ID and Page ID
+	 *
+	 * @since 4.0.0 - Note that the <code>theRequest</code> parameter was added to this
 	 * method in HAPI FHIR 4.0.0. Existing implementations may choose to
 	 * add this parameter and not use it if needed.
-	 * </p>
 	 */
 	default IBundleProvider retrieveResultList(@Nullable RequestDetails theRequestDetails, @Nonnull String theSearchId, String thePageId) {
 		return null;

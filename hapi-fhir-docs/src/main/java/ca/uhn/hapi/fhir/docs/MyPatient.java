@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ public class MyPatient extends Patient {
 	 * Accessors and mutators follow
 	 * 
 	 * IMPORTANT:
-	 * Each extension is required to have an getter/accessor and a stter/mutator. 
+	 * Each extension is required to have an getter/accessor and a setter/mutator.
 	 * You are highly recommended to create getters which create instances if they
 	 * do not already exist, since this is how the rest of the HAPI FHIR API works. 
 	 ********/

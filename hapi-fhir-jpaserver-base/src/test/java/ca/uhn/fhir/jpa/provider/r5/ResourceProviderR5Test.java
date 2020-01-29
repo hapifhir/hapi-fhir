@@ -222,6 +222,27 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertThat(ids, containsInAnyOrder(oid));
 	}
 
+
+	@Test
+	public void testCount0() {
+		Observation observation = new Observation();
+		observation.setEffective(new DateTimeType("1965-08-09"));
+		myObservationDao.create(observation).getId().toUnqualified();
+
+		observation = new Observation();
+		observation.setEffective(new DateTimeType("1965-08-10"));
+		myObservationDao.create(observation).getId().toUnqualified();
+
+		Bundle output = ourClient
+			.search()
+			.byUrl("Observation?_count=0")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(2, output.getTotal());
+		assertEquals(0, output.getEntry().size());
+	}
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

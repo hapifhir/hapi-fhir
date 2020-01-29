@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,14 +95,14 @@ public class ClientTransactionExamples {
       
       // Log the request
       FhirContext ctx = FhirContext.forR4();
-      System.out.println(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
+      System.out.println(ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
       
       // Create a client and post the transaction to the server
-      IGenericClient client = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/baseR4");
+      IGenericClient client = ctx.newRestfulGenericClient("http://hapi.fhir.org/baseR4");
       Bundle resp = client.transaction().withBundle(bundle).execute();
 
       // Log the response
-      System.out.println(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+      System.out.println(ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
       //END SNIPPET: conditional
       
    }

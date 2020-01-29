@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -282,9 +282,7 @@ public final class ResourceIndexedSearchParams {
 		} else {
 			ForcedId forcedId = target.getForcedId();
 			if (forcedId != null) {
-				// TODO KHS is forcedId.getForcedId().equals(theReference.getIdPart() also valid?
-				return forcedId.getForcedId().equals(theReference.getValue()) ||
-					forcedId.getForcedId().equals(theReference.getIdPart());
+				return forcedId.getForcedId().equals(theReference.getValue());
 			} else {
 				return false;
 			}

@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.r4.hapi.validation.PrePopulatedValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
@@ -42,22 +43,20 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "unused"})
 public class ValidatorExamples {
 
    public void validationIntro() {
    // START SNIPPET: validationIntro
-      FhirContext ctx = FhirContext.forDstu3();
+      FhirContext ctx = FhirContext.forR4();
       
       // Ask the context for a validator
       FhirValidator validator = ctx.newValidator();
       
-      // Create some modules and register them 
-      IValidatorModule module1 = new SchemaBaseValidator(ctx);
-      validator.registerValidatorModule(module1);
-      IValidatorModule module2 = new SchematronBaseValidator(ctx);
-      validator.registerValidatorModule(module2);
-      
+      // Create a validator modules and register it
+      IValidatorModule module = new FhirInstanceValidator();
+      validator.registerValidatorModule(module);
+
       // Pass a resource in to be validated. The resource can
       // be an IBaseResource instance, or can be a raw String
       // containing a serialized resource as text.
@@ -82,7 +81,7 @@ public class ValidatorExamples {
          
          // Create a context, set the error handler and instruct
          // the server to use it
-         FhirContext ctx = FhirContext.forDstu3();
+         FhirContext ctx = FhirContext.forR4();
          ctx.setParserErrorHandler(new StrictErrorHandler());
          setFhirContext(ctx);
       }
@@ -93,19 +92,19 @@ public class ValidatorExamples {
    @SuppressWarnings("unused")
    public void enableValidation() {
       // START SNIPPET: clientValidation
-      FhirContext ctx = FhirContext.forDstu3();
+      FhirContext ctx = FhirContext.forR4();
       
       ctx.setParserErrorHandler(new StrictErrorHandler());
       
       // This client will have strict parser validation enabled
-      IGenericClient client = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/baseDstu3");
+      IGenericClient client = ctx.newRestfulGenericClient("http://hapi.fhir.org/baseR4");
       // END SNIPPET: clientValidation
       
    }
    
    public void parserValidation() {
       // START SNIPPET: parserValidation
-      FhirContext ctx = FhirContext.forDstu3();
+      FhirContext ctx = FhirContext.forR4();
       
       // Create a parser and configure it to use the strict error handler
       IParser parser = ctx.newXmlParser();
@@ -122,7 +121,7 @@ public class ValidatorExamples {
    public void validateResource() {
       // START SNIPPET: basicValidation
       // As always, you need a context
-      FhirContext ctx = FhirContext.forDstu3();
+      FhirContext ctx = FhirContext.forR4();
 
       // Create and populate a new patient object
       Patient p = new Patient();
@@ -176,7 +175,7 @@ public class ValidatorExamples {
 
    private static void instanceValidator() throws Exception {
       // START SNIPPET: instanceValidator
-      FhirContext ctx = FhirContext.forDstu3();
+      FhirContext ctx = FhirContext.forR4();
 
       // Create a FhirInstanceValidator and register it to a validator
       FhirValidator validator = ctx.newValidator();
@@ -226,7 +225,7 @@ public class ValidatorExamples {
    
    private static void instanceValidatorCustom() throws Exception {
       // START SNIPPET: instanceValidatorCustom
-      FhirContext ctx = FhirContext.forDstu3();
+      FhirContext ctx = FhirContext.forR4();
 
       // Create a FhirInstanceValidator and register it to a validator
       FhirValidator validator = ctx.newValidator();
@@ -315,6 +314,43 @@ public class ValidatorExamples {
    
       // END SNIPPET: instanceValidatorCustom
    }
+
+
+   public void validateSupplyProfiles() {
+
+   	StructureDefinition someStructureDefnition = null;
+   	ValueSet someValueSet = null;
+   	String input = null;
+
+   	// START SNIPPET: validateSupplyProfiles
+		FhirContext ctx = FhirContext.forR4();
+
+		// Create a PrePopulatedValidationSupport and load it with our custom structures
+		PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport();
+
+		// In this example we're loading two things, but in a real scenario we might
+		// load many StructureDefinitions, ValueSets, CodeSystems, etc.
+		prePopulatedSupport.addStructureDefinition(someStructureDefnition);
+		prePopulatedSupport.addValueSet(someValueSet);
+
+		// We'll still use DefaultProfileValidationSupport since derived profiles generally
+		// rely on built-in profiles also being available
+		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport();
+
+		// We'll create a chain that includes both the pre-populated and default. We put
+		// the pre-populated (custom) support module first so that it takes precedence
+		ValidationSupportChain supportChain = new ValidationSupportChain();
+		supportChain.addValidationSupport(prePopulatedSupport);
+		supportChain.addValidationSupport(defaultSupport);
+
+		// Create a validator using the FhirInstanceValidator module. We can use this
+		// validator to perform validation
+		FhirInstanceValidator validatorModule = new FhirInstanceValidator(supportChain);
+		FhirValidator validator = ctx.newValidator().registerValidatorModule(validatorModule);
+		ValidationResult result = validator.validateWithResult(input);
+		// END SNIPPET: validateSupplyProfiles
+
+	}
    
    @SuppressWarnings("unused")
    private static void validateFiles() throws Exception {

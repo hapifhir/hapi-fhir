@@ -4,7 +4,7 @@ package ca.uhn.fhir.util.bundle;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,19 @@ public class BundleEntryParts {
 	private final IBaseResource myResource;
 	private final String myUrl;
 	private final String myConditionalUrl;
+	private final String myFullUrl;
 
-	public BundleEntryParts(RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource, String theConditionalUrl) {
+	public BundleEntryParts(String theFullUrl, RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource, String theConditionalUrl) {
 		super();
+		myFullUrl = theFullUrl;
 		myRequestType = theRequestType;
 		myUrl = theUrl;
 		myResource = theResource;
 		myConditionalUrl = theConditionalUrl;
+	}
+
+	public String getFullUrl() {
+		return myFullUrl;
 	}
 
 	public RequestTypeEnum getRequestType() {

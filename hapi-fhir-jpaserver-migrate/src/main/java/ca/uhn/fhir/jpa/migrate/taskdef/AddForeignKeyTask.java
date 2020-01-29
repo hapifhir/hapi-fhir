@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +38,10 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 	private String myConstraintName;
 	private String myForeignTableName;
 	private String myForeignColumnName;
+
+	public AddForeignKeyTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
 	public void setConstraintName(String theConstraintName) {
 		myConstraintName = theConstraintName;
@@ -56,18 +62,19 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 		Validate.isTrue(isNotBlank(myConstraintName));
 		Validate.isTrue(isNotBlank(myForeignTableName));
 		Validate.isTrue(isNotBlank(myForeignColumnName));
+		setDescription("Add foreign key " + myConstraintName + " from column " + getColumnName() + " of table " + getTableName() + " to column " + myForeignColumnName + " of table " + myForeignTableName);
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 
 		Set<String> existing = JdbcUtils.getForeignKeys(getConnectionProperties(), myForeignTableName, getTableName());
 		if (existing.contains(myConstraintName)) {
-			ourLog.info("Already have constraint named {} - No action performed", myConstraintName);
+			logInfo(ourLog, "Already have constraint named {} - No action performed", myConstraintName);
 			return;
 		}
 
-		String sql = null;
+		String sql;
 		switch (getDriverType()) {
 			case MARIADB_10_1:
 			case MYSQL_5_7:
@@ -95,6 +102,23 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 			}
 		}
 
+	}
+
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myConstraintName);
+		theBuilder.append(myForeignTableName);
+		theBuilder.append(myForeignColumnName);
+	}
+
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		AddForeignKeyTask otherObject = (AddForeignKeyTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(myConstraintName, otherObject.myConstraintName);
+		theBuilder.append(myForeignTableName, otherObject.myForeignTableName);
+		theBuilder.append(myForeignColumnName, otherObject.myForeignColumnName);
 	}
 
 }

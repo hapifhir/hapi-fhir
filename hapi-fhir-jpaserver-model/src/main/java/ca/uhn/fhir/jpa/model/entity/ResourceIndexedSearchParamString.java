@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -288,7 +288,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
-		b.append("value", getValueNormalized());
+		b.append("hashNormalizedPrefix", getHashNormalizedPrefix());
+		b.append("valueNormalized", getValueNormalized());
 		return b.build();
 	}
 
@@ -308,7 +309,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			hashPrefixLength = 0;
 		}
 
-		return hash(theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
+		long hash = hash(theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
+		return hash;
 	}
 
 	@Override

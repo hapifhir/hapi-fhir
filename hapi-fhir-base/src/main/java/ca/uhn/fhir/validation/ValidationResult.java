@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,7 @@ public class ValidationResult {
 					line = next.getLocationLine().toString();
 				}
 				String col = unknown;
-				if (next.getLocationCol() != null && next.getLocationCol() != null) {
+				if (next.getLocationCol() != null && next.getLocationCol() != -1) {
 					col = next.getLocationCol().toString();
 				}
 				if (!unknown.equals(line) || !unknown.equals(col)) {

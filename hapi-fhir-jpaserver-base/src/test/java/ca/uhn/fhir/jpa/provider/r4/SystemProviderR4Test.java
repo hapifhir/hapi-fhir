@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -54,8 +55,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class SystemProviderR4Test extends BaseJpaR4Test {
 
@@ -376,6 +375,19 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals(20, respSub.getTotal());
 		assertEquals(0, respSub.getEntry().size());
+	}
+
+	@Test
+	public void testCountCache() {
+		Patient patient = new Patient();
+		patient.addName().setFamily("Unique762");
+		myPatientDao.create(patient, mySrd);
+		Bundle resp1 = (Bundle) ourClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp1));
+		assertEquals(1, resp1.getTotal());
+		Bundle resp2 = (Bundle) ourClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
+		assertEquals(1, resp2.getTotal());
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp2));
 	}
 
 	@Test
