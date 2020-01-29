@@ -21,8 +21,10 @@ package ca.uhn.fhir.parser.bson;
 
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -360,9 +362,19 @@ public class BsonFhirStructure implements JsonLikeStructure {
 		@Override
 		public String getAsString() {
 			String result = null;
-			if (nativeValue != null) {
+			if (nativeValue != null && !nativeValue.isNull()) {
 				if (nativeValue.isString()) {
-					result = nativeValue.asString().getValue(); 
+					result = nativeValue.asString().getValue();
+				} else if (nativeValue.isInt32()) {
+					result = ""+nativeValue.asInt32().getValue();
+				} else if (nativeValue.isInt64()) {
+					result = ""+nativeValue.asInt64().getValue();
+				} else if (nativeValue.isBoolean()) {
+					result = ""+nativeValue.asBoolean().getValue();
+				} else if (nativeValue.isDouble()) {
+					result = ""+nativeValue.asDouble().getValue();
+				} else if (nativeValue.isDecimal128()) {
+					result = nativeValue.asDecimal128().decimal128Value().toString();
 				} else {
 					result = nativeValue.toString();
 				}
@@ -370,12 +382,21 @@ public class BsonFhirStructure implements JsonLikeStructure {
 			return result;
 		}
 
+		private static final List<String> FALSES = Arrays.asList("false", "no", "off", "0");  
+		
 		@Override
 		public boolean getAsBoolean() {
-			if (nativeValue != null && nativeValue.isBoolean()) {
-				return nativeValue.asBoolean().getValue();
+			if (nativeValue != null  && !nativeValue.isNull()) {
+				if (nativeValue.isBoolean()) {
+					return nativeValue.asBoolean().getValue();
+				} else if (nativeValue.isString()) {
+					if (FALSES.contains(nativeValue.asString().getValue().toLowerCase())) {
+						return false;
+					}
+				}
+				return true; // not null but not recognizable as boolean
 			}
-			return super.getAsBoolean();
+			return false; // null
 		}
 		
 		protected Number convertBsonNumber (final BsonValue bson) {
