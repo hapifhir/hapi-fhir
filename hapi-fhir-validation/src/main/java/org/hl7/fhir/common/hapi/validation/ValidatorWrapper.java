@@ -34,6 +34,7 @@ public class ValidatorWrapper {
 	private boolean myErrorForUnknownProfiles;
 	private boolean myNoTerminologyChecks;
 	private Collection<? extends String> myExtensionDomains;
+	private IResourceValidator.IValidatorResourceFetcher myValidatorResourceFetcher;
 
 	/**
 	 * Constructor
@@ -67,6 +68,12 @@ public class ValidatorWrapper {
 		return this;
 	}
 
+
+	public ValidatorWrapper setValidatorResourceFetcher(IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher) {
+		this.myValidatorResourceFetcher = validatorResourceFetcher;
+		return this;
+	}
+
 	public List<ValidationMessage> validate(IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
 		InstanceValidator v;
 		FHIRPathEngine.IEvaluationContext evaluationCtx = new org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator.NullEvaluationContext();
@@ -82,6 +89,7 @@ public class ValidatorWrapper {
 		v.setNoTerminologyChecks(myNoTerminologyChecks);
 		v.setErrorForUnknownProfiles(myErrorForUnknownProfiles);
 		v.getExtensionDomains().addAll(myExtensionDomains);
+		v.setFetcher(myValidatorResourceFetcher);
 		v.setAllowXsiLocation(true);
 
 		List<ValidationMessage> messages = new ArrayList<>();
