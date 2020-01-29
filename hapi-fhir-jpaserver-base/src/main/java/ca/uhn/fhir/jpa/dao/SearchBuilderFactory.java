@@ -20,11 +20,12 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Service;
 
 @Service
 public abstract class SearchBuilderFactory {
 	@Lookup
-	public abstract SearchBuilder newSearchBuilder(BaseHapiFhirDao theBaseHapiFhirResourceDao);
+	public abstract ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType);
 }

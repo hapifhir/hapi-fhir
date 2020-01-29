@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
@@ -35,6 +36,8 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider implements 
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private SearchBuilderFactory mySearchBuilderFactory;
 
 	/**
 	 * Constructor
@@ -55,7 +58,7 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider implements 
 	@Override
 	public synchronized IBundleProvider retrieveResultList(RequestDetails theRequestDetails, String theId) {
 		IFhirSystemDao<?, ?> systemDao = myDaoRegistry.getSystemDao();
-		PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theRequestDetails, theId, systemDao);
+		PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theRequestDetails, theId, systemDao, mySearchBuilderFactory);
 		if (!provider.ensureSearchEntityLoaded()) {
 			return null;
 		}

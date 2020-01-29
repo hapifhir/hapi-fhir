@@ -5,10 +5,9 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +58,7 @@ public class SearchParameterMap implements Serializable {
 	private SortSpec mySort;
 	private SummaryEnum mySummaryMode;
 	private SearchTotalModeEnum mySearchTotalMode;
+	private QuantityParam myNearDistanceParam;
 
 	/**
 	 * Constructor
@@ -495,6 +495,29 @@ public class SearchParameterMap implements Serializable {
 		}
 	}
 
+	public void setNearDistanceParam(QuantityAndListParam theQuantityAndListParam) {
+		List<QuantityOrListParam> orTokens = theQuantityAndListParam.getValuesAsQueryTokens();
+		if (orTokens.isEmpty()) {
+			return;
+		}
+		if (orTokens.size() > 1) {
+			throw new IllegalArgumentException("Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
+		}
+		QuantityOrListParam quantityOrListParam = orTokens.get(0);
+		List<QuantityParam> tokens = quantityOrListParam.getValuesAsQueryTokens();
+		if (tokens.isEmpty()) {
+			return;
+		}
+		if (tokens.size() > 1) {
+			throw new IllegalArgumentException("Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
+		}
+		myNearDistanceParam = tokens.get(0);
+	}
+
+	public QuantityParam getNearDistanceParam() {
+		return myNearDistanceParam;
+	}
+
 	public enum EverythingModeEnum {
 		/*
 		 * Don't reorder! We rely on the ordinals
@@ -636,5 +659,9 @@ public class SearchParameterMap implements Serializable {
 
 	public List<List<IQueryParameterType>> remove(String theName) {
 		return mySearchParameterMap.remove(theName);
+	}
+
+	public int size() {
+		return mySearchParameterMap.size();
 	}
 }
