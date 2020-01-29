@@ -587,6 +587,9 @@
 			<id>jiaola</id>
 			<name>Dazhi Jiao</name>
 		</developer>
+		<developer>
+			<id>dionmcm</id>
+		</developer>
 	</developers>
 
 	<licenses>

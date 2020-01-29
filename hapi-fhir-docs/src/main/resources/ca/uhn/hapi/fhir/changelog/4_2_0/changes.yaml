@@ -85,3 +85,8 @@ Sean McIlvenna for reporting!"
 - item:
    type: "fix"
    title: "A memory leak was resolved in the JPA terminology service delta upload operations."
+- item:
+   type: "fix"
+   issue: 1689
+   title: "A correction was made to the narrative generation documentation. Thanks to GitHub user
+       dionmcm for the pull request!"
