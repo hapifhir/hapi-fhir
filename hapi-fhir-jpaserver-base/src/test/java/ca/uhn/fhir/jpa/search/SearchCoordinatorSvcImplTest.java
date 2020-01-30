@@ -60,7 +60,7 @@ public class SearchCoordinatorSvcImplTest {
 	private EntityManager myEntityManager;
 	private int myExpectedNumberOfSearchBuildersCreated = 2;
 	@Mock
-	private ISearchBuilder mySearchBuilder;
+	private SearchBuilder mySearchBuilder;
 	@Mock
 	private ISearchCacheSvc mySearchCacheSvc;
 	@Mock
@@ -73,11 +73,14 @@ public class SearchCoordinatorSvcImplTest {
 	private DaoRegistry myDaoRegistry;
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Mock
+	private SearchBuilderFactory mySearchBuilderFactory;
 
 	@After
 	public void after() {
 		System.clearProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK);
-		verify(myCallingDao, atMost(myExpectedNumberOfSearchBuildersCreated)).newSearchBuilder();
+
+		verify(mySearchBuilderFactory, atMost(myExpectedNumberOfSearchBuildersCreated)).newSearchBuilder(any(), any(), any());
 	}
 
 	@Before
@@ -93,11 +96,12 @@ public class SearchCoordinatorSvcImplTest {
 		mySvc.setSearchCacheServicesForUnitTest(mySearchCacheSvc, mySearchResultCacheSvc);
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 		mySvc.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
+		mySvc.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 
 		DaoConfig daoConfig = new DaoConfig();
 		mySvc.setDaoConfigForUnitTest(daoConfig);
 
-		when(myCallingDao.newSearchBuilder()).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
 
 		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
 
@@ -379,7 +383,7 @@ public class SearchCoordinatorSvcImplTest {
 		 * Now call from a new bundle provider. This simulates a separate HTTP
 		 * client request coming in.
 		 */
-		provider = new PersistedJpaBundleProvider(null, result.getUuid(), myCallingDao);
+		provider = new PersistedJpaBundleProvider(null, result.getUuid(), myCallingDao, mySearchBuilderFactory);
 		resources = provider.getResources(10, 20);
 		assertEquals(10, resources.size());
 		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
@@ -457,13 +461,13 @@ public class SearchCoordinatorSvcImplTest {
 		 * Now call from a new bundle provider. This simulates a separate HTTP
 		 * client request coming in.
 		 */
-		provider = new PersistedJpaBundleProvider(null, uuid, myCallingDao);
+		provider = new PersistedJpaBundleProvider(null, uuid, myCallingDao, mySearchBuilderFactory);
 		resources = provider.getResources(10, 20);
 		assertEquals(10, resources.size());
 		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("29", resources.get(9).getIdElement().getValueAsString());
 
-		provider = new PersistedJpaBundleProvider(null, uuid, myCallingDao);
+		provider = new PersistedJpaBundleProvider(null, uuid, myCallingDao, mySearchBuilderFactory);
 		resources = provider.getResources(20, 40);
 		assertEquals(20, resources.size());
 		assertEquals("30", resources.get(0).getIdElement().getValueAsString());

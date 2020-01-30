@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
@@ -28,6 +29,8 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 	SearchParamMatcher mySearchParamMatcher;
 	@Autowired
 	ModelConfig myModelConfig;
+	@Autowired
+	FhirContext myFhirContext;
 
 	private void assertUnsupported(IBaseResource resource, String criteria) {
 		assertFalse(mySearchParamMatcher.match(criteria, resource, null).supported());
@@ -621,5 +624,22 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 		assertNotMatched(patient, badCriteria2);
 		assertNotMatched(patient, badCriteria3);
 		assertNotMatched(patient, badCriteria4);
+	}
+
+	@Test
+	public void testLocationPositionNotSupported() {
+		Location loc = new Location();
+		double latitude = 30.0;
+		double longitude = 40.0;
+		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		loc.setPosition(position);
+		double bigEnoughDistance = 100.0;
+		String badCriteria =
+			"Location?" +
+				Location.SP_NEAR + "=" + latitude + ":" + longitude +
+				"&" +
+				Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + "|http://unitsofmeasure.org|km";
+
+		assertUnsupported(loc, badCriteria);
 	}
 }

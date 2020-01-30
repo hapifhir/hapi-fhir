@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.dao.predicate;
 
 /*-
  * #%L
@@ -544,7 +544,7 @@ public class SearchFilterParser {
 			return FValueType;
 		}
 
-		public void setValueType(FilterValueType FValueType) {
+		void setValueType(FilterValueType FValueType) {
 
 			this.FValueType = FValueType;
 		}
@@ -602,7 +602,7 @@ public class SearchFilterParser {
 		}
 	}
 
-	static class FilterSyntaxException extends Exception {
+	public static class FilterSyntaxException extends Exception {
 		FilterSyntaxException(String theMessage) {
 			super(theMessage);
 		}

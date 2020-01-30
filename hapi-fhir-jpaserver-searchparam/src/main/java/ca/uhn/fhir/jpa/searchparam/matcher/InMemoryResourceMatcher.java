@@ -88,6 +88,9 @@ public class InMemoryResourceMatcher {
 		if (searchParameterMap.getLastUpdated() != null) {
 			return InMemoryMatchResult.unsupportedFromParameterAndReason(Constants.PARAM_LASTUPDATED, InMemoryMatchResult.STANDARD_PARAMETER);
 		}
+		if (searchParameterMap.getNearDistanceParam() != null) {
+			return InMemoryMatchResult.unsupportedFromReason(InMemoryMatchResult.LOCATION_NEAR);
+		}
 
 		for (Map.Entry<String, List<List<IQueryParameterType>>> entry : searchParameterMap.entrySet()) {
 			String theParamName = entry.getKey();
