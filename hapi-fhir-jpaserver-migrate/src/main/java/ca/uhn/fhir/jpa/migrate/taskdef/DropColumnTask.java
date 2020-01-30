@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,19 +32,28 @@ public class DropColumnTask extends BaseTableColumnTask<DropColumnTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropColumnTask.class);
 
+	public DropColumnTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void validate() {
+		super.validate();
+		setDescription("Drop column " + getColumnName() + " from table " + getTableName());
+	}
+
+	@Override
+	public void doExecute() throws SQLException {
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 		if (!columnNames.contains(getColumnName())) {
-			ourLog.info("Column {} does not exist on table {} - No action performed", getColumnName(), getTableName());
+			logInfo(ourLog, "Column {} does not exist on table {} - No action performed", getColumnName(), getTableName());
 			return;
 		}
 
 		String tableName = getTableName();
 		String columnName = getColumnName();
 		String sql = createSql(tableName, columnName);
-		ourLog.info("Dropping column {} on table {}", getColumnName(), getTableName());
+		logInfo(ourLog, "Dropping column {} on table {}", getColumnName(), getTableName());
 		executeSql(getTableName(), sql);
 	}
 
@@ -52,5 +61,6 @@ public class DropColumnTask extends BaseTableColumnTask<DropColumnTask> {
 	static String createSql(String theTableName, String theColumnName) {
 		return "alter table " + theTableName + " drop column " + theColumnName;
 	}
+
 
 }

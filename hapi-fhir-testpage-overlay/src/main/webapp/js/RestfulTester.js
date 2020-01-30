@@ -479,9 +479,9 @@ function addSearchControlQuantity(theSearchParamName, theContainerRowNum, theRow
 }
 
 function handleSearchParamTypeChange(select, params, theContainerRowNum, theParamRowNum) {
-	var oldVal = select.prevVal;
-	var newVal = select.val();
-	if (oldVal === newVal) {
+	let oldVal = select.prevVal;
+	let newVal = select.val();
+	if (oldVal == newVal || !(newVal)) {
 		return;
 	}
 	$('#search-param-rowopts-' + theContainerRowNum).empty();
@@ -540,7 +540,7 @@ function updateURLParameter(url, param, paramVal){
     var temp = "";
     if (additionalURL) {
         tempArray = additionalURL.split("&");
-        for (i=0; i<tempArray.length; i++){
+        for (var i=0; i<tempArray.length; i++){
             if(tempArray[i].split('=')[0] !== param){
                 newAdditionalURL += temp + tempArray[i];
                 temp = "&";

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ package ca.uhn.fhir.jpa.search;
  */
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
-import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -58,11 +58,21 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	}
 
 	@PostConstruct
-	public void registerScheduledJob() {
+	public void scheduleJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(StaleSearchDeletingSvcImpl.class.getName());
-		jobDetail.setJobClass(StaleSearchDeletingSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(DEFAULT_CUTOFF_SLACK, true, jobDetail);
+		jobDetail.setId(getClass().getName());
+		jobDetail.setJobClass(Job.class);
+		mySchedulerService.scheduleClusteredJob(DEFAULT_CUTOFF_SLACK, jobDetail);
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private IStaleSearchDeletingSvc myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.schedulePollForStaleSearches();
+		}
 	}
 
 	@Transactional(propagation = Propagation.NEVER)
@@ -70,16 +80,6 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	public synchronized void schedulePollForStaleSearches() {
 		if (!myDaoConfig.isSchedulingDisabled()) {
 			pollForStaleSearchesAndDeleteThem();
-		}
-	}
-
-	public static class SubmitJob implements Job {
-		@Autowired
-		private IStaleSearchDeletingSvc myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.schedulePollForStaleSearches();
 		}
 	}
 }

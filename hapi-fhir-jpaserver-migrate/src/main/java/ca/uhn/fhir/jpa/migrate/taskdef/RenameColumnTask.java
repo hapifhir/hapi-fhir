@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -35,11 +36,21 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 	private static final Logger ourLog = LoggerFactory.getLogger(RenameColumnTask.class);
 	private String myOldName;
 	private String myNewName;
-	private boolean myAllowNeitherColumnToExist;
+	private boolean myIsOkayIfNeitherColumnExists;
 	private boolean myDeleteTargetColumnFirstIfBothExist;
+
+	public RenameColumnTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
 	public void setDeleteTargetColumnFirstIfBothExist(boolean theDeleteTargetColumnFirstIfBothExist) {
 		myDeleteTargetColumnFirstIfBothExist = theDeleteTargetColumnFirstIfBothExist;
+	}
+
+	@Override
+	public void validate() {
+		super.validate();
+		setDescription("Rename column " + myOldName + " to " + myNewName + " on table " + getTableName());
 	}
 
 	public void setOldName(String theOldName) {
@@ -53,7 +64,7 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 		boolean haveOldName = columnNames.contains(myOldName.toUpperCase());
 		boolean haveNewName = columnNames.contains(myNewName.toUpperCase());
@@ -70,19 +81,19 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 					throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist and data exists in " + myNewName);
 				}
 
-				ourLog.info("Table {} has columns {} and {} - Going to drop {} before renaming", getTableName(), myOldName, myNewName, myNewName);
+				logInfo(ourLog, "Table {} has columns {} and {} - Going to drop {} before renaming", getTableName(), myOldName, myNewName, myNewName);
 				String sql = DropColumnTask.createSql(getTableName(), myNewName);
 				executeSql(getTableName(), sql);
 			} else {
 				throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist!");
 			}
 		} else if (!haveOldName && !haveNewName) {
-			if (isAllowNeitherColumnToExist()) {
+			if (isOkayIfNeitherColumnExists()) {
 				return;
 			}
 			throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because neither column exists!");
 		} else if (haveNewName) {
-			ourLog.info("Column {} already exists on table {} - No action performed", myNewName, getTableName());
+			logInfo(ourLog, "Column {} already exists on table {} - No action performed", myNewName, getTableName());
 			return;
 		}
 
@@ -111,16 +122,23 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 				throw new IllegalStateException();
 		}
 
-		ourLog.info("Renaming column {} on table {} to {}", myOldName, getTableName(), myNewName);
+		logInfo(ourLog, "Renaming column {} on table {} to {}", myOldName, getTableName(), myNewName);
 		executeSql(getTableName(), sql);
 
 	}
 
-	public boolean isAllowNeitherColumnToExist() {
-		return myAllowNeitherColumnToExist;
+	public boolean isOkayIfNeitherColumnExists() {
+		return myIsOkayIfNeitherColumnExists;
 	}
 
-	public void setAllowNeitherColumnToExist(boolean theAllowNeitherColumnToExist) {
-		myAllowNeitherColumnToExist = theAllowNeitherColumnToExist;
+	public void setOkayIfNeitherColumnExists(boolean theOkayIfNeitherColumnExists) {
+		myIsOkayIfNeitherColumnExists = theOkayIfNeitherColumnExists;
+	}
+
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myOldName);
+		theBuilder.append(myNewName);
 	}
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,6 +208,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		} catch (Exception e) {
 			// fall through
 		}
+		result.computeSharedSupertypeForResourcePerName(getResourceProviders());
 		return result;
 	}
 
@@ -934,8 +935,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			preProcessedParams.add(HttpServletRequest.class, theRequest);
 			preProcessedParams.add(HttpServletResponse.class, theResponse);
 			if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED, preProcessedParams)) {
-				return;
-			}
+					return;
+				}
 
 			String requestPath = getRequestPath(requestFullPath, servletContextPath, servletPath);
 
@@ -987,8 +988,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			postProcessedParams.add(HttpServletRequest.class, theRequest);
 			postProcessedParams.add(HttpServletResponse.class, theResponse);
 			if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, postProcessedParams)) {
-				return;
-			}
+					return;
+				}
 
 			/*
 			 * Actually invoke the server method. This call is to a HAPI method binding, which
@@ -1007,7 +1008,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				myInterceptorService.callHooks(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY, hookParams);
 
 				ourLog.trace("Done writing to stream: {}", outputStreamOrWriter);
-			}
+				}
 
 		} catch (NotModifiedException | AuthenticationException e) {
 
@@ -1018,8 +1019,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			handleExceptionParams.add(HttpServletResponse.class, theResponse);
 			handleExceptionParams.add(BaseServerResponseException.class, e);
 			if (!myInterceptorService.callHooks(Pointcut.SERVER_HANDLE_EXCEPTION, handleExceptionParams)) {
-				return;
-			}
+					return;
+				}
 
 			writeExceptionToResponse(theResponse, e);
 
@@ -1074,8 +1075,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			handleExceptionParams.add(HttpServletResponse.class, theResponse);
 			handleExceptionParams.add(BaseServerResponseException.class, exception);
 			if (!myInterceptorService.callHooks(Pointcut.SERVER_HANDLE_EXCEPTION, handleExceptionParams)) {
-				return;
-			}
+					return;
+				}
 
 			/*
 			 * If we're handling an exception, no summary mode should be applied

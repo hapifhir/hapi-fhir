@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoStructureDefinition;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
@@ -10,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * #L%
  */
 
-public class FhirResourceDaoStructureDefinitionR5 extends FhirResourceDaoR5<StructureDefinition> implements IFhirResourceDaoStructureDefinition<StructureDefinition> {
+public class FhirResourceDaoStructureDefinitionR5 extends BaseHapiFhirResourceDao<StructureDefinition> implements IFhirResourceDaoStructureDefinition<StructureDefinition> {
 
 	@Autowired
 	private IValidationSupport myValidationSupport;

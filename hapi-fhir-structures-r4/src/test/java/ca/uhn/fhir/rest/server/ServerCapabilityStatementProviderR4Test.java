@@ -39,6 +39,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+
 public class ServerCapabilityStatementProviderR4Test {
 
 	private static FhirContext ourCtx;
@@ -86,7 +88,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ConditionalProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -115,7 +117,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -142,7 +144,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider() {
 		};
 		rs.setServerConformanceProvider(sc);
 
@@ -164,7 +166,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new InstanceHistoryProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -183,7 +185,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new MultiOptionalProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -216,7 +218,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new NonConditionalProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -239,7 +241,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new MultiTypePatientProvider(), new MultiTypeEncounterProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -307,7 +309,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new SearchProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -326,7 +328,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new PlainProviderWithExtendedOperationOnNoType());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider() {
 			@Override
 			public CapabilityStatement getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 				return super.getServerConformance(theRequest, createRequestDetails(rs));
@@ -366,7 +368,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ProviderWithRequiredAndOptional());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -396,7 +398,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new VreadProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -416,7 +418,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ReadProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -436,7 +438,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new SearchProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -476,7 +478,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new PatientResourceProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -509,7 +511,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new SearchProviderWithWhitelist());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -551,7 +553,7 @@ public class ServerCapabilityStatementProviderR4Test {
 			}
 		};
 		rsNoType.registerProvider(new SearchProviderWithListNoType());
-		ServerCapabilityStatementProvider scNoType = new ServerCapabilityStatementProvider(rsNoType);
+		ServerCapabilityStatementProvider scNoType = new ServerCapabilityStatementProvider();
 		rsNoType.setServerConformanceProvider(scNoType);
 		rsNoType.init(createServletConfig());
 
@@ -568,7 +570,7 @@ public class ServerCapabilityStatementProviderR4Test {
 			}
 		};
 		rsWithType.registerProvider(new SearchProviderWithListWithType());
-		ServerCapabilityStatementProvider scWithType = new ServerCapabilityStatementProvider(rsWithType);
+		ServerCapabilityStatementProvider scWithType = new ServerCapabilityStatementProvider();
 		rsWithType.setServerConformanceProvider(scWithType);
 		rsWithType.init(createServletConfig());
 
@@ -586,7 +588,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new SystemHistoryProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -605,7 +607,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new TypeHistoryProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -619,29 +621,11 @@ public class ServerCapabilityStatementProviderR4Test {
 	}
 
 	@Test
-	public void testValidateGeneratedStatement() throws Exception {
-
-		RestfulServer rs = new RestfulServer(ourCtx);
-		rs.setProviders(new MultiOptionalProvider());
-
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
-		rs.setServerConformanceProvider(sc);
-
-		rs.init(createServletConfig());
-
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
-
-		ValidationResult result = ourCtx.newValidator().validateWithResult(conformance);
-		assertTrue(result.getMessages().toString(), result.isSuccessful());
-	}
-
-	@Test
 	public void testSystemLevelNamedQueryWithParameters() throws Exception {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new NamedQueryPlainProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -685,7 +669,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new NamedQueryResourceProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -728,7 +712,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new TypeLevelOperationProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
@@ -749,6 +733,26 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertThat(opDef.getType(), is(true));
 		assertThat(opDef.getInstance(), is(false));
 	}
+    
+    @Test
+    public void testProfiledResourceStructureDefinitionLinks() throws Exception {
+        RestfulServer rs = new RestfulServer(ourCtx);
+        rs.setResourceProviders(new ProfiledPatientProvider(), new MultipleProfilesPatientProvider());
+
+        ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
+        rs.setServerConformanceProvider(sc);
+
+        rs.init(createServletConfig());
+
+        CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+        ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+        List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+        CapabilityStatementRestResourceComponent patientResource = resources.stream()
+            .filter(resource -> "Patient".equals(resource.getType()))
+            .findFirst().get();
+        assertThat(patientResource.getProfile(), containsString(PATIENT_SUB));
+    }
 
 	private List<String> toOperationIdParts(List<CapabilityStatementRestResourceOperationComponent> theOperation) {
 		ArrayList<String> retVal = Lists.newArrayList();
@@ -1107,5 +1111,49 @@ public class ServerCapabilityStatementProviderR4Test {
 		}
 
 	}
+    
+    public static class ProfiledPatientProvider implements IResourceProvider {
+
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+      return PatientSubSub2.class;
+    }
+    
+    @Search
+    public List<PatientSubSub2> find() {
+      return null;
+    }
+  }
+  
+  public static class MultipleProfilesPatientProvider implements IResourceProvider {
+
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+      return PatientSubSub.class;
+    }
+    
+    @Read(type = PatientTripleSub.class)
+    public PatientTripleSub read(@IdParam IdType theId) {
+      return null;
+    }
+    
+  }
+  
+  public static final String PATIENT_SUB = "PatientSub";
+  public static final String PATIENT_SUB_SUB = "PatientSubSub";
+  public static final String PATIENT_SUB_SUB_2 = "PatientSubSub2";
+  public static final String PATIENT_TRIPLE_SUB = "PatientTripleSub";
+  
+  @ResourceDef(id = PATIENT_SUB)
+  public static class PatientSub extends Patient {}
+  
+  @ResourceDef(id = PATIENT_SUB_SUB)
+  public static class PatientSubSub extends PatientSub {}
+  
+  @ResourceDef(id = PATIENT_SUB_SUB_2)
+  public static class PatientSubSub2 extends PatientSub {}
+  
+  @ResourceDef(id = PATIENT_TRIPLE_SUB)
+  public static class PatientTripleSub extends PatientSubSub {}
 
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.context;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -29,6 +30,8 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 
 public abstract class BaseRuntimeChildDefinition {
+
+	private BaseRuntimeChildDefinition myReplacedParentDefinition;
 
 	public abstract IAccessor getAccessor();
 
@@ -65,11 +68,19 @@ public abstract class BaseRuntimeChildDefinition {
 		return getClass().getSimpleName() + "[" + getElementName() + "]";
 	}
 
+	public BaseRuntimeChildDefinition getReplacedParentDefinition() {
+		return myReplacedParentDefinition;
+	}
+
+	public void setReplacedParentDefinition(BaseRuntimeChildDefinition myReplacedParentDefinition) {
+		this.myReplacedParentDefinition = myReplacedParentDefinition;
+	}
+
 	public interface IAccessor {
 		List<IBase> getValues(IBase theTarget);
 
-		default IBase getFirstValueOrNull(IBase theTarget) {
-			return getValues(theTarget).stream().findFirst().orElse(null);
+		default <T extends IBase> Optional<T> getFirstValueOrNull(IBase theTarget) {
+			return (Optional<T>) getValues(theTarget).stream().findFirst();
 		}
 	}
 

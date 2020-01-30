@@ -29,7 +29,7 @@ import ca.uhn.fhir.util.*;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,23 +208,10 @@ public class MethodUtil {
 		return b;
 	}
 
-	public static void extractDescription(SearchParameter theParameter, Annotation[] theAnnotations) {
-		for (Annotation annotation : theAnnotations) {
-			if (annotation instanceof Description) {
-				Description desc = (Description) annotation;
-				if (isNotBlank(desc.formalDefinition())) {
-					theParameter.setDescription(desc.formalDefinition());
-				} else {
-					theParameter.setDescription(desc.shortDefinition());
-				}
-			}
-		}
-	}
-
 	@SuppressWarnings("unchecked")
 	public static List<IParameter> getResourceParameters(final FhirContext theContext, Method theMethod,
 			Object theProvider, RestOperationTypeEnum theRestfulOperationTypeEnum) {
-		List<IParameter> parameters = new ArrayList<IParameter>();
+		List<IParameter> parameters = new ArrayList<>();
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 		int paramIndex = 0;
@@ -268,10 +255,8 @@ public class MethodUtil {
 						parameter.setRequired(true);
 						parameter.setDeclaredTypes(((RequiredParam) nextAnnotation).targetTypes());
 						parameter.setCompositeTypes(((RequiredParam) nextAnnotation).compositeTypes());
-						parameter.setChainlists(((RequiredParam) nextAnnotation).chainWhitelist(),
-								((RequiredParam) nextAnnotation).chainBlacklist());
+						parameter.setChainlists(((RequiredParam) nextAnnotation).chainWhitelist());
 						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
-						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;
 					} else if (nextAnnotation instanceof OptionalParam) {
 						SearchParameter parameter = new SearchParameter();
@@ -279,10 +264,8 @@ public class MethodUtil {
 						parameter.setRequired(false);
 						parameter.setDeclaredTypes(((OptionalParam) nextAnnotation).targetTypes());
 						parameter.setCompositeTypes(((OptionalParam) nextAnnotation).compositeTypes());
-						parameter.setChainlists(((OptionalParam) nextAnnotation).chainWhitelist(),
-								((OptionalParam) nextAnnotation).chainBlacklist());
+						parameter.setChainlists(((OptionalParam) nextAnnotation).chainWhitelist());
 						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
-						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;
 					} else if (nextAnnotation instanceof RawParam) {
 						param = new RawParamsParmeter();

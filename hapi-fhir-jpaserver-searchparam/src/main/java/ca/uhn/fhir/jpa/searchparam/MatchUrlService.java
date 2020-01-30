@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,15 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.http.NameValuePair;
@@ -53,8 +54,7 @@ public class MatchUrlService {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 
-	public SearchParameterMap translateMatchUrl(String
-																  theMatchUrl, RuntimeResourceDefinition resourceDef) {
+	public SearchParameterMap translateMatchUrl(String theMatchUrl, RuntimeResourceDefinition theResourceDefinition) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		List<NameValuePair> parameters = translateMatchUrl(theMatchUrl);
 
@@ -115,13 +115,16 @@ public class MatchUrlService {
 			} else if (Constants.PARAM_SOURCE.equals(nextParamName)) {
 				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
+			} else if (Location.SP_NEAR_DISTANCE.equals(nextParamName)) {
+				QuantityAndListParam nearDistanceAndListParam = (QuantityAndListParam) ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.QUANTITY, nextParamName, paramList);
+				paramMap.setNearDistanceParam(nearDistanceAndListParam);
 			} else if (nextParamName.startsWith("_")) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {
-				RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(resourceDef, nextParamName);
+				RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(theResourceDefinition, nextParamName);
 				if (paramDef == null) {
 					throw new InvalidRequestException(
-						"Failed to parse match URL[" + theMatchUrl + "] - Resource type " + resourceDef.getName() + " does not have a parameter with name: " + nextParamName);
+						"Failed to parse match URL[" + theMatchUrl + "] - Resource type " + theResourceDefinition.getName() + " does not have a parameter with name: " + nextParamName);
 				}
 
 				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, paramDef, nextParamName, paramList);
@@ -135,27 +138,13 @@ public class MatchUrlService {
 		return UrlUtil.translateMatchUrl(theMatchUrl);
 	}
 
-	@CoverageIgnore
-	protected IQueryParameterAnd newInstanceAnd(String chain) {
-		IQueryParameterAnd type;
-		Class<? extends IQueryParameterAnd> clazz = ResourceMetaParams.RESOURCE_META_AND_PARAMS.get(chain);
-		try {
-			type = clazz.newInstance();
-		} catch (Exception e) {
-			throw new InternalErrorException("Failure creating instance of " + clazz, e);
-		}
-		return type;
+	private IQueryParameterAnd newInstanceAnd(String theParamType) {
+		Class<? extends IQueryParameterAnd> clazz = ResourceMetaParams.RESOURCE_META_AND_PARAMS.get(theParamType);
+		return ReflectionUtil.newInstance(clazz);
 	}
 
-	@CoverageIgnore
-	public IQueryParameterType newInstanceType(String chain) {
-		IQueryParameterType type;
-		Class<? extends IQueryParameterType> clazz = ResourceMetaParams.RESOURCE_META_PARAMS.get(chain);
-		try {
-			type = clazz.newInstance();
-		} catch (Exception e) {
-			throw new InternalErrorException("Failure creating instance of " + clazz, e);
-		}
-		return type;
+	public IQueryParameterType newInstanceType(String theParamType) {
+		Class<? extends IQueryParameterType> clazz = ResourceMetaParams.RESOURCE_META_PARAMS.get(theParamType);
+		return ReflectionUtil.newInstance(clazz);
 	}
 }

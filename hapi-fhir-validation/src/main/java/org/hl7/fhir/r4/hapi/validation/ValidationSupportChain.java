@@ -10,12 +10,14 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValidationSupportChain implements IValidationSupport {
 
@@ -129,6 +131,16 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
+	public boolean isValueSetSupported(FhirContext theContext, String theValueSetUrl) {
+		for (IValidationSupport next : myChain) {
+			if (next.isValueSetSupported(theContext, theValueSetUrl)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
 	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
 		StructureDefinition outcome = null;
 		for (IValidationSupport next : myChain) {
@@ -146,17 +158,40 @@ public class ValidationSupportChain implements IValidationSupport {
 		ourLog.debug("Validating code {} in chain with {} items", theCode, myChain.size());
 
 		for (IValidationSupport next : myChain) {
-			if (theCodeSystem != null && next.isCodeSystemSupported(theCtx, theCodeSystem)) {
+			boolean shouldTry = false;
+
+			if (isNotBlank(theValueSetUrl)) {
+				if (next.isValueSetSupported(theCtx, theValueSetUrl)) {
+					shouldTry = true;
+				}
+			} else if (next.isCodeSystemSupported(theCtx, theCodeSystem)) {
+				shouldTry = true;
+			} else {
+				ourLog.debug("Chain item {} does not support code system {}", next, theCodeSystem);
+			}
+
+			if (shouldTry) {
 				CodeValidationResult result = next.validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 				if (result != null) {
 					ourLog.debug("Chain item {} returned outcome {}", next, result.isOk());
 					return result;
 				}
-			} else {
-				ourLog.debug("Chain item {} does not support code system {}", next, theCodeSystem);
 			}
+
 		}
 		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+	}
+
+	@Override
+	public CodeValidationResult validateCodeInValueSet(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+		CodeValidationResult retVal = null;
+		for (IValidationSupport next : myChain) {
+			retVal = next.validateCodeInValueSet(theContext, theCodeSystem, theCode, theDisplay, theValueSet);
+			if (retVal != null) {
+				break;
+			}
+		}
+		return retVal;
 	}
 
 	@Override

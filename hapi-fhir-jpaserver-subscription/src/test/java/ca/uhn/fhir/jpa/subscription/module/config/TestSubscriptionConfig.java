@@ -33,8 +33,4 @@ public class TestSubscriptionConfig {
 		return new InMemorySubscriptionMatcher();
 	}
 
-	@Bean
-	public UnregisterScheduledProcessor unregisterScheduledProcessor(Environment theEnv) {
-		return new UnregisterScheduledProcessor(theEnv);
-	}
 }

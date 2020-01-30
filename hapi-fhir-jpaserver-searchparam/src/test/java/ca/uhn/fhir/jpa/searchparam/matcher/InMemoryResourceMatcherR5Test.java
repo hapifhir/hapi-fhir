@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -66,6 +67,11 @@ public class InMemoryResourceMatcherR5Test {
 		@Bean
 		FhirContext fhirContext() {
 			return FhirContext.forR5();
+		}
+
+		@Bean
+		ModelConfig modelConfig() {
+			return new ModelConfig();
 		}
 	}
 
@@ -202,7 +208,7 @@ public class InMemoryResourceMatcherR5Test {
 	private ResourceIndexedSearchParams extractDateSearchParam(Observation theObservation) {
 		ResourceIndexedSearchParams retval = new ResourceIndexedSearchParams();
 		BaseDateTimeType dateValue = (BaseDateTimeType) theObservation.getEffective();
-		ResourceIndexedSearchParamDate dateParam = new ResourceIndexedSearchParamDate("date", dateValue.getValue(), dateValue.getValue(), dateValue.getValueAsString());
+		ResourceIndexedSearchParamDate dateParam = new ResourceIndexedSearchParamDate("Patient", "date", dateValue.getValue(), dateValue.getValue(), dateValue.getValueAsString());
 		retval.myDateParams.add(dateParam);
 		return retval;
 	}

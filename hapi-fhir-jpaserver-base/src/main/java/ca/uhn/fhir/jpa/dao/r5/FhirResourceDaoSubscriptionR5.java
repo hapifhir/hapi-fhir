@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,28 +20,21 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Subscription;
-import org.hl7.fhir.r5.model.Subscription.SubscriptionChannelType;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nullable;
 import java.util.Date;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-public class FhirResourceDaoSubscriptionR5 extends FhirResourceDaoR5<Subscription> implements IFhirResourceDaoSubscription<Subscription> {
+public class FhirResourceDaoSubscriptionR5 extends BaseHapiFhirResourceDao<Subscription> implements IFhirResourceDaoSubscription<Subscription> {
 
 	@Autowired
 	private ISubscriptionTableDao mySubscriptionTableDao;
@@ -73,7 +66,7 @@ public class FhirResourceDaoSubscriptionR5 extends FhirResourceDaoR5<Subscriptio
 
 
 	@Override
-	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
+	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
 												 Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
@@ -85,85 +78,6 @@ public class FhirResourceDaoSubscriptionR5 extends FhirResourceDaoR5<Subscriptio
 		}
 
 		return retVal;
-	}
-
-	protected void validateChannelEndpoint(Subscription theResource) {
-		if (isBlank(theResource.getChannel().getEndpoint())) {
-			throw new UnprocessableEntityException("Rest-hook subscriptions must have Subscription.channel.endpoint defined");
-		}
-	}
-
-	protected void validateChannelPayload(Subscription theResource) {
-		if (!isBlank(theResource.getChannel().getPayload()) && EncodingEnum.forContentType(theResource.getChannel().getPayload()) == null) {
-			throw new UnprocessableEntityException("Invalid value for Subscription.channel.payload: " + theResource.getChannel().getPayload());
-		}
-	}
-
-	@Nullable
-	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
-		if (theResource.getStatus() == null) {
-			throw new UnprocessableEntityException("Can not process submitted Subscription - Subscription.status must be populated on this server");
-		}
-
-		switch (theResource.getStatus()) {
-			case REQUESTED:
-			case ACTIVE:
-				break;
-			case ERROR:
-			case OFF:
-			case NULL:
-				return null;
-		}
-
-		String query = theResource.getCriteria();
-		if (isBlank(query)) {
-			throw new UnprocessableEntityException("Subscription.criteria must be populated");
-		}
-
-		int sep = query.indexOf('?');
-		if (sep <= 1) {
-			throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
-		}
-
-		String resType = query.substring(0, sep);
-		if (resType.contains("/")) {
-			throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
-		}
-
-		if (theResource.getChannel().getType() == null) {
-			throw new UnprocessableEntityException("Subscription.channel.type must be populated");
-		} else if (theResource.getChannel().getType() == SubscriptionChannelType.RESTHOOK) {
-			validateChannelPayload(theResource);
-			validateChannelEndpoint(theResource);
-		}
-
-		RuntimeResourceDefinition resDef;
-		try {
-			resDef = getContext().getResourceDefinition(resType);
-		} catch (DataFormatException e) {
-			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resType);
-		}
-		return resDef;
-	}
-
-	@Override
-	protected void validateResourceForStorage(Subscription theResource, ResourceTable theEntityToSave) {
-		super.validateResourceForStorage(theResource, theEntityToSave);
-
-		RuntimeResourceDefinition resDef = validateCriteriaAndReturnResourceDefinition(theResource);
-		if (resDef == null) {
-			return;
-		}
-
-		IFhirResourceDao<? extends IBaseResource> dao = getDao(resDef.getImplementingClass());
-		if (dao == null) {
-			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resDef);
-		}
-
-		if (theResource.getChannel().getType() == null) {
-			throw new UnprocessableEntityException("Subscription.channel.type must be populated on this server");
-		}
-
 	}
 
 }

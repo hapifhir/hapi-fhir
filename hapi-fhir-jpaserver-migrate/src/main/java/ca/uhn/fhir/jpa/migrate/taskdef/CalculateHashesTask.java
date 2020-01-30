@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.VersionEnum;
 import com.google.common.collect.ForwardingMap;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -32,10 +34,7 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
@@ -53,13 +52,22 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 	/**
 	 * Constructor
 	 */
-	public CalculateHashesTask() {
-		super();
+	public CalculateHashesTask(VersionEnum theRelease, String theVersion) {
+		super(theRelease.toString(), theVersion);
+		setDescription("Calculate resource search parameter index hashes");
 	}
 
 	@Override
-	public synchronized void execute() throws SQLException {
+	public synchronized void doExecute() throws SQLException {
 		if (isDryRun()) {
+			return;
+		}
+
+		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
+		// This table was added shortly after hash indexes were added, so it is a reasonable indicator for whether this
+		// migration has already been run
+		if (tableNames.contains("HFJ_RES_REINDEX_JOB")) {
+			logInfo(ourLog, "The table HFJ_RES_REINDEX_JOB already exists.  Skipping calculate hashes task.");
 			return;
 		}
 
@@ -69,10 +77,10 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 			while(true) {
 				MyRowCallbackHandler rch = new MyRowCallbackHandler();
 				getTxTemplate().execute(t -> {
-					JdbcTemplate jdbcTemplate = newJdbcTemnplate();
+					JdbcTemplate jdbcTemplate = newJdbcTemplate();
 					jdbcTemplate.setMaxRows(100000);
 					String sql = "SELECT * FROM " + getTableName() + " WHERE " + getColumnName() + " IS NULL";
-					ourLog.info("Finding up to {} rows in {} that requires hashes", myBatchSize, getTableName());
+					logInfo(ourLog, "Finding up to {} rows in {} that requires hashes", myBatchSize, getTableName());
 
 					jdbcTemplate.query(sql, rch);
 					rch.done();
@@ -86,7 +94,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 					break;
 				}
 
-				ourLog.info("Waiting for {} tasks to complete", futures.size());
+				logInfo(ourLog, "Waiting for {} tasks to complete", futures.size());
 				for (Future<?> next : futures) {
 					try {
 						next.get();
@@ -118,7 +126,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 		RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
 			@Override
 			public void rejectedExecution(Runnable theRunnable, ThreadPoolExecutor theExecutor) {
-				ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", executorQueue.size());
+				logInfo(ourLog, "Note: Executor queue is full ({} elements), waiting for a slot to become available!", executorQueue.size());
 				StopWatch sw = new StopWatch();
 				try {
 					executorQueue.put(theRunnable);
@@ -126,7 +134,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 					throw new RejectedExecutionException("Task " + theRunnable.toString() +
 						" rejected from " + theE.toString());
 				}
-				ourLog.info("Slot become available after {}ms", sw.getMillis());
+				logInfo(ourLog, "Slot become available after {}ms", sw.getMillis());
 			}
 		};
 		myExecutor = new ThreadPoolExecutor(
@@ -176,13 +184,13 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 					arguments.add((Number) nextRow.get("SP_ID"));
 
 					// Apply update SQL
-					newJdbcTemnplate().update(sqlBuilder.toString(), arguments.toArray());
+					newJdbcTemplate().update(sqlBuilder.toString(), arguments.toArray());
 
 				}
 
 				return theRows.size();
 			});
-			ourLog.info("Updated {} rows on {} in {}", theRows.size(), getTableName(), sw.toString());
+			logInfo(ourLog, "Updated {} rows on {} in {}", theRows.size(), getTableName(), sw.toString());
 		};
 		return myExecutor.submit(task);
 	}

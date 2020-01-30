@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -252,6 +252,7 @@ public class Constants {
 	 * </p>
 	 */
 	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
+	public static final String CODESYSTEM_VALIDATE_NOT_NEEDED = UUID.randomUUID().toString();
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
@@ -353,4 +354,16 @@ public class Constants {
 		CORS_ALLWED_METHODS = Collections.unmodifiableSet(corsAllowedMethods);
 	}
 
+	public static boolean codeSystemNotNeeded(String theCodeSystem) {
+		return Constants.CODESYSTEM_VALIDATE_NOT_NEEDED.equals(theCodeSystem);
+	}
+
+
+	public static String codeSystemWithDefaultDescription(String theSystem) {
+		if (codeSystemNotNeeded(theSystem)) {
+			return "(none)";
+		} else {
+			return theSystem;
+		}
+	}
 }

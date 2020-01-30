@@ -4,7 +4,7 @@ package ca.uhn.test.concurrency;
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,10 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	private final AtomicReference<CountDownLatch> myCountdownLatch = new AtomicReference<>();
 	private final AtomicReference<List<String>> myFailures = new AtomicReference<>();
 	private final AtomicReference<List<HookParams>> myCalledWith = new AtomicReference<>();
-    private final Pointcut myPointcut;
+	private int myDefaultTimeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
+	private final Pointcut myPointcut;
 	private int myInitialCount;
+
 
 	public PointcutLatch(Pointcut thePointcut) {
 		this.name = thePointcut.name();
@@ -58,7 +60,12 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	public PointcutLatch(String theName) {
 		this.name = theName;
-        myPointcut = null;
+		myPointcut = null;
+	}
+
+	public PointcutLatch setDefaultTimeoutSeconds(int theDefaultTimeoutSeconds) {
+		myDefaultTimeoutSeconds = theDefaultTimeoutSeconds;
+		return this;
 	}
 
 	@Override
@@ -91,14 +98,14 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	@Override
 	public List<HookParams> awaitExpected() throws InterruptedException {
-		return awaitExpectedWithTimeout(DEFAULT_TIMEOUT_SECONDS);
+		return awaitExpectedWithTimeout(myDefaultTimeoutSeconds);
 	}
 
 	public List<HookParams> awaitExpectedWithTimeout(int timeoutSecond) throws InterruptedException {
 		List<HookParams> retval = myCalledWith.get();
 		try {
 			CountDownLatch latch = myCountdownLatch.get();
-            Validate.notNull(latch, getName() + " awaitExpected() called before setExpected() called.");
+			Validate.notNull(latch, getName() + " awaitExpected() called before setExpected() called.");
 			if (!latch.await(timeoutSecond, TimeUnit.SECONDS)) {
 				throw new AssertionError(getName() + " timed out waiting " + timeoutSecond + " seconds for latch to countdown from " + myInitialCount + " to 0.  Is " + latch.getCount() + ".");
 			}
@@ -145,7 +152,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	@Override
 	public void invoke(Pointcut thePointcut, HookParams theArgs) {
-        CountDownLatch latch = myCountdownLatch.get();
+		CountDownLatch latch = myCountdownLatch.get();
 		if (latch == null) {
 			throw new PointcutLatchException("invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke() arrived.", theArgs);
 		} else if (latch.getCount() <= 0) {

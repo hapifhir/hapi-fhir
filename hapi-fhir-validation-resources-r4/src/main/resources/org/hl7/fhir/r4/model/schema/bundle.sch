@@ -36,7 +36,7 @@
       <sch:assert test="not(f:total) or (f:type/@value = 'searchset') or (f:type/@value = 'history')">bdl-1: total only when a search or history</sch:assert>
       <sch:assert test="not(f:entry/f:search) or (f:type/@value = 'searchset')">bdl-2: entry.search only when a search</sch:assert>
       <sch:assert test="not(f:type/@value='document') or f:entry[1]/f:resource/f:Composition">bdl-11: A document must have a Composition as the first resource</sch:assert>
-      <sch:assert test="not(f:type/@value = 'document') or exists(f:meta/f:lastUpdated/f:value)">bdl-10: A document must have a date</sch:assert>
+      <sch:assert test="not(f:type/@value = 'document') or exists(f:timestamp/@value)">bdl-10: A document must have a date</sch:assert>
     </sch:rule>
     <sch:rule context="f:Bundle/f:identifier/f:period">
       <sch:assert test="not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) &lt;= xs:dateTime(f:end/@value))">per-1: If present, start SHALL have a lower value than end</sch:assert>

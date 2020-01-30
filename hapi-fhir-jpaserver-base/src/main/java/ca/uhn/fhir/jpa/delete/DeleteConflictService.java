@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.delete;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,12 +132,12 @@ public class DeleteConflictService {
 		}
 	}
 
-	public void validateDeleteConflictsEmptyOrThrowException(DeleteConflictList theDeleteConflicts) {
+	public static void validateDeleteConflictsEmptyOrThrowException(FhirContext theFhirContext, DeleteConflictList theDeleteConflicts) {
 		if (theDeleteConflicts.isEmpty()) {
 			return;
 		}
 
-		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(theFhirContext);
 		String firstMsg = null;
 
 		Iterator<DeleteConflict> iterator = theDeleteConflicts.iterator();
@@ -154,7 +154,7 @@ public class DeleteConflictService {
 			if (firstMsg == null) {
 				firstMsg = msg;
 			}
-			OperationOutcomeUtil.addIssue(myFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, msg, null, "processing");
+			OperationOutcomeUtil.addIssue(theFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, msg, null, "processing");
 		}
 
 		throw new ResourceVersionConflictException(firstMsg, oo);

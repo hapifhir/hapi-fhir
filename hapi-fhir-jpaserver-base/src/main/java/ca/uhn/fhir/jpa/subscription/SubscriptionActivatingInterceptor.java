@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,13 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
@@ -37,6 +40,7 @@ import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.SubscriptionUtil;
@@ -58,23 +62,23 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Responsible for transitioning subscription resources from REQUESTED to ACTIVE
  * Once activated, the subscription is added to the SubscriptionRegistry.
- *
+ * <p>
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
-@Service
 @Lazy
-@Interceptor()
+@Interceptor
 public class SubscriptionActivatingInterceptor {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingInterceptor.class);
-
 	private static boolean ourWaitForSubscriptionActivationSynchronouslyForUnitTest;
-
+	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingInterceptor.class);
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
 	@Autowired
@@ -93,18 +97,20 @@ public class SubscriptionActivatingInterceptor {
 	@Autowired
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
+	/**
+	 * Constructor
+	 */
+	public SubscriptionActivatingInterceptor() {
+		super();
+	}
+
 	public boolean activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
 		// subscriber applies..
-		String subscriptionChannelTypeCode = myFhirContext
-			.newTerser()
-			.getSingleValueOrNull(theSubscription, SubscriptionConstants.SUBSCRIPTION_TYPE, IPrimitiveType.class)
-			.getValueAsString();
-
-		Subscription.SubscriptionChannelType subscriptionChannelType = Subscription.SubscriptionChannelType.fromCode(subscriptionChannelTypeCode);
+		CanonicalSubscriptionChannelType subscriptionChannelType = mySubscriptionCanonicalizer.getChannelType(theSubscription);
 
 		// Only activate supported subscriptions
-		if (!myDaoConfig.getSupportedSubscriptionTypes().contains(subscriptionChannelType)) {
+		if (subscriptionChannelType == null || !myDaoConfig.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
 			return false;
 		}
 
@@ -156,6 +162,7 @@ public class SubscriptionActivatingInterceptor {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private boolean activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
 		IBaseResource subscription = subscriptionDao.read(theSubscription.getIdElement());
@@ -180,44 +187,117 @@ public class SubscriptionActivatingInterceptor {
 		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 	}
 
-	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
-	public void addStrategyTagCreated(IBaseResource theResource) {
-		if (isSubscription(theResource)) {
-			validateCriteriaAndAddStrategy(theResource);
-		}
-	}
-
-	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void addStrategyTagUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
-		if (isSubscription(theNewResource)) {
-			validateCriteriaAndAddStrategy(theNewResource);
-		}
-	}
-
-	// TODO KHS add third type of strategy DISABLED if that subscription type is disabled on this server
-	public void validateCriteriaAndAddStrategy(final IBaseResource theResource) {
-		String criteria = mySubscriptionCanonicalizer.getCriteria(theResource);
-		try {
-			SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(criteria);
-			mySubscriptionCanonicalizer.setMatchingStrategyTag(theResource, strategy);
-		} catch (InvalidRequestException | DataFormatException e) {
-			throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + criteria + " " + e.getMessage());
-		}
-	}
-
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
-	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
+	public void resourceUpdatedPreCommit(IBaseResource theOldResource, IBaseResource theNewResource) {
 		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
-	public void resourceCreated(IBaseResource theResource) {
+	public void resourceCreatedPreCommit(IBaseResource theResource) {
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
-	public void resourceDeleted(IBaseResource theResource) {
+	public void resourceDeletedPreCommit(IBaseResource theResource) {
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE);
+	}
+
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
+	public void resourceCreatedPreStorage(IBaseResource theResource) {
+		if (isSubscription(theResource)) {
+			validateSubmittedSubscription(theResource);
+		}
+	}
+
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
+	public void resourceUpdatedPreStorage(IBaseResource theOldResource, IBaseResource theNewResource) {
+		if (isSubscription(theNewResource)) {
+			validateSubmittedSubscription(theNewResource);
+		}
+	}
+
+	@VisibleForTesting
+	@SuppressWarnings("WeakerAccess")
+	public void setSubscriptionStrategyEvaluatorForUnitTest(SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
+	}
+
+	@SuppressWarnings("WeakerAccess")
+	public void validateSubmittedSubscription(IBaseResource theSubscription) {
+
+		CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
+		boolean finished = false;
+		if (subscription.getStatus() == null) {
+			throw new UnprocessableEntityException("Can not process submitted Subscription - Subscription.status must be populated on this server");
+		}
+
+		switch (subscription.getStatus()) {
+			case REQUESTED:
+			case ACTIVE:
+				break;
+			case ERROR:
+			case OFF:
+			case NULL:
+				finished = true;
+				break;
+		}
+
+		mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, null);
+
+		if (!finished) {
+
+			String query = subscription.getCriteriaString();
+			if (isBlank(query)) {
+				throw new UnprocessableEntityException("Subscription.criteria must be populated");
+			}
+
+			int sep = query.indexOf('?');
+			if (sep <= 1) {
+				throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
+			}
+
+			String resType = query.substring(0, sep);
+			if (resType.contains("/")) {
+				throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
+			}
+
+			if (subscription.getChannelType() == null) {
+				throw new UnprocessableEntityException("Subscription.channel.type must be populated");
+			} else if (subscription.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
+				validateChannelPayload(subscription);
+				validateChannelEndpoint(subscription);
+			}
+
+			if (!myDaoRegistry.isResourceTypeSupported(resType)) {
+				throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resType);
+			}
+
+			try {
+				SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(query);
+				mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, strategy);
+			} catch (InvalidRequestException | DataFormatException e) {
+				throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + query + " " + e.getMessage());
+			}
+
+			if (subscription.getChannelType() == null) {
+				throw new UnprocessableEntityException("Subscription.channel.type must be populated on this server");
+			}
+
+		}
+	}
+
+	@SuppressWarnings("WeakerAccess")
+	protected void validateChannelEndpoint(CanonicalSubscription theResource) {
+		if (isBlank(theResource.getEndpointUrl())) {
+			throw new UnprocessableEntityException("Rest-hook subscriptions must have Subscription.channel.endpoint defined");
+		}
+	}
+
+	@SuppressWarnings("WeakerAccess")
+	protected void validateChannelPayload(CanonicalSubscription theResource) {
+		if (!isBlank(theResource.getPayloadString()) && EncodingEnum.forContentType(theResource.getPayloadString()) == null) {
+			throw new UnprocessableEntityException("Invalid value for Subscription.channel.payload: " + theResource.getPayloadString());
+		}
 	}
 
 	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType) {
@@ -240,6 +320,7 @@ public class SubscriptionActivatingInterceptor {
 			case UPDATE:
 				activateAndRegisterSubscriptionIfRequiredInTransaction(theMsg.getNewPayload(myFhirContext));
 				break;
+			case MANUALLY_TRIGGERED:
 			default:
 				break;
 		}
@@ -249,10 +330,22 @@ public class SubscriptionActivatingInterceptor {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				activateOrRegisterSubscriptionIfRequired(theSubscription);
 			}
 		});
+	}
+
+	@SuppressWarnings("WeakerAccess")
+	@VisibleForTesting
+	public void setSubscriptionCanonicalizerForUnitTest(SubscriptionCanonicalizer theSubscriptionCanonicalizer) {
+		mySubscriptionCanonicalizer = theSubscriptionCanonicalizer;
+	}
+
+	@SuppressWarnings("WeakerAccess")
+	@VisibleForTesting
+	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
 	}
 
 

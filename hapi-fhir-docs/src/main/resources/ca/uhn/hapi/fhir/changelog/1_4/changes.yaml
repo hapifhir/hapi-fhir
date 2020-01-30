@@ -1,0 +1,88 @@
+---
+- item:
+    type: "add"
+    title: "Bump the version of a few dependencies to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Hibernate (JPA, Web Tester): 5.0.3 -&gt; 5.0.7</li> <li>Springframework (JPA, Web Tester): 4.2.2 -&gt; 4.2.4</li> <li>Phloc-Commons (Schematron Validator): 4.3.6 -&gt; 4.4.4</li> <li>Apache httpclient (Client): 4.4 -&gt; 4.5.1</li> <li>Apache httpcore (Client): 4.4 -&gt; 4.4.4</li> <li>SLF4j (All): 1.7.13 -&gt; 1.7.14</li> </ul>"
+- item:
+    type: "fix"
+    title: "Remove a dependency on a Java 1.7 class (ReflectiveOperationException) in several spots in the codebase. This dependency was accidentally introduced in 1.3, and animal-sniffer-plugin failed to detect it (sigh)."
+- item:
+    type: "add"
+    title: "Add two new server interceptors: RequestValidatingInterceptor and ResponseValidatingInterceptor which can be used to validate incoming requests or outgoing responses using the standard FHIR validation tools. See the Server Validation Page for examples of how to use these interceptors. These intereptors have both been enabled on the <a href=\"http://fhirtest.uhn.ca\">public test page</a>."
+- item:
+    issue: "259"
+    type: "fix"
+    title: "Make IBoundCodeableConcept and IValueSetEnumBinder serializable, fixing an issue when trying to serialize model classes containing bound codes. Thanks to Nick Peterson for the Pull Request!"
+- item:
+    issue: "251"
+    type: "add"
+    title: "Introduce a JAX-RS version of the REST server, which can be used to deploy the same resource provider implementations which work on the existing REST server into a JAX-RS (e.g. Jersey) environment. Thanks to Peter Van Houte from Agfa for the amazing work!"
+- item:
+    type: "add"
+    title: "CLI now supports writing to file:// URL for 'upload-examples' command"
+- item:
+    type: "add"
+    title: "GZipped content is now supported for client-to-server uploads (create, update, transaction, etc.). The server will not automatically detect compressed incoming content and decompress it (this can be disabled using a RestfulServer configuration setting). A new client interceptor has been added which compresses outgoing content from the client."
+- item:
+    type: "fix"
+    title: "JPA server transaction attempted to validate resources twice each, with one of these times being before anything had been committed to the database. This meant that if a transaction contained both a Questionnaire and a QuestionnaireResponse, it would fail because the QuestionnaireResponse validator wouldn't be able to find the questionnaire. This is now corrected."
+- item:
+    type: "add"
+    title: "Add a new method to the generic/fluent client for searching: <code>.count(int)</code><br/> This replaces the existing \".limitTo(int)\" method which has now been deprocated because it was badly named and undocumented."
+- item:
+    type: "add"
+    title: "Profile validator has been configured to allow extensions even if they aren't explicitly declared in the profile."
+- item:
+    issue: "265"
+    type: "add"
+    title: "Add a constraint that the Maven build will only run in JDK 8+. HAPI remains committed to supporting JDK 6+ in the compiled library, but these days it can only be built using JDK 8. Thanks to joelsch for the PR!"
+- item:
+    type: "fix"
+    title: "When serializing a value[x] field, if the value type was a profiled type (e.g. markdown is a profile of string) HAPI 1.3 would use the base type in the element name, e.g. valueString instead of valueMarkdown. After discussion with Grahame, this appears to be incorrect behaviour so it has been fixed."
+- item:
+    issue: "240"
+    type: "add"
+    title: "Support target parameter type in _include / _revinclude values, e.g. _include=Patient:careProvider:Organization. Thanks to Joe Portner for reporting!"
+- item:
+    type: "add"
+    title: "Use ResponseHighlighterInterceptor in the hapi-fhir-jpaserver-example project to provide nice syntax highlighting. Thanks to Rob Hausam for noting that this wasn't there."
+- item:
+    type: "add"
+    title: "Introduce custom @CoverageIgnore annotation to hapi-fhir-base in order to remove dependency on cobertura during build and in runtime."
+- item:
+    type: "fix"
+    title: "Server-generated conformance statements incorrectly used /Profile/ instead of /StructureDefinition/ in URL links to structures."
+- item:
+    type: "add"
+    title: "JsonParser has been changed so that when serializing numbers it will use plain format (0.001) instead of scientific format (1e-3). The latter is valid JSON, and the parser will still correctly parse either format (all clients should be prepared to) but this change makes serialized resources appear more consistent between XML and JSON. As a result of this change, trailing zeros will now be preserved when serializing as well."
+- item:
+    issue: "278"
+    type: "add"
+    title: "Add DSTU3 example to hapi-fhir-jpaserver-example. Thanks to Karl Davis for the Pull Request!"
+- item:
+    type: "add"
+    title: "RestfulServer#setUseBrowserFriendlyContentTypes has been deprecated and its functionality removed. The intention of this feature was that if it detected a request coming in from a browser, it would serve up JSON/XML using content types that caused the browsers to pretty print. But each browser has different rules for when to pretty print, and after we wrote that feature both Chrome and FF changed their rules to break it anyhow. ResponseHighlightingInterceptor provides a better implementation of this functionality and should be used instead."
+- item:
+    type: "remove"
+    title: "Narrative generator framework has removed the ability to generate resource titles. This functionality was only useful for DSTU1 implementations and wasn't compatible with coming changes to that API."
+- item:
+    issue: "283"
+    type: "fix"
+    title: "Remove dependency on Servlet-API 3.0+ by using methods available in 2.5 where possible. Note that we continue to use Servlet-API 3.0+ features in some parts of the JPA API, so running in an old serlvet container should be tested well before use. Thanks to Bill Denton for reporting!"
+- item:
+    issue: "288"
+    type: "add"
+    title: "Add new methods to RestfulClientFactory allowing you to configure the size of the client pool used by Apache HttpClient. Thanks to Matt Blanchette for the pull request!"
+- item:
+    type: "add"
+    title: "Add support for new modifier types on Token search params in Server and annotation client."
+- item:
+    issue: "286"
+    type: "fix"
+    title: "Server conformance statement should include search parameter chains if the chains are explicitly defined via @Search(whitelist={....}). Thanks to lcamilo15 for reporting!"
+- item:
+    type: "fix"
+    title: "Remove afterPropertiesSet() call in Java config for JPA server's EntityManagerFactory. This doesn't need to be called manually, the the manual call led to a warning about the EntityManager being created twice."
+- item:
+    issue: "289"
+    type: "add"
+    title: "Allow server to correctly figure out it's own address even if the container provides a Servlet Context Path which does not include the root. Thanks to Petro Mykhaylyshyn for the pull request!"

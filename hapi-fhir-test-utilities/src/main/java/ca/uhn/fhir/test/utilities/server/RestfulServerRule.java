@@ -4,7 +4,7 @@ package ca.uhn.fhir.test.utilities.server;
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.BeforeClass;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -75,7 +74,6 @@ public class RestfulServerRule implements TestRule {
 		myHttpClient.close();
 	}
 
-	@BeforeClass
 	private void startServer() throws Exception {
 		myServer = new Server(0);
 
@@ -111,5 +109,9 @@ public class RestfulServerRule implements TestRule {
 
 	public RestfulServer getRestfulServer() {
 		return myServlet;
+	}
+
+	public int getPort() {
+		return myPort;
 	}
 }

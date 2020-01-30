@@ -64,6 +64,10 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 		e.setSubject(new Reference(myPatientId));
 		myEncounterId = ourClient.create().resource(e).execute().getId().toUnqualifiedVersionless();
 
+		CarePlan cp = new CarePlan();
+		cp.setEncounter(new Reference(myEncounterId));
+		ourClient.create().resource(cp).execute();
+
 		Observation o = new Observation();
 		o.setStatus(Observation.ObservationStatus.FINAL);
 		o.setSubject( new Reference(myPatientId));

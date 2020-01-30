@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,11 @@
  * #L%
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import org.apache.commons.compress.archivers.zip.UnsupportedZipFeatureException;
+import org.apache.commons.io.FileUtils;
 import org.jdom2.Content;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -31,8 +36,14 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This is just here to force a javadoc to be built in order to keep
@@ -41,7 +52,7 @@ import java.util.List;
 public class ChangelogMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ChangelogMigrator.class);
-	private static final Namespace NS = Namespace.getNamespace( "http://maven.apache.org/changes/1.0.0");
+	private static final Namespace NS = Namespace.getNamespace("http://maven.apache.org/changes/1.0.0");
 
 	public static void main(String[] args) throws ParserConfigurationException, IOException, SAXException {
 
@@ -67,18 +78,81 @@ public class ChangelogMigrator {
 			ourLog.info("Found release {} - {} - {}", version, date, description);
 			releaseCount++;
 
+			ArrayList<Object> items = new ArrayList<>();
+
 			for (Element nextAction : nextRelease.getChildren("action", NS)) {
+
+				HashMap<String, Object> itemRootMap = new HashMap<>();
+				items.add(itemRootMap);
+				HashMap<Object, Object> itemMap = new HashMap<>();
+				itemRootMap.put("item", itemMap);
+
+				String type = nextAction.getAttribute("type").getValue();
+				switch (type) {
+					case "change":
+						itemMap.put("type", "change");
+						break;
+					case "fix":
+						itemMap.put("type", "fix");
+						break;
+					case "remove":
+						itemMap.put("type", "remove");
+						break;
+					case "add":
+						itemMap.put("type", "add");
+						break;
+					default:
+						throw new Error("Unknown type: " + type);
+				}
+
+				String issue = nextAction.getAttribute("issue") != null ? nextAction.getAttribute("issue").getValue() : null;
+				if (isNotBlank(issue)) {
+					itemMap.put("issue", issue);
+				}
+
 				StringBuilder contentBuilder = new StringBuilder();
 				for (Content nextContents : nextAction.getContent()) {
 					if (nextContents instanceof Text) {
 						String text = ((Text) nextContents).getTextNormalize();
-						contentBuilder.append(text);
+						contentBuilder.append(" ").append(text);
 					} else {
 						throw new IllegalStateException("Unknown type: " + nextContents.getClass());
 					}
 				}
 
+				String value = contentBuilder.toString().trim().replaceAll(" {2}", " ");
+				itemMap.put("title", value);
+
 				actionCount++;
+			}
+
+			String releaseDir = "hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/" + version.replace(".", "_");
+			File releaseDirFile = new File(releaseDir);
+			FileUtils.forceMkdir(releaseDirFile);
+			File file = new File(releaseDirFile, "changes.yaml");
+			ourLog.info("Writing file: {}", file.getAbsolutePath());
+			try (FileWriter writer = new FileWriter(file, false)) {
+
+				YAMLFactory yf = new YAMLFactory().disable(YAMLGenerator.Feature.SPLIT_LINES);
+
+				ObjectMapper mapper = new ObjectMapper(yf);
+				mapper.writeValue(writer, items);
+
+			}
+
+			file = new File(releaseDirFile, "version.yaml");
+			ourLog.info("Writing file: {}", file.getAbsolutePath());
+			try (FileWriter writer = new FileWriter(file, false)) {
+
+				YAMLFactory yf = new YAMLFactory();
+				ObjectMapper mapper = new ObjectMapper(yf);
+				HashMap<Object, Object> versionMap = new HashMap<>();
+				versionMap.put("release-date", date);
+				if (isNotBlank(description)) {
+					versionMap.put("codename", description);
+				}
+				mapper.writeValue(writer, versionMap);
+
 			}
 
 		}

@@ -23,7 +23,7 @@ import static org.apache.commons.lang3.StringUtils.*;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,7 +160,7 @@ public class FhirTerser {
 	public <T extends IBase> List<T> getAllPopulatedChildElementsOfType(IBaseResource theResource, final Class<T> theType) {
 		final ArrayList<T> retVal = new ArrayList<>();
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		visit(new IdentityHashMap<>(), theResource, theResource, null, null, def, new IModelVisitor() {
+		visit(newMap(), theResource, theResource, null, null, def, new IModelVisitor() {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void acceptElement(IBaseResource theOuterResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
@@ -179,7 +179,7 @@ public class FhirTerser {
 	public List<ResourceReferenceInfo> getAllResourceReferences(final IBaseResource theResource) {
 		final ArrayList<ResourceReferenceInfo> retVal = new ArrayList<>();
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		visit(new IdentityHashMap<>(), theResource, theResource, null, null, def, new IModelVisitor() {
+		visit(newMap(), theResource, theResource, null, null, def, new IModelVisitor() {
 			@Override
 			public void acceptElement(IBaseResource theOuterResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
 				if (theElement == null || theElement.isEmpty()) {
@@ -475,11 +475,10 @@ public class FhirTerser {
 	 * @param thePath     The path for the element to be accessed.
 	 * @return A list of values of type {@link Object}.
 	 */
-	public List<Object> getValues(IBaseResource theResource, String thePath) {
+	public List<IBase> getValues(IBaseResource theResource, String thePath) {
 		Class<IBase> wantedClass = IBase.class;
 
-		List values = getValues(theResource, thePath, wantedClass);
-		return values;
+		return getValues(theResource, thePath, wantedClass);
 	}
 
 	/**
@@ -491,11 +490,10 @@ public class FhirTerser {
 	 * @param theCreate   When set to <code>true</code>, the terser will create a null-valued element where none exists.
 	 * @return A list of values of type {@link Object}.
 	 */
-	public List<Object> getValues(IBaseResource theResource, String thePath, boolean theCreate) {
+	public List<IBase> getValues(IBaseResource theResource, String thePath, boolean theCreate) {
 		Class<IBase> wantedClass = IBase.class;
 
-		List retVal = getValues(theResource, thePath, wantedClass, theCreate);
-		return retVal;
+		return getValues(theResource, thePath, wantedClass, theCreate);
 	}
 
 	/**
@@ -508,11 +506,10 @@ public class FhirTerser {
 	 * @param theAddExtension When set to <code>true</code>, the terser will add a null-valued extension where one or more such extensions already exist.
 	 * @return A list of values of type {@link Object}.
 	 */
-	public List<Object> getValues(IBaseResource theResource, String thePath, boolean theCreate, boolean theAddExtension) {
+	public List<IBase> getValues(IBaseResource theResource, String thePath, boolean theCreate, boolean theAddExtension) {
 		Class<IBase> wantedClass = IBase.class;
 
-		List retVal = getValues(theResource, thePath, wantedClass, theCreate, theAddExtension);
-		return retVal;
+		return getValues(theResource, thePath, wantedClass, theCreate, theAddExtension);
 	}
 
 	/**
@@ -796,7 +793,11 @@ public class FhirTerser {
 	 */
 	public void visit(IBaseResource theResource, IModelVisitor theVisitor) {
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		visit(new IdentityHashMap<>(), theResource, theResource, null, null, def, theVisitor);
+		visit(newMap(), theResource, theResource, null, null, def, theVisitor);
+	}
+
+	public Map<Object, Object> newMap() {
+		return new IdentityHashMap<>();
 	}
 
 	/**
@@ -817,7 +818,7 @@ public class FhirTerser {
 		visit(theResource, null, def, theVisitor, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 	}
 
-	private void visit(IdentityHashMap<Object, Object> theStack, IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition,
+	private void visit(Map<Object, Object> theStack, IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition,
 							 BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor theCallback) {
 		List<String> pathToElement = addNameToList(thePathToElement, theChildDefinition);
 

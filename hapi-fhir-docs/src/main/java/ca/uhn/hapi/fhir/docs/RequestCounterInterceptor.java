@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,17 @@ package ca.uhn.hapi.fhir.docs;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 //START SNIPPET: interceptor
-public class RequestCounterInterceptor extends InterceptorAdapter
+@Interceptor
+public class RequestCounterInterceptor
 {
 
    private int myRequestCount;
@@ -39,7 +43,7 @@ public class RequestCounterInterceptor extends InterceptorAdapter
     * Override the incomingRequestPreProcessed method, which is called
     * for each incoming request before any processing is done
     */
-   @Override
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
    public boolean incomingRequestPreProcessed(HttpServletRequest theRequest, HttpServletResponse theResponse) {
       myRequestCount++;
       return true;

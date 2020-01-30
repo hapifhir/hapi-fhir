@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,17 +38,19 @@ public class DropIdGeneratorTask extends BaseTask<DropIdGeneratorTask> {
 	private static final Logger ourLog = LoggerFactory.getLogger(DropIdGeneratorTask.class);
 	private final String myGeneratorName;
 
-	public DropIdGeneratorTask(String theGeneratorName) {
+	public DropIdGeneratorTask(String theProductVersion, String theSchemaVersion, String theGeneratorName) {
+		super(theProductVersion, theSchemaVersion);
 		myGeneratorName = theGeneratorName;
 	}
 
 	@Override
 	public void validate() {
 		Validate.notBlank(myGeneratorName);
+		setDescription("Drop id generator " + myGeneratorName);
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		String sql = null;
 
@@ -84,12 +88,12 @@ public class DropIdGeneratorTask extends BaseTask<DropIdGeneratorTask> {
 		if (isNotBlank(sql)) {
 			Set<String> sequenceNames =
 				JdbcUtils.getSequenceNames(getConnectionProperties())
-				.stream()
-				.map(String::toLowerCase)
-				.collect(Collectors.toSet());
+					.stream()
+					.map(String::toLowerCase)
+					.collect(Collectors.toSet());
 			ourLog.debug("Currently have sequences: {}", sequenceNames);
 			if (!sequenceNames.contains(myGeneratorName.toLowerCase())) {
-				ourLog.info("Sequence {} does not exist - No action performed", myGeneratorName);
+				logInfo(ourLog, "Sequence {} does not exist - No action performed", myGeneratorName);
 				return;
 			}
 
@@ -98,4 +102,14 @@ public class DropIdGeneratorTask extends BaseTask<DropIdGeneratorTask> {
 
 	}
 
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<DropIdGeneratorTask> theOtherObject) {
+		DropIdGeneratorTask otherObject = (DropIdGeneratorTask) theOtherObject;
+		theBuilder.append(myGeneratorName, otherObject.myGeneratorName);
+	}
+
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		theBuilder.append(myGeneratorName);
+	}
 }

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
+	<!-- this content is migrated -->
+
 	<properties>
 		<title>RESTful Operations</title>
 		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
@@ -1088,7 +1090,7 @@ If-Match: W/"3"]]></pre>
 				<p>
 					It is also possible to annotate search methods and/or parameters with
 					the
-					<a href="./apidocs/ca/uhn/fhir/model/api/annotation/Description.html">@Description</a>
+					<a href="/hapi-fhir/apidocs/ca/uhn/fhir/model/api/annotation/Description.html">@Description</a>
 					annotation. This annotation allows you to add a description of the method
 					and the individual parameters. These descriptions will be placed in the
 					server's conformance statement, which can be helpful to anyone who is developing

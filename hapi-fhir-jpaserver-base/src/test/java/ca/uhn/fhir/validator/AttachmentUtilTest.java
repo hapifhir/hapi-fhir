@@ -49,7 +49,7 @@ public class AttachmentUtilTest {
 		AttachmentUtil.setSize(ctx, attachment, 123);
 
 		org.hl7.fhir.r5.model.Communication communication = new org.hl7.fhir.r5.model.Communication();
-		communication.addPayload().setContent((org.hl7.fhir.r5.model.Type) attachment);
+		communication.addPayload().setContent((org.hl7.fhir.r5.model.DataType) attachment);
 		String encoded = ctx.newJsonParser().encodeResourceToString(communication);
 		assertEquals("{\"resourceType\":\"Communication\",\"payload\":[{\"contentAttachment\":{\"contentType\":\"text/plain\",\"data\":\"AAECAw==\",\"url\":\"http://foo\",\"size\":123}}]}", encoded);
 	}

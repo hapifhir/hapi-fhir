@@ -5,15 +5,11 @@ import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu2;
 import ca.uhn.fhir.jpa.term.TermReadSvcDstu2;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
-import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcDstu2;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
-import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
@@ -31,7 +27,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +81,7 @@ public class BaseDstu2Config extends BaseConfig {
 
 	@Bean(name = "myInstanceValidatorDstu2")
 	@Lazy
-	public IValidatorModule instanceValidatorDstu2() {
+	public IInstanceValidatorModule instanceValidatorDstu2() {
 		FhirInstanceValidator retVal = new FhirInstanceValidator();
 		retVal.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
 		retVal.setValidationSupport(new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), jpaValidationSupportDstu2())));
@@ -114,11 +110,6 @@ public class BaseDstu2Config extends BaseConfig {
 	@Bean(autowire = Autowire.BY_TYPE)
 	public SearchParamExtractorDstu2 searchParamExtractor() {
 		return new SearchParamExtractorDstu2();
-	}
-
-	@Bean
-	public ISearchParamRegistry searchParamRegistry() {
-		return new SearchParamRegistryDstu2();
 	}
 
 	@Bean(name = "mySystemDaoDstu2", autowire = Autowire.BY_NAME)

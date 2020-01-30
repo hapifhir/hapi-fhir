@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,10 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 
-public class FhirResourceDaoQuestionnaireResponseDstu3 extends FhirResourceDaoDstu3<QuestionnaireResponse> {
+public class FhirResourceDaoQuestionnaireResponseDstu3 extends BaseHapiFhirResourceDao<QuestionnaireResponse> {
 
 	
 //	@Override

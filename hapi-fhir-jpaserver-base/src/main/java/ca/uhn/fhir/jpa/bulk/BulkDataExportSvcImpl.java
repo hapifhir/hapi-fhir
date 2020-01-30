@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,15 @@ package ca.uhn.fhir.jpa.bulk;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IResultIterator;
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
-import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -52,9 +50,7 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
-import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.PersistJobDataAfterExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +75,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
-	private static final long REFRESH_INTERVAL = 10 * DateUtils.MILLIS_PER_SECOND;
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImpl.class);
 	private int myReuseBulkExportForMillis = (int) (60 * DateUtils.MILLIS_PER_MINUTE);
 
@@ -97,6 +92,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	private FhirContext myContext;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+	@Autowired
+	private SearchBuilderFactory mySearchBuilderFactory;
 	private TransactionTemplate myTxTemplate;
 
 	private long myFileMaxChars = 500 * FileUtils.ONE_KB;
@@ -215,9 +212,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 			ourLog.info("Bulk export assembling export of type {} for job {}", nextType, theJobUuid);
 
-			ISearchBuilder sb = dao.newSearchBuilder();
 			Class<? extends IBaseResource> nextTypeClass = myContext.getResourceDefinition(nextType).getImplementingClass();
-			sb.setType(nextTypeClass, nextType);
+			ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, nextType, nextTypeClass);
 
 			SearchParameterMap map = new SearchParameterMap();
 			map.setLoadSynchronous(true);
@@ -227,8 +223,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 			IResultIterator resultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, theJobUuid), null);
 			storeResultsToFiles(nextCollection, sb, resultIterator, jobResourceCounter, jobStopwatch);
-
-
 		}
 
 		job.setStatus(BulkJobStatusEnum.COMPLETE);
@@ -251,7 +245,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			OutputStreamWriter writer = new OutputStreamWriter(outputStream, Constants.CHARSET_UTF8);
 			IParser parser = myContext.newJsonParser().setPrettyPrint(false);
 
-			List<Long> pidsSpool = new ArrayList<>();
+			List<ResourcePersistentId> pidsSpool = new ArrayList<>();
 			List<IBaseResource> resourcesSpool = new ArrayList<>();
 			while (query.hasNext()) {
 				pidsSpool.add(query.next());
@@ -312,13 +306,22 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	@PostConstruct
 	public void start() {
-		ourLog.info("Bulk export service starting with refresh interval {}", StopWatch.formatMillis(REFRESH_INTERVAL));
 		myTxTemplate = new TransactionTemplate(myTxManager);
 
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(BulkDataExportSvcImpl.class.getName());
-		jobDetail.setJobClass(BulkDataExportSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(REFRESH_INTERVAL, true, jobDetail);
+		jobDetail.setId(getClass().getName());
+		jobDetail.setJobClass(Job.class);
+		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private IBulkDataExportSvc myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.buildExportFiles();
+		}
 	}
 
 	@Transactional
@@ -467,22 +470,4 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			return null;
 		});
 	}
-
-	@DisallowConcurrentExecution
-	@PersistJobDataAfterExecution
-	public static class SubmitJob extends FireAtIntervalJob {
-		@Autowired
-		private IBulkDataExportSvc myTarget;
-
-		public SubmitJob() {
-			super(REFRESH_INTERVAL);
-		}
-
-		@Override
-		protected void doExecute(JobExecutionContext theContext) {
-			myTarget.buildExportFiles();
-		}
-	}
-
-
 }

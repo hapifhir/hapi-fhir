@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -54,7 +54,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class TermReindexingSvcImpl implements ITermReindexingSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermReindexingSvcImpl.class);
-	private static final long SCHEDULE_INTERVAL_MILLIS = DateUtils.MILLIS_PER_MINUTE;
 	private static boolean ourForceSaveDeferredAlwaysForUnitTest;
 	@Autowired
 	protected ITermConceptDao myConceptDao;
@@ -150,29 +149,22 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 	}
 
 	@PostConstruct
-	public void registerScheduledJob() {
+	public void scheduleJob() {
+		// TODO KHS what does this mean?
 		// Register scheduled job to save deferred concepts
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
-		jobDefinition.setId(TermReindexingSvcImpl.class.getName() + "_reindex");
-		jobDefinition.setJobClass(SaveDeferredJob.class);
-		mySchedulerService.scheduleFixedDelay(SCHEDULE_INTERVAL_MILLIS, false, jobDefinition);
+		jobDefinition.setId(this.getClass().getName());
+		jobDefinition.setJobClass(Job.class);
+		mySchedulerService.scheduleLocalJob(DateUtils.MILLIS_PER_MINUTE, jobDefinition);
 	}
 
-	public static class SaveDeferredJob extends FireAtIntervalJob {
-
+	public static class Job implements HapiJob {
 		@Autowired
 		private ITermDeferredStorageSvc myTerminologySvc;
 
-		/**
-		 * Constructor
-		 */
-		public SaveDeferredJob() {
-			super(SCHEDULE_INTERVAL_MILLIS);
-		}
-
 		@Override
-		protected void doExecute(JobExecutionContext theContext) {
+		public void execute(JobExecutionContext theContext) {
 			myTerminologySvc.saveDeferred();
 		}
 	}

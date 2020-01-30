@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,8 +80,7 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	 * @throws InvalidRequestException If the given resource type is not supported
 	 */
 	public IFhirResourceDao getResourceDao(String theResourceName) {
-		init();
-		IFhirResourceDao retVal = myResourceNameToResourceDao.get(theResourceName);
+		IFhirResourceDao<IBaseResource> retVal = getResourceDaoOrNull(theResourceName);
 		if (retVal == null) {
 			List<String> supportedResourceTypes = myResourceNameToResourceDao
 				.keySet()
@@ -126,12 +125,9 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	}
 
 	@Nullable
-	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoOrNull(String theResourceType) {
-		try {
-			return (IFhirResourceDao<T>) getResourceDao(theResourceType);
-		} catch (InvalidRequestException e) {
-			return null;
-		}
+	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoOrNull(String theResourceName) {
+		init();
+		return (IFhirResourceDao<T>) myResourceNameToResourceDao.get(theResourceName);
 	}
 
 	@Override

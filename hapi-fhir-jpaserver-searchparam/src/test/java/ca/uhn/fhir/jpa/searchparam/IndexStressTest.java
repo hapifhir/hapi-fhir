@@ -50,14 +50,12 @@ public class IndexStressTest {
 			.collect(Collectors.toMap(RuntimeSearchParam::getName, t -> t));
 		when(searchParamRegistry.getActiveSearchParams(eq("Patient"))).thenReturn(spMap);
 
-		ResourceTable entity = new ResourceTable();
-		Set<ResourceIndexedSearchParamString> params = extractor.extractSearchParamStrings(entity, p);
+		Set<ResourceIndexedSearchParamString> params = extractor.extractSearchParamStrings(p);
 
 		StopWatch sw = new StopWatch();
 		int loops = 100;
 		for (int i = 0; i < loops; i++) {
-			entity = new ResourceTable();
-			params = extractor.extractSearchParamStrings(entity, p);
+			params = extractor.extractSearchParamStrings(p);
 		}
 
 		ourLog.info("Indexed {} times in {}ms/time", loops, sw.getMillisPerOperation(loops));

@@ -37,6 +37,8 @@ import java.util.Map.Entry;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import ca.uhn.fhir.context.FhirContext;
+
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -115,7 +117,6 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     }
   }
 
-
   private DateTimeType conformanceDate(RequestDetails theRequestDetails) {
     IPrimitiveType<Date> buildDate = getServerConfiguration(theRequestDetails).getConformanceDate();
     if (buildDate != null && buildDate.getValue() != null) {
@@ -180,13 +181,21 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     Set<String> operationNames = new HashSet<>();
 
     Map<String, List<BaseMethodBinding<?>>> resourceToMethods = configuration.collectMethodBindings();
+    Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype = configuration.getNameToSharedSupertype();
     for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
 
       if (nextEntry.getKey().isEmpty() == false) {
         Set<TypeRestfulInteraction> resourceOps = new HashSet<>();
         CapabilityStatementRestResourceComponent resource = rest.addResource();
         String resourceName = nextEntry.getKey();
-        RuntimeResourceDefinition def = configuration.getFhirContext().getResourceDefinition(resourceName);
+        
+        RuntimeResourceDefinition def;
+        FhirContext context = configuration.getFhirContext();
+        if (resourceNameToSharedSupertype.containsKey(resourceName)) {
+          def = context.getResourceDefinition(resourceNameToSharedSupertype.get(resourceName));
+        } else {
+          def = context.getResourceDefinition(resourceName);
+        }
         resource.getTypeElement().setValue(def.getName());
         resource.getProfileElement().setValue((def.getResourceProfile(serverBase)));
 

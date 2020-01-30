@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,8 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	public ResourceIndexedSearchParamNumber() {
 	}
 
-	public ResourceIndexedSearchParamNumber(String theParamName, BigDecimal theValue) {
+	public ResourceIndexedSearchParamNumber(String theResourceType, String theParamName, BigDecimal theValue) {
+		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValue(theValue);
 	}
@@ -98,11 +99,10 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		}
 		ResourceIndexedSearchParamNumber obj = (ResourceIndexedSearchParamNumber) theObj;
 		EqualsBuilder b = new EqualsBuilder();
+		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-		b.append(getResource(), obj.getResource());
 		b.append(getValue(), obj.getValue());
 		b.append(isMissing(), obj.isMissing());
-		b.append(getHashIdentity(), obj.getHashIdentity());
 		return b.isEquals();
 	}
 
@@ -136,8 +136,8 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getResourceType());
 		b.append(getParamName());
-		b.append(getResource());
 		b.append(getValue());
 		b.append(isMissing());
 		return b.toHashCode();

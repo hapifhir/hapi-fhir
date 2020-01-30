@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
-import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.config.BaseConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
@@ -11,21 +10,20 @@ import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
-import ca.uhn.fhir.jpa.term.*;
+import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcR4;
+import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
-import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
@@ -38,7 +36,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,8 +85,8 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 	}
 
 	@Bean
-	public TransactionProcessor<Bundle, Bundle.BundleEntryComponent> transactionProcessor() {
-		return new TransactionProcessor<>();
+	public TransactionProcessor transactionProcessor() {
+		return new TransactionProcessor();
 	}
 
 	@Bean(name = GRAPHQL_PROVIDER_NAME)
@@ -99,7 +97,7 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 
 	@Bean(name = "myInstanceValidatorR4")
 	@Lazy
-	public IValidatorModule instanceValidatorR4() {
+	public IInstanceValidatorModule instanceValidatorR4() {
 		FhirInstanceValidator val = new FhirInstanceValidator();
 		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Warning;
 		val.setBestPracticeWarningLevel(level);
@@ -139,11 +137,6 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 	@Bean(autowire = Autowire.BY_TYPE)
 	public SearchParamExtractorR4 searchParamExtractor() {
 		return new SearchParamExtractorR4();
-	}
-
-	@Bean
-	public ISearchParamRegistry searchParamRegistry() {
-		return new SearchParamRegistryR4();
 	}
 
 	@Bean(name = "mySystemDaoR4", autowire = Autowire.BY_NAME)

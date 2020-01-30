@@ -2,14 +2,19 @@ package org.hl7.fhir.r4.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
@@ -20,9 +25,15 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class DefaultProfileValidationSupport implements IValidationSupport {
@@ -172,8 +183,16 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
   @Override
   public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+    if (isBlank(theSystem) || Constants.codeSystemNotNeeded(theSystem)) {
+      return false;
+    }
     CodeSystem cs = fetchCodeSystem(theContext, theSystem);
     return cs != null && cs.getContent() != CodeSystemContentMode.NOTPRESENT;
+  }
+
+  @Override
+  public boolean isValueSetSupported(FhirContext theContext, String theValueSetUrl) {
+    return isNotBlank(theValueSetUrl) && fetchValueSet(theContext, theValueSetUrl) != null;
   }
 
   @Override
@@ -276,7 +295,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
         nextCandidate = nextCandidate.toUpperCase();
       }
       if (nextCandidate.equals(code)) {
-        retVal = new CodeValidationResult(next);
+        retVal = new CodeValidationResult(null, null, next, next.getDisplay());
         break;
       }
 
@@ -303,16 +322,16 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
         ValueSet valueSet = fetchValueSet(theContext, theValueSetUrl);
         if (valueSet != null) {
           ValueSetExpander.ValueSetExpansionOutcome expanded = expander.expand(valueSet, null);
-          Optional<ValueSet.ValueSetExpansionContainsComponent> haveMatch = expanded
-            .getValueset()
-            .getExpansion()
-            .getContains()
-            .stream()
-            .filter(t -> (theCodeSystem == null || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
-            .findFirst();
-          if (haveMatch.isPresent()) {
-            return new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(theCode)));
+          ValueSetExpansionComponent expansion = expanded.getValueset().getExpansion();
+          for (ValueSet.ValueSetExpansionContainsComponent nextExpansionCode : expansion.getContains()) {
+
+            if (theCode.equals(nextExpansionCode.getCode())) {
+              if (Constants.codeSystemNotNeeded(theCodeSystem) || nextExpansionCode.getSystem().equals(theCodeSystem)) {
+                return new CodeValidationResult(new CodeSystem.ConceptDefinitionComponent(new CodeType(theCode)));
+              }
+            }
           }
+
         }
       } catch (Exception e) {
         return new CodeValidationResult(IssueSeverity.WARNING, e.getMessage());
@@ -342,7 +361,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
   @Override
   public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
-    return validateCode(theContext, theSystem, theCode, null, null).asLookupCodeResult(theSystem, theCode);
+    return validateCode(theContext, theSystem, theCode, null, (String) null).asLookupCodeResult(theSystem, theCode);
   }
 
 }

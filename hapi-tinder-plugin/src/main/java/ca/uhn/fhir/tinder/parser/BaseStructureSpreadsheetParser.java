@@ -110,7 +110,6 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			// Map<String,String> blockFullNameToShortName = new
 			// HashMap<String,String>();
 
-			Map<String, List<String>> pathToResourceTypes = new HashMap<String, List<String>>();
 			List<Child> blockCopies = new ArrayList<Child>();
 			for (int i = 2; i < rows.getLength(); i++) {
 				Element nextRow = (Element) rows.item(i);
@@ -160,8 +159,6 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				if (elem instanceof Child) {
 					scanForSimpleSetters(elem);
 				}
-
-				pathToResourceTypes.put(name, elem.getType());
 
 			}
 
@@ -241,12 +238,17 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				continue;
 			}
 			nextName = nextName.toLowerCase().trim().replace(".", "");
-			if ("name".equals(nextName) || "binding name".equals(nextName)) {
-				colName = j;
-			} else if ("reference".equals(nextName)) {
-				colRef = j;
-			} else if ("conformance".equals(nextName)) {
-				colStrength = j;
+			switch (nextName) {
+				case "name":
+				case "binding name":
+					colName = j;
+					break;
+				case "reference":
+					colRef = j;
+					break;
+				case "conformance":
+					colStrength = j;
+					break;
 			}
 		}
 
