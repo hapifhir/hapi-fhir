@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.sched;
 
 import org.hl7.fhir.r5.model.InstantType;
 import org.hl7.fhir.utilities.DateTimeUtil;
+import org.quartz.JobKey;
 import org.quartz.spi.TriggerFiredBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,8 @@ public class AutowiringSpringBeanJobFactory extends SpringBeanJobFactory impleme
 		String scheduled = toString(bundle.getScheduledFireTime());
 		String next = toString(bundle.getNextFireTime());
 		String fireInstanceId = bundle.getTrigger().getFireInstanceId();
-		ourLog.info("Firing job[{}] ID[{}] - Previous[{}] Scheduled[{}] Next[{}]", bundle.getJobDetail().getKey(), fireInstanceId, prev, scheduled, next);
+		JobKey key = bundle.getJobDetail().getKey();
+		ourLog.debug("Firing job[{}] ID[{}] - Previous[{}] Scheduled[{}] Next[{}]", key, fireInstanceId, prev, scheduled, next);
 
 		Object job = super.createJobInstance(bundle);
 		myBeanFactory.autowireBean(job);
