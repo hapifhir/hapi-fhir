@@ -71,6 +71,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	private boolean errorForUnknownProfiles;
 	private List<String> myExtensionDomains = Collections.emptyList();
+	private boolean assumeValidRestReferences;
 
 	/**
 	 * Constructor
@@ -287,6 +288,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			.setExtensionDomains(getExtensionDomains())
 			.setNoTerminologyChecks(isNoTerminologyChecks())
 			.setValidatorResourceFetcher(getValidatorResourceFetcher())
+			.setAssumeValidRestReferences(isAssumeValidRestReferences())
 			.validate(wrappedWorkerContext, theValidationCtx);
 
 	}
@@ -297,6 +299,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	public void setValidatorResourceFetcher(IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher) {
 		this.validatorResourceFetcher = validatorResourceFetcher;
+	}
+
+	public boolean isAssumeValidRestReferences() {
+		return assumeValidRestReferences;
+	}
+
+	public void setAssumeValidRestReferences(boolean assumeValidRestReferences) {
+		this.assumeValidRestReferences = assumeValidRestReferences;
 	}
 
 

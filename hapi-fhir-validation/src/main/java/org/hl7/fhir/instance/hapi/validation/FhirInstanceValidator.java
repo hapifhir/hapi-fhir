@@ -81,6 +81,16 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private StructureDefinition myStructureDefintion;
 	private IValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
+
+	public boolean isAssumeValidRestReferences() {
+		return assumeValidRestReferences;
+	}
+
+	public void setAssumeValidRestReferences(boolean assumeValidRestReferences) {
+		this.assumeValidRestReferences = assumeValidRestReferences;
+	}
+
+	private boolean assumeValidRestReferences;
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
 	private VersionConvertorAdvisor50 myAdvisor = new NullVersionConverterAdvisor50();
 	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
@@ -289,6 +299,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(isNoTerminologyChecks());
 		v.setFetcher(getValidatorResourceFetcher());
+		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
 
 		List<ValidationMessage> messages = new ArrayList<>();
 

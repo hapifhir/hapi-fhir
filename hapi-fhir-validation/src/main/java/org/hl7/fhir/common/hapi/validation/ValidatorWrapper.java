@@ -33,6 +33,7 @@ public class ValidatorWrapper {
 	private boolean myAnyExtensionsAllowed;
 	private boolean myErrorForUnknownProfiles;
 	private boolean myNoTerminologyChecks;
+	private boolean assumeValidRestReferences;
 	private Collection<? extends String> myExtensionDomains;
 	private IResourceValidator.IValidatorResourceFetcher myValidatorResourceFetcher;
 
@@ -41,6 +42,15 @@ public class ValidatorWrapper {
 	 */
 	public ValidatorWrapper() {
 		super();
+	}
+
+	public boolean isAssumeValidRestReferences() {
+		return assumeValidRestReferences;
+	}
+
+	public ValidatorWrapper setAssumeValidRestReferences(boolean assumeValidRestReferences) {
+		this.assumeValidRestReferences = assumeValidRestReferences;
+		return this;
 	}
 
 	public ValidatorWrapper setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel theBestPracticeWarningLevel) {
