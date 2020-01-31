@@ -35,6 +35,7 @@ import org.bson.BsonArray;
 import org.bson.BsonBoolean;
 import org.bson.BsonDecimal128;
 import org.bson.BsonDocument;
+import org.bson.BsonDocumentWriter;
 import org.bson.BsonDouble;
 import org.bson.BsonInt32;
 import org.bson.BsonInt64;
@@ -43,6 +44,7 @@ import org.bson.BsonReader;
 import org.bson.BsonString;
 import org.bson.BsonType;
 import org.bson.BsonValue;
+import org.bson.BsonWriter;
 import org.bson.types.Decimal128;
 
 import ca.uhn.fhir.parser.DataFormatException;
@@ -101,15 +103,12 @@ public class BsonFhirStructure implements JsonLikeStructure {
 	public void load () {
         if (!readDone) {
 	        readDone = true;
-	        BsonType bsonType = bsonReader.readBsonType();
-	        if (bsonType == BsonType.DOCUMENT) {
-	    		this.rootType = ROOT_TYPE.OBJECT;
-	        	nativeRoot = getObject();
-	    		System.out.println("Loaded Resource:\n"+nativeRoot.toString());
-
-	        } else {
-	    		throw new DataFormatException("Content must be a valid BSON Document.");
-	        }
+	        BsonDocumentWriter docWriter = new BsonDocumentWriter(new BsonDocument());
+	        docWriter.pipe(bsonReader);
+	        docWriter.flush();
+	        this.nativeRoot = docWriter.getDocument();
+    		this.rootType = ROOT_TYPE.OBJECT;
+	        docWriter.close();
         }
 	}
 
@@ -122,76 +121,6 @@ public class BsonFhirStructure implements JsonLikeStructure {
 	public void load(Reader theReader, boolean allowArray) throws DataFormatException {
 		// Reader is not applicable to BSON		
 	}
-
-    protected BsonDocument getObject () {
-    	BsonDocument result = new BsonDocument();
-        bsonReader.readStartDocument();
-        while (bsonReader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-            String fieldName = bsonReader.readName();
-            BsonValue value = getValue();
-            result.put(fieldName, value);
-        }
-        bsonReader.readEndDocument();
-        return result;
-    }
-    
-    protected BsonArray getArray () {
-    	BsonArray result = new BsonArray();
-        bsonReader.readStartArray();
-        while (bsonReader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-            BsonValue value = getValue();
-            result.add(value);
-        }
-        bsonReader.readEndArray();
-        return result;
-    }
-    
-    protected BsonValue getValue () {
-        BsonType bsonType = bsonReader.getCurrentBsonType();
-
-        switch (bsonType) {
-	        case NULL: {
-	            bsonReader.readNull();
-	            return BsonNull.VALUE;
-	        }
-	        case BOOLEAN: {
-	        	boolean value = bsonReader.readBoolean();
-	        	return BsonBoolean.valueOf(value);
-	        }
-	        case ARRAY: {
-	            return getArray();
-	        }
-	        case DOCUMENT: {
-	            return getObject();
-	        }
-	        case INT32: {
-	        	int value = bsonReader.readInt32();
-	        	return new BsonInt32(value);
-	        }
-	        case INT64: {
-	        	long value = bsonReader.readInt64();
-	        	return new BsonInt64(value);
-	        }
-	        case DOUBLE: {
-	        	double value = bsonReader.readDouble();
-	        	return new BsonDouble(value);
-	        }
-	        case DECIMAL128: {
-	        	Decimal128 value = bsonReader.readDecimal128();
-	        	return new BsonDecimal128(value);
-	        }
-	        case STRING: {
-	        	String value = bsonReader.readString();
-	        	return new BsonString(value);
-	        }
-	        default: {
-	        	String value = "[unsupported type "+bsonType.toString()+"]";
-	        	bsonReader.skipValue();
-	        	return new BsonString(value);
-	        }
-        }
-    }
-	
 
 	@Override
 	public JsonLikeObject getRootObject() throws DataFormatException {
@@ -206,12 +135,6 @@ public class BsonFhirStructure implements JsonLikeStructure {
 
 	@Override
 	public JsonLikeArray getRootArray() throws DataFormatException {
-//		if (rootType == ROOT_TYPE.ARRAY) {
-//			if (null == jsonLikeRoot) {
-//				jsonLikeRoot = new BsonJsonArray((JsonArray)nativeRoot);
-//			}
-//			return jsonLikeRoot.getAsArray();
-//		}
 		throw new DataFormatException("Root BSON Document cannot be an array.");
 	}
 
