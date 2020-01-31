@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.LinkedList;
-import java.util.List;
 
 public class JacksonWriter extends JsonLikeWriter {
 
@@ -21,7 +19,6 @@ public class JacksonWriter extends JsonLikeWriter {
     }
 
     private BlockType blockType = BlockType.NONE;
-    private final List<BlockType> blocks = new LinkedList<>();
 
     public JacksonWriter(Writer writer) {
         try {
@@ -39,7 +36,6 @@ public class JacksonWriter extends JsonLikeWriter {
     @Override
     public JsonLikeWriter init() {
         blockType = BlockType.NONE;
-        blocks.clear();
         return this;
     }
 
@@ -55,7 +51,6 @@ public class JacksonWriter extends JsonLikeWriter {
 
     @Override
     public JsonLikeWriter beginObject() throws IOException {
-        blocks.add(blockType);
         blockType = BlockType.OBJECT;
         jsonGenerator.writeStartObject();
         return this;
@@ -63,7 +58,6 @@ public class JacksonWriter extends JsonLikeWriter {
 
     @Override
     public JsonLikeWriter beginArray() throws IOException {
-        blocks.add(blockType);
         blockType = BlockType.ARRAY;
         jsonGenerator.writeStartArray();
         return this;
@@ -71,7 +65,6 @@ public class JacksonWriter extends JsonLikeWriter {
 
     @Override
     public JsonLikeWriter beginObject(String name) throws IOException {
-        blocks.add(blockType);
         blockType = BlockType.OBJECT;
         jsonGenerator.writeObjectFieldStart(name);
         return this;
@@ -79,7 +72,6 @@ public class JacksonWriter extends JsonLikeWriter {
 
     @Override
     public JsonLikeWriter beginArray(String name) throws IOException {
-        blocks.add(blockType);
         blockType = BlockType.ARRAY;
         jsonGenerator.writeArrayFieldStart(name);
         return this;
@@ -188,7 +180,6 @@ public class JacksonWriter extends JsonLikeWriter {
         } else {
             jsonGenerator.writeEndObject();
         }
-        blockType = blocks.remove(blocks.size() - 1);
 
         if (blockType == BlockType.NONE) {
             jsonGenerator.close();
@@ -204,7 +195,6 @@ public class JacksonWriter extends JsonLikeWriter {
         } else {
             jsonGenerator.writeEndArray();
         }
-        blockType = blocks.remove(blocks.size() - 1);
 
         if (blockType == BlockType.NONE) {
             jsonGenerator.close();
@@ -220,7 +210,6 @@ public class JacksonWriter extends JsonLikeWriter {
         } else {
             jsonGenerator.writeEndObject();
         }
-        blockType = blocks.remove(blocks.size() - 1);
 
         if (blockType == BlockType.NONE) {
             jsonGenerator.close();
