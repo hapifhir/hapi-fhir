@@ -61,6 +61,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	protected void init420() { // 20191015 - present
 		Builder version = forVersion(VersionEnum.V4_2_0);
+
+		// Eliminate circular dependency.
+		version.onTable("HFJ_RESOURCE").dropColumn("20200130.1", "FORCED_ID_PID");
+		version.onTable("HFJ_RES_VER").dropColumn("20200130.2", "FORCED_ID_PID");
+		version.onTable("HFJ_RES_VER").addForeignKey("20200130.3", "FK_RESOURCE_HISTORY_RESOURCE").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 	}
 
 	protected void init410() { // 20190815 - 20191014
