@@ -66,6 +66,7 @@ import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -4294,14 +4295,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		{ // In the box
 			double bigEnoughDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN * 2;
-			String url = "/Location/" +
-				Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + ":" + CoordCalculatorTest.LONGITUDE_CHIN +
+			String url = "/Location?" +
+				Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + URLEncoder.encode(":") + CoordCalculatorTest.LONGITUDE_CHIN +
 				"&" +
-				Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + "|http://unitsofmeasure.org|km");
+				Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
 
 			Bundle actual = ourClient
 				.search()
-				.byUrl(url)
+				.byUrl(ourServerBase + "/" + url)
 				.encodedJson()
 				.prettyPrint()
 				.returnBundle(Bundle.class)
@@ -4313,6 +4314,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 		{ // Outside the box
 			double tooSmallDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN / 2;
+			// FIXME KHS add this part
 
 //			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
 //				"Location?" +
