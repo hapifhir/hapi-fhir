@@ -4308,7 +4308,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.returnBundle(Bundle.class)
 				.execute();
 			//@formatter:on
-
+// FIXME KHS hmm this test should be passing now...?
 			assertEquals(1, actual.getEntry().size());
 			assertEquals(locId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 		}

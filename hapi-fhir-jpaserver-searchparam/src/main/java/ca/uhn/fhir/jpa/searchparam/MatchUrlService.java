@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
+import ca.uhn.fhir.rest.param.QuantityOrListParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -117,7 +118,12 @@ public class MatchUrlService {
 				paramMap.add(nextParamName, param);
 			} else if (Location.SP_NEAR_DISTANCE.equals(nextParamName)) {
 				QuantityAndListParam nearDistanceAndListParam = (QuantityAndListParam) ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.QUANTITY, nextParamName, paramList);
-				paramMap.setNearDistanceParam(nearDistanceAndListParam);
+				// FIXME KHS this needs to be set elsewhere
+				nearDistanceAndListParam.getValuesAsQueryTokens().stream()
+					.map(QuantityOrListParam::getValuesAsQueryTokens)
+					.flatMap(List::stream)
+					.findFirst()
+					.ifPresent(paramMap::setNearDistanceParam);
 			} else if (nextParamName.startsWith("_")) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {

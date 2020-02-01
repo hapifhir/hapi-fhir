@@ -53,6 +53,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -65,6 +66,7 @@ import org.apache.commons.lang3.Validate;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
+import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -160,6 +162,8 @@ public class SearchBuilder implements ISearchBuilder {
 		// Remove any empty parameters
 		theParams.clean();
 
+		setLocationDistance(theParams);
+
 		/*
 		 * Check if there is a unique key associated with the set
 		 * of parameters passed in
@@ -179,6 +183,17 @@ public class SearchBuilder implements ISearchBuilder {
 			searchForIdsWithAndOr(myResourceName, nextParamName, andOrParams, theRequest);
 		}
 
+	}
+
+	private void setLocationDistance(SearchParameterMap theParams) {
+		if (myResourceType == Location.class && theParams.containsKey(Location.SP_NEAR_DISTANCE)) {
+			List<List<IQueryParameterType>> paramList = theParams.get(Location.SP_NEAR_DISTANCE);
+			paramList.stream()
+				.flatMap(List::stream)
+				.findFirst()
+				.map(QuantityParam.class::cast)
+				.ifPresent(theParams::setNearDistanceParam);
+		}
 	}
 
 
