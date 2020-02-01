@@ -77,7 +77,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 			while(true) {
 				MyRowCallbackHandler rch = new MyRowCallbackHandler();
 				getTxTemplate().execute(t -> {
-					JdbcTemplate jdbcTemplate = newJdbcTemnplate();
+					JdbcTemplate jdbcTemplate = newJdbcTemplate();
 					jdbcTemplate.setMaxRows(100000);
 					String sql = "SELECT * FROM " + getTableName() + " WHERE " + getColumnName() + " IS NULL";
 					logInfo(ourLog, "Finding up to {} rows in {} that requires hashes", myBatchSize, getTableName());
@@ -184,7 +184,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 					arguments.add((Number) nextRow.get("SP_ID"));
 
 					// Apply update SQL
-					newJdbcTemnplate().update(sqlBuilder.toString(), arguments.toArray());
+					newJdbcTemplate().update(sqlBuilder.toString(), arguments.toArray());
 
 				}
 

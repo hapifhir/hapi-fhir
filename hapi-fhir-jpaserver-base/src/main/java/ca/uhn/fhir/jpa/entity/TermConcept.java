@@ -97,7 +97,7 @@ public class TermConcept implements Serializable {
 	@Column(name = "PARENT_PIDS", nullable = true)
 	private String myParentPids;
 	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myChild")
-	private Collection<TermConceptParentChildLink> myParents;
+	private List<TermConceptParentChildLink> myParents;
 	@Column(name = "CODE_SEQUENCE", nullable = true)
 	private Integer mySequence;
 
@@ -269,7 +269,7 @@ public class TermConcept implements Serializable {
 		return myParentPids;
 	}
 
-	public Collection<TermConceptParentChildLink> getParents() {
+	public List<TermConceptParentChildLink> getParents() {
 		if (myParents == null) {
 			myParents = new ArrayList<>();
 		}

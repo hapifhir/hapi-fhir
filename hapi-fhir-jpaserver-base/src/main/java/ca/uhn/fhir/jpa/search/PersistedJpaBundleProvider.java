@@ -26,9 +26,10 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
@@ -60,20 +61,22 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaBundleProvider.class);
 	private final RequestDetails myRequest;
 	private FhirContext myContext;
-	private IDao myDao;
+	private final IDao myDao;
 	private EntityManager myEntityManager;
 	private PlatformTransactionManager myPlatformTransactionManager;
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	private ISearchCacheSvc mySearchCacheSvc;
 	private Search mySearchEntity;
-	private String myUuid;
+	private final String myUuid;
 	private boolean myCacheHit;
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	private final SearchBuilderFactory mySearchBuilderFactory;
 
-	public PersistedJpaBundleProvider(RequestDetails theRequest, String theSearchUuid, IDao theDao) {
+	public PersistedJpaBundleProvider(RequestDetails theRequest, String theSearchUuid, IDao theDao, SearchBuilderFactory theSearchBuilderFactory) {
 		myRequest = theRequest;
 		myUuid = theSearchUuid;
 		myDao = theDao;
+		mySearchBuilderFactory = theSearchBuilderFactory;
 	}
 
 	/**
@@ -170,11 +173,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			// No resources to fetch (e.g. we did a _summary=count search)
 			return Collections.emptyList();
 		}
-		final ISearchBuilder sb = myDao.newSearchBuilder();
-
 		String resourceName = mySearchEntity.getResourceType();
 		Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(resourceName).getImplementingClass();
-		sb.setType(resourceType, resourceName);
+		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(myDao, resourceName, resourceType);
 
 		final List<ResourcePersistentId> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest);
 

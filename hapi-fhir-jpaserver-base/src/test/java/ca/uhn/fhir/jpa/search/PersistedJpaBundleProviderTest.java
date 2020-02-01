@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.dao.IDao;
+import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.junit.Before;
@@ -15,13 +16,15 @@ import static org.mockito.Mockito.verifyNoInteractions;
 public class PersistedJpaBundleProviderTest {
 	private PersistedJpaBundleProvider myPersistedJpaBundleProvider;
 	private IDao myDao;
+	private SearchBuilderFactory mySearchBuilderFactory;
 
 	@Before
 	public void init() {
 		RequestDetails request = mock(RequestDetails.class);
 		String searchUuid = "this is not a hat";
 		myDao = mock(IDao.class);
-		myPersistedJpaBundleProvider = new PersistedJpaBundleProvider(request, searchUuid, myDao);
+		mySearchBuilderFactory = mock(SearchBuilderFactory.class);
+		myPersistedJpaBundleProvider = new PersistedJpaBundleProvider(request, searchUuid, myDao, mySearchBuilderFactory);
 	}
 
 	@Test
@@ -31,5 +34,6 @@ public class PersistedJpaBundleProviderTest {
 		myPersistedJpaBundleProvider.setSearchEntity(searchEntity);
 		myPersistedJpaBundleProvider.doSearchOrEverything(0, 1);
 		verifyNoInteractions(myDao);
+		verifyNoInteractions(mySearchBuilderFactory);
 	}
 }

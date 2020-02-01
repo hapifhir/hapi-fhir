@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 
 /*
  * #%L
@@ -28,7 +30,7 @@ import java.util.*;
 
 public interface ISearchParamExtractor {
 
-	SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource);
+//	SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource);
 
 	SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource);
 
@@ -39,6 +41,8 @@ public interface ISearchParamExtractor {
 	SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource);
 
 	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource);
+
+	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource);
 
 	SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource);
 

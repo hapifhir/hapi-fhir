@@ -51,7 +51,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 
 	private IFhirResourceDao<? extends IBaseResource> getDao(String theResourceType) {
 		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theResourceType);
-		return getDao(typeDef.getImplementingClass());
+		return myDaoRegistry.getResourceDaoOrNull(typeDef.getImplementingClass());
 	}
 
 	@Transactional(propagation = Propagation.NEVER)
@@ -59,7 +59,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 	public void listResources(Object theAppInfo, String theType, List<Argument> theSearchParams, List<IBaseResource> theMatches) throws FHIRException {
 
 		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theType);
-		IFhirResourceDao<? extends IBaseResource> dao = getDao(typeDef.getImplementingClass());
+		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDaoOrNull(typeDef.getImplementingClass());
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(MAX_SEARCH_SIZE);

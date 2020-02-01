@@ -81,6 +81,21 @@ public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
 
 	}
 
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		DropForeignKeyTask otherObject = (DropForeignKeyTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(myConstraintName, otherObject.myConstraintName);
+		theBuilder.append(myParentTableName, otherObject.myParentTableName);
+	}
+
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myConstraintName);
+		theBuilder.append(myParentTableName);
+	}
+
 	@Nonnull
 	static List<String> generateSql(String theTableName, String theConstraintName, DriverTypeEnum theDriverType) {
 		List<String> sqls = new ArrayList<>();
@@ -102,29 +117,5 @@ public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
 				throw new IllegalStateException();
 		}
 		return sqls;
-	}
-
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		DropForeignKeyTask that = (DropForeignKeyTask) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myConstraintName, that.myConstraintName)
-			.append(myParentTableName, that.myParentTableName)
-			.isEquals();
-	}
-
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myConstraintName)
-			.append(myParentTableName)
-			.toHashCode();
 	}
 }

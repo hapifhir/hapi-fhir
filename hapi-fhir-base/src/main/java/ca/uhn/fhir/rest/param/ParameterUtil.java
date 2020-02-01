@@ -98,6 +98,12 @@ public class ParameterUtil {
 				binder = new QueryParameterAndBinder(HasAndListParam.class,
 					Collections.<Class<? extends IQueryParameterType>>emptyList());
 				break;
+			case SPECIAL:
+				binder = new QueryParameterAndBinder(SpecialAndListParam.class,
+					Collections.emptyList());
+				break;
+			default:
+				throw new IllegalArgumentException("Parameter '" + theUnqualifiedParamName + "' has type " + paramType + " which is currently not supported.");
 		}
 
 		// FIXME null access
