@@ -188,6 +188,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private void setLocationDistance(SearchParameterMap theParams) {
 		if (myResourceType == Location.class && theParams.containsKey(Location.SP_NEAR_DISTANCE)) {
 			List<List<IQueryParameterType>> paramList = theParams.get(Location.SP_NEAR_DISTANCE);
+			// Set nearDistanceParam on the SearchParameterMap so it's available to the near predicate
 			paramList.stream()
 				.flatMap(List::stream)
 				.findFirst()

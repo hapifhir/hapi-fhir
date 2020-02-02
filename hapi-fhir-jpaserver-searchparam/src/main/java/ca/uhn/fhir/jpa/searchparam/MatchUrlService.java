@@ -118,7 +118,6 @@ public class MatchUrlService {
 				paramMap.add(nextParamName, param);
 			} else if (Location.SP_NEAR_DISTANCE.equals(nextParamName)) {
 				QuantityAndListParam nearDistanceAndListParam = (QuantityAndListParam) ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.QUANTITY, nextParamName, paramList);
-				// FIXME KHS this needs to be set elsewhere
 				nearDistanceAndListParam.getValuesAsQueryTokens().stream()
 					.map(QuantityOrListParam::getValuesAsQueryTokens)
 					.flatMap(List::stream)
