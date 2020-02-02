@@ -4300,6 +4300,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				"&" +
 				Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
 
+			myCaptureQueriesListener.clear();
 			Bundle actual = ourClient
 				.search()
 				.byUrl(ourServerBase + "/" + url)
@@ -4307,23 +4308,29 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.prettyPrint()
 				.returnBundle(Bundle.class)
 				.execute();
-			//@formatter:on
-// FIXME KHS hmm this test should be passing now...?
+			myCaptureQueriesListener.logSelectQueries();
+
 			assertEquals(1, actual.getEntry().size());
 			assertEquals(locId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 		}
 		{ // Outside the box
 			double tooSmallDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN / 2;
-			// FIXME KHS add this part
+			String url = "/Location?" +
+				Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + URLEncoder.encode(":") + CoordCalculatorTest.LONGITUDE_CHIN +
+				"&" +
+				Location.SP_NEAR_DISTANCE + "=" + tooSmallDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
 
-//			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-//				"Location?" +
-//					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + ":" + CoordCalculatorTest.LONGITUDE_CHIN +
-//					"&" +
-//					Location.SP_NEAR_DISTANCE + "=" + tooSmallDistance + "|http://unitsofmeasure.org|km", myFhirCtx.getResourceDefinition("Location"));
+			myCaptureQueriesListener.clear();
+			Bundle actual = ourClient
+				.search()
+				.byUrl(ourServerBase + "/" + url)
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+			myCaptureQueriesListener.logSelectQueries();
 
-//			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-//			assertThat(ids.size(), is(0));
+			assertEquals(0, actual.getEntry().size());
 		}
 
 	}

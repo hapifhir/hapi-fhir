@@ -193,6 +193,8 @@ public class SearchBuilder implements ISearchBuilder {
 				.findFirst()
 				.map(QuantityParam.class::cast)
 				.ifPresent(theParams::setNearDistanceParam);
+			// Need to remove near-distance or it we'll get a hashcode predicate for it
+			theParams.remove(Location.SP_NEAR_DISTANCE);
 		}
 	}
 
