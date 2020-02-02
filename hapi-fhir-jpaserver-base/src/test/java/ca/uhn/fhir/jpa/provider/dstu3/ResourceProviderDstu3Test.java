@@ -4300,7 +4300,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				"&" +
 				Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
 
-//			myCaptureQueriesListener.clear();
 			Bundle actual = ourClient
 				.search()
 				.byUrl(ourServerBase + "/" + url)
@@ -4308,7 +4307,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.prettyPrint()
 				.returnBundle(Bundle.class)
 				.execute();
-//			myCaptureQueriesListener.logSelectQueries();
 
 			assertEquals(1, actual.getEntry().size());
 			assertEquals(locId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
