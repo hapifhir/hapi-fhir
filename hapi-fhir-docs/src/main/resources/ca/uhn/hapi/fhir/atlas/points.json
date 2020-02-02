@@ -226,17 +226,6 @@
 			"added": "2019-09-29"
 		},
 		{
-			"title": "ResMed",
-			"description": "Digital Health Technologies: The largest tele-monitored device fleet in the world. Focus on various respiratory diseases from Sleep Disordered breathing (sleep apnea) to COPD.",
-			"link": null,
-			"contactName": null,
-			"contactEmail": null,
-			"city": "San Diego, California",
-			"lat": 32.8246,
-			"lon": -117.1971,
-			"added": "2019-09-29"
-		},
-		{
 			"title": "Highmark",
 			"description": "FHIR-based Provider Directory Message Model: Using R4 FHIR we created a standard provider directory message model that captures all practitioners, practitioner roles, vendors, vendor roles, locations, healthcare services, affiliated directory networks and tiered insurance plans. We supply this FHIR-based extract to a well-known transparency vendor whom processes our FHIR message model extract and loads the data to be consumed and accessed on a web-based provider search application. Members can then access this provider search app to search for practitioners whom participate in their products and networks.",
 			"link": "https://highmark.sapphirecareselect.com",
