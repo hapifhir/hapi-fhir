@@ -264,8 +264,6 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 	@Test
 	public void testTriggerUsingOrSeparatedList_MultipleStrings() throws Exception {
-		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(13, 22, 100));
-
 		String payload = "application/fhir+json";
 		IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
 
@@ -299,6 +297,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 		mySubscriptionTriggeringSvc.runDeliveryPass();
+		assertEquals(0, mySubscriptionTriggeringSvc.getActiveJobCount());
 
 		assertEquals(0, ourCreatedPatients.size());
 		assertEquals(ourUpdatedPatients.stream().map(t->t.getId()).collect(Collectors.joining(", ")), 3, ourUpdatedPatients.size());
