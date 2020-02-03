@@ -55,7 +55,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	 */
 	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT = 500;
 	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS = 20000;
-	public static final long DEFAULT_CUTOFF_SLACK = 10 * DateUtils.MILLIS_PER_SECOND;
+	public static final long SEARCH_CLEANUP_JOB_INTERVAL_MILLIS = 10 * DateUtils.MILLIS_PER_SECOND;
 	private static final Logger ourLog = LoggerFactory.getLogger(DatabaseSearchCacheSvcImpl.class);
 	private static int ourMaximumResultsToDeleteInOneStatement = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT;
 	private static int ourMaximumResultsToDeleteInOnePass = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS;
@@ -65,7 +65,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	 * is being reused (because a new client request came in with the same params) right before
 	 * the result is to be deleted
 	 */
-	private long myCutoffSlack = DEFAULT_CUTOFF_SLACK;
+	private long myCutoffSlack = SEARCH_CLEANUP_JOB_INTERVAL_MILLIS;
 
 	@Autowired
 	private ISearchDao mySearchDao;
@@ -163,7 +163,8 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 			ourLog.info("Searching for searches which are before {} - now is {}", new InstantType(cutoff), new InstantType(new Date(now())));
 		}
 
-		ourLog.debug("Searching for searches which are before {}", cutoff);
+		// FIXME KHS
+		ourLog.info("Searching for searches which are before {}", cutoff);
 
 		TransactionTemplate tt = new TransactionTemplate(myTxManager);
 		final Slice<Long> toDelete = tt.execute(theStatus ->
@@ -172,7 +173,9 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		assert toDelete != null;
 
 		for (final Long nextSearchToDelete : toDelete) {
-			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
+			// FIXME KHS
+			ourLog.info("Deleting search with PID {}", nextSearchToDelete);
+			// FIXME KHS do this outside of loop.  Make a "deleteWhereCreatedBefore"
 			tt.execute(t -> {
 				mySearchDao.updateDeleted(nextSearchToDelete, true);
 				return null;
@@ -186,9 +189,12 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 
 		int count = toDelete.getContent().size();
 		if (count > 0) {
-			if (ourLog.isDebugEnabled() || "true".equalsIgnoreCase(System.getProperty("test"))) {
+			// FIXME KHS
+//			if (ourLog.isDebugEnabled() || "true".equalsIgnoreCase(System.getProperty("test"))) {
+			if ( "true".equalsIgnoreCase(System.getProperty("test"))) {
 				Long total = tt.execute(t -> mySearchDao.count());
-				ourLog.debug("Deleted {} searches, {} remaining", count, total);
+				// FIXME KHS
+				ourLog.info("Deleted {} searches, {} remaining", count, total);
 			}
 		}
 	}
