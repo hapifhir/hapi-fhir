@@ -65,6 +65,7 @@ import org.apache.commons.lang3.Validate;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
+import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -160,6 +161,10 @@ public class SearchBuilder implements ISearchBuilder {
 		// Remove any empty parameters
 		theParams.clean();
 
+		if (myResourceType == Location.class) {
+			theParams.setLocationDistance();
+		}
+
 		/*
 		 * Check if there is a unique key associated with the set
 		 * of parameters passed in
@@ -180,7 +185,6 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 	}
-
 
 	@Override
 	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest) {
