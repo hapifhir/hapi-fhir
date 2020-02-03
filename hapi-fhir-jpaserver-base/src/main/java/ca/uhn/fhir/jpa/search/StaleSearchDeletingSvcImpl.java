@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 
-import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.DEFAULT_CUTOFF_SLACK;
+import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLEANUP_JOB_INTERVAL_MILLIS;
 
 /**
  * Deletes old searches
@@ -62,7 +62,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleClusteredJob(DEFAULT_CUTOFF_SLACK, jobDetail);
+		mySchedulerService.scheduleClusteredJob(SEARCH_CLEANUP_JOB_INTERVAL_MILLIS, jobDetail);
 	}
 
 	public static class Job implements HapiJob {
