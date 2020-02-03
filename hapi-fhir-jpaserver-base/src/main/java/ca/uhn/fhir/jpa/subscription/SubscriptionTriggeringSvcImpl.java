@@ -386,7 +386,9 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(60 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+		// Currently jobs ae kept in a local ArrayList so this should be a local job, and
+		// it can fire frequently without adding load
+		mySchedulerService.scheduleLocalJob(5 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
 	public static class Job implements HapiJob {
