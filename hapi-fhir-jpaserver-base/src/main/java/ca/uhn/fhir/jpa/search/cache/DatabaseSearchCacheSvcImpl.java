@@ -167,7 +167,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 
 		TransactionTemplate tt = new TransactionTemplate(myTxManager);
 		final Slice<Long> toDelete = tt.execute(theStatus ->
-			mySearchDao.findWhereLastReturnedBefore(cutoff, new Date(), PageRequest.of(0, 2000))
+			mySearchDao.findWhereCreatedBefore(cutoff, new Date(), PageRequest.of(0, 2000))
 		);
 		assert toDelete != null;
 

@@ -64,6 +64,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName searchTable = version.onTable("HFJ_SEARCH");
 		searchTable.dropIndex("20200203.1", "IDX_SEARCH_LASTRETURNED");
 		searchTable.dropColumn("20200203.2", "SEARCH_LAST_RETURNED");
+		searchTable.addIndex("20200203.3", "IDX_SEARCH_CREATED").unique(false).withColumns("CREATED");
 	}
 
 	protected void init410() { // 20190815 - 20191014

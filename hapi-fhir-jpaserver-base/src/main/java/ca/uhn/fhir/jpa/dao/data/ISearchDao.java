@@ -38,7 +38,7 @@ public interface ISearchDao extends JpaRepository<Search, Long> {
 	Optional<Search> findByUuidAndFetchIncludes(@Param("uuid") String theUuid);
 
 	@Query("SELECT s.myId FROM Search s WHERE (s.myCreated < :cutoff) AND (s.myExpiryOrNull IS NULL OR s.myExpiryOrNull < :now)")
-	Slice<Long> findWhereLastReturnedBefore(@Param("cutoff") Date theCutoff, @Param("now") Date theNow, Pageable thePage);
+	Slice<Long> findWhereCreatedBefore(@Param("cutoff") Date theCutoff, @Param("now") Date theNow, Pageable thePage);
 
 	@Query("SELECT s FROM Search s WHERE s.myResourceType = :type AND mySearchQueryStringHash = :hash AND (s.myCreated > :cutoff) AND s.myDeleted = false AND s.myStatus <> 'FAILED'")
 	Collection<Search> findWithCutoffOrExpiry(@Param("type") String theResourceType, @Param("hash") int theHashCode, @Param("cutoff") Date theCreatedCutoff);

@@ -42,7 +42,8 @@ import static org.apache.commons.lang3.StringUtils.left;
 @Table(name = "HFJ_SEARCH", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_SEARCH_UUID", columnNames = "SEARCH_UUID")
 }, indexes = {
-	@Index(name = "IDX_SEARCH_RESTYPE_HASHS", columnList = "RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED")
+	@Index(name = "IDX_SEARCH_RESTYPE_HASHS", columnList = "RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED"),
+	@Index(name = "IDX_SEARCH_CREATED", columnList = "CREATED")
 })
 public class Search implements ICachedSearchDetails, Serializable {
 
