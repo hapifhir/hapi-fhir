@@ -9,12 +9,10 @@ import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
@@ -25,7 +23,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.AopTestUtils;
 
 import java.util.Date;
@@ -50,7 +47,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 	public void after() throws Exception {
 		super.after();
 		DatabaseSearchCacheSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(mySearchCacheSvc);
-		staleSearchDeletingSvc.setCutoffSlackForUnitTest(DatabaseSearchCacheSvcImpl.DEFAULT_CUTOFF_SLACK);
+		staleSearchDeletingSvc.setCutoffSlackForUnitTest(DatabaseSearchCacheSvcImpl.SEARCH_CLEANUP_JOB_INTERVAL_MILLIS);
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteForUnitTest(DatabaseSearchCacheSvcImpl.DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT);
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(DatabaseSearchCacheSvcImpl.DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS);
 	}
@@ -121,7 +118,6 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 			search.setCreated(DateUtils.addDays(new Date(), -10000));
 			search.setSearchType(SearchTypeEnum.SEARCH);
 			search.setResourceType("Patient");
-			search.setSearchLastReturned(DateUtils.addDays(new Date(), -10000));
 			search = mySearchEntityDao.save(search);
 
 			for (int i = 0; i < 15; i++) {
@@ -163,7 +159,6 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 			search.setCreated(DateUtils.addDays(new Date(), -10000));
 			search.setSearchType(SearchTypeEnum.SEARCH);
 			search.setResourceType("Patient");
-			search.setSearchLastReturned(DateUtils.addDays(new Date(), -10000));
 			mySearchEntityDao.save(search);
 		});
 
@@ -190,7 +185,6 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 			search.setCreated(DateUtils.addDays(new Date(), -10000));
 			search.setSearchType(SearchTypeEnum.SEARCH);
 			search.setResourceType("Patient");
-			search.setSearchLastReturned(DateUtils.addDays(new Date(), -10000));
 			search = mySearchEntityDao.save(search);
 
 		});
