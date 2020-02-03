@@ -133,7 +133,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 				assertNotNull(search3);
 				Search search2 = mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid2).orElseThrow(()->new InternalErrorException("Search doesn't exist"));
 				assertNotNull(search2);
-				search3timestamp.set(search2.getSearchLastReturned().getTime());
+				search3timestamp.set(search2.getCreated().getTime());
 			}
 		});
 

@@ -14,27 +14,15 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
-import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -46,29 +34,16 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
+import org.hl7.fhir.r4.model.Bundle.*;
 import org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
@@ -77,11 +52,7 @@ import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
@@ -96,28 +67,14 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
@@ -4115,11 +4072,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.count(5)
 			.returnBundle(Bundle.class)
 			.execute();
-		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
 		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new InternalErrorException("")));
-		Date lastReturned1 = search1.getSearchLastReturned();
+		Date created1 = search1.getCreated();
 
 		Bundle result2 = ourClient
 			.search()
@@ -4128,13 +4084,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.count(5)
 			.returnBundle(Bundle.class)
 			.execute();
-		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
 		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(() -> new InternalErrorException("")));
-		Date lastReturned2 = search2.getSearchLastReturned();
+		Date created2 = search2.getCreated();
 
-		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
+		assertEquals(created2.getTime(), created1.getTime());
 
 		Thread.sleep(1500);
 
@@ -4145,7 +4100,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.count(5)
 			.returnBundle(Bundle.class)
 			.execute();
-		mySearchCacheSvc.flushLastUpdated();
 
 		String uuid3 = toSearchUuidFromLinkNext(result3);
 
@@ -4170,11 +4124,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.forResource("Organization")
 			.returnBundle(Bundle.class)
 			.execute();
-		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
 		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new InternalErrorException("")));
-		Date lastReturned1 = search1.getSearchLastReturned();
+		Date created1 = search1.getCreated();
 
 		sleepOneClick();
 
@@ -4183,13 +4136,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.forResource("Organization")
 			.returnBundle(Bundle.class)
 			.execute();
-		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
 		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(() -> new InternalErrorException("")));
-		Date lastReturned2 = search2.getSearchLastReturned();
+		Date created2 = search2.getCreated();
 
-		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
+		assertEquals(created2.getTime(), created1.getTime());
 
 		assertEquals(uuid1, uuid2);
 	}

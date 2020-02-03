@@ -406,8 +406,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
 
-			mySearchCacheSvc.updateSearchLastReturned(searchToUse, new Date());
-
 			PersistedJpaBundleProvider retVal = new PersistedJpaBundleProvider(theRequestDetails, searchToUse.getUuid(), theCallingDao, mySearchBuilderFactory);
 			retVal.setCacheHit(true);
 			populateBundleProvider(retVal);
@@ -1142,7 +1140,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		theSearch.setDeleted(false);
 		theSearch.setUuid(theSearchUuid);
 		theSearch.setCreated(new Date());
-		theSearch.setSearchLastReturned(new Date());
 		theSearch.setTotalCount(null);
 		theSearch.setNumFound(0);
 		theSearch.setPreferredPageSize(theParams.getCount());

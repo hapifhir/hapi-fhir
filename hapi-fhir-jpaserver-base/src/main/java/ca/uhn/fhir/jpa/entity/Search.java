@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.*;
 
@@ -43,7 +42,6 @@ import static org.apache.commons.lang3.StringUtils.left;
 @Table(name = "HFJ_SEARCH", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_SEARCH_UUID", columnNames = "SEARCH_UUID")
 }, indexes = {
-	@Index(name = "IDX_SEARCH_LASTRETURNED", columnList = "SEARCH_LAST_RETURNED"),
 	@Index(name = "IDX_SEARCH_RESTYPE_HASHS", columnList = "RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED")
 })
 public class Search implements ICachedSearchDetails, Serializable {
@@ -90,11 +88,6 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private Long myResourceId;
 	@Column(name = "RESOURCE_TYPE", length = 200, nullable = true)
 	private String myResourceType;
-	@NotNull
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "SEARCH_LAST_RETURNED", nullable = false, updatable = false)
-	@OptimisticLock(excluded = true)
-	private Date mySearchLastReturned;
 	@Lob()
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "SEARCH_QUERY_STRING", nullable = true, updatable = false, length = MAX_SEARCH_QUERY_STRING)
@@ -259,14 +252,6 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
-	}
-
-	public Date getSearchLastReturned() {
-		return mySearchLastReturned;
-	}
-
-	public void setSearchLastReturned(Date theDate) {
-		mySearchLastReturned = theDate;
 	}
 
 	public String getSearchQueryString() {

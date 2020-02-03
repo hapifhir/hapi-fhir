@@ -47,7 +47,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public class DatabaseSearchCacheSvcImpl extends BaseSearchCacheSvcImpl {
+public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	/*
 	 * Be careful increasing this number! We use the number of params here in a
 	 * DELETE FROM foo WHERE params IN (term,term,term...)
@@ -146,11 +146,6 @@ public class DatabaseSearchCacheSvcImpl extends BaseSearchCacheSvcImpl {
 
 	}
 
-	@Override
-	protected void flushLastUpdated(Long theSearchId, Date theLastUpdated) {
-		mySearchDao.updateSearchLastReturned(theSearchId, theLastUpdated);
-	}
-
 	@Transactional(Transactional.TxType.NEVER)
 	@Override
 	public void pollForStaleSearchesAndDeleteThem() {
@@ -160,7 +155,7 @@ public class DatabaseSearchCacheSvcImpl extends BaseSearchCacheSvcImpl {
 
 		long cutoffMillis = myDaoConfig.getExpireSearchResultsAfterMillis();
 		if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null) {
-			cutoffMillis = Math.max(cutoffMillis, myDaoConfig.getReuseCachedSearchResultsForMillis());
+			cutoffMillis = cutoffMillis + myDaoConfig.getReuseCachedSearchResultsForMillis();
 		}
 		final Date cutoff = new Date((now() - cutoffMillis) - myCutoffSlack);
 
@@ -223,7 +218,7 @@ public class DatabaseSearchCacheSvcImpl extends BaseSearchCacheSvcImpl {
 
 			// Only delete if we don't have results left in this search
 			if (resultPids.getNumberOfElements() < max) {
-				ourLog.debug("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), new InstantType(searchToDelete.getCreated()), new InstantType(searchToDelete.getSearchLastReturned()));
+				ourLog.debug("Deleting search {}/{} - Created[{}]", searchToDelete.getId(), searchToDelete.getUuid(), new InstantType(searchToDelete.getCreated()));
 				mySearchDao.deleteByPid(searchToDelete.getId());
 			} else {
 				ourLog.debug("Purged {} search results for deleted search {}/{}", resultPids.getSize(), searchToDelete.getId(), searchToDelete.getUuid());
