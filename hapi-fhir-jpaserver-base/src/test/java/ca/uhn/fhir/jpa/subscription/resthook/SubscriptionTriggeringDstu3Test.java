@@ -46,6 +46,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
@@ -252,6 +253,8 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
 		waitForSize(51, ourUpdatedObservations);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(0, ourCreatedPatients);
@@ -292,9 +295,11 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
 
 		assertEquals(0, ourCreatedPatients.size());
-		assertEquals(ourUpdatedPatients.toString(), 3, ourUpdatedPatients.size());
+		assertEquals(ourUpdatedPatients.stream().map(t->t.getId()).collect(Collectors.joining(", ")), 3, ourUpdatedPatients.size());
 
 	}
 
