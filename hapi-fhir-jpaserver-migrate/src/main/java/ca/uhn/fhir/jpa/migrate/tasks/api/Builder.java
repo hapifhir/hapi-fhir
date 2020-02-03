@@ -158,20 +158,22 @@ public class Builder {
 			return myTableName;
 		}
 
-		public void dropIndex(String theVersion, String theIndexName) {
-			dropIndexOptional(false, theVersion, theIndexName);
+		public BuilderCompleteTask dropIndex(String theVersion, String theIndexName) {
+			BaseTask task = dropIndexOptional(false, theVersion, theIndexName);
+			return new BuilderCompleteTask(task);
 		}
 
 		public void dropIndexStub(String theVersion, String theIndexName) {
 			dropIndexOptional(true, theVersion, theIndexName);
 		}
 
-		private void dropIndexOptional(boolean theDoNothing, String theVersion, String theIndexName) {
+		private DropIndexTask dropIndexOptional(boolean theDoNothing, String theVersion, String theIndexName) {
 			DropIndexTask task = new DropIndexTask(myRelease, theVersion);
 			task.setIndexName(theIndexName);
 			task.setTableName(myTableName);
 			task.setDoNothing(theDoNothing);
 			addTask(task);
+			return task;
 		}
 
 		public void renameIndex(String theVersion, String theOldIndexName, String theNewIndexName) {
@@ -286,11 +288,12 @@ public class Builder {
 					withColumnsOptional(true, theColumnNames);
 				}
 
-				public void withColumns(String... theColumnNames) {
-					withColumnsOptional(false, theColumnNames);
+				public BuilderCompleteTask withColumns(String... theColumnNames) {
+					BaseTask task = withColumnsOptional(false, theColumnNames);
+					return new BuilderCompleteTask(task);
 				}
 
-				private void withColumnsOptional(boolean theDoNothing, String... theColumnNames) {
+				private AddIndexTask withColumnsOptional(boolean theDoNothing, String... theColumnNames) {
 					AddIndexTask task = new AddIndexTask(myRelease, myVersion);
 					task.setTableName(myTableName);
 					task.setIndexName(myIndexName);
@@ -298,6 +301,7 @@ public class Builder {
 					task.setColumns(theColumnNames);
 					task.setDoNothing(theDoNothing);
 					addTask(task);
+					return task;
 				}
 			}
 		}
@@ -463,6 +467,12 @@ public class Builder {
 			myTask.setFailureAllowed(true);
 			return this;
 		}
+
+		public BuilderCompleteTask doNothing() {
+			myTask.setDoNothing(true);
+			return this;
+		}
+
 	}
 
 }
