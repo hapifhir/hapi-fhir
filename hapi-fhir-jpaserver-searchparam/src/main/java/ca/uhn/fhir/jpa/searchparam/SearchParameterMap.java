@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.dstu3.model.Location;
 
 import java.io.Serializable;
 import java.util.*;
@@ -502,6 +503,30 @@ public class SearchParameterMap implements Serializable {
 
 	public QuantityParam getNearDistanceParam() {
 		return myNearDistanceParam;
+	}
+
+	public void setLocationDistance() {
+		if (containsKey(Location.SP_NEAR_DISTANCE)) {
+			List<List<IQueryParameterType>> paramAndList = get(Location.SP_NEAR_DISTANCE);
+
+			if (paramAndList.isEmpty()) {
+				return;
+			}
+			if (paramAndList.size() > 1) {
+				throw new IllegalArgumentException("Only one " + ca.uhn.fhir.model.dstu2.resource.Location.SP_NEAR_DISTANCE + " parameter may be present");
+			}
+			List<IQueryParameterType> paramOrList =  paramAndList.get(0);
+			if (paramOrList.isEmpty()) {
+				return;
+			}
+			if (paramOrList.size() > 1) {
+				throw new IllegalArgumentException("Only one " + ca.uhn.fhir.model.dstu2.resource.Location.SP_NEAR_DISTANCE + " parameter may be present");
+			}
+			setNearDistanceParam((QuantityParam) paramOrList.get(0));
+
+			// Need to remove near-distance or it we'll get a hashcode predicate for it
+			remove(Location.SP_NEAR_DISTANCE);
+		}
 	}
 
 	public enum EverythingModeEnum {

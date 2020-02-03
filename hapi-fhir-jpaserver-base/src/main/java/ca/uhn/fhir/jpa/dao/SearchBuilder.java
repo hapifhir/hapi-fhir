@@ -53,7 +53,6 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -162,7 +161,9 @@ public class SearchBuilder implements ISearchBuilder {
 		// Remove any empty parameters
 		theParams.clean();
 
-		setLocationDistance(theParams);
+		if (myResourceType == Location.class) {
+			theParams.setLocationDistance();
+		}
 
 		/*
 		 * Check if there is a unique key associated with the set
@@ -184,21 +185,6 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 	}
-
-	private void setLocationDistance(SearchParameterMap theParams) {
-		if (myResourceType == Location.class && theParams.containsKey(Location.SP_NEAR_DISTANCE)) {
-			List<List<IQueryParameterType>> paramList = theParams.get(Location.SP_NEAR_DISTANCE);
-			// Set nearDistanceParam on the SearchParameterMap so it's available to the near predicate
-			paramList.stream()
-				.flatMap(List::stream)
-				.findFirst()
-				.map(QuantityParam.class::cast)
-				.ifPresent(theParams::setNearDistanceParam);
-			// Need to remove near-distance or it we'll get a hashcode predicate for it
-			theParams.remove(Location.SP_NEAR_DISTANCE);
-		}
-	}
-
 
 	@Override
 	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest) {
