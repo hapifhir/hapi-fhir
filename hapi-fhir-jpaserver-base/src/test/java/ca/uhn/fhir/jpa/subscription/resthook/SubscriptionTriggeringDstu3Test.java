@@ -17,7 +17,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
-import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -39,8 +38,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -48,6 +45,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -300,7 +298,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		assertEquals(0, mySubscriptionTriggeringSvc.getActiveJobCount());
 
 		assertEquals(0, ourCreatedPatients.size());
-		assertEquals(ourUpdatedPatients.stream().map(t->t.getId()).collect(Collectors.joining(", ")), 3, ourUpdatedPatients.size());
+		await().until(() -> ourUpdatedPatients.size() == 3);
 
 	}
 
