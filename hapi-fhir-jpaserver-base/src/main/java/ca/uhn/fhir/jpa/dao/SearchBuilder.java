@@ -594,6 +594,7 @@ public class SearchBuilder implements ISearchBuilder {
 			return new HashSet<>();
 		}
 		String searchFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
+		String findFieldName = theReverseMode ? "mySourceResourcePid" : "myTargetResourcePid";
 
 		Collection<ResourcePersistentId> nextRoundMatches = theMatches;
 		HashSet<ResourcePersistentId> allAdded = new HashSet<>();
@@ -618,17 +619,17 @@ public class SearchBuilder implements ISearchBuilder {
 				boolean matchAll = "*".equals(nextInclude.getValue());
 				if (matchAll) {
 					String sql;
-					sql = "SELECT r FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids) ";
+					sql = "SELECT r." + findFieldName + " FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids) ";
 					List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, MAXIMUM_PAGE_SIZE);
 					for (Collection<ResourcePersistentId> nextPartition : partitions) {
-						TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
+						TypedQuery<Long> q = theEntityManager.createQuery(sql, Long.class);
 						q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
-						List<ResourceLink> results = q.getResultList();
-						for (ResourceLink resourceLink : results) {
+						List<Long> results = q.getResultList();
+						for (Long resourceLink : results) {
 							if (theReverseMode) {
-								pidsToInclude.add(new ResourcePersistentId(resourceLink.getSourceResourcePid()));
+								pidsToInclude.add(new ResourcePersistentId(resourceLink));
 							} else {
-								pidsToInclude.add(new ResourcePersistentId(resourceLink.getTargetResourcePid()));
+								pidsToInclude.add(new ResourcePersistentId(resourceLink));
 							}
 						}
 					}
