@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
 import com.google.common.annotations.VisibleForTesting;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.MigrationInfoService;
@@ -85,7 +86,11 @@ public class FlywayMigrator extends BaseMigrator {
 
 	@Override
 	public void addTasks(List<BaseTask> theTasks) {
-		theTasks.forEach(this::addTask);
+		if ("true".equals(System.getProperty("unit_test_mode"))) {
+			theTasks.stream().filter(task -> task instanceof InitializeSchemaTask).forEach(this::addTask);
+		} else {
+			theTasks.forEach(this::addTask);
+		}
 	}
 
 	@Override
