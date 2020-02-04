@@ -53,9 +53,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class TerminologyUploaderProvider extends BaseJpaProvider {
 
@@ -226,9 +231,9 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			b.append(ConceptHandler.DISPLAY);
 			b.append("\n");
 			for (Map.Entry<String, String> nextEntry : codes.entrySet()) {
-				b.append(nextEntry.getKey());
+				b.append(csvEscape(nextEntry.getKey()));
 				b.append(",");
-				b.append(defaultString(nextEntry.getValue()));
+				b.append(csvEscape(nextEntry.getValue()));
 				b.append("\n");
 			}
 			byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
@@ -245,9 +250,9 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			b.append(HierarchyHandler.PARENT);
 			b.append("\n");
 			for (Map.Entry<String, String> nextEntry : codeToParentCodes.entries()) {
-				b.append(nextEntry.getKey());
+				b.append(csvEscape(nextEntry.getKey()));
 				b.append(",");
-				b.append(defaultString(nextEntry.getValue()));
+				b.append(csvEscape(nextEntry.getValue()));
 				b.append("\n");
 			}
 			byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
@@ -354,7 +359,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		return retVal;
 	}
 
-
 	private static class FileBackedFileDescriptor implements ITermLoaderSvc.FileDescriptor {
 		private final File myNextFile;
 
@@ -375,5 +379,14 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				throw new InternalErrorException(theE);
 			}
 		}
+	}
+
+	private static String csvEscape(String theValue) {
+		return '"' +
+			theValue
+				.replace("\"", "\"\"")
+				.replace("\n", "\\n")
+				.replace("\r", "") +
+			'"';
 	}
 }
