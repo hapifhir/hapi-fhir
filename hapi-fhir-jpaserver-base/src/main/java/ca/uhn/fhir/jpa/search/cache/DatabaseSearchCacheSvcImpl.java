@@ -163,8 +163,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 			ourLog.info("Searching for searches which are before {} - now is {}", new InstantType(cutoff), new InstantType(new Date(now())));
 		}
 
-		// FIXME KHS
-		ourLog.info("Searching for searches which are before {}", cutoff);
+		ourLog.debug("Searching for searches which are before {}", cutoff);
 
 		TransactionTemplate tt = new TransactionTemplate(myTxManager);
 		final Slice<Long> toDelete = tt.execute(theStatus ->
@@ -173,9 +172,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		assert toDelete != null;
 
 		for (final Long nextSearchToDelete : toDelete) {
-			// FIXME KHS
-			ourLog.info("Deleting search with PID {}", nextSearchToDelete);
-			// FIXME KHS do this outside of loop.  Make a "deleteWhereCreatedBefore"
+			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
 			tt.execute(t -> {
 				mySearchDao.updateDeleted(nextSearchToDelete, true);
 				return null;
@@ -189,12 +186,9 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 
 		int count = toDelete.getContent().size();
 		if (count > 0) {
-			// FIXME KHS
-//			if (ourLog.isDebugEnabled() || "true".equalsIgnoreCase(System.getProperty("test"))) {
-			if ( "true".equalsIgnoreCase(System.getProperty("test"))) {
+			if (ourLog.isDebugEnabled() || "true".equalsIgnoreCase(System.getProperty("test"))) {
 				Long total = tt.execute(t -> mySearchDao.count());
-				// FIXME KHS
-				ourLog.info("Deleted {} searches, {} remaining", count, total);
+				ourLog.debug("Deleted {} searches, {} remaining", count, total);
 			}
 		}
 	}
