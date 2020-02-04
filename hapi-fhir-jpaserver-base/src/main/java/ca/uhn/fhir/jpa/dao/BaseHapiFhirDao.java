@@ -368,7 +368,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		Search search = new Search();
 		search.setDeleted(false);
 		search.setCreated(new Date());
-		search.setSearchLastReturned(new Date());
 		search.setLastUpdated(theSince, theUntil);
 		search.setUuid(UUID.randomUUID().toString());
 		search.setResourceType(resourceName);

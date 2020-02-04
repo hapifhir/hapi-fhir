@@ -297,6 +297,8 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
 
 		assertEquals(0, ourCreatedPatients.size());
 		assertEquals(ourUpdatedPatients.stream().map(t->t.getId()).collect(Collectors.joining(", ")), 3, ourUpdatedPatients.size());
