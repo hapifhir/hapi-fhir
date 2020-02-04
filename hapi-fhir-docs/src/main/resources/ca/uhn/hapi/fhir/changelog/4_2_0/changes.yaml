@@ -98,4 +98,4 @@ Sean McIlvenna for reporting!"
      is provided, the coordinates must match exactly."
 - item:
      type: perf
-     title: "Loading of _includee and _revinclude values has been optimized to be slightly faster"
+     title: "Loading of _include and _revinclude values has been optimized to be slightly faster"
