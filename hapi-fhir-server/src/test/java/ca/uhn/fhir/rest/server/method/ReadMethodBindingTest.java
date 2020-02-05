@@ -63,6 +63,7 @@ public class ReadMethodBindingTest {
 		assertFalse(binding.incomingServerRequestMatchesMethod(myRequestDetails));
 
 		// Type history
+		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
 		when(myRequestDetails.getResourceName()).thenReturn("Patient");
 		when(myRequestDetails.getOperation()).thenReturn("_history");
 		assertFalse(binding.incomingServerRequestMatchesMethod(myRequestDetails));
