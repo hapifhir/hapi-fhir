@@ -54,7 +54,9 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 	private boolean noTerminologyChecks = false;
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
 	private boolean errorForUnknownProfiles;
+	private boolean assumeValidRestReferences;
 	private List<String> myExtensionDomains = Collections.emptyList();
+	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
 
 	/**
 	 * Constructor
@@ -220,7 +222,25 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 			.setErrorForUnknownProfiles(isErrorForUnknownProfiles())
 			.setExtensionDomains(getExtensionDomains())
 			.setNoTerminologyChecks(isNoTerminologyChecks())
+			.setValidatorResourceFetcher(getValidatorResourceFetcher())
+			.setAssumeValidRestReferences(isAssumeValidRestReferences())
 			.validate(wrappedWorkerContext, theValidationCtx);
+	}
+
+	public IResourceValidator.IValidatorResourceFetcher getValidatorResourceFetcher() {
+		return validatorResourceFetcher;
+	}
+
+	public void setValidatorResourceFetcher(IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher) {
+		this.validatorResourceFetcher = validatorResourceFetcher;
+	}
+
+	public boolean isAssumeValidRestReferences() {
+		return assumeValidRestReferences;
+	}
+
+	public void setAssumeValidRestReferences(boolean assumeValidRestReferences) {
+		this.assumeValidRestReferences = assumeValidRestReferences;
 	}
 
 

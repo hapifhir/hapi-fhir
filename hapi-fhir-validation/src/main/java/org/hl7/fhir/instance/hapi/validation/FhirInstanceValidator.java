@@ -81,8 +81,19 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private StructureDefinition myStructureDefintion;
 	private IValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
+
+	public boolean isAssumeValidRestReferences() {
+		return assumeValidRestReferences;
+	}
+
+	public void setAssumeValidRestReferences(boolean assumeValidRestReferences) {
+		this.assumeValidRestReferences = assumeValidRestReferences;
+	}
+
+	private boolean assumeValidRestReferences;
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
 	private VersionConvertorAdvisor50 myAdvisor = new NullVersionConverterAdvisor50();
+	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
 
 	/**
 	 * Constructor
@@ -287,6 +298,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		v.setAnyExtensionsAllowed(isAnyExtensionsAllowed());
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(isNoTerminologyChecks());
+		v.setFetcher(getValidatorResourceFetcher());
+		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
 
 		List<ValidationMessage> messages = new ArrayList<>();
 
@@ -386,6 +399,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			}
 		}
 		return messages;
+	}
+
+	public IResourceValidator.IValidatorResourceFetcher getValidatorResourceFetcher() {
+		return validatorResourceFetcher;
+	}
+
+	public void setValidatorResourceFetcher(IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher) {
+		this.validatorResourceFetcher = validatorResourceFetcher;
 	}
 
 	@Override

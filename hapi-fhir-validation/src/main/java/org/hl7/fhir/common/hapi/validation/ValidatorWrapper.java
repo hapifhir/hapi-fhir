@@ -32,13 +32,24 @@ public class ValidatorWrapper {
 	private boolean myAnyExtensionsAllowed;
 	private boolean myErrorForUnknownProfiles;
 	private boolean myNoTerminologyChecks;
+	private boolean assumeValidRestReferences;
 	private Collection<? extends String> myExtensionDomains;
+	private IResourceValidator.IValidatorResourceFetcher myValidatorResourceFetcher;
 
 	/**
 	 * Constructor
 	 */
 	public ValidatorWrapper() {
 		super();
+	}
+
+	public boolean isAssumeValidRestReferences() {
+		return assumeValidRestReferences;
+	}
+
+	public ValidatorWrapper setAssumeValidRestReferences(boolean assumeValidRestReferences) {
+		this.assumeValidRestReferences = assumeValidRestReferences;
+		return this;
 	}
 
 	public ValidatorWrapper setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel theBestPracticeWarningLevel) {
@@ -66,6 +77,12 @@ public class ValidatorWrapper {
 		return this;
 	}
 
+
+	public ValidatorWrapper setValidatorResourceFetcher(IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher) {
+		this.myValidatorResourceFetcher = validatorResourceFetcher;
+		return this;
+	}
+
 	public List<ValidationMessage> validate(IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
 		InstanceValidator v;
 		FHIRPathEngine.IEvaluationContext evaluationCtx = new org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator.NullEvaluationContext();
@@ -81,6 +98,7 @@ public class ValidatorWrapper {
 		v.setNoTerminologyChecks(myNoTerminologyChecks);
 		v.setErrorForUnknownProfiles(myErrorForUnknownProfiles);
 		v.getExtensionDomains().addAll(myExtensionDomains);
+		v.setFetcher(myValidatorResourceFetcher);
 		v.setAllowXsiLocation(true);
 
 		List<ValidationMessage> messages = new ArrayList<>();
