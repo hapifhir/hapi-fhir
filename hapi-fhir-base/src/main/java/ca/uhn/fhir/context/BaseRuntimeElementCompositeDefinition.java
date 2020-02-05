@@ -462,7 +462,6 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		if (mySealed) {
 			return;
 		}
-		mySealed = true;
 
 		scanCompositeElementForChildren();
 		
@@ -529,6 +528,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		}
 		
 		myChildrenAndExtensions=Collections.unmodifiableList(children);
+		mySealed = true;
 	}
 
 	
