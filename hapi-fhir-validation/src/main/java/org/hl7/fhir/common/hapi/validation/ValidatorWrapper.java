@@ -11,7 +11,6 @@ import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Manager;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.hl7.fhir.r5.utils.ValidationProfileSet;
 import org.hl7.fhir.r5.validation.InstanceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.slf4j.Logger;
