@@ -726,7 +726,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 		}
 
 		@Override
-		public Base resolveReference(Object appContext, String url) throws FHIRException {
+		public Base resolveReference(Object appContext, String url, Base refContext) throws FHIRException {
 			return null;
 		}
 

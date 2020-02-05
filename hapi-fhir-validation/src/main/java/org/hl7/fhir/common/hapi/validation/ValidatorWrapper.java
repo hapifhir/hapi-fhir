@@ -9,6 +9,7 @@ import org.apache.commons.codec.Charsets;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Manager;
+import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.r5.validation.InstanceValidator;
@@ -103,9 +104,10 @@ public class ValidatorWrapper {
 
 		List<ValidationMessage> messages = new ArrayList<>();
 
-		ValidationProfileSet profileSet = new ValidationProfileSet();
+		List<StructureDefinition> profileUrls = new ArrayList<>();
 		for (String next : theValidationContext.getOptions().getProfiles()) {
-			profileSet.getCanonical().add(new ValidationProfileSet.ProfileRegistration(next, true));
+			StructureDefinition structureDefinition = theWorkerContext.fetchResourceWithException(StructureDefinition.class, next);
+			profileUrls.add(structureDefinition);
 		}
 
 		String input = theValidationContext.getResourceAsString();
@@ -126,14 +128,15 @@ public class ValidatorWrapper {
 			// Determine if meta/profiles are present...
 			ArrayList<String> profiles = determineIfProfilesSpecified(document);
 			for (String nextProfile : profiles) {
-				profileSet.getCanonical().add(new ValidationProfileSet.ProfileRegistration(nextProfile, true));
+				StructureDefinition structureDefinition = theWorkerContext.fetchResourceWithException(StructureDefinition.class, nextProfile);
+				profileUrls.add(structureDefinition);
 			}
 
 			String resourceAsString = theValidationContext.getResourceAsString();
 			InputStream inputStream = new ReaderInputStream(new StringReader(resourceAsString), Charsets.UTF_8);
 
 			Manager.FhirFormat format = Manager.FhirFormat.XML;
-			v.validate(null, messages, inputStream, format, profileSet);
+			v.validate(null, messages, inputStream, format, profileUrls);
 
 		} else if (encoding == EncodingEnum.JSON) {
 
@@ -146,7 +149,9 @@ public class ValidatorWrapper {
 				if (profileElement != null && profileElement.isJsonArray()) {
 					JsonArray profiles = profileElement.getAsJsonArray();
 					for (JsonElement element : profiles) {
-						profileSet.getCanonical().add(new ValidationProfileSet.ProfileRegistration(element.getAsString(), true));
+						String nextProfile = element.getAsString();
+						StructureDefinition structureDefinition = theWorkerContext.fetchResourceWithException(StructureDefinition.class, nextProfile);
+						profileUrls.add(structureDefinition);
 					}
 				}
 			}
@@ -155,7 +160,7 @@ public class ValidatorWrapper {
 			InputStream inputStream = new ReaderInputStream(new StringReader(resourceAsString), Charsets.UTF_8);
 
 			Manager.FhirFormat format = Manager.FhirFormat.JSON;
-			v.validate(null, messages, inputStream, format, profileSet);
+			v.validate(null, messages, inputStream, format, profileUrls);
 
 		} else {
 			throw new IllegalArgumentException("Unknown encoding: " + encoding);
