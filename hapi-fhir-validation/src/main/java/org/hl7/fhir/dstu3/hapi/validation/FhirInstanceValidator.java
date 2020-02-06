@@ -23,6 +23,7 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ImplementationGuide;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -353,6 +354,9 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 							break;
 						case "ImplementationGuide":
 							fetched = myWrap.fetchResource(ImplementationGuide.class, key.getUri());
+							break;
+						case "SearchParameter":
+							fetched = myWrap.fetchResource(SearchParameter.class, key.getUri());
 							break;
 						default:
 							throw new UnsupportedOperationException("Don't know how to fetch " + key.getResourceName());
