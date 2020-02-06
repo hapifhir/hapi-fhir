@@ -4,9 +4,14 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.XmlUtil;
 import ca.uhn.fhir.validation.IValidationContext;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.io.input.ReaderInputStream;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Manager;
 import org.hl7.fhir.r5.model.StructureDefinition;
@@ -17,7 +22,6 @@ import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import java.io.InputStream;
@@ -33,7 +37,7 @@ public class ValidatorWrapper {
 	private boolean myAnyExtensionsAllowed;
 	private boolean myErrorForUnknownProfiles;
 	private boolean myNoTerminologyChecks;
-	private boolean assumeValidRestReferences;
+	private boolean myAssumeValidRestReferences;
 	private Collection<? extends String> myExtensionDomains;
 	private IResourceValidator.IValidatorResourceFetcher myValidatorResourceFetcher;
 
@@ -45,11 +49,11 @@ public class ValidatorWrapper {
 	}
 
 	public boolean isAssumeValidRestReferences() {
-		return assumeValidRestReferences;
+		return myAssumeValidRestReferences;
 	}
 
 	public ValidatorWrapper setAssumeValidRestReferences(boolean assumeValidRestReferences) {
-		this.assumeValidRestReferences = assumeValidRestReferences;
+		this.myAssumeValidRestReferences = assumeValidRestReferences;
 		return this;
 	}
 
@@ -93,6 +97,7 @@ public class ValidatorWrapper {
 			throw new ConfigurationException(e);
 		}
 
+		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
 		v.setBestPracticeWarningLevel(myBestPracticeWarningLevel);
 		v.setAnyExtensionsAllowed(myAnyExtensionsAllowed);
 		v.setResourceIdRule(IResourceValidator.IdStatus.OPTIONAL);
@@ -106,8 +111,7 @@ public class ValidatorWrapper {
 
 		List<StructureDefinition> profileUrls = new ArrayList<>();
 		for (String next : theValidationContext.getOptions().getProfiles()) {
-			StructureDefinition structureDefinition = theWorkerContext.fetchResourceWithException(StructureDefinition.class, next);
-			profileUrls.add(structureDefinition);
+			fetchAndAddProfile(theWorkerContext, profileUrls, next);
 		}
 
 		String input = theValidationContext.getResourceAsString();
@@ -128,8 +132,7 @@ public class ValidatorWrapper {
 			// Determine if meta/profiles are present...
 			ArrayList<String> profiles = determineIfProfilesSpecified(document);
 			for (String nextProfile : profiles) {
-				StructureDefinition structureDefinition = theWorkerContext.fetchResourceWithException(StructureDefinition.class, nextProfile);
-				profileUrls.add(structureDefinition);
+				fetchAndAddProfile(theWorkerContext, profileUrls, nextProfile);
 			}
 
 			String resourceAsString = theValidationContext.getResourceAsString();
@@ -150,8 +153,7 @@ public class ValidatorWrapper {
 					JsonArray profiles = profileElement.getAsJsonArray();
 					for (JsonElement element : profiles) {
 						String nextProfile = element.getAsString();
-						StructureDefinition structureDefinition = theWorkerContext.fetchResourceWithException(StructureDefinition.class, nextProfile);
-						profileUrls.add(structureDefinition);
+						fetchAndAddProfile(theWorkerContext, profileUrls, nextProfile);
 					}
 				}
 			}
@@ -179,16 +181,15 @@ public class ValidatorWrapper {
 		return messages;
 	}
 
-
-	private String determineResourceName(Document theDocument) {
-		NodeList list = theDocument.getChildNodes();
-		for (int i = 0; i < list.getLength(); i++) {
-			if (list.item(i) instanceof Element) {
-				return list.item(i).getLocalName();
-			}
+	private void fetchAndAddProfile(IWorkerContext theWorkerContext, List<StructureDefinition> theProfileStructureDefinitions, String theUrl) throws org.hl7.fhir.exceptions.FHIRException {
+		try {
+			StructureDefinition structureDefinition = theWorkerContext.fetchResourceWithException(StructureDefinition.class, theUrl);
+			theProfileStructureDefinitions.add(structureDefinition);
+		} catch (FHIRException e) {
+			ourLog.debug("Failed to load profile: {}", theUrl);
 		}
-		return theDocument.getDocumentElement().getLocalName();
 	}
+
 
 	private ArrayList<String> determineIfProfilesSpecified(Document theDocument) {
 		ArrayList<String> profileNames = new ArrayList<>();
