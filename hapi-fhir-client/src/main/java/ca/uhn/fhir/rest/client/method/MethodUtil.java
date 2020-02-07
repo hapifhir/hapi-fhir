@@ -1,29 +1,51 @@
 package ca.uhn.fhir.rest.client.method;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.*;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.Map.Entry;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.*;
-
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.method.OperationParameter.IOperationParamConverter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.binder.CollectionBinder;
-import ca.uhn.fhir.util.*;
+import ca.uhn.fhir.util.DateUtils;
+import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -45,7 +67,6 @@ import ca.uhn.fhir.util.*;
  * #L%
  */
 
-@SuppressWarnings("deprecation")
 public class MethodUtil {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MethodUtil.class);
@@ -345,19 +366,6 @@ public class MethodUtil {
 						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE,
 								Constants.EXTOP_VALIDATE_MODE, 0, 1).setConverter(new IOperationParamConverter() {
 									@Override
-									public Object incomingServer(Object theObject) {
-										if (isNotBlank(theObject.toString())) {
-											ValidationModeEnum retVal = ValidationModeEnum
-													.forCode(theObject.toString());
-											if (retVal == null) {
-												OperationParameter.throwInvalidMode(theObject.toString());
-											}
-											return retVal;
-										}
-										return null;
-									}
-
-									@Override
 									public Object outgoingClient(Object theObject) {
 										return ParametersUtil.createString(theContext,
 												((ValidationModeEnum) theObject).getCode());
@@ -371,10 +379,6 @@ public class MethodUtil {
 						}
 						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE,
 								Constants.EXTOP_VALIDATE_PROFILE, 0, 1).setConverter(new IOperationParamConverter() {
-									@Override
-									public Object incomingServer(Object theObject) {
-										return theObject.toString();
-									}
 
 									@Override
 									public Object outgoingClient(Object theObject) {

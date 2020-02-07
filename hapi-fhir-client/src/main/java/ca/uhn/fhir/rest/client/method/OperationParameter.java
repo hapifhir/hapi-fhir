@@ -191,8 +191,6 @@ public class OperationParameter implements IParameter {
 
 	interface IOperationParamConverter {
 
-		Object incomingServer(Object theObject);
-
 		Object outgoingClient(Object theObject);
 
 	}
@@ -201,13 +199,6 @@ public class OperationParameter implements IParameter {
 
 		public OperationParamConverter() {
 			Validate.isTrue(mySearchParameterBinding != null);
-		}
-
-		@Override
-		public Object incomingServer(Object theObject) {
-			IPrimitiveType<?> obj = (IPrimitiveType<?>) theObject;
-			List<QualifiedParamList> paramList = Collections.singletonList(QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, obj.getValueAsString()));
-			return mySearchParameterBinding.parse(myContext, paramList);
 		}
 
 		@Override

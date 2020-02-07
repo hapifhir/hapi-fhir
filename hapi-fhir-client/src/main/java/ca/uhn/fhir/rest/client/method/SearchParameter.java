@@ -157,23 +157,8 @@ public class SearchParameter extends BaseQueryParameter {
 	}
 
 	@Override
-	public boolean handlesMissing() {
-		return false;
-	}
-
-	@Override
 	public boolean isRequired() {
 		return myRequired;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ca.uhn.fhir.rest.param.IParameter#parse(java.util.List)
-	 */
-	@Override
-	public Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
-		return myParamBinder.parse(theContext, getName(), theString);
 	}
 
 	public void setChainlists(String[] theChainWhitelist) {

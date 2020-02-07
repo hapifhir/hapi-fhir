@@ -29,7 +29,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +36,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 class IncludeParameter extends BaseQueryParameter {
 
@@ -116,55 +114,8 @@ class IncludeParameter extends BaseQueryParameter {
 	}
 
 	@Override
-	public boolean handlesMissing() {
-		return true;
-	}
-
-	@Override
 	public boolean isRequired() {
 		return false;
-	}
-
-	@Override
-	public Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
-		Collection<Include> retValCollection;
-
-			try {
-				retValCollection = myInstantiableCollectionType.getConstructor().newInstance();
-			} catch (Exception e) {
-				throw new InternalErrorException("Failed to instantiate " + myInstantiableCollectionType.getName(), e);
-			}
-
-		for (QualifiedParamList nextParamList : theString) {
-			if (nextParamList.isEmpty()) {
-				continue;
-			}
-			if (nextParamList.size() > 1) {
-				throw new InvalidRequestException(theContext.getLocalizer().getMessage(IncludeParameter.class, "orIncludeInRequest"));
-			}
-
-			boolean recurse = Constants.PARAM_INCLUDE_QUALIFIER_RECURSE.equals(nextParamList.getQualifier());
-
-			String value = nextParamList.get(0);
-			if (myAllow != null && !myAllow.isEmpty()) {
-				if (!myAllow.contains(value)) {
-					if (!myAllow.contains("*")) {
-						String msg = theContext.getLocalizer().getMessage(IncludeParameter.class, "invalidIncludeNameInRequest", value, new TreeSet<>(myAllow).toString(), getName());
-						throw new InvalidRequestException(msg);
-					}
-				}
-			}
-			if (myInstantiableCollectionType == null) {
-				if (mySpecType == String.class) {
-					return value;
-				}
-				return new Include(value, recurse);
-			}
-
-			retValCollection.add(new Include(value, recurse));
-		}
-
-		return retValCollection;
 	}
 
 }
