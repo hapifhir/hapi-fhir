@@ -27,12 +27,20 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
-import org.hibernate.search.annotations.*;
+import org.hibernate.search.annotations.Analyze;
+import org.hibernate.search.annotations.Analyzer;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Fields;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.Store;
 
-import javax.persistence.Index;
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -51,12 +59,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final int MAX_PROFILE_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
-
-//	@Transient
-//	private transient byte[] myResource;
-//
-//	@Transient
-//	private transient ResourceEncodingEnum myEncoding;
 
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
@@ -186,9 +188,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * {@link #myHasLinks} is true, meaning that there are actually resource links present
 	 * right now. This avoids Hibernate Search triggering a select on the resource link
 	 * table.
-	 *
+	 * <p>
 	 * This field is used by FulltextSearchSvcImpl
-	 *
+	 * <p>
 	 * You can test that any changes don't cause extra queries by running
 	 * FhirResourceDaoR4QueryCountTest
 	 */
@@ -421,7 +423,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return this;
 	}
 
-	@Override
 	public Collection<ResourceTag> getTags() {
 		if (myTags == null) {
 			myTags = new HashSet<>();
@@ -590,16 +591,16 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * This is a convenience to avoid loading the version a second time within a single transaction. It is
 	 * not persisted.
 	 */
-	public void setCurrentVersionEntity(ResourceHistoryTable theCurrentVersionEntity) {
-		myCurrentVersionEntity = theCurrentVersionEntity;
+	public ResourceHistoryTable getCurrentVersionEntity() {
+		return myCurrentVersionEntity;
 	}
 
 	/**
 	 * This is a convenience to avoid loading the version a second time within a single transaction. It is
 	 * not persisted.
 	 */
-	public ResourceHistoryTable getCurrentVersionEntity() {
-		return myCurrentVersionEntity;
+	public void setCurrentVersionEntity(ResourceHistoryTable theCurrentVersionEntity) {
+		myCurrentVersionEntity = theCurrentVersionEntity;
 	}
 
 	@Override

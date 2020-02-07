@@ -31,7 +31,14 @@ import com.google.common.hash.Hashing;
 import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.util.Date;
 
 @MappedSuperclass
@@ -47,10 +54,9 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	private static final byte[] DELIMITER_BYTES = "|".getBytes(Charsets.UTF_8);
 	private static final long serialVersionUID = 1L;
 
-	// TODO: make this nullable=false and a primitive (written may 2017)
 	@Field()
-	@Column(name = "SP_MISSING", nullable = true)
-	private Boolean myMissing = Boolean.FALSE;
+	@Column(name = "SP_MISSING", nullable = false)
+	private boolean myMissing = false;
 
 	@Field
 	@Column(name = "SP_NAME", length = MAX_SP_NAME, nullable = false)
@@ -64,13 +70,26 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@Column(name = "RES_ID", insertable = false, updatable = false, nullable = false)
 	private Long myResourcePid;
 
+	// FIXME: replace with join
 	@Field()
 	@Column(name = "RES_TYPE", nullable = false, length = Constants.MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
+
 	@Field()
 	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
+
+	@Embedded
+	private TenantId myTenantId;
+
+	public TenantId getTenantId() {
+		return myTenantId;
+	}
+
+	public void setTenantId(TenantId theTenantId) {
+		myTenantId = theTenantId;
+	}
 
 	/**
 	 * Subclasses may override
@@ -123,7 +142,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	public boolean isMissing() {
-		return Boolean.TRUE.equals(myMissing);
+		return myMissing;
 	}
 
 	public BaseResourceIndexedSearchParam setMissing(boolean theMissing) {

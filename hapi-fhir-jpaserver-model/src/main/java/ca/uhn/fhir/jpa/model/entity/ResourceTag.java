@@ -28,8 +28,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "HFJ_RES_TAG", uniqueConstraints= {
-		@UniqueConstraint(name="IDX_RESTAG_TAGID", columnNames= {"RES_ID","TAG_ID"})
+@Table(name = "HFJ_RES_TAG", uniqueConstraints = {
+	@UniqueConstraint(name = "IDX_RESTAG_TAGID", columnNames = {"RES_ID", "TAG_ID"})
 })
 public class ResourceTag extends BaseTag {
 
@@ -42,7 +42,7 @@ public class ResourceTag extends BaseTag {
 	private Long myId;
 
 	@ManyToOne(cascade = {})
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", foreignKey=@ForeignKey(name="FK_RESTAG_RESOURCE"))
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_RESTAG_RESOURCE"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
@@ -50,14 +50,8 @@ public class ResourceTag extends BaseTag {
 
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourceId;
-
-	public Long getResourceId() {
-		return myResourceId;
-	}
-
-	public void setResourceId(Long theResourceId) {
-		myResourceId = theResourceId;
-	}
+	@Embedded
+	private TenantId myTenantId;
 
 	public ResourceTag() {
 	}
@@ -69,16 +63,28 @@ public class ResourceTag extends BaseTag {
 		setResourceType(theResourceTable.getResourceType());
 	}
 
+	public void setTenantId(TenantId theTenantId) {
+		myTenantId = theTenantId;
+	}
+
+	public Long getResourceId() {
+		return myResourceId;
+	}
+
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
+	}
+
 	public ResourceTable getResource() {
 		return myResource;
 	}
 
-	public String getResourceType() {
-		return myResourceType;
-	}
-
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
+	}
+
+	public String getResourceType() {
+		return myResourceType;
 	}
 
 	public void setResourceType(String theResourceType) {

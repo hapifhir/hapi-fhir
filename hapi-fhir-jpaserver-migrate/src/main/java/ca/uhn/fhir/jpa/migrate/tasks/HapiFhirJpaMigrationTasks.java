@@ -56,7 +56,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init360(); // 20180918 - 20181112
 		init400(); // 20190401 - 20190814
 		init410(); // 20190815 - 20191014
-		init420(); // 20191015 - present
+		init420(); // 20191015 - 20200213
+		init430(); // 20200213 - present
+	}
+
+	protected void init430() {
+		Builder version = forVersion(VersionEnum.V4_3_0);
+
 	}
 
 	protected void init420() { // 20191015 - present

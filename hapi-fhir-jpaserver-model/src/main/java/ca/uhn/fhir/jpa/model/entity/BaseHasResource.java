@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -64,12 +63,23 @@ public abstract class BaseHasResource implements IBaseResourceEntity, IBasePersi
 	@OptimisticLock(excluded = true)
 	private Date myUpdated;
 
+	@Embedded
+	private TenantId myTenantId;
+
 	/**
 	 * This is stored as an optimization to avoid neeind to query for this
 	 * after an update
 	 */
 	@Transient
 	private transient String myTransientForcedId;
+
+	public TenantId getTenantId() {
+		return myTenantId;
+	}
+
+	public void setTenantId(TenantId theTenantId) {
+		myTenantId = theTenantId;
+	}
 
 	public String getTransientForcedId() {
 		return myTransientForcedId;
