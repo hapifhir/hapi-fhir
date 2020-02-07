@@ -37,6 +37,9 @@ import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
 
 class IncludeParameter extends BaseQueryParameter {
 
@@ -45,7 +48,9 @@ class IncludeParameter extends BaseQueryParameter {
 	private Class<?> mySpecType;
 	private boolean myReverse;
 
-	public IncludeParameter(IncludeParam theAnnotation, Class<? extends Collection<Include>> theInstantiableCollectionType, Class<?> theSpecType) {
+	public IncludeParameter(IncludeParam theAnnotation, @Nonnull Class<? extends Collection<Include>> theInstantiableCollectionType, Class<?> theSpecType) {
+		Validate.notNull(theInstantiableCollectionType, "theInstantiableCollectionType must not be null");
+
 		myInstantiableCollectionType = theInstantiableCollectionType;
 		myReverse = theAnnotation.reverse();
 		if (theAnnotation.allow().length > 0) {
@@ -69,7 +74,7 @@ class IncludeParameter extends BaseQueryParameter {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<QualifiedParamList> encode(FhirContext theContext, Object theObject) throws InternalErrorException {
-		ArrayList<QualifiedParamList> retVal = new ArrayList<QualifiedParamList>();
+		ArrayList<QualifiedParamList> retVal = new ArrayList<>();
 
 		if (myInstantiableCollectionType == null) {
 			if (mySpecType == Include.class) {
@@ -122,7 +127,7 @@ class IncludeParameter extends BaseQueryParameter {
 
 		if (myInstantiableCollectionType != null) {
 			try {
-				retValCollection = myInstantiableCollectionType.newInstance();
+				retValCollection = myInstantiableCollectionType.getConstructor().newInstance();
 			} catch (Exception e) {
 				throw new InternalErrorException("Failed to instantiate " + myInstantiableCollectionType.getName(), e);
 			}
@@ -143,7 +148,7 @@ class IncludeParameter extends BaseQueryParameter {
 			if (myAllow != null && !myAllow.isEmpty()) {
 				if (!myAllow.contains(value)) {
 					if (!myAllow.contains("*")) {
-						String msg = theContext.getLocalizer().getMessage(IncludeParameter.class, "invalidIncludeNameInRequest", value, new TreeSet<String>(myAllow).toString(), getName());
+						String msg = theContext.getLocalizer().getMessage(IncludeParameter.class, "invalidIncludeNameInRequest", value, new TreeSet<>(myAllow).toString(), getName());
 						throw new InvalidRequestException(msg);
 					}
 				}
@@ -154,7 +159,7 @@ class IncludeParameter extends BaseQueryParameter {
 				}
 				return new Include(value, recurse);
 			}
-			//FIXME null access
+
 			retValCollection.add(new Include(value, recurse));
 		}
 

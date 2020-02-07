@@ -288,8 +288,7 @@ public class MethodUtil {
 							specType = parameterType;
 						}
 
-						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType,
-								specType);
+						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType,								specType);
 					} else if (nextAnnotation instanceof ResourceParam) {
 						if (IBaseResource.class.isAssignableFrom(parameterType)) {
 							// good

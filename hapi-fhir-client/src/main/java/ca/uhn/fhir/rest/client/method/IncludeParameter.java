@@ -19,16 +19,27 @@ package ca.uhn.fhir.rest.client.method;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 class IncludeParameter extends BaseQueryParameter {
 
@@ -37,11 +48,16 @@ class IncludeParameter extends BaseQueryParameter {
 	private Class<?> mySpecType;
 	private boolean myReverse;
 
-	public IncludeParameter(IncludeParam theAnnotation, Class<? extends Collection<Include>> theInstantiableCollectionType, Class<?> theSpecType) {
+	/**
+	 * Constructor
+	 */
+	public IncludeParameter(IncludeParam theAnnotation, @Nonnull Class<? extends Collection<Include>> theInstantiableCollectionType, Class<?> theSpecType) {
+		Validate.notNull(theInstantiableCollectionType, "theInstantiableCollectionType must not be null");
+
 		myInstantiableCollectionType = theInstantiableCollectionType;
 		myReverse = theAnnotation.reverse();
 		if (theAnnotation.allow().length > 0) {
-			myAllow = new HashSet<String>();
+			myAllow = new HashSet<>();
 			for (String next : theAnnotation.allow()) {
 				if (next != null) {
 					myAllow.add(next);
@@ -61,7 +77,7 @@ class IncludeParameter extends BaseQueryParameter {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<QualifiedParamList> encode(FhirContext theContext, Object theObject) throws InternalErrorException {
-		ArrayList<QualifiedParamList> retVal = new ArrayList<QualifiedParamList>();
+		ArrayList<QualifiedParamList> retVal = new ArrayList<>();
 
 		if (myInstantiableCollectionType == null) {
 			if (mySpecType == Include.class) {
@@ -117,14 +133,12 @@ class IncludeParameter extends BaseQueryParameter {
 
 	@Override
 	public Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
-		Collection<Include> retValCollection = null;
+		Collection<Include> retValCollection;
 
-		if (myInstantiableCollectionType != null) {
-			try {
-				retValCollection = myInstantiableCollectionType.newInstance();
-			} catch (Exception e) {
-				throw new InternalErrorException("Failed to instantiate " + myInstantiableCollectionType.getName(), e);
-			}
+		try {
+			retValCollection = myInstantiableCollectionType.getConstructor().newInstance();
+		} catch (Exception e) {
+			throw new InternalErrorException("Failed to instantiate " + myInstantiableCollectionType.getName(), e);
 		}
 
 		for (QualifiedParamList nextParamList : theString) {
@@ -141,7 +155,7 @@ class IncludeParameter extends BaseQueryParameter {
 			if (myAllow != null && !myAllow.isEmpty()) {
 				if (!myAllow.contains(value)) {
 					if (!myAllow.contains("*")) {
-						String msg = theContext.getLocalizer().getMessage(IncludeParameter.class, "invalidIncludeNameInRequest", value, new TreeSet<String>(myAllow).toString(), getName());
+						String msg = theContext.getLocalizer().getMessage(IncludeParameter.class, "invalidIncludeNameInRequest", value, new TreeSet<>(myAllow).toString(), getName());
 						throw new InvalidRequestException(msg);
 					}
 				}
@@ -152,7 +166,7 @@ class IncludeParameter extends BaseQueryParameter {
 				}
 				return new Include(value, recurse);
 			}
-			//FIXME null access
+
 			retValCollection.add(new Include(value, recurse));
 		}
 
