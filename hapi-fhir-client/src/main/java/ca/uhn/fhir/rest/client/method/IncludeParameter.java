@@ -30,9 +30,7 @@ import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,12 +46,8 @@ class IncludeParameter extends BaseQueryParameter {
 	private Class<?> mySpecType;
 	private boolean myReverse;
 
-	/**
-	 * Constructor
-	 */
-	public IncludeParameter(IncludeParam theAnnotation, @Nonnull Class<? extends Collection<Include>> theInstantiableCollectionType, Class<?> theSpecType) {
-		Validate.notNull(theInstantiableCollectionType, "theInstantiableCollectionType must not be null");
 
+	public IncludeParameter(IncludeParam theAnnotation, Class<? extends Collection<Include>> theInstantiableCollectionType, Class<?> theSpecType) {
 		myInstantiableCollectionType = theInstantiableCollectionType;
 		myReverse = theAnnotation.reverse();
 		if (theAnnotation.allow().length > 0) {
@@ -135,11 +129,11 @@ class IncludeParameter extends BaseQueryParameter {
 	public Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
 		Collection<Include> retValCollection;
 
-		try {
-			retValCollection = myInstantiableCollectionType.getConstructor().newInstance();
-		} catch (Exception e) {
-			throw new InternalErrorException("Failed to instantiate " + myInstantiableCollectionType.getName(), e);
-		}
+			try {
+				retValCollection = myInstantiableCollectionType.getConstructor().newInstance();
+			} catch (Exception e) {
+				throw new InternalErrorException("Failed to instantiate " + myInstantiableCollectionType.getName(), e);
+			}
 
 		for (QualifiedParamList nextParamList : theString) {
 			if (nextParamList.isEmpty()) {

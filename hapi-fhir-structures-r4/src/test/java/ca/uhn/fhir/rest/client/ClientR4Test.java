@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.client.apache.ApacheHttpRequest;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
@@ -36,6 +37,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -226,6 +228,36 @@ public class ClientR4Test {
 		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
+	}
+
+	interface MyClient extends IRestfulClient {
+
+		@Search()
+		List<Patient> search(@IncludeParam String theInclude);
+
+
+	}
+
+
+	@Test
+	public void testStringIncludeTest() throws Exception {
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.SEARCHSET);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(ourCtx.newXmlParser().encodeResourceToString(bundle)), StandardCharsets.UTF_8));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[0]);
+
+		MyClient client = ourCtx.newRestfulClient(MyClient.class, "http://foo");
+		List<Patient> response = client.search("Patient:organization");
+
+		assertEquals(HttpGet.class, capt.getValue().getClass());
+		HttpGet post = (HttpGet) capt.getValue();
+		assertEquals("http://foo/Patient?_include=Patient%3Aorganization", post.getURI().toString());
 	}
 
 	@Test
