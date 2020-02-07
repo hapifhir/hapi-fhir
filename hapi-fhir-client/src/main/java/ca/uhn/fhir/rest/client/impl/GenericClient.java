@@ -1788,13 +1788,17 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
 				SortSpec rootSs = null;
+				SortSpec lastSs = null;
 				for (SortInternal next : mySort) {
 					SortSpec nextSortSpec = new SortSpec();
 					nextSortSpec.setParamName(next.getParamValue());
 					nextSortSpec.setOrder(next.getDirection());
 					if (rootSs == null) {
 						rootSs = nextSortSpec;
+					} else {
+						lastSs.setChain(nextSortSpec);
 					}
+					lastSs = nextSortSpec;
 				}
 				if (rootSs != null) {
 					addParam(params, Constants.PARAM_SORT, SortParameter.createSortStringDstu3(rootSs));
