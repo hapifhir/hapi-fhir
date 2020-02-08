@@ -590,6 +590,11 @@
 		<developer>
 			<id>dionmcm</id>
 		</developer>
+		<developer>
+			<id>ttntrifork</id>
+			<organization>Trifork</organization>
+			<name>Tue Toft Nørgård</name>
+		</developer>
 	</developers>
 
 	<licenses>
