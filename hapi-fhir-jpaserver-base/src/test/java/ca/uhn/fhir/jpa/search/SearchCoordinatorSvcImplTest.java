@@ -200,13 +200,7 @@ public class SearchCoordinatorSvcImplTest {
 			search.setStatus(SearchStatusEnum.LOADING);
 			return Optional.of(search);
 		});
-
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
-		assertNotNull(result.getUuid());
-		assertEquals(null, result.size());
-
-		List<IBaseResource> resources;
-
+		
 		when(mySearchCacheSvc.save(any())).thenAnswer(t -> {
 			Search search = t.getArgument(0, Search.class);
 			myCurrentSearch = search;
@@ -216,7 +210,11 @@ public class SearchCoordinatorSvcImplTest {
 		IFhirResourceDao dao = myCallingDao;
 		when(myDaoRegistry.getResourceDao(any(String.class))).thenReturn(dao);
 
-		resources = result.getResources(0, 100000);
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		assertNotNull(result.getUuid());
+		assertEquals(null, result.size());
+
+		List<IBaseResource> resources = result.getResources(0, 100000);
 		assertEquals(790, resources.size());
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("799", resources.get(789).getIdElement().getValueAsString());

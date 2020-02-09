@@ -1538,21 +1538,21 @@ public class GenericClientDstu3Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
 
-		client
-				.search()
-				.forResource(Patient.class)
-				.sort().ascending("address")
-				.returnBundle(Bundle.class)
-				.execute();
-		assertEquals("http://example.com/fhir/Patient?_sort=address", capt.getAllValues().get(idx++).getURI().toASCIIString());
-
-		client
-				.search()
-				.forResource(Patient.class)
-				.sort().descending("address")
-				.returnBundle(Bundle.class)
-				.execute();
-		assertEquals("http://example.com/fhir/Patient?_sort=-address", capt.getAllValues().get(idx++).getURI().toASCIIString());
+//		client
+//				.search()
+//				.forResource(Patient.class)
+//				.sort().ascending("address")
+//				.returnBundle(Bundle.class)
+//				.execute();
+//		assertEquals("http://example.com/fhir/Patient?_sort=address", capt.getAllValues().get(idx++).getURI().toASCIIString());
+//
+//		client
+//				.search()
+//				.forResource(Patient.class)
+//				.sort().descending("address")
+//				.returnBundle(Bundle.class)
+//				.execute();
+//		assertEquals("http://example.com/fhir/Patient?_sort=-address", capt.getAllValues().get(idx++).getURI().toASCIIString());
 
 		client
 				.search()

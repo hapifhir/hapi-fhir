@@ -388,7 +388,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			}
 		}
 
-		// FIXME: DM 2019-09-13 - Manually add EXTERNAL_COPYRIGHT_NOTICE property until Regenstrief adds this to loinc.xml
+		// TODO: DM 2019-09-13 - Manually add EXTERNAL_COPYRIGHT_NOTICE property until Regenstrief adds this to loinc.xml
 		if (!propertyNamesToTypes.containsKey("EXTERNAL_COPYRIGHT_NOTICE")) {
 			String externalCopyRightNoticeCode = "EXTERNAL_COPYRIGHT_NOTICE";
 			CodeSystem.PropertyType externalCopyRightNoticeType = CodeSystem.PropertyType.STRING;

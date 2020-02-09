@@ -62,41 +62,41 @@ public class ParameterUtil {
 	 */
 	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RestSearchParameterTypeEnum paramType,
 																		  String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
-		QueryParameterAndBinder binder = null;
+		QueryParameterAndBinder binder;
 		switch (paramType) {
 			case COMPOSITE:
 				throw new UnsupportedOperationException();
 			case DATE:
 				binder = new QueryParameterAndBinder(DateAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>>emptyList());
+					Collections.emptyList());
 				break;
 			case NUMBER:
 				binder = new QueryParameterAndBinder(NumberAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>>emptyList());
+					Collections.emptyList());
 				break;
 			case QUANTITY:
 				binder = new QueryParameterAndBinder(QuantityAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>>emptyList());
+					Collections.emptyList());
 				break;
 			case REFERENCE:
 				binder = new QueryParameterAndBinder(ReferenceAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>>emptyList());
+					Collections.emptyList());
 				break;
 			case STRING:
 				binder = new QueryParameterAndBinder(StringAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>>emptyList());
+					Collections.emptyList());
 				break;
 			case TOKEN:
 				binder = new QueryParameterAndBinder(TokenAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>>emptyList());
+					Collections.emptyList());
 				break;
 			case URI:
 				binder = new QueryParameterAndBinder(UriAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>>emptyList());
+					Collections.emptyList());
 				break;
 			case HAS:
 				binder = new QueryParameterAndBinder(HasAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>>emptyList());
+					Collections.emptyList());
 				break;
 			case SPECIAL:
 				binder = new QueryParameterAndBinder(SpecialAndListParam.class,
@@ -106,7 +106,6 @@ public class ParameterUtil {
 				throw new IllegalArgumentException("Parameter '" + theUnqualifiedParamName + "' has type " + paramType + " which is currently not supported.");
 		}
 
-		// FIXME null access
 		return binder.parse(theContext, theUnqualifiedParamName, theParameters);
 	}
 
