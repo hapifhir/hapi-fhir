@@ -313,6 +313,8 @@ public class MethodUtil {
 					} else if (nextAnnotation instanceof ResourceParam) {
 						if (IBaseResource.class.isAssignableFrom(parameterType)) {
 							// good
+						} else if (String.class.equals(parameterType)) {
+							// good
 						} else {
 							StringBuilder b = new StringBuilder();
 							b.append("Method '");
