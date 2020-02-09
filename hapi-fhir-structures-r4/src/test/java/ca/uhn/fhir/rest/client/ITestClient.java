@@ -17,40 +17,40 @@ import ca.uhn.fhir.rest.param.*;
 public interface ITestClient extends IBasicClient {
 
 	@Create
-	public MethodOutcome createPatient(@ResourceParam Patient thePatient);
+	MethodOutcome createPatient(@ResourceParam Patient thePatient);
 
 	@Search()
-	public List<Patient> getPatientByDateRange(@RequiredParam(name = "dateRange") DateRangeParam theIdentifiers);
+	List<Patient> getPatientByDateRange(@RequiredParam(name = "dateRange") DateRangeParam theIdentifiers);
 
 	@Search(type=Observation.class)
-	public Bundle getObservationByNameValueDate(@RequiredParam(name = Observation.SP_CODE_VALUE_DATE, compositeTypes= {StringParam.class,DateParam.class}) CompositeParam<StringParam, DateParam> theIdentifiers);
+	Bundle getObservationByNameValueDate(@RequiredParam(name = Observation.SP_CODE_VALUE_DATE, compositeTypes = {StringParam.class, DateParam.class}) CompositeParam<StringParam, DateParam> theIdentifiers);
 
 	@Search()
-	public List<Patient> getPatientByDob(@RequiredParam(name=Patient.SP_BIRTHDATE) DateParam theBirthDate);
+	List<Patient> getPatientByDob(@RequiredParam(name = Patient.SP_BIRTHDATE) DateParam theBirthDate);
 
 	@Search(type=ExtendedPatient.class)
-	public List<IBaseResource> getPatientByDobWithGenericResourceReturnType(@RequiredParam(name=Patient.SP_BIRTHDATE) DateParam theBirthDate);
+	List<IBaseResource> getPatientByDobWithGenericResourceReturnType(@RequiredParam(name = Patient.SP_BIRTHDATE) DateParam theBirthDate);
 
    @Search(type=ExtendedPatient.class)
-   public List<IAnyResource> getPatientByDobWithGenericResourceReturnType2(@RequiredParam(name=Patient.SP_BIRTHDATE) DateParam theBirthDate);
+	List<IAnyResource> getPatientByDobWithGenericResourceReturnType2(@RequiredParam(name = Patient.SP_BIRTHDATE) DateParam theBirthDate);
 
    @Search()
-	public List<Patient> getPatientMultipleIdentifiers(@RequiredParam(name = "ids") TokenOrListParam theIdentifiers);
+	List<Patient> getPatientMultipleIdentifiers(@RequiredParam(name = "ids") TokenOrListParam theIdentifiers);
 
 	@Search(queryName="someQueryNoParams")
-	public Patient getPatientNoParams();
+	Patient getPatientNoParams();
 
 	@Search(queryName="someQueryOneParam")
-	public Patient getPatientOneParam(@RequiredParam(name="param1") StringParam theParam);
+	Patient getPatientOneParam(@RequiredParam(name = "param1") StringParam theParam);
 
 	@Search(type=Patient.class)
-	public Bundle findPatient(@RequiredParam(name = "param") StringAndListParam theStrings);
+	Bundle findPatient(@RequiredParam(name = "param") StringAndListParam theStrings);
 
 	@Search()
-	public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringParam theString, @IncludeParam List<Include> theIncludes);
+	Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringParam theString, @IncludeParam List<Include> theIncludes);
 	
 	@Update
-	public MethodOutcome updatePatient(@IdParam IdType theId, @ResourceParam Patient thePatient);
+	MethodOutcome updatePatient(@IdParam IdType theId, @ResourceParam Patient thePatient);
 
 	@Delete(type=DiagnosticReport.class)
 	void deleteDiagnosticReport(@IdParam IdType theId);
@@ -89,7 +89,8 @@ public interface ITestClient extends IBasicClient {
 	Patient findPatientQuantity(@RequiredParam(name="quantityParam") QuantityParam theQuantityType);
 
 	@Search(compartmentName="compartmentName")
-	public List<Patient> getPatientByCompartmentAndDob(@IdParam IdType theIdType, @RequiredParam(name=Patient.SP_BIRTHDATE) DateParam theBirthDate);
+	List<Patient> getPatientByCompartmentAndDob(@IdParam IdType theIdType, @RequiredParam(name = Patient.SP_BIRTHDATE) DateParam theBirthDate);
 
-
+	@Search
+	Patient getPatientWithAt(@At InstantType theInstantType);
 }

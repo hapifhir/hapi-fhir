@@ -313,12 +313,6 @@ public class MethodUtil {
 					} else if (nextAnnotation instanceof ResourceParam) {
 						if (IBaseResource.class.isAssignableFrom(parameterType)) {
 							// good
-						} else if (String.class.equals(parameterType)) {
-							// good
-						} else if (byte[].class.equals(parameterType)) {
-							// good
-						} else if (EncodingEnum.class.equals(parameterType)) {
-							// good
 						} else {
 							StringBuilder b = new StringBuilder();
 							b.append("Method '");
@@ -327,14 +321,11 @@ public class MethodUtil {
 							b.append(ResourceParam.class.getSimpleName());
 							b.append(" but has a type that is not an implemtation of ");
 							b.append(IBaseResource.class.getCanonicalName());
-							b.append(" or String or byte[]");
 							throw new ConfigurationException(b.toString());
 						}
 						param = new ResourceParameter(parameterType);
 					} else if (nextAnnotation instanceof IdParam) {
 						param = new NullParameter();
-					} else if (nextAnnotation instanceof ServerBase) {
-						param = new ServerBaseParamBinder();
 					} else if (nextAnnotation instanceof Elements) {
 						param = new ElementsParameter();
 					} else if (nextAnnotation instanceof Since) {
