@@ -37,7 +37,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SchemaInitializationProvider implements ISchemaInitializationProvider {
 
-	private final String mySchemaFileClassPath;
+	private String mySchemaFileClassPath;
 	private final String mySchemaExistsIndicatorTable;
 
 	/**
@@ -109,6 +109,11 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 	@Override
 	public String getSchemaExistsIndicatorTable() {
 		return mySchemaExistsIndicatorTable;
+	}
+
+	public SchemaInitializationProvider setSchemaFileClassPath(String theSchemaFileClassPath) {
+		mySchemaFileClassPath = theSchemaFileClassPath;
+		return this;
 	}
 }
 

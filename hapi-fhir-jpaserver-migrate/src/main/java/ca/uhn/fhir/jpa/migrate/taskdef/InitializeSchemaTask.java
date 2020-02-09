@@ -34,6 +34,7 @@ import java.util.Set;
 
 public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
 	private static final Logger ourLog = LoggerFactory.getLogger(InitializeSchemaTask.class);
+
 	private final ISchemaInitializationProvider mySchemaInitializationProvider;
 
 	public InitializeSchemaTask(String theProductVersion, String theSchemaVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
@@ -76,5 +77,9 @@ public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
 	@Override
 	protected void generateHashCode(HashCodeBuilder theBuilder) {
 		theBuilder.append(mySchemaInitializationProvider);
+	}
+
+	public ISchemaInitializationProvider getSchemaInitializationProvider() {
+		return mySchemaInitializationProvider;
 	}
 }
