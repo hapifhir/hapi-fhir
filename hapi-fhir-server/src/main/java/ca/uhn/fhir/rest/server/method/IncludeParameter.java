@@ -154,7 +154,7 @@ class IncludeParameter extends BaseQueryParameter {
 				}
 				return new Include(value, recurse);
 			}
-			//FIXME null access
+
 			retValCollection.add(new Include(value, recurse));
 		}
 

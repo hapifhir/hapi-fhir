@@ -199,26 +199,7 @@ public class JaxRsPatientProviderDstu3Test {
             //assertEquals(e.getStatusCode(), Constants.STATUS_HTTP_404_NOT_FOUND);
         }
     }
-    
-    /** Transaction - Server */
-    @Ignore
-    @Test
-    public void testTransaction() {
-        Bundle bundle = new Bundle();
-        BundleEntryComponent entry = bundle.addEntry();
-        final Patient existing = new Patient();
-        existing.getName().get(0).setFamily("Created with bundle");
-        entry.setResource(existing);
 
-        // FIXME ?
-//        BoundCodeDt<BundleEntryTransactionMethodEnum> theTransactionOperation = 
-//                new BoundCodeDt(
-//                        BundleEntryTransactionMethodEnum.VALUESET_BINDER, 
-//                        BundleEntryTransactionMethodEnum.POST);
-//        entry.setTransactionMethod(theTransactionOperation);
-        Bundle response = client.transaction().withBundle(bundle).execute();
-    }
-    
     /** Conformance - Server */
     @Test
     @Ignore
