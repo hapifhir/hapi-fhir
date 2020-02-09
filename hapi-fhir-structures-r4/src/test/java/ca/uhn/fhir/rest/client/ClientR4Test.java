@@ -281,7 +281,7 @@ public class ClientR4Test {
 			ourCtx.newRestfulClient(ITestClientWithCreateWithInvalidParameterType.class, "http://foo");
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Method 'createPatient' is annotated with @ResourceParam but has a type that is not an implemtation of org.hl7.fhir.instance.model.api.IBaseResource", e.getMessage());
+			assertEquals("Method 'createPatient' is annotated with @ResourceParam but has a type that is not an implementation of org.hl7.fhir.instance.model.api.IBaseResource", e.getMessage());
 		}
 	}
 
