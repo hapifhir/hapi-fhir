@@ -262,9 +262,21 @@ public class IncludeTest {
 		}
 	}
 
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
+	@Test
+	public void testStringInclude() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=stringInclude&_include=foo");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+			assertEquals(1, bundle.getEntry().size());
+
+			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
+			assertEquals("foo", p.getIdentifierFirstRep().getValue());
+		}
+	}
+
 	public static class DummyDiagnosticReportResourceProvider implements IResourceProvider {
 
 		@Override
@@ -391,6 +403,17 @@ public class IncludeTest {
 
 			return retVal;
 		}
+
+
+		@Search(queryName = "stringInclude")
+		public List<Patient> stringInclude(@IncludeParam String theInclude) {
+			Patient p = new Patient();
+			p.setId("p");
+			p.addIdentifier().setValue(theInclude);
+
+			return Arrays.asList(p);
+		}
+
 
 		@Override
 		public Class<Patient> getResourceType() {

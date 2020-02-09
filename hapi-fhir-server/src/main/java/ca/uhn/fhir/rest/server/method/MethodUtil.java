@@ -192,7 +192,7 @@ public class MethodUtil {
 							b.append(theMethod.getName());
 							b.append("' is annotated with @");
 							b.append(ResourceParam.class.getSimpleName());
-							b.append(" but has a type that is not an implemtation of ");
+							b.append(" but has a type that is not an implementation of ");
 							b.append(IBaseResource.class.getCanonicalName());
 							b.append(" or String or byte[]");
 							throw new ConfigurationException(b.toString());

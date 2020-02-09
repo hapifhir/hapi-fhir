@@ -2565,6 +2565,30 @@
 			<properties>
 				<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m -XX:TieredStopAtLevel=1 -XX:+UseParallelGC -Xverify:none  -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M</surefire_jvm_args>
 			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>validate</id>
+								<phase>generate-sources</phase>
+								<configuration>
+									<configLocation>src/checkstyle/checkstyle_config_nofixmes.xml</configLocation>
+									<encoding>UTF-8</encoding>
+									<consoleOutput>true</consoleOutput>
+									<failOnViolation>true</failOnViolation>
+									<failsOnError>false</failsOnError>
+								</configuration>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		<profile>
 			<id>NOPARALLEL</id>
