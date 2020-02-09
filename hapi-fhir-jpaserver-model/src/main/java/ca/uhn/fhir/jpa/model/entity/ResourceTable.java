@@ -221,6 +221,13 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Transient
 	private transient ResourceHistoryTable myCurrentVersionEntity;
 
+	/**
+	 * Constructor
+	 */
+	public ResourceTable() {
+		super();
+	}
+
 	@Override
 	public ResourceTag addTag(TagDefinition theTag) {
 		for (ResourceTag next : getTags()) {
@@ -423,6 +430,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return this;
 	}
 
+	@Override
 	public Collection<ResourceTag> getTags() {
 		if (myTags == null) {
 			myTags = new HashSet<>();
@@ -551,6 +559,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		retVal.setFhirVersion(getFhirVersion());
 		retVal.setDeleted(getDeleted());
 		retVal.setForcedId(getForcedId());
+		retVal.setTenantId(getTenantId());
 
 		retVal.getTags().clear();
 

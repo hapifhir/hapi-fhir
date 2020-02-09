@@ -390,6 +390,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
 
+		if (myDaoConfig.isMultiTenancyEnabled()) {
+			// Interceptor call: STORAGE_TENANT_IDENTIFY_CREATE
+			HookParams params = new HookParams()
+				.add(IBaseResource.class, theResource)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			TenantId tenantId = (TenantId) doCallHooksAndReturnObject(theRequest, Pointcut.STORAGE_TENANT_IDENTIFY_CREATE, params);
+			if (tenantId != null) {
+				ourLog.debug("Resource has been assigned tenant ID: {}", tenantId);
+				entity.setTenantId(tenantId);
+			}
+		}
+
 		if (isNotBlank(theIfNoneExist)) {
 			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType, theRequest);
 			if (match.size() > 1) {
@@ -432,7 +445,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			notifyInterceptors(RestOperationTypeEnum.CREATE, requestDetails);
 		}
 
-		// Notify JPA interceptors
+		// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_CREATED
 		HookParams hookParams = new HookParams()
 			.add(IBaseResource.class, theResource)
 			.add(RequestDetails.class, theRequest)

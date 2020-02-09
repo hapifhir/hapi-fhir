@@ -24,9 +24,6 @@ import ca.uhn.fhir.rest.api.Constants;
 
 public class JpaConstants {
 
-	public static final String USERDATA_TENANT_ID = JpaConstants.class.getName() + "_USERDATA_TENANT_ID";
-	public static final String USERDATA_TENANT_DATE = JpaConstants.class.getName() + "_USERDATA_TENANT_DATE";
-
 	/**
 	 * Operation name for the $apply-codesystem-delta-add operation
 	 */

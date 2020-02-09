@@ -41,6 +41,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class InterceptorService implements IInterceptorService, IInterceptorBroadcaster {
@@ -142,6 +143,22 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 	public void registerInterceptors(@Nullable Collection<?> theInterceptors) {
 		if (theInterceptors != null) {
 			theInterceptors.forEach(t -> registerInterceptor(t));
+		}
+	}
+
+	@Override
+	public void unregisterInterceptorsIf(Function<Object, Boolean> theShouldUnregisterFunction) {
+		unregisterInterceptorsIf(theShouldUnregisterFunction, myGlobalInvokers);
+		unregisterInterceptorsIf(theShouldUnregisterFunction, myAnonymousInvokers);
+	}
+
+	private void unregisterInterceptorsIf(Function<Object, Boolean> theShouldUnregisterFunction, ListMultimap<Pointcut, BaseInvoker> theGlobalInvokers) {
+		for (Iterator<Map.Entry<Pointcut, BaseInvoker>> iter = theGlobalInvokers.entries().iterator(); iter.hasNext(); ) {
+			Map.Entry<Pointcut, BaseInvoker> next = iter.next();
+			Object nextInterceptor = next.getValue().getInterceptor();
+			if (theShouldUnregisterFunction.apply(nextInterceptor)) {
+				iter.remove();
+			}
 		}
 	}
 

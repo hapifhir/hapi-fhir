@@ -70,6 +70,7 @@ public class DaoSearchParamSynchronizer {
 			theEntity.getParamsQuantity().remove(next);
 		}
 		for (T next : quantitiesToAdd) {
+			next.setTenantId(theEntity.getTenantId());
 			myEntityManager.merge(next);
 		}
 

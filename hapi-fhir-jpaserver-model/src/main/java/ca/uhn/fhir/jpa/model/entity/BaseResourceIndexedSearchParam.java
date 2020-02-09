@@ -80,17 +80,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
 
-	@Embedded
-	private TenantId myTenantId;
-
-	public TenantId getTenantId() {
-		return myTenantId;
-	}
-
-	public void setTenantId(TenantId theTenantId) {
-		myTenantId = theTenantId;
-	}
-
 	/**
 	 * Subclasses may override
 	 */

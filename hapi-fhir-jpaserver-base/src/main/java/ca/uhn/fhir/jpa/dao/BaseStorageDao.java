@@ -54,7 +54,6 @@ import java.util.Set;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.OO_SEVERITY_ERROR;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.OO_SEVERITY_INFO;
 import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseStorageDao {
@@ -159,6 +158,10 @@ public abstract class BaseStorageDao {
 
 	protected void doCallHooks(RequestDetails theRequestDetails, Pointcut thePointcut, HookParams theParams) {
 		JpaInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequestDetails, thePointcut, theParams);
+	}
+
+	protected Object doCallHooksAndReturnObject(RequestDetails theRequestDetails, Pointcut thePointcut, HookParams theParams) {
+		return JpaInterceptorBroadcaster.doCallHooksAndReturnObject(getInterceptorBroadcaster(), theRequestDetails, thePointcut, theParams);
 	}
 
 	protected abstract IInterceptorBroadcaster getInterceptorBroadcaster();

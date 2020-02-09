@@ -184,6 +184,11 @@ public class DaoConfig {
 	private boolean myPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets;
 
 	/**
+	 * @since 4.3.0
+	 */
+	private boolean myMultiTenancyEnabled;
+
+	/**
 	 * Constructor
 	 */
 	public DaoConfig() {
@@ -1907,7 +1912,25 @@ public class DaoConfig {
 		setPreExpandValueSetsDefaultCount(Math.min(getPreExpandValueSetsDefaultCount(), getPreExpandValueSetsMaxCount()));
 	}
 
-	public enum StoreMetaSourceInformationEnum {
+	/**
+	 * If enabled (default is <code>false</code>) the JPA server will support multitenant queries
+	 *
+	 * @since 4.3.0
+	 */
+	public void setMultiTenancyEnabled(boolean theMultiTenancyEnabled) {
+		myMultiTenancyEnabled = theMultiTenancyEnabled;
+	}
+
+	/**
+	 * If enabled (default is <code>false</code>) the JPA server will support multitenant queries
+	 *
+	 * @since 4.3.0
+	 */
+	public boolean isMultiTenancyEnabled() {
+		return myMultiTenancyEnabled;
+	}
+
+    public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
 		SOURCE_URI(true, false),
 		REQUEST_ID(false, true),

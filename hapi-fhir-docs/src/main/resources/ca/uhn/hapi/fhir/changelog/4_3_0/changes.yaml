@@ -4,7 +4,7 @@
       title: "The version of a few dependencies have been bumped to the latest versions
     (dependent HAPI modules listed in brackets):
     <ul>
-    <li>Hibernate ORM (JPA): 5.4.6 -&gt; 5.4.10</li>
+    <li>Hibernate ORM (JPA): 5.4.6.Final -&gt; 5.4.11.Final</li>
     </ul>"
 -  item:
       type: change

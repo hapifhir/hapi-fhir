@@ -20,9 +20,23 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import javax.persistence.Embedded;
+import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
+@MappedSuperclass
 public abstract class BaseResourceIndex implements Serializable {
+
+	@Embedded
+	private TenantId myTenantId;
+
+	public TenantId getTenantId() {
+		return myTenantId;
+	}
+
+	public void setTenantId(TenantId theTenantId) {
+		myTenantId = theTenantId;
+	}
 
 	public abstract Long getId();
 
