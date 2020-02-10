@@ -48,6 +48,8 @@ public class ResourceIndexedCompositeStringUnique implements Comparable<Resource
 	private Long myResourceId;
 	@Column(name = "IDX_STRING", nullable = false, length = MAX_STRING_LENGTH)
 	private String myIndexString;
+	@Embedded
+	private TenantId myTenantId;
 
 	/**
 	 * Constructor
@@ -62,6 +64,14 @@ public class ResourceIndexedCompositeStringUnique implements Comparable<Resource
 	public ResourceIndexedCompositeStringUnique(ResourceTable theResource, String theIndexString) {
 		setResource(theResource);
 		setIndexString(theIndexString);
+	}
+
+	public TenantId getTenantId() {
+		return myTenantId;
+	}
+
+	public void setTenantId(TenantId theTenantId) {
+		myTenantId = theTenantId;
 	}
 
 	@Override
@@ -116,6 +126,7 @@ public class ResourceIndexedCompositeStringUnique implements Comparable<Resource
 			.append("id", myId)
 			.append("resourceId", myResourceId)
 			.append("indexString", myIndexString)
+			.append("tenant", myTenantId)
 			.toString();
 	}
 }

@@ -46,12 +46,14 @@ public class SearchParamPresent implements Serializable {
 	@ManyToOne()
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_RESPARMPRES_RESID"))
 	private ResourceTable myResource;
-	@Column(name="RES_ID", nullable = false, insertable = false, updatable = false)
+	@Column(name = "RES_ID", nullable = false, insertable = false, updatable = false)
 	private Long myResourcePid;
 	@Transient
 	private transient String myParamName;
 	@Column(name = "HASH_PRESENCE")
 	private Long myHashPresence;
+	@Embedded
+	private TenantId myTenantId;
 
 	/**
 	 * Constructor
@@ -110,7 +112,16 @@ public class SearchParamPresent implements Serializable {
 		b.append("resPid", myResource.getIdDt().toUnqualifiedVersionless().getValue());
 		b.append("paramName", myParamName);
 		b.append("present", myPresent);
+		b.append("tenant", myTenantId);
 		return b.build();
+	}
+
+	public TenantId getTenantId() {
+		return myTenantId;
+	}
+
+	public void setTenantId(TenantId theTenantId) {
+		myTenantId = theTenantId;
 	}
 
 	public static long calculateHashPresence(String theResourceType, String theParamName, Boolean thePresent) {

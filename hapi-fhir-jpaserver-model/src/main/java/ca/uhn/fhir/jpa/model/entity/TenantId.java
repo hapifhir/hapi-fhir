@@ -1,18 +1,17 @@
 package ca.uhn.fhir.jpa.model.entity;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.time.LocalDate;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
 @Embeddable
 public class TenantId implements Cloneable {
 
-	@Column(name = "TENANT_ID", nullable = true)
+	@Column(name = "TENANT_ID", nullable = true, insertable = true, updatable = false)
 	private Integer myTenantId;
-	@Column(name = "TENANT_DATE", nullable = true)
+	@Column(name = "TENANT_DATE", nullable = true, insertable = true, updatable = false)
 	private LocalDate myTenantDate;
 
 	/**
@@ -30,7 +29,7 @@ public class TenantId implements Cloneable {
 		setTenantDate(theTenantDate);
 	}
 
-    public Integer getTenantId() {
+	public Integer getTenantId() {
 		return myTenantId;
 	}
 
@@ -57,9 +56,6 @@ public class TenantId implements Cloneable {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("id", myTenantId)
-			.append("date", myTenantDate)
-			.toString();
+		return defaultIfNull(myTenantId, "null").toString();
 	}
 }
