@@ -137,7 +137,7 @@ public class ConsentInterceptor {
 				case PROCEED:
 					break;
 				case AUTHORIZED:
-					break;
+					break;q
 				case REJECT:
 					thePreResourceAccessDetails.setDontReturnResourceAtIndex(i);
 					break;

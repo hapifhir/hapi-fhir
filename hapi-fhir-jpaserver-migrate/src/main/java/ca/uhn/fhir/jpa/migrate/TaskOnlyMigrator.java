@@ -51,7 +51,11 @@ public class TaskOnlyMigrator extends BaseMigrator {
 			next.setConnectionProperties(connectionProperties);
 
 			try {
-				ourLog.info("Executing task of type: {}", next.getClass().getSimpleName());
+				if (isDryRun()) {
+					ourLog.info("Dry run {} {}", next.getFlywayVersion(), next.getDescription());
+				} else {
+					ourLog.info("Executing {} {}", next.getFlywayVersion(), next.getDescription());
+				}
 				next.execute();
 				addExecutedStatements(next.getExecutedStatements());
 			} catch (SQLException e) {

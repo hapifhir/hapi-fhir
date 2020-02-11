@@ -254,7 +254,8 @@ public class SearchBuilder implements ISearchBuilder {
 				outerQuery.multiselect(myBuilder.countDistinct(myQueryRoot.getRoot()));
 			} else {
 				outerQuery.multiselect(myQueryRoot.get("myId").as(Long.class));
-				outerQuery.distinct(true);
+				// KHS This distinct call is causing performance issues in large installations
+//				outerQuery.distinct(true);
 			}
 
 		}
