@@ -97,6 +97,7 @@ public class SchemaMigrator {
 			return;
 		}
 		newMigrator().migrate();
+		ourLog.info("Schema migrated successfully.");
 	}
 
 	private BaseMigrator newMigrator() {
