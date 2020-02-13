@@ -107,8 +107,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private EntityManager myEntityManager;
 	private ExecutorService myExecutor;
 	private Integer myLoadingThrottleForUnitTests = null;
-	// FIXME: reduce
-	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_HOUR;
+	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
 	private boolean myNeverUseLocalSearchForUnitTests;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
