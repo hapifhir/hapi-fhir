@@ -1039,7 +1039,7 @@ public class SearchBuilder implements ISearchBuilder {
 							}
 
 							if (!myResultsIterator.hasNext()) {
-								if (mySkipCount + myNonSkipCount == myMaxResultsToFetch) {
+								if (myMaxResultsToFetch != null && (mySkipCount + myNonSkipCount == myMaxResultsToFetch)) {
 									if (mySkipCount > 0 && myNonSkipCount == 0) {
 										myMaxResultsToFetch += 1000;
 
