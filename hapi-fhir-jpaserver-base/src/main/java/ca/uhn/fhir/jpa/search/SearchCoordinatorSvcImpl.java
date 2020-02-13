@@ -107,7 +107,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private EntityManager myEntityManager;
 	private ExecutorService myExecutor;
 	private Integer myLoadingThrottleForUnitTests = null;
-	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
+	// FIXME: reduce
+	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_HOUR;
 	private boolean myNeverUseLocalSearchForUnitTests;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -774,10 +775,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 						if (theResultIter.hasNext() == false) {
 							int skippedCount = theResultIter.getSkippedCount();
+							int nonSkippedCount = theResultIter.getNonSkippedCount();
 							int totalFetched = skippedCount + myCountSavedThisPass + myCountBlockedThisPass;
 							ourLog.trace("MaxToFetch[{}] SkippedCount[{}] CountSavedThisPass[{}] CountSavedThisTotal[{}] AdditionalPrefetchRemaining[{}]", myMaxResultsToFetch, skippedCount, myCountSavedThisPass, myCountSavedTotal, myAdditionalPrefetchThresholdsRemaining);
 
-							if (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch) {
+							if (nonSkippedCount == 0 || (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch)) {
 								ourLog.trace("Setting search status to FINISHED");
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
 								mySearch.setTotalCount(myCountSavedTotal);

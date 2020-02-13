@@ -603,6 +603,11 @@ public class SearchCoordinatorSvcImplTest {
 		}
 
 		@Override
+		public int getNonSkippedCount() {
+			return myCount;
+		}
+
+		@Override
 		public void close() {
 			// nothing
 		}
@@ -611,6 +616,7 @@ public class SearchCoordinatorSvcImplTest {
 	public static class ResultIterator extends BaseIterator<ResourcePersistentId> implements IResultIterator {
 
 		private final Iterator<ResourcePersistentId> myWrap;
+		private int myCount;
 
 		ResultIterator(Iterator<ResourcePersistentId> theWrap) {
 			myWrap = theWrap;
@@ -623,12 +629,18 @@ public class SearchCoordinatorSvcImplTest {
 
 		@Override
 		public ResourcePersistentId next() {
+			myCount++;
 			return myWrap.next();
 		}
 
 		@Override
 		public int getSkippedCount() {
 			return 0;
+		}
+
+		@Override
+		public int getNonSkippedCount() {
+			return myCount;
 		}
 
 		@Override
@@ -695,6 +707,11 @@ public class SearchCoordinatorSvcImplTest {
 			} else {
 				return myResultIteratorWrap.getSkippedCount();
 			}
+		}
+
+		@Override
+		public int getNonSkippedCount() {
+			return 0;
 		}
 
 		@Override
