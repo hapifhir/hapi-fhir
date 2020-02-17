@@ -9,10 +9,13 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ValidateUtil;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -31,6 +34,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.convertors.conv30_40.CodeSystem30_40.convertCodeSystem;
+import static org.hl7.fhir.convertors.conv30_40.ValueSet30_40.convertValueSet;
+import static org.hl7.fhir.convertors.conv30_40.ValueSet30_40.convertValueSetExpansionComponent;
 
 /*
  * #%L
@@ -104,7 +110,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
 			valueSetToExpandR4 = toCanonicalValueSet(valueSetToExpand);
 			org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandedR4 = super.expandValueSetInMemory(valueSetToExpandR4, null).getExpansion();
-			return VersionConvertor_30_40.convertValueSetExpansionComponent(expandedR4);
+			return convertValueSetExpansionComponent(expandedR4);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
@@ -118,7 +124,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
 			valueSetToExpandR4 = toCanonicalValueSet(valueSetToExpand);
 			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(valueSetToExpandR4, null);
-			return VersionConvertor_30_40.convertValueSet(expandedR4);
+			return convertValueSet(expandedR4);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
@@ -127,7 +133,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 	@Override
 	protected org.hl7.fhir.r4.model.ValueSet toCanonicalValueSet(IBaseResource theValueSet) throws FHIRException {
 		org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
-		valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet((ValueSet) theValueSet);
+		valueSetToExpandR4 = convertValueSet((ValueSet) theValueSet);
 		return valueSetToExpandR4;
 	}
 
@@ -139,7 +145,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
 			valueSetToExpandR4 = toCanonicalValueSet(valueSetToExpand);
 			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(valueSetToExpandR4, theOffset, theCount);
-			return VersionConvertor_30_40.convertValueSet(expandedR4);
+			return convertValueSet(expandedR4);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
@@ -256,7 +262,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 	public org.hl7.fhir.r4.model.CodeSystem getCodeSystemFromContext(String theSystem) {
 		CodeSystem codeSystem = myValidationSupport.fetchCodeSystem(myContext, theSystem);
 		try {
-			return VersionConvertor_30_40.convertCodeSystem(codeSystem);
+			return convertCodeSystem(codeSystem);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
@@ -323,7 +329,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 	public ValidateCodeResult validateCodeIsInPreExpandedValueSet(IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
 		ValueSet valueSet = (ValueSet) theValueSet;
-		org.hl7.fhir.r4.model.ValueSet valueSetR4 = VersionConvertor_30_40.convertValueSet(valueSet);
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = convertValueSet(valueSet);
 
 		Coding coding = (Coding) theCoding;
 		org.hl7.fhir.r4.model.Coding codingR4 = null;
@@ -347,7 +353,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 	public boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
 		ValueSet valueSet = (ValueSet) theValueSet;
-		org.hl7.fhir.r4.model.ValueSet valueSetR4 = VersionConvertor_30_40.convertValueSet(valueSet);
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = convertValueSet(valueSet);
 		return super.isValueSetPreExpandedForCodeValidation(valueSetR4);
 	}
 }

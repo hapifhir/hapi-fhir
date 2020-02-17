@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
@@ -71,7 +72,7 @@ public class QuestionnaireValidatorDstu3Test {
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
 			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages(), Matchers.empty());
+			assertThat(errors.getMessages().stream().filter(t->t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList()), Matchers.empty());
 		}
 
 	}
