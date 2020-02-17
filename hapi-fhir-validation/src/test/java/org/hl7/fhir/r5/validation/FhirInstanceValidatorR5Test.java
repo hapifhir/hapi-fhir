@@ -364,9 +364,7 @@ public class FhirInstanceValidatorR5Test {
 
 	}
 
-	// FIXME: enable and change performed to occurrence
 	@Test
-	@Ignore
 	public void testCompareTimesWithDifferentTimezones() {
 		Procedure procedure = new Procedure();
 		procedure.setStatus(Enumerations.EventStatus.COMPLETED);

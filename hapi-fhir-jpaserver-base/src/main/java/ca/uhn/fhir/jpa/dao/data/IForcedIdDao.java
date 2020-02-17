@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.model.entity.ForcedId;
 
 public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 
-	// FIXME: JA We should log a performance warning if this is used since it's not indexed
 	@Query("SELECT f.myResourcePid FROM ForcedId f WHERE myForcedId IN (:forced_id)")
 	List<Long> findByForcedId(@Param("forced_id") Collection<String> theForcedId);
 

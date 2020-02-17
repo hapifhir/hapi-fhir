@@ -85,13 +85,11 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	public HttpClient getNativeHttpClient() {
 		if (myHttpClient == null) {
 
-			//FIXME potential resoource leak
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000,
 					TimeUnit.MILLISECONDS);
 			connectionManager.setMaxTotal(getPoolMaxTotal());
 			connectionManager.setDefaultMaxPerRoute(getPoolMaxPerRoute());
 
-			// @formatter:off
 			//TODO: Use of a deprecated method should be resolved.
 			RequestConfig defaultRequestConfig =
 				RequestConfig.custom()
@@ -114,7 +112,6 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 			}
 
 			myHttpClient = builder.build();
-			// @formatter:on
 
 		}
 
@@ -128,7 +125,7 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 
 	/**
 	 * Only allows to set an instance of type org.apache.http.client.HttpClient
-	 * @see ca.uhn.fhir.rest.client.api.IRestfulClientFactory#setHttpClient(ca.uhn.fhir.rest.client.api.IHttpClient)
+	 * @see ca.uhn.fhir.rest.client.api.IRestfulClientFactory#setHttpClient(Object)
 	 */
 	@Override
 	public synchronized void setHttpClient(Object theHttpClient) {
