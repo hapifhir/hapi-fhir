@@ -337,7 +337,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 				retVal = new ArrayList<>();
 				for (StructureDefinition next : myWrap.allStructures()) {
 					try {
-						retVal.add(org.hl7.fhir.convertors.conv40_50.StructureDefinition.convertStructureDefinition(next));
+						retVal.add(org.hl7.fhir.convertors.conv40_50.StructureDefinition40_50.convertStructureDefinition(next));
 					} catch (FHIRException e) {
 						throw new InternalErrorException(e);
 					}
@@ -367,7 +367,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 				org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent conceptDefinition = null;
 				if (theResult.asConceptDefinition() != null) {
 					try {
-						conceptDefinition = org.hl7.fhir.convertors.conv40_50.CodeSystem.convertConceptDefinitionComponent(theResult.asConceptDefinition());
+						conceptDefinition = org.hl7.fhir.convertors.conv40_50.CodeSystem40_50.convertConceptDefinitionComponent(theResult.asConceptDefinition());
 					} catch (FHIRException e) {
 						throw new InternalErrorException(e);
 					}
@@ -387,7 +387,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ValueSet source, boolean cacheOk, boolean heiarchical) {
 			ValueSet convertedSource;
 			try {
-				convertedSource = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(source);
+				convertedSource = org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(source);
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
 			}
@@ -396,7 +396,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 			org.hl7.fhir.r5.model.ValueSet convertedResult = null;
 			if (expanded.getValueset() != null) {
 				try {
-					convertedResult = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(expanded.getValueset());
+					convertedResult = org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(expanded.getValueset());
 				} catch (FHIRException e) {
 					throw new InternalErrorException(e);
 				}
@@ -418,7 +418,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 			ValueSet.ConceptSetComponent convertedInc = null;
 			if (inc != null) {
 				try {
-					convertedInc = org.hl7.fhir.convertors.conv40_50.ValueSet.convertConceptSetComponent(inc);
+					convertedInc = org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertConceptSetComponent(inc);
 				} catch (FHIRException e) {
 					throw new InternalErrorException(e);
 				}
@@ -428,7 +428,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 			org.hl7.fhir.r5.model.ValueSet valueSetExpansion = null;
 			if (expansion != null) {
 				try {
-					valueSetExpansion = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(expansion.getValueset());
+					valueSetExpansion = org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(expansion.getValueset());
 				} catch (FHIRException e) {
 					throw new InternalErrorException(e);
 				}
@@ -444,7 +444,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 				return null;
 			}
 			try {
-				return org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem(fetched);
+				return org.hl7.fhir.convertors.conv40_50.CodeSystem40_50.convertCodeSystem(fetched);
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
 			}
@@ -527,6 +527,11 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 		@Override
 		public org.hl7.fhir.r5.model.StructureDefinition fetchTypeDefinition(String typeName) {
 			return fetchResource(org.hl7.fhir.r5.model.StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
+		}
+
+		@Override
+		public org.hl7.fhir.r5.model.StructureDefinition fetchRawProfile(String url) {
+			return fetchResource(org.hl7.fhir.r5.model.StructureDefinition.class, url);
 		}
 
 		@Override
@@ -625,7 +630,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 
 			try {
 				if (vs != null) {
-					convertedVs = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(vs);
+					convertedVs = org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(vs);
 				}
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
@@ -640,7 +645,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 			ValueSet convertedVs = null;
 			try {
 				if (vs != null) {
-					convertedVs = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(vs);
+					convertedVs = org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(vs);
 				}
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
@@ -660,7 +665,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 					convertedCode = VersionConvertor_40_50.convertCoding(code);
 				}
 				if (vs != null) {
-					convertedVs = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(vs);
+					convertedVs = org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(vs);
 				}
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
@@ -680,7 +685,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 					convertedCode = VersionConvertor_40_50.convertCodeableConcept(code);
 				}
 				if (vs != null) {
-					convertedVs = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(vs);
+					convertedVs = org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(vs);
 				}
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);

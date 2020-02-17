@@ -398,7 +398,11 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ValidationResult output = myVal.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(46, errors.size());
+		errors = errors
+			.stream()
+			.filter(t->t.getMessage().contains("Bundle entry missing fullUrl"))
+			.collect(Collectors.toList());
+		assertEquals(5, errors.size());
 	}
 
 	@Test
@@ -634,8 +638,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport));
 
 		// Prepopulate SDs
-		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/dstu3/myconsent-profile.xml"));
-		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/dstu3/myconsent-ext.xml"));
+		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/r4/myconsent-profile.xml"));
+		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/r4/myconsent-ext.xml"));
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new FhirInstanceValidator(support));
@@ -1034,7 +1038,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidationSupport(myMockSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.toString(), containsString("StructureDefinition reference \"http://foo/structuredefinition/myprofile\" could not be resolved"));
+		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked"));
 	}
 
 	@Test

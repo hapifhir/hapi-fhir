@@ -308,50 +308,6 @@ public class ClientR4Test {
 	}
 
 	@Test
-	public void testCreateWithInvalidType() throws Exception {
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("urn:foo").setValue("123");
-		String serialized = ourCtx.newXmlParser().encodeResourceToString(patient);
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(serialized), StandardCharsets.UTF_8));
-		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
-
-		try {
-			ourCtx.newRestfulClient(ITestClientWithCreateWithInvalidParameterType.class, "http://foo");
-			fail();
-		} catch (ConfigurationException e) {
-			assertEquals("Method 'createPatient' is annotated with @ResourceParam but has a type that is not an implemtation of org.hl7.fhir.instance.model.api.IBaseResource", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testCreateWithValidAndInvalidType() throws Exception {
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("urn:foo").setValue("123");
-		String serialized = ourCtx.newXmlParser().encodeResourceToString(patient);
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(serialized), StandardCharsets.UTF_8));
-		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
-
-		try {
-			ourCtx.newRestfulClient(ITestClientWithCreateWithValidAndInvalidParameterType.class, "http://foo");
-			fail();
-		} catch (ConfigurationException e) {
-			assertEquals("Parameter #2/2 of method 'createPatient' on type 'ca.uhn.fhir.rest.client.ClientR4Test.ITestClientWithCreateWithValidAndInvalidParameterType' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter", e.getMessage());
-		}
-	}
-
-	@Test
 	public void testDelete() throws Exception {
 
 		OperationOutcome oo = new OperationOutcome();

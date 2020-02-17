@@ -616,6 +616,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
+		public org.hl7.fhir.r5.model.StructureDefinition fetchRawProfile(String url) {
+			return fetchResource(org.hl7.fhir.r5.model.StructureDefinition.class, url);
+		}
+
+		@Override
 		public List<String> getTypeNames() {
 			return myWrap.getTypeNames();
 		}

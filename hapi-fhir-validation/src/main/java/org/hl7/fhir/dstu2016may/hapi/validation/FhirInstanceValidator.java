@@ -585,6 +585,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			return fetchResource(org.hl7.fhir.r5.model.StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
 		}
 
+		@Override
+		public org.hl7.fhir.r5.model.StructureDefinition fetchRawProfile(String url) {
+			return fetchResource(org.hl7.fhir.r5.model.StructureDefinition.class, url);
+		}
+
 
 		@Override
 		public List<String> getTypeNames() {

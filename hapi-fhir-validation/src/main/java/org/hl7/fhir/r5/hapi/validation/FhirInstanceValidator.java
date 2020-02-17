@@ -535,6 +535,11 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 		}
 
 		@Override
+		public StructureDefinition fetchRawProfile(String url) {
+			return myWrap.fetchRawProfile(url);
+		}
+
+		@Override
 		public List<String> getTypeNames() {
 			return myWrap.getTypeNames();
 		}

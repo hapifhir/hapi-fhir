@@ -27,6 +27,8 @@ import org.fhir.ucum.UcumService;
 import org.hl7.fhir.converter.NullVersionConverterAdvisor50;
 import org.hl7.fhir.convertors.VersionConvertorAdvisor50;
 import org.hl7.fhir.convertors.VersionConvertor_10_50;
+import org.hl7.fhir.convertors.conv10_50.ValueSet10_50;
+import org.hl7.fhir.convertors.conv14_50.CodeSystem14_50;
 import org.hl7.fhir.dstu2.model.CodeableConcept;
 import org.hl7.fhir.dstu2.model.Coding;
 import org.hl7.fhir.dstu2.model.Questionnaire;
@@ -483,11 +485,17 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 						case "StructureDefinition":
 							fetched = myWrap.fetchResource(StructureDefinition.class, key.getUri());
 							break;
+						case "CodeSystem":
 						case "ValueSet":
 							fetched = myWrap.fetchResource(ValueSet.class, key.getUri());
-							break;
-						case "CodeSystem":
-							fetched = myWrap.fetchResource(ValueSet.class, key.getUri());
+
+							ValueSet fetchedVs = (ValueSet) fetched;
+							if (!fetchedVs.hasCompose()) {
+								if (fetchedVs.hasCodeSystem()) {
+									fetchedVs.getCompose().addInclude().setSystem(fetchedVs.getCodeSystem().getSystem());
+								}
+							}
+
 							break;
 						case "Questionnaire":
 							fetched = myWrap.fetchResource(Questionnaire.class, key.getUri());
@@ -503,7 +511,15 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 					}
 
 					try {
-						org.hl7.fhir.r5.model.Resource converted = new VersionConvertor_10_50().convertResource(fetched);
+						org.hl7.fhir.r5.model.Resource converted;
+						if ("CodeSystem".equals(key.getUri())) {
+							NullVersionConverterAdvisor50 advisor = new NullVersionConverterAdvisor50();
+							converted = ValueSet10_50.convertValueSet((ValueSet) fetched, advisor);
+							converted = advisor.getCodeSystem((org.hl7.fhir.r5.model.ValueSet) converted);
+						} else {
+							converted = VersionConvertor_10_50.convertResource(fetched);
+						}
+
 
 						if (fetched instanceof StructureDefinition) {
 							StructureDefinition fetchedSd = (StructureDefinition) fetched;
@@ -760,6 +776,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
+		public org.hl7.fhir.r5.model.StructureDefinition fetchRawProfile(String url) {
+			return fetchResource(org.hl7.fhir.r5.model.StructureDefinition.class, url);
+		}
+
+		@Override
 		public void setUcumService(UcumService ucumService) {
 			throw new UnsupportedOperationException();
 		}
@@ -866,7 +887,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			ValueSet convertedVs = null;
 			try {
 				if (vs != null) {
-					VersionConvertorAdvisor50 advisor50 = new NullVersionConverterAdvisor50();
 					convertedVs = convertValueSet(vs);
 				}
 			} catch (FHIRException e) {

@@ -275,7 +275,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				nextCodeSystem = convertCodeSystem((org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem);
 				break;
 			case R5:
-				nextCodeSystem = org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem);
+				nextCodeSystem = org.hl7.fhir.convertors.conv40_50.CodeSystem40_50.convertCodeSystem((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem);
 				break;
 			default:
 				nextCodeSystem = (CodeSystem) theCodeSystem;
