@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 1702
+title: "Loading of _include and _revinclude values has been optimized to be slightly faster"

@@ -138,10 +138,6 @@ public class ResourceLink extends BaseResourceIndex {
 		mySourceResourceType = theSourceResource.getResourceType();
 	}
 
-	public Long getSourceResourcePid() {
-		return mySourceResourcePid;
-	}
-
 	public ResourceTable getTargetResource() {
 		return myTargetResource;
 	}
@@ -155,10 +151,6 @@ public class ResourceLink extends BaseResourceIndex {
 
 	public Long getTargetResourcePid() {
 		return myTargetResourcePid;
-	}
-
-	public String getTargetResourceUrl() {
-		return myTargetResourceUrl;
 	}
 
 	public void setTargetResourceUrl(IIdType theTargetResourceUrl) {
