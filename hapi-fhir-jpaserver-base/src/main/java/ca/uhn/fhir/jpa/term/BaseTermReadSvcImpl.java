@@ -608,8 +608,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 						builder.add(new TermQuery(nextCode), BooleanClause.Occur.SHOULD);
 					}
 
-					MultiPhraseQuery query = new MultiPhraseQuery();
-					query.add(codes.toArray(new Term[0]));
 					luceneQuery = new BooleanQuery.Builder()
 						.add(luceneQuery, BooleanClause.Occur.MUST)
 						.add(builder.build(), BooleanClause.Occur.MUST)
