@@ -74,7 +74,7 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 			return;
 		}
 
-		String sql = null;
+		String sql;
 		switch (getDriverType()) {
 			case MARIADB_10_1:
 			case MYSQL_5_7:
@@ -105,28 +105,20 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		AddForeignKeyTask that = (AddForeignKeyTask) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myConstraintName, that.myConstraintName)
-			.append(myForeignTableName, that.myForeignTableName)
-			.append(myForeignColumnName, that.myForeignColumnName)
-			.isEquals();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myConstraintName);
+		theBuilder.append(myForeignTableName);
+		theBuilder.append(myForeignColumnName);
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myConstraintName)
-			.append(myForeignTableName)
-			.append(myForeignColumnName)
-			.toHashCode();
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		AddForeignKeyTask otherObject = (AddForeignKeyTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(myConstraintName, otherObject.myConstraintName);
+		theBuilder.append(myForeignTableName, otherObject.myForeignTableName);
+		theBuilder.append(myForeignColumnName, otherObject.myForeignColumnName);
 	}
+
 }

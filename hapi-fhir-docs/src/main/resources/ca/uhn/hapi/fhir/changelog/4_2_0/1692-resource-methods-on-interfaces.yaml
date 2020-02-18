@@ -1,0 +1,6 @@
+---
+type: add
+issue: 1694
+title: It is now possible to specify resource provider method annotations on interface methods implemented by
+   resource provider classes, as opposed to needing to specify them directly on the concrete class. Thanks
+   to Tue Toft Nørgård for the pull request!

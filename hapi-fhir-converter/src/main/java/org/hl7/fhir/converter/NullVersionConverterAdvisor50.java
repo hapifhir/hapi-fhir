@@ -27,7 +27,11 @@ import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.ValueSet;
 
+import java.util.IdentityHashMap;
+
 public class NullVersionConverterAdvisor50 implements VersionConvertorAdvisor50 {
+
+	private IdentityHashMap<ValueSet, CodeSystem> myCodeSystems = new IdentityHashMap<>();
 
 	@Override
 	public boolean ignoreEntry(Bundle.BundleEntryComponent src) {
@@ -56,11 +60,11 @@ public class NullVersionConverterAdvisor50 implements VersionConvertorAdvisor50 
 
 	@Override
 	public void handleCodeSystem(CodeSystem tgtcs, ValueSet source) throws FHIRException {
-
+		myCodeSystems.put(source, tgtcs);
 	}
 
 	@Override
 	public CodeSystem getCodeSystem(ValueSet src) throws FHIRException {
-		return null;
+		return myCodeSystems.get(src);
 	}
 }

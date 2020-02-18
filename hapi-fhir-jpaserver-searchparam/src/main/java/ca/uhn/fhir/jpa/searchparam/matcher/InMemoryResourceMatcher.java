@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -87,6 +88,9 @@ public class InMemoryResourceMatcher {
 		searchParameterMap.clean();
 		if (searchParameterMap.getLastUpdated() != null) {
 			return InMemoryMatchResult.unsupportedFromParameterAndReason(Constants.PARAM_LASTUPDATED, InMemoryMatchResult.STANDARD_PARAMETER);
+		}
+		if (searchParameterMap.containsKey(Location.SP_NEAR)) {
+			return InMemoryMatchResult.unsupportedFromReason(InMemoryMatchResult.LOCATION_NEAR);
 		}
 
 		for (Map.Entry<String, List<List<IQueryParameterType>>> entry : searchParameterMap.entrySet()) {

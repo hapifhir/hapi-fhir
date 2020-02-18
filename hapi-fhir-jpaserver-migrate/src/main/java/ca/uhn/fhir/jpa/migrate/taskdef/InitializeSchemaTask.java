@@ -68,22 +68,13 @@ public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		InitializeSchemaTask that = (InitializeSchemaTask) theO;
-
-		return new EqualsBuilder()
-			.append(mySchemaInitializationProvider, that.mySchemaInitializationProvider)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<InitializeSchemaTask> theOtherObject) {
+		InitializeSchemaTask otherObject = (InitializeSchemaTask) theOtherObject;
+		theBuilder.append(mySchemaInitializationProvider, otherObject.mySchemaInitializationProvider);
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(mySchemaInitializationProvider)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		theBuilder.append(mySchemaInitializationProvider);
 	}
 }

@@ -52,12 +52,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private static final int MAX_PROFILE_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
 
-//	@Transient
-//	private transient byte[] myResource;
-//
-//	@Transient
-//	private transient ResourceEncodingEnum myEncoding;
-
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 */

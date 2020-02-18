@@ -1,0 +1,5 @@
+---
+type: add
+title: "In the JPA server, a new setting called `setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(boolean)` has
+   been added to the DaoConfig. If this setting is enabled, when creating placeholder resources, the Reference.identifier
+   value is copied to the target resource if possible."

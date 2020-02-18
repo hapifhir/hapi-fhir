@@ -18,7 +18,6 @@ import org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r5.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.r5.model.Observation.ObservationStatus;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
@@ -54,9 +53,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 
 public class FhirInstanceValidatorR5Test {
 
@@ -160,7 +160,7 @@ public class FhirInstanceValidatorR5Test {
 				String valueSetUrl = theInvocation.getArgument(4, String.class);
 				IContextValidationSupport.CodeValidationResult retVal;
 				if (myValidConcepts.contains(system + "___" + code)) {
-					retVal = new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(new CodeType(code)));
+					retVal = new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent((code)));
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(ctx, system, code, display, valueSetUrl);
 				}
@@ -261,7 +261,7 @@ public class FhirInstanceValidatorR5Test {
 	public void testValidateDoesntEnforceBestPracticesByDefault() {
 		Observation input = new Observation();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-		input.setStatus(ObservationStatus.AMENDED);
+		input.setStatus(Enumerations.ObservationStatus.AMENDED);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234").setDisplay("FOO");
 
 		FhirInstanceValidator instanceModule;
@@ -364,12 +364,10 @@ public class FhirInstanceValidatorR5Test {
 
 	}
 
-	// FIXME: enable and change performed to occurrence
 	@Test
-	@Ignore
 	public void testCompareTimesWithDifferentTimezones() {
 		Procedure procedure = new Procedure();
-		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
+		procedure.setStatus(Enumerations.EventStatus.COMPLETED);
 		procedure.getSubject().setReference("Patient/1");
 		procedure.getCode().setText("Some proc");
 
@@ -416,6 +414,23 @@ public class FhirInstanceValidatorR5Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(nonInfo, empty());
+	}
+
+
+
+	@Test
+	public void testInvocationOfValidatorFetcher() throws IOException {
+
+		String input = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream("/vitals.json"), Charsets.UTF_8);
+
+		IResourceValidator.IValidatorResourceFetcher resourceFetcher = mock(IResourceValidator.IValidatorResourceFetcher.class);
+		when(resourceFetcher.validationPolicy(any(),anyString(), anyString())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
+		myVal.validateWithResult(input);
+
+		verify(resourceFetcher, times(12)).resolveURL(any(), anyString(), anyString());
+		verify(resourceFetcher, times(3)).validationPolicy(any(), anyString(), anyString());
+		verify(resourceFetcher, times(3)).fetch(any(), anyString());
 	}
 
 	@Test
@@ -729,7 +744,7 @@ public class FhirInstanceValidatorR5Test {
 
 		input.addIdentifier().setSystem("http://acme").setValue("12345");
 		input.getEncounter().setReference("http://foo.com/Encounter/9");
-		input.setStatus(ObservationStatus.FINAL);
+		input.setStatus(Enumerations.ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
 		myInstanceVal.setValidationSupport(myMockSupport);
@@ -750,7 +765,7 @@ public class FhirInstanceValidatorR5Test {
 
 		input.addIdentifier().setSystem("http://acme").setValue("12345");
 		input.getEncounter().setReference("http://foo.com/Encounter/9");
-		input.setStatus(ObservationStatus.FINAL);
+		input.setStatus(Enumerations.ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
 		myInstanceVal.setValidationSupport(myMockSupport);
@@ -772,12 +787,12 @@ public class FhirInstanceValidatorR5Test {
 		input.getMeta().addProfile("http://foo/structuredefinition/myprofile");
 
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
-		input.setStatus(ObservationStatus.FINAL);
+		input.setStatus(Enumerations.ObservationStatus.FINAL);
 
 		myInstanceVal.setValidationSupport(myMockSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.toString(), containsString("StructureDefinition reference \"http://foo/structuredefinition/myprofile\" could not be resolved"));
+		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked"));
 	}
 
 	@Test
@@ -800,7 +815,7 @@ public class FhirInstanceValidatorR5Test {
 		Observation input = new Observation();
 
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-		input.setStatus(ObservationStatus.FINAL);
+		input.setStatus(Enumerations.ObservationStatus.FINAL);
 		input.getCode().setText("No code here!");
 
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
@@ -825,7 +840,7 @@ public class FhirInstanceValidatorR5Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertEquals(
-			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.1.0 (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code[notvalidcode] in system[(none)])",
+			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.2.0 (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code[notvalidcode] in system[(none)])",
 			output.getMessages().get(0).getMessage());
 	}
 
@@ -836,7 +851,7 @@ public class FhirInstanceValidatorR5Test {
 
 		myInstanceVal.setValidationSupport(myMockSupport);
 
-		input.setStatus(ObservationStatus.FINAL);
+		input.setStatus(Enumerations.ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
 		ValidationResult output = myVal.validateWithResult(input);
@@ -853,7 +868,7 @@ public class FhirInstanceValidatorR5Test {
 		myInstanceVal.setValidationSupport(myMockSupport);
 		addValidConcept("http://acme.org", "12345");
 
-		input.setStatus(ObservationStatus.FINAL);
+		input.setStatus(Enumerations.ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://acme.org").setCode("9988877");
 
 		ValidationResult output = myVal.validateWithResult(input);
@@ -871,7 +886,7 @@ public class FhirInstanceValidatorR5Test {
 		myInstanceVal.setValidationSupport(myMockSupport);
 		addValidConcept("http://loinc.org", "12345");
 
-		input.setStatus(ObservationStatus.FINAL);
+		input.setStatus(Enumerations.ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
 		ValidationResult output = myVal.validateWithResult(input);
@@ -891,7 +906,7 @@ public class FhirInstanceValidatorR5Test {
 		myInstanceVal.setValidationSupport(myMockSupport);
 		addValidConcept("http://loinc.org", "12345");
 
-		input.setStatus(ObservationStatus.FINAL);
+		input.setStatus(Enumerations.ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234");
 
 		ValidationResult output = myVal.validateWithResult(input);
@@ -908,7 +923,7 @@ public class FhirInstanceValidatorR5Test {
 		myInstanceVal.setValidationSupport(myMockSupport);
 		addValidConcept("http://acme.org", "12345");
 
-		input.setStatus(ObservationStatus.FINAL);
+		input.setStatus(Enumerations.ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://acme.org").setCode("12345");
 
 		ValidationResult output = myVal.validateWithResult(input);

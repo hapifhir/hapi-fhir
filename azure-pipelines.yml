@@ -2,7 +2,9 @@
 
 variables:
   MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
-  MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+  #MAVEN_CACHE_FOLDER: $(Agent.TempDirectory)/.m2/repository
+  #MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+  MAVEN_OPTS: ''
 
 trigger:
 - master
@@ -15,17 +17,21 @@ jobs:
     timeoutInMinutes: 360
     container: maven:3-jdk-11
     steps:
-      - task: CacheBeta@0
+      - task: Cache@2
         inputs:
-          key: maven
+          key: 'maven | "$(Agent.OS)" | ./pom.xml'
           path: $(MAVEN_CACHE_FOLDER)
+      - task: Bash@3
+        inputs:
+          targetType: 'inline'
+          script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
       - task: Maven@3
         env:
           JAVA_HOME_11_X64: /usr/local/openjdk-11
         inputs:
-          goals: 'clean dependency:resolve install'
+          goals: 'clean install'
           # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
-          options: '-P ALLMODULES,JACOCO,CI,ERRORPRONE -nsu'
+          options: '-P ALLMODULES,JACOCO,CI,ERRORPRONE -nsu -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
           # These are JVM options (and don't show up in the build logs)
           mavenOptions: '-Xmx2048m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
           jdkVersionOption: 1.11

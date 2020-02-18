@@ -4,20 +4,24 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.XmlUtil;
 import ca.uhn.fhir.validation.IValidationContext;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.io.input.ReaderInputStream;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Manager;
+import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.hl7.fhir.r5.utils.ValidationProfileSet;
 import org.hl7.fhir.r5.validation.InstanceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import java.io.InputStream;
@@ -33,13 +37,24 @@ public class ValidatorWrapper {
 	private boolean myAnyExtensionsAllowed;
 	private boolean myErrorForUnknownProfiles;
 	private boolean myNoTerminologyChecks;
+	private boolean myAssumeValidRestReferences;
 	private Collection<? extends String> myExtensionDomains;
+	private IResourceValidator.IValidatorResourceFetcher myValidatorResourceFetcher;
 
 	/**
 	 * Constructor
 	 */
 	public ValidatorWrapper() {
 		super();
+	}
+
+	public boolean isAssumeValidRestReferences() {
+		return myAssumeValidRestReferences;
+	}
+
+	public ValidatorWrapper setAssumeValidRestReferences(boolean assumeValidRestReferences) {
+		this.myAssumeValidRestReferences = assumeValidRestReferences;
+		return this;
 	}
 
 	public ValidatorWrapper setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel theBestPracticeWarningLevel) {
@@ -67,6 +82,12 @@ public class ValidatorWrapper {
 		return this;
 	}
 
+
+	public ValidatorWrapper setValidatorResourceFetcher(IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher) {
+		this.myValidatorResourceFetcher = validatorResourceFetcher;
+		return this;
+	}
+
 	public List<ValidationMessage> validate(IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
 		InstanceValidator v;
 		FHIRPathEngine.IEvaluationContext evaluationCtx = new org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator.NullEvaluationContext();
@@ -76,18 +97,21 @@ public class ValidatorWrapper {
 			throw new ConfigurationException(e);
 		}
 
+		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
 		v.setBestPracticeWarningLevel(myBestPracticeWarningLevel);
 		v.setAnyExtensionsAllowed(myAnyExtensionsAllowed);
 		v.setResourceIdRule(IResourceValidator.IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(myNoTerminologyChecks);
 		v.setErrorForUnknownProfiles(myErrorForUnknownProfiles);
 		v.getExtensionDomains().addAll(myExtensionDomains);
+		v.setFetcher(myValidatorResourceFetcher);
+		v.setAllowXsiLocation(true);
 
 		List<ValidationMessage> messages = new ArrayList<>();
 
-		ValidationProfileSet profileSet = new ValidationProfileSet();
+		List<StructureDefinition> profileUrls = new ArrayList<>();
 		for (String next : theValidationContext.getOptions().getProfiles()) {
-			profileSet.getCanonical().add(new ValidationProfileSet.ProfileRegistration(next, true));
+			fetchAndAddProfile(theWorkerContext, profileUrls, next);
 		}
 
 		String input = theValidationContext.getResourceAsString();
@@ -108,14 +132,14 @@ public class ValidatorWrapper {
 			// Determine if meta/profiles are present...
 			ArrayList<String> profiles = determineIfProfilesSpecified(document);
 			for (String nextProfile : profiles) {
-				profileSet.getCanonical().add(new ValidationProfileSet.ProfileRegistration(nextProfile, true));
+				fetchAndAddProfile(theWorkerContext, profileUrls, nextProfile);
 			}
 
 			String resourceAsString = theValidationContext.getResourceAsString();
 			InputStream inputStream = new ReaderInputStream(new StringReader(resourceAsString), Charsets.UTF_8);
 
 			Manager.FhirFormat format = Manager.FhirFormat.XML;
-			v.validate(null, messages, inputStream, format, profileSet);
+			v.validate(null, messages, inputStream, format, profileUrls);
 
 		} else if (encoding == EncodingEnum.JSON) {
 
@@ -128,7 +152,8 @@ public class ValidatorWrapper {
 				if (profileElement != null && profileElement.isJsonArray()) {
 					JsonArray profiles = profileElement.getAsJsonArray();
 					for (JsonElement element : profiles) {
-						profileSet.getCanonical().add(new ValidationProfileSet.ProfileRegistration(element.getAsString(), true));
+						String nextProfile = element.getAsString();
+						fetchAndAddProfile(theWorkerContext, profileUrls, nextProfile);
 					}
 				}
 			}
@@ -137,7 +162,7 @@ public class ValidatorWrapper {
 			InputStream inputStream = new ReaderInputStream(new StringReader(resourceAsString), Charsets.UTF_8);
 
 			Manager.FhirFormat format = Manager.FhirFormat.JSON;
-			v.validate(null, messages, inputStream, format, profileSet);
+			v.validate(null, messages, inputStream, format, profileUrls);
 
 		} else {
 			throw new IllegalArgumentException("Unknown encoding: " + encoding);
@@ -156,16 +181,15 @@ public class ValidatorWrapper {
 		return messages;
 	}
 
-
-	private String determineResourceName(Document theDocument) {
-		NodeList list = theDocument.getChildNodes();
-		for (int i = 0; i < list.getLength(); i++) {
-			if (list.item(i) instanceof Element) {
-				return list.item(i).getLocalName();
-			}
+	private void fetchAndAddProfile(IWorkerContext theWorkerContext, List<StructureDefinition> theProfileStructureDefinitions, String theUrl) throws org.hl7.fhir.exceptions.FHIRException {
+		try {
+			StructureDefinition structureDefinition = theWorkerContext.fetchResourceWithException(StructureDefinition.class, theUrl);
+			theProfileStructureDefinitions.add(structureDefinition);
+		} catch (FHIRException e) {
+			ourLog.debug("Failed to load profile: {}", theUrl);
 		}
-		return theDocument.getDocumentElement().getLocalName();
 	}
+
 
 	private ArrayList<String> determineIfProfilesSpecified(Document theDocument) {
 		ArrayList<String> profileNames = new ArrayList<>();

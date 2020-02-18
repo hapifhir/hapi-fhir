@@ -1593,44 +1593,6 @@ public class JsonParserDstu3Test {
 		assertEquals("<Linkage xmlns=\"http://hl7.org/fhir\"><item><resource><display value=\"FOO\"/></resource></item></Linkage>", out);
 	}
 
-	// FIXME: this should pass
-	@Test
-	@Ignore
-	public void testNamespacePreservationEncode() {
-		//@formatter:off
-		String input = "<Patient xmlns=\"http://hl7.org/fhir\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">" +
-			"<text>" +
-			"<xhtml:div>" +
-			"<xhtml:img src=\"foo\"/>" +
-			"@fhirabend" +
-			"</xhtml:div>" +
-			"</text>" +
-			"</Patient>";
-		//@formatter:on
-		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, input);
-
-		String expected = "<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div>";
-		assertEquals(expected, parsed.getText().getDiv().getValueAsString());
-
-		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
-		ourLog.info(encoded);
-		assertThat(encoded, containsString("\"div\":\"" + expected.replace("\"", "\\\"") + "\""));
-	}
-
-	// TODO: this should pass
-	@Test
-	@Ignore
-	public void testNamespacePreservationParse() {
-		String input = "{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\"><xhtml:img src=\\\"foo\\\"/>@fhirabend</xhtml:div>\"}}";
-		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, input);
-		XhtmlNode div = parsed.getText().getDiv();
-
-		assertEquals("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div>", div.getValueAsString());
-
-		String encoded = ourCtx.newXmlParser().encodeResourceToString(parsed);
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div></text></Patient>", encoded);
-	}
-
 	@Test
 	public void testOmitResourceId() {
 		Patient p = new Patient();
@@ -2187,15 +2149,27 @@ public class JsonParserDstu3Test {
 	public void testParseNarrativeWithEmptyDiv() {
 		String input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div/>\"}}";
 		Basic basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
-		assertEquals(null, basic.getText().getDivAsString());
+		assertEquals("<div/>", basic.getText().getDivAsString());
 
 		input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div></div>\"}}";
 		basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
-		assertEquals(null, basic.getText().getDivAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"/>", basic.getText().getDivAsString());
 
 		input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div> </div>\"}}";
 		basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"> </div>", basic.getText().getDivAsString());
+
+	}
+
+	/**
+	 * See #1658
+	 */
+	@Test
+	public void testParseNarrativeWithLang() {
+		String input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\" lang=\\\"en-US\\\">foo</div>\"}}";
+		Basic basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\">foo</div>", basic.getText().getDivAsString());
+
 
 	}
 

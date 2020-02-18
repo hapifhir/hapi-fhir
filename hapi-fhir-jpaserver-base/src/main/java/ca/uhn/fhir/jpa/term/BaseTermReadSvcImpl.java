@@ -1414,7 +1414,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 						TermConceptMapGroupElement termConceptMapGroupElement;
 						for (ConceptMap.SourceElementComponent element : group.getElement()) {
 							if (isBlank(element.getCode())) {
-								// FIXME: JA - send this to an interceptor message so it can be output
 								continue;
 							}
 							termConceptMapGroupElement = new TermConceptMapGroupElement();

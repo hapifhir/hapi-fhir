@@ -54,7 +54,7 @@ public class ServerInvalidDefinitionR4Test {
 		} catch (ServletException e) {
 			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
 			assertThat(e.getCause().toString(), StringContains
-				.containsString("Method 'update' is annotated with @ResourceParam but has a type that is not an implemtation of org.hl7.fhir.instance.model.api.IBaseResource or String or byte[]"));
+				.containsString("Method 'update' is annotated with @ResourceParam but has a type that is not an implementation of org.hl7.fhir.instance.model.api.IBaseResource or String or byte[]"));
 		}
 	}
 

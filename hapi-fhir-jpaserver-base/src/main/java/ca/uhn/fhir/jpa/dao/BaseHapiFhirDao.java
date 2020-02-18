@@ -1,21 +1,10 @@
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -86,11 +75,7 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.TypedQuery;
+import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -99,12 +84,7 @@ import javax.xml.stream.events.XMLEvent;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.left;
-import static org.apache.commons.lang3.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /*
  * #%L
@@ -179,7 +159,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	private ISearchParamPresenceSvc mySearchParamPresenceSvc;
 	@Autowired
-	private DaoRegistry myDaoRegistry;
+	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 	@Autowired
@@ -317,7 +297,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	@Override
-	protected DaoConfig getConfig() {
+	public DaoConfig getConfig() {
 		return myConfig;
 	}
 
@@ -345,10 +325,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 			return retVal;
 		}
-	}
-
-	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
-		return myDaoRegistry.getResourceDaoOrNull(theType);
 	}
 
 	protected TagDefinition getTagOrNull(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -392,7 +368,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		Search search = new Search();
 		search.setDeleted(false);
 		search.setCreated(new Date());
-		search.setSearchLastReturned(new Date());
 		search.setLastUpdated(theSince, theUntil);
 		search.setUuid(UUID.randomUUID().toString());
 		search.setResourceType(resourceName);
@@ -420,7 +395,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		search = mySearchCacheSvc.save(search);
 
-		return new PersistedJpaBundleProvider(theRequest, search.getUuid(), this);
+		return new PersistedJpaBundleProvider(theRequest, search.getUuid(), this, mySearchBuilderFactory);
 	}
 
 	void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
@@ -452,12 +427,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	public boolean isLogicalReference(IIdType theId) {
 		return LogicalReferenceHelper.isLogicalReference(myConfig.getModelConfig(), theId);
-	}
-
-	// TODO KHS inject a searchBuilderFactory into callers of this method and delete this method
-	@Override
-	public SearchBuilder newSearchBuilder() {
-		return mySearchBuilderFactory.newSearchBuilder(this);
 	}
 
 	public void notifyInterceptors(RestOperationTypeEnum theOperationType, ActionRequestDetails theRequestDetails) {

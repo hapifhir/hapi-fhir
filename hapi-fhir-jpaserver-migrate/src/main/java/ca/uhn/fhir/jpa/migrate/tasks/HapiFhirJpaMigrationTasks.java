@@ -61,6 +61,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	protected void init420() { // 20191015 - present
 		Builder version = forVersion(VersionEnum.V4_2_0);
+
+		// TermValueSetConceptDesignation
+		version.onTable("TRM_VALUESET_C_DESIGNATION").dropIndex("20200202.1", "IDX_VALUESET_C_DSGNTN_VAL").failureAllowed();
+		Builder.BuilderWithTableName searchTable = version.onTable("HFJ_SEARCH");
+		searchTable.dropIndex("20200203.1", "IDX_SEARCH_LASTRETURNED");
+		searchTable.dropColumn("20200203.2", "SEARCH_LAST_RETURNED");
+		searchTable.addIndex("20200203.3", "IDX_SEARCH_CREATED").unique(false).withColumns("CREATED");
 	}
 
 	protected void init410() { // 20190815 - 20191014
@@ -324,10 +331,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		termValueSetConceptDesignationTable.addColumn("USE_CODE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
 		termValueSetConceptDesignationTable.addColumn("USE_DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
 		termValueSetConceptDesignationTable.addColumn("VAL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
+
+		// This index turned out not to be needed so it is disabled
 		termValueSetConceptDesignationTable
 			.addIndex("20190801.6", "IDX_VALUESET_C_DSGNTN_VAL")
 			.unique(false)
-			.withColumns("VAL");
+			.withColumns("VAL")
+			.doNothing();
 
 		// TermCodeSystemVersion
 		version.startSectionWithMessage("Processing table: TRM_CODESYSTEM_VER");

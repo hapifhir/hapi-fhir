@@ -12,7 +12,6 @@ import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu3.hapi.validation.ResourceValidatorDstu3Test;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
@@ -36,7 +35,11 @@ import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -44,16 +47,29 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 
 public class FhirInstanceValidatorR4Test extends BaseTest {
 
@@ -127,8 +143,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		});
 		when(myMockSupport.isCodeSystemSupported(nullable(FhirContext.class), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
-			public Boolean answer(InvocationOnMock theInvocation) throws Throwable {
-				boolean retVal = myValidSystems.contains(theInvocation.getArguments()[1]);
+			public Boolean answer(InvocationOnMock theInvocation) {
+				boolean retVal = myValidSystems.contains(theInvocation.getArgument(1, String.class));
 				ourLog.debug("isCodeSystemSupported({}) : {}", new Object[]{theInvocation.getArguments()[1], retVal});
 				return retVal;
 			}
@@ -139,7 +155,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				IBaseResource retVal;
 				String id = (String) theInvocation.getArguments()[2];
 				if ("Questionnaire/q_jon".equals(id)) {
-					retVal = ourCtx.newJsonParser().parseResource(IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/q_jon.json")));
+					retVal = ourCtx.newJsonParser().parseResource(loadResource("/q_jon.json"));
 				} else {
 					retVal = myDefaultValidationSupport.fetchResource((FhirContext) theInvocation.getArguments()[0], (Class<IBaseResource>) theInvocation.getArguments()[1], id);
 				}
@@ -210,7 +226,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	private List<SingleValidationMessage> logResultsAndReturnAll(ValidationResult theOutput) {
-		List<SingleValidationMessage> retVal = new ArrayList<SingleValidationMessage>();
+		List<SingleValidationMessage> retVal = new ArrayList<>();
 
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {
@@ -262,6 +278,27 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
 		assertEquals("Primitive types must have a value that is not empty", all.get(0).getMessage());
+	}
+
+	/**
+	 * See #1676 - We should ignore schema location
+	 */
+	@Test
+	public void testValidateResourceWithSchemaLocation() {
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://hl7.org/fhir ../../schema/foo.xsd\">" +
+			"  <text>\n" +
+			"    <status value=\"generated\"/>\n" +
+			"    <div xmlns=\"http://www.w3.org/1999/xhtml\">AAA</div>\n" +
+			"  </text>" +
+			"  <active value=\"true\"/>" +
+			"</Patient>";
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+
+		ValidationResult result = val.validateWithResult(input);
+		logResultsAndReturnAll(result);
+		assertTrue(result.isSuccessful());
 	}
 
 	/**
@@ -361,7 +398,11 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ValidationResult output = myVal.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(46, errors.size());
+		errors = errors
+			.stream()
+			.filter(t->t.getMessage().contains("Bundle entry missing fullUrl"))
+			.collect(Collectors.toList());
+		assertEquals(5, errors.size());
 	}
 
 	@Test
@@ -597,8 +638,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport));
 
 		// Prepopulate SDs
-		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/dstu3/myconsent-profile.xml"));
-		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/dstu3/myconsent-ext.xml"));
+		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/r4/myconsent-profile.xml"));
+		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/r4/myconsent-ext.xml"));
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new FhirInstanceValidator(support));
@@ -615,6 +656,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			.getCodingFirstRep()
 			.setSystem("http://terminology.hl7.org/CodeSystem/consentcategorycodes")
 			.setCode("acd");
+
+
 
 		// Should pass
 		ValidationResult output = val.validateWithResult(input);
@@ -995,7 +1038,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidationSupport(myMockSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.toString(), containsString("StructureDefinition reference \"http://foo/structuredefinition/myprofile\" could not be resolved"));
+		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked"));
 	}
 
 	@Test
@@ -1212,6 +1255,21 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myVal.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(0, all.size());
+	}
+
+	@Test
+	public void testInvocationOfValidatorFetcher() throws IOException {
+
+		String encoded = loadResource("/r4/r4-caredove-bundle.json");
+
+		IResourceValidator.IValidatorResourceFetcher resourceFetcher = mock(IResourceValidator.IValidatorResourceFetcher.class);
+		when(resourceFetcher.validationPolicy(any(),anyString(), anyString())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
+		myVal.validateWithResult(encoded);
+
+		verify(resourceFetcher, times(14)).resolveURL(any(), anyString(), anyString());
+		verify(resourceFetcher, times(12)).validationPolicy(any(), anyString(), anyString());
+		verify(resourceFetcher, times(12)).fetch(any(), anyString());
 	}
 
 	@Test

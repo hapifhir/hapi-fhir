@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,30 +136,9 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		RenameColumnTask that = (RenameColumnTask) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myIsOkayIfNeitherColumnExists, that.myIsOkayIfNeitherColumnExists)
-			.append(myDeleteTargetColumnFirstIfBothExist, that.myDeleteTargetColumnFirstIfBothExist)
-			.append(myOldName, that.myOldName)
-			.append(myNewName, that.myNewName)
-			.isEquals();
-	}
-
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myOldName)
-			.append(myNewName)
-			.append(myIsOkayIfNeitherColumnExists)
-			.append(myDeleteTargetColumnFirstIfBothExist)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myOldName);
+		theBuilder.append(myNewName);
 	}
 }

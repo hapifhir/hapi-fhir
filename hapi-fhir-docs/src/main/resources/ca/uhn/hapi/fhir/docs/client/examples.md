@@ -161,7 +161,8 @@ The server responds with the following response. Note that the ID of the already
          <lastModified value="2015-10-29T07:33:28.047-04:00"/>
       </response>
    </entry>
-</Bundle>```
+</Bundle>
+```
 
 # Fetch all Pages of a Bundle
 
