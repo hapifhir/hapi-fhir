@@ -160,7 +160,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		IBundleProvider retVal = toResourceList(response);
 
 
-		if (retVal.size() == 1) {
+		if (Integer.valueOf(1).equals(retVal.size())) {
 			List<IBaseResource> responseResources = retVal.getResources(0, 1);
 			IBaseResource responseResource = responseResources.get(0);
 

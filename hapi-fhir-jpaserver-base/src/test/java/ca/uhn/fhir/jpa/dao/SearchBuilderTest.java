@@ -39,11 +39,10 @@ public class SearchBuilderTest {
 
 		TypedQuery mockQuery = mock(TypedQuery.class);
 		when(mockEntityManager.createQuery(any(), any())).thenReturn(mockQuery);
-		List<ResourceLink> resultList = new ArrayList<>();
-		ResourceLink link = new ResourceLink();
+		List<Long> resultList = new ArrayList<>();
+		Long link = 1L;
 		ResourceTable target = new ResourceTable();
 		target.setId(1L);
-		link.setTargetResource(target);
 		resultList.add(link);
 		when(mockQuery.getResultList()).thenReturn(resultList);
 
