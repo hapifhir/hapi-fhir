@@ -48,7 +48,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * and calling code is expected to be able to handle this.
  * </p>
  */
-public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST> {
+public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST> {
 
 	/**
 	 * Expands the given portion of a ValueSet

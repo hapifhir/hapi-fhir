@@ -50,10 +50,10 @@ public class FhirDstu3 implements IFhirVersion {
   }
 
   @Override
-  public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
+  public IContextValidationSupport<?, ?, ?, ?> createValidationSupport() {
     String className = "org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport";
     try {
-      return (IContextValidationSupport<?, ?, ?, ?, ?, ?>) Class.forName(className).newInstance();
+      return (IContextValidationSupport<?, ?, ?, ?>) Class.forName(className).newInstance();
     } catch (Exception theE) {
       throw new ConfigurationException(className + " is not on classpath. Make sure that hapi-fhir-validation-VERSION.jar is available.");
     }

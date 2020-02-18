@@ -3,20 +3,16 @@ package org.hl7.fhir.dstu2016may.hapi.validation;
 import java.util.List;
 
 import org.hl7.fhir.dstu2016may.model.CodeSystem;
-import org.hl7.fhir.dstu2016may.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu2016may.model.OperationOutcome;
 import org.hl7.fhir.dstu2016may.model.ValueSet;
-import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
 
 public interface IValidationSupport
-		extends ca.uhn.fhir.context.support.IContextValidationSupport<ConceptSetComponent, ValueSetExpansionComponent, StructureDefinition, CodeSystem, ConceptDefinitionComponent, OperationOutcome.IssueSeverity> {
+		extends ca.uhn.fhir.context.support.IContextValidationSupport<ConceptSetComponent, ValueSetExpansionComponent, StructureDefinition, CodeSystem> {
 
 	/**
 	 * Expands the given portion of a ValueSet

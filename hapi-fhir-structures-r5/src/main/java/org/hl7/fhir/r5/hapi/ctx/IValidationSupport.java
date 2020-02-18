@@ -4,17 +4,15 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.CodeSystem;
-import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
-import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
 import java.util.List;
 
 public interface IValidationSupport
-  extends IContextValidationSupport<ConceptSetComponent, ValueSetExpander.ValueSetExpansionOutcome, StructureDefinition, CodeSystem, ConceptDefinitionComponent, IssueSeverity> {
+  extends IContextValidationSupport<ConceptSetComponent, ValueSetExpander.ValueSetExpansionOutcome, StructureDefinition, CodeSystem> {
 
   /**
    * Expands the given portion of a ValueSet

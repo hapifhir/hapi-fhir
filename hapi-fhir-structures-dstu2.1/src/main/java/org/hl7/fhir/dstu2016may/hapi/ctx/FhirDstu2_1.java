@@ -47,7 +47,7 @@ public class FhirDstu2_1 implements IFhirVersion {
 	}
 
 	@Override
-	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
+	public IContextValidationSupport<?, ?, ?, ?> createValidationSupport() {
 		throw new UnsupportedOperationException("Validation is not supported in DSTU2.1 contexts");
 	}
 

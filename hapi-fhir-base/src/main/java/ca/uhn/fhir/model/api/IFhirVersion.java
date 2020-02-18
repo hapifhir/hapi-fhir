@@ -41,7 +41,7 @@ public interface IFhirVersion {
 
 	IFluentPath createFluentPathExecutor(FhirContext theFhirContext);
 
-	IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport();
+	IContextValidationSupport<?, ?, ?, ?> createValidationSupport();
 
 	IBaseResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
 

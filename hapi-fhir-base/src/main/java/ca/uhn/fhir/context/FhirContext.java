@@ -20,7 +20,6 @@ import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.VersionUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.jena.riot.Lang;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -97,7 +96,7 @@ public class FhirContext {
 	private Collection<Class<? extends IBaseResource>> myResourceTypesToScan;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
-	private IContextValidationSupport<?, ?, ?, ?, ?, ?> myValidationSupport;
+	private IContextValidationSupport<?, ?, ?, ?> myValidationSupport;
 	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
 
 	/**
@@ -549,7 +548,7 @@ public class FhirContext {
 	 *
 	 * @see #setValidationSupport(IContextValidationSupport)
 	 */
-	public IContextValidationSupport<?, ?, ?, ?, ?, ?> getValidationSupport() {
+	public IContextValidationSupport<?, ?, ?, ?> getValidationSupport() {
 		if (myValidationSupport == null) {
 			myValidationSupport = myVersion.createValidationSupport();
 		}
@@ -561,7 +560,7 @@ public class FhirContext {
 	 * is used to supply underlying infrastructure such as conformance resources (StructureDefinition, ValueSet, etc)
 	 * as well as to provide terminology services to modules such as the validator and FluentPath executor
 	 */
-	public void setValidationSupport(IContextValidationSupport<?, ?, ?, ?, ?, ?> theValidationSupport) {
+	public void setValidationSupport(IContextValidationSupport<?, ?, ?, ?> theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 	}
 

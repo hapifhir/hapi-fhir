@@ -35,7 +35,6 @@ import ca.uhn.fhir.model.dstu2.composite.*;
 import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.provider.dstu2.Dstu2BundleFactory;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 public class FhirDstu2 implements IFhirVersion {
@@ -49,7 +48,7 @@ public class FhirDstu2 implements IFhirVersion {
 
 
 	@Override
-	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
+	public IContextValidationSupport<?, ?, ?, ?> createValidationSupport() {
 		throw new UnsupportedOperationException("Validation support is not supported in DSTU2 contexts");
 	}
 
