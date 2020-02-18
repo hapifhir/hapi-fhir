@@ -37,6 +37,9 @@ import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hl7.fhir.convertors.conv30_40.CodeSystem30_40.convertCodeSystem;
+import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
+import static org.hl7.fhir.convertors.conv30_40.ValueSet30_40.convertValueSet;
 
 public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl implements ITermVersionAdapterSvc {
 
@@ -72,7 +75,7 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 	public IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource) {
 		CodeSystem resourceToStore;
 		try {
-			resourceToStore = VersionConvertor_30_40.convertCodeSystem(theCodeSystemResource);
+			resourceToStore = convertCodeSystem(theCodeSystemResource);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
@@ -89,7 +92,7 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 	public void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap) {
 		ConceptMap resourceToStore;
 		try {
-			resourceToStore = VersionConvertor_30_40.convertConceptMap(theConceptMap);
+			resourceToStore = convertConceptMap(theConceptMap);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
@@ -105,7 +108,7 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 	public void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet) {
 		ValueSet valueSetDstu3;
 		try {
-			valueSetDstu3 = VersionConvertor_30_40.convertValueSet(theValueSet);
+			valueSetDstu3 = convertValueSet(theValueSet);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}

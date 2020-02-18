@@ -23,6 +23,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.stream.Collectors;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -72,7 +74,7 @@ public class QuestionnaireValidatorR4Test {
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
 			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages(), Matchers.empty());
+			assertThat(errors.getMessages().stream().filter(t->t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList()), Matchers.empty());
 		}
 	}
 

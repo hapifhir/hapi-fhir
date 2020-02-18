@@ -44,14 +44,11 @@ public interface ITermLoaderSvc {
 
 	UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
-	// FIXME: remove the default implementation before 4.1.0
-	default UploadStatistics loadCustom(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) { return null; };
+	UploadStatistics loadCustom(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
-	// FIXME: remove the default implementation before 4.1.0
-	default UploadStatistics loadDeltaAdd(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) { return null; };
+	UploadStatistics loadDeltaAdd(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
-	// FIXME: remove the default implementation before 4.1.0
-	default UploadStatistics loadDeltaRemove(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) { return null; };
+	UploadStatistics loadDeltaRemove(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
 	interface FileDescriptor {
 

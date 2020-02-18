@@ -54,7 +54,9 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 	private boolean noTerminologyChecks = false;
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
 	private boolean errorForUnknownProfiles;
+	private boolean assumeValidRestReferences;
 	private List<String> myExtensionDomains = Collections.emptyList();
+	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
 
 	/**
 	 * Constructor
@@ -220,7 +222,25 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 			.setErrorForUnknownProfiles(isErrorForUnknownProfiles())
 			.setExtensionDomains(getExtensionDomains())
 			.setNoTerminologyChecks(isNoTerminologyChecks())
+			.setValidatorResourceFetcher(getValidatorResourceFetcher())
+			.setAssumeValidRestReferences(isAssumeValidRestReferences())
 			.validate(wrappedWorkerContext, theValidationCtx);
+	}
+
+	public IResourceValidator.IValidatorResourceFetcher getValidatorResourceFetcher() {
+		return validatorResourceFetcher;
+	}
+
+	public void setValidatorResourceFetcher(IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher) {
+		this.validatorResourceFetcher = validatorResourceFetcher;
+	}
+
+	public boolean isAssumeValidRestReferences() {
+		return assumeValidRestReferences;
+	}
+
+	public void setAssumeValidRestReferences(boolean assumeValidRestReferences) {
+		this.assumeValidRestReferences = assumeValidRestReferences;
 	}
 
 
@@ -515,6 +535,11 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 		}
 
 		@Override
+		public StructureDefinition fetchRawProfile(String url) {
+			return myWrap.fetchRawProfile(url);
+		}
+
+		@Override
 		public List<String> getTypeNames() {
 			return myWrap.getTypeNames();
 		}
@@ -706,7 +731,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 		}
 
 		@Override
-		public Base resolveReference(Object appContext, String url) throws FHIRException {
+		public Base resolveReference(Object appContext, String url, Base refContext) throws FHIRException {
 			return null;
 		}
 

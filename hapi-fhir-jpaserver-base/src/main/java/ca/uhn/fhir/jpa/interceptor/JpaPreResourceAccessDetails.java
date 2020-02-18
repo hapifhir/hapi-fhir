@@ -57,7 +57,6 @@ public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 	public IBaseResource getResource(int theIndex) {
 		if (myResources == null) {
 			myResources = new ArrayList<>(myResourcePids.size());
-			// FIXME: JA don't call interceptors for this query
 			mySearchBuilderSupplier.call().loadResourcesByPid(myResourcePids, Collections.emptySet(), myResources, false, null);
 		}
 		return myResources.get(theIndex);
