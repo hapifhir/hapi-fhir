@@ -62,7 +62,7 @@ public class TermVersionAdapterSvcR5 extends BaseTermVersionAdapterSvcImpl imple
 	public IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource) {
 		validateCodeSystemForStorage(theCodeSystemResource);
 
-		CodeSystem codeSystemR4 = org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem(theCodeSystemResource);
+		CodeSystem codeSystemR4 = org.hl7.fhir.convertors.conv40_50.CodeSystem40_50.convertCodeSystem(theCodeSystemResource);
 		if (isBlank(theCodeSystemResource.getIdElement().getIdPart())) {
 			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
 			return myCodeSystemResourceDao.update(codeSystemR4, matchUrl).getId();
@@ -74,7 +74,7 @@ public class TermVersionAdapterSvcR5 extends BaseTermVersionAdapterSvcImpl imple
 	@Override
 	public void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap) {
 
-		ConceptMap conceptMapR4 = org.hl7.fhir.convertors.conv40_50.ConceptMap.convertConceptMap(theConceptMap);
+		ConceptMap conceptMapR4 = org.hl7.fhir.convertors.conv40_50.ConceptMap40_50.convertConceptMap(theConceptMap);
 
 		if (isBlank(theConceptMap.getIdElement().getIdPart())) {
 			String matchUrl = "ConceptMap?url=" + UrlUtil.escapeUrlParam(theConceptMap.getUrl());
@@ -87,7 +87,7 @@ public class TermVersionAdapterSvcR5 extends BaseTermVersionAdapterSvcImpl imple
 	@Override
 	public void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet) {
 
-		ValueSet valueSetR4 = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(theValueSet);
+		ValueSet valueSetR4 = org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(theValueSet);
 
 		if (isBlank(theValueSet.getIdElement().getIdPart())) {
 			String matchUrl = "ValueSet?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());

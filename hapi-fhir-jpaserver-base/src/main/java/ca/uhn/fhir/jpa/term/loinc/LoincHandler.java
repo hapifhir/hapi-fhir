@@ -86,7 +86,7 @@ public class LoincHandler implements IRecordHandler {
 							concept.addPropertyString(nextPropertyName, nextPropertyValue);
 							break;
 						case CODING:
-							// FIXME: handle "Ser/Plas^Donor"
+							// TODO: handle "Ser/Plas^Donor"
 							String propertyValue = nextPropertyValue;
 							if (nextPropertyName.equals("COMPONENT")) {
 								if (propertyValue.contains("^")) {

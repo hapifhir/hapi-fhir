@@ -65,6 +65,7 @@ import org.apache.commons.lang3.Validate;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
+import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -160,6 +161,10 @@ public class SearchBuilder implements ISearchBuilder {
 		// Remove any empty parameters
 		theParams.clean();
 
+		if (myResourceType == Location.class) {
+			theParams.setLocationDistance();
+		}
+
 		/*
 		 * Check if there is a unique key associated with the set
 		 * of parameters passed in
@@ -180,7 +185,6 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 	}
-
 
 	@Override
 	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest) {
@@ -250,7 +254,8 @@ public class SearchBuilder implements ISearchBuilder {
 				outerQuery.multiselect(myBuilder.countDistinct(myQueryRoot.getRoot()));
 			} else {
 				outerQuery.multiselect(myQueryRoot.get("myId").as(Long.class));
-				outerQuery.distinct(true);
+				// KHS This distinct call is causing performance issues in large installations
+//				outerQuery.distinct(true);
 			}
 
 		}
@@ -961,6 +966,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private SortSpec mySort;
 		private boolean myStillNeedToFetchIncludes;
 		private int mySkipCount = 0;
+		private int myNonSkipCount = 0;
 
 		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
 			mySearchRuntimeDetails = theSearchRuntimeDetails;
@@ -990,14 +996,7 @@ public class SearchBuilder implements ISearchBuilder {
 						myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();
 					}
 
-					final TypedQuery<Long> query = createQuery(mySort, myMaxResultsToFetch, false, myRequest);
-
-					mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
-
-					Query<Long> hibernateQuery = (Query<Long>) query;
-					hibernateQuery.setFetchSize(myFetchSize);
-					ScrollableResults scroll = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-					myResultsIterator = new ScrollableResultsIterator<>(scroll);
+					initializeIteratorQuery(myMaxResultsToFetch);
 
 					// If the query resulted in extra results being requested
 					if (myAlsoIncludePids != null) {
@@ -1032,9 +1031,30 @@ public class SearchBuilder implements ISearchBuilder {
 								ResourcePersistentId next = new ResourcePersistentId(nextLong);
 								if (myPidSet.add(next)) {
 									myNext = next;
+									myNonSkipCount++;
 									break;
 								} else {
 									mySkipCount++;
+								}
+							}
+
+							if (!myResultsIterator.hasNext()) {
+								if (myMaxResultsToFetch != null && (mySkipCount + myNonSkipCount == myMaxResultsToFetch)) {
+									if (mySkipCount > 0 && myNonSkipCount == 0) {
+										myMaxResultsToFetch += 1000;
+
+										StorageProcessingMessage message = new StorageProcessingMessage();
+										String msg = "Pass completed with no matching results. This indicates an inefficient query! Retrying with new max count of " + myMaxResultsToFetch;
+										ourLog.warn(msg);
+										message.setMessage(msg);
+										HookParams params = new HookParams()
+											.add(RequestDetails.class, myRequest)
+											.addIfMatchesType(ServletRequestDetails.class, myRequest)
+											.add(StorageProcessingMessage.class, message);
+										JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
+
+										initializeIteratorQuery(myMaxResultsToFetch);
+									}
 								}
 							}
 						}
@@ -1096,6 +1116,20 @@ public class SearchBuilder implements ISearchBuilder {
 
 		}
 
+		private void initializeIteratorQuery(Integer theMaxResultsToFetch) {
+			final TypedQuery<Long> query = createQuery(mySort, theMaxResultsToFetch, false, myRequest);
+
+			mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
+
+			Query<Long> hibernateQuery = (Query<Long>) query;
+			hibernateQuery.setFetchSize(myFetchSize);
+			ScrollableResults scroll = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+			myResultsIterator = new ScrollableResultsIterator<>(scroll);
+
+			mySkipCount = 0;
+			myNonSkipCount = 0;
+		}
+
 		@Override
 		public boolean hasNext() {
 			if (myNext == null) {
@@ -1116,6 +1150,11 @@ public class SearchBuilder implements ISearchBuilder {
 		@Override
 		public int getSkippedCount() {
 			return mySkipCount;
+		}
+
+		@Override
+		public int getNonSkippedCount() {
+			return myNonSkipCount;
 		}
 
 		@Override

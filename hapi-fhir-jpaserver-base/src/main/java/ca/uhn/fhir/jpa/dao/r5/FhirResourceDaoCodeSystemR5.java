@@ -148,7 +148,7 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 			CodeSystem cs = (CodeSystem) theResource;
 			addPidToResource(theEntity, theResource);
 
-			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem(cs), (ResourceTable) theEntity);
+			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(org.hl7.fhir.convertors.conv40_50.CodeSystem40_50.convertCodeSystem(cs), (ResourceTable) theEntity);
 		}
 
 		return retVal;

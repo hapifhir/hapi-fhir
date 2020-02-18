@@ -28,7 +28,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
@@ -45,7 +44,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
 
 public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConceptMapCommand {
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
@@ -154,7 +156,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 
 	private org.hl7.fhir.dstu3.model.ConceptMap convertCsvToConceptMapDstu3() throws ExecutionException {
 		try {
-			return VersionConvertor_30_40.convertConceptMap(convertCsvToConceptMapR4());
+			return convertConceptMap(convertCsvToConceptMapR4());
 		} catch (FHIRException fe) {
 			throw new ExecutionException(fe);
 		}
@@ -174,7 +176,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 					.withFirstRecordAsHeader()
 					.withIgnoreHeaderCase()
 					.withIgnoreEmptyLines()
-					.withTrim());
+					.withTrim())
 		) {
 			retVal.setUrl(conceptMapUrl);
 

@@ -1,8 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
@@ -21,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -252,6 +257,67 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				" C&S seq=0"
 		);
 	}
+
+	@Test
+	public void testApplyDeltaAdd_UsingCodeSystemWithComma() throws IOException {
+
+		// Create initial codesystem
+		{
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+			codeSystem.setUrl("https://good.health");
+
+			LoggingInterceptor interceptor = new LoggingInterceptor(true);
+			ourClient.registerInterceptor(interceptor);
+			ourClient
+				.create()
+				.resource(codeSystem)
+				.execute();
+			ourClient.unregisterInterceptor(interceptor);
+		}
+
+		// Add a child with a really long description
+		Parameters outcome;
+		{
+			Parameters inputBundle = loadResourceFromClasspath(Parameters.class, "/term-delta-json.json");
+
+			LoggingInterceptor interceptor = new LoggingInterceptor(true);
+			ourClient.registerInterceptor(interceptor);
+			outcome = ourClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+				.withParameters(inputBundle)
+				.execute();
+			ourClient.unregisterInterceptor(interceptor);
+		}
+
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(
+			"\"name\": \"conceptCount\"",
+			"\"valueInteger\": 2",
+			"\"name\": \"target\"",
+			"\"reference\": \"CodeSystem/"
+		));
+
+		assertHierarchyContains(
+			"1111222233 seq=0",
+			" 1111222234 seq=0"
+		);
+
+		runInTransaction(()->{
+			TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri("https://good.health");
+			TermCodeSystemVersion version = codeSystem.getCurrentVersion();
+			TermConcept code = myTermConceptDao.findByCodeSystemAndCode(version, "1111222233").get();
+			assertEquals("Some label for the parent - with a dash too", code.getDisplay());
+
+			code = myTermConceptDao.findByCodeSystemAndCode(version, "1111222234").get();
+			assertEquals("Some very very very very very looooooong child label with a coma, another one, one more, more and final one", code.getDisplay());
+		});
+	}
+
+
 
 	@Test
 	public void testApplyDeltaAdd_UsingCodeSystemWithVeryLongDescription() {
