@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
@@ -265,7 +266,7 @@ public class ValidatorExamples {
 			}
 
 			@Override
-			public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSet) {
+			public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSet) {
 				// TODO: implement
 				return null;
 			}

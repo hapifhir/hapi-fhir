@@ -150,7 +150,7 @@ public class FhirInstanceValidatorR5Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.validateCode(nullable(FhirContext.class), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IContextValidationSupport.CodeValidationResult>() {
+		when(myMockSupport.validateCode(, nullable(FhirContext.class), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IContextValidationSupport.CodeValidationResult>() {
 			@Override
 			public IContextValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
 				FhirContext ctx = theInvocation.getArgument(0, FhirContext.class);
@@ -162,7 +162,7 @@ public class FhirInstanceValidatorR5Test {
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent((code)));
 				} else {
-					retVal = myDefaultValidationSupport.validateCode(ctx, system, code, display, valueSetUrl);
+					retVal = myDefaultValidationSupport.validateCode(, ctx, system, code, display, valueSetUrl);
 				}
 				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
 				return retVal;

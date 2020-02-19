@@ -1,8 +1,8 @@
 package org.hl7.fhir.dstu3.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -284,7 +284,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
   }
 
   @Override
-  public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+  public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
     if (isNotBlank(theValueSetUrl)) {
       HapiWorkerContext workerContext = new HapiWorkerContext(theContext, this);
       ValueSetExpander expander = new ValueSetExpanderSimple(workerContext, workerContext);
@@ -331,7 +331,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
   @Override
   public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
-    return validateCode(theContext, theSystem, theCode, null, (String)null).asLookupCodeResult(theSystem, theCode);
+    return validateCode(, theContext, theSystem, theCode, null, (String)null).asLookupCodeResult(theSystem, theCode);
   }
 
   @Override

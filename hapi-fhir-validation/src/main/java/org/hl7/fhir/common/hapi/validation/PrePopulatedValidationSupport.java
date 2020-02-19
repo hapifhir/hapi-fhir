@@ -1,22 +1,21 @@
-package org.hl7.fhir.r4.hapi.validation;
+package org.hl7.fhir.common.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.VersionIndependentConcept;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
-import org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -32,11 +32,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * This class is an implementation of {@link IValidationSupport} which may be pre-populated
  * with a collection of validation resources to be used by the validator.
  */
-public class PrePopulatedValidationSupport implements IValidationSupport {
+public class PrePopulatedValidationSupport implements IContextValidationSupport {
 
-	private Map<String, CodeSystem> myCodeSystems;
-	private Map<String, StructureDefinition> myStructureDefinitions;
-	private Map<String, ValueSet> myValueSets;
+	private Map<String, IBaseResource> myCodeSystems;
+	private Map<String, IBaseResource> myStructureDefinitions;
+	private Map<String, IBaseResource> myValueSets;
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
 
 	/**
@@ -59,7 +59,7 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 	 * @param theCodeSystems          The CodeSystems to be returned by this module. Keys are the logical URL for the resource, and values are
 	 *                                the resource itself.
 	 */
-	public PrePopulatedValidationSupport(Map<String, StructureDefinition> theStructureDefinitions, Map<String, ValueSet> theValueSets, Map<String, CodeSystem> theCodeSystems) {
+	public PrePopulatedValidationSupport(Map<String, IBaseResource> theStructureDefinitions, Map<String, IBaseResource> theValueSets, Map<String, IBaseResource> theCodeSystems) {
 		myStructureDefinitions = theStructureDefinitions;
 		myValueSets = theValueSets;
 		myCodeSystems = theCodeSystems;
@@ -79,9 +79,29 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 	 * </ul>
 	 * </p>
 	 */
-	public void addCodeSystem(CodeSystem theCodeSystem) {
-		Validate.notBlank(theCodeSystem.getUrl(), "theCodeSystem.getUrl() must not return a value");
-		addToMap(theCodeSystem, myCodeSystems, theCodeSystem.getUrl());
+	public void addCodeSystem(IBaseResource theCodeSystem) {
+		String url;
+
+		switch (theCodeSystem.getStructureFhirVersionEnum()) {
+			case DSTU3:
+				url = ((org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem).getUrl();
+				break;
+			case R4:
+				url = ((org.hl7.fhir.r4.model.CodeSystem) theCodeSystem).getUrl();
+				break;
+			case R5:
+				url = ((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem).getUrl();
+				break;
+			case DSTU2:
+			case DSTU2_HL7ORG:
+			case DSTU2_1:
+			default:
+				throw new IllegalArgumentException("Can not add for version: " + theCodeSystem.getStructureFhirVersionEnum());
+		}
+
+
+		Validate.notBlank(url, "theCodeSystem.getUrl() must return a value");
+		addToMap(theCodeSystem, myCodeSystems, url);
 	}
 
 	/**
@@ -103,7 +123,7 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 		addToMap(theStructureDefinition, myStructureDefinitions, theStructureDefinition.getUrl());
 	}
 
-	private <T extends MetadataResource> void addToMap(T theStructureDefinition, Map<String, T> map, String theUrl) {
+	private <T extends IBaseResource> void addToMap(T theStructureDefinition, Map<String, T> map, String theUrl) {
 		if (isNotBlank(theUrl)) {
 			map.put(theUrl, theStructureDefinition);
 
@@ -194,13 +214,13 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public CodeSystem fetchCodeSystem(FhirContext theContext, String uri) {
-		return myCodeSystems.get(uri);
+	public <T extends IBaseResource> T fetchCodeSystem(FhirContext theContext, String theSystem, Class<T> theCodeSystemType) {
+		return (T) myCodeSystems.get(theSystem);
 	}
 
 	@Override
-	public ValueSet fetchValueSet(FhirContext theContext, String uri) {
-		return myValueSets.get(uri);
+	public IBaseResource fetchValueSet(FhirContext theContext, String theUri) {
+		return myValueSets.get(theUri);
 	}
 
 
@@ -220,7 +240,7 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
+	public IBaseResource fetchStructureDefinition(FhirContext theCtx, String theUrl) {
 		return myStructureDefinitions.get(theUrl);
 	}
 
@@ -235,27 +255,71 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
-		return null;
-	}
-
-	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
-		ValueSet vs;
+	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+		IBaseResource vs;
 		if (isNotBlank(theValueSetUrl)) {
 			vs = myValueSets.get(theValueSetUrl);
-			if (vs == null) {
-				return null;
-			}
 		} else {
-			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(theCodeSystem);
+			switch (theContext.getVersion().getVersion()) {
+				case DSTU3:
+					vs = new org.hl7.fhir.dstu3.model.ValueSet()
+						.setCompose(new org.hl7.fhir.dstu3.model.ValueSet.ValueSetComposeComponent()
+							.addInclude(new org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent().setSystem(theCodeSystem)));
+					break;
+				case R4:
+					vs = new org.hl7.fhir.r4.model.ValueSet()
+						.setCompose(new org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent()
+							.addInclude(new org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent().setSystem(theCodeSystem)));
+					break;
+				case R5:
+					vs = new org.hl7.fhir.r5.model.ValueSet()
+						.setCompose(new org.hl7.fhir.r5.model.ValueSet.ValueSetComposeComponent()
+							.addInclude(new org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent().setSystem(theCodeSystem)));
+					break;
+				case DSTU2:
+				case DSTU2_1:
+				case DSTU2_HL7ORG:
+				default:
+					throw new IllegalArgumentException("Can not handle version: " + theContext.getVersion().getVersion());
+			}
 		}
 
-		IValidationSupport support = new ValidationSupportChain(this, myDefaultProfileValidationSupport);
-		ValueSetExpanderSimple expander = new ValueSetExpanderSimple(new HapiWorkerContext(theContext, support));
-		ValueSetExpander.ValueSetExpansionOutcome expansion = expander.expand(vs, new Parameters());
-		for (ValueSet.ValueSetExpansionContainsComponent nextExpansionCode : expansion.getValueset().getExpansion().getContains()) {
+		if (vs == null) {
+			return null;
+		}
+
+		List<VersionIndependentConcept> codes;
+
+		switch (theContext.getVersion().getVersion()) {
+			case DSTU3: {
+				org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple expander = new org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple(new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(theContext, theRootValidationSupport), null);
+				ValueSetExpander.ValueSetExpansionOutcome expansion = expander.expand(vs, new Parameters());
+				List<ValueSet.ValueSetExpansionContainsComponent> contains = expansion.getValueset().getExpansion().getContains();
+				codes = contains.stream().map(t -> new VersionIndependentConcept(t.getSystem(), t.getCode())).collect(Collectors.toList());
+				break;
+			}
+			case R4: {
+				org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple expander = new org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple(new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(theContext, theRootValidationSupport));
+				ValueSetExpander.ValueSetExpansionOutcome expansion = expander.expand(vs, new Parameters());
+				List<ValueSet.ValueSetExpansionContainsComponent> contains = expansion.getValueset().getExpansion().getContains();
+				codes = contains.stream().map(t -> new VersionIndependentConcept(t.getSystem(), t.getCode())).collect(Collectors.toList());
+				break;
+			}
+			case R5: {
+				org.hl7.fhir.r5.terminologies.ValueSetExpanderSimple expander = new org.hl7.fhir.r5.terminologies.ValueSetExpanderSimple(new org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext(theContext, theRootValidationSupport));
+				ValueSetExpander.ValueSetExpansionOutcome expansion = expander.expand(vs, new Parameters());
+				List<ValueSet.ValueSetExpansionContainsComponent> contains = expansion.getValueset().getExpansion().getContains();
+				codes = contains.stream().map(t -> new VersionIndependentConcept(t.getSystem(), t.getCode())).collect(Collectors.toList());
+				break;
+			}
+			case DSTU2:
+			case DSTU2_1:
+			case DSTU2_HL7ORG:
+			default:
+				throw new IllegalArgumentException("Can not handle version: " + theContext.getVersion().getVersion());
+		}
+
+		for (VersionIndependentConcept nextExpansionCode : codes) {
 
 			if (theCode.equals(nextExpansionCode.getCode())) {
 				if (Constants.codeSystemNotNeeded(theCodeSystem) || nextExpansionCode.getSystem().equals(theCodeSystem)) {

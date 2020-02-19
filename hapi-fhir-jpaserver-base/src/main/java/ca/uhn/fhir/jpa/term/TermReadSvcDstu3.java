@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -9,6 +10,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ValidateUtil;
+import ca.uhn.fhir.util.VersionIndependentConcept;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
@@ -289,7 +291,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 
 	@CoverageIgnore
 	@Override
-	public IValidationSupport.CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public IValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		Optional<VersionIndependentConcept> codeOpt = Optional.empty();
 		boolean haveValidated = false;
 

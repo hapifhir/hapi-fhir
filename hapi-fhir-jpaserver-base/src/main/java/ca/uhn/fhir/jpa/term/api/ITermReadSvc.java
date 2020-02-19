@@ -8,7 +8,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
 import ca.uhn.fhir.jpa.term.TranslationRequest;
-import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
+import ca.uhn.fhir.util.VersionIndependentConcept;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;

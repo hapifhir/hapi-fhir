@@ -10,7 +10,7 @@ import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.PrePopulatedValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;

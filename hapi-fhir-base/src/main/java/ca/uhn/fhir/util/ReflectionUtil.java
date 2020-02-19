@@ -144,12 +144,12 @@ public class ReflectionUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <EVS_IN, EVS_OUT, SDT, CST, CDCT, IST> ca.uhn.fhir.context.support.IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST> newInstanceOfFhirProfileValidationSupport(
+	public static <EVS_IN, EVS_OUT, SDT, CST, CDCT, IST> ca.uhn.fhir.context.support.IContextValidationSupport newInstanceOfFhirProfileValidationSupport(
 			String theType) {
 		String errorMessage = "Unable to instantiate validation support! Please make sure that hapi-fhir-validation and the appropriate structures JAR are on your classpath!";
 		String wantedType = "ca.uhn.fhir.context.support.IContextValidationSupport";
 		Object fhirServerVersion = newInstanceOfType(theType, errorMessage, wantedType);
-		return (IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST>) fhirServerVersion;
+		return (IContextValidationSupport) fhirServerVersion;
 	}
 
 	private static Object newInstanceOfType(String theType, String errorMessage, String wantedType) {

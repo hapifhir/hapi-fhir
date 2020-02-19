@@ -1,8 +1,8 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2016may.model.*;
@@ -14,7 +14,6 @@ import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpander;
 import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -262,7 +261,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		if (isNotBlank(theValueSetUrl)) {
 			HapiWorkerContext workerContext = new HapiWorkerContext(theContext, this);
 			ValueSetExpander expander = new ValueSetExpanderSimple(workerContext, workerContext);
@@ -309,7 +308,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	@Override
 	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
-		return validateCode(theContext, theSystem, theCode, null, (String)null).asLookupCodeResult(theSystem, theCode);
+		return validateCode(, theContext, theSystem, theCode, null, (String)null).asLookupCodeResult(theSystem, theCode);
 	}
 
 }

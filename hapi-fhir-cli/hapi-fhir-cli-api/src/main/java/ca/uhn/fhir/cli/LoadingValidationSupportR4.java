@@ -21,6 +21,7 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -98,7 +99,7 @@ public class LoadingValidationSupportR4 implements org.hl7.fhir.r4.hapi.ctx.IVal
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSet) {
+	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSet) {
 		return null;
 	}
 

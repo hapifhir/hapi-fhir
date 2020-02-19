@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.SnapshotGeneratingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.springframework.beans.factory.annotation.Autowired;

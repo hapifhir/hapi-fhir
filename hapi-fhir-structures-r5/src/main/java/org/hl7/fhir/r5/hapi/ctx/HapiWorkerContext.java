@@ -40,11 +40,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
 	private final FhirContext myCtx;
 	private final Cache<String, Resource> myFetchedResourceCache;
-	private IValidationSupport myValidationSupport;
+	private IContextValidationSupport myValidationSupport;
 	private Parameters myExpansionProfile;
 	private String myOverrideVersionNs;
 
-	public HapiWorkerContext(FhirContext theCtx, IValidationSupport theValidationSupport) {
+	public HapiWorkerContext(FhirContext theCtx, IContextValidationSupport theValidationSupport) {
 		Validate.notNull(theCtx, "theCtx must not be null");
 		Validate.notNull(theValidationSupport, "theValidationSupport must not be null");
 		myCtx = theCtx;
@@ -60,7 +60,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public List<StructureDefinition> allStructures() {
-		return myValidationSupport.fetchAllStructureDefinitions(myCtx);
+		return myValidationSupport.fetchAllStructureDefinitions(myCtx, StructureDefinition.class);
 	}
 
 	@Override
@@ -73,7 +73,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		if (myValidationSupport == null) {
 			return null;
 		} else {
-			return myValidationSupport.fetchCodeSystem(myCtx, theSystem);
+			return myValidationSupport.fetchCodeSystem(myCtx, theSystem, CodeSystem.class);
 		}
 	}
 
@@ -171,7 +171,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay) {
-		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, null);
+		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(, myCtx, theSystem, theCode, theDisplay, null);
 		if (result == null) {
 			return null;
 		}
@@ -203,7 +203,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 		IValidationSupport.CodeValidationResult outcome;
 		if (isNotBlank(theVs.getUrl())) {
-			outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
+			outcome = myValidationSupport.validateCode(, myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
 		} else {
 			outcome = myValidationSupport.validateCodeInValueSet(myCtx, theSystem, theCode, theDisplay, theVs);
 		}
@@ -280,7 +280,10 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValueSetExpansionOutcome expandVS(ConceptSetComponent theInc, boolean theHeiarchical) throws TerminologyServiceException {
-		return myValidationSupport.expandValueSet(myCtx, theInc);
+		ValueSet input = new ValueSet();
+		input.getCompose().addInclude(theInc);
+		IContextValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(myCtx, input);
+		return new ValueSetExpansionOutcome((ValueSet) output.getValueSet(), output.getError(), null);
 	}
 
 	@Override
@@ -394,7 +397,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandVS(ElementDefinitionBindingComponent theBinding, boolean theCacheOk, boolean theHeiarchical) throws FHIRException {
+	public ValueSetExpansionOutcome expandVS(ElementDefinitionBindingComponent theBinding, boolean theCacheOk, boolean theHierarchical) throws FHIRException {
 		throw new UnsupportedOperationException();
 	}
 

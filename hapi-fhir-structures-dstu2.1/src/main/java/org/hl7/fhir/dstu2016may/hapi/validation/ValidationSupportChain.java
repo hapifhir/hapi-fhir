@@ -1,6 +1,7 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.hl7.fhir.dstu2016may.model.CodeSystem;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition;
 import org.hl7.fhir.dstu2016may.model.ValueSet;
@@ -134,13 +135,13 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		for (IValidationSupport next : myChain) {
 			if (theCodeSystem != null && next.isCodeSystemSupported(theCtx, theCodeSystem)) {
-				return next.validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+				return next.validateCode(, theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 			}
 		}
-		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+		return myChain.get(0).validateCode(, theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 	}
 
 	@Override

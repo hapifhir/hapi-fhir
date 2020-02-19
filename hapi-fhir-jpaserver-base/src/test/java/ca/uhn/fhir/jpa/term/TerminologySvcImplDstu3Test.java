@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.VersionIndependentConcept;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
@@ -1935,7 +1936,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	@Ignore
 	public void testValidateCodeWithProperties() {
 		createCodeSystem();
-		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(myFhirCtx, CS_URL, "childAAB", null, (String)null);
+		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(, myFhirCtx, CS_URL, "childAAB", null, (String)null);
 		assertEquals(true, code.isOk());
 		assertEquals(2, code.getProperties().size());
 	}

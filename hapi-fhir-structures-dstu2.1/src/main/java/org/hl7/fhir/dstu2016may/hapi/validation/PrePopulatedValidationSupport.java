@@ -1,6 +1,7 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2016may.model.CodeSystem;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition;
@@ -134,7 +135,7 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 

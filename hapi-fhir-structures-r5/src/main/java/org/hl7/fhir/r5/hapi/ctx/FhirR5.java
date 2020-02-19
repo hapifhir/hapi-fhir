@@ -50,7 +50,7 @@ public class FhirR5 implements IFhirVersion {
 	}
 
 	@Override
-	public IContextValidationSupport<?, ?, ?, ?> createValidationSupport() {
+	public IContextValidationSupport createValidationSupport() {
 		return ReflectionUtil.newInstanceOfFhirProfileValidationSupport("org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport");
 	}
 

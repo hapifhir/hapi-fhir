@@ -1,6 +1,7 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
@@ -150,13 +151,13 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 
 		ourLog.debug("Validating code {} in chain with {} items", theCode, myChain.size());
 
 		for (IValidationSupport next : myChain) {
 			if (theCodeSystem != null && next.isCodeSystemSupported(theCtx, theCodeSystem)) {
-				CodeValidationResult result = next.validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+				CodeValidationResult result = next.validateCode(, theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 				if (result != null) {
 					ourLog.debug("Chain item {} returned outcome {}", next, result.isOk());
 					return result;
@@ -165,7 +166,7 @@ public class ValidationSupportChain implements IValidationSupport {
 				ourLog.debug("Chain item {} does not support code system {}", next, theCodeSystem);
 			}
 		}
-		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+		return myChain.get(0).validateCode(, theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 	}
 
 	@Override

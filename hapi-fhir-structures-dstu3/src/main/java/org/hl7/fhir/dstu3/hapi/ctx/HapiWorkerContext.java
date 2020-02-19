@@ -1,6 +1,7 @@
 package org.hl7.fhir.dstu3.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -25,7 +26,12 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -34,10 +40,10 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   private final FhirContext myCtx;
   private final Cache<String, Resource> myFetchedResourceCache;
 
-  private IValidationSupport myValidationSupport;
+  private IContextValidationSupport myValidationSupport;
   private ExpansionProfile myExpansionProfile;
 
-  public HapiWorkerContext(FhirContext theCtx, IValidationSupport theValidationSupport) {
+  public HapiWorkerContext(FhirContext theCtx, IContextValidationSupport theValidationSupport) {
     Validate.notNull(theCtx, "theCtx must not be null");
     Validate.notNull(theValidationSupport, "theValidationSupport must not be null");
     myCtx = theCtx;
@@ -58,7 +64,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public List<StructureDefinition> allStructures() {
-    return myValidationSupport.fetchAllStructureDefinitions(myCtx);
+    return myValidationSupport.fetchAllStructureDefinitions(myCtx, StructureDefinition.class);
   }
 
   @Override
@@ -87,7 +93,15 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc, boolean theHeiarchical) {
-    return myValidationSupport.expandValueSet(myCtx, theInc);
+    ValueSet input = new ValueSet();
+    input.getCompose().addInclude(theInc);
+    IContextValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(myCtx, input);
+    ValueSet outputValueSet = (ValueSet) output.getValueSet();
+    if (outputValueSet != null) {
+      return outputValueSet.getExpansion();
+    } else {
+      return null;
+    }
   }
 
   @Override
@@ -100,7 +114,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     if (myValidationSupport == null) {
       return null;
     } else {
-      return myValidationSupport.fetchCodeSystem(myCtx, theSystem);
+      return myValidationSupport.fetchCodeSystem(myCtx, theSystem, CodeSystem.class);
     }
   }
 
@@ -183,7 +197,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public List<String> getResourceNames() {
-    List<String> result = new ArrayList<String>();
+    List<String> result = new ArrayList<>();
     for (ResourceType next : ResourceType.values()) {
       result.add(next.name());
     }
@@ -253,7 +267,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public Set<String> typeTails() {
-    return new HashSet<String>(Arrays.asList("Integer", "UnsignedInt", "PositiveInt", "Decimal", "DateTime", "Date", "Time", "Instant", "String", "Uri", "Oid", "Uuid", "Id", "Boolean", "Code",
+    return new HashSet<>(Arrays.asList("Integer", "UnsignedInt", "PositiveInt", "Decimal", "DateTime", "Date", "Time", "Instant", "String", "Uri", "Oid", "Uuid", "Id", "Boolean", "Code",
       "Markdown", "Base64Binary", "Coding", "CodeableConcept", "Attachment", "Identifier", "Quantity", "SampledData", "Range", "Period", "Ratio", "HumanName", "Address", "ContactPoint",
       "Timing", "Reference", "Annotation", "Signature", "Meta"));
   }
@@ -280,7 +294,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, (String)null);
+    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(, myCtx, theSystem, theCode, theDisplay, null);
     if (result == null) {
       return null;
     }
@@ -317,7 +331,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
     IValidationSupport.CodeValidationResult outcome;
     if (isNotBlank(theVs.getUrl())) {
-      outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
+      outcome = myValidationSupport.validateCode(, myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
     } else {
       outcome = myValidationSupport.validateCodeInValueSet(myCtx, theSystem, theCode, theDisplay, theVs);
     }

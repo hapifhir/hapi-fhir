@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -85,7 +86,7 @@ public class JpaValidationSupportR4 extends BaseJpaValidationSupport implements 
 
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
-	public IValidationSupport.CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theSystemUrl) {
+	public IValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theSystemUrl) {
 		return null;
 	}
 

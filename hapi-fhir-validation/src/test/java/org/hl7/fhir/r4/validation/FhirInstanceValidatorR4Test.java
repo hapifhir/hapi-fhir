@@ -21,7 +21,7 @@ import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.r4.hapi.validation.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.PrePopulatedValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -163,7 +163,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				return retVal;
 			}
 		});
-		when(myMockSupport.validateCode(nullable(FhirContext.class), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IContextValidationSupport.CodeValidationResult>() {
+		when(myMockSupport.validateCode(, nullable(FhirContext.class), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IContextValidationSupport.CodeValidationResult>() {
 			@Override
 			public IContextValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
 				FhirContext ctx = theInvocation.getArgument(0, FhirContext.class);
@@ -175,7 +175,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(new CodeType(code)));
 				} else {
-					retVal = myDefaultValidationSupport.validateCode(ctx, system, code, display, valueSetUrl);
+					retVal = myDefaultValidationSupport.validateCode(, ctx, system, code, display, valueSetUrl);
 				}
 				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
 				return retVal;

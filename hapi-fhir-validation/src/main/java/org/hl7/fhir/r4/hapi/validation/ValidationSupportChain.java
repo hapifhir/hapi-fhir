@@ -1,6 +1,7 @@
 package org.hl7.fhir.r4.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
@@ -153,7 +154,7 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 
 		ourLog.debug("Validating code {} in chain with {} items", theCode, myChain.size());
 
@@ -171,7 +172,7 @@ public class ValidationSupportChain implements IValidationSupport {
 			}
 
 			if (shouldTry) {
-				CodeValidationResult result = next.validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+				CodeValidationResult result = next.validateCode(, theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 				if (result != null) {
 					ourLog.debug("Chain item {} returned outcome {}", next, result.isOk());
 					return result;
@@ -179,7 +180,7 @@ public class ValidationSupportChain implements IValidationSupport {
 			}
 
 		}
-		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+		return myChain.get(0).validateCode(, theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 	}
 
 	@Override

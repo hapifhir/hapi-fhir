@@ -21,6 +21,7 @@ package ca.uhn.hapi.fhir.docs;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -33,7 +34,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.r4.hapi.validation.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.PrePopulatedValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
@@ -289,7 +290,7 @@ public class ValidatorExamples {
 			}
 
 			@Override
-			public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+			public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}

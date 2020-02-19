@@ -6,7 +6,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.SnapshotGeneratingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.Test;

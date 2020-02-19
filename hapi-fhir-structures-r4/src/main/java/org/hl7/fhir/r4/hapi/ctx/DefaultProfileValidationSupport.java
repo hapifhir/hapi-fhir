@@ -1,6 +1,7 @@
 package org.hl7.fhir.r4.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -315,7 +316,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
   }
 
   @Override
-  public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+  public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
     if (isNotBlank(theValueSetUrl)) {
       ValueSetExpander expander = new ValueSetExpanderSimple(new HapiWorkerContext(theContext, this));
       try {
@@ -361,7 +362,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
   @Override
   public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
-    return validateCode(theContext, theSystem, theCode, null, (String) null).asLookupCodeResult(theSystem, theCode);
+    return validateCode(, theContext, theSystem, theCode, null, (String) null).asLookupCodeResult(theSystem, theCode);
   }
 
 }

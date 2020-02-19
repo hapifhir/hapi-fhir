@@ -29,7 +29,6 @@ import org.junit.*;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-import org.mockito.internal.matchers.Any;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -147,7 +146,7 @@ public class FhirInstanceValidatorDstu3Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.validateCode(nullable(FhirContext.class), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IContextValidationSupport.CodeValidationResult>() {
+		when(myMockSupport.validateCode(, nullable(FhirContext.class), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IContextValidationSupport.CodeValidationResult>() {
 			@Override
 			public IContextValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
 				FhirContext ctx = theInvocation.getArgument(0, FhirContext.class);
@@ -163,7 +162,7 @@ public class FhirInstanceValidatorDstu3Test {
 					Optional<ConceptDefinitionComponent> found = cs.getConcept().stream().filter(t -> t.getCode().equals(code)).findFirst();
 					retVal = found.map(t->new IContextValidationSupport.CodeValidationResult(t)).orElse(null);
 				} else {
-					retVal = myDefaultValidationSupport.validateCode(ctx, system, code, display, valueSetUrl);
+					retVal = myDefaultValidationSupport.validateCode(, ctx, system, code, display, valueSetUrl);
 				}
 				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
 				return retVal;

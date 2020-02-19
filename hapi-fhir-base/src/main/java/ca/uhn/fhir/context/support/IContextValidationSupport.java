@@ -48,7 +48,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * and calling code is expected to be able to handle this.
  * </p>
  */
-public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST> {
+public interface IContextValidationSupport {
 
 	/**
 	 * Expands the given portion of a ValueSet
@@ -56,19 +56,25 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST> {
 	 * @param theInclude The portion to include
 	 * @return The expansion
 	 */
-	EVS_OUT expandValueSet(FhirContext theContext, EVS_IN theInclude);
+	default ValueSetExpansionOutcome expandValueSet(FhirContext theContext, IBaseResource theInclude) {
+		return null;
+	}
 
 	/**
 	 * Load and return all conformance resources associated with this
 	 * validation support module. This method may return null if it doesn't
 	 * make sense for a given module.
 	 */
-	List<IBaseResource> fetchAllConformanceResources(FhirContext theContext);
+	default List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+		return null;
+	}
 
 	/**
 	 * Load and return all possible structure definitions
 	 */
-	List<SDT> fetchAllStructureDefinitions(FhirContext theContext);
+	default <T extends IBaseResource> List<T> fetchAllStructureDefinitions(FhirContext theContext, Class<T> theStructureDefinitionType) {
+		return null;
+	}
 
 	/**
 	 * Fetch a code system by ID
@@ -76,7 +82,9 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST> {
 	 * @param theSystem The code system
 	 * @return The valueset (must not be null, but can be an empty ValueSet)
 	 */
-	CST fetchCodeSystem(FhirContext theContext, String theSystem);
+	default <T extends IBaseResource> T fetchCodeSystem(FhirContext theContext, String theSystem, Class<T> theCodeSystemType) {
+		return null;
+	}
 
 	/**
 	 * Loads a resource needed by the validation (a StructureDefinition, or a
@@ -88,9 +96,13 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST> {
 	 * @return Returns the resource, or <code>null</code> if no resource with the
 	 * given URI can be found
 	 */
-	<T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri);
+	default <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+		return null;
+	}
 
-	SDT fetchStructureDefinition(FhirContext theCtx, String theUrl);
+	default IBaseResource fetchStructureDefinition(FhirContext theCtx, String theUrl) {
+		return null;
+	}
 
 	/**
 	 * Returns <code>true</code> if codes in the given code system can be expanded
@@ -100,24 +112,32 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST> {
 	 * @return Returns <code>true</code> if codes in the given code system can be
 	 * validated
 	 */
-	boolean isCodeSystemSupported(FhirContext theContext, String theSystem);
+	default boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+		return false;
+	}
 
 	/**
 	 * Fetch the given ValueSet by URL
 	 */
-	IBaseResource fetchValueSet(FhirContext theContext, String theValueSetUrl);
+	default IBaseResource fetchValueSet(FhirContext theContext, String theValueSetUrl) {
+		return null;
+	}
 
 	/**
 	 * Validates that the given code exists and if possible returns a display
 	 * name. This method is called to check codes which are found in "example"
 	 * binding fields (e.g. <code>Observation.code</code> in the default profile.
 	 *
+	 *
+	 * @param theRootValidationSupport
 	 * @param theCodeSystem The code system, e.g. "<code>http://loinc.org</code>"
 	 * @param theCode       The code, e.g. "<code>1234-5</code>"
 	 * @param theDisplay    The display name, if it should also be validated
 	 * @return Returns a validation result object
 	 */
-	CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl);
+	default CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+		return null;
+	}
 
 	/**
 	 * Validates that the given code exists and if possible returns a display
@@ -130,7 +150,9 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST> {
 	 * @param theValueSet   The ValueSet to validate against. Must not be null, and must be a ValueSet resource.
 	 * @return Returns a validation result object, or <code>null</code> if this validation support module can not handle this kind of request
 	 */
-	default CodeValidationResult validateCodeInValueSet(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) { return null; }
+	default CodeValidationResult validateCodeInValueSet(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+		return null;
+	}
 
 	/**
 	 * Look up a code using the system and code value
@@ -139,7 +161,31 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST> {
 	 * @param theSystem  The CodeSystem URL
 	 * @param theCode    The code
 	 */
-	LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode);
+	default LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return null;
+	}
+
+	/**
+	 * Returns <code>true</code> if the given valueset can be validated by the given
+	 * validation support module
+	 *
+	 * @param theContext     The FHIR context
+	 * @param theValueSetUrl The URL
+	 */
+	default boolean isValueSetSupported(FhirContext theContext, String theValueSetUrl) {
+		return false;
+	}
+
+	/**
+	 * Generate a snapshot from the given differential profile.
+	 *
+	 * @param theRootValidationSupport The root validation support object is passed in, in order to allow this operation to perform other lookups as required
+	 * @return Returns null if this module does not know how to handle this request
+	 */
+	default IBaseResource generateSnapshot(IContextValidationSupport theRootValidationSupport, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
+		return null;
+	}
+
 
 	class ConceptDesignation {
 		private String myLanguage;
@@ -339,6 +385,20 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST> {
 			return retVal;
 		}
 
+	}
+
+	class ValueSetExpansionOutcome {
+
+		private IBaseResource myValueSet;
+		private String myError;
+
+		public String getError() {
+			return myError;
+		}
+
+		public IBaseResource getValueSet() {
+			return myValueSet;
+		}
 	}
 
 	class LookupCodeResult {

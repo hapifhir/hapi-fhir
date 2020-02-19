@@ -96,7 +96,7 @@ public class FhirContext {
 	private Collection<Class<? extends IBaseResource>> myResourceTypesToScan;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
-	private IContextValidationSupport<?, ?, ?, ?> myValidationSupport;
+	private IContextValidationSupport myValidationSupport;
 	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
 
 	/**
@@ -548,11 +548,13 @@ public class FhirContext {
 	 *
 	 * @see #setValidationSupport(IContextValidationSupport)
 	 */
-	public IContextValidationSupport<?, ?, ?, ?> getValidationSupport() {
-		if (myValidationSupport == null) {
-			myValidationSupport = myVersion.createValidationSupport();
+	public IContextValidationSupport getValidationSupport() {
+		IContextValidationSupport retVal = myValidationSupport;
+		if (retVal == null) {
+			retVal = myVersion.createValidationSupport();
+			myValidationSupport = retVal;
 		}
-		return myValidationSupport;
+		return retVal;
 	}
 
 	/**
@@ -560,7 +562,7 @@ public class FhirContext {
 	 * is used to supply underlying infrastructure such as conformance resources (StructureDefinition, ValueSet, etc)
 	 * as well as to provide terminology services to modules such as the validator and FluentPath executor
 	 */
-	public void setValidationSupport(IContextValidationSupport<?, ?, ?, ?> theValidationSupport) {
+	public void setValidationSupport(IContextValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 	}
 
