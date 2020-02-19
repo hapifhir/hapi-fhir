@@ -34,7 +34,7 @@ public class FhirResourceDaoStructureDefinitionDstu3 extends BaseHapiFhirResourc
 
 	@Override
 	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theName) {
-		StructureDefinition output = myValidationSupport.generateSnapshot(theInput, theUrl, theName);
+		StructureDefinition output = (StructureDefinition) myValidationSupport.generateSnapshot(myValidationSupport, theInput, theUrl, theName, null);
 		Validate.notNull(output);
 		return output;
 	}

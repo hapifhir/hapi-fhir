@@ -211,7 +211,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 				return retVal;
 			}
 
-			return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
+			return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR.toCode(), "Unknown code {" + theCodeSystem + "}" + theCode);
 	}
 
 	@Override

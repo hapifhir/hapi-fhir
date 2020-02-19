@@ -215,7 +215,7 @@ public class ResponseValidatingInterceptorR4Test {
 
 	@Test
 	public void testLongHeaderTruncated() throws Exception {
-		IValidatorModule module = new FhirInstanceValidator();
+		IValidatorModule module = new FhirInstanceValidator(ourCtx);
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 		myInterceptor.setFailOnSeverity(null);
@@ -356,7 +356,7 @@ public class ResponseValidatingInterceptorR4Test {
 
 	@Test
 	public void testSearchXmlInvalidInstanceValidator() throws Exception {
-		IValidatorModule module = new FhirInstanceValidator();
+		IValidatorModule module = new FhirInstanceValidator(ourCtx);
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
@@ -429,7 +429,7 @@ public class ResponseValidatingInterceptorR4Test {
 
 	@Test
 	public void testSkipEnabled() throws Exception {
-		IValidatorModule module = new FhirInstanceValidator();
+		IValidatorModule module = new FhirInstanceValidator(ourCtx);
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.addExcludeOperationType(RestOperationTypeEnum.METADATA);
 		myInterceptor.setResponseHeaderValueNoIssues("No issues");
@@ -449,7 +449,7 @@ public class ResponseValidatingInterceptorR4Test {
 
 	@Test
 	public void testSkipNotEnabled() throws Exception {
-		IValidatorModule module = new FhirInstanceValidator();
+		IValidatorModule module = new FhirInstanceValidator(ourCtx);
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setResponseHeaderValueNoIssues("No issues");
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);

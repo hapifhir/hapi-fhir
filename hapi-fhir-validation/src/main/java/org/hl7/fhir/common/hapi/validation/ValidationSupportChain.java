@@ -2,10 +2,10 @@ package org.hl7.fhir.common.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
-import org.hl7.fhir.dstu2016may.hapi.validation.IValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,7 +36,40 @@ public class ValidationSupportChain implements IContextValidationSupport {
 		}
 	}
 
-	public void addValidationSupport(IValidationSupport theValidationSupport) {
+	@Override
+	public CodeValidationResult validateCodeInValueSet(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+		for (IContextValidationSupport next : myChain) {
+			CodeValidationResult retVal = next.validateCodeInValueSet(theContext, theCodeSystem, theCode, theDisplay, theValueSet);
+			if (retVal != null) {
+				return retVal;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public boolean isValueSetSupported(FhirContext theContext, String theValueSetUrl) {
+		for (IContextValidationSupport next : myChain) {
+			boolean retVal = next.isValueSetSupported(theContext, theValueSetUrl);
+			if (retVal) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public IBaseResource generateSnapshot(IContextValidationSupport theRootValidationSupport, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
+		for (IContextValidationSupport next : myChain) {
+			IBaseResource retVal = next.generateSnapshot(theRootValidationSupport, theInput, theUrl, theWebUrl, theProfileName);
+			if (retVal != null) {
+				return retVal;
+			}
+		}
+		return null;
+	}
+
+	public void addValidationSupport(IContextValidationSupport theValidationSupport) {
 		myChain.add(theValidationSupport);
 	}
 

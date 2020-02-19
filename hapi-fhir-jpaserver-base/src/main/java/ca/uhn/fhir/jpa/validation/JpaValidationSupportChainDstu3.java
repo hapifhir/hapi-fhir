@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
-import org.hl7.fhir.dstu3.hapi.validation.SnapshotGeneratingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.SnapshotGeneratingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,9 +60,9 @@ public class JpaValidationSupportChainDstu3 extends ValidationSupportChain {
 
 	@Override
 	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
-		StructureDefinition retVal = super.fetchStructureDefinition(theCtx, theUrl);
+		StructureDefinition retVal = (StructureDefinition) super.fetchStructureDefinition(theCtx, theUrl);
 		if (retVal != null && !retVal.hasSnapshot()) {
-			retVal = generateSnapshot(retVal, theUrl, null);
+			retVal = (StructureDefinition) generateSnapshot(this, retVal, theUrl, null,null);
 		}
 		return retVal;
 	}
@@ -76,7 +76,7 @@ public class JpaValidationSupportChainDstu3 extends ValidationSupportChain {
 		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myJpaValidationSupportDstu3);
 		addValidationSupport(myTerminologyService);
-		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext, this));
+		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
 	}
 
 	@PreDestroy

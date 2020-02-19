@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.searchparam.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
-import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -49,7 +49,7 @@ public class SearchParamDstu2Config extends BaseSearchParamConfig {
 
 	@Primary
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainDstu2")
-	public IValidationSupport validationSupportChainDstu2() {
+	public IContextValidationSupport validationSupportChainDstu2() {
 		return new DefaultProfileValidationSupport();
 	}
 }

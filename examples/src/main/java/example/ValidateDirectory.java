@@ -1,27 +1,26 @@
 package example;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.File;
-import java.io.FileReader;
-import java.util.HashMap;
-import java.util.Map;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.hapi.validation.PrePopulatedValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.ValidationResult;
+import java.io.File;
+import java.io.FileReader;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValidateDirectory {
    private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateDirectory.class);
@@ -37,9 +36,9 @@ public class ValidateDirectory {
       IParser xmlParser = ctx.newXmlParser();
       IParser jsonParser = ctx.newJsonParser();
 
-      Map<String, StructureDefinition> structureDefinitions = new HashMap<String, StructureDefinition>();
-      Map<String, CodeSystem> codeSystems = new HashMap<String, CodeSystem>();
-      Map<String, ValueSet> valueSets = new HashMap<String, ValueSet>();
+      Map<String, IBaseResource> structureDefinitions = new HashMap<>();
+      Map<String, IBaseResource> codeSystems = new HashMap<>();
+      Map<String, IBaseResource> valueSets = new HashMap<>();
 
       // Load all profile files
       for (File nextFile : profileDirectory.listFiles()) {
@@ -71,11 +70,11 @@ public class ValidateDirectory {
          }
       }
 
-      FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
+      FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 
       ValidationSupportChain validationSupportChain = new ValidationSupportChain();
       validationSupportChain.addValidationSupport(new DefaultProfileValidationSupport());
-      validationSupportChain.addValidationSupport(new PrePopulatedValidationSupport(structureDefinitions, valueSets, codeSystems));
+      validationSupportChain.addValidationSupport(new PrePopulatedValidationSupport(ctx, structureDefinitions, valueSets, codeSystems));
 
       instanceValidator.setValidationSupport(validationSupportChain);
 

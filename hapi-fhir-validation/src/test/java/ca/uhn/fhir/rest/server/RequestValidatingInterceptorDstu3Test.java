@@ -179,7 +179,7 @@ public class RequestValidatingInterceptorDstu3Test {
 
 	@Test
 	public void testCreateXmlInvalidInstanceValidator() throws Exception {
-		IValidatorModule module = new FhirInstanceValidator();
+		IValidatorModule module = new FhirInstanceValidator(ourCtx);
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);

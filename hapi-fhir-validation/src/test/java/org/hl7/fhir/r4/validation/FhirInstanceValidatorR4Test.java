@@ -635,7 +635,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	@Test
 	public void testValidateProfileWithExtension() throws IOException, FHIRException {
-		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport();
+		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport(ourCtx);
 		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport();
 		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport));
 

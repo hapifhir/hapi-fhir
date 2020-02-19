@@ -26,18 +26,27 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.validation.*;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.SchemaBaseValidator;
+import ca.uhn.fhir.validation.SingleValidationMessage;
+import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.common.hapi.validation.PrePopulatedValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.terminologies.ValueSetExpander;
+import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
 
 import javax.servlet.ServletException;
 import java.io.File;
@@ -55,7 +64,7 @@ public class ValidatorExamples {
       FhirValidator validator = ctx.newValidator();
       
       // Create a validator modules and register it
-      IValidatorModule module = new FhirInstanceValidator();
+      IValidatorModule module = new FhirInstanceValidator(ctx);
       validator.registerValidatorModule(module);
 
       // Pass a resource in to be validated. The resource can
@@ -180,7 +189,7 @@ public class ValidatorExamples {
 
       // Create a FhirInstanceValidator and register it to a validator
       FhirValidator validator = ctx.newValidator();
-      FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
+      FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
       validator.registerValidatorModule(instanceValidator);
       
       /*
@@ -230,31 +239,13 @@ public class ValidatorExamples {
 
       // Create a FhirInstanceValidator and register it to a validator
       FhirValidator validator = ctx.newValidator();
-      FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
+      FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
       validator.registerValidatorModule(instanceValidator);
       
       IValidationSupport valSupport = new IValidationSupport() {
 
 			@Override
-			public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, ValueSet.ConceptSetComponent theInclude) {
-				// TODO: implement (or return null if your implementation does not support this function)
-				return null;
-			}
-
-			@Override
 			public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
-				// TODO: implement (or return null if your implementation does not support this function)
-				return null;
-			}
-
-			@Override
-			public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-				// TODO: implement (or return null if your implementation does not support this function)
-				return null;
-			}
-
-			@Override
-			public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}
@@ -281,12 +272,6 @@ public class ValidatorExamples {
 			public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return false;
-			}
-
-			@Override
-			public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
-				// TODO: implement (or return null if your implementation does not support this function)
-				return null;
 			}
 
 			@Override
@@ -327,7 +312,7 @@ public class ValidatorExamples {
 		FhirContext ctx = FhirContext.forR4();
 
 		// Create a PrePopulatedValidationSupport and load it with our custom structures
-		PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport();
+		PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport(ctx);
 
 		// In this example we're loading two things, but in a real scenario we might
 		// load many StructureDefinitions, ValueSets, CodeSystems, etc.

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.config.r5;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.config.BaseConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
@@ -20,9 +21,8 @@ import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR5;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r5.hapi.validation.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.utils.IResourceValidator;
@@ -99,7 +99,7 @@ public class BaseR5Config extends BaseConfigDstu3Plus {
 	@Bean(name = "myInstanceValidatorR5")
 	@Lazy
 	public IInstanceValidatorModule instanceValidatorR5() {
-		FhirInstanceValidator val = new FhirInstanceValidator();
+		FhirInstanceValidator val = new FhirInstanceValidator(fhirContext());
 		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Warning;
 		val.setBestPracticeWarningLevel(level);
 		val.setValidationSupport(validationSupportChainR5());
@@ -166,7 +166,7 @@ public class BaseR5Config extends BaseConfigDstu3Plus {
 
 	@Primary
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainR5")
-	public IValidationSupport validationSupportChainR5() {
+	public IContextValidationSupport validationSupportChainR5() {
 		return new CachingValidationSupport(jpaValidationSupportChain());
 	}
 

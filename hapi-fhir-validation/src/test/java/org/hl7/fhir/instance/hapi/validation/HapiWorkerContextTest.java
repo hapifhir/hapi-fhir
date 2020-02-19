@@ -1,6 +1,7 @@
 package org.hl7.fhir.instance.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.dstu2.utils.IWorkerContext;
 import org.junit.Test;

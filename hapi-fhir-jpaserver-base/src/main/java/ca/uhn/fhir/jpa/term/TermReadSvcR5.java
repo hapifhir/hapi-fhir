@@ -6,16 +6,19 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
+import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.fhir.util.VersionIndependentConcept;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.r5.terminologies.ValueSetExpander;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.StructureDefinition;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,8 +26,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,6 +86,13 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 		return false;
 	}
 
+	@Override
+	@Transactional(dontRollbackOn = {ExpansionTooCostlyException.class})
+	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theInclude) {
+		ValueSet valueSetToExpand = (ValueSet) theInclude;
+		org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetToExpand), null);
+		return new ValueSetExpansionOutcome(org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(expandedR4));
+	}
 
 	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
@@ -116,28 +126,10 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	}
 
 	@Override
-	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
-		ValueSet valueSetToExpand = new ValueSet();
-		valueSetToExpand.getCompose().addInclude(theInclude);
-		org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetToExpand), null);
-		return new ValueSetExpander.ValueSetExpansionOutcome(org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(expandedR4));
-	}
-
-	@Override
 	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
 		return null;
 	}
 
-	@Override
-	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		return Collections.emptyList();
-	}
-
-	@CoverageIgnore
-	@Override
-	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
-		return null;
-	}
 
 	@CoverageIgnore
 	@Override
@@ -166,7 +158,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	@Override
 	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem, CodeSystem.class);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
 		}
@@ -191,7 +183,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	@Override
 	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem, CodeSystem.class);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}
@@ -200,7 +192,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 
 	@Override
 	public org.hl7.fhir.r4.model.CodeSystem getCodeSystemFromContext(String theSystem) {
-		CodeSystem codeSystemR5 = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		CodeSystem codeSystemR5 = myValidationSupport.fetchCodeSystem(myContext, theSystem, CodeSystem.class);
 		return org.hl7.fhir.convertors.conv40_50.CodeSystem40_50.convertCodeSystem(codeSystemR5);
 	}
 
@@ -213,11 +205,6 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	@Override
 	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
 		return supportsSystem(theSystem);
-	}
-
-	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
-		return null;
 	}
 
 	@CoverageIgnore
@@ -245,7 +232,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 			return retVal;
 		}
 
-		return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
+		return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR.toCode(), "Unknown code {" + theCodeSystem + "}" + theCode);
 	}
 
 	@Override

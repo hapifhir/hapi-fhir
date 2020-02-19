@@ -1,11 +1,10 @@
 package example;
 
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 
 public class ValidatorExamplesDstu3 {
 
@@ -24,7 +23,7 @@ public class ValidatorExamplesDstu3 {
       // FhirInstanceValidator is the validation module that handles 
       // profile validation. So, create an InstanceValidator module 
       // and register it to the validator.
-      FhirInstanceValidator instanceVal = new FhirInstanceValidator();
+      FhirInstanceValidator instanceVal = new FhirInstanceValidator(ctx);
       validator.registerValidatorModule(instanceVal);
 
       // FhirInstanceValidator requires an instance of "IValidationSupport" in

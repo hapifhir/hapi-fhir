@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.config.BaseConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
@@ -20,9 +21,8 @@ import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.common.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -98,7 +98,7 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 	@Bean(name = "myInstanceValidatorR4")
 	@Lazy
 	public IInstanceValidatorModule instanceValidatorR4() {
-		FhirInstanceValidator val = new FhirInstanceValidator();
+		FhirInstanceValidator val = new FhirInstanceValidator(fhirContext());
 		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Warning;
 		val.setBestPracticeWarningLevel(level);
 		val.setValidationSupport(validationSupportChainR4());
@@ -165,7 +165,7 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 
 	@Primary
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainR4")
-	public IValidationSupport validationSupportChainR4() {
+	public IContextValidationSupport validationSupportChainR4() {
 		return new CachingValidationSupport(jpaValidationSupportChain());
 	}
 

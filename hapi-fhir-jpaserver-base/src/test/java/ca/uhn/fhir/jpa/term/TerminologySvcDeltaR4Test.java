@@ -276,7 +276,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		assertEquals("http://foo", outcome.getUrl());
 		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, outcome.getContent());
 
-		IContextValidationSupport.LookupCodeResult lookup = myTermSvc.lookupCode(, myFhirCtx, "http://foo", "CBC");
+		IContextValidationSupport.LookupCodeResult lookup = myTermSvc.lookupCode(myValidationSupport, myFhirCtx, "http://foo", "CBC");
 		assertEquals("Complete Blood Count", lookup.getCodeDisplay());
 	}
 
@@ -291,7 +291,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA0", myTermSvc.lookupCode(, myFhirCtx, "http://foo", "codea").getCodeDisplay());
+		assertEquals("CODEA0", myTermSvc.lookupCode(myValidationSupport, myFhirCtx, "http://foo", "codea").getCodeDisplay());
 
 		// Add codes again with different display
 		delta = new CustomTerminologySet();
@@ -299,12 +299,12 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("codeb", "CODEB1");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA1", myTermSvc.lookupCode(, myFhirCtx, "http://foo", "codea").getCodeDisplay());
+		assertEquals("CODEA1", myTermSvc.lookupCode(myValidationSupport, myFhirCtx, "http://foo", "codea").getCodeDisplay());
 
 		// Add codes again with no changes
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA1", myTermSvc.lookupCode(, myFhirCtx, "http://foo", "codea").getCodeDisplay());
+		assertEquals("CODEA1", myTermSvc.lookupCode(myValidationSupport, myFhirCtx, "http://foo", "codea").getCodeDisplay());
 	}
 
 	@Test
@@ -389,7 +389,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			.setCode("useless_sct_code")
 			.setValue(new Coding("http://snomed.info", "1234567", "Choked on large meal (finding)"));
 
-		IContextValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(, myFhirCtx, "http://foo/cs", "lunch");
+		IContextValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(myValidationSupport, myFhirCtx, "http://foo/cs", "lunch");
 		assertEquals(true, result.isFound());
 		assertEquals("lunch", result.getSearchedForCode());
 		assertEquals("http://foo/cs", result.getSearchedForSystem());

@@ -13,11 +13,11 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.time.DateUtils;
 import org.fhir.ucum.UcumService;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.ValidatorWrapper;
 import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
-import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -168,7 +168,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
 	 * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
 	 */
-	public void setValidationSupport(IValidationSupport theValidationSupport) {
+	public void setValidationSupport(IContextValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 		myWrappedWorkerContext = null;
 	}

@@ -41,9 +41,9 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.codec.binary.StringUtils;
-import org.hl7.fhir.instance.hapi.validation.CachingValidationSupport;
-import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,7 +184,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 
 		List<IIdType> valueSetIds;
 		Set<ResourcePersistentId> ids = searchForIds(new SearchParameterMap(ValueSet.SP_CODE, new TokenParam(theSystem, theCode)), theRequest);
-		valueSetIds = new ArrayList<IIdType>();
+		valueSetIds = new ArrayList<>();
 		for (ResourcePersistentId next : ids) {
 			IIdType id = myIdHelperService.translatePidIdToForcedId(myFhirContext, "ValueSet", next);
 			valueSetIds.add(id);

@@ -108,7 +108,7 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	@Override
 	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		org.hl7.fhir.dstu2.model.ValueSet system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		org.hl7.fhir.dstu2.model.ValueSet system = myValidationSupport.fetchCodeSystem(myContext, theSystem, org.hl7.fhir.dstu2.model.ValueSet.class);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
 		}
@@ -133,7 +133,7 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	@Override
 	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		org.hl7.fhir.dstu2.model.ValueSet system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		org.hl7.fhir.dstu2.model.ValueSet system = myValidationSupport.fetchCodeSystem(myContext, theSystem, org.hl7.fhir.dstu2.model.ValueSet.class);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}

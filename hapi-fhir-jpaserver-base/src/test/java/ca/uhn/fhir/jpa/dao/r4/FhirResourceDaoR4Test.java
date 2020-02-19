@@ -3842,7 +3842,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testUploadExtensionStructureDefinition() {
-		StructureDefinition ext = myValidationSupport.fetchStructureDefinition(myFhirCtx, "http://hl7.org/fhir/StructureDefinition/familymemberhistory-type");
+		StructureDefinition ext = (StructureDefinition) myValidationSupport.fetchStructureDefinition(myFhirCtx, "http://hl7.org/fhir/StructureDefinition/familymemberhistory-type");
 		Validate.notNull(ext);
 		myStructureDefinitionDao.update(ext);
 	}
@@ -3880,7 +3880,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	private static List<String> toStringList(List<CanonicalType> theUriType) {
-		ArrayList<String> retVal = new ArrayList<String>();
+		ArrayList<String> retVal = new ArrayList<>();
 		for (UriType next : theUriType) {
 			retVal.add(next.getValue());
 		}

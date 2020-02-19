@@ -28,7 +28,7 @@ public class CustomResourceGenerationTest extends BaseTest {
 		StructureDefinition customProfile = loadResource(myCtx, StructureDefinition.class, "/r4/custom-resource-profile.json");
 		String customResource = loadResource("/r4/custom-resource.json");
 
-		PrePopulatedValidationSupport prePopulatedValidationSupport = new PrePopulatedValidationSupport();
+		PrePopulatedValidationSupport prePopulatedValidationSupport = new PrePopulatedValidationSupport(myCtx);
 		prePopulatedValidationSupport.addStructureDefinition(customProfile);
 
 		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport();

@@ -28,16 +28,19 @@ import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
-import com.helger.commons.io.file.FileHelper;
 import com.google.common.base.Charsets;
-import org.apache.commons.cli.*;
+import com.helger.commons.io.file.FileHelper;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.OptionGroup;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.fusesource.jansi.Ansi.Color;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -46,7 +49,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.fusesource.jansi.Ansi.ansi;
 
 public class ValidateCommand extends BaseCommand {
@@ -151,10 +157,10 @@ public class ValidateCommand extends BaseCommand {
 		if (theCommandLine.hasOption("p")) {
 			switch (ctx.getVersion().getVersion()) {
 				case DSTU2: {
-					org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator instanceValidator = new org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator();
+					org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator instanceValidator = new org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator(ctx);
 					val.registerValidatorModule(instanceValidator);
-					org.hl7.fhir.instance.hapi.validation.ValidationSupportChain validationSupport = new org.hl7.fhir.instance.hapi.validation.ValidationSupportChain(
-						new org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport());
+					ValidationSupportChain validationSupport = new ValidationSupportChain(
+						new DefaultProfileValidationSupport());
 					if (igPack != null) {
 						FhirContext hl7orgCtx = FhirContext.forDstu2Hl7Org();
 						hl7orgCtx.setParserErrorHandler(new LenientErrorHandler(false));
@@ -174,7 +180,7 @@ public class ValidateCommand extends BaseCommand {
 					break;
 				}
 				case DSTU3: {
-					FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
+					FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 					val.registerValidatorModule(instanceValidator);
 					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport());
 					if (igPack != null) {

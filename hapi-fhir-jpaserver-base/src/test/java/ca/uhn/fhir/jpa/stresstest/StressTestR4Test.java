@@ -91,7 +91,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		super.before();
 
 		myRequestValidatingInterceptor = new RequestValidatingInterceptor();
-		FhirInstanceValidator module = new FhirInstanceValidator();
+		FhirInstanceValidator module = new FhirInstanceValidator(myFhirCtx);
 		module.setValidationSupport(myValidationSupport);
 		myRequestValidatingInterceptor.addValidatorModule(module);
 

@@ -2,16 +2,15 @@ package ca.uhn.fhir.jpa.searchparam;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.util.StopWatch;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.CachingValidationSupport;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -23,7 +22,11 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class IndexStressTest {
 
@@ -37,8 +40,8 @@ public class IndexStressTest {
 		p.addAddress().addLine("A").addLine("B").addLine("C");
 
 		FhirContext ctx = FhirContext.forDstu3();
-		IValidationSupport mockValidationSupport = mock(IValidationSupport.class);
-		IValidationSupport validationSupport = new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), mockValidationSupport));
+		IContextValidationSupport mockValidationSupport = mock(IContextValidationSupport.class);
+		IContextValidationSupport validationSupport = new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), mockValidationSupport));
 		ISearchParamRegistry searchParamRegistry = mock(ISearchParamRegistry.class);
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ctx, validationSupport, searchParamRegistry);
 		extractor.start();
@@ -61,6 +64,6 @@ public class IndexStressTest {
 		ourLog.info("Indexed {} times in {}ms/time", loops, sw.getMillisPerOperation(loops));
 
 		assertEquals(9, params.size());
-		verify(mockValidationSupport, times(1)).fetchAllStructureDefinitions((any(FhirContext.class)));
+		verify(mockValidationSupport, times(1)).fetchAllStructureDefinitions(any(FhirContext.class), any());
 	}
 }

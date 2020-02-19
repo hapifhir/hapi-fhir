@@ -11,8 +11,6 @@ import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.junit.Test;
@@ -31,25 +29,25 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public class HapiWorkerContextTest extends BaseTest {
-	FhirContext ctx = FhirContext.forR4();
+	FhirContext myCtx = FhirContext.forR4();
 
 	@Test
 	public void testCodeInPrePopulatedValidationSupport() throws IOException {
 
-		PrePopulatedValidationSupport prePopulatedValidationSupport = new PrePopulatedValidationSupport();
+		PrePopulatedValidationSupport prePopulatedValidationSupport = new PrePopulatedValidationSupport(myCtx);
 
-		getResources("/r4/carin/carin/codesystem/").forEach(t -> prePopulatedValidationSupport.addCodeSystem((CodeSystem) t));
-		getResources("/r4/carin/uscore/codesystem/").forEach(t -> prePopulatedValidationSupport.addCodeSystem((CodeSystem) t));
+		getResources("/r4/carin/carin/codesystem/").forEach(t -> prePopulatedValidationSupport.addCodeSystem(t));
+		getResources("/r4/carin/uscore/codesystem/").forEach(t -> prePopulatedValidationSupport.addCodeSystem(t));
 		getResources("/r4/carin/carin/valueset/").forEach(t -> prePopulatedValidationSupport.addValueSet((ValueSet) t));
 		getResources("/r4/carin/uscore/valueset/").forEach(t -> prePopulatedValidationSupport.addValueSet((ValueSet) t));
-		getResources("/r4/carin/carin/structuredefinition/").forEach(t -> prePopulatedValidationSupport.addStructureDefinition((StructureDefinition) t));
-		getResources("/r4/carin/uscore/structuredefinition/").forEach(t -> prePopulatedValidationSupport.addStructureDefinition((StructureDefinition) t));
+		getResources("/r4/carin/carin/structuredefinition/").forEach(t -> prePopulatedValidationSupport.addStructureDefinition(t));
+		getResources("/r4/carin/uscore/structuredefinition/").forEach(t -> prePopulatedValidationSupport.addStructureDefinition(t));
 
 		ValidationSupportChain validationSupportChain = new ValidationSupportChain(
 			new DefaultProfileValidationSupport(),
 			prePopulatedValidationSupport
 		);
-		HapiWorkerContext workerCtx = new HapiWorkerContext(ctx, validationSupportChain);
+		HapiWorkerContext workerCtx = new HapiWorkerContext(myCtx, validationSupportChain);
 
 		ValueSet vs = new ValueSet();
 		IWorkerContext.ValidationResult outcome;
@@ -91,7 +89,7 @@ public class HapiWorkerContextTest extends BaseTest {
 		for (Resource nextFileResource : resources) {
 			try (InputStream is = nextFileResource.getInputStream()) {
 				Reader reader = new InputStreamReader(is, Charsets.UTF_8);
-				retVal.add(ctx.newJsonParser().parseResource(reader));
+				retVal.add(myCtx.newJsonParser().parseResource(reader));
 			}
 		}
 

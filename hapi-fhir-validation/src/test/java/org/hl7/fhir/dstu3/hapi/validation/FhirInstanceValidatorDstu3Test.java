@@ -174,11 +174,11 @@ public class FhirInstanceValidatorDstu3Test {
 		when(myMockSupport.validateCode(any(), nullable(FhirContext.class), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IContextValidationSupport.CodeValidationResult>() {
 			@Override
 			public IContextValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
-				FhirContext ctx = theInvocation.getArgument(0, FhirContext.class);
-				String system = theInvocation.getArgument(1, String.class);
-				String code = theInvocation.getArgument(2, String.class);
-				String display = theInvocation.getArgument(3, String.class);
-				String valueSetUrl = theInvocation.getArgument(4, String.class);
+				FhirContext ctx = theInvocation.getArgument(1, FhirContext.class);
+				String system = theInvocation.getArgument(2, String.class);
+				String code = theInvocation.getArgument(3, String.class);
+				String display = theInvocation.getArgument(4, String.class);
+				String valueSetUrl = theInvocation.getArgument(5, String.class);
 				IContextValidationSupport.CodeValidationResult retVal;
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(new CodeType(code)));

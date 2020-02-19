@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
@@ -49,7 +50,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 
 	// This constructor is used by tests
 	@VisibleForTesting
-	public SearchParamExtractorDstu3(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
+	public SearchParamExtractorDstu3(ModelConfig theModelConfig, FhirContext theCtx, IContextValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
 		super(theCtx, theSearchParamRegistry);
 		initFhirPathEngine(theValidationSupport);
 		start();
@@ -79,7 +80,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		}
 	}
 
-	public void initFhirPathEngine(IValidationSupport theSupport) {
+	public void initFhirPathEngine(IContextValidationSupport theSupport) {
 		IWorkerContext worker = new HapiWorkerContext(getContext(), theSupport);
 		myFhirPathEngine = new FHIRPathEngine(worker);
 	}

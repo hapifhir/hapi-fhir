@@ -4,9 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import java.io.FileReader;
@@ -18,7 +18,7 @@ public class ValidateSimple {
 		FhirContext ctx = FhirContext.forR4();
 
 		// Create a validator module
-		FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
+		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 
 		// We'll create a validation chain with only the DefaultProfileValidationupport registered
 		ValidationSupportChain validationSupportChain = new ValidationSupportChain();

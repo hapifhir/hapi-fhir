@@ -32,14 +32,18 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ElementUtil;
 import org.apache.commons.codec.binary.StringUtils;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetFilterComponent;
 import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
@@ -305,9 +309,9 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 		if (theId != null) {
 			vs = read(theId, theRequestDetails);
 		} else if (haveIdentifierParam) {
-			vs = myDefaultProfileValidationSupport.fetchValueSet(getContext(), theValueSetIdentifier.getValue());
+			vs = (ValueSet) myDefaultProfileValidationSupport.fetchValueSet(getContext(), theValueSetIdentifier.getValue());
 			if (vs == null) {
-				vs = myValidationSupport.fetchValueSet(getContext(), theValueSetIdentifier.getValue());
+				vs = (ValueSet) myValidationSupport.fetchValueSet(getContext(), theValueSetIdentifier.getValue());
 				if (vs == null) {
 					throw new InvalidRequestException("Unknown ValueSet identifier: " + theValueSetIdentifier.getValue());
 				}

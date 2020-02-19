@@ -48,7 +48,7 @@ public class FhirDstu2_1 implements IFhirVersion {
 
 	@Override
 	public IContextValidationSupport createValidationSupport() {
-		throw new UnsupportedOperationException("Validation is not supported in DSTU2.1 contexts");
+		return ReflectionUtil.newInstanceOfFhirProfileValidationSupport("org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport");
 	}
 
 	@Override

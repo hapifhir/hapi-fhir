@@ -7,18 +7,12 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import org.hl7.fhir.dstu2.model.IdType;
-import org.hl7.fhir.dstu2.model.StructureDefinition;
-import org.hl7.fhir.dstu2.model.ValueSet;
-import org.hl7.fhir.dstu2.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.dstu2.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
-import java.util.ArrayList;
-import java.util.List;
 
 /*
  * #%L
@@ -64,23 +58,6 @@ public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 	@Autowired
 	@Qualifier("myFhirContextDstu2")
 	private FhirContext myDstu2Ctx;
-
-	@Override
-	public List<StructureDefinition> allStructures() {
-		return new ArrayList<>();
-	}
-
-	@Override
-	@Transactional(value = TxType.SUPPORTS)
-	public ValueSetExpansionComponent expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
-		return null;
-	}
-
-	@Override
-	@Transactional(value = TxType.SUPPORTS)
-	public ValueSet fetchCodeSystem(FhirContext theCtx, String theSystem) {
-		return null;
-	}
 
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
@@ -133,12 +110,6 @@ public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 	@Transactional(value = TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
 		return false;
-	}
-
-	@Override
-	@Transactional(value = TxType.SUPPORTS)
-	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
-		return null;
 	}
 
 }

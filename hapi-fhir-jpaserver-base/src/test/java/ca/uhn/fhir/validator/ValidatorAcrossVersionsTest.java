@@ -45,7 +45,7 @@ public class ValidatorAcrossVersionsTest {
 		FhirValidator val = ctxDstu2.newValidator();
 		val.setValidateAgainstStandardSchema(false);
 		val.setValidateAgainstStandardSchematron(false);
-		val.registerValidatorModule(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator(ctxDstu2));
 
 		QuestionnaireResponse resp = new QuestionnaireResponse();
 		resp.setAuthored(DateTimeDt.withCurrentTime());

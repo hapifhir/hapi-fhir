@@ -41,10 +41,6 @@ public class IgPackValidationSupportDstu3 implements IValidationSupport {
 		myIgResources = theIgResources;
 	}
 
-	@Override
-	public ValueSet.ValueSetExpansionComponent expandValueSet(FhirContext theContext, ValueSet.ConceptSetComponent theInclude) {
-		return null;
-	}
 
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
@@ -52,21 +48,6 @@ public class IgPackValidationSupportDstu3 implements IValidationSupport {
 	}
 
 
-	@Override
-	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		ArrayList<StructureDefinition> retVal = new ArrayList<>();
-		for (Map.Entry<IIdType, IBaseResource> next : myIgResources.entrySet()) {
-			if (next.getKey().getResourceType().equals("StructureDefinition")) {
-				retVal.add((StructureDefinition) next.getValue());
-			}
-		}
-		return retVal;
-	}
-
-	@Override
-	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
-		return fetchResource(theContext, CodeSystem.class, theSystem);
-	}
 
 	@Override
 	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
@@ -133,8 +114,4 @@ public class IgPackValidationSupportDstu3 implements IValidationSupport {
 		return null;
 	}
 
-	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
-		return null;
-	}
 }

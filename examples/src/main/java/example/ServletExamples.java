@@ -5,6 +5,7 @@ import java.util.Arrays;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
 import org.springframework.web.cors.CorsConfiguration;
 
@@ -48,14 +49,16 @@ public class ServletExamples {
 
       @Override
       protected void initialize() throws ServletException {
-         
+			FhirContext ctx = FhirContext.forDstu3();
+			setFhirContext(ctx);
+
          // ... define your resource providers here ...
 
          // Create an interceptor to validate incoming requests
          RequestValidatingInterceptor requestInterceptor = new RequestValidatingInterceptor();
          
          // Register a validator module (you could also use SchemaBaseValidator and/or SchematronBaseValidator)
-         requestInterceptor.addValidatorModule(new FhirInstanceValidator());
+         requestInterceptor.addValidatorModule(new FhirInstanceValidator(ctx));
          
          requestInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
          requestInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
@@ -68,7 +71,7 @@ public class ServletExamples {
          // Create an interceptor to validate responses
          // This is configured in the same way as above
          ResponseValidatingInterceptor responseInterceptor = new ResponseValidatingInterceptor();
-         responseInterceptor.addValidatorModule(new FhirInstanceValidator());
+         responseInterceptor.addValidatorModule(new FhirInstanceValidator(ctx));
          responseInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
          responseInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
          responseInterceptor.setResponseHeaderValue("Validation on ${line}: ${message} ${severity}");

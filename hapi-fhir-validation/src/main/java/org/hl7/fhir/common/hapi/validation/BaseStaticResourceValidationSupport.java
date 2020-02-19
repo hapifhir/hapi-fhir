@@ -26,7 +26,7 @@ public abstract class BaseStaticResourceValidationSupport implements IContextVal
 		switch (theContext.getVersion().getVersion()) {
 			case DSTU3: {
 				org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple expander = new org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple(new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(theContext, theRootValidationSupport), null);
-				expansion = expander.expand((org.hl7.fhir.dstu3.model.ValueSet) theValueSet, new ExpansionProfile()).getValueset();
+				expansion = expander.expand((org.hl7.fhir.dstu3.model.ValueSet) theValueSet, null).getValueset();
 				break;
 			}
 			case R4: {

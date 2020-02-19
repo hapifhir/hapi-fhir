@@ -20,20 +20,12 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
-import org.hl7.fhir.dstu2.model.StructureDefinition;
-import org.hl7.fhir.dstu2.model.ValueSet;
-import org.hl7.fhir.dstu2.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.dstu2.model.ValueSet.ValueSetExpansionComponent;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class LoadingValidationSupportDstu2 implements IValidationSupport {
 
@@ -41,21 +33,6 @@ public class LoadingValidationSupportDstu2 implements IValidationSupport {
 
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoadingValidationSupportDstu2.class);
-
-	@Override
-	public List<StructureDefinition> allStructures() {
-		return new ArrayList<>();
-	}
-
-	@Override
-	public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
-		return null;
-	}
-
-	@Override
-	public ValueSet fetchCodeSystem(FhirContext theContext, String theSystem) {
-		return null;
-	}
 
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
@@ -78,11 +55,6 @@ public class LoadingValidationSupportDstu2 implements IValidationSupport {
 	@Override
 	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
 		return false;
-	}
-
-	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-		return null;
 	}
 
 }

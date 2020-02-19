@@ -160,7 +160,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
 	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
 	 */
-	public void setValidationSupport(IValidationSupport theValidationSupport) {
+	public void setValidationSupport(IContextValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 		myWrappedWorkerContext = null;
 	}

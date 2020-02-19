@@ -32,10 +32,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ElementUtil;
 import org.apache.commons.codec.binary.StringUtils;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -321,9 +321,9 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 		if (theId != null) {
 			vs = read(theId, theRequestDetails);
 		} else if (haveIdentifierParam) {
-			vs = myDefaultProfileValidationSupport.fetchValueSet(getContext(), theValueSetIdentifier.getValue());
+			vs = (ValueSet) myDefaultProfileValidationSupport.fetchValueSet(getContext(), theValueSetIdentifier.getValue());
 			if (vs == null) {
-				vs = myValidationSupport.fetchValueSet(getContext(), theValueSetIdentifier.getValue());
+				vs = (ValueSet) myValidationSupport.fetchValueSet(getContext(), theValueSetIdentifier.getValue());
 				if (vs == null) {
 					throw new InvalidRequestException("Unknown ValueSet identifier: " + theValueSetIdentifier.getValue());
 				}

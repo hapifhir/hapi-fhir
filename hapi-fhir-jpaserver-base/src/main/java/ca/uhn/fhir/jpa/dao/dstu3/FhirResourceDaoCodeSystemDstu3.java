@@ -35,7 +35,7 @@ import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -111,7 +111,7 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 
 		if (myValidationSupport.isCodeSystemSupported(getContext(), system)) {
 			ourLog.debug("Code system {} is supported", system);
-			IContextValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(getContext(), system, code);
+			IContextValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(myValidationSupport, getContext(), system, code);
 			if (result != null) {
 				return result;
 			}

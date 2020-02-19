@@ -21,15 +21,13 @@ package ca.uhn.fhir.igpacks.parser;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu2.model.ConceptMap;
 import org.hl7.fhir.dstu2.model.StructureDefinition;
 import org.hl7.fhir.dstu2.model.ValueSet;
+import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class IgPackValidationSupportDstu2 implements IValidationSupport {
@@ -39,35 +37,6 @@ public class IgPackValidationSupportDstu2 implements IValidationSupport {
 		myIgResources = theIgResources;
 	}
 
-	@Override
-	public List<StructureDefinition> allStructures() {
-		ArrayList<StructureDefinition> retVal = new ArrayList<>();
-
-		for (Map.Entry<IIdType, IBaseResource> next : myIgResources.entrySet()) {
-			if (next.getKey().getResourceType().equals("StructureDefinition")) {
-				retVal.add((StructureDefinition) next.getValue());
-			}
-		}
-		return retVal;
-	}
-
-	@Override
-	public ValueSet.ValueSetExpansionComponent expandValueSet(FhirContext theContext, ValueSet.ConceptSetComponent theInclude) {
-		return null;
-	}
-
-	@Override
-	public ValueSet fetchCodeSystem(FhirContext theContext, String theSystem) {
-		for (Map.Entry<IIdType, IBaseResource> next : myIgResources.entrySet()) {
-			if (next.getKey().getResourceType().equals("ValueSet")) {
-				ValueSet nextVs = (ValueSet) next.getValue();
-				if (theSystem.equals(nextVs.getUrl())) {
-					return nextVs;
-				}
-			}
-		}
-		return null;
-	}
 
 
 	@Override
@@ -108,8 +77,4 @@ public class IgPackValidationSupportDstu2 implements IValidationSupport {
 		return false;
 	}
 
-	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-		return null;
-	}
 }
