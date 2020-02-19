@@ -156,11 +156,79 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertHierarchyContains(
 			"RootA seq=0",
+			" ChildAA seq=0",
+			"  ChildAAA seq=0",
 			"RootB seq=0",
 			" ChildAA seq=0",
 			"  ChildAAA seq=0"
 		);
 		assertEquals(2, outcome.getUpdatedConceptCount());
+
+	}
+
+	@Test
+	public void testReAddingConceptsDoesntRecreateExistingLinks() {
+		createNotPresentCodeSystem();
+		assertHierarchyContains();
+
+		UploadStatistics outcome;
+		CustomTerminologySet delta;
+
+		myCaptureQueriesListener.clear();
+
+		delta = new CustomTerminologySet();
+		delta.addRootConcept("RootA", "Root A")
+			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAA").setDisplay("Child AA");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
+		assertHierarchyContains(
+			"RootA seq=0",
+			" ChildAA seq=0"
+		);
+
+		myCaptureQueriesListener.logDeleteQueries();
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		// 2 concepts, 1 link
+		assertEquals(3, myCaptureQueriesListener.countInsertQueries());
+		myCaptureQueriesListener.clear();
+
+		delta = new CustomTerminologySet();
+		delta.addRootConcept("RootA", "Root A")
+			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAA").setDisplay("Child AA")
+			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAAA").setDisplay("Child AAA");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
+		assertHierarchyContains(
+			"RootA seq=0",
+			" ChildAA seq=0",
+			"  ChildAAA seq=0"
+		);
+
+		myCaptureQueriesListener.logDeleteQueries();
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		// 1 concept, 1 link
+		assertEquals(2, myCaptureQueriesListener.countInsertQueries());
+		myCaptureQueriesListener.clear();
+
+		delta = new CustomTerminologySet();
+		delta.addRootConcept("RootA", "Root A")
+			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAA").setDisplay("Child AA")
+			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAAA").setDisplay("Child AAA")
+			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAAAA").setDisplay("Child AAAA");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
+		assertHierarchyContains(
+			"RootA seq=0",
+			" ChildAA seq=0",
+			"  ChildAAA seq=0",
+			"   ChildAAAA seq=0"
+		);
+
+		myCaptureQueriesListener.logDeleteQueries();
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		// 1 concept, 1 link
+		assertEquals(2, myCaptureQueriesListener.countInsertQueries());
+		myCaptureQueriesListener.clear();
 
 	}
 
@@ -305,54 +373,6 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
 		assertEquals("CODEA1", myTermSvc.lookupCode(myFhirCtx, "http://foo", "codea").getCodeDisplay());
-	}
-
-	@Test
-	public void testAddRelocateHierarchy() {
-		createNotPresentCodeSystem();
-
-		// Add code hierarchy
-		CustomTerminologySet delta = new CustomTerminologySet();
-		TermConcept codeA = delta.addRootConcept("CodeA", "Code A");
-		TermConcept codeAA = codeA.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeAA").setDisplay("Code AA");
-		codeAA.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeAAA").setDisplay("Code AAA");
-		codeAA.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeAAB").setDisplay("Code AAB");
-		TermConcept codeB = delta.addRootConcept("CodeB", "Code B");
-		TermConcept codeBA = codeB.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeBA").setDisplay("Code BA");
-		codeBA.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeBAA").setDisplay("Code BAA");
-		codeBA.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeBAB").setDisplay("Code BAB");
-		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertEquals(8, outcome.getUpdatedConceptCount());
-		assertHierarchyContains(
-			"CodeA seq=0",
-			" CodeAA seq=0",
-			"  CodeAAA seq=0",
-			"  CodeAAB seq=1",
-			"CodeB seq=0",
-			" CodeBA seq=0",
-			"  CodeBAA seq=0",
-			"  CodeBAB seq=1"
-		);
-
-		// Move a single child code to a new spot and make sure the hierarchy comes along
-		// for the ride..
-		delta = new CustomTerminologySet();
-		delta
-			.addRootConcept("CodeB", "Code B")
-			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeAA").setDisplay("Code AA");
-		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertHierarchyContains(
-			"CodeA seq=0",
-			"CodeB seq=0",
-			" CodeBA seq=0",
-			"  CodeBAA seq=0",
-			"  CodeBAB seq=1",
-			" CodeAA seq=0", // <-- CodeAA got added here so it comes second
-			"  CodeAAA seq=0",
-			"  CodeAAB seq=1"
-		);
-
 	}
 
 	@Test
