@@ -14,8 +14,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,7 +23,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -218,7 +215,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theSystem, String theCode) {
 		return super.lookupCode(theContext, theSystem, theCode);
 	}
 

@@ -5,7 +5,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.utils.FhirPathEngineTest;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;

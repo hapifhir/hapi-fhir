@@ -129,7 +129,7 @@ public class IgPackValidationSupportDstu3 implements IValidationSupport {
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theSystem, String theCode) {
 		return null;
 	}
 

@@ -318,7 +318,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theSystem, String theCode) {
 		return super.lookupCode(theContext, theSystem, theCode);
 	}
 

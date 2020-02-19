@@ -1,12 +1,17 @@
 package org.hl7.fhir.instance.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu2.formats.IParser;
 import org.hl7.fhir.dstu2.formats.ParserType;
-import org.hl7.fhir.instance.hapi.validation.IValidationSupport.CodeValidationResult;
-import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.dstu2.model.CodeableConcept;
+import org.hl7.fhir.dstu2.model.Coding;
+import org.hl7.fhir.dstu2.model.ConceptMap;
+import org.hl7.fhir.dstu2.model.Resource;
+import org.hl7.fhir.dstu2.model.StructureDefinition;
+import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu2.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu2.model.ValueSet.ConceptSetComponent;
@@ -26,16 +31,16 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpanderFactory, ValueSetExpander {
 	private final FhirContext myCtx;
-	private IValidationSupport myValidationSupport;
+	private IContextValidationSupport myValidationSupport;
 
-	public HapiWorkerContext(FhirContext theCtx, IValidationSupport theValidationSupport) {
+	public HapiWorkerContext(FhirContext theCtx, IContextValidationSupport theValidationSupport) {
 		myCtx = theCtx;
 		myValidationSupport = theValidationSupport;
 	}
 
 	@Override
 	public List<StructureDefinition> allStructures() {
-		return myValidationSupport.allStructures();
+		return myValidationSupport.fetchAllStructureDefinitions(myCtx, StructureDefinition.class);
 	}
 
 	@Override
@@ -56,7 +61,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc) {
-		return myValidationSupport.expandValueSet(myCtx, theInc);
+		ValueSet input = new ValueSet();
+		input.getCompose().addInclude(theInc);
+		IContextValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(myValidationSupport, myCtx, input);
+		ValueSet outputVs = (ValueSet) output.getValueSet();
+		return outputVs.getExpansion();
 	}
 
 	@Override
@@ -69,7 +78,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		if (myValidationSupport == null) {
 			return null;
 		} else {
-			return myValidationSupport.fetchCodeSystem(myCtx, theSystem);
+			return myValidationSupport.fetchCodeSystem(myCtx, theSystem, ValueSet.class);
 		}
 	}
 
@@ -168,11 +177,16 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-		CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay);
+		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, myCtx, theSystem, theCode, theDisplay, null);
 		if (result == null) {
 			return null;
 		}
-		return new ValidationResult(result.getSeverity(), result.getMessage(), result.asConceptDefinition());
+		IssueSeverity severity = null;
+		if (result.getSeverity() != null) {
+			severity = IssueSeverity.fromCode(result.getSeverity());
+		}
+
+		return new ValidationResult(severity, result.getMessage(), (ConceptDefinitionComponent) result.asConceptDefinition());
 	}
 
 	@Override
@@ -210,7 +224,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 					}
 				}
 
-				if (nextComposeConceptSet.getConcept().isEmpty()){
+				if (nextComposeConceptSet.getConcept().isEmpty()) {
 
 					String validateSystem = nextSystem;
 					if (Constants.codeSystemNotNeeded(nextSystem)) {
@@ -218,7 +232,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 					}
 
 					ValidationResult result = validateCode(validateSystem, theCode, null);
-					if (result.isOk()){
+					if (result.isOk()) {
 						return result;
 					}
 				}

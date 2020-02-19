@@ -20,7 +20,7 @@ import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;

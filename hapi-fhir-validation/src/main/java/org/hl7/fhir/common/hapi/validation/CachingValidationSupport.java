@@ -6,7 +6,6 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -22,7 +21,7 @@ public class CachingValidationSupport implements IContextValidationSupport {
 	private final IContextValidationSupport myWrap;
 	private final Cache<String, Object> myCache;
 
-	public CachingValidationSupport(IValidationSupport theWrap) {
+	public CachingValidationSupport(IContextValidationSupport theWrap) {
 		myWrap = theWrap;
 		myCache = Caffeine
 			.newBuilder()
@@ -33,7 +32,7 @@ public class CachingValidationSupport implements IContextValidationSupport {
 
 	@Override
 	public IContextValidationSupport.ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theInclude) {
-		return myWrap.expandValueSet(, theContext, theInclude);
+		return myWrap.expandValueSet(theRootValidationSupport, theContext, theInclude);
 	}
 
 	@Override
@@ -94,9 +93,9 @@ public class CachingValidationSupport implements IContextValidationSupport {
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theSystem, String theCode) {
 		String key = "lookupCode " + theSystem + " " + theCode;
-		return loadFromCache(key, t -> myWrap.lookupCode(theContext, theSystem, theCode));
+		return loadFromCache(key, t -> myWrap.lookupCode(theRootValidationSupport, theContext, theSystem, theCode));
 	}
 
 	@SuppressWarnings("OptionalAssignedToNull")

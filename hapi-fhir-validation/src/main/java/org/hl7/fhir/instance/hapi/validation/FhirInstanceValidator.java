@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -28,7 +29,6 @@ import org.hl7.fhir.converter.NullVersionConverterAdvisor50;
 import org.hl7.fhir.convertors.VersionConvertorAdvisor50;
 import org.hl7.fhir.convertors.VersionConvertor_10_50;
 import org.hl7.fhir.convertors.conv10_50.ValueSet10_50;
-import org.hl7.fhir.convertors.conv14_50.CodeSystem14_50;
 import org.hl7.fhir.dstu2.model.CodeableConcept;
 import org.hl7.fhir.dstu2.model.Coding;
 import org.hl7.fhir.dstu2.model.Questionnaire;
@@ -86,7 +86,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private boolean myAnyExtensionsAllowed = true;
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
 	private StructureDefinition myStructureDefintion;
-	private IValidationSupport myValidationSupport;
+	private IContextValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
 
 	public boolean isAssumeValidRestReferences() {
@@ -105,10 +105,10 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	/**
 	 * Constructor
 	 * <p>
-	 * Uses {@link DefaultProfileValidationSupport} for {@link IValidationSupport validation support}
+	 * Uses DefaultProfileValidationSupport for {@link IValidationSupport validation support}
 	 */
-	public FhirInstanceValidator() {
-		this(new DefaultProfileValidationSupport());
+	public FhirInstanceValidator(FhirContext theContext) {
+		this(theContext.getVersion().createValidationSupport());
 	}
 
 	/**
@@ -116,7 +116,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	 *
 	 * @param theValidationSupport The validation support
 	 */
-	public FhirInstanceValidator(IValidationSupport theValidationSupport) {
+	public FhirInstanceValidator(IContextValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 	}
 
@@ -233,17 +233,18 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	/**
 	 * Returns the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
-	 * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
+	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
+	 * @return
 	 */
-	public IValidationSupport getValidationSupport() {
+	public IContextValidationSupport getValidationSupport() {
 		return myValidationSupport;
 	}
 
 	/**
 	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
-	 * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
+	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
 	 */
-	public void setValidationSupport(IValidationSupport theValidationSupport) {
+	public void setValidationSupport(IContextValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 		myWrappedWorkerContext = null;
 	}
@@ -626,7 +627,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
-		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ValueSet source, boolean cacheOk, boolean heiarchical) {
+		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ValueSet source, boolean cacheOk, boolean Hierarchical) {
 			ValueSet convertedSource = null;
 			try {
 				convertedSource = convertValueSet(source);
@@ -651,7 +652,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
-		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent binding, boolean cacheOk, boolean heiarchical) throws FHIRException {
+		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent binding, boolean cacheOk, boolean Hierarchical) throws FHIRException {
 			throw new UnsupportedOperationException();
 		}
 

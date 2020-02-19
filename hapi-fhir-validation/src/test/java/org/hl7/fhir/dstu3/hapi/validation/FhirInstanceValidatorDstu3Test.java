@@ -9,7 +9,9 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
@@ -20,12 +22,15 @@ import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -35,20 +40,39 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class FhirInstanceValidatorDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu3Test.class);
-	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
 	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static DefaultProfileValidationSupport myDefaultValidationSupport = (DefaultProfileValidationSupport) ourCtx.getValidationSupport();
 	@Rule
 	public TestRule watcher = new TestWatcher() {
 		@Override
@@ -89,13 +113,14 @@ public class FhirInstanceValidatorDstu3Test {
 
 		myValidConcepts = new ArrayList<>();
 
-		when(myMockSupport.expandValueSet(, any(FhirContext.class), nullable(ConceptSetComponent.class))).thenAnswer(new Answer<ValueSetExpansionComponent>() {
+		when(myMockSupport.expandValueSet(any(), any(FhirContext.class), nullable(IBaseResource.class))).thenAnswer(new Answer<ValueSetExpansionComponent>() {
 			@Override
 			public ValueSetExpansionComponent answer(InvocationOnMock theInvocation) {
-				ConceptSetComponent arg = (ConceptSetComponent) theInvocation.getArguments()[0];
-				ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getSystem());
+				ValueSet arg = (ValueSet) theInvocation.getArgument(0, IBaseResource.class);
+				ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getCompose().getIncludeFirstRep().getSystem());
 				if (retVal == null) {
-					retVal = myDefaultValidationSupport.expandValueSet(nullable(FhirContext.class), arg);
+					ValueSet expandedVs = (ValueSet) myDefaultValidationSupport.expandValueSet(myDefaultValidationSupport, ourCtx, arg).getValueSet();
+					retVal = expandedVs.getExpansion();
 				}
 				ourLog.debug("expandValueSet({}) : {}", new Object[] {theInvocation.getArguments()[0], retVal});
 				return retVal;
@@ -146,7 +171,7 @@ public class FhirInstanceValidatorDstu3Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.validateCode(, nullable(FhirContext.class), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IContextValidationSupport.CodeValidationResult>() {
+		when(myMockSupport.validateCode(any(), nullable(FhirContext.class), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IContextValidationSupport.CodeValidationResult>() {
 			@Override
 			public IContextValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
 				FhirContext ctx = theInvocation.getArgument(0, FhirContext.class);
@@ -162,13 +187,13 @@ public class FhirInstanceValidatorDstu3Test {
 					Optional<ConceptDefinitionComponent> found = cs.getConcept().stream().filter(t -> t.getCode().equals(code)).findFirst();
 					retVal = found.map(t->new IContextValidationSupport.CodeValidationResult(t)).orElse(null);
 				} else {
-					retVal = myDefaultValidationSupport.validateCode(, ctx, system, code, display, valueSetUrl);
+					retVal = myDefaultValidationSupport.validateCode(myDefaultValidationSupport, ctx, system, code, display, valueSetUrl);
 				}
 				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
 				return retVal;
 			}
 		});
-		when(myMockSupport.fetchCodeSystem(nullable(FhirContext.class), nullable(String.class))).thenAnswer(new Answer<CodeSystem>() {
+		when(myMockSupport.fetchCodeSystem(nullable(FhirContext.class), nullable(String.class), any())).thenAnswer(new Answer<CodeSystem>() {
 			@Override
 			public CodeSystem answer(InvocationOnMock theInvocation) {
 				CodeSystem retVal;
@@ -177,7 +202,7 @@ public class FhirInstanceValidatorDstu3Test {
 				retVal = myCodeSystems.get(id);
 
 				if (retVal == null) {
-					retVal = myDefaultValidationSupport.fetchCodeSystem((FhirContext) theInvocation.getArguments()[0], id);
+					retVal = myDefaultValidationSupport.fetchCodeSystem(theInvocation.getArgument(0, FhirContext.class), id, CodeSystem.class);
 				}
 
 				if (retVal == null) {
@@ -196,16 +221,16 @@ public class FhirInstanceValidatorDstu3Test {
 				String url = (String) theInvocation.getArguments()[1];
 				StructureDefinition retVal = myStructureDefinitions.get(url);
 				if (retVal == null) {
-					retVal = myDefaultValidationSupport.fetchStructureDefinition((FhirContext) theInvocation.getArguments()[0], url);
+					retVal = (StructureDefinition) myDefaultValidationSupport.fetchStructureDefinition((FhirContext) theInvocation.getArguments()[0], url);
 				}
 				ourLog.info("fetchStructureDefinition({}) : {}", new Object[] {url, retVal});
 				return retVal;
 			}
 		});
-		when(myMockSupport.fetchAllStructureDefinitions(nullable(FhirContext.class))).thenAnswer(new Answer<List<StructureDefinition>>() {
+		when(myMockSupport.fetchAllStructureDefinitions(nullable(FhirContext.class), any())).thenAnswer(new Answer<List<StructureDefinition>>() {
 			@Override
 			public List<StructureDefinition> answer(InvocationOnMock theInvocation) {
-				List<StructureDefinition> retVal = myDefaultValidationSupport.fetchAllStructureDefinitions((FhirContext) theInvocation.getArguments()[0]);
+				List<StructureDefinition> retVal = myDefaultValidationSupport.fetchAllStructureDefinitions((FhirContext) theInvocation.getArguments()[0], StructureDefinition.class);
 				ourLog.debug("fetchAllStructureDefinitions()", new Object[] {});
 				return retVal;
 			}

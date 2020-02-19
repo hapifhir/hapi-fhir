@@ -5,13 +5,12 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.BaseTest;
 import com.google.common.base.Charsets;
 import org.apache.commons.lang.Validate;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.context.IWorkerContext;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.common.hapi.validation.PrePopulatedValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -46,7 +45,7 @@ public class HapiWorkerContextTest extends BaseTest {
 		getResources("/r4/carin/carin/structuredefinition/").forEach(t -> prePopulatedValidationSupport.addStructureDefinition((StructureDefinition) t));
 		getResources("/r4/carin/uscore/structuredefinition/").forEach(t -> prePopulatedValidationSupport.addStructureDefinition((StructureDefinition) t));
 
-		IValidationSupport validationSupportChain = new ValidationSupportChain(
+		ValidationSupportChain validationSupportChain = new ValidationSupportChain(
 			new DefaultProfileValidationSupport(),
 			prePopulatedValidationSupport
 		);

@@ -49,7 +49,7 @@ public class FhirR4 implements IFhirVersion {
 
 	@Override
 	public IContextValidationSupport createValidationSupport() {
-		return ReflectionUtil.newInstanceOfFhirProfileValidationSupport("org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport");
+		return ReflectionUtil.newInstanceOfFhirProfileValidationSupport("org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport");
 	}
 
 	@Override

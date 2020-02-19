@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.r4.model.StructureDefinition;

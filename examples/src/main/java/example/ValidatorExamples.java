@@ -272,7 +272,7 @@ public class ValidatorExamples {
 			}
 
 			@Override
-			public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+			public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theSystem, String theCode) {
 				// TODO: implement
 				return null;
 			}

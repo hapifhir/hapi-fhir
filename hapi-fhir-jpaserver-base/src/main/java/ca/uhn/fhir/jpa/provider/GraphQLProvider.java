@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.annotation.GraphQL;
 import ca.uhn.fhir.rest.annotation.GraphQLQuery;
@@ -35,7 +36,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -85,7 +85,7 @@ public class GraphQLProvider {
 			}
 			case R4: {
 				org.hl7.fhir.r4.hapi.ctx.IValidationSupport validationSupport = (org.hl7.fhir.r4.hapi.ctx.IValidationSupport) theValidationSupport;
-				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport());
+				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new DefaultProfileValidationSupport());
 				org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext workerContext = new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
 				engineFactory = () -> new org.hl7.fhir.r4.utils.GraphQLEngine(workerContext);
 				break;

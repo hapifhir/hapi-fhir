@@ -1,5 +1,7 @@
 package org.hl7.fhir.r5.hapi.validation;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
@@ -19,7 +21,6 @@ import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.formats.IParser;
 import org.hl7.fhir.r5.formats.ParserType;
-import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.model.*;
@@ -50,7 +51,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 
 	private boolean myAnyExtensionsAllowed = true;
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
-	private IValidationSupport myValidationSupport;
+	private IContextValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
 	private boolean errorForUnknownProfiles;
@@ -61,10 +62,10 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 	/**
 	 * Constructor
 	 * <p>
-	 * Uses {@link DefaultProfileValidationSupport} for {@link IValidationSupport validation support}
+	 * Uses DefaultProfileValidationSupport for {@link IValidationSupport validation support}
 	 */
-	public FhirInstanceValidator() {
-		this(new DefaultProfileValidationSupport());
+	public FhirInstanceValidator(FhirContext theContext) {
+		this(theContext.getVersion().createValidationSupport());
 	}
 
 	/**
@@ -72,7 +73,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 	 *
 	 * @param theValidationSupport The validation support
 	 */
-	public FhirInstanceValidator(IValidationSupport theValidationSupport) {
+	public FhirInstanceValidator(IContextValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 	}
 
@@ -148,15 +149,16 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 
 	/**
 	 * Returns the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
-	 * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
+	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
+	 * @return
 	 */
-	public IValidationSupport getValidationSupport() {
+	public IContextValidationSupport getValidationSupport() {
 		return myValidationSupport;
 	}
 
 	/**
 	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
-	 * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
+	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
 	 */
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
@@ -388,14 +390,14 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 		}
 
 		@Override
-		public ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ValueSet source, boolean cacheOk, boolean heiarchical) {
+		public ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ValueSet source, boolean cacheOk, boolean Hierarchical) {
 			ValueSet convertedSource;
 			try {
 				convertedSource = (source);
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
 			}
-			ValueSetExpansionOutcome expanded = myWrap.expandVS(convertedSource, cacheOk, heiarchical);
+			ValueSetExpansionOutcome expanded = myWrap.expandVS(convertedSource, cacheOk, Hierarchical);
 
 			org.hl7.fhir.r5.model.ValueSet convertedResult = null;
 			if (expanded.getValueset() != null) {
@@ -413,7 +415,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 		}
 
 		@Override
-		public ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent binding, boolean cacheOk, boolean heiarchical) {
+		public ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent binding, boolean cacheOk, boolean Hierarchical) {
 			throw new UnsupportedOperationException();
 		}
 

@@ -171,11 +171,15 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay) {
-		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(, myCtx, theSystem, theCode, theDisplay, null);
+		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, myCtx, theSystem, theCode, theDisplay, null);
 		if (result == null) {
 			return null;
 		}
-		return new ValidationResult((IssueSeverity) result.getSeverity(), result.getMessage(), (ConceptDefinitionComponent) result.asConceptDefinition());
+		IssueSeverity severity = null;
+		if (result.getSeverity() != null) {
+			severity = IssueSeverity.fromCode(result.getSeverity());
+		}
+		return new ValidationResult(severity, result.getMessage(), (ConceptDefinitionComponent) result.asConceptDefinition());
 	}
 
 	@Override
@@ -203,7 +207,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 		IValidationSupport.CodeValidationResult outcome;
 		if (isNotBlank(theVs.getUrl())) {
-			outcome = myValidationSupport.validateCode(, myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
+			outcome = myValidationSupport.validateCode(myValidationSupport, myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
 		} else {
 			outcome = myValidationSupport.validateCodeInValueSet(myCtx, theSystem, theCode, theDisplay, theVs);
 		}
@@ -274,15 +278,15 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHeiarchical) {
+	public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHierarchical) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandVS(ConceptSetComponent theInc, boolean theHeiarchical) throws TerminologyServiceException {
+	public ValueSetExpansionOutcome expandVS(ConceptSetComponent theInc, boolean theHierarchical) throws TerminologyServiceException {
 		ValueSet input = new ValueSet();
 		input.getCompose().addInclude(theInc);
-		IContextValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(, myCtx, input);
+		IContextValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(myValidationSupport, myCtx, input);
 		return new ValueSetExpansionOutcome((ValueSet) output.getValueSet(), output.getError(), null);
 	}
 

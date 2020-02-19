@@ -23,6 +23,7 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
@@ -236,7 +237,7 @@ public class ExampleDataUploader extends BaseCommand {
 		bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
 
 		FhirValidator val = ctx.newValidator();
-		val.registerValidatorModule(new org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator(new org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport()));
+		val.registerValidatorModule(new org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator(new DefaultProfileValidationSupport()));
 
 		ZipInputStream zis = new ZipInputStream(FileUtils.openInputStream(inputFile));
 		byte[] buffer = new byte[2048];

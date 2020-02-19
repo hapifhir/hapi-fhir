@@ -87,15 +87,15 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHeiarchical) {
+  public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHierarchical) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc, boolean theHeiarchical) {
+  public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc, boolean theHierarchical) {
     ValueSet input = new ValueSet();
     input.getCompose().addInclude(theInc);
-    IContextValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(, myCtx, input);
+    IContextValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(myValidationSupport, myCtx, input);
     ValueSet outputValueSet = (ValueSet) output.getValueSet();
     if (outputValueSet != null) {
       return outputValueSet.getExpansion();
@@ -294,11 +294,16 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(, myCtx, theSystem, theCode, theDisplay, null);
+    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, myCtx, theSystem, theCode, theDisplay, null);
     if (result == null) {
       return null;
     }
-    return new ValidationResult((IssueSeverity)result.getSeverity(), result.getMessage(), (ConceptDefinitionComponent)result.asConceptDefinition());
+
+    IssueSeverity severity = null;
+    if (result.getSeverity() != null) {
+      severity = IssueSeverity.fromCode(result.getSeverity());
+    }
+    return new ValidationResult(severity, result.getMessage(), (ConceptDefinitionComponent)result.asConceptDefinition());
   }
 
   @Override
@@ -331,7 +336,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
     IValidationSupport.CodeValidationResult outcome;
     if (isNotBlank(theVs.getUrl())) {
-      outcome = myValidationSupport.validateCode(, myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
+      outcome = myValidationSupport.validateCode(myValidationSupport, myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
     } else {
       outcome = myValidationSupport.validateCodeInValueSet(myCtx, theSystem, theCode, theDisplay, theVs);
     }

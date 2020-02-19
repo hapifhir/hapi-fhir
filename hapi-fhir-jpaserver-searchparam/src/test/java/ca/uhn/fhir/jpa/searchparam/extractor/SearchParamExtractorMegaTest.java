@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.*;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
@@ -41,7 +42,7 @@ public class SearchParamExtractorMegaTest {
 
 		ctx = FhirContext.forR4();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorR4(null, ctx, new org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport(), searchParamRegistry));
+		process(ctx, new SearchParamExtractorR4(null, ctx, new DefaultProfileValidationSupport(), searchParamRegistry));
 
 		ctx = FhirContext.forR5();
 		searchParamRegistry = new MySearchParamRegistry(ctx);

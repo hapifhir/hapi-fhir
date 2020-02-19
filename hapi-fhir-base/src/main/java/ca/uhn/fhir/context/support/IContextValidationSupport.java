@@ -23,6 +23,7 @@ package ca.uhn.fhir.context.support;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ParametersUtil;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -49,10 +50,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * </p>
  */
 public interface IContextValidationSupport {
+	String URL_PREFIX_VALUE_SET = "http://hl7.org/fhir/ValueSet/";
 
 	/**
 	 * Expands the given portion of a ValueSet
-	 *
 	 *
 	 * @param theInclude The portion to include
 	 * @return The expansion
@@ -98,6 +99,21 @@ public interface IContextValidationSupport {
 	 * given URI can be found
 	 */
 	default <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+		Validate.notBlank(theUri, "theUri must not be null or blank");
+
+		switch (theContext.getResourceDefinition(theClass).getName()) {
+			case "StructureDefinition":
+				return theClass.cast(fetchStructureDefinition(theContext, theUri));
+			case "ValueSet":
+				return theClass.cast(fetchValueSet(theContext, theUri));
+			case "CodeSystem":
+				return fetchCodeSystem(theContext, theUri, theClass);
+		}
+
+		if (theUri.startsWith(URL_PREFIX_VALUE_SET)) {
+			return theClass.cast(fetchValueSet(theContext, theUri));
+		}
+
 		return null;
 	}
 
@@ -129,11 +145,10 @@ public interface IContextValidationSupport {
 	 * name. This method is called to check codes which are found in "example"
 	 * binding fields (e.g. <code>Observation.code</code> in the default profile.
 	 *
-	 *
 	 * @param theRootValidationSupport
-	 * @param theCodeSystem The code system, e.g. "<code>http://loinc.org</code>"
-	 * @param theCode       The code, e.g. "<code>1234-5</code>"
-	 * @param theDisplay    The display name, if it should also be validated
+	 * @param theCodeSystem            The code system, e.g. "<code>http://loinc.org</code>"
+	 * @param theCode                  The code, e.g. "<code>1234-5</code>"
+	 * @param theDisplay               The display name, if it should also be validated
 	 * @return Returns a validation result object
 	 */
 	default CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
@@ -158,11 +173,12 @@ public interface IContextValidationSupport {
 	/**
 	 * Look up a code using the system and code value
 	 *
-	 * @param theContext The FHIR context
-	 * @param theSystem  The CodeSystem URL
-	 * @param theCode    The code
+	 * @param theRootValidationSupport
+	 * @param theContext               The FHIR context
+	 * @param theSystem                The CodeSystem URL
+	 * @param theCode                  The code
 	 */
-	default LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+	default LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theSystem, String theCode) {
 		return null;
 	}
 
@@ -307,7 +323,7 @@ public interface IContextValidationSupport {
 	class CodeValidationResult {
 		private IBase myDefinition;
 		private String myMessage;
-		private Enum mySeverity;
+		private String mySeverity;
 		private String myCodeSystemName;
 		private String myCodeSystemVersion;
 		private List<BaseConceptProperty> myProperties;
@@ -317,12 +333,12 @@ public interface IContextValidationSupport {
 			this.myDefinition = theDefinition;
 		}
 
-		public CodeValidationResult(Enum theSeverity, String message) {
+		public CodeValidationResult(String theSeverity, String message) {
 			this.mySeverity = theSeverity;
 			this.myMessage = message;
 		}
 
-		public CodeValidationResult(Enum theSeverity, String theMessage, IBase theDefinition, String theDisplay) {
+		public CodeValidationResult(String theSeverity, String theMessage, IBase theDefinition, String theDisplay) {
 			this.mySeverity = theSeverity;
 			this.myMessage = theMessage;
 			this.myDefinition = theDefinition;
@@ -365,7 +381,7 @@ public interface IContextValidationSupport {
 			myProperties = theProperties;
 		}
 
-		public Enum getSeverity() {
+		public String getSeverity() {
 			return mySeverity;
 		}
 

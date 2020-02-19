@@ -1,6 +1,7 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
@@ -14,7 +15,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.common.hapi.validation.ValidatorWrapper;
 import org.hl7.fhir.convertors.VersionConvertor_30_50;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -46,8 +46,6 @@ import org.w3c.dom.NodeList;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,7 +70,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private boolean myAnyExtensionsAllowed = true;
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
 	private StructureDefinition myStructureDefintion;
-	private IValidationSupport myValidationSupport;
+	private IContextValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
 	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
@@ -84,10 +82,10 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	/**
 	 * Constructor
 	 * <p>
-	 * Uses {@link DefaultProfileValidationSupport} for {@link IValidationSupport validation support}
+	 * Uses DefaultProfileValidationSupport for {@link IValidationSupport validation support}
 	 */
-	public FhirInstanceValidator() {
-		this(new DefaultProfileValidationSupport());
+	public FhirInstanceValidator(FhirContext theFhirContext) {
+		this(theFhirContext.getVersion().createValidationSupport());
 	}
 
 	/**
@@ -95,7 +93,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	 *
 	 * @param theValidationSupport The validation support
 	 */
-	public FhirInstanceValidator(IValidationSupport theValidationSupport) {
+	public FhirInstanceValidator(IContextValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 	}
 
@@ -164,19 +162,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		return profileNames;
 	}
 
-	private StructureDefinition findStructureDefinitionForResourceName(final FhirContext theCtx, String resourceName) {
-		String sdName = null;
-		try {
-			// Test if a URL was passed in specifying the structure definition and test if "StructureDefinition" is part of the URL
-			URL testIfUrl = new URL(resourceName);
-			sdName = resourceName;
-		} catch (MalformedURLException e) {
-			sdName = "http://hl7.org/fhir/StructureDefinition/" + resourceName;
-		}
-		StructureDefinition profile = myStructureDefintion != null ? myStructureDefintion : myValidationSupport.fetchStructureDefinition(theCtx, sdName);
-		return profile;
-	}
-
 	public void flushCaches() {
 		myWrappedWorkerContext = null;
 	}
@@ -215,15 +200,16 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	/**
 	 * Returns the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
-	 * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
+	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
+	 * @return
 	 */
-	public IValidationSupport getValidationSupport() {
+	public IContextValidationSupport getValidationSupport() {
 		return myValidationSupport;
 	}
 
 	/**
 	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
-	 * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
+	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
 	 */
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
@@ -464,14 +450,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
-		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ValueSet source, boolean cacheOk, boolean heiarchical) {
+		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ValueSet source, boolean cacheOk, boolean Hierarchical) {
 			ValueSet convertedSource;
 			try {
 				convertedSource = convertValueSet(source);
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
 			}
-			org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcome expanded = myWrap.expandVS(convertedSource, cacheOk, heiarchical);
+			org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcome expanded = myWrap.expandVS(convertedSource, cacheOk, Hierarchical);
 
 			org.hl7.fhir.r5.model.ValueSet convertedResult = null;
 			if (expanded.getValueset() != null) {
@@ -489,7 +475,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
-		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent binding, boolean cacheOk, boolean heiarchical) {
+		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent binding, boolean cacheOk, boolean Hierarchical) {
 			throw new UnsupportedOperationException();
 		}
 

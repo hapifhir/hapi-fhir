@@ -31,7 +31,7 @@ import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.PrePopulatedValidationSupport;
@@ -296,7 +296,7 @@ public class ValidatorExamples {
 			}
 
 			@Override
-			public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+			public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theSystem, String theCode) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}

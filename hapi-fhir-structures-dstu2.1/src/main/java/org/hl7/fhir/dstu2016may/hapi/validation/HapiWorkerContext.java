@@ -21,17 +21,24 @@ import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.dstu2016may.utils.INarrativeGenerator;
 import org.hl7.fhir.dstu2016may.utils.IWorkerContext;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public final class HapiWorkerContext implements IWorkerContext, ValueSetExpanderFactory  {
+public final class HapiWorkerContext implements IWorkerContext, ValueSetExpanderFactory {
 	private final FhirContext myCtx;
 	private Map<String, Resource> myFetchedResourceCache = new HashMap<>();
-	private IValidationSupport myValidationSupport;
+	private IContextValidationSupport myValidationSupport;
 
-	public HapiWorkerContext(FhirContext theCtx, IValidationSupport theValidationSupport) {
+	public HapiWorkerContext(FhirContext theCtx, IContextValidationSupport theValidationSupport) {
 		Validate.notNull(theCtx, "theCtx must not be null");
 		Validate.notNull(theValidationSupport, "theValidationSupport must not be null");
 		myCtx = theCtx;
@@ -40,7 +47,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public List<StructureDefinition> allStructures() {
-		return myValidationSupport.fetchAllStructureDefinitions(myCtx);
+		return myValidationSupport.fetchAllStructureDefinitions(myCtx, StructureDefinition.class);
 	}
 
 	@Override
@@ -48,7 +55,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		if (myValidationSupport == null) {
 			return null;
 		} else {
-			return myValidationSupport.fetchCodeSystem(myCtx, theSystem);
+			return myValidationSupport.fetchCodeSystem(myCtx, theSystem, CodeSystem.class);
 		}
 	}
 
@@ -168,13 +175,16 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(, myCtx, theSystem, theCode, theDisplay, (String)null);
+		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, myCtx, theSystem, theCode, theDisplay, null);
 		if (result == null) {
 			return null;
 		}
 		ConceptDefinitionComponent definition = (ConceptDefinitionComponent) result.asConceptDefinition();
 		String message = result.getMessage();
-		OperationOutcome.IssueSeverity severity = (OperationOutcome.IssueSeverity) result.getSeverity();
+		OperationOutcome.IssueSeverity severity = null;
+		if (result.getSeverity() != null) {
+			severity = OperationOutcome.IssueSeverity.fromCode(result.getSeverity());
+		}
 		return new ValidationResult(severity, message, definition);
 	}
 
