@@ -451,47 +451,54 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		String nextCodeToAdd = conceptToAdd.getCode();
 		String parentDescription = "(root concept)";
-		Set<TermConcept> parentConcepts = new HashSet<>();
-
-		if (!theParentCodes.isEmpty()) {
-			parentDescription = "[" + String.join(", ", theParentCodes) + "]";
-			for (String nextParentCode : theParentCodes) {
-				Optional<TermConcept> nextParentOpt = myConceptDao.findByCodeSystemAndCode(theCsv, nextParentCode);
-				if (nextParentOpt.isPresent() == false) {
-					throw new InvalidRequestException("Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + nextParentCode);
-				}
-				parentConcepts.add(nextParentOpt.get());
-			}
-		}
 
 		ourLog.info("Saving concept {} with parent {}", theStatisticsTracker.getUpdatedConceptCount(), parentDescription);
 
 		Optional<TermConcept> existingCodeOpt = myConceptDao.findByCodeSystemAndCode(theCsv, nextCodeToAdd);
+		List<TermConceptParentChildLink> existingParentLinks;
 		if (existingCodeOpt.isPresent()) {
 			TermConcept existingCode = existingCodeOpt.get();
 			existingCode.setIndexStatus(null);
 			existingCode.setDisplay(conceptToAdd.getDisplay());
 			conceptToAdd = existingCode;
+			existingParentLinks = conceptToAdd.getParents();
+		} else {
+			existingParentLinks = Collections.emptyList();
+		}
+
+		Set<TermConcept> parentConceptsWeShouldLinkTo = new HashSet<>();
+		for (String nextParentCode : theParentCodes) {
+
+			// Don't add parent links that already exist for the code
+			if (existingParentLinks.stream().anyMatch(t->t.getParent().getCode().equals(nextParentCode))) {
+				continue;
+			}
+
+			Optional<TermConcept> nextParentOpt = myConceptDao.findByCodeSystemAndCode(theCsv, nextParentCode);
+			if (nextParentOpt.isPresent() == false) {
+				throw new InvalidRequestException("Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + nextParentCode);
+			}
+			parentConceptsWeShouldLinkTo.add(nextParentOpt.get());
 		}
 
 		if (conceptToAdd.getSequence() == null) {
 			conceptToAdd.setSequence(theSequence);
 		}
 
-		// Drop any old parent-child links if they aren't explicitly specified in the
-		// hierarchy being added
-		if (!theRootConcept) {
-			for (Iterator<TermConceptParentChildLink> iter = conceptToAdd.getParents().iterator(); iter.hasNext(); ) {
-				TermConceptParentChildLink nextLink = iter.next();
-				String parentCode = nextLink.getParent().getCode();
-				ourLog.info("Dropping existing parent/child link from {} -> {}", parentCode, nextCodeToAdd);
-				myConceptParentChildLinkDao.delete(nextLink);
-				iter.remove();
-
-				List<TermConceptParentChildLink> parentChildrenList = nextLink.getParent().getChildren();
-				parentChildrenList.remove(nextLink);
-			}
-		}
+//		// Drop any old parent-child links if they aren't explicitly specified in the
+//		// hierarchy being added
+//		if (!theRootConcept) {
+//			for (Iterator<TermConceptParentChildLink> iter = conceptToAdd.getParents().iterator(); iter.hasNext(); ) {
+//				TermConceptParentChildLink nextLink = iter.next();
+//				String parentCode = nextLink.getParent().getCode();
+//				ourLog.info("Dropping existing parent/child link from {} -> {}", parentCode, nextCodeToAdd);
+//				myConceptParentChildLinkDao.delete(nextLink);
+//				iter.remove();
+//
+//				List<TermConceptParentChildLink> parentChildrenList = nextLink.getParent().getChildren();
+//				parentChildrenList.remove(nextLink);
+//			}
+//		}
 
 		// Null out the hierarchy PIDs for this concept always. We do this because we're going to
 		// force a reindex, and it'll be regenerated then
@@ -504,7 +511,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		theStatisticsTracker.incrementUpdatedConceptCount();
 
 		// Add link to new child to the parent
-		for (TermConcept nextParentConcept : parentConcepts) {
+		for (TermConcept nextParentConcept : parentConceptsWeShouldLinkTo) {
 			TermConceptParentChildLink parentLink = new TermConceptParentChildLink();
 			parentLink.setParent(nextParentConcept);
 			parentLink.setChild(conceptToAdd);
