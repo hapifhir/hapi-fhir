@@ -485,21 +485,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			conceptToAdd.setSequence(theSequence);
 		}
 
-//		// Drop any old parent-child links if they aren't explicitly specified in the
-//		// hierarchy being added
-//		if (!theRootConcept) {
-//			for (Iterator<TermConceptParentChildLink> iter = conceptToAdd.getParents().iterator(); iter.hasNext(); ) {
-//				TermConceptParentChildLink nextLink = iter.next();
-//				String parentCode = nextLink.getParent().getCode();
-//				ourLog.info("Dropping existing parent/child link from {} -> {}", parentCode, nextCodeToAdd);
-//				myConceptParentChildLinkDao.delete(nextLink);
-//				iter.remove();
-//
-//				List<TermConceptParentChildLink> parentChildrenList = nextLink.getParent().getChildren();
-//				parentChildrenList.remove(nextLink);
-//			}
-//		}
-
 		// Null out the hierarchy PIDs for this concept always. We do this because we're going to
 		// force a reindex, and it'll be regenerated then
 		conceptToAdd.setParentPids(null);
