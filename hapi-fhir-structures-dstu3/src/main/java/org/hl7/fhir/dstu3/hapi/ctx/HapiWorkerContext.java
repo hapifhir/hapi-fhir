@@ -95,7 +95,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc, boolean theHeiarchical) {
     ValueSet input = new ValueSet();
     input.getCompose().addInclude(theInc);
-    IContextValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(myCtx, input);
+    IContextValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(, myCtx, input);
     ValueSet outputValueSet = (ValueSet) output.getValueSet();
     if (outputValueSet != null) {
       return outputValueSet.getExpansion();

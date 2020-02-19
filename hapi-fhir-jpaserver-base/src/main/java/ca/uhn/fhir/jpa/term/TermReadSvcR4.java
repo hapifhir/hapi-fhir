@@ -116,44 +116,9 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 
 	@Transactional(dontRollbackOn = {ExpansionTooCostlyException.class})
 	@Override
-	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
-		ValueSet valueSetToExpand = new ValueSet();
-		valueSetToExpand.getCompose().addInclude(theInclude);
-		ValueSet expanded = super.expandValueSetInMemory(valueSetToExpand, null);
-		return new ValueSetExpander.ValueSetExpansionOutcome(expanded);
-	}
-
-	@Override
-	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
-		return null;
-	}
-
-	@Override
-	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		return Collections.emptyList();
-	}
-
-	@CoverageIgnore
-	@Override
-	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
-		return null;
-	}
-
-	@CoverageIgnore
-	@Override
-	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
-		return null;
-	}
-
-	@Override
-	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
-		return null;
-	}
-
-	@CoverageIgnore
-	@Override
-	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
-		return null;
+	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theInclude)  {
+		ValueSet expanded = super.expandValueSetInMemory((ValueSet) theInclude, null);
+		return new ValueSetExpansionOutcome(expanded);
 	}
 
 	private void findCodesAbove(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
@@ -166,7 +131,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	@Override
 	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem, CodeSystem.class);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
 		}
@@ -191,7 +156,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	@Override
 	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem, CodeSystem.class);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}
@@ -200,7 +165,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 
 	@Override
 	public CodeSystem getCodeSystemFromContext(String theSystem) {
-		return myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		return myValidationSupport.fetchCodeSystem(myContext, theSystem, CodeSystem.class);
 	}
 
 	@Override
@@ -218,10 +183,6 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 		return myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSetUrl) != null;
 	}
 
-	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
-		return null;
-	}
 
 	@Override
 	protected ValueSet toCanonicalValueSet(IBaseResource theValueSet) {

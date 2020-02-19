@@ -1,19 +1,13 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
-import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
-import java.util.Collections;
-import java.util.List;
 
 /*
  * #%L
@@ -47,25 +41,8 @@ public class JpaValidationSupportR5 extends BaseJpaValidationSupport implements 
 
 
 	@Override
-	@Transactional(value = TxType.SUPPORTS)
-	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
-		return null;
-	}
-
-	@Override
-	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
-		return null;
-	}
-
-	@Override
-	@Transactional(value = TxType.SUPPORTS)
-	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public CodeSystem fetchCodeSystem(FhirContext theCtx, String theSystem) {
-		return fetchResource(theCtx, CodeSystem.class, theSystem);
+	public <T extends IBaseResource> T fetchCodeSystem(FhirContext theContext, String theSystem, Class<T> theCodeSystemType) {
+		return fetchResource(theContext, theCodeSystemType, theSystem);
 	}
 
 	@Override
@@ -73,33 +50,9 @@ public class JpaValidationSupportR5 extends BaseJpaValidationSupport implements 
 		return fetchResource(theCtx, ValueSet.class, theSystem);
 	}
 
-
 	@Override
 	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
 		return fetchResource(theCtx, StructureDefinition.class, theUrl);
-	}
-
-	@Override
-	@Transactional(value = TxType.SUPPORTS)
-	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
-		return false;
-	}
-
-
-	@Override
-	@Transactional(value = TxType.SUPPORTS)
-	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theSystemUrl) {
-		return null;
-	}
-
-	@Override
-	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
-		return null;
-	}
-
-	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
-		return null;
 	}
 
 }

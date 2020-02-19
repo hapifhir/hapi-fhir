@@ -53,10 +53,11 @@ public interface IContextValidationSupport {
 	/**
 	 * Expands the given portion of a ValueSet
 	 *
+	 *
 	 * @param theInclude The portion to include
 	 * @return The expansion
 	 */
-	default ValueSetExpansionOutcome expandValueSet(FhirContext theContext, IBaseResource theInclude) {
+	default ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theInclude) {
 		return null;
 	}
 
@@ -389,8 +390,18 @@ public interface IContextValidationSupport {
 
 	class ValueSetExpansionOutcome {
 
-		private IBaseResource myValueSet;
-		private String myError;
+		private final IBaseResource myValueSet;
+		private final String myError;
+
+		public ValueSetExpansionOutcome(IBaseResource theValueSet, String theError) {
+			myValueSet = theValueSet;
+			myError = theError;
+		}
+
+		public ValueSetExpansionOutcome(IBaseResource theValueSet) {
+			myValueSet = theValueSet;
+			myError = null;
+		}
 
 		public String getError() {
 			return myError;

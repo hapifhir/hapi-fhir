@@ -32,8 +32,8 @@ public class CachingValidationSupport implements IContextValidationSupport {
 	}
 
 	@Override
-	public IContextValidationSupport.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, IBaseResource theInclude) {
-		return myWrap.expandValueSet(theContext, theInclude);
+	public IContextValidationSupport.ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theInclude) {
+		return myWrap.expandValueSet(, theContext, theInclude);
 	}
 
 	@Override
@@ -85,7 +85,7 @@ public class CachingValidationSupport implements IContextValidationSupport {
 	@Override
 	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		String key = "validateCode " + theCodeSystem + " " + theCode + " " + defaultIfBlank(theValueSetUrl, "NO_VS");
-		return loadFromCache(key, t -> myWrap.validateCode(, theContext, theCodeSystem, theCode, theDisplay, theValueSetUrl));
+		return loadFromCache(key, t -> myWrap.validateCode(theRootValidationSupport, theContext, theCodeSystem, theCode, theDisplay, theValueSetUrl));
 	}
 
 	@Override

@@ -5,27 +5,20 @@ import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.VersionIndependentConcept;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.dstu3.model.ExpansionProfile;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -37,7 +30,6 @@ public class PrePopulatedValidationSupport implements IContextValidationSupport 
 	private Map<String, IBaseResource> myCodeSystems;
 	private Map<String, IBaseResource> myStructureDefinitions;
 	private Map<String, IBaseResource> myValueSets;
-	private DefaultProfileValidationSupport myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
 
 	/**
 	 * Constructor
@@ -159,45 +151,35 @@ public class PrePopulatedValidationSupport implements IContextValidationSupport 
 	}
 
 	@Override
-	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
-		ValueSetExpander.ValueSetExpansionOutcome retVal = new ValueSetExpander.ValueSetExpansionOutcome(new ValueSet());
+	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theValueSet) {
 
-		Set<String> wantCodes = new HashSet<>();
-		for (ValueSet.ConceptReferenceComponent next : theInclude.getConcept()) {
-			wantCodes.add(next.getCode());
-		}
-
-		CodeSystem system = fetchCodeSystem(theContext, theInclude.getSystem());
-		if (system != null) {
-			List<CodeSystem.ConceptDefinitionComponent> concepts = system.getConcept();
-			addConcepts(theInclude, retVal.getValueset().getExpansion(), wantCodes, concepts);
-		}
-
-		for (UriType next : theInclude.getValueSet()) {
-			ValueSet vs = myValueSets.get(defaultString(next.getValueAsString()));
-			if (vs != null) {
-				for (ConceptSetComponent nextInclude : vs.getCompose().getInclude()) {
-					ValueSetExpander.ValueSetExpansionOutcome contents = expandValueSet(theContext, nextInclude);
-					retVal.getValueset().getExpansion().getContains().addAll(contents.getValueset().getExpansion().getContains());
-				}
+		IBaseResource expansion;
+		switch (theContext.getVersion().getVersion()) {
+			case DSTU3: {
+				org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple expander = new org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple(new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(theContext, theRootValidationSupport), null);
+				expansion = expander.expand((org.hl7.fhir.dstu3.model.ValueSet)theValueSet, new ExpansionProfile()).getValueset();
+				break;
 			}
+			case R4: {
+				org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple expander = new org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple(new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(theContext, theRootValidationSupport));
+				expansion = expander.expand((org.hl7.fhir.r4.model.ValueSet)theValueSet, new org.hl7.fhir.r4.model.Parameters()).getValueset();
+				break;
+			}
+			case R5: {
+				org.hl7.fhir.r5.terminologies.ValueSetExpanderSimple expander = new org.hl7.fhir.r5.terminologies.ValueSetExpanderSimple(new org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext(theContext, theRootValidationSupport));
+				expansion = expander.expand((org.hl7.fhir.r5.model.ValueSet)theValueSet, new org.hl7.fhir.r5.model.Parameters()).getValueset();
+				break;
+			}
+			case DSTU2:
+			case DSTU2_1:
+			case DSTU2_HL7ORG:
+			default:
+				throw new IllegalArgumentException("Can not handle version: " + theContext.getVersion().getVersion());
 		}
 
-		return retVal;
+		return new ValueSetExpansionOutcome(expansion, null);
 	}
 
-	private void addConcepts(ConceptSetComponent theInclude, ValueSet.ValueSetExpansionComponent theRetVal, Set<String> theWantCodes, List<CodeSystem.ConceptDefinitionComponent> theConcepts) {
-		for (CodeSystem.ConceptDefinitionComponent next : theConcepts) {
-			if (theWantCodes.isEmpty() || theWantCodes.contains(next.getCode())) {
-				theRetVal
-					.addContains()
-					.setSystem(theInclude.getSystem())
-					.setCode(next.getCode())
-					.setDisplay(next.getDisplay());
-			}
-			addConcepts(theInclude, theRetVal, theWantCodes, next.getConcept());
-		}
-	}
 
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
@@ -209,8 +191,16 @@ public class PrePopulatedValidationSupport implements IContextValidationSupport 
 	}
 
 	@Override
-	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		return new ArrayList<>(myStructureDefinitions.values());
+	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions(FhirContext theContext, Class<T> theStructureDefinitionClass) {
+		return toList(myStructureDefinitions, theStructureDefinitionClass);
+	}
+
+	private <T extends IBaseResource> ArrayList<T> toList(Map<String, IBaseResource> theMap, Class<T> theType) {
+		ArrayList<T> retVal = new ArrayList<>(theMap.size());
+		for (IBaseResource next : theMap.values()) {
+			retVal.add(theType.cast(next));
+		}
+		return retVal;
 	}
 
 	@Override
@@ -288,27 +278,26 @@ public class PrePopulatedValidationSupport implements IContextValidationSupport 
 			return null;
 		}
 
-		List<VersionIndependentConcept> codes;
 
+		IBaseResource expansion = expandValueSet(theRootValidationSupport, theContext, vs).getValueSet();
+
+		List<VersionIndependentConcept> codes;
 		switch (theContext.getVersion().getVersion()) {
 			case DSTU3: {
-				org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple expander = new org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple(new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(theContext, theRootValidationSupport), null);
-				ValueSetExpander.ValueSetExpansionOutcome expansion = expander.expand(vs, new Parameters());
-				List<ValueSet.ValueSetExpansionContainsComponent> contains = expansion.getValueset().getExpansion().getContains();
+				org.hl7.fhir.dstu3.model.ValueSet expansionVs = (org.hl7.fhir.dstu3.model.ValueSet)expansion;
+				List<org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent> contains = expansionVs.getExpansion().getContains();
 				codes = contains.stream().map(t -> new VersionIndependentConcept(t.getSystem(), t.getCode())).collect(Collectors.toList());
 				break;
 			}
 			case R4: {
-				org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple expander = new org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple(new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(theContext, theRootValidationSupport));
-				ValueSetExpander.ValueSetExpansionOutcome expansion = expander.expand(vs, new Parameters());
-				List<ValueSet.ValueSetExpansionContainsComponent> contains = expansion.getValueset().getExpansion().getContains();
+				org.hl7.fhir.r4.model.ValueSet expansionVs = (org.hl7.fhir.r4.model.ValueSet)expansion;
+				List<ValueSet.ValueSetExpansionContainsComponent> contains = expansionVs.getExpansion().getContains();
 				codes = contains.stream().map(t -> new VersionIndependentConcept(t.getSystem(), t.getCode())).collect(Collectors.toList());
 				break;
 			}
 			case R5: {
-				org.hl7.fhir.r5.terminologies.ValueSetExpanderSimple expander = new org.hl7.fhir.r5.terminologies.ValueSetExpanderSimple(new org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext(theContext, theRootValidationSupport));
-				ValueSetExpander.ValueSetExpansionOutcome expansion = expander.expand(vs, new Parameters());
-				List<ValueSet.ValueSetExpansionContainsComponent> contains = expansion.getValueset().getExpansion().getContains();
+				org.hl7.fhir.r5.model.ValueSet expansionVs = (org.hl7.fhir.r5.model.ValueSet)expansion;
+				List<org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent> contains = expansionVs.getExpansion().getContains();
 				codes = contains.stream().map(t -> new VersionIndependentConcept(t.getSystem(), t.getCode())).collect(Collectors.toList());
 				break;
 			}

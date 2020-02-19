@@ -128,7 +128,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		myValidConcepts = new ArrayList<>();
 
-		when(myMockSupport.expandValueSet(nullable(FhirContext.class), nullable(ConceptSetComponent.class))).thenAnswer(t -> {
+		when(myMockSupport.expandValueSet(, nullable(FhirContext.class), nullable(ConceptSetComponent.class))).thenAnswer(t -> {
 			ConceptSetComponent arg = (ConceptSetComponent) t.getArguments()[1];
 			ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getSystem());
 			if (retVal == null) {

@@ -41,31 +41,6 @@ public class LoadingValidationSupportR4 implements org.hl7.fhir.r4.hapi.ctx.IVal
 	private FhirContext myCtx = FhirContext.forR4();
 
 	@Override
-	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
-		return null;
-	}
-
-	@Override
-	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
-		return null;
-	}
-
-	@Override
-	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
-		return null;
-	}
-
-	@Override
-	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
-		return null;
-	}
-
-	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
 		String resName = myCtx.getResourceDefinition(theClass).getName();
 		ourLog.info("Attempting to fetch {} at URL: {}", resName, theUri);
@@ -83,29 +58,5 @@ public class LoadingValidationSupportR4 implements org.hl7.fhir.r4.hapi.ctx.IVal
 		return result;
 	}
 
-	@Override
-	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
-		return null;
-	}
-
-	@Override
-	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
-		return false;
-	}
-
-	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
-		return null;
-	}
-
-	@Override
-	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSet) {
-		return null;
-	}
-
-	@Override
-	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
-		return null;
-	}
 
 }

@@ -44,26 +44,6 @@ public class LoadingValidationSupportDstu3 implements IValidationSupport {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoadingValidationSupportDstu3.class);
 
 	@Override
-	public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
-		return null;
-	}
-
-	@Override
-	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
-		return null;
-	}
-
-	@Override
-	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
-		return null;
-	}
-
-	@Override
-	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
-		return null;
-	}
-
-	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
 		String resName = myCtx.getResourceDefinition(theClass).getName();
 		ourLog.info("Attempting to fetch {} at URL: {}", resName, theUri);
@@ -79,36 +59,6 @@ public class LoadingValidationSupportDstu3 implements IValidationSupport {
 		}
 		ourLog.info("Successfully loaded resource");
 		return result;
-	}
-
-	@Override
-	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
-		return null;
-	}
-
-	@Override
-	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
-		return false;
-	}
-
-	@Override
-	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
-		return null;
-	}
-
-	@Override
-	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
-		return null;
-	}
-
-	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
-		return null;
-	}
-
-	@Override
-	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		return Collections.emptyList();
 	}
 
 }
