@@ -85,7 +85,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	 * Uses DefaultProfileValidationSupport for {@link IValidationSupport validation support}
 	 */
 	public FhirInstanceValidator(FhirContext theFhirContext) {
-		this(theFhirContext.getVersion().createValidationSupport());
+		this(theFhirContext.getValidationSupport());
 	}
 
 	/**

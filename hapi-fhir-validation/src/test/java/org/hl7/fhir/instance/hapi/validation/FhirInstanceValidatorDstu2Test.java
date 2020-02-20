@@ -33,8 +33,8 @@ import static org.junit.Assert.*;
 public class FhirInstanceValidatorDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu2Test.class);
-	private static FhirInstanceValidator ourValidator = new FhirInstanceValidator(new DefaultProfileValidationSupport());
 	private static FhirContext ourCtxDstu2 = FhirContext.forDstu2();
+	private static FhirInstanceValidator ourValidator = new FhirInstanceValidator(new DefaultProfileValidationSupport(ourCtxDstu2));
 	private static FhirContext ourCtxHl7OrgDstu2 = FhirContext.forDstu2Hl7Org();
 
 	/**

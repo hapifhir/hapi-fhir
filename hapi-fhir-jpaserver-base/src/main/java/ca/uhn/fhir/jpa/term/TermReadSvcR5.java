@@ -88,7 +88,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 
 	@Override
 	@Transactional(dontRollbackOn = {ExpansionTooCostlyException.class})
-	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, IBaseResource theValueSetToExpand) {
 		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
 		org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetToExpand), null);
 		return new ValueSetExpansionOutcome(org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(expandedR4));

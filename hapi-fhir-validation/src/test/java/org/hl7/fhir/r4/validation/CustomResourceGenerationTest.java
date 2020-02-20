@@ -31,7 +31,7 @@ public class CustomResourceGenerationTest extends BaseTest {
 		PrePopulatedValidationSupport prePopulatedValidationSupport = new PrePopulatedValidationSupport(myCtx);
 		prePopulatedValidationSupport.addStructureDefinition(customProfile);
 
-		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport();
+		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(myCtx);
 		ValidationSupportChain validationSupport = new ValidationSupportChain(defaultProfileValidationSupport, prePopulatedValidationSupport);
 
 		FhirValidator validator = myCtx.newValidator();

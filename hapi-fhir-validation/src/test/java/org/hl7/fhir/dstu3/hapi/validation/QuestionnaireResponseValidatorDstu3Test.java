@@ -14,7 +14,6 @@ import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
-import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemEnableWhenComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemOptionComponent;
@@ -34,14 +33,22 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.BOOLEAN;
 import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.CHOICE;
 import static org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 public class QuestionnaireResponseValidatorDstu3Test {
 	private static final String QUESTIONNAIRE_URL = "http://example.com/Questionnaire/q1";
@@ -51,7 +58,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	private static final IdType ID_VS_SCHOOLTYPE = new IdType("ValueSet/schooltype");
 	private static final String SYSTEMURI_ICC_SCHOOLTYPE = "http://ehealthinnovation/icc/ns/schooltype";
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
+	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
 	private IValidationSupport myValSupport;
@@ -146,7 +153,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 			when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq("http://codesystems.com/system"), any())).thenReturn(codeSystem);
 			when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 			when(myValSupport.validateCodeInValueSet(any(), eq("http://codesystems.com/system"), eq("code0"),  any(), nullable(ValueSet.class)))
-				.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent().setCode("code0")));
+				.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode("code0"));
 			myInstanceVal.flushCaches();
 
 			q.getItem().clear();
@@ -199,9 +206,9 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
 		when(myValSupport.validateCodeInValueSet(any(), eq("http://codesystems.com/system"), eq("code0"),  any(), nullable(ValueSet.class)))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent().setCode("code0")));
+			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCodeInValueSet(any(), eq("http://codesystems.com/system"), eq("code1"),  any(), nullable(ValueSet.class)))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult(ValidationMessage.IssueSeverity.ERROR.toCode(), "Unknown code"));
+			.thenReturn(new IContextValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -221,7 +228,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent().setCode(CODE_ICC_SCHOOLTYPE_PT)));
+			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
 
 
 		QuestionnaireResponse qa;
@@ -777,7 +784,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(valueSetRef)))
 			.thenReturn(options);
 		when(myValSupport.validateCode(any(), any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(new CodeType(codeValue))));
+			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode(codeValue));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String qXml = xmlParser.encodeResourceToString(q);
@@ -833,7 +840,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(valueSetRef)))
 			.thenReturn(options);
 		when(myValSupport.validateCode(any(), any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(new CodeType(codeValue))));
+			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode(codeValue));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String qXml = xmlParser.encodeResourceToString(q);
@@ -947,7 +954,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(questionnaireResponse.getQuestionnaire().getReference()))).thenReturn(questionnaire);
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(ID_VS_SCHOOLTYPE.getValue()))).thenReturn(iccSchoolTypeVs);
 		when(myValSupport.validateCodeInValueSet(any(), eq(SYSTEMURI_ICC_SCHOOLTYPE), eq(CODE_ICC_SCHOOLTYPE_PT),  any(), nullable(ValueSet.class)))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent().setCode(CODE_ICC_SCHOOLTYPE_PT)));
+			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
 
 		ValidationResult errors = myVal.validateWithResult(questionnaireResponse);
 
@@ -996,9 +1003,9 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent().setCode("code0")));
+			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult(ValidationMessage.IssueSeverity.ERROR.toCode(), "Unknown code"));
+			.thenReturn(new IContextValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setSeverity( "Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -1018,7 +1025,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 
-		when(myValSupport.validateCodeInValueSet(any(FhirContext.class), eq("http://codesystems.com/system"), eq("code0"), any(), any(IBaseResource.class))).thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(new CodeType("code0"))));
+		when(myValSupport.validateCodeInValueSet(any(FhirContext.class), eq("http://codesystems.com/system"), eq("code0"), any(), any(IBaseResource.class))).thenReturn(new IContextValidationSupport.CodeValidationResult().setCode("code0"));
 
 		QuestionnaireResponse qa;
 		ValidationResult errors;

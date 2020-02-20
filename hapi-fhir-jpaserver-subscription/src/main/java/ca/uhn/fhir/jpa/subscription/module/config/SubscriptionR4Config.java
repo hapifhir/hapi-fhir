@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.module.config;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamR4Config;
 import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
@@ -34,6 +35,6 @@ public class SubscriptionR4Config extends BaseSubscriptionConfig {
 	@Primary
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainR4")
 	public IContextValidationSupport validationSupportChainR4() {
-		return new DefaultProfileValidationSupport();
+		return new DefaultProfileValidationSupport(FhirContext.forR4());
 	}
 }

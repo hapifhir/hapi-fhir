@@ -29,7 +29,7 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 
 		// Create a validation chain that includes default validation support and a
 		// snapshot generator
-		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport();
+		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(myFhirCtx);
 		SnapshotGeneratingValidationSupport snapshotGenerator = new SnapshotGeneratingValidationSupport(myFhirCtx);
 		ValidationSupportChain chain = new ValidationSupportChain(defaultSupport, snapshotGenerator);
 

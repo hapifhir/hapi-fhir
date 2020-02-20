@@ -59,6 +59,6 @@ public class PropertyTest {
         final String sdString = IOUtils.toString(PropertyTest.class.getResourceAsStream("/customPatientSd.xml"), StandardCharsets.UTF_8);
         final IParser parser = ourCtx.newXmlParser();
         sd = parser.parseResource(StructureDefinition.class, sdString);
-        workerContext = new HapiWorkerContext(ourCtx, ourCtx.getVersion().createValidationSupport());
+        workerContext = new HapiWorkerContext(ourCtx, ourCtx.getValidationSupport());
     }
 }

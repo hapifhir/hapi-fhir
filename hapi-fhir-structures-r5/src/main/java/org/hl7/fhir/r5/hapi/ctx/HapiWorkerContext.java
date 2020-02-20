@@ -179,7 +179,8 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		if (result.getSeverity() != null) {
 			severity = IssueSeverity.fromCode(result.getSeverity());
 		}
-		return new ValidationResult(severity, result.getMessage(), (ConceptDefinitionComponent) result.asConceptDefinition());
+		ConceptDefinitionComponent definition = new ConceptDefinitionComponent().setCode(result.getCode());
+		return new ValidationResult(severity, result.getMessage(), definition);
 	}
 
 	@Override
@@ -286,7 +287,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	public ValueSetExpansionOutcome expandVS(ConceptSetComponent theInc, boolean theHierarchical) throws TerminologyServiceException {
 		ValueSet input = new ValueSet();
 		input.getCompose().addInclude(theInc);
-		IContextValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(myValidationSupport, myCtx, input);
+		IContextValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(myValidationSupport, input);
 		return new ValueSetExpansionOutcome((ValueSet) output.getValueSet(), output.getError(), null);
 	}
 

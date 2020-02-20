@@ -11,7 +11,7 @@ import static org.junit.Assert.assertNull;
 
 public class DefaultProfileValidationSupportTest {
 
-	private DefaultProfileValidationSupport mySvc = new DefaultProfileValidationSupport();
+	private DefaultProfileValidationSupport mySvc = new DefaultProfileValidationSupport(ourCtx);
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	
 	@Test

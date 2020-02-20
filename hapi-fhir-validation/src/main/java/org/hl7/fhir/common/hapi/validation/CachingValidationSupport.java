@@ -31,8 +31,8 @@ public class CachingValidationSupport implements IContextValidationSupport {
 	}
 
 	@Override
-	public IContextValidationSupport.ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theValueSetToExpand) {
-		return myWrap.expandValueSet(theRootValidationSupport, theContext, theValueSetToExpand);
+	public IContextValidationSupport.ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, IBaseResource theValueSetToExpand) {
+		return myWrap.expandValueSet(theRootValidationSupport, theValueSetToExpand);
 	}
 
 	@Override

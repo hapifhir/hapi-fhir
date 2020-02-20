@@ -72,7 +72,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 	 * Uses {@link DefaultProfileValidationSupport} for {@link IValidationSupport validation support}
 	 */
 	public FhirInstanceValidator(FhirContext theContext) {
-		this(theContext.getVersion().createValidationSupport());
+		this(theContext.getValidationSupport());
 	}
 
 	/**

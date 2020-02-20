@@ -17,7 +17,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r5.model.*;
-import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.IResourceValidator;
@@ -63,8 +62,8 @@ import static org.mockito.Mockito.when;
 public class FhirInstanceValidatorR5Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorR5Test.class);
-	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
 	private static FhirContext ourCtx = FhirContext.forR5();
+	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	@Rule
 	public TestRule watcher = new TestWatcher() {
 		@Override
@@ -117,11 +116,11 @@ public class FhirInstanceValidatorR5Test {
 
 		myValidConcepts = new ArrayList<>();
 
-		when(myMockSupport.expandValueSet(any(), nullable(FhirContext.class), nullable(IBaseResource.class))).thenAnswer(theInvocation -> {
+		when(myMockSupport.expandValueSet(any(), nullable(IBaseResource.class))).thenAnswer(theInvocation -> {
 			ValueSet arg = (ValueSet) theInvocation.getArgument(2, IBaseResource.class);
 			ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getCompose().getIncludeFirstRep().getSystem());
 			if (retVal == null) {
-				IContextValidationSupport.ValueSetExpansionOutcome outcome = myDefaultValidationSupport.expandValueSet(myDefaultValidationSupport, ourCtx, arg);
+				IContextValidationSupport.ValueSetExpansionOutcome outcome = myDefaultValidationSupport.expandValueSet(myDefaultValidationSupport, arg);
 				return outcome;
 			}
 			ourLog.debug("expandValueSet({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
@@ -162,7 +161,7 @@ public class FhirInstanceValidatorR5Test {
 				String valueSetUrl = theInvocation.getArgument(5, String.class);
 				IContextValidationSupport.CodeValidationResult retVal;
 				if (myValidConcepts.contains(system + "___" + code)) {
-					retVal = new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent((code)));
+					retVal = new IContextValidationSupport.CodeValidationResult().setCode(code);
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(myDefaultValidationSupport, ctx, system, code, display, valueSetUrl);
 				}
@@ -294,7 +293,7 @@ public class FhirInstanceValidatorR5Test {
 
 
 	private List<SingleValidationMessage> logResultsAndReturnNonInformationalOnes(ValidationResult theOutput) {
-		List<SingleValidationMessage> retVal = new ArrayList<SingleValidationMessage>();
+		List<SingleValidationMessage> retVal = new ArrayList<>();
 
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {
@@ -310,7 +309,7 @@ public class FhirInstanceValidatorR5Test {
 	}
 
 	private List<SingleValidationMessage> logResultsAndReturnErrorOnes(ValidationResult theOutput) {
-		List<SingleValidationMessage> retVal = new ArrayList<SingleValidationMessage>();
+		List<SingleValidationMessage> retVal = new ArrayList<>();
 
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {

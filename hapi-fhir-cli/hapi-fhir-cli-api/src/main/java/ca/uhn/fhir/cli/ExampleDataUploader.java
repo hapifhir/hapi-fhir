@@ -161,7 +161,7 @@ public class ExampleDataUploader extends BaseCommand {
 		bundle.setType(BundleType.TRANSACTION);
 
 		FhirValidator val = ctx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator(new DefaultProfileValidationSupport()));
+		val.registerValidatorModule(new FhirInstanceValidator(new DefaultProfileValidationSupport(ctx)));
 
 		ZipInputStream zis = new ZipInputStream(FileUtils.openInputStream(inputFile));
 		byte[] buffer = new byte[2048];
@@ -245,7 +245,7 @@ public class ExampleDataUploader extends BaseCommand {
 		bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
 
 		FhirValidator val = ctx.newValidator();
-		val.registerValidatorModule(new org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator(new DefaultProfileValidationSupport()));
+		val.registerValidatorModule(new org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator(new DefaultProfileValidationSupport(ctx)));
 
 		ZipInputStream zis = new ZipInputStream(FileUtils.openInputStream(inputFile));
 		byte[] buffer = new byte[2048];
@@ -624,7 +624,6 @@ public class ExampleDataUploader extends BaseCommand {
 		}
 
 		String specUrl;
-
 		switch (ctx.getVersion().getVersion()) {
 			case DSTU2:
 				specUrl = "http://hl7.org/fhir/dstu2/examples-json.zip";

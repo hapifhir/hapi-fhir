@@ -300,7 +300,7 @@ public class SearchParamExtractorDstu3Test {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourValidationSupport = new DefaultProfileValidationSupport();
+		ourValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	}
 
 }

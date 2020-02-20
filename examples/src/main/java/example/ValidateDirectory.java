@@ -73,7 +73,7 @@ public class ValidateDirectory {
       FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 
       ValidationSupportChain validationSupportChain = new ValidationSupportChain();
-      validationSupportChain.addValidationSupport(new DefaultProfileValidationSupport());
+      validationSupportChain.addValidationSupport(new DefaultProfileValidationSupport(ctx));
       validationSupportChain.addValidationSupport(new PrePopulatedValidationSupport(ctx, structureDefinitions, valueSets, codeSystems));
 
       instanceValidator.setValidationSupport(validationSupportChain);

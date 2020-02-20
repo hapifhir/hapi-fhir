@@ -107,7 +107,7 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 
 	@Bean
 	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
-		return new DefaultProfileValidationSupport();
+		return new DefaultProfileValidationSupport(fhirContext());
 	}
 
 	@Bean

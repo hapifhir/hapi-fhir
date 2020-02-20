@@ -276,7 +276,7 @@ public class ValidatorExamples {
        * which loads the default HL7 versions. Any StructureDefinitions which are not found in
        * the built-in set are delegated to your custom implementation.
        */
-      ValidationSupportChain support = new ValidationSupportChain(new DefaultProfileValidationSupport(), valSupport);
+      ValidationSupportChain support = new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), valSupport);
       instanceValidator.setValidationSupport(support);
    
       // END SNIPPET: instanceValidatorCustom

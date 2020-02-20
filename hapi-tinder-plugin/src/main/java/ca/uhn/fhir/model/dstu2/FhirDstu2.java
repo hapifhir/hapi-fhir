@@ -48,11 +48,6 @@ public class FhirDstu2 implements IFhirVersion {
 
 
 	@Override
-	public IContextValidationSupport createValidationSupport() {
-		return ReflectionUtil.newInstanceOfFhirProfileValidationSupport("org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport");
-	}
-
-	@Override
 	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
 		StructureDefinition retVal = new StructureDefinition();
 

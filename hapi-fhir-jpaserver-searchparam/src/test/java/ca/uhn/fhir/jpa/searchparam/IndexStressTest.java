@@ -41,7 +41,7 @@ public class IndexStressTest {
 
 		FhirContext ctx = FhirContext.forDstu3();
 		IContextValidationSupport mockValidationSupport = mock(IContextValidationSupport.class);
-		IContextValidationSupport validationSupport = new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), mockValidationSupport));
+		IContextValidationSupport validationSupport = new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), mockValidationSupport));
 		ISearchParamRegistry searchParamRegistry = mock(ISearchParamRegistry.class);
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ctx, validationSupport, searchParamRegistry);
 		extractor.start();

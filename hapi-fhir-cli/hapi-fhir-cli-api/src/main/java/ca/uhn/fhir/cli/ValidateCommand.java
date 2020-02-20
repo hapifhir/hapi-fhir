@@ -160,7 +160,7 @@ public class ValidateCommand extends BaseCommand {
 					org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator instanceValidator = new org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator(ctx);
 					val.registerValidatorModule(instanceValidator);
 					ValidationSupportChain validationSupport = new ValidationSupportChain(
-						new DefaultProfileValidationSupport());
+						new DefaultProfileValidationSupport(ctx));
 					if (igPack != null) {
 						FhirContext hl7orgCtx = FhirContext.forDstu2Hl7Org();
 						hl7orgCtx.setParserErrorHandler(new LenientErrorHandler(false));
@@ -182,7 +182,7 @@ public class ValidateCommand extends BaseCommand {
 				case DSTU3: {
 					FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 					val.registerValidatorModule(instanceValidator);
-					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport());
+					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport(ctx));
 					if (igPack != null) {
 						IgPackParserDstu3 parser = new IgPackParserDstu3(getFhirContext());
 						IValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);

@@ -58,11 +58,10 @@ public interface IContextValidationSupport {
 	 *
 	 * @param theRootValidationSupport The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                 other method in the support chain.
-	 * @param theValueSetToExpand The valueset that should be expanded
-	 *
+	 * @param theValueSetToExpand      The valueset that should be expanded
 	 * @return The expansion, or null
 	 */
-	default ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theValueSetToExpand) {
+	default ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, IBaseResource theValueSetToExpand) {
 		return null;
 	}
 
@@ -325,7 +324,7 @@ public interface IContextValidationSupport {
 	}
 
 	class CodeValidationResult {
-		private IBase myDefinition;
+		private String myCode;
 		private String myMessage;
 		private String mySeverity;
 		private String myCodeSystemName;
@@ -333,28 +332,21 @@ public interface IContextValidationSupport {
 		private List<BaseConceptProperty> myProperties;
 		private String myDisplay;
 
-		public CodeValidationResult(IBase theDefinition) {
-			this.myDefinition = theDefinition;
-		}
-
-		public CodeValidationResult(String theSeverity, String message) {
-			this.mySeverity = theSeverity;
-			this.myMessage = message;
-		}
-
-		public CodeValidationResult(String theSeverity, String theMessage, IBase theDefinition, String theDisplay) {
-			this.mySeverity = theSeverity;
-			this.myMessage = theMessage;
-			this.myDefinition = theDefinition;
-			this.myDisplay = theDisplay;
+		public CodeValidationResult() {
+			super();
 		}
 
 		public String getDisplay() {
 			return myDisplay;
 		}
 
-		public IBase asConceptDefinition() {
-			return myDefinition;
+		public String getCode() {
+			return myCode;
+		}
+
+		public CodeValidationResult setCode(String theCode) {
+			myCode = theCode;
+			return this;
 		}
 
 		String getCodeSystemName() {
@@ -390,7 +382,7 @@ public interface IContextValidationSupport {
 		}
 
 		public boolean isOk() {
-			return myDefinition != null;
+			return isNotBlank(myCode);
 		}
 
 		public LookupCodeResult asLookupCodeResult(String theSearchedForSystem, String theSearchedForCode) {
@@ -406,6 +398,15 @@ public interface IContextValidationSupport {
 			return retVal;
 		}
 
+		public CodeValidationResult setMessage(String theMessage) {
+			myMessage = theMessage;
+			return this;
+		}
+
+		public CodeValidationResult setSeverity(String theSeverity) {
+			mySeverity = theSeverity;
+			return this;
+		}
 	}
 
 	class ValueSetExpansionOutcome {

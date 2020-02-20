@@ -22,7 +22,7 @@ public class ValidateSimple {
 
 		// We'll create a validation chain with only the DefaultProfileValidationupport registered
 		ValidationSupportChain validationSupportChain = new ValidationSupportChain();
-		validationSupportChain.addValidationSupport(new DefaultProfileValidationSupport());
+		validationSupportChain.addValidationSupport(new DefaultProfileValidationSupport(ctx));
 		instanceValidator.setValidationSupport(validationSupportChain);
 
 		// Create a validator and register the InstanceValidator module

@@ -81,7 +81,7 @@ public class FhirPathEngineTest {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourEngine = new FHIRPathEngine(new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport()));
+		ourEngine = new FHIRPathEngine(new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport(ourCtx)));
 	}
 
 }

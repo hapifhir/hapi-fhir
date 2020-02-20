@@ -129,7 +129,7 @@ public class GraphQLEngineTest {
 	@BeforeClass
 	public static void beforeClass() {
 		ourCtx = FhirContext.forR4();
-		ourWorkerCtx = new HapiWorkerContext(ourCtx, ourCtx.getVersion().createValidationSupport());
+		ourWorkerCtx = new HapiWorkerContext(ourCtx, ourCtx.getValidationSupport());
 	}
 
 }

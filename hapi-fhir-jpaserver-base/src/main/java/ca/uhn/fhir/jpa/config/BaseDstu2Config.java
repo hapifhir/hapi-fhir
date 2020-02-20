@@ -84,7 +84,7 @@ public class BaseDstu2Config extends BaseConfig {
 	public IInstanceValidatorModule instanceValidatorDstu2() {
 		FhirInstanceValidator retVal = new FhirInstanceValidator(fhirContext());
 		retVal.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
-		retVal.setValidationSupport(new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), jpaValidationSupportDstu2())));
+		retVal.setValidationSupport(new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(fhirContext()), jpaValidationSupportDstu2())));
 		return retVal;
 	}
 

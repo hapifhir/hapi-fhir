@@ -59,7 +59,7 @@ public class ValidatorExamplesDstu3 {
       // the DefaultProfileValidationSupport, which supplies the "built-in" FHIR
       // StructureDefinitions and ValueSets
       ValidationSupportChain validationSupportChain = new ValidationSupportChain();
-      validationSupportChain.addValidationSupport(new DefaultProfileValidationSupport());
+      validationSupportChain.addValidationSupport(new DefaultProfileValidationSupport(ctx));
       instanceVal.setValidationSupport(validationSupportChain);
       
       // END SNIPPET: validateFiles

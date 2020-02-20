@@ -113,7 +113,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 
 	@Transactional(dontRollbackOn = {ExpansionTooCostlyException.class})
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theValueSetToExpand)  {
+	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, IBaseResource theValueSetToExpand)  {
 		ValueSet expanded = super.expandValueSetInMemory((ValueSet) theValueSetToExpand, null);
 		return new ValueSetExpansionOutcome(expanded);
 	}

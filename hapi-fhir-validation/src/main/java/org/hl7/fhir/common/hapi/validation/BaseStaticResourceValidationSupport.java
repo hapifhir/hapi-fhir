@@ -4,10 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.VersionIndependentConcept;
-import org.hl7.fhir.dstu3.model.ExpansionProfile;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.ArrayList;
@@ -20,7 +17,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseStaticResourceValidationSupport implements IContextValidationSupport {
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, IBaseResource theValueSetToExpand) {
 
 		IBaseResource expansion;
 		switch (theContext.getVersion().getVersion()) {
@@ -84,7 +81,7 @@ public abstract class BaseStaticResourceValidationSupport implements IContextVal
 		}
 
 
-		IBaseResource expansion = expandValueSet(theRootValidationSupport, theContext, vs).getValueSet();
+		IBaseResource expansion = expandValueSet(theRootValidationSupport, vs).getValueSet();
 
 		List<VersionIndependentConcept> codes;
 		switch (theContext.getVersion().getVersion()) {
@@ -117,7 +114,8 @@ public abstract class BaseStaticResourceValidationSupport implements IContextVal
 
 			if (theCode.equals(nextExpansionCode.getCode())) {
 				if (Constants.codeSystemNotNeeded(theCodeSystem) || nextExpansionCode.getSystem().equals(theCodeSystem)) {
-					return new CodeValidationResult(new CodeSystem.ConceptDefinitionComponent(new CodeType(theCode)));
+					return new CodeValidationResult()
+						.setCode(theCode);
 				}
 			}
 		}

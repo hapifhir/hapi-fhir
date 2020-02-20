@@ -9,7 +9,13 @@ import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
-import ca.uhn.fhir.parser.*;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.IParserErrorHandler;
+import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.LenientErrorHandler;
+import ca.uhn.fhir.parser.RDFParser;
+import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -371,6 +377,19 @@ public class FhirContext {
 	}
 
 	/**
+	 * Sets the configured performance options
+	 *
+	 * @see PerformanceOptionsEnum for a list of available options
+	 */
+	public void setPerformanceOptions(final PerformanceOptionsEnum... thePerformanceOptions) {
+		Collection<PerformanceOptionsEnum> asList = null;
+		if (thePerformanceOptions != null) {
+			asList = Arrays.asList(thePerformanceOptions);
+		}
+		setPerformanceOptions(asList);
+	}
+
+	/**
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
 	 */
@@ -551,7 +570,8 @@ public class FhirContext {
 	public IContextValidationSupport getValidationSupport() {
 		IContextValidationSupport retVal = myValidationSupport;
 		if (retVal == null) {
-			retVal = myVersion.createValidationSupport();
+			String className = "org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport";
+			retVal = ReflectionUtil.newInstanceOfFhirProfileValidationSupport(className, this);
 			myValidationSupport = retVal;
 		}
 		return retVal;
@@ -642,7 +662,6 @@ public class FhirContext {
 	public IParser newRDFParser() {
 		return new RDFParser(this, myParserErrorHandler, Lang.TURTLE);
 	}
-
 
 	/**
 	 * Instantiates a new client instance. This method requires an interface which is defined specifically for your use
@@ -861,19 +880,6 @@ public class FhirContext {
 	public void setParserErrorHandler(final IParserErrorHandler theParserErrorHandler) {
 		Validate.notNull(theParserErrorHandler, "theParserErrorHandler must not be null");
 		myParserErrorHandler = theParserErrorHandler;
-	}
-
-	/**
-	 * Sets the configured performance options
-	 *
-	 * @see PerformanceOptionsEnum for a list of available options
-	 */
-	public void setPerformanceOptions(final PerformanceOptionsEnum... thePerformanceOptions) {
-		Collection<PerformanceOptionsEnum> asList = null;
-		if (thePerformanceOptions != null) {
-			asList = Arrays.asList(thePerformanceOptions);
-		}
-		setPerformanceOptions(asList);
 	}
 
 	@SuppressWarnings({"cast"})

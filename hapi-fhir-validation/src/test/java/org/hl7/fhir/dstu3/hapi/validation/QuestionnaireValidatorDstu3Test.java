@@ -30,8 +30,8 @@ import static org.mockito.Mockito.mock;
 
 public class QuestionnaireValidatorDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(QuestionnaireValidatorDstu3Test.class);
-	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
 	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
 

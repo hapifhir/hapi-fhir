@@ -19,19 +19,27 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
-import java.lang.reflect.*;
+
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
+import org.apache.commons.lang3.Validate;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.lang3.Validate;
-
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
-
 public class ReflectionUtil {
 
-	private static final ConcurrentHashMap<String, Object> ourFhirServerVersions = new ConcurrentHashMap<String, Object>();
+	private static final ConcurrentHashMap<String, Object> ourFhirServerVersions = new ConcurrentHashMap<>();
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReflectionUtil.class);
 
@@ -93,7 +101,7 @@ public class ReflectionUtil {
 		return getGenericCollectionTypeOf(collectionType.getActualTypeArguments()[0]);
 	}
 
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings({"rawtypes"})
 	private static Class<?> getGenericCollectionTypeOf(Type theType) {
 		Class<?> type;
 		if (ParameterizedType.class.isAssignableFrom(theType.getClass())) {
@@ -140,31 +148,30 @@ public class ReflectionUtil {
 	public static Object newInstanceOfFhirServerType(String theType) {
 		String errorMessage = "Unable to instantiate server framework. Please make sure that hapi-fhir-server library is on your classpath!";
 		String wantedType = "ca.uhn.fhir.rest.api.server.IFhirVersionServer";
-		return newInstanceOfType(theType, errorMessage, wantedType);
+		return newInstanceOfType(theType, theType, errorMessage, wantedType, new Class[0], new Object[0]);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <EVS_IN, EVS_OUT, SDT, CST, CDCT, IST> ca.uhn.fhir.context.support.IContextValidationSupport newInstanceOfFhirProfileValidationSupport(
-			String theType) {
+	public static ca.uhn.fhir.context.support.IContextValidationSupport newInstanceOfFhirProfileValidationSupport(String theType, FhirContext theContext) {
 		String errorMessage = "Unable to instantiate validation support! Please make sure that hapi-fhir-validation and the appropriate structures JAR are on your classpath!";
 		String wantedType = "ca.uhn.fhir.context.support.IContextValidationSupport";
-		Object fhirServerVersion = newInstanceOfType(theType, errorMessage, wantedType);
+		Object fhirServerVersion = newInstanceOfType(wantedType + theContext.getVersion().getVersion().name(), theType, errorMessage, wantedType, new Class[]{FhirContext.class}, new Object[]{theContext});
 		return (IContextValidationSupport) fhirServerVersion;
 	}
 
-	private static Object newInstanceOfType(String theType, String errorMessage, String wantedType) {
-		Object fhirServerVersion = ourFhirServerVersions.get(theType);
+	private static Object newInstanceOfType(String theKey, String theType, String errorMessage, String wantedType, Class<?>[] theParameterArgTypes, Object[] theConstructorArgs) {
+		Object fhirServerVersion = ourFhirServerVersions.get(theKey);
 		if (fhirServerVersion == null) {
 			try {
 				Class<?> type = Class.forName(theType);
 				Class<?> serverType = Class.forName(wantedType);
 				Validate.isTrue(serverType.isAssignableFrom(type));
-				fhirServerVersion = type.newInstance();
+				fhirServerVersion = type.getConstructor(theParameterArgTypes).newInstance(theConstructorArgs);
 			} catch (Exception e) {
 				throw new ConfigurationException(errorMessage, e);
 			}
 
-			ourFhirServerVersions.put(theType, fhirServerVersion);
+			ourFhirServerVersions.put(theKey, fhirServerVersion);
 		}
 		return fhirServerVersion;
 	}

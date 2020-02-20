@@ -25,7 +25,6 @@ import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
@@ -76,8 +75,8 @@ import static org.mockito.Mockito.when;
 public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorR4Test.class);
-	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
 	private static FhirContext ourCtx = FhirContext.forR4();
+	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	@Rule
 	public TestRule watcher = new TestWatcher() {
 		@Override
@@ -130,11 +129,11 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		myValidConcepts = new ArrayList<>();
 
-		when(myMockSupport.expandValueSet(any(), nullable(FhirContext.class), any())).thenAnswer(t -> {
+		when(myMockSupport.expandValueSet(any(), any())).thenAnswer(t -> {
 			ValueSet arg = (ValueSet) t.getArgument(2, IBaseResource.class);
 			ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getCompose().getIncludeFirstRep().getSystem());
 			if (retVal == null) {
-				IBaseResource outcome = myDefaultValidationSupport.expandValueSet(myDefaultValidationSupport, ourCtx, arg).getValueSet();
+				IBaseResource outcome = myDefaultValidationSupport.expandValueSet(myDefaultValidationSupport, arg).getValueSet();
 				return outcome;
 			}
 			ourLog.debug("expandValueSet({}) : {}", new Object[]{t.getArguments()[0], retVal});
@@ -175,7 +174,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				String valueSetUrl = theInvocation.getArgument(4, String.class);
 				IContextValidationSupport.CodeValidationResult retVal;
 				if (myValidConcepts.contains(system + "___" + code)) {
-					retVal = new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(new CodeType(code)));
+					retVal = new IContextValidationSupport.CodeValidationResult().setCode(code);
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(myDefaultValidationSupport, ctx, system, code, display, valueSetUrl);
 				}
@@ -636,7 +635,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	@Test
 	public void testValidateProfileWithExtension() throws IOException, FHIRException {
 		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport(ourCtx);
-		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport();
+		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ourCtx);
 		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport));
 
 		// Prepopulate SDs

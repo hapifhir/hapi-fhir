@@ -50,16 +50,6 @@ public class FhirDstu3 implements IFhirVersion {
   }
 
   @Override
-  public IContextValidationSupport createValidationSupport() {
-    String className = "org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport";
-    try {
-      return (IContextValidationSupport) Class.forName(className).newInstance();
-    } catch (Exception theE) {
-      throw new ConfigurationException(className + " is not on classpath. Make sure that hapi-fhir-validation-VERSION.jar is available.");
-    }
-  }
-
-  @Override
   public IBaseResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
     StructureDefinition retVal = new StructureDefinition();
 

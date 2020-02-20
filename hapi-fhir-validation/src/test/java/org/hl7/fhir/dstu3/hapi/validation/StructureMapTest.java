@@ -279,7 +279,7 @@ public class StructureMapTest {
 	public void testMappingTransform() throws Exception {
 		Map<String, StructureMap> maps = new HashMap<>(); // Instantiate a hashmap for StructureMaps
 		PrePopulatedValidationSupport prePopulatedValidationSupport = new PrePopulatedValidationSupport(myCtx);
-		this.validationSupport = new ValidationSupportChain(prePopulatedValidationSupport, new DefaultProfileValidationSupport());
+		this.validationSupport = new ValidationSupportChain(prePopulatedValidationSupport, new DefaultProfileValidationSupport(myCtx));
 
 		StructureDefinition sd1 = this.createTestStructure(); // Calls a method that constructs a comp
 		prePopulatedValidationSupport.addStructureDefinition(sd1); // Add custom structure to validation support.

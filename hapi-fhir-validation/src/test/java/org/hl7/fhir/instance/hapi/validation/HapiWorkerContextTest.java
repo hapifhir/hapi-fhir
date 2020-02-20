@@ -14,8 +14,8 @@ public class HapiWorkerContextTest {
 	@Test
 	public void testIdTypes(){
 
-		DefaultProfileValidationSupport validationSupport = new DefaultProfileValidationSupport();
 		FhirContext ctx = FhirContext.forDstu2();
+		DefaultProfileValidationSupport validationSupport = new DefaultProfileValidationSupport(ctx);
 		HapiWorkerContext hwc = new HapiWorkerContext(ctx, validationSupport);
 
 		ValueSet vs = validationSupport.fetchResource(ctx, ValueSet.class, "http://hl7.org/fhir/ValueSet/defined-types");

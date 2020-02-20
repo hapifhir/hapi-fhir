@@ -280,7 +280,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	@PostConstruct
 	public void postConstruct() {
 		super.postConstruct();
-		myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
+		myDefaultProfileValidationSupport = new DefaultProfileValidationSupport(myFhirContext);
 		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(myDefaultProfileValidationSupport, myJpaValidationSupport));
 	}
 

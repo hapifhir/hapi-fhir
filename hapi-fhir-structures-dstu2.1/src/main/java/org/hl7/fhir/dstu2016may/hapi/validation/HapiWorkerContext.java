@@ -179,13 +179,13 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		if (result == null) {
 			return null;
 		}
-		ConceptDefinitionComponent definition = (ConceptDefinitionComponent) result.asConceptDefinition();
 		String message = result.getMessage();
 		OperationOutcome.IssueSeverity severity = null;
 		if (result.getSeverity() != null) {
 			severity = OperationOutcome.IssueSeverity.fromCode(result.getSeverity());
 		}
-		return new ValidationResult(severity, message, definition);
+		ConceptDefinitionComponent definition = new ConceptDefinitionComponent().setCode(result.getCode());
+		return new ValidationResult(severity, result.getMessage(), definition);
 	}
 
 	@Override

@@ -113,13 +113,13 @@ public class FhirInstanceValidatorDstu3Test {
 
 		myValidConcepts = new ArrayList<>();
 
-		when(myMockSupport.expandValueSet(any(), any(FhirContext.class), nullable(IBaseResource.class))).thenAnswer(new Answer<ValueSetExpansionComponent>() {
+		when(myMockSupport.expandValueSet(any(), nullable(IBaseResource.class))).thenAnswer(new Answer<ValueSetExpansionComponent>() {
 			@Override
 			public ValueSetExpansionComponent answer(InvocationOnMock theInvocation) {
 				ValueSet arg = (ValueSet) theInvocation.getArgument(0, IBaseResource.class);
 				ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getCompose().getIncludeFirstRep().getSystem());
 				if (retVal == null) {
-					ValueSet expandedVs = (ValueSet) myDefaultValidationSupport.expandValueSet(myDefaultValidationSupport, ourCtx, arg).getValueSet();
+					ValueSet expandedVs = (ValueSet) myDefaultValidationSupport.expandValueSet(myDefaultValidationSupport, arg).getValueSet();
 					retVal = expandedVs.getExpansion();
 				}
 				ourLog.debug("expandValueSet({}) : {}", new Object[] {theInvocation.getArguments()[0], retVal});
@@ -181,11 +181,11 @@ public class FhirInstanceValidatorDstu3Test {
 				String valueSetUrl = theInvocation.getArgument(5, String.class);
 				IContextValidationSupport.CodeValidationResult retVal;
 				if (myValidConcepts.contains(system + "___" + code)) {
-					retVal = new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(new CodeType(code)));
+					retVal = new IContextValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myCodeSystems.containsKey(system)) {
 					CodeSystem cs = myCodeSystems.get(system);
 					Optional<ConceptDefinitionComponent> found = cs.getConcept().stream().filter(t -> t.getCode().equals(code)).findFirst();
-					retVal = found.map(t->new IContextValidationSupport.CodeValidationResult(t)).orElse(null);
+					retVal = found.map(t->new IContextValidationSupport.CodeValidationResult().setCode(t.getCode())).orElse(null);
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(myDefaultValidationSupport, ctx, system, code, display, valueSetUrl);
 				}
@@ -266,7 +266,7 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	private List<SingleValidationMessage> logResultsAndReturnNonInformationalOnes(ValidationResult theOutput) {
-		List<SingleValidationMessage> retVal = new ArrayList<SingleValidationMessage>();
+		List<SingleValidationMessage> retVal = new ArrayList<>();
 
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {

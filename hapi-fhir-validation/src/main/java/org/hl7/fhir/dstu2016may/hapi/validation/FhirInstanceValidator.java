@@ -73,7 +73,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 * Uses DefaultProfileValidationSupport for {@link IValidationSupport validation support}
 	 */
 	public FhirInstanceValidator(FhirContext theContext) {
-		this(theContext.getVersion().createValidationSupport());
+		this(theContext.getValidationSupport());
 	}
 
 	/**

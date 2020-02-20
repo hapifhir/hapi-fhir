@@ -63,7 +63,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc) {
 		ValueSet input = new ValueSet();
 		input.getCompose().addInclude(theInc);
-		IContextValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(myValidationSupport, myCtx, input);
+		IContextValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(myValidationSupport, input);
 		ValueSet outputVs = (ValueSet) output.getValueSet();
 		return outputVs.getExpansion();
 	}
@@ -186,7 +186,9 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 			severity = IssueSeverity.fromCode(result.getSeverity());
 		}
 
-		return new ValidationResult(severity, result.getMessage(), (ConceptDefinitionComponent) result.asConceptDefinition());
+		ConceptDefinitionComponent definition = new ConceptDefinitionComponent()
+			.setCode(result.getCode());
+		return new ValidationResult(severity, result.getMessage(), definition);
 	}
 
 	@Override

@@ -42,15 +42,15 @@ public class SearchParamExtractorMegaTest {
 
 		ctx = FhirContext.forDstu3();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorDstu3(null, ctx, new DefaultProfileValidationSupport(), searchParamRegistry));
+		process(ctx, new SearchParamExtractorDstu3(null, ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry));
 
 		ctx = FhirContext.forR4();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorR4(null, ctx, new DefaultProfileValidationSupport(), searchParamRegistry));
+		process(ctx, new SearchParamExtractorR4(null, ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry));
 
 		ctx = FhirContext.forR5();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorR5(ctx, new DefaultProfileValidationSupport(), searchParamRegistry));
+		process(ctx, new SearchParamExtractorR5(ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry));
 	}
 
 	private void process(FhirContext theCtx, BaseSearchParamExtractor theExtractor) throws Exception {

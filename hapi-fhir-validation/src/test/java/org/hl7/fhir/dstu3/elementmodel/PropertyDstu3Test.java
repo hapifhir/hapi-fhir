@@ -33,7 +33,7 @@ public class PropertyDstu3Test {
         final String sdString = IOUtils.toString(getClass().getResourceAsStream("/customPatientSd.xml"), StandardCharsets.UTF_8);
         final IParser parser = ourCtx.newXmlParser();
         sd = parser.parseResource(StructureDefinition.class, sdString);
-        workerContext = new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport());
+        workerContext = new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport(ourCtx));
     }
 
     @Test

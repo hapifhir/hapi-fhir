@@ -44,7 +44,7 @@ public class HapiWorkerContextTest extends BaseTest {
 		getResources("/r4/carin/uscore/structuredefinition/").forEach(t -> prePopulatedValidationSupport.addStructureDefinition(t));
 
 		ValidationSupportChain validationSupportChain = new ValidationSupportChain(
-			new DefaultProfileValidationSupport(),
+			new DefaultProfileValidationSupport(myCtx),
 			prePopulatedValidationSupport
 		);
 		HapiWorkerContext workerCtx = new HapiWorkerContext(myCtx, validationSupportChain);

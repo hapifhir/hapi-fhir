@@ -31,8 +31,8 @@ import static org.mockito.Mockito.mock;
 
 public class QuestionnaireValidatorR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(QuestionnaireValidatorR4Test.class);
-	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
 	private static FhirContext ourCtx = FhirContext.forR4();
+	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
 

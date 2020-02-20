@@ -188,7 +188,7 @@ public class ResourceValidatorDstu3Test {
 	@Ignore
 	public void testValidateProfileWithExtension() throws IOException, FHIRException {
 		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport(ourCtx);
-		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport();
+		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ourCtx);
 		ValidationSupportChain support = new ValidationSupportChain(valSupport, defaultSupport);
 
 		// Prepopulate SDs
