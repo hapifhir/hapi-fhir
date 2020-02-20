@@ -295,22 +295,23 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
     ourLog.info("Loading structure definitions from classpath: {}", theClasspath);
     try (InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath)) {
       if (valuesetText != null) {
-        InputStreamReader reader = new InputStreamReader(valuesetText, Constants.CHARSET_UTF8);
+        try (InputStreamReader reader = new InputStreamReader(valuesetText, Constants.CHARSET_UTF8)) {
 
-        List<IBaseResource> resources = parseBundle(theContext, reader);
-        for (IBaseResource next : resources) {
+			  List<IBaseResource> resources = parseBundle(theContext, reader);
+			  for (IBaseResource next : resources) {
 
-          String nextType = theContext.getResourceDefinition(next).getName();
-          if ("StructureDefinition".equals(nextType)) {
+				  String nextType = theContext.getResourceDefinition(next).getName();
+				  if ("StructureDefinition".equals(nextType)) {
 
-            String url = getConformanceResourceUrl(theContext, next);
-            if (isNotBlank(url)) {
-              theCodeSystems.put(url, next);
-            }
+					  String url = getConformanceResourceUrl(theContext, next);
+					  if (isNotBlank(url)) {
+						  theCodeSystems.put(url, next);
+					  }
 
-          }
+				  }
 
-        }
+			  }
+		  }
       } else {
         ourLog.warn("Unable to load resource: {}", theClasspath);
       }
