@@ -227,9 +227,13 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		template.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				ensureSearchEntityLoaded();
+				boolean entityLoaded = ensureSearchEntityLoaded();
+				assert entityLoaded;
 			}
 		});
+
+		assert mySearchEntity != null;
+		assert mySearchEntity.getSearchType() != null;
 
 		switch (mySearchEntity.getSearchType()) {
 			case HISTORY:

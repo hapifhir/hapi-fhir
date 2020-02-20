@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1717
+title: ValueSet expansions containing lists of terms did not correctly expand when backed by
+   ElasticSearch due to the use of a feature not supported in ES. Thanks to Jens Villadsen for 
+   reporting!
