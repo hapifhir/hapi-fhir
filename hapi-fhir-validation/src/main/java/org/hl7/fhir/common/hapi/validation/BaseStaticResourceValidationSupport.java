@@ -20,23 +20,23 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseStaticResourceValidationSupport implements IContextValidationSupport {
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theValueSet) {
+	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theValueSetToExpand) {
 
 		IBaseResource expansion;
 		switch (theContext.getVersion().getVersion()) {
 			case DSTU3: {
 				org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple expander = new org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple(new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(theContext, theRootValidationSupport), null);
-				expansion = expander.expand((org.hl7.fhir.dstu3.model.ValueSet) theValueSet, null).getValueset();
+				expansion = expander.expand((org.hl7.fhir.dstu3.model.ValueSet) theValueSetToExpand, null).getValueset();
 				break;
 			}
 			case R4: {
 				org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple expander = new org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple(new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(theContext, theRootValidationSupport));
-				expansion = expander.expand((org.hl7.fhir.r4.model.ValueSet) theValueSet, new org.hl7.fhir.r4.model.Parameters()).getValueset();
+				expansion = expander.expand((org.hl7.fhir.r4.model.ValueSet) theValueSetToExpand, new org.hl7.fhir.r4.model.Parameters()).getValueset();
 				break;
 			}
 			case R5: {
 				org.hl7.fhir.r5.terminologies.ValueSetExpanderSimple expander = new org.hl7.fhir.r5.terminologies.ValueSetExpanderSimple(new org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext(theContext, theRootValidationSupport));
-				expansion = expander.expand((org.hl7.fhir.r5.model.ValueSet) theValueSet, new org.hl7.fhir.r5.model.Parameters()).getValueset();
+				expansion = expander.expand((org.hl7.fhir.r5.model.ValueSet) theValueSetToExpand, new org.hl7.fhir.r5.model.Parameters()).getValueset();
 				break;
 			}
 			case DSTU2:

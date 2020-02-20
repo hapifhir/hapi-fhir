@@ -52,13 +52,17 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public interface IContextValidationSupport {
 	String URL_PREFIX_VALUE_SET = "http://hl7.org/fhir/ValueSet/";
 
+
 	/**
 	 * Expands the given portion of a ValueSet
 	 *
-	 * @param theInclude The portion to include
-	 * @return The expansion
+	 * @param theRootValidationSupport The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
+	 *                                 other method in the support chain.
+	 * @param theValueSetToExpand The valueset that should be expanded
+	 *
+	 * @return The expansion, or null
 	 */
-	default ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theInclude) {
+	default ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theValueSetToExpand) {
 		return null;
 	}
 

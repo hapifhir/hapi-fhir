@@ -74,10 +74,10 @@ public class ValidationSupportChain implements IContextValidationSupport {
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theInclude) {
+	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theValueSetToExpand) {
 		for (IContextValidationSupport next : myChain) {
 			// TODO: test if code system is supported?
-			ValueSetExpansionOutcome expanded = next.expandValueSet(theRootValidationSupport, theContext, theInclude);
+			ValueSetExpansionOutcome expanded = next.expandValueSet(theRootValidationSupport, theContext, theValueSetToExpand);
 			if (expanded != null) {
 				return expanded;
 			}

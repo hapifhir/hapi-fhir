@@ -100,10 +100,10 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theInclude) {
+	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, FhirContext theContext, IBaseResource theValueSetToExpand) {
 		try {
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
-			valueSetToExpandR4 = toCanonicalValueSet(theInclude);
+			valueSetToExpandR4 = toCanonicalValueSet(theValueSetToExpand);
 			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(valueSetToExpandR4, null);
 			return new ValueSetExpansionOutcome(expandedR4, null);
 		} catch (FHIRException e) {
