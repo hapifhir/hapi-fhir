@@ -26,7 +26,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.converter.NullVersionConverterAdvisor50;
-import org.hl7.fhir.convertors.VersionConvertorAdvisor50;
 import org.hl7.fhir.convertors.VersionConvertor_10_50;
 import org.hl7.fhir.convertors.conv10_50.ValueSet10_50;
 import org.hl7.fhir.dstu2.model.CodeableConcept;
@@ -86,22 +85,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private boolean myAnyExtensionsAllowed = true;
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
 	private StructureDefinition myStructureDefintion;
-	private IContextValidationSupport myValidationSupport;
+	private final IContextValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
-
-	public boolean isAssumeValidRestReferences() {
-		return assumeValidRestReferences;
-	}
-
-	public void setAssumeValidRestReferences(boolean assumeValidRestReferences) {
-		this.assumeValidRestReferences = assumeValidRestReferences;
-	}
-
 	private boolean assumeValidRestReferences;
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
-	private VersionConvertorAdvisor50 myAdvisor = new NullVersionConverterAdvisor50();
 	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
-
 	/**
 	 * Constructor
 	 * <p>
@@ -110,14 +98,25 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	public FhirInstanceValidator(FhirContext theContext) {
 		this(theContext.getValidationSupport());
 	}
-
 	/**
 	 * Constructor which uses the given validation support
 	 *
 	 * @param theValidationSupport The validation support
 	 */
 	public FhirInstanceValidator(IContextValidationSupport theValidationSupport) {
-		myValidationSupport = theValidationSupport;
+		if (theValidationSupport.getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU2) {
+			myValidationSupport = new HapiToHl7OrgDstu2ValidatingSupportWrapper(theValidationSupport.getFhirContext(), theValidationSupport);
+		} else {
+			myValidationSupport = theValidationSupport;
+		}
+	}
+
+	public boolean isAssumeValidRestReferences() {
+		return assumeValidRestReferences;
+	}
+
+	public void setAssumeValidRestReferences(boolean assumeValidRestReferences) {
+		this.assumeValidRestReferences = assumeValidRestReferences;
 	}
 
 	private CodeSystem convertCodeSystem(ValueSet theFetched) {
@@ -163,18 +162,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		return root.getLocalName();
 	}
 
-	private ArrayList<String> determineIfProfilesSpecified(Document theDocument)
-	{
+	private ArrayList<String> determineIfProfilesSpecified(Document theDocument) {
 		ArrayList<String> profileNames = new ArrayList<String>();
 		NodeList list = theDocument.getChildNodes().item(0).getChildNodes();
 		for (int i = 0; i < list.getLength(); i++) {
-			if (list.item(i).getNodeName().compareToIgnoreCase("meta") == 0)
-			{
+			if (list.item(i).getNodeName().compareToIgnoreCase("meta") == 0) {
 				NodeList metaList = list.item(i).getChildNodes();
-				for (int j = 0; j < metaList.getLength(); j++)
-				{
-					if (metaList.item(j).getNodeName().compareToIgnoreCase("profile") == 0)
-					{
+				for (int j = 0; j < metaList.getLength(); j++) {
+					if (metaList.item(j).getNodeName().compareToIgnoreCase("profile") == 0) {
 						profileNames.add(metaList.item(j).getAttributes().item(0).getNodeValue());
 					}
 				}
@@ -184,18 +179,21 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		return profileNames;
 	}
 
-	private StructureDefinition findStructureDefinitionForResourceName(final FhirContext theCtx, String resourceName) {
-		String sdName = null;
+	private StructureDefinition findStructureDefinitionForResourceName(String resourceName) {
+		String sdName;
 		try {
 			// Test if a URL was passed in specifying the structure definition and test if "StructureDefinition" is part of the URL
 			URL testIfUrl = new URL(resourceName);
-				sdName = resourceName;
-		}
-		catch (MalformedURLException e)
-		{
+			sdName = resourceName;
+		} catch (MalformedURLException e) {
 			sdName = "http://hl7.org/fhir/StructureDefinition/" + resourceName;
 		}
-		StructureDefinition profile = myStructureDefintion != null ? myStructureDefintion : myValidationSupport.fetchResource(theCtx, StructureDefinition.class, sdName);
+		StructureDefinition profile;
+		if (myStructureDefintion != null) {
+			profile = myStructureDefintion;
+		} else {
+			profile = myValidationSupport.fetchResource(StructureDefinition.class, sdName);
+		}
 		return profile;
 	}
 
@@ -234,20 +232,22 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	/**
 	 * Returns the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
 	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
+	 *
 	 * @return
 	 */
 	public IContextValidationSupport getValidationSupport() {
 		return myValidationSupport;
 	}
 
-	/**
-	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
-	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
-	 */
-	public void setValidationSupport(IContextValidationSupport theValidationSupport) {
-		myValidationSupport = theValidationSupport;
-		myWrappedWorkerContext = null;
-	}
+// FIXME: remove
+//	/**
+//	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
+//	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
+//	 */
+//	public void setValidationSupport(IContextValidationSupport theValidationSupport) {
+//		myValidationSupport = theValidationSupport;
+//		myWrappedWorkerContext = null;
+//	}
 
 	/**
 	 * If set to {@literal true} (default is true) extensions which are not known to the
@@ -325,13 +325,12 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 			// Determine if meta/profiles are present...
 			ArrayList<String> resourceNames = determineIfProfilesSpecified(document);
-			if (resourceNames.isEmpty())
-			{
+			if (resourceNames.isEmpty()) {
 				resourceNames.add(determineResourceName(document));
 			}
 
 			for (String resourceName : resourceNames) {
-				StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
+				StructureDefinition profile = findStructureDefinitionForResourceName(resourceName);
 				if (profile != null) {
 					try {
 						v.validate(null, messages, document, profile.getUrl());
@@ -339,10 +338,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 						ourLog.error("Failure during validation", e);
 						throw new InternalErrorException("Unexpected failure while validating resource", e);
 					}
-				}
-				else
-				{
-					profile = findStructureDefinitionForResourceName(theCtx, determineResourceName(document));
+				} else {
+					profile = findStructureDefinitionForResourceName(determineResourceName(document));
 					if (profile != null) {
 						try {
 							v.validate(null, messages, document, profile.getUrl());
@@ -361,8 +358,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			JsonArray profiles = null;
 			try {
 				profiles = json.getAsJsonObject("meta").getAsJsonArray("profile");
-				for (JsonElement element : profiles)
-				{
+				for (JsonElement element : profiles) {
 					resourceNames.add(element.getAsString());
 				}
 			} catch (Exception e) {
@@ -370,17 +366,15 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			}
 
 			for (String resourceName : resourceNames) {
-				StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
+				StructureDefinition profile = findStructureDefinitionForResourceName(resourceName);
 				if (profile != null) {
 					try {
 						v.validate(null, messages, json, profile.getUrl());
 					} catch (Exception e) {
 						throw new InternalErrorException("Unexpected failure while validating resource", e);
 					}
-				}
-				else
-				{
-					profile = findStructureDefinitionForResourceName(theCtx, json.get("resourceType").getAsString());
+				} else {
+					profile = findStructureDefinitionForResourceName(json.get("resourceType").getAsString());
 					if (profile != null) {
 						try {
 							v.validate(null, messages, json, profile.getUrl());
@@ -420,54 +414,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	@Override
 	protected List<ValidationMessage> validate(IValidationContext<?> theCtx) {
 		return validate(theCtx.getFhirContext(), theCtx.getResourceAsString(), theCtx.getResourceAsStringEncoding());
-	}
-
-	static FhirContext getHl7OrgDstu2Ctx(FhirContext theCtx) {
-		if (theCtx.getVersion().getVersion() == FhirVersionEnum.DSTU2_HL7ORG) {
-			return theCtx;
-		}
-		FhirContext retVal = ourHl7OrgCtx;
-		if (retVal == null) {
-			retVal = FhirContext.forDstu2Hl7Org();
-			ourHl7OrgCtx = retVal;
-		}
-		return retVal;
-	}
-
-	static StructureDefinition loadProfileOrReturnNull(List<ValidationMessage> theMessages, FhirContext theCtx,
-																		String theResourceName) {
-		if (isBlank(theResourceName)) {
-			if (theMessages != null) {
-				theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL)
-					.setMessage("Could not determine resource type from request. Content appears invalid."));
-			}
-			return null;
-		}
-
-		String profileClasspath = theCtx.getVersion().getPathToSchemaDefinitions().replace("/schema", "/profile");
-		String profileCpName = profileClasspath + '/' + theResourceName.toLowerCase() + ".profile.xml";
-		String profileText;
-		try (InputStream inputStream = FhirInstanceValidator.class.getResourceAsStream(profileCpName)) {
-			if (inputStream == null) {
-				if (theMessages != null) {
-					theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL)
-						.setMessage("No profile found for resource type " + theResourceName));
-					return null;
-				} else {
-					return null;
-				}
-			}
-			profileText = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-		} catch (IOException e1) {
-			if (theMessages != null) {
-				theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL)
-					.setMessage("No profile found for resource type " + theResourceName));
-			}
-			return null;
-		}
-		StructureDefinition profile = getHl7OrgDstu2Ctx(theCtx).newXmlParser().parseResource(StructureDefinition.class,
-			profileText);
-		return profile;
 	}
 
 	private class WorkerContextWrapper implements IWorkerContext {
@@ -579,7 +525,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 		@Override
 		public void setExpansionProfile(Parameters expParameters) {
-			 myExpansionProfile = expParameters;
+			myExpansionProfile = expParameters;
 		}
 
 		@Override
@@ -773,17 +719,12 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 		@Override
 		public org.hl7.fhir.r5.model.StructureDefinition fetchTypeDefinition(String typeName) {
-			return fetchResource(org.hl7.fhir.r5.model.StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+typeName);
+			return fetchResource(org.hl7.fhir.r5.model.StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
 		}
 
 		@Override
 		public org.hl7.fhir.r5.model.StructureDefinition fetchRawProfile(String url) {
 			return fetchResource(org.hl7.fhir.r5.model.StructureDefinition.class, url);
-		}
-
-		@Override
-		public void setUcumService(UcumService ucumService) {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -798,6 +739,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 		@Override
 		public UcumService getUcumService() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setUcumService(UcumService ucumService) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -842,13 +788,13 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
-		public void setLogger(ILoggingService logger) {
-			throw new UnsupportedOperationException();
+		public ILoggingService getLogger() {
+			return null;
 		}
 
 		@Override
-		public ILoggingService getLogger() {
-			return null;
+		public void setLogger(ILoggingService logger) {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -940,7 +886,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	}
 
-
 	private static class ResourceKey {
 		private final int myHashCode;
 		private String myResourceName;
@@ -985,5 +930,53 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		public int hashCode() {
 			return myHashCode;
 		}
+	}
+
+	static FhirContext getHl7OrgDstu2Ctx(FhirContext theCtx) {
+		if (theCtx.getVersion().getVersion() == FhirVersionEnum.DSTU2_HL7ORG) {
+			return theCtx;
+		}
+		FhirContext retVal = ourHl7OrgCtx;
+		if (retVal == null) {
+			retVal = FhirContext.forDstu2Hl7Org();
+			ourHl7OrgCtx = retVal;
+		}
+		return retVal;
+	}
+
+	static StructureDefinition loadProfileOrReturnNull(List<ValidationMessage> theMessages, FhirContext theCtx,
+																		String theResourceName) {
+		if (isBlank(theResourceName)) {
+			if (theMessages != null) {
+				theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL)
+					.setMessage("Could not determine resource type from request. Content appears invalid."));
+			}
+			return null;
+		}
+
+		String profileClasspath = theCtx.getVersion().getPathToSchemaDefinitions().replace("/schema", "/profile");
+		String profileCpName = profileClasspath + '/' + theResourceName.toLowerCase() + ".profile.xml";
+		String profileText;
+		try (InputStream inputStream = FhirInstanceValidator.class.getResourceAsStream(profileCpName)) {
+			if (inputStream == null) {
+				if (theMessages != null) {
+					theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL)
+						.setMessage("No profile found for resource type " + theResourceName));
+					return null;
+				} else {
+					return null;
+				}
+			}
+			profileText = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+		} catch (IOException e1) {
+			if (theMessages != null) {
+				theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL)
+					.setMessage("No profile found for resource type " + theResourceName));
+			}
+			return null;
+		}
+		StructureDefinition profile = getHl7OrgDstu2Ctx(theCtx).newXmlParser().parseResource(StructureDefinition.class,
+			profileText);
+		return profile;
 	}
 }

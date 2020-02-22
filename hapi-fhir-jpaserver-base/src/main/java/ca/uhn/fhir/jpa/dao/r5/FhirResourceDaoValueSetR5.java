@@ -321,9 +321,9 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 		if (theId != null) {
 			vs = read(theId, theRequestDetails);
 		} else if (haveIdentifierParam) {
-			vs = (ValueSet) myDefaultProfileValidationSupport.fetchValueSet(getContext(), theValueSetIdentifier.getValue());
+			vs = (ValueSet) myDefaultProfileValidationSupport.fetchValueSet(theValueSetIdentifier.getValue());
 			if (vs == null) {
-				vs = (ValueSet) myValidationSupport.fetchValueSet(getContext(), theValueSetIdentifier.getValue());
+				vs = (ValueSet) myValidationSupport.fetchValueSet(theValueSetIdentifier.getValue());
 				if (vs == null) {
 					throw new InvalidRequestException("Unknown ValueSet identifier: " + theValueSetIdentifier.getValue());
 				}

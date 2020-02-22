@@ -154,7 +154,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		}
 		ValueSet source;
 
-		org.hl7.fhir.dstu2.model.ValueSet defaultValueSet = myDefaultProfileValidationSupport.fetchResource(myRiCtx, org.hl7.fhir.dstu2.model.ValueSet.class, theUri);
+		org.hl7.fhir.dstu2.model.ValueSet defaultValueSet = myDefaultProfileValidationSupport.fetchResource(org.hl7.fhir.dstu2.model.ValueSet.class, theUri);
 		if (defaultValueSet != null) {
 			source = getContext().newJsonParser().parseResource(ValueSet.class, myRiCtx.newJsonParser().encodeResourceToString(defaultValueSet));
 		} else {
@@ -194,7 +194,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 
 	private ValueSet loadValueSetForExpansion(IIdType theId, RequestDetails theRequest) {
 		if (theId.getValue().startsWith("http://hl7.org/fhir/")) {
-			org.hl7.fhir.dstu2.model.ValueSet valueSet = myValidationSupport.fetchResource(myRiCtx, org.hl7.fhir.dstu2.model.ValueSet.class, theId.getValue());
+			org.hl7.fhir.dstu2.model.ValueSet valueSet = myValidationSupport.fetchResource(org.hl7.fhir.dstu2.model.ValueSet.class, theId.getValue());
 			if (valueSet != null) {
 				return getContext().newJsonParser().parseResource(ValueSet.class, myRiCtx.newJsonParser().encodeResourceToString(valueSet));
 			}

@@ -96,7 +96,7 @@ public class IgPackUploader extends BaseCommand {
 					} catch (FileNotFoundException e) {
 						throw new CommandFailureException(e);
 					}
-					Iterable<IBaseResource> conformanceResources = ig.fetchAllConformanceResources(ctx);
+					Iterable<IBaseResource> conformanceResources = ig.fetchAllConformanceResources();
 					for (IBaseResource nextResource : conformanceResources) {
 						String nextResourceUrl = ((IPrimitiveType<?>)ctx.newTerser().getSingleValueOrNull(nextResource, "url")).getValueAsString();
 						ourLog.info("Uploading resource: {}", nextResourceUrl);

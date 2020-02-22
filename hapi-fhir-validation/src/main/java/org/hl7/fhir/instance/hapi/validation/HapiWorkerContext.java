@@ -40,7 +40,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public List<StructureDefinition> allStructures() {
-		return myValidationSupport.fetchAllStructureDefinitions(myCtx, StructureDefinition.class);
+		return myValidationSupport.fetchAllStructureDefinitions();
 	}
 
 	@Override
@@ -78,7 +78,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		if (myValidationSupport == null) {
 			return null;
 		} else {
-			return myValidationSupport.fetchCodeSystem(myCtx, theSystem, ValueSet.class);
+			return (ValueSet) myValidationSupport.fetchCodeSystem(theSystem);
 		}
 	}
 
@@ -87,7 +87,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		if (myValidationSupport == null) {
 			return null;
 		} else {
-			return myValidationSupport.fetchResource(myCtx, theClass, theUri);
+			return myValidationSupport.fetchResource(theClass, theUri);
 		}
 	}
 
@@ -151,7 +151,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		if (myValidationSupport == null) {
 			return false;
 		} else {
-			return myValidationSupport.isCodeSystemSupported(myCtx, theSystem);
+			return myValidationSupport.isCodeSystemSupported(theSystem);
 		}
 	}
 
@@ -177,7 +177,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, myCtx, theSystem, theCode, theDisplay, null);
+		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, theSystem, theCode, theDisplay, null);
 		if (result == null) {
 			return null;
 		}

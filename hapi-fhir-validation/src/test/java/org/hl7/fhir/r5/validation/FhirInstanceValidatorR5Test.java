@@ -20,6 +20,7 @@ import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -107,6 +108,7 @@ public class FhirInstanceValidatorR5Test {
 		myVal.setValidateAgainstStandardSchematron(false);
 
 		myMockSupport = mock(IValidationSupport.class);
+		when(myMockSupport.getFhirContext()).thenReturn(ourCtx);
 		CachingValidationSupport validationSupport = new CachingValidationSupport(new ValidationSupportChain(myMockSupport, myDefaultValidationSupport));
 		myInstanceVal = new FhirInstanceValidator(validationSupport);
 
@@ -129,66 +131,69 @@ public class FhirInstanceValidatorR5Test {
 			valueset.setExpansion(retVal);
 			return new ValueSetExpander.ValueSetExpansionOutcome(valueset);
 		});
-		when(myMockSupport.isCodeSystemSupported(nullable(FhirContext.class), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
+		when(myMockSupport.isCodeSystemSupported(nullable(String.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
 			public Boolean answer(InvocationOnMock theInvocation) throws Throwable {
-				boolean retVal = myValidSystems.contains(theInvocation.getArguments()[1]);
-				ourLog.debug("isCodeSystemSupported({}) : {}", new Object[]{theInvocation.getArguments()[1], retVal});
+				boolean retVal = myValidSystems.contains(theInvocation.getArguments()[0]);
+				ourLog.debug("isCodeSystemSupported({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
 				return retVal;
 			}
 		});
-		when(myMockSupport.fetchResource(nullable(FhirContext.class), nullable(Class.class), nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
+		when(myMockSupport.fetchResource(nullable(Class.class), nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
 			@Override
 			public IBaseResource answer(InvocationOnMock theInvocation) throws Throwable {
 				IBaseResource retVal;
-				String id = (String) theInvocation.getArguments()[2];
+				String id = (String) theInvocation.getArguments()[1];
+				Class<IBaseResource> clazz = (Class<IBaseResource>) theInvocation.getArguments()[0];
 				if ("Questionnaire/q_jon".equals(id)) {
 					retVal = ourCtx.newJsonParser().parseResource(IOUtils.toString(FhirInstanceValidatorR5Test.class.getResourceAsStream("/q_jon.json")));
 				} else {
-					retVal = myDefaultValidationSupport.fetchResource((FhirContext) theInvocation.getArguments()[0], (Class<IBaseResource>) theInvocation.getArguments()[1], id);
+					retVal = myDefaultValidationSupport.fetchResource(clazz, id);
 				}
-				ourLog.debug("fetchResource({}, {}) : {}", theInvocation.getArguments()[1], id, retVal);
+				ourLog.debug("fetchResource({}, {}) : {}", clazz, id, retVal);
 				return retVal;
 			}
 		});
-		when(myMockSupport.validateCode(any(), nullable(FhirContext.class), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IContextValidationSupport.CodeValidationResult>() {
+		when(myMockSupport.validateCode(any(), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IContextValidationSupport.CodeValidationResult>() {
 			@Override
 			public IContextValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
-				FhirContext ctx = theInvocation.getArgument(1, FhirContext.class);
-				String system = theInvocation.getArgument(2, String.class);
-				String code = theInvocation.getArgument(3, String.class);
-				String display = theInvocation.getArgument(4, String.class);
-				String valueSetUrl = theInvocation.getArgument(5, String.class);
+				String system = theInvocation.getArgument(1, String.class);
+				String code = theInvocation.getArgument(2, String.class);
+				String display = theInvocation.getArgument(3, String.class);
+				String valueSetUrl = theInvocation.getArgument(4, String.class);
 				IContextValidationSupport.CodeValidationResult retVal;
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IContextValidationSupport.CodeValidationResult().setCode(code);
+				} else if (myValidSystems.contains(system)) {
+					return new IContextValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.WARNING.toCode()).setMessage("Unknown code: " + system + " / " + code);
 				} else {
-					retVal = myDefaultValidationSupport.validateCode(myDefaultValidationSupport, ctx, system, code, display, valueSetUrl);
+					retVal = myDefaultValidationSupport.validateCode(myDefaultValidationSupport, system, code, display, valueSetUrl);
 				}
 				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
 				return retVal;
 			}
 		});
-		when(myMockSupport.fetchCodeSystem(nullable(FhirContext.class), nullable(String.class), any())).thenAnswer(new Answer<CodeSystem>() {
+		when(myMockSupport.fetchCodeSystem(nullable(String.class))).thenAnswer(new Answer<CodeSystem>() {
 			@Override
 			public CodeSystem answer(InvocationOnMock theInvocation) {
-				CodeSystem retVal = myDefaultValidationSupport.fetchCodeSystem( theInvocation.getArgument(0, FhirContext.class), (String) theInvocation.getArguments()[1], CodeSystem.class);
-				ourLog.debug("fetchCodeSystem({}) : {}", new Object[]{theInvocation.getArguments()[1], retVal});
+				String codeSystem = (String) theInvocation.getArguments()[0];
+				CodeSystem retVal = (CodeSystem) myDefaultValidationSupport.fetchCodeSystem(codeSystem);
+				ourLog.debug("fetchCodeSystem({}) : {}", new Object[]{codeSystem, retVal});
 				return retVal;
 			}
 		});
-		when(myMockSupport.fetchStructureDefinition(nullable(FhirContext.class), nullable(String.class))).thenAnswer(new Answer<StructureDefinition>() {
+		when(myMockSupport.fetchStructureDefinition(nullable(String.class))).thenAnswer(new Answer<StructureDefinition>() {
 			@Override
 			public StructureDefinition answer(InvocationOnMock theInvocation) {
-				StructureDefinition retVal = (StructureDefinition) myDefaultValidationSupport.fetchStructureDefinition((FhirContext) theInvocation.getArguments()[0], (String) theInvocation.getArguments()[1]);
-				ourLog.debug("fetchStructureDefinition({}) : {}", new Object[]{theInvocation.getArguments()[1], retVal});
+				StructureDefinition retVal = (StructureDefinition) myDefaultValidationSupport.fetchStructureDefinition((String) theInvocation.getArguments()[1]);
+				ourLog.debug("fetchStructureDefinition({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
 				return retVal;
 			}
 		});
-		when(myMockSupport.fetchAllStructureDefinitions(nullable(FhirContext.class), any())).thenAnswer(new Answer<List<StructureDefinition>>() {
+		when(myMockSupport.fetchAllStructureDefinitions()).thenAnswer(new Answer<List<StructureDefinition>>() {
 			@Override
 			public List<StructureDefinition> answer(InvocationOnMock theInvocation) {
-				List<StructureDefinition> retVal = myDefaultValidationSupport.fetchAllStructureDefinitions((FhirContext) theInvocation.getArguments()[0], StructureDefinition.class);
+				List<StructureDefinition> retVal = myDefaultValidationSupport.fetchAllStructureDefinitions();
 				ourLog.debug("fetchAllStructureDefinitions()", new Object[]{});
 				return retVal;
 			}

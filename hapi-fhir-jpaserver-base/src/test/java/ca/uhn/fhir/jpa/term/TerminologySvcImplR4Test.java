@@ -1774,10 +1774,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	public void testValidateCode() {
 		createCodeSystem();
 
-		IContextValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(myValidationSupport, myFhirCtx, CS_URL, "ParentWithNoChildrenA", null, null);
+		IContextValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(myValidationSupport, CS_URL, "ParentWithNoChildrenA", null, null);
 		assertEquals(true, validation.isOk());
 
-		validation = myTermSvc.validateCode(myValidationSupport, myFhirCtx, CS_URL, "ZZZZZZZ", null, null);
+		validation = myTermSvc.validateCode(myValidationSupport, CS_URL, "ZZZZZZZ", null, null);
 		assertEquals(false, validation.isOk());
 	}
 

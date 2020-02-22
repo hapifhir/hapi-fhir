@@ -35,7 +35,7 @@ public class LoadingValidationSupportDstu2 implements IValidationSupport {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoadingValidationSupportDstu2.class);
 
 	@Override
-	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
 		String resName = myCtx.getResourceDefinition(theClass).getName();
 		ourLog.info("Attempting to fetch {} at URL: {}", resName, theUri);
 		
@@ -53,7 +53,7 @@ public class LoadingValidationSupportDstu2 implements IValidationSupport {
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+	public boolean isCodeSystemSupported(String theSystem) {
 		return false;
 	}
 

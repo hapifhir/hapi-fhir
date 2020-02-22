@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
@@ -97,7 +96,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
 		// TODO: DM 2019-09-10 - This is problematic because an incorrect URL that matches ValueSet.id will not be found in the terminology tables but will yield a ValueSet here. Depending on the ValueSet, the expansion may time-out.
-		ValueSet valueSetR5 = myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSet);
+		ValueSet valueSetR5 = myValidationSupport.fetchResource(ValueSet.class, theValueSet);
 		if (valueSetR5 == null) {
 			super.throwInvalidValueSet(theValueSet);
 		}
@@ -126,25 +125,25 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	}
 
 	@Override
-	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+	public List<IBaseResource> fetchAllConformanceResources() {
 		return null;
 	}
 
 
 	@CoverageIgnore
 	@Override
-	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
+	public ValueSet fetchValueSet(String theSystem) {
 		return null;
 	}
 
 	@Override
-	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
 		return null;
 	}
 
 	@CoverageIgnore
 	@Override
-	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
+	public StructureDefinition fetchStructureDefinition(String theUrl) {
 		return null;
 	}
 
@@ -158,7 +157,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	@Override
 	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem, CodeSystem.class);
+		CodeSystem system = myValidationSupport.fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
 		}
@@ -183,7 +182,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	@Override
 	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem, CodeSystem.class);
+		CodeSystem system = myValidationSupport.fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}
@@ -192,7 +191,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 
 	@Override
 	public org.hl7.fhir.r4.model.CodeSystem getCodeSystemFromContext(String theSystem) {
-		CodeSystem codeSystemR5 = myValidationSupport.fetchCodeSystem(myContext, theSystem, CodeSystem.class);
+		CodeSystem codeSystemR5 = myValidationSupport.fetchCodeSystem(theSystem);
 		return org.hl7.fhir.convertors.conv40_50.CodeSystem40_50.convertCodeSystem(codeSystemR5);
 	}
 
@@ -203,13 +202,13 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+	public boolean isCodeSystemSupported(String theSystem) {
 		return supportsSystem(theSystem);
 	}
 
 	@CoverageIgnore
 	@Override
-	public IValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public IValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		Optional<VersionIndependentConcept> codeOpt = Optional.empty();
 		boolean haveValidated = false;
 
@@ -236,7 +235,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, String theSystem, String theCode) {
 		return super.lookupCode(theContext, theSystem, theCode);
 	}
 

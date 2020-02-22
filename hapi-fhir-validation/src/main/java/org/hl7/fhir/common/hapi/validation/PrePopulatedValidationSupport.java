@@ -49,6 +49,7 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 *                                the resource itself.
 	 */
 	public PrePopulatedValidationSupport(FhirContext theFhirContext, Map<String, IBaseResource> theStructureDefinitions, Map<String, IBaseResource> theValueSets, Map<String, IBaseResource> theCodeSystems) {
+		super(theFhirContext);
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 		Validate.notNull(theStructureDefinitions, "theStructureDefinitions must not be null");
 		Validate.notNull(theValueSets, "theValueSets must not be null");
@@ -87,6 +88,7 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 		Optional<IBase> urlValue = resourceDef.getChildByName("url").getAccessor().getFirstValueOrNull(theCodeSystem);
 		String url = urlValue.map(t -> (((IPrimitiveType<?>) t).getValueAsString())).orElse(null);
 
+		Validate.notNull(url, "the" + theResourceName + ".getUrl() must not return null");
 		Validate.notBlank(url, "the" + theResourceName + ".getUrl() must return a value");
 		return url;
 	}
@@ -147,7 +149,7 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 
 
 	@Override
-	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+	public List<IBaseResource> fetchAllConformanceResources() {
 		ArrayList<IBaseResource> retVal = new ArrayList<>();
 		retVal.addAll(myCodeSystems.values());
 		retVal.addAll(myStructureDefinitions.values());
@@ -156,48 +158,32 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	}
 
 	@Override
-	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions(FhirContext theContext, Class<T> theStructureDefinitionClass) {
-		return toList(myStructureDefinitions, theStructureDefinitionClass);
+	public List<IBaseResource> fetchAllStructureDefinitions() {
+		return toList(myStructureDefinitions);
 	}
 
 	@Override
-	public <T extends IBaseResource> T fetchCodeSystem(FhirContext theContext, String theSystem, Class<T> theCodeSystemType) {
-		return (T) myCodeSystems.get(theSystem);
+	public IBaseResource fetchCodeSystem(String theSystem) {
+		return myCodeSystems.get(theSystem);
 	}
 
 	@Override
-	public IBaseResource fetchValueSet(FhirContext theContext, String theUri) {
+	public IBaseResource fetchValueSet(String theUri) {
 		return myValueSets.get(theUri);
 	}
 
-
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
-		if (theClass.equals(StructureDefinition.class)) {
-			return (T) myStructureDefinitions.get(theUri);
-		}
-		if (theClass.equals(ValueSet.class)) {
-			return (T) myValueSets.get(theUri);
-		}
-		if (theClass.equals(CodeSystem.class)) {
-			return (T) myCodeSystems.get(theUri);
-		}
-		return null;
-	}
-
-	@Override
-	public IBaseResource fetchStructureDefinition(FhirContext theCtx, String theUrl) {
+	public IBaseResource fetchStructureDefinition(String theUrl) {
 		return myStructureDefinitions.get(theUrl);
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+	public boolean isCodeSystemSupported(String theSystem) {
 		return myCodeSystems.containsKey(theSystem);
 	}
 
 	@Override
-	public boolean isValueSetSupported(FhirContext theContext, String theValueSetUrl) {
+	public boolean isValueSetSupported(String theValueSetUrl) {
 		return myValueSets.containsKey(theValueSetUrl);
 	}
 

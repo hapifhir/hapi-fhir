@@ -64,7 +64,6 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.TermsQuery;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.TermQuery;
@@ -1514,7 +1513,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 	}
 
 	private boolean isNotSafeToPreExpandValueSets() {
-		return !myDeferredStorageSvc.isStorageQueueEmpty();
+		return myDeferredStorageSvc != null && !myDeferredStorageSvc.isStorageQueueEmpty();
 	}
 
 	protected abstract ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable);
@@ -1875,7 +1874,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 	}
 
 	Optional<VersionIndependentConcept> validateCodeInValueSet(String theValueSetUrl, String theCodeSystem, String theCode) {
-		IBaseResource valueSet = myValidationSupport.fetchValueSet(myContext, theValueSetUrl);
+		IBaseResource valueSet = myValidationSupport.fetchValueSet(theValueSetUrl);
 
 		// If we don't have a PID, this came from some source other than the JPA
 		// database, so we don't need to check if it's pre-expanded or not

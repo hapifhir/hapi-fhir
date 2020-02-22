@@ -64,6 +64,6 @@ public class IndexStressTest {
 		ourLog.info("Indexed {} times in {}ms/time", loops, sw.getMillisPerOperation(loops));
 
 		assertEquals(9, params.size());
-		verify(mockValidationSupport, times(1)).fetchAllStructureDefinitions(any(FhirContext.class), any());
+		verify(mockValidationSupport, times(1)).fetchAllStructureDefinitions();
 	}
 }

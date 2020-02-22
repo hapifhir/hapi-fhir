@@ -60,7 +60,7 @@ public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 	private FhirContext myDstu2Ctx;
 
 	@Override
-	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
 		String resourceName = myRiCtx.getResourceDefinition(theClass).getName();
 		IBundleProvider search;
 		IdType uriAsId = new IdType(theUri);
@@ -108,7 +108,7 @@ public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
-	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
+	public boolean isCodeSystemSupported(String theSystem) {
 		return false;
 	}
 

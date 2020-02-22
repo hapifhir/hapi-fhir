@@ -58,16 +58,16 @@ public class JpaValidationSupportChainR4 extends ValidationSupportChain {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
 		if (theClass.equals(StructureDefinition.class)) {
-			return (T) fetchStructureDefinition(theContext, theUri);
+			return (T) fetchStructureDefinition(theUri);
 		}
-		return super.fetchResource(theContext, theClass, theUri);
+		return super.fetchResource(theClass, theUri);
 	}
 
 	@Override
-	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
-		StructureDefinition retVal = (StructureDefinition) super.fetchStructureDefinition(theCtx, theUrl);
+	public StructureDefinition fetchStructureDefinition(String theUrl) {
+		StructureDefinition retVal = (StructureDefinition) super.fetchStructureDefinition(theUrl);
 		if (retVal != null && !retVal.hasSnapshot()) {
 			retVal = (StructureDefinition) generateSnapshot(this, retVal, theUrl, null, null);
 		}

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaValidationSupport;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
@@ -42,7 +41,7 @@ public class JpaValidationSupportDstu3 extends BaseJpaValidationSupport implemen
 	}
 
 	@Override
-	public <T extends IBaseResource> T fetchCodeSystem(FhirContext theContext, String theSystem, Class<T> theCodeSystemType) {
+	public <T extends IBaseResource> T fetchCodeSystem(String theSystem) {
 		if (isBlank(theSystem)) {
 			return null;
 		}
@@ -50,7 +49,7 @@ public class JpaValidationSupportDstu3 extends BaseJpaValidationSupport implemen
 	}
 
 	@Override
-	public ValueSet fetchValueSet(FhirContext theCtx, String theSystem) {
+	public ValueSet fetchValueSet(String theSystem) {
 		if (isBlank(theSystem)) {
 			return null;
 		}
@@ -59,7 +58,7 @@ public class JpaValidationSupportDstu3 extends BaseJpaValidationSupport implemen
 
 
 	@Override
-	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
+	public StructureDefinition fetchStructureDefinition(String theUrl) {
 		return fetchResource(theCtx, StructureDefinition.class, theUrl);
 	}
 

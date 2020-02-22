@@ -51,7 +51,7 @@ public abstract class BaseJpaValidationSupport {
 	private IFhirResourceDao<?> myImplementationGuideDao;
 
 	@SuppressWarnings({"unchecked", "unused"})
-	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
 		IdType id = new IdType(theUri);
 		boolean localReference = false;
 		if (id.hasBaseUrl() == false && id.hasIdPart() == true) {

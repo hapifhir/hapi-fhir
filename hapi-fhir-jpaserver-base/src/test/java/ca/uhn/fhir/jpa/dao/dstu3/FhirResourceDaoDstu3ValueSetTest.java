@@ -49,7 +49,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 			// good
 		}
 
-		ValueSet vs = myValidationSupport.fetchResource(myFhirCtx, ValueSet.class, "http://hl7.org/fhir/ValueSet/endpoint-payload-type");
+		ValueSet vs = myValidationSupport.fetchResource(ValueSet.class, "http://hl7.org/fhir/ValueSet/endpoint-payload-type");
 		myValueSetDao.update(vs);
 
 		vs = myValueSetDao.read(new IdType("ValueSet/endpoint-payload-type"));

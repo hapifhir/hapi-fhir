@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
@@ -85,7 +84,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
 		// TODO: DM 2019-09-10 - This is problematic because an incorrect URL that matches ValueSet.id will not be found in the terminology tables but will yield a ValueSet here. Depending on the ValueSet, the expansion may time-out.
-		ValueSet vs = myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSet);
+		ValueSet vs = myValidationSupport.fetchResource(ValueSet.class, theValueSet);
 		if (vs == null) {
 			super.throwInvalidValueSet(theValueSet);
 		}
@@ -128,7 +127,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	@Override
 	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem, CodeSystem.class);
+		CodeSystem system = myValidationSupport.fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
 		}
@@ -153,7 +152,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	@Override
 	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem, CodeSystem.class);
+		CodeSystem system = myValidationSupport.fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}
@@ -162,7 +161,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 
 	@Override
 	public CodeSystem getCodeSystemFromContext(String theSystem) {
-		return myValidationSupport.fetchCodeSystem(myContext, theSystem, CodeSystem.class);
+		return myValidationSupport.fetchCodeSystem(theSystem);
 	}
 
 	@Override
@@ -171,13 +170,13 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+	public boolean isCodeSystemSupported(String theSystem) {
 		return supportsSystem(theSystem);
 	}
 
 	@Override
-	public boolean isValueSetSupported(FhirContext theContext, String theValueSetUrl) {
-		return myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSetUrl) != null;
+	public boolean isValueSetSupported(String theValueSetUrl) {
+		return myValidationSupport.fetchResource(ValueSet.class, theValueSetUrl) != null;
 	}
 
 
@@ -188,7 +187,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 
 	@CoverageIgnore
 	@Override
-	public IValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public IValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		Optional<VersionIndependentConcept> codeOpt = Optional.empty();
 		boolean haveValidated = false;
 
@@ -215,7 +214,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, String theSystem, String theCode) {
 		return super.lookupCode(theContext, theSystem, theCode);
 	}
 

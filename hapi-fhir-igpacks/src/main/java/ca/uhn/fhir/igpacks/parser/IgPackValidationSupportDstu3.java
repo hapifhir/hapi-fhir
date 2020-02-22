@@ -20,7 +20,6 @@ package ca.uhn.fhir.igpacks.parser;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -43,19 +42,19 @@ public class IgPackValidationSupportDstu3 implements IValidationSupport {
 
 
 	@Override
-	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+	public List<IBaseResource> fetchAllConformanceResources() {
 		return new ArrayList<>(myIgResources.values());
 	}
 
 
 
 	@Override
-	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
-		return fetchResource(theContext, ValueSet.class, theSystem);
+	public ValueSet fetchValueSet(String theSystem) {
+		return fetchResource(ValueSet.class, theSystem);
 	}
 
 	@Override
-	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
 		for (Map.Entry<IIdType, IBaseResource> next : myIgResources.entrySet()) {
 			if (theClass.equals(CodeSystem.class)) {
 				if (theClass.isAssignableFrom(next.getValue().getClass())) {
@@ -95,22 +94,22 @@ public class IgPackValidationSupportDstu3 implements IValidationSupport {
 	}
 
 	@Override
-	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
-		return fetchResource(theCtx, StructureDefinition.class, theUrl);
+	public StructureDefinition fetchStructureDefinition(String theUrl) {
+		return fetchResource(StructureDefinition.class, theUrl);
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+	public boolean isCodeSystemSupported(String theSystem) {
 		return false;
 	}
 
 	@Override
-	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, String theSystem, String theCode) {
 		return null;
 	}
 

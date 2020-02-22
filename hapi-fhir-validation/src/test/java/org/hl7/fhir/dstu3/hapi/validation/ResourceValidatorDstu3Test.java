@@ -209,7 +209,7 @@ public class ResourceValidatorDstu3Test {
 
 	private StructureDefinition loadStructureDefinition(DefaultProfileValidationSupport theDefaultValSupport, String theResName) throws IOException, FHIRException {
 		StructureDefinition derived = ourCtx.newXmlParser().parseResource(StructureDefinition.class, IOUtils.toString(ResourceValidatorDstu3Test.class.getResourceAsStream(theResName)));
-		StructureDefinition base = (StructureDefinition) theDefaultValSupport.fetchStructureDefinition(ourCtx, derived.getBaseDefinition());
+		StructureDefinition base = (StructureDefinition) theDefaultValSupport.fetchStructureDefinition(derived.getBaseDefinition());
 		Validate.notNull(base);
 
 		IWorkerContext worker = new HapiWorkerContext(ourCtx, theDefaultValSupport);

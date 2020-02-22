@@ -6,7 +6,6 @@ import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -30,7 +29,6 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 	private static final String URL_PREFIX_STRUCTURE_DEFINITION_BASE = "http://hl7.org/fhir/";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultProfileValidationSupport.class);
 
-	private final FhirContext myCtx;
 	private Map<String, IBaseResource> myCodeSystems;
 	private Map<String, IBaseResource> myStructureDefinitions;
 	private Map<String, IBaseResource> myValueSets;
@@ -43,12 +41,11 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 	 * @param theFhirContext The context to use
 	 */
 	public DefaultProfileValidationSupport(FhirContext theFhirContext) {
-		Validate.notNull(theFhirContext, "theFhirContext must not be null");
-		myCtx = theFhirContext;
+		super(theFhirContext);
 	}
 
 
-	private void initializeResourceLists(FhirContext theContext) {
+	private void initializeResourceLists() {
 
 		if (myTerminologyResources != null && myStructureDefinitionResources != null) {
 			return;
@@ -56,7 +53,7 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 
 		List<String> terminologyResources = new ArrayList<>();
 		List<String> structureDefinitionResources = new ArrayList<>();
-		switch (theContext.getVersion().getVersion()) {
+		switch (getFhirContext().getVersion().getVersion()) {
 			case DSTU2:
 			case DSTU2_HL7ORG:
 				terminologyResources.add("/org/hl7/fhir/instance/model/valueset/valuesets.xml");
@@ -106,7 +103,7 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 
 
 	@Override
-	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+	public List<IBaseResource> fetchAllConformanceResources() {
 		ArrayList<IBaseResource> retVal = new ArrayList<>();
 		retVal.addAll(myCodeSystems.values());
 		retVal.addAll(myStructureDefinitions.values());
@@ -115,18 +112,17 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 	}
 
 	@Override
-	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions(FhirContext theContext, Class<T> theStructureDefinitionType) {
-		return toList(provideStructureDefinitionMap(theContext), theStructureDefinitionType);
+	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
+		return toList(provideStructureDefinitionMap());
 	}
 
 
 	@Override
-	public <T extends IBaseResource> T fetchCodeSystem(FhirContext theContext, String theSystem, Class<T> theCodeSystemType) {
-		IBaseResource retVal = fetchCodeSystemOrValueSet(theContext, theSystem, true);
-		return theCodeSystemType.cast(retVal);
+	public IBaseResource fetchCodeSystem(String theSystem) {
+		return fetchCodeSystemOrValueSet(theSystem, true);
 	}
 
-	private IBaseResource fetchCodeSystemOrValueSet(FhirContext theContext, String theSystem, boolean codeSystem) {
+	private IBaseResource fetchCodeSystemOrValueSet(String theSystem, boolean codeSystem) {
 		synchronized (this) {
 			Map<String, IBaseResource> codeSystems = myCodeSystems;
 			Map<String, IBaseResource> valueSets = myValueSets;
@@ -134,9 +130,9 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 				codeSystems = new HashMap<>();
 				valueSets = new HashMap<>();
 
-				initializeResourceLists(theContext);
+				initializeResourceLists();
 				for (String next : myTerminologyResources) {
-					loadCodeSystems(theContext, codeSystems, valueSets, next);
+					loadCodeSystems(codeSystems, valueSets, next);
 				}
 
 				myCodeSystems = codeSystems;
@@ -161,7 +157,7 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 	}
 
 	@Override
-	public IBaseResource fetchStructureDefinition(FhirContext theContext, String theUrl) {
+	public IBaseResource fetchStructureDefinition(String theUrl) {
 		String url = theUrl;
 		if (url.startsWith(URL_PREFIX_STRUCTURE_DEFINITION)) {
 			// no change
@@ -170,12 +166,12 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 		} else if (StringUtils.countMatches(url, '/') == 1) {
 			url = URL_PREFIX_STRUCTURE_DEFINITION_BASE + url;
 		}
-		return provideStructureDefinitionMap(theContext).get(url);
+		return provideStructureDefinitionMap().get(url);
 	}
 
 	@Override
-	public IBaseResource fetchValueSet(FhirContext theContext, String uri) {
-		return fetchCodeSystemOrValueSet(theContext, uri, false);
+	public IBaseResource fetchValueSet(String uri) {
+		return fetchCodeSystemOrValueSet(uri, false);
 	}
 
 	public void flush() {
@@ -184,16 +180,15 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+	public boolean isCodeSystemSupported(String theSystem) {
 		if (isBlank(theSystem) || Constants.codeSystemNotNeeded(theSystem)) {
 			return false;
 		}
 
-		RuntimeResourceDefinition codeSystem = theContext.getResourceDefinition("CodeSystem");
-		Class<? extends IBaseResource> codeSystemType = codeSystem.getImplementingClass();
-		IBaseResource cs = fetchCodeSystem(theContext, theSystem, codeSystemType);
+		RuntimeResourceDefinition codeSystem = getFhirContext().getResourceDefinition("CodeSystem");
+		IBaseResource cs = fetchCodeSystem(theSystem);
 		if (cs != null) {
-			IPrimitiveType<?> content = theContext.newTerser().getSingleValueOrNull(cs, "content", IPrimitiveType.class);
+			IPrimitiveType<?> content = getFhirContext().newTerser().getSingleValueOrNull(cs, "content", IPrimitiveType.class);
 			if (!"not-present".equals(content.getValueAsString())) {
 				return true;
 			}
@@ -203,23 +198,23 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 	}
 
 	@Override
-	public boolean isValueSetSupported(FhirContext theContext, String theValueSetUrl) {
-		return isNotBlank(theValueSetUrl) && fetchValueSet(theContext, theValueSetUrl) != null;
+	public boolean isValueSetSupported(String theValueSetUrl) {
+		return isNotBlank(theValueSetUrl) && fetchValueSet(theValueSetUrl) != null;
 	}
 
-	private Map<String, IBaseResource> provideStructureDefinitionMap(FhirContext theContext) {
-		if (theContext.getVersion().getVersion() != myCtx.getVersion().getVersion()) {
-			assert theContext.getVersion().getVersion() == myCtx.getVersion().getVersion() : "Support created for " + myCtx.getVersion().getVersion() + " but requested version: " + theContext.getVersion().getVersion();
+	private Map<String, IBaseResource> provideStructureDefinitionMap() {
+		if (getFhirContext().getVersion().getVersion() != getFhirContext().getVersion().getVersion()) {
+			assert getFhirContext().getVersion().getVersion() == getFhirContext().getVersion().getVersion() : "Support created for " + getFhirContext().getVersion().getVersion() + " but requested version: " + getFhirContext().getVersion().getVersion();
 		}
-		assert theContext.getVersion().getVersion() == myCtx.getVersion().getVersion() : "Support created for " + myCtx.getVersion().getVersion() + " but requested version: " + theContext.getVersion().getVersion();
+		assert getFhirContext().getVersion().getVersion() == getFhirContext().getVersion().getVersion() : "Support created for " + getFhirContext().getVersion().getVersion() + " but requested version: " + getFhirContext().getVersion().getVersion();
 
 		Map<String, IBaseResource> structureDefinitions = myStructureDefinitions;
 		if (structureDefinitions == null) {
 			structureDefinitions = new HashMap<>();
 
-			initializeResourceLists(theContext);
+			initializeResourceLists();
 			for (String next : myStructureDefinitionResources) {
-				loadStructureDefinitions(theContext, structureDefinitions, next);
+				loadStructureDefinitions(structureDefinitions, next);
 			}
 
 			myStructureDefinitions = structureDefinitions;
@@ -227,17 +222,17 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 		return structureDefinitions;
 	}
 
-	private static void loadCodeSystems(FhirContext theContext, Map<String, IBaseResource> theCodeSystems, Map<String, IBaseResource> theValueSets, String theClasspath) {
+	private void loadCodeSystems(Map<String, IBaseResource> theCodeSystems, Map<String, IBaseResource> theValueSets, String theClasspath) {
 		ourLog.info("Loading CodeSystem/ValueSet from classpath: {}", theClasspath);
 		InputStream inputStream = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
 		InputStreamReader reader = null;
 		if (inputStream != null) {
 			try {
 				reader = new InputStreamReader(inputStream, Constants.CHARSET_UTF8);
-				List<IBaseResource> resources = parseBundle(theContext, reader);
+				List<IBaseResource> resources = parseBundle(reader);
 				for (IBaseResource next : resources) {
 
-					RuntimeResourceDefinition nextDef = theContext.getResourceDefinition(next);
+					RuntimeResourceDefinition nextDef = getFhirContext().getResourceDefinition(next);
 					Map<String, IBaseResource> map = null;
 					switch (nextDef.getName()) {
 						case "CodeSystem":
@@ -249,7 +244,7 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 					}
 
 					if (map != null) {
-						String urlValueString = getConformanceResourceUrl(theContext, next);
+						String urlValueString = getConformanceResourceUrl(next);
 						if (isNotBlank(urlValueString)) {
 							map.put(urlValueString, next);
 						}
@@ -272,19 +267,19 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 		}
 	}
 
-	private static void loadStructureDefinitions(FhirContext theContext, Map<String, IBaseResource> theCodeSystems, String theClasspath) {
+	private void loadStructureDefinitions(Map<String, IBaseResource> theCodeSystems, String theClasspath) {
 		ourLog.info("Loading structure definitions from classpath: {}", theClasspath);
 		try (InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath)) {
 			if (valuesetText != null) {
 				try (InputStreamReader reader = new InputStreamReader(valuesetText, Constants.CHARSET_UTF8)) {
 
-					List<IBaseResource> resources = parseBundle(theContext, reader);
+					List<IBaseResource> resources = parseBundle(reader);
 					for (IBaseResource next : resources) {
 
-						String nextType = theContext.getResourceDefinition(next).getName();
+						String nextType = getFhirContext().getResourceDefinition(next).getName();
 						if ("StructureDefinition".equals(nextType)) {
 
-							String url = getConformanceResourceUrl(theContext, next);
+							String url = getConformanceResourceUrl(next);
 							if (isNotBlank(url)) {
 								theCodeSystems.put(url, next);
 							}
@@ -301,9 +296,9 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 		}
 	}
 
-	private static String getConformanceResourceUrl(FhirContext theContext, IBaseResource next) {
+	private String getConformanceResourceUrl(IBaseResource theResource) {
 		String urlValueString = null;
-		Optional<IBase> urlValue = theContext.getResourceDefinition(next).getChildByName("url").getAccessor().getFirstValueOrNull(next);
+		Optional<IBase> urlValue = getFhirContext().getResourceDefinition(theResource).getChildByName("url").getAccessor().getFirstValueOrNull(theResource);
 		if (urlValue.isPresent()) {
 			IPrimitiveType<?> urlValueType = (IPrimitiveType<?>) urlValue.get();
 			urlValueString = urlValueType.getValueAsString();
@@ -311,10 +306,10 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 		return urlValueString;
 	}
 
-	private static List<IBaseResource> parseBundle(FhirContext theContext, InputStreamReader theReader) {
-		Class<? extends IBaseResource> bundleType = theContext.getResourceDefinition("Bundle").getImplementingClass();
-		IBaseBundle bundle = (IBaseBundle) theContext.newXmlParser().parseResource(bundleType, theReader);
-		return BundleUtil.toListOfResources(theContext, bundle);
+	private List<IBaseResource> parseBundle(InputStreamReader theReader) {
+		Class<? extends IBaseResource> bundleType = getFhirContext().getResourceDefinition("Bundle").getImplementingClass();
+		IBaseBundle bundle = (IBaseBundle) getFhirContext().newXmlParser().parseResource(bundleType, theReader);
+		return BundleUtil.toListOfResources(getFhirContext(), bundle);
 	}
 
 }

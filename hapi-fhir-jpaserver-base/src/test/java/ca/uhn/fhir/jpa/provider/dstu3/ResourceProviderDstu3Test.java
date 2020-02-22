@@ -164,7 +164,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testExtensionUrlWithHl7UrlPost() throws IOException {
 
-		ValueSet vs = myValidationSupport.fetchResource(myFhirCtx, ValueSet.class, "http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode");
+		ValueSet vs = myValidationSupport.fetchResource(ValueSet.class, "http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode");
 		myValueSetDao.create(vs);
 
 

@@ -3842,7 +3842,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testUploadExtensionStructureDefinition() {
-		StructureDefinition ext = (StructureDefinition) myValidationSupport.fetchStructureDefinition(myFhirCtx, "http://hl7.org/fhir/StructureDefinition/familymemberhistory-type");
+		StructureDefinition ext = (StructureDefinition) myValidationSupport.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/familymemberhistory-type");
 		Validate.notNull(ext);
 		myStructureDefinitionDao.update(ext);
 	}

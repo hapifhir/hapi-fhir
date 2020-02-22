@@ -48,7 +48,7 @@ public class SnapshotGeneratingValidationSupport implements IContextValidationSu
 				org.hl7.fhir.dstu3.context.IWorkerContext context = new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(myCtx, theValidationSupport);
 				org.hl7.fhir.dstu3.conformance.ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new MyProfileKnowledgeWorkerDstu3();
 				ArrayList<ValidationMessage> messages = new ArrayList<>();
-				org.hl7.fhir.dstu3.model.StructureDefinition base = (org.hl7.fhir.dstu3.model.StructureDefinition) theValidationSupport.fetchStructureDefinition(myCtx, input.getBaseDefinition());
+				org.hl7.fhir.dstu3.model.StructureDefinition base = (org.hl7.fhir.dstu3.model.StructureDefinition) theValidationSupport.fetchStructureDefinition(input.getBaseDefinition());
 				if (base == null) {
 					throw new PreconditionFailedException("Unknown base definition: " + input.getBaseDefinition());
 				}
@@ -60,7 +60,7 @@ public class SnapshotGeneratingValidationSupport implements IContextValidationSu
 				org.hl7.fhir.r4.context.IWorkerContext context = new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(myCtx, theValidationSupport);
 				org.hl7.fhir.r4.conformance.ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new MyProfileKnowledgeWorkerR4();
 				ArrayList<ValidationMessage> messages = new ArrayList<>();
-				org.hl7.fhir.r4.model.StructureDefinition base = (org.hl7.fhir.r4.model.StructureDefinition) theValidationSupport.fetchStructureDefinition(myCtx, input.getBaseDefinition());
+				org.hl7.fhir.r4.model.StructureDefinition base = (org.hl7.fhir.r4.model.StructureDefinition) theValidationSupport.fetchStructureDefinition(input.getBaseDefinition());
 				if (base == null) {
 					throw new PreconditionFailedException("Unknown base definition: " + input.getBaseDefinition());
 				}
@@ -72,7 +72,7 @@ public class SnapshotGeneratingValidationSupport implements IContextValidationSu
 				org.hl7.fhir.r5.context.IWorkerContext context = new org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext(myCtx, theValidationSupport);
 				org.hl7.fhir.r5.conformance.ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new MyProfileKnowledgeWorkerR5();
 				ArrayList<ValidationMessage> messages = new ArrayList<>();
-				org.hl7.fhir.r5.model.StructureDefinition base = (org.hl7.fhir.r5.model.StructureDefinition) theValidationSupport.fetchStructureDefinition(myCtx, input.getBaseDefinition());
+				org.hl7.fhir.r5.model.StructureDefinition base = (org.hl7.fhir.r5.model.StructureDefinition) theValidationSupport.fetchStructureDefinition(input.getBaseDefinition());
 				if (base == null) {
 					throw new PreconditionFailedException("Unknown base definition: " + input.getBaseDefinition());
 				}
@@ -90,6 +90,11 @@ public class SnapshotGeneratingValidationSupport implements IContextValidationSu
 		}
 
 		return theInput;
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myCtx;
 	}
 
 

@@ -16,13 +16,13 @@ public class DefaultProfileValidationSupportTest {
 	
 	@Test
 	public void testGetStructureDefinitionsWithRelativeUrls() {
-		assertNotNull(mySvc.fetchStructureDefinition(ourCtx, "http://hl7.org/fhir/StructureDefinition/Extension"));
-		assertNotNull(mySvc.fetchStructureDefinition(ourCtx, "StructureDefinition/Extension"));
-		assertNotNull(mySvc.fetchStructureDefinition(ourCtx, "Extension"));
+		assertNotNull(mySvc.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Extension"));
+		assertNotNull(mySvc.fetchStructureDefinition("StructureDefinition/Extension"));
+		assertNotNull(mySvc.fetchStructureDefinition("Extension"));
 		
-		assertNull(mySvc.fetchStructureDefinition(ourCtx, "http://hl7.org/fhir/StructureDefinition/Extension2"));
-		assertNull(mySvc.fetchStructureDefinition(ourCtx, "StructureDefinition/Extension2"));
-		assertNull(mySvc.fetchStructureDefinition(ourCtx, "Extension2"));
+		assertNull(mySvc.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Extension2"));
+		assertNull(mySvc.fetchStructureDefinition("StructureDefinition/Extension2"));
+		assertNull(mySvc.fetchStructureDefinition("Extension2"));
 
 	}
 	

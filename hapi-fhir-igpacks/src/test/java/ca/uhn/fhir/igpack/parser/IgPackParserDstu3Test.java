@@ -22,8 +22,8 @@ public class IgPackParserDstu3Test {
 
 		IValidationSupport result = igParser.parseIg(IgPackParserDstu3Test.class.getResourceAsStream("/us-core-stu3-validator.pack"), "US-Core STU3");
 
-		assertNotNull(result.fetchResource(ctx, ValueSet.class, "http://hl7.org/fhir/us/core/ValueSet/simple-language"));
-		assertEquals(50, result.fetchAllConformanceResources(ctx).size());
+		assertNotNull(result.fetchResource(ValueSet.class, "http://hl7.org/fhir/us/core/ValueSet/simple-language"));
+		assertEquals(50, result.fetchAllConformanceResources().size());
 	}
 
 }

@@ -14,11 +14,11 @@ public class HapiWorkerContextTest {
 	@Test
 	public void testIdTypes(){
 
-		FhirContext ctx = FhirContext.forDstu2();
+		FhirContext ctx = FhirContext.forDstu2Hl7Org();
 		DefaultProfileValidationSupport validationSupport = new DefaultProfileValidationSupport(ctx);
 		HapiWorkerContext hwc = new HapiWorkerContext(ctx, validationSupport);
 
-		ValueSet vs = validationSupport.fetchResource(ctx, ValueSet.class, "http://hl7.org/fhir/ValueSet/defined-types");
+		ValueSet vs = validationSupport.fetchResource(ValueSet.class, "http://hl7.org/fhir/ValueSet/defined-types");
 		IWorkerContext.ValidationResult outcome;
 
 		outcome = hwc.validateCode("http://hl7.org/fhir/resource-types", "Patient", null);

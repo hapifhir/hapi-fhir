@@ -245,43 +245,43 @@ public class ValidatorExamples {
       IValidationSupport valSupport = new IValidationSupport() {
 
 			@Override
-			public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+			public List<IBaseResource> fetchAllConformanceResources() {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}
 
 			@Override
-			public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
+			public ValueSet fetchValueSet(String theSystem) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}
 
 			@Override
-			public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+			public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}
 
 			@Override
-			public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
+			public StructureDefinition fetchStructureDefinition(String theUrl) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}
 
 			@Override
-			public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+			public boolean isCodeSystemSupported(String theSystem) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return false;
 			}
 
 			@Override
-			public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+			public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}
 
 			@Override
-			public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theSystem, String theCode) {
+			public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, String theSystem, String theCode) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}

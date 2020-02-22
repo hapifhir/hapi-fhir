@@ -148,11 +148,11 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 			reset(myValSupport);
 			Questionnaire q = new Questionnaire();
-			when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class),
+			when(myValSupport.fetchResource(eq(Questionnaire.class),
 				eq(QUESTIONNAIRE_URL))).thenReturn(q);
-			when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq("http://codesystems.com/system"), any())).thenReturn(codeSystem);
-			when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
-			when(myValSupport.validateCodeInValueSet(any(), eq("http://codesystems.com/system"), eq("code0"),  any(), nullable(ValueSet.class)))
+			when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system"))).thenReturn(codeSystem);
+			when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
+			when(myValSupport.validateCodeInValueSet(eq("http://codesystems.com/system"), eq("code0"),  any(), nullable(ValueSet.class)))
 				.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode("code0"));
 			myInstanceVal.flushCaches();
 
@@ -187,7 +187,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
 
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
 
 		ValidationResult errors = myVal.validateWithResult(qa);
 
@@ -201,34 +201,36 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.CHOICE).setOptions(new Reference("http://somevalueset"));
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(QUESTIONNAIRE_URL))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(QUESTIONNAIRE_URL))).thenReturn(q);
 
-		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
-		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
-		when(myValSupport.validateCodeInValueSet(any(), eq("http://codesystems.com/system"), eq("code0"),  any(), nullable(ValueSet.class)))
+		when(myValSupport.isCodeSystemSupported(eq("http://codesystems.com/system"))).thenReturn(true);
+		when(myValSupport.isCodeSystemSupported(eq("http://codesystems.com/system2"))).thenReturn(true);
+		when(myValSupport.validateCodeInValueSet(eq("http://codesystems.com/system"), eq("code0"),  any(), nullable(ValueSet.class)))
 			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode("code0"));
-		when(myValSupport.validateCodeInValueSet(any(), eq("http://codesystems.com/system"), eq("code1"),  any(), nullable(ValueSet.class)))
+		when(myValSupport.validateCodeInValueSet(eq("http://codesystems.com/system"), eq("code1"),  any(), nullable(ValueSet.class)))
 			.thenReturn(new IContextValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem.setUrl("http://codesystems.com/system");
 		codeSystem.addConcept().setCode("code0");
-		when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq("http://codesystems.com/system"), any())).thenReturn(codeSystem);
+		when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system"))).thenReturn(codeSystem);
 
 		CodeSystem codeSystem2 = new CodeSystem();
 		codeSystem2.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem2.setUrl("http://codesystems.com/system2");
 		codeSystem2.addConcept().setCode("code2");
-		when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq("http://codesystems.com/system2"), any())).thenReturn(codeSystem2);
+		when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system2"))).thenReturn(codeSystem2);
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
+		when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 
-		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
 			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
+			.thenReturn(new IContextValidationSupport.CodeValidationResult().setSeverity("warning").setMessage("Unknown code: http://codesystems.com/system / code1"));
 
 
 		QuestionnaireResponse qa;
@@ -256,6 +258,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		assertThat(errors.toString(), containsString("Unknown code: http://codesystems.com/system / code1 - QuestionnaireResponse.item[0].answer[0].value.ofType(Coding)"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
+		// Unhandled system
+
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference(questionnaireRef);
@@ -263,7 +267,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Unknown code: http://codesystems.com/system2 / code3"));
+		assertThat(errors.toString(), containsString("Validation failed for 'http://codesystems.com/system2#code3'"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 	}
@@ -280,7 +284,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		QuestionnaireResponseItemComponent qaGroup = qa.addItem();
 		qaGroup.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
 
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
@@ -298,7 +302,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
 		
 		ValidationResult errors = myVal.validateWithResult(qa);
 		
@@ -317,7 +321,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("group")
 		  .addItem().setLinkId("child").addAnswer().setValue(new BooleanType(true));
 		
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
 		
 		ValidationResult errors = myVal.validateWithResult(qa);
 		
@@ -336,7 +340,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		QuestionnaireResponseItemComponent qaItem = qa.addItem().setLinkId("link0");
 		qaItem.addAnswer().setValue(new StringType("FOO"));
 
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
@@ -357,7 +361,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
 
 		String reference = qa.getQuestionnaire().getReference();
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
@@ -376,7 +380,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 
 		String reference = qa.getQuestionnaire().getReference();
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
@@ -400,7 +404,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		
 		String reference = qa.getQuestionnaire().getReference();
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
@@ -428,7 +432,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 
 		String reference = qa.getQuestionnaire().getReference();
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
@@ -456,7 +460,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Quantity().setValue(1L));
 
 		String reference = qa.getQuestionnaire().getReference();
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
@@ -483,7 +487,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Quantity().setValue(1L));
 
 		String reference = qa.getQuestionnaire().getReference();
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
@@ -508,7 +512,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 			.setQuestion("link0")
 			.setAnswer(new Coding("http://foo", "YES", null));
 
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(QUESTIONNAIRE_URL))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(QUESTIONNAIRE_URL))).thenReturn(q);
 		QuestionnaireResponse qa;
 		ValidationResult errors;
 
@@ -563,7 +567,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("BAR"));
 
 		String reference = qa.getQuestionnaire().getReference();
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
@@ -594,7 +598,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
 
 		String reference = qa.getQuestionnaire().getReference();
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
@@ -614,7 +618,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qr.addItem().setLinkId("link2").addAnswer().setValue(new StringType("FOO"));
 		
 		String reference = qr.getQuestionnaire().getReference();
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 		
 		ValidationResult errors = myVal.validateWithResult(qr);
 		
@@ -634,7 +638,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qr.addItem().setLinkId("link2");
 		
 		String reference = qr.getQuestionnaire().getReference();
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 		
 		ValidationResult errors = myVal.validateWithResult(qr);
 		
@@ -663,7 +667,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qr.addItem().setLinkId("link2");
 		
 		String reference = qr.getQuestionnaire().getReference();
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 
 		// Without an answer
 		ValidationResult errors = myVal.validateWithResult(qr);
@@ -687,7 +691,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qr.addItem().setLinkId("link0").setText("Text");
 		qr.addItem().setLinkId("link1").addAnswer().setValue(new StringType("Answer"));
 		String reference = qr.getQuestionnaire().getReference();
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 		
 		ValidationResult errors = myVal.validateWithResult(qr);
 		assertThat(errors.toString(), Matchers.not(containsString("No issues")));
@@ -716,7 +720,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qr.addItem().setLinkId("2B").addAnswer().setValue(new BooleanType(true));
 				
 		String reference = qr.getQuestionnaire().getReference();
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 		
 		ValidationResult errors = myVal.validateWithResult(qr);
 		assertThat(errors.toString(), containsString("No issues"));
@@ -746,7 +750,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qr.addItem().setLinkId("2B").addAnswer().setValue(new BooleanType(true));
 				
 		String reference = qr.getQuestionnaire().getReference();
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 		
 		ValidationResult errors = myVal.validateWithResult(qr);
 		assertThat(errors.toString(), containsString("No issues"));
@@ -770,20 +774,20 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		Questionnaire q = new Questionnaire();
 		q.addItem(item1);
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(questionnaireRef)))
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(questionnaireRef)))
 			.thenReturn(q);
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem.setUrl(codeSystemUrl);
 		codeSystem.addConcept().setCode(codeValue);
-		when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq(codeSystemUrl), any()))			.thenReturn(codeSystem);
+		when(myValSupport.fetchCodeSystem(eq(codeSystemUrl)))			.thenReturn(codeSystem);
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(valueSetRef)))
+		when(myValSupport.fetchResource(eq(ValueSet.class), eq(valueSetRef)))
 			.thenReturn(options);
-		when(myValSupport.validateCode(any(), any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
+		when(myValSupport.validateCode(any(), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
 			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode(codeValue));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -825,21 +829,21 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		Questionnaire q = new Questionnaire();
 		q.addItem(item1);
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(questionnaireRef)))
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(questionnaireRef)))
 			.thenReturn(q);
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem.setUrl(codeSystemUrl);
 		codeSystem.addConcept().setCode(codeValue);
-		when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq(codeSystemUrl), any()))
+		when(myValSupport.fetchCodeSystem(eq(codeSystemUrl)))
 			.thenReturn(codeSystem);
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(valueSetRef)))
+		when(myValSupport.fetchResource(eq(ValueSet.class), eq(valueSetRef)))
 			.thenReturn(options);
-		when(myValSupport.validateCode(any(), any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
+		when(myValSupport.validateCode(any(), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
 			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode(codeValue));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -877,7 +881,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		Questionnaire q = new Questionnaire();
 		q.addItem(item1);
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(questionnaireRef)))
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(questionnaireRef)))
 			.thenReturn(q);
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -951,9 +955,9 @@ public class QuestionnaireResponseValidatorDstu3Test {
 			.addAnswer()
 			.setValue(new Coding(SYSTEMURI_ICC_SCHOOLTYPE, CODE_ICC_SCHOOLTYPE_PT, ""));
 
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(questionnaireResponse.getQuestionnaire().getReference()))).thenReturn(questionnaire);
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(ID_VS_SCHOOLTYPE.getValue()))).thenReturn(iccSchoolTypeVs);
-		when(myValSupport.validateCodeInValueSet(any(), eq(SYSTEMURI_ICC_SCHOOLTYPE), eq(CODE_ICC_SCHOOLTYPE_PT),  any(), nullable(ValueSet.class)))
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(questionnaireResponse.getQuestionnaire().getReference()))).thenReturn(questionnaire);
+		when(myValSupport.fetchResource(eq(ValueSet.class), eq(ID_VS_SCHOOLTYPE.getValue()))).thenReturn(iccSchoolTypeVs);
+		when(myValSupport.validateCodeInValueSet(eq(SYSTEMURI_ICC_SCHOOLTYPE), eq(CODE_ICC_SCHOOLTYPE_PT),  any(), nullable(ValueSet.class)))
 			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
 
 		ValidationResult errors = myVal.validateWithResult(questionnaireResponse);
@@ -970,7 +974,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 			.setRequired(true);
 
 		String reference = QUESTIONNAIRE_URL;
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference)))
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference)))
 			.thenReturn(q);
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
@@ -998,34 +1002,34 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		Questionnaire q = new Questionnaire();
 		QuestionnaireItemComponent item = q.addItem();
 		item.setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.OPENCHOICE).setOptions(new Reference("http://somevalueset"));
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(questionnaireRef))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(questionnaireRef))).thenReturn(q);
 
-		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
-		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
-		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
+		when(myValSupport.isCodeSystemSupported(eq("http://codesystems.com/system"))).thenReturn(true);
+		when(myValSupport.isCodeSystemSupported(eq("http://codesystems.com/system2"))).thenReturn(true);
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
 			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode("code0"));
-		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setSeverity( "Unknown code"));
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
+			.thenReturn(new IContextValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage( "Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem.setUrl("http://codesystems.com/system");
 		codeSystem.addConcept().setCode("code0");
-		when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq("http://codesystems.com/system"), any())).thenReturn(codeSystem);
+		when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system"))).thenReturn(codeSystem);
 
 		CodeSystem codeSystem2 = new CodeSystem();
 		codeSystem2.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem2.setUrl("http://codesystems.com/system2");
 		codeSystem2.addConcept().setCode("code2");
-		when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq("http://codesystems.com/system2"), any())).thenReturn(codeSystem2);
+		when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system2"))).thenReturn(codeSystem2);
 
 		ValueSet options = new ValueSet();
 		options.setUrl("http://somevalueset");
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
+		when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 
-		when(myValSupport.validateCodeInValueSet(any(FhirContext.class), eq("http://codesystems.com/system"), eq("code0"), any(), any(IBaseResource.class))).thenReturn(new IContextValidationSupport.CodeValidationResult().setCode("code0"));
+		when(myValSupport.validateCodeInValueSet(eq("http://codesystems.com/system"), eq("code0"), any(), any(IBaseResource.class))).thenReturn(new IContextValidationSupport.CodeValidationResult().setCode("code0"));
 
 		QuestionnaireResponse qa;
 		ValidationResult errors;
@@ -1125,7 +1129,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
 
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
@@ -1143,7 +1147,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		qa.addItem().setLinkId("link1").addItem().setLinkId("link2");
 
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());

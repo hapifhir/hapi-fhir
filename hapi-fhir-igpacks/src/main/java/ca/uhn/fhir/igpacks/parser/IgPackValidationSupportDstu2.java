@@ -20,7 +20,6 @@ package ca.uhn.fhir.igpacks.parser;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.dstu2.model.ConceptMap;
 import org.hl7.fhir.dstu2.model.StructureDefinition;
 import org.hl7.fhir.dstu2.model.ValueSet;
@@ -40,7 +39,7 @@ public class IgPackValidationSupportDstu2 implements IValidationSupport {
 
 
 	@Override
-	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
 		for (Map.Entry<IIdType, IBaseResource> next : myIgResources.entrySet()) {
 			if (theClass.equals(ConceptMap.class)) {
 				if (theClass.isAssignableFrom(next.getValue().getClass())) {
@@ -73,7 +72,7 @@ public class IgPackValidationSupportDstu2 implements IValidationSupport {
 
 
 	@Override
-	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+	public boolean isCodeSystemSupported(String theSystem) {
 		return false;
 	}
 

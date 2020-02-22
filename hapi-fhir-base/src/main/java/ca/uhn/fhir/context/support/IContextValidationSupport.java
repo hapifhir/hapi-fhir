@@ -70,14 +70,14 @@ public interface IContextValidationSupport {
 	 * validation support module. This method may return null if it doesn't
 	 * make sense for a given module.
 	 */
-	default List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+	default List<IBaseResource> fetchAllConformanceResources() {
 		return null;
 	}
 
 	/**
 	 * Load and return all possible structure definitions
 	 */
-	default <T extends IBaseResource> List<T> fetchAllStructureDefinitions(FhirContext theContext, Class<T> theStructureDefinitionType) {
+	default <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
 		return null;
 	}
 
@@ -87,7 +87,7 @@ public interface IContextValidationSupport {
 	 * @param theSystem The code system
 	 * @return The valueset (must not be null, but can be an empty ValueSet)
 	 */
-	default <T extends IBaseResource> T fetchCodeSystem(FhirContext theContext, String theSystem, Class<T> theCodeSystemType) {
+	default IBaseResource fetchCodeSystem(String theSystem) {
 		return null;
 	}
 
@@ -95,32 +95,32 @@ public interface IContextValidationSupport {
 	 * Loads a resource needed by the validation (a StructureDefinition, or a
 	 * ValueSet)
 	 *
-	 * @param theContext The HAPI FHIR Context object current in use by the validator
-	 * @param theClass   The type of the resource to load
-	 * @param theUri     The resource URI
+	 * @param theClass The type of the resource to load
+	 * @param theUri   The resource URI
 	 * @return Returns the resource, or <code>null</code> if no resource with the
 	 * given URI can be found
 	 */
-	default <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+	default <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
+		Validate.notNull(theClass, "theClass must not be null or blank");
 		Validate.notBlank(theUri, "theUri must not be null or blank");
 
-		switch (theContext.getResourceDefinition(theClass).getName()) {
+		switch (getFhirContext().getResourceDefinition(theClass).getName()) {
 			case "StructureDefinition":
-				return theClass.cast(fetchStructureDefinition(theContext, theUri));
+				return theClass.cast(fetchStructureDefinition(theUri));
 			case "ValueSet":
-				return theClass.cast(fetchValueSet(theContext, theUri));
+				return theClass.cast(fetchValueSet(theUri));
 			case "CodeSystem":
-				return fetchCodeSystem(theContext, theUri, theClass);
+				return theClass.cast(fetchCodeSystem(theUri));
 		}
 
 		if (theUri.startsWith(URL_PREFIX_VALUE_SET)) {
-			return theClass.cast(fetchValueSet(theContext, theUri));
+			return theClass.cast(fetchValueSet(theUri));
 		}
 
 		return null;
 	}
 
-	default IBaseResource fetchStructureDefinition(FhirContext theCtx, String theUrl) {
+	default IBaseResource fetchStructureDefinition(String theUrl) {
 		return null;
 	}
 
@@ -132,14 +132,14 @@ public interface IContextValidationSupport {
 	 * @return Returns <code>true</code> if codes in the given code system can be
 	 * validated
 	 */
-	default boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+	default boolean isCodeSystemSupported(String theSystem) {
 		return false;
 	}
 
 	/**
 	 * Fetch the given ValueSet by URL
 	 */
-	default IBaseResource fetchValueSet(FhirContext theContext, String theValueSetUrl) {
+	default IBaseResource fetchValueSet(String theValueSetUrl) {
 		return null;
 	}
 
@@ -154,7 +154,7 @@ public interface IContextValidationSupport {
 	 * @param theDisplay               The display name, if it should also be validated
 	 * @return Returns a validation result object
 	 */
-	default CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	default CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 
@@ -169,7 +169,7 @@ public interface IContextValidationSupport {
 	 * @param theValueSet   The ValueSet to validate against. Must not be null, and must be a ValueSet resource.
 	 * @return Returns a validation result object, or <code>null</code> if this validation support module can not handle this kind of request
 	 */
-	default CodeValidationResult validateCodeInValueSet(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	default CodeValidationResult validateCodeInValueSet(String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		return null;
 	}
 
@@ -177,11 +177,10 @@ public interface IContextValidationSupport {
 	 * Look up a code using the system and code value
 	 *
 	 * @param theRootValidationSupport
-	 * @param theContext               The FHIR context
 	 * @param theSystem                The CodeSystem URL
 	 * @param theCode                  The code
 	 */
-	default LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, FhirContext theContext, String theSystem, String theCode) {
+	default LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, String theSystem, String theCode) {
 		return null;
 	}
 
@@ -189,10 +188,9 @@ public interface IContextValidationSupport {
 	 * Returns <code>true</code> if the given valueset can be validated by the given
 	 * validation support module
 	 *
-	 * @param theContext     The FHIR context
 	 * @param theValueSetUrl The URL
 	 */
-	default boolean isValueSetSupported(FhirContext theContext, String theValueSetUrl) {
+	default boolean isValueSetSupported(String theValueSetUrl) {
 		return false;
 	}
 
@@ -205,6 +203,11 @@ public interface IContextValidationSupport {
 	default IBaseResource generateSnapshot(IContextValidationSupport theRootValidationSupport, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
 		return null;
 	}
+
+	/**
+	 * Returns the FHIR Context associated with this module
+	 */
+	FhirContext getFhirContext();
 
 
 	class ConceptDesignation {
@@ -369,6 +372,11 @@ public interface IContextValidationSupport {
 			return myMessage;
 		}
 
+		public CodeValidationResult setMessage(String theMessage) {
+			myMessage = theMessage;
+			return this;
+		}
+
 		public List<BaseConceptProperty> getProperties() {
 			return myProperties;
 		}
@@ -379,6 +387,11 @@ public interface IContextValidationSupport {
 
 		public String getSeverity() {
 			return mySeverity;
+		}
+
+		public CodeValidationResult setSeverity(String theSeverity) {
+			mySeverity = theSeverity;
+			return this;
 		}
 
 		public boolean isOk() {
@@ -396,16 +409,6 @@ public interface IContextValidationSupport {
 				retVal.setCodeSystemVersion(getCodeSystemVersion());
 			}
 			return retVal;
-		}
-
-		public CodeValidationResult setMessage(String theMessage) {
-			myMessage = theMessage;
-			return this;
-		}
-
-		public CodeValidationResult setSeverity(String theSeverity) {
-			mySeverity = theSeverity;
-			return this;
 		}
 	}
 

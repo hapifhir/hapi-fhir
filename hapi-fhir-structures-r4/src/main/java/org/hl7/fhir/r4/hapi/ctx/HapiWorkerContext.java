@@ -56,7 +56,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public List<StructureDefinition> allStructures() {
-    return myValidationSupport.fetchAllStructureDefinitions(myCtx, StructureDefinition.class);
+    return myValidationSupport.fetchAllStructureDefinitions();
   }
 
   @Override
@@ -69,7 +69,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     if (myValidationSupport == null) {
       return null;
     } else {
-      return myValidationSupport.fetchCodeSystem(myCtx, theSystem, CodeSystem.class);
+      return (CodeSystem) myValidationSupport.fetchCodeSystem(theSystem);
     }
   }
 
@@ -140,7 +140,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     if (myValidationSupport == null) {
       return false;
     } else {
-      return myValidationSupport.isCodeSystemSupported(myCtx, theSystem);
+      return myValidationSupport.isCodeSystemSupported(theSystem);
     }
   }
 
@@ -173,7 +173,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay) {
-    IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, myCtx, theSystem, theCode, theDisplay, null);
+    IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, theSystem, theCode, theDisplay, null);
     if (result == null) {
       return null;
     }
@@ -218,9 +218,9 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
     IValidationSupport.CodeValidationResult outcome;
     if (isNotBlank(theVs.getUrl())) {
-      outcome = myValidationSupport.validateCode(myValidationSupport, myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
+      outcome = myValidationSupport.validateCode(myValidationSupport, theSystem, theCode, theDisplay, theVs.getUrl());
     } else {
-      outcome = myValidationSupport.validateCodeInValueSet(myCtx, theSystem, theCode, theDisplay, theVs);
+      outcome = myValidationSupport.validateCodeInValueSet(theSystem, theCode, theDisplay, theVs);
     }
 
     if (outcome != null && outcome.isOk()) {
@@ -371,7 +371,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       return null;
     } else {
       @SuppressWarnings("unchecked")
-      T retVal = (T) myFetchedResourceCache.get(theUri, t -> myValidationSupport.fetchResource(myCtx, theClass, theUri));
+      T retVal = (T) myFetchedResourceCache.get(theUri, t -> myValidationSupport.fetchResource(theClass, theUri));
       return retVal;
     }
   }
