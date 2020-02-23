@@ -49,11 +49,6 @@ public class FhirDstu2 implements IFhirVersion {
 
 
 	@Override
-	public IContextValidationSupport createValidationSupport() {
-		throw new UnsupportedOperationException("Validation support is not supported in DSTU2 contexts");
-	}
-
-	@Override
 	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
 		StructureDefinition retVal = new StructureDefinition();
 

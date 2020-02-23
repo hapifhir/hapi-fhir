@@ -1,6 +1,7 @@
 package org.hl7.fhir.common.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
@@ -185,8 +186,12 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 			return false;
 		}
 
-		RuntimeResourceDefinition codeSystem = getFhirContext().getResourceDefinition("CodeSystem");
 		IBaseResource cs = fetchCodeSystem(theSystem);
+
+		if (!myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU2_1)) {
+			return cs != null;
+		}
+
 		if (cs != null) {
 			IPrimitiveType<?> content = getFhirContext().newTerser().getSingleValueOrNull(cs, "content", IPrimitiveType.class);
 			if (!"not-present".equals(content.getValueAsString())) {
@@ -247,6 +252,25 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 						String urlValueString = getConformanceResourceUrl(next);
 						if (isNotBlank(urlValueString)) {
 							map.put(urlValueString, next);
+						}
+
+						switch (myCtx.getVersion().getVersion()) {
+							case DSTU2:
+							case DSTU2_HL7ORG:
+
+								IPrimitiveType<?> codeSystem = myCtx.newTerser().getSingleValueOrNull(next, "ValueSet.codeSystem.system", IPrimitiveType.class);
+								if (codeSystem != null && isNotBlank(codeSystem.getValueAsString())) {
+									theCodeSystems.put(codeSystem.getValueAsString(), next);
+								}
+
+								break;
+
+							default:
+							case DSTU2_1:
+							case DSTU3:
+							case R4:
+							case R5:
+								break;
 						}
 					}
 

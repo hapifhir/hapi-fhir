@@ -26,6 +26,8 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -59,6 +61,40 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		}
 	}
 
+//	@Override
+//	public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc) {
+//		if (isNotBlank(theInc.getSystem())) {
+//			ValueSet codeSystem = fetchCodeSystem(theInc.getSystem());
+//			if (codeSystem != null) {
+//
+//				ValueSetExpansionComponent retVal = new ValueSetExpansionComponent();
+//
+//				Set<String> wantCodes = theInc.getConcept().stream().map(ConceptReferenceComponent::getCode).collect(Collectors.toSet());
+//				addCodes(theInc.getSystem(), retVal, codeSystem.getCodeSystem().getConcept(), wantCodes);
+//
+//				return retVal;
+//			}
+//		}
+//
+//		return null;
+//	}
+//
+//	private void addCodes(String theSystem, ValueSetExpansionComponent theExpansion, List<ConceptDefinitionComponent> theConcept, Set<String> theWantCodes) {
+//		for (ConceptDefinitionComponent nextConcept : theConcept) {
+//			if (theWantCodes.isEmpty() || theWantCodes.contains(nextConcept.getCode())) {
+//				theExpansion
+//					.addContains()
+//					.setSystem(theSystem)
+//					.setCode(nextConcept.getCode())
+//					.setDisplay(nextConcept.getDisplay());
+//			}
+//
+//			// Recurse
+//			addCodes(theSystem, theExpansion, nextConcept.getConcept(), theWantCodes);
+//		}
+//	}
+
+	// FIXME: remove above?
 	@Override
 	public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc) {
 		ValueSet input = new ValueSet();
@@ -186,8 +222,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 			severity = IssueSeverity.fromCode(result.getSeverity());
 		}
 
-		ConceptDefinitionComponent definition = new ConceptDefinitionComponent()
-			.setCode(result.getCode());
+		ConceptDefinitionComponent definition = null;
+		if (isNotBlank(result.getCode())) {
+			definition = new ConceptDefinitionComponent()
+				.setCode(result.getCode());
+		}
 		return new ValidationResult(severity, result.getMessage(), definition);
 	}
 

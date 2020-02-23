@@ -25,6 +25,8 @@ import org.hl7.fhir.dstu3.utils.IResourceValidator;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,9 +39,9 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
+  private static final Logger ourLog = LoggerFactory.getLogger(HapiWorkerContext.class);
   private final FhirContext myCtx;
   private final Cache<String, Resource> myFetchedResourceCache;
-
   private IContextValidationSupport myValidationSupport;
   private ExpansionProfile myExpansionProfile;
 
@@ -124,18 +126,21 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     if (myValidationSupport == null) {
       return null;
     } else {
-        try {
-          //noinspection unchecked
-          return (T) myFetchedResourceCache.get(theUri, t -> {
-            T resource = myValidationSupport.fetchResource(theClass, theUri);
-            if (resource == null) {
-              throw new IllegalArgumentException();
-            }
-            return resource;
-          });
-        } catch (IllegalArgumentException e) {
-          return null;
-        }
+      try {
+        // FIXME: remove
+        ourLog.info("Fetching {} resource: {}", theClass.getSimpleName(), theUri);
+
+        //noinspection unchecked
+        return (T) myFetchedResourceCache.get(theUri, t -> {
+          T resource = myValidationSupport.fetchResource(theClass, theUri);
+          if (resource == null) {
+            throw new IllegalArgumentException();
+          }
+          return resource;
+        });
+      } catch (IllegalArgumentException e) {
+        return null;
+      }
     }
   }
 

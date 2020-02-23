@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.VersionIndependentConcept;
+import org.hl7.fhir.dstu2.model.ValueSet;
+import org.hl7.fhir.dstu2.terminologies.ValueSetExpander;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
@@ -30,7 +32,8 @@ public abstract class BaseStaticResourceValidationSupport extends BaseValidation
 		switch (myCtx.getVersion().getVersion()) {
 			case DSTU2_HL7ORG: {
 				org.hl7.fhir.dstu2.terminologies.ValueSetExpanderSimple expander = new org.hl7.fhir.dstu2.terminologies.ValueSetExpanderSimple(new org.hl7.fhir.instance.hapi.validation.HapiWorkerContext(myCtx, theRootValidationSupport), null);
-				expansion = expander.expand((org.hl7.fhir.dstu2.model.ValueSet) theValueSetToExpand).getValueset();
+				ValueSetExpander.ValueSetExpansionOutcome expanded = expander.expand((ValueSet) theValueSetToExpand);
+				expansion = expanded.getValueset();
 				break;
 			}
 			case DSTU3: {
