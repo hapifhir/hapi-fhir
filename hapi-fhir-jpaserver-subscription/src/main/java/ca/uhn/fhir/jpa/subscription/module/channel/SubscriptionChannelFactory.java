@@ -22,16 +22,12 @@ package ca.uhn.fhir.jpa.subscription.module.channel;
 
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.SubscribableChannel;
-import org.springframework.stereotype.Component;
 
-@Component
 public class SubscriptionChannelFactory {
 
 	private ISubscribableChannelFactory mySubscribableChannelFactory;
 
-	@Autowired
 	public SubscriptionChannelFactory(ISubscribableChannelFactory theSubscribableChannelFactory) {
 		mySubscribableChannelFactory = theSubscribableChannelFactory;
 	}
