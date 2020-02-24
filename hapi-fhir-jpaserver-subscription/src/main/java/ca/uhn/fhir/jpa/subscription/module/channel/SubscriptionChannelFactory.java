@@ -22,15 +22,13 @@ package ca.uhn.fhir.jpa.subscription.module.channel;
 
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.SubscribableChannel;
 
 public class SubscriptionChannelFactory {
 
+	@Autowired
 	private ISubscribableChannelFactory mySubscribableChannelFactory;
-
-	public SubscriptionChannelFactory(ISubscribableChannelFactory theSubscribableChannelFactory) {
-		mySubscribableChannelFactory = theSubscribableChannelFactory;
-	}
 
 	public SubscribableChannel newDeliveryChannel(String theChannelName) {
 		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName, ResourceDeliveryMessage.class, mySubscribableChannelFactory.getDeliveryChannelConcurrentConsumers());

@@ -211,7 +211,7 @@ public abstract class BaseConfig {
 
 	@Bean
 	public SubscriptionChannelFactory subscriptionChannelFactory() {
-		return new SubscriptionChannelFactory(subscribableChannelFactory());
+		return new SubscriptionChannelFactory();
 	}
 
 	@Bean

@@ -45,6 +45,6 @@ public abstract class BaseSubscriptionConfig {
 
 	@Bean
 	public SubscriptionChannelFactory subscriptionChannelFactory() {
-		return new SubscriptionChannelFactory(subscribableChannelFactory());
+		return new SubscriptionChannelFactory();
 	}
 }
