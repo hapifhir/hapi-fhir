@@ -24,7 +24,7 @@ import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.r4.utils.IResourceValidator;
-import org.hl7.fhir.utilities.TerminologyServiceOptions;
+import org.hl7.fhir.utilities.ValidationOptions;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
@@ -152,7 +152,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, CodeableConcept theCode, ValueSet theVs) {
+  public ValidationResult validateCode(ValidationOptions theOptions, CodeableConcept theCode, ValueSet theVs) {
     for (Coding next : theCode.getCoding()) {
       ValidationResult retVal = validateCode(theOptions, next, theVs);
       if (retVal.isOk()) {
@@ -164,7 +164,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, Coding theCode, ValueSet theVs) {
+  public ValidationResult validateCode(ValidationOptions theOptions, Coding theCode, ValueSet theVs) {
     String system = theCode.getSystem();
     String code = theCode.getCode();
     String display = theCode.getDisplay();
@@ -172,8 +172,8 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay) {
-    IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, theSystem, theCode, theDisplay, null);
+  public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay) {
+    IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, , theSystem, theCode, theDisplay, null);
     if (result == null) {
       return null;
     }
@@ -188,13 +188,13 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay, ConceptSetComponent theVsi) {
+  public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay, ConceptSetComponent theVsi) {
     throw new UnsupportedOperationException();
   }
 
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
+  public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
 
     /*
      * The following valueset is a special case, since the BCP codesystem is very difficult to expand
@@ -218,7 +218,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
     IValidationSupport.CodeValidationResult outcome;
     if (isNotBlank(theVs.getUrl())) {
-      outcome = myValidationSupport.validateCode(myValidationSupport, theSystem, theCode, theDisplay, theVs.getUrl());
+      outcome = myValidationSupport.validateCode(myValidationSupport, , theSystem, theCode, theDisplay, theVs.getUrl());
     } else {
       outcome = myValidationSupport.validateCodeInValueSet(theSystem, theCode, theDisplay, theVs);
     }
@@ -234,7 +234,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String code, ValueSet vs) {
+  public ValidationResult validateCode(ValidationOptions theOptions, String code, ValueSet vs) {
     return validateCode(theOptions, Constants.CODESYSTEM_VALIDATE_NOT_NEEDED, code, null, vs);
   }
 

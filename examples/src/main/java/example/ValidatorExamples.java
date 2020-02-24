@@ -26,6 +26,7 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.utilities.ValidationOptions;
 
 import javax.servlet.ServletException;
 import java.io.File;
@@ -256,7 +257,7 @@ public class ValidatorExamples {
 			}
 
 			@Override
-			public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, String theCodeSystem, String theCode, String theDisplay, String theValueSet) {
+			public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSet) {
 				// TODO: implement
 				return null;
 			}

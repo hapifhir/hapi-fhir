@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.utilities.ValidationOptions;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -45,8 +46,8 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
-		return myWrap.validateCode(theRootValidationSupport, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+		return myWrap.validateCode(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 	}
 
 	@Override

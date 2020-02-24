@@ -28,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.utilities.ValidationOptions;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -149,12 +150,13 @@ public interface IContextValidationSupport {
 	 * binding fields (e.g. <code>Observation.code</code> in the default profile.
 	 *
 	 * @param theRootValidationSupport
+	 * @param theOptions
 	 * @param theCodeSystem            The code system, e.g. "<code>http://loinc.org</code>"
 	 * @param theCode                  The code, e.g. "<code>1234-5</code>"
 	 * @param theDisplay               The display name, if it should also be validated
 	 * @return Returns a validation result object
 	 */
-	default CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	default CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 

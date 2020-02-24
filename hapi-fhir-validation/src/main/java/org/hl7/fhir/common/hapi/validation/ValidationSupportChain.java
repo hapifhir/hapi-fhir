@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.utilities.ValidationOptions;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -175,16 +176,16 @@ public class ValidationSupportChain implements IContextValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		for (IContextValidationSupport next : myChain) {
-			if (Constants.codeSystemNotNeeded(theCodeSystem) || (theCodeSystem != null && next.isCodeSystemSupported(theCodeSystem))) {
-				CodeValidationResult retVal = next.validateCode(theRootValidationSupport, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+			if (theOptions.isGuessSystem() || (theCodeSystem != null && next.isCodeSystemSupported(theCodeSystem))) {
+				CodeValidationResult retVal = next.validateCode(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 				if (retVal != null) {
 					return retVal;
 				}
 			}
 		}
-		return myChain.get(0).validateCode(theRootValidationSupport, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+		return null; // myChain.get(0).validateCode(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 	}
 
 	@Override

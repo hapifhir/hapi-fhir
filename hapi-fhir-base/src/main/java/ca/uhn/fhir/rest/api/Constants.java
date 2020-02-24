@@ -252,7 +252,6 @@ public class Constants {
 	 * </p>
 	 */
 	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
-	public static final String CODESYSTEM_VALIDATE_NOT_NEEDED = UUID.randomUUID().toString();
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
@@ -354,16 +353,17 @@ public class Constants {
 		CORS_ALLWED_METHODS = Collections.unmodifiableSet(corsAllowedMethods);
 	}
 
-	public static boolean codeSystemNotNeeded(String theCodeSystem) {
-		return Constants.CODESYSTEM_VALIDATE_NOT_NEEDED.equals(theCodeSystem);
+	// FIXME: remove
+	public static final String CODESYSTEM_VALIDATE_NOT_NEEDED_ = UUID.randomUUID().toString();
+
+	// FIXME: remove
+	public static boolean codeSystemNotNeeded_(String theCodeSystem) {
+		return Constants.CODESYSTEM_VALIDATE_NOT_NEEDED_.equals(theCodeSystem);
 	}
 
 
+	// FIXME: should we handle "guess" and null nicely?
 	public static String codeSystemWithDefaultDescription(String theSystem) {
-		if (codeSystemNotNeeded(theSystem)) {
-			return "(none)";
-		} else {
 			return theSystem;
-		}
 	}
 }

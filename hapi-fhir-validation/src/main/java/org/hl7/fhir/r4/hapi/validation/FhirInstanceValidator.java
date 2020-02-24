@@ -36,7 +36,7 @@ import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.INarrativeGenerator;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel;
-import org.hl7.fhir.utilities.TerminologyServiceOptions;
+import org.hl7.fhir.utilities.ValidationOptions;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
@@ -623,8 +623,8 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 			return convertValidationResult(result);
 		}
 
-		private TerminologyServiceOptions toValidationOptions(ValidationOptions theOptions) {
-			return new TerminologyServiceOptions();
+		private ValidationOptions toValidationOptions(ValidationOptions theOptions) {
+			return new ValidationOptions();
 		}
 
 		@Override

@@ -175,7 +175,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, theSystem, theCode, theDisplay, null);
+		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, , theSystem, theCode, theDisplay, null);
 		if (result == null) {
 			return null;
 		}
