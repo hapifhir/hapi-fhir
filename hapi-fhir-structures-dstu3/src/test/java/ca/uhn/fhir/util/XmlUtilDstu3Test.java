@@ -1,16 +1,22 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.utilities.xml.XMLUtil;
 import org.junit.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
 
 public class XmlUtilDstu3Test {
 
@@ -66,6 +72,14 @@ public class XmlUtilDstu3Test {
 		} catch (ConfigurationException e) {
 			// good
 		}
+	}
+
+	@Test
+	public void testApplyUnsupportedFeature() throws IOException, SAXException {
+		assertNotNull(XmlUtil.parseDocument("<document></document>"));
+
+		XmlUtil.setThrowExceptionForUnitTest(new ParserConfigurationException("AA"));
+		assertNotNull(XmlUtil.parseDocument("<document></document>"));
 	}
 
 	@AfterClass

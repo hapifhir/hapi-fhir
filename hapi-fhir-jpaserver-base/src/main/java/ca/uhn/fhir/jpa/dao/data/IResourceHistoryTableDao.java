@@ -17,7 +17,7 @@ import java.util.Date;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,14 +91,12 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 		"LEFT OUTER JOIN ResourceTable t ON (v.myResourceId = t.myId) " +
 		"WHERE v.myResourceVersion != t.myVersion")
 	Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage);
-	
-	@Query("" + 
-		"SELECT h FROM ResourceHistoryTable h " + 
-		"INNER JOIN ResourceTable r ON (r.myId = h.myResourceId and r.myVersion = h.myResourceVersion) " + 
-		"WHERE r.myId in (:pids)")
-	Collection<ResourceHistoryTable> findByResourceIds(@Param("pids") Collection<Long> pids);
 
 	@Modifying
 	@Query("UPDATE ResourceHistoryTable r SET r.myResourceVersion = :newVersion WHERE r.myResourceId = :id AND r.myResourceVersion = :oldVersion")
 	void updateVersion(@Param("id") long theId, @Param("oldVersion") long theOldVersion, @Param("newVersion") long theNewVersion);
+
+	@Modifying
+	@Query("DELETE FROM ResourceHistoryTable t WHERE t.myId = :pid")
+	void deleteByPid(@Param("pid") Long theId);
 }

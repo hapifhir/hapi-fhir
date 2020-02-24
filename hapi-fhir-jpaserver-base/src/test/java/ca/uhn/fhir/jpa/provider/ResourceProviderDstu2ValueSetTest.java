@@ -47,7 +47,6 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	
 	@Test
 	public void testValidateCodeOperationByCodeAndSystemInstance() {
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId)
@@ -55,7 +54,6 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.withParameter(Parameters.class, "code", new CodeDt("8495-4"))
 			.andParameter("system", new UriDt("http://loinc.org"))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -65,7 +63,6 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 	@Test
 	public void testValidateCodeOperationByCodeAndSystemType() {
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -73,7 +70,6 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.withParameter(Parameters.class, "code", new CodeDt("8450-9"))
 			.andParameter("system", new UriDt("http://loinc.org"))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -83,7 +79,6 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 	@Test
 	public void testLookupOperationByCodeAndSystem() {
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -91,7 +86,6 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.withParameter(Parameters.class, "code", new CodeDt("8450-9"))
 			.andParameter("system", new UriDt("http://loinc.org"))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -107,7 +101,6 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	@Test
 	@Ignore
 	public void testLookupOperationForBuiltInCode() {
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -115,7 +108,6 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.withParameter(Parameters.class, "code", new CodeDt("M"))
 			.andParameter("system", new UriDt("http://hl7.org/fhir/v3/MaritalStatus"))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -130,14 +122,12 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 	@Test
 	public void testLookupOperationByCoding() {
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("lookup")
 			.withParameter(Parameters.class, "coding", new CodingDt("http://loinc.org", "8450-9"))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -152,7 +142,6 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 	@Test
 	public void testLookupOperationByInvalidCombination() {
-		//@formatter:off
 		try {
 			ourClient
 				.operation()
@@ -166,12 +155,10 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
-		//@formatter:on
 	}
 
 	@Test
 	public void testLookupOperationByInvalidCombination2() {
-		//@formatter:off
 		try {
 			ourClient
 				.operation()
@@ -184,12 +171,10 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
-		//@formatter:on
 	}
 
 	@Test
 	public void testLookupOperationByInvalidCombination3() {
-		//@formatter:off
 		try {
 			ourClient
 				.operation()
@@ -201,12 +186,10 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: No code, coding, or codeableConcept provided to validate", e.getMessage());
 		}
-		//@formatter:on
 	}
 
 	@Test
 	public void testExpandById() throws IOException {
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId)
@@ -214,11 +197,9 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.withNoParameters(Parameters.class)
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
-		
+
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		// @formatter:off
 		assertThat(resp,
 			stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">", 
 				"<expansion>", 
@@ -234,13 +215,11 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 					"</contains>",
 				"</expansion>" 
 					));
-		//@formatter:on
 
 		/*
 		 * Filter with display name
 		 */
 
-		//@formatter:off
 		respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId)
@@ -248,22 +227,18 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.withParameter(Parameters.class, "filter", new StringDt("systolic"))
 			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
 
 		expanded = myValueSetDao.expand(myExtensionalVsId, ("systolic"), mySrd);
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
 				"<code value=\"11378-7\"/>", 
 				"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
 
 		/*
 		 * Filter with code
 		 */
 
-		//@formatter:off
 		respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId)
@@ -271,19 +246,15 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.withParameter(Parameters.class, "filter", new StringDt("11378"))
 			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
 				"<code value=\"11378-7\"/>", 
 				"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
 	}
 	
 	@Test
 	public void testExpandByIdentifier() {
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -292,15 +263,12 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.andParameter("filter", new StringDt("11378"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
 				"<code value=\"11378-7\"/>", 
 				"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
 
 		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
 	}
@@ -309,7 +277,6 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	public void testExpandByValueSet() throws IOException {
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
 		
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -318,22 +285,18 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.andParameter("filter", new StringDt("11378"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
 				"<code value=\"11378-7\"/>", 
 				"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
 
 		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
 	}
 
 	@Test
 	public void testExpandInvalidParams() throws IOException {
-		//@formatter:off
 		try {
 			ourClient
 				.operation()
@@ -345,9 +308,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: $expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request", e.getMessage());
 		}
-		//@formatter:on
 
-		//@formatter:off
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
 			ourClient
@@ -361,9 +322,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: $expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
-		//@formatter:on
 
-		//@formatter:off
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
 			ourClient
@@ -377,7 +336,6 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: $expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
-		//@formatter:on
 
 	}
 	

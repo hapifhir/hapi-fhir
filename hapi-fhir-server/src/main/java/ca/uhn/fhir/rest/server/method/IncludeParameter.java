@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ class IncludeParameter extends BaseQueryParameter {
 		myInstantiableCollectionType = theInstantiableCollectionType;
 		myReverse = theAnnotation.reverse();
 		if (theAnnotation.allow().length > 0) {
-			myAllow = new HashSet<String>();
+			myAllow = new HashSet<>();
 			for (String next : theAnnotation.allow()) {
 				if (next != null) {
 					myAllow.add(next);
@@ -136,7 +136,8 @@ class IncludeParameter extends BaseQueryParameter {
 				throw new InvalidRequestException(theContext.getLocalizer().getMessage(IncludeParameter.class, "orIncludeInRequest"));
 			}
 
-			boolean recurse = Constants.PARAM_INCLUDE_QUALIFIER_RECURSE.equals(nextParamList.getQualifier());
+			String qualifier = nextParamList.getQualifier();
+			boolean recurse = Constants.PARAM_INCLUDE_QUALIFIER_RECURSE.equals(qualifier) || Constants.PARAM_INCLUDE_QUALIFIER_ITERATE.equals(qualifier);
 
 			String value = nextParamList.get(0);
 			if (myAllow != null && !myAllow.isEmpty()) {
@@ -153,7 +154,7 @@ class IncludeParameter extends BaseQueryParameter {
 				}
 				return new Include(value, recurse);
 			}
-			//FIXME null access
+
 			retValCollection.add(new Include(value, recurse));
 		}
 

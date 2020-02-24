@@ -1,19 +1,16 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
-import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.Optional;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,5 +27,13 @@ import java.util.Optional;
  */
 
 public interface IBulkExportCollectionDao extends JpaRepository<BulkExportCollectionEntity, Long> {
-	// nothing currently
+
+	@Modifying
+	@Query("DELETE FROM BulkExportCollectionEntity t")
+	void deleteAllFiles();
+
+	@Modifying
+	@Query("DELETE FROM BulkExportCollectionEntity t WHERE t.myId = :pid")
+	void deleteByPid(@Param("pid") Long theId);
+
 }

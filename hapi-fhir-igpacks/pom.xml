@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>hapi-deployable-pom</artifactId>
 		<groupId>ca.uhn.hapi.fhir</groupId>
-		<version>4.1.0-SNAPSHOT</version>
+		<version>4.3.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
@@ -40,6 +40,28 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>animal-sniffer-maven-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<dumpOnExit>true</dumpOnExit>
+				</configuration>
+				<executions>
+					<execution>
+						<id>default-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 
 	</build>

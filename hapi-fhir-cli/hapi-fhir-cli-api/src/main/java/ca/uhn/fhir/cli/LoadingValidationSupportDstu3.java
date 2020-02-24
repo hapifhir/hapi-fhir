@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public class LoadingValidationSupportDstu3 implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 

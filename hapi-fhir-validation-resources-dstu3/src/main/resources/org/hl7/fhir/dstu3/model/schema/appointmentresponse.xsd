@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Wed, Apr 19, 2017 07:44+1000 for FHIR v3.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="AppointmentResponse" type="AppointmentResponse">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A reply to an appointment request for a patient and/or practitioner(s), such as a confirmation or rejection.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="AppointmentResponse">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A reply to an appointment request for a patient and/or practitioner(s), such as a confirmation or rejection.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">This records identifiers associated with this appointment response concern that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="appointment" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Appointment that this response is replying to.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="start" minOccurs="0" maxOccurs="1" type="instant">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Date/Time that the appointment is to take place, or requested new start time.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="end" minOccurs="0" maxOccurs="1" type="instant">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="participantType" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Role of participant in the appointment.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="actor" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A Person, Location/HealthcareService or Device that is participating in the appointment.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="participantStatus" minOccurs="1" maxOccurs="1" type="ParticipationStatus">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Participation status of the participant. When the status is declined or tentative if the start/end times are different to the appointment, then these times should be interpreted as a requested time change. When the status is accepted, the times can either be the time of the appointment (as a confirmation of the time) or can be empty.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="comment" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Additional comments about the appointment.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

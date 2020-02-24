@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.module;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,13 @@ package ca.uhn.fhir.jpa.subscription.module;
  * #L%
  */
 
+import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.exceptions.FHIRException;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public enum CanonicalSubscriptionChannelType {
 	/**
@@ -48,23 +54,6 @@ public enum CanonicalSubscriptionChannelType {
 	 */
 	NULL;
 
-	public static CanonicalSubscriptionChannelType fromCode(String codeString) throws FHIRException {
-		if (codeString == null || "".equals(codeString))
-			return null;
-		if ("rest-hook".equals(codeString))
-			return RESTHOOK;
-		if ("websocket".equals(codeString))
-			return WEBSOCKET;
-		if ("email".equals(codeString))
-			return EMAIL;
-		if ("sms".equals(codeString))
-			return SMS;
-		if ("message".equals(codeString))
-			return MESSAGE;
-		else
-			throw new FHIRException("Unknown SubscriptionChannelType code '" + codeString + "'");
-	}
-
 	public String toCode() {
 		switch (this) {
 			case RESTHOOK:
@@ -77,6 +66,7 @@ public enum CanonicalSubscriptionChannelType {
 				return "sms";
 			case MESSAGE:
 				return "message";
+			case NULL:
 			default:
 				return "?";
 		}
@@ -85,15 +75,12 @@ public enum CanonicalSubscriptionChannelType {
 	public String getSystem() {
 		switch (this) {
 			case RESTHOOK:
-				return "http://hl7.org/fhir/subscription-channel-type";
 			case WEBSOCKET:
-				return "http://hl7.org/fhir/subscription-channel-type";
 			case EMAIL:
-				return "http://hl7.org/fhir/subscription-channel-type";
 			case SMS:
-				return "http://hl7.org/fhir/subscription-channel-type";
 			case MESSAGE:
-				return "http://hl7.org/fhir/subscription-channel-type";
+				return "http://terminology.hl7.org/CodeSystem/subscription-channel-type";
+			case NULL:
 			default:
 				return "?";
 		}
@@ -111,6 +98,7 @@ public enum CanonicalSubscriptionChannelType {
 				return "The channel is executed by sending an SMS message to the phone number identified in the URL (tel:).";
 			case MESSAGE:
 				return "The channel is executed by sending a message (e.g. a Bundle with a MessageHeader resource etc.) to the application identified in the URI.";
+			case NULL:
 			default:
 				return "?";
 		}
@@ -128,8 +116,41 @@ public enum CanonicalSubscriptionChannelType {
 				return "SMS";
 			case MESSAGE:
 				return "Message";
+			case NULL:
 			default:
 				return "?";
 		}
+	}
+
+	public Subscription.SubscriptionChannelType toCanonical() {
+		return Subscription.SubscriptionChannelType.fromCode(toCode());
+	}
+
+	public static CanonicalSubscriptionChannelType fromCode(@Nullable String theSystem, @Nonnull String codeString) throws FHIRException {
+		if (isBlank(codeString)) {
+			return null;
+		} else if ("rest-hook".equals(codeString)) {
+			if (theSystem == null || theSystem.equals("http://terminology.hl7.org/CodeSystem/subscription-channel-type")) {
+				return RESTHOOK;
+			}
+		} else if ("websocket".equals(codeString)) {
+			if (theSystem == null || theSystem.equals("http://terminology.hl7.org/CodeSystem/subscription-channel-type")) {
+				return WEBSOCKET;
+			}
+		} else if ("email".equals(codeString)) {
+			if (theSystem == null || theSystem.equals("http://terminology.hl7.org/CodeSystem/subscription-channel-type")) {
+				return EMAIL;
+			}
+		} else if ("sms".equals(codeString)) {
+			if (theSystem == null || theSystem.equals("http://terminology.hl7.org/CodeSystem/subscription-channel-type")) {
+				return SMS;
+			}
+		} else if ("message".equals(codeString)) {
+			if (theSystem == null || theSystem.equals("http://terminology.hl7.org/CodeSystem/subscription-channel-type")) {
+				return MESSAGE;
+			}
+		}
+
+		throw new FHIRException("Unknown SubscriptionChannelType code '" + codeString + "'");
 	}
 }

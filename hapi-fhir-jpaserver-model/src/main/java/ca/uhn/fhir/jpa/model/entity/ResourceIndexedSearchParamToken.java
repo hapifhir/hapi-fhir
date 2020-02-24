@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,9 +101,10 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamToken(String theName, String theSystem, String theValue) {
+	public ResourceIndexedSearchParamToken(String theResourceType, String theParamName, String theSystem, String theValue) {
 		super();
-		setParamName(theName);
+		setResourceType(theResourceType);
+		setParamName(theParamName);
 		setSystem(theSystem);
 		setValue(theValue);
 	}
@@ -143,14 +144,10 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		}
 		ResourceIndexedSearchParamToken obj = (ResourceIndexedSearchParamToken) theObj;
 		EqualsBuilder b = new EqualsBuilder();
+		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-		b.append(getResource(), obj.getResource());
 		b.append(getSystem(), obj.getSystem());
 		b.append(getValue(), obj.getValue());
-		b.append(getHashIdentity(), obj.getHashIdentity());
-		b.append(getHashSystem(), obj.getHashSystem());
-		b.append(getHashSystemAndValue(), obj.getHashSystemAndValue());
-		b.append(getHashValue(), obj.getHashValue());
 		return b.isEquals();
 	}
 
@@ -161,11 +158,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	private void setHashSystem(Long theHashSystem) {
 		myHashSystem = theHashSystem;
-	}
-
-	private Long getHashIdentity() {
-		calculateHashes();
-		return myHashIdentity;
 	}
 
 	private void setHashIdentity(Long theHashIdentity) {
@@ -214,17 +206,18 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return myValue;
 	}
 
-	public void setValue(String theValue) {
+	public ResourceIndexedSearchParamToken setValue(String theValue) {
 		clearHashes();
 		myValue = StringUtils.defaultIfBlank(theValue, null);
+		return this;
 	}
 
 	@Override
 	public int hashCode() {
 		calculateHashes();
 		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getResourceType());
 		b.append(getParamName());
-		b.append(getResource());
 		b.append(getSystem());
 		b.append(getValue());
 		return b.toHashCode();
@@ -238,8 +231,8 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("resourceType", getResourceType());
 		b.append("paramName", getParamName());
-		b.append("resourceId", getResourcePid());
 		b.append("system", getSystem());
 		b.append("value", getValue());
 		return b.build();
@@ -282,7 +275,9 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	public static long calculateHashValue(String theResourceType, String theParamName, String theValue) {
-		return hash(theResourceType, theParamName, trim(theValue));
+		String value = trim(theValue);
+		return hash(theResourceType, theParamName, value);
 	}
+
 
 }

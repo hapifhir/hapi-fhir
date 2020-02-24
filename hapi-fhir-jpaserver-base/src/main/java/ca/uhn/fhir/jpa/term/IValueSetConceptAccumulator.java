@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,22 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 
 public interface IValueSetConceptAccumulator {
 
+	void addMessage(String theMessage);
+
 	void includeConcept(String theSystem, String theCode, String theDisplay);
 
-	void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations);
+	void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, @Nullable Collection<TermConceptDesignation> theDesignations);
 
 	void excludeConcept(String theSystem, String theCode);
+
+	@Nullable
+	default Integer getCapacityRemaining() {
+		return null;
+	}
 
 }

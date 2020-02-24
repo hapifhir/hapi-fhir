@@ -32,7 +32,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,12 +73,21 @@ public abstract class RequestDetails {
 	private Map<Object, Object> myUserData;
 	private IBaseResource myResource;
 	private String myRequestId;
+	private String myFixedConditionalUrl;
 
 	/**
 	 * Constructor
 	 */
 	public RequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
+	public String getFixedConditionalUrl() {
+		return myFixedConditionalUrl;
+	}
+
+	public void setFixedConditionalUrl(String theFixedConditionalUrl) {
+		myFixedConditionalUrl = theFixedConditionalUrl;
 	}
 
 	public String getRequestId() {
@@ -152,6 +161,9 @@ public abstract class RequestDetails {
 	 * @return Returns the <b>conditional URL</b> if this request has one, or <code>null</code> otherwise
 	 */
 	public String getConditionalUrl(RestOperationTypeEnum theOperationType) {
+		if (myFixedConditionalUrl != null) {
+			return myFixedConditionalUrl;
+		}
 		switch (theOperationType) {
 			case CREATE:
 				String retVal = this.getHeader(Constants.HEADER_IF_NONE_EXIST);

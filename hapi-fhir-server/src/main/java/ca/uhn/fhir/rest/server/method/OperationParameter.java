@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.BaseAndListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.binder.CollectionBinder;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -21,14 +22,12 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -36,7 +35,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,7 +162,10 @@ public class OperationParameter implements IParameter {
 		 */
 		isSearchParam &= typeIsConcrete && !IBase.class.isAssignableFrom(myParameterType);
 
-		myAllowGet = IPrimitiveType.class.isAssignableFrom(myParameterType) || String.class.equals(myParameterType) || isSearchParam || ValidationModeEnum.class.equals(myParameterType);
+		myAllowGet = IPrimitiveType.class.isAssignableFrom(myParameterType)
+			|| String.class.equals(myParameterType)
+			|| isSearchParam
+			|| ValidationModeEnum.class.equals(myParameterType);
 
 		/*
 		 * The parameter can be of type string for validation methods - This is a bit weird. See ValidateDstu2Test. We
@@ -172,6 +174,12 @@ public class OperationParameter implements IParameter {
 		if (!myParameterType.equals(IBase.class) && !myParameterType.equals(String.class)) {
 			if (IBaseResource.class.isAssignableFrom(myParameterType) && myParameterType.isInterface()) {
 				myParamType = "Resource";
+			} else if (IBaseReference.class.isAssignableFrom(myParameterType)) {
+				myParamType = "Reference";
+				myAllowGet = true;
+			} else if (IBaseCoding.class.isAssignableFrom(myParameterType)) {
+				myParamType = "Coding";
+				myAllowGet = true;
 			} else if (DateRangeParam.class.isAssignableFrom(myParameterType)) {
 				myParamType = "date";
 				myMax = 2;
@@ -266,7 +274,7 @@ public class OperationParameter implements IParameter {
 				if (myAllowGet) {
 
 					if (DateRangeParam.class.isAssignableFrom(myParameterType)) {
-						List<QualifiedParamList> parameters = new ArrayList<QualifiedParamList>();
+						List<QualifiedParamList> parameters = new ArrayList<>();
 						parameters.add(QualifiedParamList.singleton(paramValues[0]));
 						if (paramValues.length > 1) {
 							parameters.add(QualifiedParamList.singleton(paramValues[1]));
@@ -275,11 +283,31 @@ public class OperationParameter implements IParameter {
 						FhirContext ctx = theRequest.getServer().getFhirContext();
 						dateRangeParam.setValuesAsQueryTokens(ctx, myName, parameters);
 						matchingParamValues.add(dateRangeParam);
+
+					} else if (IBaseReference.class.isAssignableFrom(myParameterType)) {
+
+						processAllCommaSeparatedValues(paramValues, t -> {
+							IBaseReference param = (IBaseReference) ReflectionUtil.newInstance(myParameterType);
+							param.setReference(t);
+							matchingParamValues.add(param);
+						});
+
+					} else if (IBaseCoding.class.isAssignableFrom(myParameterType)) {
+
+						processAllCommaSeparatedValues(paramValues, t -> {
+							TokenParam tokenParam = new TokenParam();
+							tokenParam.setValueAsQueryToken(myContext, myName, null, t);
+
+							IBaseCoding param = (IBaseCoding) ReflectionUtil.newInstance(myParameterType);
+							param.setSystem(tokenParam.getSystem());
+							param.setCode(tokenParam.getValue());
+							matchingParamValues.add(param);
+						});
+
 					} else if (String.class.isAssignableFrom(myParameterType)) {
 
-						for (String next : paramValues) {
-							matchingParamValues.add(next);
-						}
+						matchingParamValues.addAll(Arrays.asList(paramValues));
+
 					} else if (ValidationModeEnum.class.equals(myParameterType)) {
 
 						if (isNotBlank(paramValues[0])) {
@@ -305,6 +333,22 @@ public class OperationParameter implements IParameter {
 					String msg = localizer.getMessage(OperationParameter.class, "urlParamNotPrimitive", myOperationName, myName);
 					throw new MethodNotAllowedException(msg, RequestTypeEnum.POST);
 				}
+			}
+		}
+	}
+
+	/**
+	 * This method is here to mediate between the POST form of operation parameters (i.e. elements within a <code>Parameters</code>
+	 * resource) and the GET form (i.e. URL parameters).
+	 * <p>
+	 * Essentially we want to allow comma-separated values as is done with searches on URLs.
+	 * </p>
+	 */
+	private void processAllCommaSeparatedValues(String[] theParamValues, Consumer<String> theHandler) {
+		for (String nextValue : theParamValues) {
+			QualifiedParamList qualifiedParamList = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, nextValue);
+			for (String nextSplitValue : qualifiedParamList) {
+				theHandler.accept(nextSplitValue);
 			}
 		}
 	}
@@ -394,10 +438,6 @@ public class OperationParameter implements IParameter {
 		}
 	}
 
-	public static void throwInvalidMode(String paramValues) {
-		throw new InvalidRequestException("Invalid mode value: \"" + paramValues + "\"");
-	}
-
 	interface IOperationParamConverter {
 
 		Object incomingServer(Object theObject);
@@ -427,6 +467,10 @@ public class OperationParameter implements IParameter {
 			return retVal;
 		}
 
+	}
+
+	public static void throwInvalidMode(String paramValues) {
+		throw new InvalidRequestException("Invalid mode value: \"" + paramValues + "\"");
 	}
 
 

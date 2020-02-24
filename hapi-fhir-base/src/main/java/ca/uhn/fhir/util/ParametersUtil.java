@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,8 @@ public class ParametersUtil {
 	}
 
 	private static void addClientParameter(FhirContext theContext, Object theValue, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem, String theName) {
+		Validate.notNull(theValue, "theValue must not be null");
+
 		if (theValue instanceof IBaseResource) {
 			IBase parameter = createParameterRepetition(theContext, theTargetResource, paramChild, paramChildElem, theName);
 			paramChildElem.getChildByName("resource").getMutator().addValue(parameter, (IBaseResource) theValue);
@@ -162,7 +164,6 @@ public class ParametersUtil {
 		IPrimitiveType<Boolean> value = (IPrimitiveType<Boolean>) theCtx.getElementDefinition("boolean").newInstance();
 		value.setValue(theValue);
 		addParameterToParameters(theCtx, theParameters, theName, value);
-
 	}
 
 	@SuppressWarnings("unchecked")

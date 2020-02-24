@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface ITermConceptPropertyDao extends JpaRepository<TermConceptProperty, Long> {
 
-	@Query("SELECT t FROM TermConceptProperty t WHERE t.myCodeSystemVersion.myId = :cs_pid")
-	Slice<TermConceptProperty> findByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
+	@Query("SELECT t.myId FROM TermConceptProperty t WHERE t.myCodeSystemVersion.myId = :cs_pid")
+	Slice<Long> findIdsByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
 
 	@Query("SELECT COUNT(t) FROM TermConceptProperty t WHERE t.myCodeSystemVersion.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);

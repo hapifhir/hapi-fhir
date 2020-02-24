@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 			throw new InvalidRequestException("$expand must EITHER be invoked at the instance level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.");
 		}
 
-		int offset = myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental();
+		int offset = myDaoConfig.getPreExpandValueSetsDefaultOffset();
 		if (theOffset != null && theOffset.hasValue()) {
 			if (theOffset.getValue() >= 0) {
 				offset = theOffset.getValue();
@@ -77,7 +77,7 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 			}
 		}
 
-		int count = myDaoConfig.getPreExpandValueSetsDefaultCountExperimental();
+		int count = myDaoConfig.getPreExpandValueSetsDefaultCount();
 		if (theCount != null && theCount.hasValue()) {
 			if (theCount.getValue() >= 0) {
 				count = theCount.getValue();
@@ -85,7 +85,7 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 				throw new InvalidRequestException("count parameter for $expand operation must be >= 0 when specified. count: " + theCount.getValue());
 			}
 		}
-		int countMax = myDaoConfig.getPreExpandValueSetsMaxCountExperimental();
+		int countMax = myDaoConfig.getPreExpandValueSetsMaxCount();
 		if (count > countMax) {
 			ourLog.warn("count parameter for $expand operation of {} exceeds maximum value of {}; using maximum value.", count, countMax);
 			count = countMax;
@@ -94,7 +94,7 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
-			if (myDaoConfig.isPreExpandValueSetsExperimental()) {
+			if (myDaoConfig.isPreExpandValueSets()) {
 				if (haveId) {
 					return dao.expand(theId, toFilterString(theFilter), offset, count, theRequestDetails);
 				} else if (haveIdentifier) {

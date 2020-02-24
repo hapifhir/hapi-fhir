@@ -3,7 +3,7 @@ package ca.uhn.fhir.parser.json;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,15 +50,6 @@ public class GsonStructure implements JsonLikeStructure {
 	
 	public GsonStructure() {
 		super();
-	}
-	
-	public GsonStructure (JsonObject json) {
-		super();
-		setNativeObject(json);
-	}
-	public GsonStructure (JsonArray json) {
-		super();
-		setNativeArray(json);
 	}
 	
 	public void setNativeObject (JsonObject json) {
@@ -111,8 +102,7 @@ public class GsonStructure implements JsonLikeStructure {
 			if (nextInt == '{') {
 				JsonObject root = gson.fromJson(pbr, JsonObject.class);
 				setNativeObject(root);
-			} else
-			if (nextInt == '[') {
+			} else if (nextInt == '[') {
 				JsonArray root = gson.fromJson(pbr, JsonArray.class);
 				setNativeArray(root);
 			}

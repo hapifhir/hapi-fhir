@@ -342,7 +342,7 @@ public class GenericClientR4Test {
 		Patient pt = new Patient();
 		pt.getText().setDivAsString("A PATIENT");
 
-		MethodOutcome outcome = client.create().resource(pt).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
+		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertEquals(2, myAnswerCount);
 		assertNotNull(outcome.getOperationOutcome());
@@ -388,7 +388,7 @@ public class GenericClientR4Test {
 		Patient pt = new Patient();
 		pt.getText().setDivAsString("A PATIENT");
 
-		MethodOutcome outcome = client.create().resource(pt).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
+		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertEquals(1, myAnswerCount);
 		assertNull(outcome.getOperationOutcome());
@@ -1296,7 +1296,7 @@ public class GenericClientR4Test {
 		client
 			.update()
 			.resource(bundle)
-			.prefer(PreferHeader.PreferReturnEnum.REPRESENTATION)
+			.prefer(PreferReturnEnum.REPRESENTATION)
 			.encodedJson()
 			.execute();
 
@@ -1341,7 +1341,7 @@ public class GenericClientR4Test {
 		client
 			.update()
 			.resource(bundle)
-			.prefer(PreferHeader.PreferReturnEnum.REPRESENTATION)
+			.prefer(PreferReturnEnum.REPRESENTATION)
 			.encodedXml()
 			.execute();
 
@@ -1451,7 +1451,7 @@ public class GenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/EpisodeOfCare?patient=123&_revinclude=Encounter%3Aepisode-of-care&_revinclude%3Arecurse=Observation%3Aencounter",
+		assertEquals("http://example.com/fhir/EpisodeOfCare?patient=123&_revinclude=Encounter%3Aepisode-of-care&_revinclude%3Aiterate=Observation%3Aencounter",
 			capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
@@ -2153,7 +2153,7 @@ public class GenericClientR4Test {
 		pt.setId("Patient/222");
 		pt.getText().setDivAsString("A PATIENT");
 
-		MethodOutcome outcome = client.update().resource(pt).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
+		MethodOutcome outcome = client.update().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertEquals(2, myAnswerCount);
 		assertNotNull(outcome.getOperationOutcome());
@@ -2198,7 +2198,7 @@ public class GenericClientR4Test {
 		pt.setId("Patient/222");
 		pt.getText().setDivAsString("A PATIENT");
 
-		MethodOutcome outcome = client.update().resource(pt).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
+		MethodOutcome outcome = client.update().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertEquals(1, myAnswerCount);
 		assertNull(outcome.getOperationOutcome());

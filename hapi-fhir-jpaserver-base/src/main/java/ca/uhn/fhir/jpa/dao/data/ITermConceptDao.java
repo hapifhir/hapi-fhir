@@ -17,7 +17,7 @@ import java.util.Optional;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,17 +41,13 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, Long> {
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system AND c.myCode = :code")
 	Optional<TermConcept> findByCodeSystemAndCode(@Param("code_system") TermCodeSystemVersion theCodeSystem, @Param("code") String theCode);
 
-	@Query("SELECT t FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
-	Slice<TermConcept> findByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
+	@Query("SELECT t.myId FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
+	Slice<Long> findIdsByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
 
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system")
 	List<TermConcept> findByCodeSystemVersion(@Param("code_system") TermCodeSystemVersion theCodeSystem);
 
 	@Query("SELECT t FROM TermConcept t WHERE t.myIndexStatus = null")
 	Page<TermConcept> findResourcesRequiringReindexing(Pageable thePageRequest);
-
-	@Query("UPDATE TermConcept t SET t.myIndexStatus = null")
-	@Modifying
-	int markAllForReindexing();
 
 }

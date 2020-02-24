@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,23 +78,8 @@ public class ForcedId {
 		myForcedId = theForcedId;
 	}
 
-	public ResourceTable getResource() {
-		return myResource;
-	}
-
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
-	}
-
-	public Long getResourcePid() {
-		if (myResourcePid == null) {
-			return myResource.getId();
-		}
-		return myResourcePid;
-	}
-
-	public void setResourcePid(ResourceTable theResourcePid) {
-		myResource = theResourcePid;
 	}
 
 	public String getResourceType() {
@@ -105,8 +90,7 @@ public class ForcedId {
 		myResourceType = theResourceType;
 	}
 
-	public void setResourcePid(Long theResourcePid) {
-		myResourcePid = theResourcePid;
+	public Long getId() {
+		return myId;
 	}
-
 }

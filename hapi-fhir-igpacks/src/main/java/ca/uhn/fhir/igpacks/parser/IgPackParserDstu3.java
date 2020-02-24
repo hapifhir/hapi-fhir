@@ -4,7 +4,7 @@ package ca.uhn.fhir.igpacks.parser;
  * #%L
  * hapi-fhir-igpacks
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,12 @@ public class IgPackParserDstu3 extends BaseIgPackParser<IValidationSupport> {
 		super(theCtx);
 	}
 
+	@Override
 	protected IValidationSupport createValidationSupport(Map<IIdType, IBaseResource> theIgResources) {
 		return new IgPackValidationSupportDstu3(theIgResources);
 	}
 
+	@Override
 	protected FhirVersionEnum provideExpectedVersion() {
 		return FhirVersionEnum.DSTU3;
 	}

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Wed, Apr 19, 2017 07:44+1000 for FHIR v3.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="Provenance" type="Provenance">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="Provenance">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="target" minOccurs="1" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The Reference(s) that were generated or updated by  the activity described in this resource. A provenance can point to more than one target if multiple resources were created/updated by the same activity.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="period" minOccurs="0" maxOccurs="1" type="Period">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The period during which the activity occurred.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="recorded" minOccurs="1" maxOccurs="1" type="instant">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The instant of time at which the activity was recorded.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="policy" minOccurs="0" maxOccurs="unbounded" type="uri">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Policy or plan the activity was defined by. Typically, a single activity may have multiple applicable policy documents, such as patient consent, guarantor funding, etc.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="location" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Where the activity occurred, if relevant.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="reason" minOccurs="0" maxOccurs="unbounded" type="Coding">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The reason that the activity was taking place.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="activity" minOccurs="0" maxOccurs="1" type="Coding">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="agent" type="Provenance.Agent" minOccurs="1" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An actor taking a role in an activity  for which it can be assigned some degree of responsibility for the activity taking place.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="entity" type="Provenance.Entity" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An entity used in this activity.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="signature" minOccurs="0" maxOccurs="unbounded" type="Signature">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A digital signature on the target Reference(s). The signer should match a Provenance.agent. The purpose of the signature is indicated.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Provenance.Agent">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="role" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The function of the agent with respect to the activity. The security role enabling the agent with respect to the activity.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:choice minOccurs="1" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The individual, device or organization that participated in the event.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="whoUri" type="uri"/>
+            <xs:element name="whoReference" type="Reference"/>
+          </xs:choice>
+          <xs:choice minOccurs="0" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The individual, device, or organization for whom the change was made.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="onBehalfOfUri" type="uri"/>
+            <xs:element name="onBehalfOfReference" type="Reference"/>
+          </xs:choice>
+          <xs:element name="relatedAgentType" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The type of relationship between agents.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Provenance.Entity">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="role" minOccurs="1" maxOccurs="1" type="ProvenanceEntityRole">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">How the entity was used during the activity.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:choice minOccurs="1" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="whatUri" type="uri"/>
+            <xs:element name="whatReference" type="Reference"/>
+            <xs:element name="whatIdentifier" type="Identifier"/>
+          </xs:choice>
+          <xs:element name="agent" type="Provenance.Agent" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The entity is attributed to an agent to express the agent's responsibility for that entity, possibly along with other agents. This description can be understood as shorthand for saying that the agent was responsible for the activity which generated the entity.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ProvenanceEntityRole-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="derivation">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Derivation</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="revision">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Revision</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="quotation">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Quotation</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="source">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Source</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="removal">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Removal</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ProvenanceEntityRole">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">How an entity was used in an activity.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="ProvenanceEntityRole-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

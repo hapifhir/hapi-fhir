@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.client.interceptor;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 		}
 	}
 
+	@Override
 	@Hook(Pointcut.CLIENT_REQUEST)
 	public void interceptRequest(IHttpRequest theRequest) {
 		if (myLogRequestSummary) {
@@ -93,14 +95,13 @@ public class LoggingInterceptor implements IClientInterceptor {
 				if (content != null) {
 					myLog.info("Client request body:\n{}", content);
 				}
-			} catch (IllegalStateException e) {
-				myLog.warn("Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
-			} catch (IOException e) {
+			} catch (IllegalStateException | IOException e) {
 				myLog.warn("Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
 			}
 		}
 	}
 
+	@Override
 	@Hook(Pointcut.CLIENT_RESPONSE)
 	public void interceptResponse(IHttpResponse theResponse) throws IOException {
 		if (myLogResponseSummary) {
@@ -145,11 +146,8 @@ public class LoggingInterceptor implements IClientInterceptor {
 		}
 
 		if (myLogResponseBody) {
-			//TODO: Use of a deprecated method should be resolved.
-			theResponse.bufferEntitity();
-			InputStream respEntity = null;
-			try  {
-				respEntity = theResponse.readEntity();
+			theResponse.bufferEntity();
+			try (InputStream respEntity = theResponse.readEntity()) {
 				if (respEntity != null) {
 					final byte[] bytes;
 					try {
@@ -157,12 +155,10 @@ public class LoggingInterceptor implements IClientInterceptor {
 					} catch (IllegalStateException e) {
 						throw new InternalErrorException(e);
 					}
-					myLog.info("Client response body:\n{}", new String(bytes, "UTF-8"));
+					myLog.info("Client response body:\n{}", new String(bytes, StandardCharsets.UTF_8));
 				} else {
 					myLog.info("Client response body: (none)");
 				}
-			} finally {
-				IOUtils.closeQuietly(respEntity);
 			}
 		}
 	}
@@ -176,7 +172,9 @@ public class LoggingInterceptor implements IClientInterceptor {
 				Iterator<String> values = theHeaders.get(key).iterator();
 				while(values.hasNext()) {
 					String value = values.next();
-						b.append(key + ": " + value);
+						b.append(key);
+						b.append(": ");
+						b.append(value);
 						if (nameEntries.hasNext() || values.hasNext()) {
 							b.append('\n');
 						}

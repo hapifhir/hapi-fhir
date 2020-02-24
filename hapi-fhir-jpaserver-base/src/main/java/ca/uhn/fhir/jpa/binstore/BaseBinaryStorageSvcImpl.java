@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.binstore;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -33,6 +32,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import javax.annotation.Nonnull;
 import java.io.InputStream;
 import java.security.SecureRandom;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	private final SecureRandom myRandom;
@@ -66,7 +67,8 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 		myMinimumBinarySize = theMinimumBinarySize;
 	}
 
-	String newRandomId() {
+	@Override
+	public String newBlobId() {
 		StringBuilder b = new StringBuilder();
 		for (int i = 0; i < ID_LENGTH; i++) {
 			int nextInt = Math.abs(myRandom.nextInt());
@@ -89,13 +91,13 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Nonnull
 	CountingInputStream createCountingInputStream(InputStream theInputStream) {
-		InputStream is = ByteStreams.limit(theInputStream, myMaximumBinarySize + 1L);
+		InputStream is = ByteStreams.limit(theInputStream, getMaximumBinarySize() + 1L);
 		return new CountingInputStream(is) {
 			@Override
 			public int getCount() {
 				int retVal = super.getCount();
-				if (retVal > myMaximumBinarySize) {
-					throw new PayloadTooLargeException("Binary size exceeds maximum: " + myMaximumBinarySize);
+				if (retVal > getMaximumBinarySize()) {
+					throw new PayloadTooLargeException("Binary size exceeds maximum: " + getMaximumBinarySize());
 				}
 				return retVal;
 			}
@@ -103,4 +105,11 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 
+	String provideIdForNewBlob(String theBlobIdOrNull) {
+		String id = theBlobIdOrNull;
+		if (isBlank(theBlobIdOrNull)) {
+			id = newBlobId();
+		}
+		return id;
+	}
 }

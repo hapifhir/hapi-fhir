@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.After;
 import org.junit.Assert;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -303,9 +305,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			.addExtension(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS, new BooleanType("true"));
 		ourLog.info("** About to update subscription");
 
-		int modCount = myCountingInterceptor.getSentCount();
+		int modCount = (int) myCountingInterceptor.getSentCount("Subscription");
 		ourClient.update().resource(subscription1).execute();
-		waitForSize(modCount + 1, () -> myCountingInterceptor.getSentCount());
+		waitForSize(modCount + 2, () -> myCountingInterceptor.getSentCount("Subscription"), () -> myCountingInterceptor.toString());
 
 		ourLog.info("** About to send observation");
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
@@ -450,7 +452,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForSize(3, ourUpdatedObservations);
 
 		ourClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
-		waitForQueueToDrain();
+		waitForActivatedSubscriptionCount(1);
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
@@ -869,6 +871,28 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		ourClient.create().resource(subscription).execute();
 		assertEquals(1, subscriptionCount());
 	}
+
+	/**
+	 * Make sure we don't activate a subscription if its type is incorrect
+	 */
+	@Test
+	public void testSubscriptionDoesntActivateIfRestHookIsNotEnabled() throws InterruptedException {
+		Set<org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType> existingSupportedSubscriptionTypes = myDaoConfig.getSupportedSubscriptionTypes();
+		myDaoConfig.clearSupportedSubscriptionTypesForUnitTest();
+		try {
+
+			Subscription subscription = newSubscription("Observation?", "application/fhir+json");
+			IIdType id = ourClient.create().resource(subscription).execute().getId().toUnqualifiedVersionless();
+
+			Thread.sleep(1000);
+			subscription = ourClient.read().resource(Subscription.class).withId(id).execute();
+			assertEquals(Subscription.SubscriptionStatus.REQUESTED, subscription.getStatus());
+
+		} finally {
+			existingSupportedSubscriptionTypes.forEach(t-> myDaoConfig.addSupportedSubscriptionType(t));
+		}
+	}
+
 
 	private int subscriptionCount() {
 		IBaseBundle found = ourClient.search().forResource(Subscription.class).cacheControl(new CacheControlDirective().setNoCache(true)).execute();

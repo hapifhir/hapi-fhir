@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Fri, Nov 1, 2019 09:29+1100 for FHIR v4.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="SubstanceProtein" type="SubstanceProtein">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A SubstanceProtein is defined as a single unit of a linear amino acid sequence, or a combination of subunits that are either covalently linked or have a defined invariant stoichiometric relationship. This includes all synthetic, recombinant and purified SubstanceProteins of defined sequence, whether the use is therapeutic or prophylactic. This set of elements will be used to describe albumins, coagulation factors, cytokines, growth factors, peptide/SubstanceProtein hormones, enzymes, toxins, toxoids, recombinant vaccines, and immunomodulators.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="SubstanceProtein">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A SubstanceProtein is defined as a single unit of a linear amino acid sequence, or a combination of subunits that are either covalently linked or have a defined invariant stoichiometric relationship. This includes all synthetic, recombinant and purified SubstanceProteins of defined sequence, whether the use is therapeutic or prophylactic. This set of elements will be used to describe albumins, coagulation factors, cytokines, growth factors, peptide/SubstanceProtein hormones, enzymes, toxins, toxoids, recombinant vaccines, and immunomodulators.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="sequenceType" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The SubstanceProtein descriptive elements will only be used when a complete or partial amino acid sequence is available or derivable from a nucleic acid sequence.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="numberOfSubunits" minOccurs="0" maxOccurs="1" type="integer">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Number of linear sequences of amino acids linked through peptide bonds. The number of subunits constituting the SubstanceProtein shall be described. It is possible that the number of subunits can be variable.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="disulfideLinkage" minOccurs="0" maxOccurs="unbounded" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The disulphide bond between two cysteine residues either on the same subunit or on two different subunits shall be described. The position of the disulfide bonds in the SubstanceProtein shall be listed in increasing order of subunit number and position within subunit followed by the abbreviation of the amino acids involved. The disulfide linkage positions shall actually contain the amino acid Cysteine at the respective positions.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="subunit" type="SubstanceProtein.Subunit" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">This subclause refers to the description of each subunit constituting the SubstanceProtein. A subunit is a linear sequence of amino acids linked through peptide bonds. The Subunit information shall be provided when the finished SubstanceProtein is a complex of multiple sequences; subunits are not used to delineate domains within a single sequence. Subunits are listed in order of decreasing length; sequences of the same length will be ordered by decreasing molecular weight; subunits that have identical sequences will be repeated multiple times.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="SubstanceProtein.Subunit">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A SubstanceProtein is defined as a single unit of a linear amino acid sequence, or a combination of subunits that are either covalently linked or have a defined invariant stoichiometric relationship. This includes all synthetic, recombinant and purified SubstanceProteins of defined sequence, whether the use is therapeutic or prophylactic. This set of elements will be used to describe albumins, coagulation factors, cytokines, growth factors, peptide/SubstanceProtein hormones, enzymes, toxins, toxoids, recombinant vaccines, and immunomodulators.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="subunit" minOccurs="0" maxOccurs="1" type="integer">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Index of primary sequences of amino acids linked through peptide bonds in order of decreasing length. Sequences of the same length will be ordered by molecular weight. Subunits that have identical sequences will be repeated and have sequential subscripts.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="sequence" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The sequence information shall be provided enumerating the amino acids from N- to C-terminal end using standard single-letter amino acid codes. Uppercase shall be used for L-amino acids and lowercase for D-amino acids. Transcribed SubstanceProteins will always be described using the translated sequence; for synthetic peptide containing amino acids that are not represented with a single letter code an X should be used within the sequence. The modified amino acids will be distinguished by their position in the sequence.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="length" minOccurs="0" maxOccurs="1" type="integer">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Length of linear sequences of amino acids contained in the subunit.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="sequenceAttachment" minOccurs="0" maxOccurs="1" type="Attachment">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The sequence information shall be provided enumerating the amino acids from N- to C-terminal end using standard single-letter amino acid codes. Uppercase shall be used for L-amino acids and lowercase for D-amino acids. Transcribed SubstanceProteins will always be described using the translated sequence; for synthetic peptide containing amino acids that are not represented with a single letter code an X should be used within the sequence. The modified amino acids will be distinguished by their position in the sequence.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="nTerminalModificationId" minOccurs="0" maxOccurs="1" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Unique identifier for molecular fragment modification based on the ISO 11238 Substance ID.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="nTerminalModification" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The name of the fragment modified at the N-terminal of the SubstanceProtein shall be specified.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="cTerminalModificationId" minOccurs="0" maxOccurs="1" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Unique identifier for molecular fragment modification based on the ISO 11238 Substance ID.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="cTerminalModification" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The modification at the C-terminal shall be specified.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

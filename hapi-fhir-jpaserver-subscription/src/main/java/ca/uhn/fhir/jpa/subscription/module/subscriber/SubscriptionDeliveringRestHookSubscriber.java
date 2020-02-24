@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,6 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	@Autowired
 	IResourceRetriever myResourceRetriever;
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
-	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
 		IBaseResource payloadResource = getAndMassagePayload(theMsg, theSubscription);
@@ -144,7 +142,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		HookParams params = new HookParams()
 			.add(CanonicalSubscription.class, subscription)
 			.add(ResourceDeliveryMessage.class, theMessage);
-		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY, params)) {
+		if (!getInterceptorBroadcaster().callHooks(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY, params)) {
 			return;
 		}
 
@@ -179,7 +177,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		params = new HookParams()
 			.add(CanonicalSubscription.class, subscription)
 			.add(ResourceDeliveryMessage.class, theMessage);
-		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, params)) {
+		if (!getInterceptorBroadcaster().callHooks(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, params)) {
 			//noinspection UnnecessaryReturnStatement
 			return;
 		}

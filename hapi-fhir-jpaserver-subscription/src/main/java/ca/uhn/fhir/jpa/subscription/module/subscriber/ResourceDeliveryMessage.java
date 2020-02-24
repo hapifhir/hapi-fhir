@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,6 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	public String toString() {
 		return new ToStringBuilder(this)
 			.append("mySubscription", mySubscription)
-//			.append("mySubscriptionString", mySubscriptionString)
 			.append("myPayloadString", myPayloadString)
 			.append("myPayload", myPayload)
 			.append("myPayloadId", myPayloadId)
@@ -134,7 +133,10 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	public String getSubscriptionId(FhirContext theFhirContext) {
 		String retVal = null;
 		if (getSubscription() != null) {
-			retVal = getSubscription().getIdElement(theFhirContext).getValue();
+			IIdType idElement = getSubscription().getIdElement(theFhirContext);
+			if (idElement != null) {
+				retVal = idElement.getValue();
+			}
 		}
 		return retVal;
 	}

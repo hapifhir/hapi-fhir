@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.binstore;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 	}
 
 	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theContentType, InputStream theInputStream) throws IOException {
-		String id = newRandomId();
+	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
+		String id = super.provideIdForNewBlob(theBlobIdOrNull);
 		String key = toKey(theResourceId, id);
 
 		HashingInputStream hashingIs = createHashingInputStream(theInputStream);
@@ -85,10 +85,21 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 	public void expungeBlob(IIdType theResourceId, String theBlobId) {
 		String key = toKey(theResourceId, theBlobId);
 		myDataMap.remove(key);
+		myDetailsMap.remove(key);
+	}
+
+	@Override
+	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) {
+		String key = toKey(theResourceId, theBlobId);
+		return myDataMap.get(key);
 	}
 
 	private String toKey(IIdType theResourceId, String theBlobId) {
 		return theBlobId + '-' + theResourceId.toUnqualifiedVersionless().getValue();
 	}
 
+	public void clear() {
+		myDetailsMap.clear();
+		myDataMap.clear();
+	}
 }

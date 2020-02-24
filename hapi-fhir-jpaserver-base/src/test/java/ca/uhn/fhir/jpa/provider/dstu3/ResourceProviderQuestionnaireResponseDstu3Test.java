@@ -79,30 +79,6 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 		}
 	}
 	
-	@SuppressWarnings("unused")
-	@Test
-	@Ignore
-	public void testCreateWithAbsoluteReference() {
-		Patient pt1 = new Patient();
-		pt1.addName().setFamily("Everything").addGiven("Arthur");
-		IIdType ptId1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
-
-		Questionnaire q1 = new Questionnaire();
-		q1.addItem().setLinkId("link1").setType(QuestionnaireItemType.STRING);
-		IIdType qId = myQuestionnaireDao.create(q1, mySrd).getId().toUnqualifiedVersionless();
-		
-		QuestionnaireResponse qr1 = new QuestionnaireResponse();
-		qr1.getQuestionnaire().setReferenceElement(qId.withServerBase(null, "Questionnaire"));
-		qr1.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qr1.addItem().setLinkId("link1").addAnswer().setValue(new DecimalType(123));
-		try {
-			ourClient.create().resource(qr1).execute();
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertThat(e.toString(), containsString("Answer value must be of type string"));
-		}
-	}
-	
 	@Test
 	public void testSaveQuestionnaire() throws Exception {
 		String input = "<QuestionnaireResponse xmlns=\"http://hl7.org/fhir\">\n" + 

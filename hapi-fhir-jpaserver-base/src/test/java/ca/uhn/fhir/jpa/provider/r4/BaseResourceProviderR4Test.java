@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -61,14 +61,14 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static int ourPort;
 	protected static RestfulServer ourRestServer;
 	protected static String ourServerBase;
-	protected static SearchParamRegistryR4 ourSearchParamRegistry;
+	protected static SearchParamRegistryImpl ourSearchParamRegistry;
 	private static DatabaseBackedPagingProvider ourPagingProvider;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	private static SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor;
 	protected static Server ourServer;
 	protected IGenericClient ourClient;
-	ResourceCountCache ourResourceCountsCache;
+	ResourceCountCache myResourceCountsCache;
 	private TerminologyUploaderProvider myTerminologyUploaderProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
 
@@ -93,6 +93,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myResourceCountsCache = (ResourceCountCache) myAppCtx.getBean("myResourceCountsCache");
 
 		if (ourServer == null) {
 			ourRestServer = new RestfulServer(myFhirCtx);
@@ -113,7 +114,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourRestServer.setServerConformanceProvider(confProvider);
 
 			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
-			ourResourceCountsCache = (ResourceCountCache) myAppCtx.getBean("myResourceCountsCache");
 
 			Server server = new Server(0);
 
@@ -163,7 +163,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
 			myValidationSupport = wac.getBean(JpaValidationSupportChainR4.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
-			ourSearchParamRegistry = wac.getBean(SearchParamRegistryR4.class);
+			ourSearchParamRegistry = wac.getBean(SearchParamRegistryImpl.class);
 			ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
 			ourSubscriptionMatcherInterceptor.start();
 

@@ -1,6 +1,7 @@
 package org.hl7.fhir.instance.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu2.formats.IParser;
 import org.hl7.fhir.dstu2.formats.ParserType;
@@ -149,7 +150,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	public ValidationResult validateCode(CodeableConcept theCode, ValueSet theVs) {
 		for (Coding next : theCode.getCoding()) {
 			ValidationResult retVal = validateCode(next, theVs);
-			if (retVal != null && retVal.isOk()) {
+			if (retVal.isOk()) {
 				return retVal;
 			}
 		}
@@ -182,7 +183,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ValueSet theVs) {
 
-		if (theSystem == null || StringUtils.equals(theSystem, theVs.getCodeSystem().getSystem())) {
+		if (Constants.codeSystemNotNeeded(theSystem) || StringUtils.equals(theSystem, theVs.getCodeSystem().getSystem())) {
 			for (ConceptDefinitionComponent next : theVs.getCodeSystem().getConcept()) {
 				ValidationResult retVal = validateCodeSystem(theCode, next);
 				if (retVal != null && retVal.isOk()) {
@@ -198,7 +199,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 				nextSystem = nextComposeConceptSet.getSystem();
 			}
 
-			if (StringUtils.equals(nextSystem, nextComposeConceptSet.getSystem())) {
+			if (Constants.codeSystemNotNeeded(theSystem) || StringUtils.equals(nextSystem, nextComposeConceptSet.getSystem())) {
 				for (ConceptReferenceComponent nextComposeCode : nextComposeConceptSet.getConcept()) {
 					ConceptDefinitionComponent conceptDef = new ConceptDefinitionComponent();
 					conceptDef.setCode(nextComposeCode.getCode());
@@ -210,7 +211,13 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 				}
 
 				if (nextComposeConceptSet.getConcept().isEmpty()){
-					ValidationResult result = validateCode(nextSystem, theCode, null);
+
+					String validateSystem = nextSystem;
+					if (Constants.codeSystemNotNeeded(nextSystem)) {
+						validateSystem = nextComposeConceptSet.getSystem();
+					}
+
+					ValidationResult result = validateCode(validateSystem, theCode, null);
 					if (result.isOk()){
 						return result;
 					}
@@ -218,7 +225,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 			}
 		}
 
-		return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");
+		return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + Constants.codeSystemWithDefaultDescription(theSystem) + "]");
 	}
 
 	private ValidationResult validateCodeSystem(String theCode, ConceptDefinitionComponent theConcept) {

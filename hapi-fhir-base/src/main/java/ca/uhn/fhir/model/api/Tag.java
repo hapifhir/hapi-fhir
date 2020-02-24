@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,18 +166,6 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 	public Tag setTerm(String theTerm) {
 		myTerm = theTerm;
 		return this;
-	}
-
-	public String toHeaderValue() {
-		StringBuilder b = new StringBuilder();
-		b.append(this.getTerm());
-		if (isNotBlank(this.getLabel())) {
-			b.append("; label=\"").append(this.getLabel()).append('"');
-		}
-		if (isNotBlank(this.getScheme())) {
-			b.append("; scheme=\"").append(this.getScheme()).append('"');
-		}
-		return b.toString();
 	}
 
 	@Override

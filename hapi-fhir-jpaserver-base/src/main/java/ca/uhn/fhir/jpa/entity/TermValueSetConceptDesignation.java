@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,10 @@ import java.io.Serializable;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
-@Table(name = "TRM_VALUESET_C_DESIGNATION", indexes = {
-	@Index(name = "IDX_VALUESET_C_DSGNTN_VAL", columnList = "VAL")
-})
+@Table(name = "TRM_VALUESET_C_DESIGNATION")
 @Entity()
 public class TermValueSetConceptDesignation implements Serializable {
 	private static final long serialVersionUID = 1L;
-
-	public static final int MAX_LENGTH = 500;
 
 	@Id()
 	@SequenceGenerator(name = "SEQ_VALUESET_C_DSGNTN_PID", sequenceName = "SEQ_VALUESET_C_DSGNTN_PID")
@@ -68,19 +64,19 @@ public class TermValueSetConceptDesignation implements Serializable {
 	@Transient
 	private String myValueSetName;
 
-	@Column(name = "LANG", nullable = true, length = MAX_LENGTH)
+	@Column(name = "LANG", nullable = true, length = TermConceptDesignation.MAX_LENGTH)
 	private String myLanguage;
 
-	@Column(name = "USE_SYSTEM", nullable = true, length = MAX_LENGTH)
+	@Column(name = "USE_SYSTEM", nullable = true, length = TermConceptDesignation.MAX_LENGTH)
 	private String myUseSystem;
 
-	@Column(name = "USE_CODE", nullable = true, length = MAX_LENGTH)
+	@Column(name = "USE_CODE", nullable = true, length = TermConceptDesignation.MAX_LENGTH)
 	private String myUseCode;
 
-	@Column(name = "USE_DISPLAY", nullable = true, length = MAX_LENGTH)
+	@Column(name = "USE_DISPLAY", nullable = true, length = TermConceptDesignation.MAX_LENGTH)
 	private String myUseDisplay;
 
-	@Column(name = "VAL", nullable = false, length = MAX_LENGTH)
+	@Column(name = "VAL", nullable = false, length = TermConceptDesignation.MAX_VAL_LENGTH)
 	private String myValue;
 
 	@Transient
@@ -129,8 +125,8 @@ public class TermValueSetConceptDesignation implements Serializable {
 	}
 
 	public TermValueSetConceptDesignation setLanguage(String theLanguage) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theLanguage, MAX_LENGTH,
-			"Language exceeds maximum length (" + MAX_LENGTH + "): " + length(theLanguage));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theLanguage, TermConceptDesignation.MAX_LENGTH,
+			"Language exceeds maximum length (" + TermConceptDesignation.MAX_LENGTH + "): " + length(theLanguage));
 		myLanguage = theLanguage;
 		return this;
 	}
@@ -140,8 +136,8 @@ public class TermValueSetConceptDesignation implements Serializable {
 	}
 
 	public TermValueSetConceptDesignation setUseSystem(String theUseSystem) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUseSystem, MAX_LENGTH,
-			"Use system exceeds maximum length (" + MAX_LENGTH + "): " + length(theUseSystem));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUseSystem, TermConceptDesignation.MAX_LENGTH,
+			"Use system exceeds maximum length (" + TermConceptDesignation.MAX_LENGTH + "): " + length(theUseSystem));
 		myUseSystem = theUseSystem;
 		return this;
 	}
@@ -151,8 +147,8 @@ public class TermValueSetConceptDesignation implements Serializable {
 	}
 
 	public TermValueSetConceptDesignation setUseCode(String theUseCode) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUseCode, MAX_LENGTH,
-			"Use code exceeds maximum length (" + MAX_LENGTH + "): " + length(theUseCode));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUseCode, TermConceptDesignation.MAX_LENGTH,
+			"Use code exceeds maximum length (" + TermConceptDesignation.MAX_LENGTH + "): " + length(theUseCode));
 		myUseCode = theUseCode;
 		return this;
 	}
@@ -162,7 +158,7 @@ public class TermValueSetConceptDesignation implements Serializable {
 	}
 
 	public TermValueSetConceptDesignation setUseDisplay(String theUseDisplay) {
-		myUseDisplay = left(theUseDisplay, MAX_LENGTH);
+		myUseDisplay = left(theUseDisplay, TermConceptDesignation.MAX_LENGTH);
 		return this;
 	}
 
@@ -172,8 +168,8 @@ public class TermValueSetConceptDesignation implements Serializable {
 
 	public TermValueSetConceptDesignation setValue(@Nonnull String theValue) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theValue, "theValue must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theValue, MAX_LENGTH,
-			"Value exceeds maximum length (" + MAX_LENGTH + "): " + length(theValue));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theValue, TermConceptDesignation.MAX_VAL_LENGTH,
+			"Value exceeds maximum length (" + TermConceptDesignation.MAX_VAL_LENGTH + "): " + length(theValue));
 		myValue = theValue;
 		return this;
 	}

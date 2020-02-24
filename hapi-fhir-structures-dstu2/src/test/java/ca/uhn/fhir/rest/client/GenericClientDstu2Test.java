@@ -14,6 +14,8 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestSecurity;
+import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -22,6 +24,7 @@ import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
+import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.client.impl.BaseClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -416,12 +419,12 @@ public class GenericClientDstu2Test {
 		Patient p = new Patient();
 		p.addName().addFamily("FOOFAMILY");
 
-		client.create().resource(p).prefer(PreferHeader.PreferReturnEnum.MINIMAL).execute();
+		client.create().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER).length);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER)[0].getValue());
 		idx++;
 
-		client.create().resource(p).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
+		client.create().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER).length);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER)[0].getValue());
 		idx++;
@@ -1191,6 +1194,16 @@ public class GenericClientDstu2Test {
 			@Override
 			public List<String> getFormatCommentsPost() {
 				return null;
+			}
+
+			@Override
+			public Object getUserData(String theName) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void setUserData(String theName, Object theValue) {
+				throw new UnsupportedOperationException();
 			}
 
 			@Override
@@ -2221,25 +2234,27 @@ public class GenericClientDstu2Test {
 
 		Patient p2 = new Patient(); // Yes ID
 		p2.addName().addFamily("PATIENT2");
-		p2.setId("Patient/2");
+		p2.setId("http://foo.com/Patient/2");
 		input.add(p2);
 
 		//@formatter:off
 		List<IBaseResource> response = client.transaction()
 			.withResources(input)
 			.encodedJson()
+			.prettyPrint()
 			.execute();
 		//@formatter:on
 
-		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
+		assertEquals("http://example.com/fhir?_pretty=true", capt.getValue().getURI().toString());
 		assertEquals(2, response.size());
 
 		String requestString = IOUtils.toString(((HttpEntityEnclosingRequest) capt.getValue()).getEntity().getContent());
+		ourLog.info(requestString);
 		ca.uhn.fhir.model.dstu2.resource.Bundle requestBundle = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, requestString);
 		assertEquals(2, requestBundle.getEntry().size());
 		assertEquals("POST", requestBundle.getEntry().get(0).getRequest().getMethod());
 		assertEquals("PUT", requestBundle.getEntry().get(1).getRequest().getMethod());
-		assertEquals("Patient/2", requestBundle.getEntry().get(1).getRequest().getUrl());
+		assertEquals("http://foo.com/Patient/2", requestBundle.getEntry().get(1).getFullUrl());
 		assertEquals("application/json+fhir", capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 
 		p1 = (Patient) response.get(0);
@@ -2346,6 +2361,33 @@ public class GenericClientDstu2Test {
 
 		assertEquals("Patient/1/_history/1", response.getEntry().get(0).getResponse().getLocation());
 		assertEquals("Patient/2/_history/2", response.getEntry().get(1).getResponse().getLocation());
+	}
+
+	@Test
+	public void testTransactionHandle204NoBody() throws Exception {
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = new Bundle();
+		bundle.setType(BundleTypeEnum.TRANSACTION);
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle.Entry entry = bundle.addEntry();
+		entry.setResource(new Patient());
+		entry.getRequest().setMethod(HTTPVerbEnum.PUT);
+
+
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_204_NO_CONTENT, ""));
+		when(myHttpResponse.getEntity() ).thenReturn(null);
+
+		try {
+			client.transaction().withBundle(bundle).execute();
+			fail("Should throw an exception");
+		} catch (NonFhirResponseException e) {
+			assertEquals("status", Constants.STATUS_HTTP_204_NO_CONTENT, e.getStatusCode());
+		}
 	}
 
 	@Test
@@ -2465,12 +2507,12 @@ public class GenericClientDstu2Test {
 		p.setId(new IdDt("1"));
 		p.addName().addFamily("FOOFAMILY");
 
-		client.update().resource(p).prefer(PreferHeader.PreferReturnEnum.MINIMAL).execute();
+		client.update().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER).length);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER)[0].getValue());
 		idx++;
 
-		client.update().resource(p).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
+		client.update().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER).length);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER)[0].getValue());
 		idx++;
@@ -2646,7 +2688,7 @@ public class GenericClientDstu2Test {
 		}
 
 		@Override
-		public void registerInterceptor(IClientInterceptor theInterceptor) {
+		public void registerInterceptor(Object theInterceptor) {
 			// nothing
 		}
 
@@ -2661,7 +2703,7 @@ public class GenericClientDstu2Test {
 		}
 
 		@Override
-		public void unregisterInterceptor(IClientInterceptor theInterceptor) {
+		public void unregisterInterceptor(Object theInterceptor) {
 			// nothing
 		}
 

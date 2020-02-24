@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,16 +51,8 @@ public class ReflectionUtil {
 	}
 
 	public static Class<?> getGenericCollectionTypeOfField(Field next) {
-		Class<?> type;
 		ParameterizedType collectionType = (ParameterizedType) next.getGenericType();
-		Type firstArg = collectionType.getActualTypeArguments()[0];
-		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
-			ParameterizedType pt = ((ParameterizedType) firstArg);
-			type = (Class<?>) pt.getRawType();
-		} else {
-			type = (Class<?>) firstArg;
-		}
-		return type;
+		return getGenericCollectionTypeOf(collectionType.getActualTypeArguments()[0]);
 	}
 
 	/**
@@ -84,42 +76,37 @@ public class ReflectionUtil {
 	}
 
 	public static Class<?> getGenericCollectionTypeOfMethodParameter(Method theMethod, int theParamIndex) {
-		Class<?> type;
 		Type genericParameterType = theMethod.getGenericParameterTypes()[theParamIndex];
 		if (Class.class.equals(genericParameterType) || Class.class.equals(genericParameterType.getClass())) {
 			return null;
 		}
 		ParameterizedType collectionType = (ParameterizedType) genericParameterType;
-		Type firstArg = collectionType.getActualTypeArguments()[0];
-		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
-			ParameterizedType pt = ((ParameterizedType) firstArg);
-			type = (Class<?>) pt.getRawType();
-		} else {
-			type = (Class<?>) firstArg;
-		}
-		return type;
+		return getGenericCollectionTypeOf(collectionType.getActualTypeArguments()[0]);
 	}
 
-	@SuppressWarnings({ "rawtypes" })
 	public static Class<?> getGenericCollectionTypeOfMethodReturnType(Method theMethod) {
-		Class<?> type;
 		Type genericReturnType = theMethod.getGenericReturnType();
 		if (!(genericReturnType instanceof ParameterizedType)) {
 			return null;
 		}
 		ParameterizedType collectionType = (ParameterizedType) genericReturnType;
-		Type firstArg = collectionType.getActualTypeArguments()[0];
-		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
-			ParameterizedType pt = ((ParameterizedType) firstArg);
+		return getGenericCollectionTypeOf(collectionType.getActualTypeArguments()[0]);
+	}
+
+	@SuppressWarnings({ "rawtypes" })
+	private static Class<?> getGenericCollectionTypeOf(Type theType) {
+		Class<?> type;
+		if (ParameterizedType.class.isAssignableFrom(theType.getClass())) {
+			ParameterizedType pt = ((ParameterizedType) theType);
 			type = (Class<?>) pt.getRawType();
-		} else if (firstArg instanceof TypeVariable<?>) {
-			Type decl = ((TypeVariable) firstArg).getBounds()[0];
+		} else if (theType instanceof TypeVariable<?>) {
+			Type decl = ((TypeVariable) theType).getBounds()[0];
 			return (Class<?>) decl;
-		} else if (firstArg instanceof WildcardType) {
-			Type decl = ((WildcardType) firstArg).getUpperBounds()[0];
+		} else if (theType instanceof WildcardType) {
+			Type decl = ((WildcardType) theType).getUpperBounds()[0];
 			return (Class<?>) decl;
 		} else {
-			type = (Class<?>) firstArg;
+			type = (Class<?>) theType;
 		}
 		return type;
 	}
@@ -131,11 +118,10 @@ public class ReflectionUtil {
 	/**
 	 * Instantiate a class by no-arg constructor, throw {@link ConfigurationException} if we fail to do so
 	 */
-	@CoverageIgnore
 	public static <T> T newInstance(Class<T> theType) {
 		Validate.notNull(theType, "theType must not be null");
 		try {
-			return theType.newInstance();
+			return theType.getConstructor().newInstance();
 		} catch (Exception e) {
 			throw new ConfigurationException("Failed to instantiate " + theType.getName(), e);
 		}
@@ -154,8 +140,7 @@ public class ReflectionUtil {
 	public static Object newInstanceOfFhirServerType(String theType) {
 		String errorMessage = "Unable to instantiate server framework. Please make sure that hapi-fhir-server library is on your classpath!";
 		String wantedType = "ca.uhn.fhir.rest.api.server.IFhirVersionServer";
-		Object fhirServerVersion = newInstanceOfType(theType, errorMessage, wantedType);
-		return fhirServerVersion;
+		return newInstanceOfType(theType, errorMessage, wantedType);
 	}
 
 	@SuppressWarnings("unchecked")

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -25,6 +26,8 @@ import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+
+import javax.annotation.Nonnull;
 
 public class OverlayTestApp {
 
@@ -156,14 +159,37 @@ public class OverlayTestApp {
 		@Search
 		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
 				@OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange, @IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
-			return null;
+			return getDiagnosticReports();
 		}
 
 		@Description(shortDefinition = "This is a query by issued.. blah blah foo bar blah blah")
 		@Search
 		public List<DiagnosticReport> findDiagnosticReportsByPatientIssued(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
 				@OptionalParam(name = DiagnosticReport.SP_ISSUED) DateRangeParam theDateRange, @IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
-			return null;
+			return getDiagnosticReports();
+		}
+
+		@Description(shortDefinition = "This is a query by issued.. blah blah foo bar blah blah")
+		@Search
+		public List<DiagnosticReport> findDiagnosticReportsByPatientIssued() throws Exception {
+			return getDiagnosticReports();
+		}
+
+		@Nonnull
+		private List<DiagnosticReport> getDiagnosticReports() {
+			ArrayList<DiagnosticReport> retVal = new ArrayList<>();
+
+			DiagnosticReport dr = new DiagnosticReport();
+			dr.addResult().setReference("Observation/123");
+			dr.setId("DiagnosticReport/1");
+			retVal.add(dr);
+
+			dr = new DiagnosticReport();
+			dr.addResult().setReference("Observation/123");
+			dr.setId("DiagnosticReport/2");
+			retVal.add(dr);
+
+			return retVal;
 		}
 
 		@Override

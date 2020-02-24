@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Wed, Apr 19, 2017 07:44+1000 for FHIR v3.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="Group" type="Group">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="Group">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A unique business identifier for this group.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="active" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Indicates whether the record for the group is available for use or is merely being retained for historical purposes.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="type" minOccurs="1" maxOccurs="1" type="GroupType">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies the broad classification of the kind of resources the group includes.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="actual" minOccurs="1" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="code" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Provides a specific type of resource the group includes; e.g. &quot;cow&quot;, &quot;syringe&quot;, etc.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A label assigned to the group for human identification and communication.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="quantity" minOccurs="0" maxOccurs="1" type="unsignedInt">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A count of the number of resource instances that are part of the group.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="characteristic" type="Group.Characteristic" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies the traits shared by members of the group.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="member" type="Group.Member" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies the resource instances that are members of the group.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Group.Characteristic">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="code" minOccurs="1" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A code that identifies the kind of trait being asserted.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:choice minOccurs="1" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The value of the trait that holds (or does not hold - see 'exclude') for members of the group.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="valueCodeableConcept" type="CodeableConcept"/>
+            <xs:element name="valueBoolean" type="boolean"/>
+            <xs:element name="valueQuantity" type="Quantity"/>
+            <xs:element name="valueRange" type="Range"/>
+          </xs:choice>
+          <xs:element name="exclude" minOccurs="1" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">If true, indicates the characteristic is one that is NOT held by members of the group.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="period" minOccurs="0" maxOccurs="1" type="Period">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The period over which the characteristic is tested; e.g. the patient had an operation during the month of June.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Group.Member">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="entity" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A reference to the entity that is a member of the group. Must be consistent with Group.type.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="period" minOccurs="0" maxOccurs="1" type="Period">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The period that the member was in the group, if known.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="inactive" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A flag to indicate that the member is no longer in the group, but previously may have been a member.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="GroupType-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="person">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Person</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="animal">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Animal</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="practitioner">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Practitioner</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="device">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Device</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="medication">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Medication</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="substance">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Substance</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="GroupType">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Types of resources that are part of group</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="GroupType-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

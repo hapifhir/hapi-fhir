@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,55 +20,70 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.convertors.conv30_40.CodeSystem30_40.convertCodeSystem;
 
-public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
+@Transactional
+public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoCodeSystemDstu3.class);
 
 	@Autowired
 	private ITermCodeSystemDao myCsDao;
-
 	@Autowired
 	private ValidationSupportChain myValidationSupport;
+	@Autowired
+	protected ITermCodeSystemStorageSvc myTerminologyCodeSystemStorageSvc;
+	@Autowired
+	private FhirContext myFhirContext;
+
+	public FhirResourceDaoCodeSystemDstu3() {
+		super();
+	}
 
 	@Override
 	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest) {
-		List<IIdType> valueSetIds;
-		Set<Long> ids = searchForIds(new SearchParameterMap(CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)), theRequest );
-		valueSetIds = new ArrayList<>();
-		for (Long next : ids) {
-			valueSetIds.add(new IdType("CodeSystem", next));
+		Set<ResourcePersistentId> ids = searchForIds(new SearchParameterMap(CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)), theRequest );
+		List<IIdType> valueSetIds = new ArrayList<>();
+		for (ResourcePersistentId next : ids) {
+			IIdType id = myIdHelperService.translatePidIdToForcedId(myFhirContext, "CodeSystem", next);
+			valueSetIds.add(id);
 		}
 		return valueSetIds;
 	}
 
+	@Nonnull
 	@Override
 	public IContextValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
@@ -119,22 +134,25 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 		if (isNotBlank(codeSystemUrl)) {
 			TermCodeSystem persCs = myCsDao.findByCodeSystemUri(codeSystemUrl);
 			if (persCs != null) {
-				myTerminologySvc.deleteCodeSystem(persCs);
+				myTerminologyCodeSystemStorageSvc.deleteCodeSystem(persCs);
 			}
 		}
 	}
 
 	@Override
-	protected ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-													 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
+												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
+		if (!retVal.isUnchangedInCurrentOperation()) {
 
-		CodeSystem csDstu3 = (CodeSystem) theResource;
+			CodeSystem csDstu3 = (CodeSystem) theResource;
 
-		org.hl7.fhir.r4.model.CodeSystem cs = VersionConvertor_30_40.convertCodeSystem(csDstu3);
-		addPidToResource(theEntity, cs);
+			org.hl7.fhir.r4.model.CodeSystem cs = convertCodeSystem(csDstu3);
+			addPidToResource(theEntity, cs);
 
-		myTerminologySvc.storeNewCodeSystemVersionIfNeeded(cs, theEntity);
+			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(cs, (ResourceTable) theEntity);
+
+		}
 
 		return retVal;
 	}

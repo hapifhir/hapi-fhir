@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.impl;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,14 @@ package ca.uhn.fhir.rest.client.impl;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.*;
@@ -533,7 +536,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private class CreateInternal extends BaseSearch<ICreateTyped, ICreateWithQueryTyped, MethodOutcome> implements ICreate, ICreateTyped, ICreateWithQuery, ICreateWithQueryTyped {
 
 		private boolean myConditional;
-		private PreferHeader.PreferReturnEnum myPrefer;
+		private PreferReturnEnum myPrefer;
 		private IBaseResource myResource;
 		private String myResourceBody;
 		private String mySearchUrl;
@@ -580,7 +583,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public ICreateTyped prefer(PreferHeader.PreferReturnEnum theReturn) {
+		public ICreateTyped prefer(PreferReturnEnum theReturn) {
 			myPrefer = theReturn;
 			return this;
 		}
@@ -1380,13 +1383,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	private final class OutcomeResponseHandler implements IClientResponseHandler<MethodOutcome> {
-		private PreferHeader.PreferReturnEnum myPrefer;
+		private PreferReturnEnum myPrefer;
 
 		private OutcomeResponseHandler() {
 			super();
 		}
 
-		private OutcomeResponseHandler(PreferHeader.PreferReturnEnum thePrefer) {
+		private OutcomeResponseHandler(PreferReturnEnum thePrefer) {
 			this();
 			myPrefer = thePrefer;
 		}
@@ -1396,7 +1399,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			MethodOutcome response = MethodUtil.process2xxResponse(myContext, theResponseStatusCode, theResponseMimeType, theResponseInputStream, theHeaders);
 			response.setCreatedUsingStatusCode(theResponseStatusCode);
 
-			if (myPrefer == PreferHeader.PreferReturnEnum.REPRESENTATION) {
+			if (myPrefer == PreferReturnEnum.REPRESENTATION) {
 				if (response.getResource() == null) {
 					if (response.getId() != null && isNotBlank(response.getId().getValue()) && response.getId().hasBaseUrl()) {
 						ourLog.info("Server did not return resource for Prefer-representation, going to fetch: {}", response.getId().getValue());
@@ -1418,7 +1421,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private IIdType myId;
 		private String myPatchBody;
 		private PatchTypeEnum myPatchType;
-		private PreferHeader.PreferReturnEnum myPrefer;
+		private PreferReturnEnum myPrefer;
 		private String myResourceType;
 		private String mySearchUrl;
 
@@ -1476,7 +1479,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IPatchExecutable prefer(PreferHeader.PreferReturnEnum theReturn) {
+		public IPatchExecutable prefer(PreferReturnEnum theReturn) {
 			myPrefer = theReturn;
 			return this;
 		}
@@ -1761,7 +1764,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			for (Include next : myInclude) {
 				if (next.isRecurse()) {
-					addParam(params, Constants.PARAM_INCLUDE_RECURSE, next.getValue());
+					if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+						addParam(params, Constants.PARAM_INCLUDE_ITERATE, next.getValue());
+					} else {
+						addParam(params, Constants.PARAM_INCLUDE_RECURSE, next.getValue());
+					}
 				} else {
 					addParam(params, Constants.PARAM_INCLUDE, next.getValue());
 				}
@@ -1769,7 +1776,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			for (Include next : myRevInclude) {
 				if (next.isRecurse()) {
-					addParam(params, Constants.PARAM_REVINCLUDE_RECURSE, next.getValue());
+					if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+						addParam(params, Constants.PARAM_REVINCLUDE_ITERATE, next.getValue());
+					} else {
+						addParam(params, Constants.PARAM_REVINCLUDE_RECURSE, next.getValue());
+					}
 				} else {
 					addParam(params, Constants.PARAM_REVINCLUDE, next.getValue());
 				}
@@ -1785,11 +1796,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					if (rootSs == null) {
 						rootSs = nextSortSpec;
 					} else {
-						// FIXME lastSs is null never set
-						// TODO unused assignment
 						lastSs.setChain(nextSortSpec);
 					}
-					// TODO unused assignment
 					lastSs = nextSortSpec;
 				}
 				if (rootSs != null) {
@@ -2038,7 +2046,35 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public ITransactionTyped<List<IBaseResource>> withResources(List<? extends IBaseResource> theResources) {
 			Validate.notNull(theResources, "theResources must not be null");
-			return new TransactionExecutable<List<IBaseResource>>(theResources);
+
+			for (IBaseResource next : theResources) {
+				String entryMethod = null;
+				if (next instanceof IResource) {
+					BundleEntryTransactionMethodEnum entryMethodEnum = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IResource) next);
+					if (entryMethodEnum != null) {
+						entryMethod = entryMethodEnum.getCode();
+					}
+				} else {
+					entryMethod = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IAnyResource) next);
+				}
+
+				if (isBlank(entryMethod)) {
+					if (isBlank(next.getIdElement().getValue())) {
+						entryMethod = "POST";
+					} else {
+						entryMethod = "PUT";
+					}
+					if (next instanceof IResource) {
+						ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put((IResource) next, BundleEntryTransactionMethodEnum.valueOf(entryMethod));
+					} else {
+						ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put((IAnyResource) next, entryMethod);
+					}
+
+				}
+
+			}
+
+			return new TransactionExecutable<>(theResources);
 		}
 
 	}
@@ -2048,7 +2084,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		private boolean myConditional;
 		private IIdType myId;
-		private PreferHeader.PreferReturnEnum myPrefer;
+		private PreferReturnEnum myPrefer;
 		private IBaseResource myResource;
 		private String myResourceBody;
 		private String mySearchUrl;
@@ -2102,7 +2138,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IUpdateExecutable prefer(PreferHeader.PreferReturnEnum theReturn) {
+		public IUpdateExecutable prefer(PreferReturnEnum theReturn) {
 			myPrefer = theReturn;
 			return this;
 		}
@@ -2282,7 +2318,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		params.get(parameterName).add(parameterValue);
 	}
 
-	private static void addPreferHeader(PreferHeader.PreferReturnEnum thePrefer, BaseHttpClientInvocation theInvocation) {
+	private static void addPreferHeader(PreferReturnEnum thePrefer, BaseHttpClientInvocation theInvocation) {
 		if (thePrefer != null) {
 			theInvocation.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + thePrefer.getHeaderValue());
 		}

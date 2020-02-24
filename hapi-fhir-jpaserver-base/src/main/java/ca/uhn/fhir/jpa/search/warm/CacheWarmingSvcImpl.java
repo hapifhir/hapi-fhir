@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.warm;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,14 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.time.DateUtils;
-import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.PersistJobDataAfterExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +45,6 @@ import java.util.*;
 @Component
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
-	public static final long SCHEDULED_JOB_INTERVAL = 10 * DateUtils.MILLIS_PER_SECOND;
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
 	@Autowired
 	private DaoConfig myDaoConfig;
@@ -83,14 +80,6 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
 	}
 
-	@PostConstruct
-	public void registerScheduledJob() {
-		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(CacheWarmingSvcImpl.class.getName());
-		jobDetail.setJobClass(CacheWarmingSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(SCHEDULED_JOB_INTERVAL, true, jobDetail);
-	}
-
 	private void refreshNow(WarmCacheEntry theCacheEntry) {
 		String nextUrl = theCacheEntry.getUrl();
 
@@ -113,6 +102,24 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 	@PostConstruct
 	public void start() {
 		initCacheMap();
+		scheduleJob();
+	}
+
+	public void scheduleJob() {
+		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(getClass().getName());
+		jobDetail.setJobClass(Job.class);
+		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private ICacheWarmingSvc myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.performWarmingPass();
+		}
 	}
 
 	public synchronized Set<WarmCacheEntry> initCacheMap() {
@@ -129,22 +136,5 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 		}
 
 		return Collections.unmodifiableSet(myCacheEntryToNextRefresh.keySet());
-
-	}
-
-	@DisallowConcurrentExecution
-	@PersistJobDataAfterExecution
-	public static class SubmitJob extends FireAtIntervalJob {
-		@Autowired
-		private ICacheWarmingSvc myTarget;
-
-		public SubmitJob() {
-			super(SCHEDULED_JOB_INTERVAL);
-		}
-
-		@Override
-		protected void doExecute(JobExecutionContext theContext) {
-			myTarget.performWarmingPass();
-		}
 	}
 }

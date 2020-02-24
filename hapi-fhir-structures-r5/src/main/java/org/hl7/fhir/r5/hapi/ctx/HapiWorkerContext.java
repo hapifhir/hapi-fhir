@@ -1,6 +1,7 @@
 package org.hl7.fhir.r5.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -15,25 +16,25 @@ import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.formats.IParser;
 import org.hl7.fhir.r5.formats.ParserType;
-import org.hl7.fhir.r5.hapi.ctx.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent;
-import org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.r5.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.hl7.fhir.utilities.validation.ValidationOptions;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
@@ -147,18 +148,12 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		}
 	}
 
-	@Override
-	public Set<String> typeTails() {
-		return new HashSet<>(Arrays.asList("Integer", "UnsignedInt", "PositiveInt", "Decimal", "DateTime", "Date", "Time", "Instant", "String", "Uri", "Oid", "Uuid", "Id", "Boolean", "Code",
-			"Markdown", "Base64Binary", "Coding", "CodeableConcept", "Attachment", "Identifier", "Quantity", "SampledData", "Range", "Period", "Ratio", "HumanName", "Address", "ContactPoint",
-			"Timing", "Reference", "Annotation", "Signature", "Meta"));
-	}
 
 	@Override
-	public ValidationResult validateCode(TerminologyServiceOptions theOptions, CodeableConcept theCode, ValueSet theVs) {
+	public ValidationResult validateCode(ValidationOptions theOptions, CodeableConcept theCode, ValueSet theVs) {
 		for (Coding next : theCode.getCoding()) {
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
-			if (retVal != null && retVal.isOk()) {
+			if (retVal.isOk()) {
 				return retVal;
 			}
 		}
@@ -167,7 +162,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	}
 
 	@Override
-	public ValidationResult validateCode(TerminologyServiceOptions theOptions, Coding theCode, ValueSet theVs) {
+	public ValidationResult validateCode(ValidationOptions theOptions, Coding theCode, ValueSet theVs) {
 		String system = theCode.getSystem();
 		String code = theCode.getCode();
 		String display = theCode.getDisplay();
@@ -175,113 +170,73 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	}
 
 	@Override
-	public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay) {
-		CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay);
+	public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay) {
+		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, null);
 		if (result == null) {
 			return null;
 		}
-		return new ValidationResult(result.getSeverity(), result.getMessage(), result.asConceptDefinition());
+		return new ValidationResult((IssueSeverity) result.getSeverity(), result.getMessage(), (ConceptDefinitionComponent) result.asConceptDefinition());
 	}
 
 	@Override
-	public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay, ConceptSetComponent theVsi) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
-
-		if (theVs != null && isNotBlank(theCode)) {
-			for (ConceptSetComponent next : theVs.getCompose().getInclude()) {
-				if (isBlank(theSystem) || theSystem.equals(next.getSystem())) {
-					for (ConceptReferenceComponent nextCode : next.getConcept()) {
-						if (theCode.equals(nextCode.getCode())) {
-							CodeType code = new CodeType(theCode);
-							return new ValidationResult(new ConceptDefinitionComponent(code));
-						}
-					}
-				}
-			}
-		}
-
-		boolean caseSensitive = true;
-		if (isNotBlank(theSystem)) {
-			CodeSystem system = fetchCodeSystem(theSystem);
-			if (system == null) {
-				return new ValidationResult(IssueSeverity.INFORMATION, "Code " + theSystem + "/" + theCode + " was not validated because the code system is not present");
-			}
-
-			if (system.hasCaseSensitive()) {
-				caseSensitive = system.getCaseSensitive();
-			}
-		}
-
-		String wantCode = theCode;
-		if (!caseSensitive) {
-			wantCode = wantCode.toUpperCase();
-		}
-
-		ValueSetExpansionOutcome expandedValueSet = null;
+	public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
 
 		/*
 		 * The following valueset is a special case, since the BCP codesystem is very difficult to expand
 		 */
-		if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getId())) {
-			ValueSet expansion = new ValueSet();
-			for (ConceptSetComponent nextInclude : theVs.getCompose().getInclude()) {
-				for (ConceptReferenceComponent nextConcept : nextInclude.getConcept()) {
-					expansion.getExpansion().addContains().setCode(nextConcept.getCode()).setDisplay(nextConcept.getDisplay());
-				}
-			}
-			expandedValueSet = new ValueSetExpansionOutcome(expansion);
+		if ("http://hl7.org/fhir/ValueSet/languages".equals(theVs.getUrl())) {
+			ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+			definition.setCode(theSystem);
+			definition.setDisplay(theCode);
+			return new ValidationResult(definition);
 		}
 
 		/*
 		 * The following valueset is a special case, since the mime types codesystem is very difficult to expand
 		 */
-		if (theVs != null && "http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getId())) {
-			ValueSet expansion = new ValueSet();
-			expansion.getExpansion().addContains().setCode(theCode).setSystem(theSystem).setDisplay(theDisplay);
-			expandedValueSet = new ValueSetExpansionOutcome(expansion);
+		if ("http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getUrl())) {
+			ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+			definition.setCode(theSystem);
+			definition.setDisplay(theCode);
+			return new ValidationResult(definition);
 		}
 
-		if (expandedValueSet == null) {
-			expandedValueSet = expand(theVs, null);
+		IValidationSupport.CodeValidationResult outcome;
+		if (isNotBlank(theVs.getUrl())) {
+			outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
+		} else {
+			outcome = myValidationSupport.validateCodeInValueSet(myCtx, theSystem, theCode, theDisplay, theVs);
 		}
 
-		for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
-			String nextCode = next.getCode();
-			if (!caseSensitive) {
-				nextCode = nextCode.toUpperCase();
-			}
-
-			if (nextCode.equals(wantCode)) {
-				if (theSystem == null || next.getSystem().equals(theSystem)) {
-					ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-					definition.setCode(next.getCode());
-					definition.setDisplay(next.getDisplay());
-					ValidationResult retVal = new ValidationResult(definition);
-					return retVal;
-				}
-			}
+		if (outcome != null && outcome.isOk()) {
+			ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+			definition.setCode(theCode);
+			definition.setDisplay(outcome.getDisplay());
+			return new ValidationResult(definition);
 		}
 
-		return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");
+		return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + Constants.codeSystemWithDefaultDescription(theSystem) + "]");
 	}
 
+
 	@Override
-	public ValidationResult validateCode(TerminologyServiceOptions theOptions, String code, ValueSet vs) {
+	public ValidationResult validateCode(ValidationOptions theOptions, String code, ValueSet vs) {
 		return validateCode(theOptions, null, code, null, vs);
 	}
 
 	@Override
 	@CoverageIgnore
-	public List<MetadataResource> allConformanceResources() {
+	public List<CanonicalResource> allConformanceResources() {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void generateSnapshot(StructureDefinition p) throws FHIRException {
+
+	}
+
+	@Override
+	public void generateSnapshot(StructureDefinition mr, boolean ifLogical) {
 
 	}
 
@@ -389,6 +344,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	}
 
 	@Override
+	public StructureDefinition fetchRawProfile(String url) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public List<String> getTypeNames() {
 		throw new UnsupportedOperationException();
 	}
@@ -441,6 +401,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	@Override
 	public String getLinkForUrl(String corePath, String url) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Map<String, byte[]> getBinaries() {
+		return null;
 	}
 
 }

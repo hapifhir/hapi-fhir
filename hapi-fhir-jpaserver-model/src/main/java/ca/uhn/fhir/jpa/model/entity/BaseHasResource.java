@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -31,7 +33,7 @@ import java.util.Collection;
 import java.util.Date;
 
 @MappedSuperclass
-public abstract class BaseHasResource implements IBaseResourceEntity {
+public abstract class BaseHasResource implements IBaseResourceEntity, IBasePersistedResource {
 
 	@Column(name = "RES_DELETED_AT", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -42,11 +44,6 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 	@Enumerated(EnumType.STRING)
 	@OptimisticLock(excluded = true)
 	private FhirVersionEnum myFhirVersion;
-
-	@OneToOne(optional = true, fetch = FetchType.LAZY, cascade = {}, orphanRemoval = false)
-	@JoinColumn(name = "FORCED_ID_PID")
-	@OptimisticLock(excluded = true)
-	private ForcedId myForcedId;
 
 	@Column(name = "HAS_TAGS", nullable = false)
 	@OptimisticLock(excluded = true)
@@ -85,10 +82,6 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 		return cloneDate(myDeleted);
 	}
 
-	public void setDeleted(Date theDate) {
-		myDeleted = theDate;
-	}
-
 	@Override
 	public FhirVersionEnum getFhirVersion() {
 		return myFhirVersion;
@@ -98,27 +91,20 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 		myFhirVersion = theFhirVersion;
 	}
 
-	public ForcedId getForcedId() {
-		return myForcedId;
-	}
+	abstract public ForcedId getForcedId();
 
-	public void setForcedId(ForcedId theForcedId) {
-		myForcedId = theForcedId;
-	}
+	abstract public void setForcedId(ForcedId theForcedId);
 
 	@Override
 	public abstract Long getId();
 
 	@Override
-	public IdDt getIdDt() {
-		if (getForcedId() == null) {
-			Long id = getResourceId();
-			return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-		} else {
-			// Avoid a join query if possible
-			String forcedId = getTransientForcedId() != null ? getTransientForcedId() : getForcedId().getForcedId();
-			return new IdDt(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-		}
+	public boolean isDeleted() {
+		return myDeleted != null;
+	}
+
+	public void setDeleted(Date theDate) {
+		myDeleted = theDate;
 	}
 
 	@Override

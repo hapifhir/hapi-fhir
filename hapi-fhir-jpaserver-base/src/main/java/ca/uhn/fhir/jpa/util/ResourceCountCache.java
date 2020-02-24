@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.util;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
-import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,14 +92,14 @@ public class ResourceCountCache {
 	}
 
 	@PostConstruct
-	public void registerScheduledJob() {
+	public void scheduleJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(ResourceCountCache.class.getName());
-		jobDetail.setJobClass(ResourceCountCache.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(10 * DateUtils.MILLIS_PER_MINUTE, false, jobDetail);
+		jobDetail.setId(getClass().getName());
+		jobDetail.setJobClass(Job.class);
+		mySchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_MINUTE, jobDetail);
 	}
 
-	public static class SubmitJob implements Job {
+	public static class Job implements HapiJob {
 		@Autowired
 		private ResourceCountCache myTarget;
 

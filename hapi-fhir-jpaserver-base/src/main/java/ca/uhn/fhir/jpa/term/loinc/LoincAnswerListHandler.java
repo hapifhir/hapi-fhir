@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -96,7 +96,7 @@ public class LoincAnswerListHandler extends BaseLoincHandler {
 			vs
 				.getCompose()
 				.getIncludeFirstRep()
-				.setSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
+				.setSystem(ITermLoaderSvc.LOINC_URI)
 				.addConcept()
 				.setCode(answerString)
 				.setDisplay(displayText);

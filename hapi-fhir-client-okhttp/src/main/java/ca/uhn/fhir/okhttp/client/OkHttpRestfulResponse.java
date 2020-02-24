@@ -14,7 +14,7 @@ import ca.uhn.fhir.rest.api.Constants;
  * #%L
  * HAPI FHIR OkHttp Client
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,22 +52,18 @@ public class OkHttpRestfulResponse extends BaseHttpResponse implements IHttpResp
 	}
 
 	@Override
-	public void bufferEntitity() throws IOException {
-		bufferEntity();
-	}
-
-	@Override
 	public void bufferEntity() throws IOException {
 		if (myEntityBuffered) {
 			return;
 		}
-		InputStream responseEntity = readEntity();
-		if (responseEntity != null) {
-			myEntityBuffered = true;
-			try {
-				myEntityBytes = IOUtils.toByteArray(responseEntity);
-			} catch (IllegalStateException e) {
-				throw new InternalErrorException(e);
+		try (InputStream responseEntity = readEntity()) {
+			if (responseEntity != null) {
+				myEntityBuffered = true;
+				try {
+					myEntityBytes = IOUtils.toByteArray(responseEntity);
+				} catch (IllegalStateException e) {
+					throw new InternalErrorException(e);
+				}
 			}
 		}
 	}

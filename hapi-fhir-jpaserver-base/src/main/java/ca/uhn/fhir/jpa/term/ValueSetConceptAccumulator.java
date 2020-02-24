@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isAnyBlank;
+import static org.apache.commons.lang3.StringUtils.isNoneBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetConceptAccumulator.class);
@@ -58,6 +60,12 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	}
 
 	@Override
+	public void addMessage(String theMessage) {
+		// ignore for now
+
+	}
+
+	@Override
 	public void includeConcept(String theSystem, String theCode, String theDisplay) {
 		saveConcept(theSystem, theCode, theDisplay);
 	}
@@ -65,8 +73,10 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	@Override
 	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations) {
 		TermValueSetConcept concept = saveConcept(theSystem, theCode, theDisplay);
-		for (TermConceptDesignation designation : theDesignations) {
-			saveConceptDesignation(concept, designation);
+		if (theDesignations != null) {
+			for (TermConceptDesignation designation : theDesignations) {
+				saveConceptDesignation(concept, designation);
+			}
 		}
 	}
 
@@ -82,7 +92,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		if (optionalConcept.isPresent()) {
 			TermValueSetConcept concept = optionalConcept.get();
 
-			ourLog.info("Excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
+			ourLog.debug("Excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
 			for (TermValueSetConceptDesignation designation : concept.getDesignations()) {
 				myValueSetConceptDesignationDao.deleteById(designation.getId());
 				myTermValueSet.decrementTotalConceptDesignations();
@@ -90,7 +100,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 			myValueSetConceptDao.deleteById(concept.getId());
 			myTermValueSet.decrementTotalConcepts();
 			myValueSetDao.save(myTermValueSet);
-			ourLog.info("Done excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
+			ourLog.debug("Done excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
 
 			if (++myConceptsExcluded % 250 == 0) {
 				ourLog.info("Have excluded {} concepts from ValueSet[{}]", myConceptsExcluded, myTermValueSet.getUrl());

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -37,7 +38,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
 
-public class FhirResourceDaoEncounterDstu3 extends FhirResourceDaoDstu3<Encounter>implements IFhirResourceDaoEncounter<Encounter> {
+public class FhirResourceDaoEncounterDstu3 extends BaseHapiFhirResourceDao<Encounter> implements IFhirResourceDaoEncounter<Encounter> {
 
 	@Override
 	public IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort) {

@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
@@ -23,6 +24,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -41,7 +43,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +82,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			}
 
 		} else if (IBaseResource.class.isAssignableFrom(methodReturnType)) {
-			if (Modifier.isAbstract(methodReturnType.getModifiers()) == false && theContext.getResourceDefinition((Class<? extends IBaseResource>) methodReturnType).isBundle()) {
+
+			if ( IBaseBundle.class.isAssignableFrom(methodReturnType)) {
 				myMethodReturnType = MethodReturnTypeEnum.BUNDLE_RESOURCE;
 			} else {
 				myMethodReturnType = MethodReturnTypeEnum.RESOURCE;
@@ -103,7 +106,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				// type let's grab it
 				if (!Modifier.isAbstract(theReturnResourceType.getModifiers()) && !Modifier.isInterface(theReturnResourceType.getModifiers())) {
 					Class<? extends IBaseResource> resourceType = (Class<? extends IResource>) theReturnResourceType;
-					myResourceName = theContext.getResourceDefinition(resourceType).getName();
+					RuntimeResourceDefinition resourceDefinition = theContext.getResourceDefinition(resourceType);
+					myResourceName = resourceDefinition.getName();
 				}
 			}
 		}

@@ -3,6 +3,7 @@ package org.hl7.fhir.r5.hapi.ctx;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -14,6 +15,7 @@ import org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
+import org.hl7.fhir.r5.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
 import java.io.IOException;
@@ -21,301 +23,329 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class DefaultProfileValidationSupport implements IValidationSupport {
 
-  private static final String URL_PREFIX_VALUE_SET = "http://hl7.org/fhir/ValueSet/";
-  private static final String URL_PREFIX_STRUCTURE_DEFINITION = "http://hl7.org/fhir/StructureDefinition/";
-  private static final String URL_PREFIX_STRUCTURE_DEFINITION_BASE = "http://hl7.org/fhir/";
+	private static final String URL_PREFIX_VALUE_SET = "http://hl7.org/fhir/ValueSet/";
+	private static final String URL_PREFIX_STRUCTURE_DEFINITION = "http://hl7.org/fhir/StructureDefinition/";
+	private static final String URL_PREFIX_STRUCTURE_DEFINITION_BASE = "http://hl7.org/fhir/";
 
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultProfileValidationSupport.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultProfileValidationSupport.class);
 
-  private Map<String, CodeSystem> myCodeSystems;
-  private Map<String, StructureDefinition> myStructureDefinitions;
-  private Map<String, ValueSet> myValueSets;
+	private Map<String, CodeSystem> myCodeSystems;
+	private Map<String, StructureDefinition> myStructureDefinitions;
+	private Map<String, ValueSet> myValueSets;
 
-  private void addConcepts(ConceptSetComponent theInclude, ValueSetExpansionComponent theRetVal, Set<String> theWantCodes, List<ConceptDefinitionComponent> theConcepts) {
-    for (ConceptDefinitionComponent next : theConcepts) {
-      if (theWantCodes.isEmpty() || theWantCodes.contains(next.getCode())) {
-        theRetVal
-          .addContains()
-          .setSystem(theInclude.getSystem())
-          .setCode(next.getCode())
-          .setDisplay(next.getDisplay());
-      }
-      addConcepts(theInclude, theRetVal, theWantCodes, next.getConcept());
-    }
-  }
+	private void addConcepts(ConceptSetComponent theInclude, ValueSetExpansionComponent theRetVal, Set<String> theWantCodes, List<ConceptDefinitionComponent> theConcepts) {
+		for (ConceptDefinitionComponent next : theConcepts) {
+			if (theWantCodes.isEmpty() || theWantCodes.contains(next.getCode())) {
+				theRetVal
+					.addContains()
+					.setSystem(theInclude.getSystem())
+					.setCode(next.getCode())
+					.setDisplay(next.getDisplay());
+			}
+			addConcepts(theInclude, theRetVal, theWantCodes, next.getConcept());
+		}
+	}
 
-  @Override
-  public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
-    ValueSetExpander.ValueSetExpansionOutcome retVal = new ValueSetExpander.ValueSetExpansionOutcome(new ValueSet());
+	@Override
+	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
+		ValueSetExpander.ValueSetExpansionOutcome retVal = new ValueSetExpander.ValueSetExpansionOutcome(new ValueSet());
 
-    Set<String> wantCodes = new HashSet<>();
-    for (ConceptReferenceComponent next : theInclude.getConcept()) {
-      wantCodes.add(next.getCode());
-    }
+		Set<String> wantCodes = new HashSet<>();
+		for (ConceptReferenceComponent next : theInclude.getConcept()) {
+			wantCodes.add(next.getCode());
+		}
 
-    CodeSystem system = fetchCodeSystem(theContext, theInclude.getSystem());
-    if (system != null) {
-      List<ConceptDefinitionComponent> concepts = system.getConcept();
-      addConcepts(theInclude, retVal.getValueset().getExpansion(), wantCodes, concepts);
-    }
+		CodeSystem system = fetchCodeSystem(theContext, theInclude.getSystem());
+		if (system != null) {
+			List<ConceptDefinitionComponent> concepts = system.getConcept();
+			addConcepts(theInclude, retVal.getValueset().getExpansion(), wantCodes, concepts);
+		}
 
-    for (UriType next : theInclude.getValueSet()) {
-      ValueSet vs = myValueSets.get(defaultString(next.getValueAsString()));
-      if (vs != null) {
-        for (ConceptSetComponent nextInclude : vs.getCompose().getInclude()) {
-          ValueSetExpander.ValueSetExpansionOutcome contents = expandValueSet(theContext, nextInclude);
-          retVal.getValueset().getExpansion().getContains().addAll(contents.getValueset().getExpansion().getContains());
-        }
-      }
-    }
+		for (UriType next : theInclude.getValueSet()) {
+			ValueSet vs = myValueSets.get(defaultString(next.getValueAsString()));
+			if (vs != null) {
+				for (ConceptSetComponent nextInclude : vs.getCompose().getInclude()) {
+					ValueSetExpander.ValueSetExpansionOutcome contents = expandValueSet(theContext, nextInclude);
+					retVal.getValueset().getExpansion().getContains().addAll(contents.getValueset().getExpansion().getContains());
+				}
+			}
+		}
 
-    return retVal;
-  }
+		return retVal;
+	}
 
-  @Override
-  public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
-    ArrayList<IBaseResource> retVal = new ArrayList<>();
-    retVal.addAll(myCodeSystems.values());
-    retVal.addAll(myStructureDefinitions.values());
-    retVal.addAll(myValueSets.values());
-    return retVal;
-  }
+	@Override
+	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+		ArrayList<IBaseResource> retVal = new ArrayList<>();
+		retVal.addAll(myCodeSystems.values());
+		retVal.addAll(myStructureDefinitions.values());
+		retVal.addAll(myValueSets.values());
+		return retVal;
+	}
 
-  @Override
-  public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-    return new ArrayList<>(provideStructureDefinitionMap(theContext).values());
-  }
+	@Override
+	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
+		return new ArrayList<>(provideStructureDefinitionMap(theContext).values());
+	}
 
 
-  @Override
-  public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
-    return (CodeSystem) fetchCodeSystemOrValueSet(theContext, theSystem, true);
-  }
+	@Override
+	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
+		return (CodeSystem) fetchCodeSystemOrValueSet(theContext, theSystem, true);
+	}
 
-  private DomainResource fetchCodeSystemOrValueSet(FhirContext theContext, String theSystem, boolean codeSystem) {
-    synchronized (this) {
-      Map<String, CodeSystem> codeSystems = myCodeSystems;
-      Map<String, ValueSet> valueSets = myValueSets;
-      if (codeSystems == null || valueSets == null) {
-        codeSystems = new HashMap<>();
-        valueSets = new HashMap<>();
+	private DomainResource fetchCodeSystemOrValueSet(FhirContext theContext, String theSystem, boolean codeSystem) {
+		synchronized (this) {
+			Map<String, CodeSystem> codeSystems = myCodeSystems;
+			Map<String, ValueSet> valueSets = myValueSets;
+			if (codeSystems == null || valueSets == null) {
+				codeSystems = new HashMap<>();
+				valueSets = new HashMap<>();
 
-        loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/r5/model/valueset/valuesets.xml");
-        loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/r5/model/valueset/v2-tables.xml");
-        loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/r5/model/valueset/v3-codesystems.xml");
+				loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/r5/model/valueset/valuesets.xml");
+				loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/r5/model/valueset/v2-tables.xml");
+				loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/r5/model/valueset/v3-codesystems.xml");
 
-        myCodeSystems = codeSystems;
-        myValueSets = valueSets;
-      }
+				myCodeSystems = codeSystems;
+				myValueSets = valueSets;
+			}
 
-      // System can take the form "http://url|version"
-      String system = theSystem;
-      if (system.contains("|")) {
-        String version = system.substring(system.indexOf('|') + 1);
-        if (version.matches("^[0-9.]+$")) {
-          system = system.substring(0, system.indexOf('|'));
-        }
-      }
+			// System can take the form "http://url|version"
+			String system = theSystem;
+			if (system.contains("|")) {
+				String version = system.substring(system.indexOf('|') + 1);
+				if (version.matches("^[0-9.]+$")) {
+					system = system.substring(0, system.indexOf('|'));
+				}
+			}
 
-      if (codeSystem) {
-        return codeSystems.get(system);
-      } else {
-        return valueSets.get(system);
-      }
-    }
-  }
+			if (codeSystem) {
+				return codeSystems.get(system);
+			} else {
+				return valueSets.get(system);
+			}
+		}
+	}
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
-    Validate.notBlank(theUri, "theUri must not be null or blank");
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+		Validate.notBlank(theUri, "theUri must not be null or blank");
 
-    if (theClass.equals(StructureDefinition.class)) {
-      return (T) fetchStructureDefinition(theContext, theUri);
-    }
+		if (theClass.equals(StructureDefinition.class)) {
+			return (T) fetchStructureDefinition(theContext, theUri);
+		}
 
-    if (theClass.equals(ValueSet.class) || theUri.startsWith(URL_PREFIX_VALUE_SET)) {
-      return (T) fetchValueSet(theContext, theUri);
-    }
+		if (theClass.equals(ValueSet.class) || theUri.startsWith(URL_PREFIX_VALUE_SET)) {
+			return (T) fetchValueSet(theContext, theUri);
+		}
 
-    return null;
-  }
+		return null;
+	}
 
-  @Override
-  public StructureDefinition fetchStructureDefinition(FhirContext theContext, String theUrl) {
-    String url = theUrl;
-    if (url.startsWith(URL_PREFIX_STRUCTURE_DEFINITION)) {
-      // no change
-    } else if (url.indexOf('/') == -1) {
-      url = URL_PREFIX_STRUCTURE_DEFINITION + url;
-    } else if (StringUtils.countMatches(url, '/') == 1) {
-      url = URL_PREFIX_STRUCTURE_DEFINITION_BASE + url;
-    }
-    return provideStructureDefinitionMap(theContext).get(url);
-  }
+	@Override
+	public StructureDefinition fetchStructureDefinition(FhirContext theContext, String theUrl) {
+		String url = theUrl;
+		if (url.startsWith(URL_PREFIX_STRUCTURE_DEFINITION)) {
+			// no change
+		} else if (url.indexOf('/') == -1) {
+			url = URL_PREFIX_STRUCTURE_DEFINITION + url;
+		} else if (StringUtils.countMatches(url, '/') == 1) {
+			url = URL_PREFIX_STRUCTURE_DEFINITION_BASE + url;
+		}
+		return provideStructureDefinitionMap(theContext).get(url);
+	}
 
-  @Override
-  public ValueSet fetchValueSet(FhirContext theContext, String uri) {
-    return (ValueSet) fetchCodeSystemOrValueSet(theContext, uri, false);
-  }
+	@Override
+	public ValueSet fetchValueSet(FhirContext theContext, String uri) {
+		return (ValueSet) fetchCodeSystemOrValueSet(theContext, uri, false);
+	}
 
-  public void flush() {
-    myCodeSystems = null;
-    myStructureDefinitions = null;
-  }
+	public void flush() {
+		myCodeSystems = null;
+		myStructureDefinitions = null;
+	}
 
-  @Override
-  public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
-    CodeSystem cs = fetchCodeSystem(theContext, theSystem);
-    return cs != null && cs.getContent() != CodeSystemContentMode.NOTPRESENT;
-  }
+	@Override
+	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+		if (isBlank(theSystem) || Constants.codeSystemNotNeeded(theSystem)) {
+			return false;
+		}
+		CodeSystem cs = fetchCodeSystem(theContext, theSystem);
+		return cs != null && cs.getContent() != CodeSystemContentMode.NOTPRESENT;
+	}
 
-  @Override
-  public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
-    return null;
-  }
+	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
+		return null;
+	}
 
-  private void loadCodeSystems(FhirContext theContext, Map<String, CodeSystem> theCodeSystems, Map<String, ValueSet> theValueSets, String theClasspath) {
-    ourLog.info("Loading CodeSystem/ValueSet from classpath: {}", theClasspath);
-    InputStream inputStream = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
-    InputStreamReader reader = null;
-    if (inputStream != null) {
-      try {
-        reader = new InputStreamReader(inputStream, Constants.CHARSET_UTF8);
+	private void loadCodeSystems(FhirContext theContext, Map<String, CodeSystem> theCodeSystems, Map<String, ValueSet> theValueSets, String theClasspath) {
+		ourLog.info("Loading CodeSystem/ValueSet from classpath: {}", theClasspath);
+		InputStream inputStream = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
+		InputStreamReader reader = null;
+		if (inputStream != null) {
+			try {
+				reader = new InputStreamReader(inputStream, Constants.CHARSET_UTF8);
 
-        Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
-        for (BundleEntryComponent next : bundle.getEntry()) {
-          if (next.getResource() instanceof CodeSystem) {
-            CodeSystem nextValueSet = (CodeSystem) next.getResource();
-            nextValueSet.getText().setDivAsString("");
-            String system = nextValueSet.getUrl();
-            if (isNotBlank(system)) {
-              theCodeSystems.put(system, nextValueSet);
-            }
-          } else if (next.getResource() instanceof ValueSet) {
-            ValueSet nextValueSet = (ValueSet) next.getResource();
-            nextValueSet.getText().setDivAsString("");
-            String system = nextValueSet.getUrl();
-            if (isNotBlank(system)) {
-              theValueSets.put(system, nextValueSet);
-            }
-          }
-        }
-      } finally {
-        try {
-          if (reader != null) {
-            reader.close();
-          }
-          inputStream.close();
-        } catch (IOException e) {
-          ourLog.warn("Failure closing stream", e);
-        }
-      }
-    } else {
-      ourLog.warn("Unable to load resource: {}", theClasspath);
-    }
-  }
+				Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
+				for (BundleEntryComponent next : bundle.getEntry()) {
+					if (next.getResource() instanceof CodeSystem) {
+						CodeSystem nextValueSet = (CodeSystem) next.getResource();
+						nextValueSet.getText().setDivAsString("");
+						String system = nextValueSet.getUrl();
+						if (isNotBlank(system)) {
+							theCodeSystems.put(system, nextValueSet);
+						}
+					} else if (next.getResource() instanceof ValueSet) {
+						ValueSet nextValueSet = (ValueSet) next.getResource();
+						nextValueSet.getText().setDivAsString("");
+						String system = nextValueSet.getUrl();
+						if (isNotBlank(system)) {
+							theValueSets.put(system, nextValueSet);
+						}
+					}
+				}
+			} finally {
+				try {
+					if (reader != null) {
+						reader.close();
+					}
+					inputStream.close();
+				} catch (IOException e) {
+					ourLog.warn("Failure closing stream", e);
+				}
+			}
+		} else {
+			ourLog.warn("Unable to load resource: {}", theClasspath);
+		}
+	}
 
-  private void loadStructureDefinitions(FhirContext theContext, Map<String, StructureDefinition> theCodeSystems, String theClasspath) {
-    ourLog.info("Loading structure definitions from classpath: {}", theClasspath);
-    InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
-    if (valuesetText != null) {
-      InputStreamReader reader = new InputStreamReader(valuesetText, Constants.CHARSET_UTF8);
+	private void loadStructureDefinitions(FhirContext theContext, Map<String, StructureDefinition> theCodeSystems, String theClasspath) {
+		ourLog.info("Loading structure definitions from classpath: {}", theClasspath);
+		InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
+		if (valuesetText != null) {
+			InputStreamReader reader = new InputStreamReader(valuesetText, Constants.CHARSET_UTF8);
 
-      Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
-      for (BundleEntryComponent next : bundle.getEntry()) {
-        if (next.getResource() instanceof StructureDefinition) {
-          StructureDefinition nextSd = (StructureDefinition) next.getResource();
-          nextSd.getText().setDivAsString("");
-          String system = nextSd.getUrl();
-          if (isNotBlank(system)) {
-            theCodeSystems.put(system, nextSd);
-          }
-        }
-      }
-    } else {
-      ourLog.warn("Unable to load resource: {}", theClasspath);
-    }
-  }
+			Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
+			for (BundleEntryComponent next : bundle.getEntry()) {
+				if (next.getResource() instanceof StructureDefinition) {
+					StructureDefinition nextSd = (StructureDefinition) next.getResource();
+					nextSd.getText().setDivAsString("");
+					String system = nextSd.getUrl();
+					if (isNotBlank(system)) {
+						theCodeSystems.put(system, nextSd);
+					}
+				}
+			}
+		} else {
+			ourLog.warn("Unable to load resource: {}", theClasspath);
+		}
+	}
 
-  private Map<String, StructureDefinition> provideStructureDefinitionMap(FhirContext theContext) {
-    Map<String, StructureDefinition> structureDefinitions = myStructureDefinitions;
-    if (structureDefinitions == null) {
-      structureDefinitions = new HashMap<>();
+	private Map<String, StructureDefinition> provideStructureDefinitionMap(FhirContext theContext) {
+		Map<String, StructureDefinition> structureDefinitions = myStructureDefinitions;
+		if (structureDefinitions == null) {
+			structureDefinitions = new HashMap<>();
 
-      loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/r5/model/profile/profiles-resources.xml");
-      loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/r5/model/profile/profiles-types.xml");
-      loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/r5/model/profile/profiles-others.xml");
-      loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/r5/model/extension/extension-definitions.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/r5/model/profile/profiles-resources.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/r5/model/profile/profiles-types.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/r5/model/profile/profiles-others.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/r5/model/extension/extension-definitions.xml");
 
-      myStructureDefinitions = structureDefinitions;
-    }
-    return structureDefinitions;
-  }
+			myStructureDefinitions = structureDefinitions;
+		}
+		return structureDefinitions;
+	}
 
-  private CodeValidationResult testIfConceptIsInList(CodeSystem theCodeSystem, String theCode, List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive) {
-    String code = theCode;
-    if (theCaseSensitive == false) {
-      code = code.toUpperCase();
-    }
+	private CodeValidationResult testIfConceptIsInList(CodeSystem theCodeSystem, String theCode, List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive) {
+		String code = theCode;
+		if (theCaseSensitive == false) {
+			code = code.toUpperCase();
+		}
 
-    return testIfConceptIsInListInner(theCodeSystem, conceptList, theCaseSensitive, code);
-  }
+		return testIfConceptIsInListInner(theCodeSystem, conceptList, theCaseSensitive, code);
+	}
 
-  private CodeValidationResult testIfConceptIsInListInner(CodeSystem theCodeSystem, List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive, String code) {
-    CodeValidationResult retVal = null;
-    for (ConceptDefinitionComponent next : conceptList) {
-      String nextCandidate = next.getCode();
-      if (theCaseSensitive == false) {
-        nextCandidate = nextCandidate.toUpperCase();
-      }
-      if (nextCandidate.equals(code)) {
-        retVal = new CodeValidationResult(next);
-        break;
-      }
+	private CodeValidationResult testIfConceptIsInListInner(CodeSystem theCodeSystem, List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive, String code) {
+		CodeValidationResult retVal = null;
+		for (ConceptDefinitionComponent next : conceptList) {
+			String nextCandidate = next.getCode();
+			if (theCaseSensitive == false) {
+				nextCandidate = nextCandidate.toUpperCase();
+			}
+			if (nextCandidate.equals(code)) {
+				retVal = new CodeValidationResult(null, null, next, next.getDisplay());
+				break;
+			}
 
-      // recurse
-      retVal = testIfConceptIsInList(theCodeSystem, code, next.getConcept(), theCaseSensitive);
-      if (retVal != null) {
-        break;
-      }
-    }
+			// recurse
+			retVal = testIfConceptIsInList(theCodeSystem, code, next.getConcept(), theCaseSensitive);
+			if (retVal != null) {
+				break;
+			}
+		}
 
-    if (retVal != null) {
-      retVal.setCodeSystemName(theCodeSystem.getName());
-      retVal.setCodeSystemVersion(theCodeSystem.getVersion());
-    }
+		if (retVal != null) {
+			retVal.setCodeSystemName(theCodeSystem.getName());
+			retVal.setCodeSystemVersion(theCodeSystem.getVersion());
+		}
 
-    return retVal;
-  }
+		return retVal;
+	}
 
-  @Override
-  public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-    CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
-    if (cs != null) {
-      boolean caseSensitive = true;
-      if (cs.hasCaseSensitive()) {
-        caseSensitive = cs.getCaseSensitive();
-      }
+	@Override
+	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+		if (isNotBlank(theValueSetUrl)) {
+			ValueSetExpander expander = new ValueSetExpanderSimple(new HapiWorkerContext(theContext, this));
+			try {
+				ValueSet valueSet = fetchValueSet(theContext, theValueSetUrl);
+				if (valueSet != null) {
+					ValueSetExpander.ValueSetExpansionOutcome expanded = expander.expand(valueSet, null);
+					Optional<ValueSet.ValueSetExpansionContainsComponent> haveMatch = expanded
+						.getValueset()
+						.getExpansion()
+						.getContains()
+						.stream()
+						.filter(t -> (Constants.codeSystemNotNeeded(theCodeSystem) || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
+						.findFirst();
+					if (haveMatch.isPresent()) {
+						return new CodeValidationResult(new ConceptDefinitionComponent(theCode));
+					}
+				}
+			} catch (Exception e) {
+				return new CodeValidationResult(IssueSeverity.WARNING, e.getMessage());
+			}
 
-      CodeValidationResult retVal = testIfConceptIsInList(cs, theCode, cs.getConcept(), caseSensitive);
+			return null;
+		}
 
-      if (retVal != null) {
-        return retVal;
-      }
-    }
+		if (theCodeSystem != null) {
+			CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
+			if (cs != null) {
+				boolean caseSensitive = true;
+				if (cs.hasCaseSensitive()) {
+					caseSensitive = cs.getCaseSensitive();
+				}
 
-    return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
-  }
+				CodeValidationResult retVal = testIfConceptIsInList(cs, theCode, cs.getConcept(), caseSensitive);
 
-  @Override
-  public IContextValidationSupport.LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
-    return validateCode(theContext, theSystem, theCode, null).asLookupCodeResult(theSystem, theCode);
-  }
+				if (retVal != null) {
+					return retVal;
+				}
+			}
+		}
+
+		return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
+	}
+
+	@Override
+	public IContextValidationSupport.LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return validateCode(theContext, theSystem, theCode, null, null).asLookupCodeResult(theSystem, theCode);
+	}
 
 }

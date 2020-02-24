@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>4.1.0-SNAPSHOT</version>
+		<version>4.3.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -69,12 +69,21 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
+
+		<!-- JENA Dependencies - Used for Turtle encoding -->
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>apache-jena-libs</artifactId>
 			<optional>true</optional>
 			<type>pom</type>
+			<exclusions>
+				<exclusion>
+					<groupId>com.github.jsonld-java</groupId>
+					<artifactId>jsonld-java</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>
@@ -90,10 +99,6 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-		</dependency>
-        <dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
 		</dependency>
 
 		<!-- Logging -->
@@ -111,6 +116,12 @@
 			<optional>true</optional>
 		</dependency>
 
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -119,12 +130,6 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
-					<classFolders>
-						<classFolder>${basedir}/target/classes</classFolder>
-					</classFolders>
-					<sourceFolders>
-						<sourceFolder>${basedir}/src/main/java</sourceFolder>
-					</sourceFolders>
 					<dumpOnExit>true</dumpOnExit>
 				</configuration>
 				<executions>
@@ -140,23 +145,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
+					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
 				</configuration>
 			</plugin>
-			<!--
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			-->
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
@@ -197,6 +188,7 @@
 							<timestampPropertyName>hapifhir.timestamp</timestampPropertyName>
 							<timestampFormat>yyyy-MM-dd'T'HH:mm:ss.SXXX</timestampFormat>
 							<versionPropertyName>hapifhir.version</versionPropertyName>
+							<revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
 						</configuration>
 					</execution>
 				</executions>
@@ -213,66 +205,5 @@
 			</resource>
 		</resources>
 	</build>
-
-	<profiles>
-		<profile>
-			<id>MINI</id>
-		</profile>
-		<profile>
-			<id>SITE</id>
-			<reporting>
-				<plugins>
-					<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> 
-						<reportSets> <reportSet> <reports> <report>checkstyle</report> </reports> 
-						</reportSet> </reportSets> <configuration> <linkXRef>false</linkXRef> <sourceDirectories> 
-						<sourceDirectory>hapi-fhir-base/src/main/java</sourceDirectory> </sourceDirectories> 
-						</configuration> </plugin> -->
-					<!--<plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>findbugs-maven-plugin</artifactId> 
-						<version>3.0.0</version> <configuration> </configuration> </plugin> -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jxr-plugin</artifactId>
-						<reportSets>
-							<reportSet>
-								<id>normal</id>
-								<reports>
-									<report>jxr</report>
-								</reports>
-							</reportSet>
-							<!-- <reportSet> <id>restful-server-example</id> <reports> <report>jxr</report> 
-								</reports> <configuration> <sourcePath>../restful-server-example/src/main/java</sourcePath> 
-								<destDir>${project.reporting.outputDirectory}/rse-xref</destDir> <outputDirectory>tmp</outputDirectory> 
-								<reportOutputDirectory>rse-xref</reportOutputDirectory> </configuration> 
-								</reportSet> -->
-						</reportSets>
-					</plugin>
-					<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> 
-						<version>1.1</version> <configuration> <forceSite>false</forceSite> </configuration> 
-						</plugin> -->
-
-
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-checkstyle-plugin</artifactId>
-						<reportSets>
-							<reportSet>
-								<reports>
-									<report>checkstyle</report>
-								</reports>
-							</reportSet>
-						</reportSets>
-						<configuration>
-							<linkXRef>false</linkXRef>
-							<configLocation>${project.basedir}/../src/checkstyle/checkstyle.xml</configLocation>
-							<!--<sourceDirectories> <sourceDirectory> ${project.basedir}/../hapi-fhir-base/src/main/java 
-								</sourceDirectory> </sourceDirectories> -->
-						</configuration>
-					</plugin>
-
-
-				</plugins>
-			</reporting>
-		</profile>
-	</profiles>
 
 </project>

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
 import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.*;
@@ -38,10 +41,14 @@ import java.util.Collection;
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
 
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
+
 	/**
 	 * @see ResourceEncodingEnum
 	 */
+	// Don't reduce the visibility here, we reference this from Smile
+	@SuppressWarnings("WeakerAccess")
 	public static final int ENCODING_COL_LENGTH = 5;
+
 	private static final long serialVersionUID = 1L;
 	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
@@ -49,10 +56,14 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name = "RES_ID")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_RESOURCE_HISTORY_RESOURCE"))
+	private ResourceTable myResourceTable;
+
+	@Column(name = "RES_ID", nullable = false, updatable = false, insertable = false)
 	private Long myResourceId;
 
-	@Column(name = "RES_TYPE", length = 30, nullable = false)
+	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
 
 	@Column(name = "RES_VER", nullable = false)
@@ -80,19 +91,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public ResourceHistoryProvenanceEntity getProvenance() {
 		return myProvenance;
-	}
-
-	public void setProvenance(ResourceHistoryProvenanceEntity theProvenance) {
-		myProvenance = theProvenance;
-	}
-
-	public void addTag(ResourceHistoryTag theTag) {
-		for (ResourceHistoryTag next : getTags()) {
-			if (next.equals(theTag)) {
-				return;
-			}
-		}
-		getTags().add(theTag);
 	}
 
 	public void addTag(ResourceTag theTag) {
@@ -126,10 +124,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		return myId;
 	}
 
-	public void setId(Long theId) {
-		myId = theId;
-	}
-
 	public byte[] getResource() {
 		return myResource;
 	}
@@ -159,7 +153,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Override
 	public Collection<ResourceHistoryTag> getTags() {
 		if (myTags == null) {
-			myTags = new ArrayList<ResourceHistoryTag>();
+			myTags = new ArrayList<>();
 		}
 		return myTags;
 	}
@@ -173,13 +167,39 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		myResourceVersion = theVersion;
 	}
 
-	public boolean hasTag(String theTerm, String theScheme) {
-		for (ResourceHistoryTag next : getTags()) {
-			if (next.getTag().getSystem().equals(theScheme) && next.getTag().getCode().equals(theTerm)) {
-				return true;
-			}
+	@Override
+	public ResourcePersistentId getPersistentId() {
+		return new ResourcePersistentId(myResourceId);
+	}
+
+	public ResourceTable getResourceTable() {
+		return myResourceTable;
+	}
+
+	public void setResourceTable(ResourceTable theResourceTable) {
+		myResourceTable = theResourceTable;
+	}
+
+	@Override
+	public IdDt getIdDt() {
+		if (getResourceTable().getForcedId() == null) {
+			Long id = getResourceId();
+			return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else {
+			// Avoid a join query if possible
+			String forcedId = getTransientForcedId() != null ? getTransientForcedId() : getResourceTable().getForcedId().getForcedId();
+			return new IdDt(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		}
-		return false;
+	}
+
+	@Override
+	public ForcedId getForcedId() {
+		return getResourceTable().getForcedId();
+	}
+
+	@Override
+	public void setForcedId(ForcedId theForcedId) {
+		getResourceTable().setForcedId(theForcedId);
 	}
 
 }

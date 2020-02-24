@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
+	<!-- This content is migrated -->
+
 	<properties>
 		<title>Server Interceptors</title>
 		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
@@ -311,6 +313,18 @@
 					can be used to accomplish this.
 				</p>
 				
+			</subsection>
+
+			<subsection name="Capturing Meta.source from an HTTP Header">
+
+				<p>
+					If you wish to override the value of <code>Resource.meta.source</code> using the value
+					supplied in an HTTP header, you can use the
+					<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/CaptureResourceSourceFromHeaderInterceptor.html">CaptureResourceSourceFromHeaderInterceptor</a>
+					(<a href="./xref/ca/uhn/fhir/rest/server/interceptor/CaptureResourceSourceFromHeaderInterceptor.html">code</a>)
+					to accomplish this.
+				</p>
+
 			</subsection>
 
 		</section>

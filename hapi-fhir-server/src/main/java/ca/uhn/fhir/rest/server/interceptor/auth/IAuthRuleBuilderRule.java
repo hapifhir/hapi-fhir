@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,16 @@ public interface IAuthRuleBuilderRule {
 	IAuthRuleBuilderRuleOp write();
 
 	/**
+	 * This rule specifically allows a user to perform a FHIR create, but not an update or other write operations
+	 *
+	 * @see #write()
+	 * @since 4.1.0
+	 */
+	IAuthRuleBuilderRuleOp create();
+
+	/**
 	 * Allow a GraphQL query
 	 */
 	IAuthRuleBuilderGraphQL graphQL();
+
 }

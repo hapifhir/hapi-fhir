@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -17,7 +19,7 @@ import java.util.zip.ZipOutputStream;
 public class ZipCollectionBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ZipCollectionBuilder.class);
-	private final ArrayList<IHapiTerminologyLoaderSvc.FileDescriptor> myFiles;
+	private final ArrayList<ITermLoaderSvc.FileDescriptor> myFiles;
 
 	/**
 	 * Constructor
@@ -31,7 +33,7 @@ public class ZipCollectionBuilder {
 	 */
 	public void addFilePlain(String theClasspathPrefix, String theClasspathFileName) throws IOException {
 		byte[] file = readFile(theClasspathPrefix, theClasspathFileName);
-		myFiles.add(new IHapiTerminologyLoaderSvc.FileDescriptor() {
+		myFiles.add(new ITermLoaderSvc.FileDescriptor() {
 			@Override
 			public String getFilename() {
 				return theClasspathFileName;
@@ -61,7 +63,7 @@ public class ZipCollectionBuilder {
 		zos.closeEntry();
 		zos.close();
 		ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);
-		myFiles.add(new IHapiTerminologyLoaderSvc.FileDescriptor() {
+		myFiles.add(new ITermLoaderSvc.FileDescriptor() {
 			@Override
 			public String getFilename() {
 				return "AAA.zip";
@@ -83,8 +85,21 @@ public class ZipCollectionBuilder {
 		return byteArray;
 	}
 
-	public List<IHapiTerminologyLoaderSvc.FileDescriptor> getFiles() {
+	public List<ITermLoaderSvc.FileDescriptor> getFiles() {
 		return myFiles;
 	}
 
+	public void addFileText(String theText, String theFilename) {
+		myFiles.add(new ITermLoaderSvc.FileDescriptor() {
+			@Override
+			public String getFilename() {
+				return theFilename;
+			}
+
+			@Override
+			public InputStream getInputStream() {
+				return new ByteArrayInputStream(theText.getBytes(Charsets.UTF_8));
+			}
+		});
+	}
 }

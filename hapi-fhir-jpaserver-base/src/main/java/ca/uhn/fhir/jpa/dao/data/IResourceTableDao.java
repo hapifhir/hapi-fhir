@@ -16,7 +16,7 @@ import java.util.Map;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,4 +58,9 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
 	@Modifying
 	@Query("UPDATE ResourceTable t SET t.myIndexStatus = :status WHERE t.myId = :id")
 	void updateIndexStatus(@Param("id") Long theId, @Param("status") Long theIndexStatus);
+
+	@Modifying
+	@Query("DELETE FROM ResourceTable t WHERE t.myId = :pid")
+	void deleteByPid(@Param("pid") Long theId);
+
 }

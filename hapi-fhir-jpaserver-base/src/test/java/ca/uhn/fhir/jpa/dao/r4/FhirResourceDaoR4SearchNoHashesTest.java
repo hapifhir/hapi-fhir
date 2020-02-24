@@ -652,10 +652,10 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 				List<ResourceIndexedSearchParamNumber> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
 				ourLog.info(toStringMultiline(results));
 
-				ResourceIndexedSearchParamNumber expect0 = new ResourceIndexedSearchParamNumber(RiskAssessment.SP_PROBABILITY, new BigDecimal("1.00"));
+				ResourceIndexedSearchParamNumber expect0 = new ResourceIndexedSearchParamNumber("RiskAssessment", RiskAssessment.SP_PROBABILITY, new BigDecimal("1.00"));
 				expect0.setResource(resource);
 				expect0.calculateHashes();
-				ResourceIndexedSearchParamNumber expect1 = new ResourceIndexedSearchParamNumber(RiskAssessment.SP_PROBABILITY, new BigDecimal("2.00"));
+				ResourceIndexedSearchParamNumber expect1 = new ResourceIndexedSearchParamNumber("RiskAssessment", RiskAssessment.SP_PROBABILITY, new BigDecimal("2.00"));
 				expect1.setResource(resource);
 				expect1.calculateHashes();
 
@@ -772,6 +772,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	@Test
 	public void testIndexNoDuplicatesUri() {
 		ValueSet res = new ValueSet();
+		res.setUrl("http://www.example.org/vs");
 		res.getCompose().addInclude().setSystem("http://foo");
 		res.getCompose().addInclude().setSystem("http://bar");
 		res.getCompose().addInclude().setSystem("http://foo");
@@ -785,7 +786,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			Class<ResourceIndexedSearchParamUri> type = ResourceIndexedSearchParamUri.class;
 			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i WHERE i.myMissing = false", type).getResultList();
 			ourLog.info(toStringMultiline(results));
-			assertEquals(2, results.size());
+			assertEquals(3, results.size());
 		});
 
 		List<IIdType> actual = toUnqualifiedVersionlessIds(myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(ValueSet.SP_REFERENCE, new UriParam("http://foo"))));

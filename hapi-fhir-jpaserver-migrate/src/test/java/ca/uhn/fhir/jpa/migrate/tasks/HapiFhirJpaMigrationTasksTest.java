@@ -10,5 +10,4 @@ public class HapiFhirJpaMigrationTasksTest {
 	public void testCreate() {
 		new HapiFhirJpaMigrationTasks(Collections.emptySet());
 	}
-
 }

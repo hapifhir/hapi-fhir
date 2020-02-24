@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
@@ -29,7 +30,6 @@ import org.junit.Test;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,10 +44,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 
-@TestPropertySource(properties = {
-	"scheduling_disabled=true"
-})
-@SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
 public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchOptimizedTest.class);
@@ -119,20 +115,24 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myPatientDao.update(p);
 
 		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+		SearchParameterMap params;
+		IBundleProvider results;
+		String uuid;
+		List<String> ids;
 
-		// Seach with count only
-		SearchParameterMap params = new SearchParameterMap();
+		// Search with count only
+		params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam("FAM"));
 		params.setSummaryMode((SummaryEnum.COUNT));
-		IBundleProvider results = myPatientDao.search(params);
-		String uuid = results.getUuid();
+		results = myPatientDao.search(params);
+		uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
 		assertEquals(201, results.size().intValue());
-		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
+		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, empty());
 		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
-		// Seach with total explicitly requested
+		// Search with total explicitly requested
 		params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam("FAM"));
 		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
@@ -142,7 +142,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(201, results.size().intValue());
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, hasSize(10));
-		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
+		PersistedJpaBundleProvider bundleProvider = (PersistedJpaBundleProvider) myDatabaseBackedPagingProvider.retrieveResultList(null, uuid);
+		Integer bundleSize = bundleProvider.size();
+		assertNotNull("Null size from provider of type " + bundleProvider.getClass() + " - Cache hit: " + bundleProvider.isCacheHit(), bundleSize);
+		assertEquals(201, bundleSize.intValue());
 
 		// Search with count only
 		params = new SearchParameterMap();
@@ -159,7 +162,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testFetchTotalAccurateForSlowLoading() throws InterruptedException {
+	public void testFetchTotalAccurateForSlowLoading() {
 		create200Patients();
 
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(25);
@@ -209,7 +212,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
 
-		await().until(() -> myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size() != null);
 		results = myDatabaseBackedPagingProvider.retrieveResultList(null, uuid);
 		Integer resultsSize = results.size();
 		assertEquals(200, resultsSize.intValue());
@@ -295,6 +297,11 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * 20 should be prefetched since that's the initial page size
 		 */
 
+		await().until(()-> runInTransaction(()->{
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
+			return search.getNumFound() >= 200;
+		}));
+
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(200, search.getNumFound());
@@ -349,6 +356,15 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		/*
 		 * 20 should be prefetched since that's the initial page size
 		 */
+
+		await().until(()->{
+			return runInTransaction(()->{
+				return mySearchEntityDao
+					.findByUuidAndFetchIncludes(uuid)
+					.orElseThrow(() -> new InternalErrorException(""))
+					.getStatus() == SearchStatusEnum.PASSCMPLET;
+			});
+		});
 
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
@@ -477,6 +493,12 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * 20 should be prefetched since that's the initial page size
 		 */
 
+		await().until(()->{
+			return runInTransaction(()->{
+				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
+				return search.getNumFound() >= 50;
+			});
+		});
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(50, search.getNumFound());
@@ -511,7 +533,12 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		/*
 		 * 20 should be prefetched since that's the initial page size
 		 */
-
+		await().until(()->{
+			return runInTransaction(()->{
+				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
+				return search.getNumFound() == 20;
+			});
+		});
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(20, search.getNumFound());
@@ -631,6 +658,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals(1, ids.size());
+
+		await().until(()-> runInTransaction(()-> mySearchEntityDao
+			.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""))
+			.getStatus() == SearchStatusEnum.FINISHED));
 
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
@@ -774,6 +805,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		search.getResources(0, 20);
 		ourLog.info("** Done retrieving resources");
 
+		await().until(()->myCaptureQueriesListener.countSelectQueries() == 4);
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
@@ -803,8 +835,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		// Because of the forced ID's bidirectional link HFJ_RESOURCE <-> HFJ_FORCED_ID
-		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		runInTransaction(() -> {
 			assertEquals(1, myResourceTableDao.count());
 			assertEquals(1, myResourceHistoryTableDao.count());

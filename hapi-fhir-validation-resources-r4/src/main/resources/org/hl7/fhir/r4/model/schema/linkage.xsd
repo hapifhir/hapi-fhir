@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Fri, Nov 1, 2019 09:29+1100 for FHIR v4.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="Linkage" type="Linkage">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Identifies two or more records (resource instances) that refer to the same real-world &quot;occurrence&quot;.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="Linkage">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Identifies two or more records (resource instances) that refer to the same real-world &quot;occurrence&quot;.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="active" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Indicates whether the asserted set of linkages are considered to be &quot;in effect&quot;.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="author" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies the user or organization responsible for asserting the linkages as well as the user or organization who establishes the context in which the nature of each linkage is evaluated.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="item" type="Linkage.Item" minOccurs="1" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies which record considered as the reference to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Linkage.Item">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Identifies two or more records (resource instances) that refer to the same real-world &quot;occurrence&quot;.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="type" minOccurs="1" maxOccurs="1" type="LinkageType">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Distinguishes which item is &quot;source of truth&quot; (if any) and which items are no longer considered to be current representations.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="resource" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The resource instance being linked as part of the group.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="LinkageType-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="source">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Source of Truth</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="alternate">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Alternate Record</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="historical">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Historical/Obsolete Record</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="LinkageType">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Used to distinguish different roles a resource can play within a set of linked resources.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="LinkageType-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

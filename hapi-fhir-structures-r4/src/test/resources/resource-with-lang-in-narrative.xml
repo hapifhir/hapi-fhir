@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><Observation xmlns="http://hl7.org/fhir">
+	<id value="f001"/><!--    urn:oid:2.16.840.1.113883.4.642.1.7    --><!--    2.16.840.1.113883.4.642.1.118    -->
+	<text>
+		<status value="generated"/>
+		<div xmlns="http://www.w3.org/1999/xhtml" lang="en-US"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: f001</p><p><b>identifier</b>: 6323 (OFFICIAL)</p><p><b>status</b>: final</p><p><b>code</b>: Glucose [Moles/volume] in Blood <span>(Details : {LOINC code &#39;15074-8&#39; = &#39;Glucose [Moles/volume] in Blood&#39;, given as &#39;Glucose [Moles/volume] in Blood&#39;})</span></p><p><b>subject</b>: <a>P. van de Heuvel</a></p><p><b>effective</b>: 02/04/2013 9:30:10 AM --&gt; (ongoing)</p><p><b>issued</b>: 03/04/2013 3:30:10 PM</p><p><b>performer</b>: <a>A. Langeveld</a></p><p><b>value</b>: 6.3 mmol/l<span> (Details: UCUM code mmol/L = &#39;mmol/L&#39;)</span></p><p><b>interpretation</b>: High <span>(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code &#39;H&#39; = &#39;High&#39;, given as &#39;High&#39;})</span></p><h3>ReferenceRanges</h3><table><tr><td>-</td><td><b>Low</b></td><td><b>High</b></td></tr><tr><td>*</td><td>3.1 mmol/l<span> (Details: UCUM code mmol/L = &#39;mmol/L&#39;)</span></td><td>6.2 mmol/l<span> (Details: UCUM code mmol/L = &#39;mmol/L&#39;)</span></td></tr></table></div></text><identifier>
+	<use value="official"/>
+	<system value="http://www.bmc.nl/zorgportal/identifiers/observations"/>
+	<value value="6323"/>
+</identifier>
+	<status value="final"/>
+	<code>
+		<coding>
+			<system value="http://loinc.org"/>
+			<code value="15074-8"/>
+			<display value="Glucose [Moles/volume] in Blood"/>
+		</coding>
+	</code>
+	<effectivePeriod>
+		<start value="2013-04-02T09:30:10+01:00"/>
+	</effectivePeriod>
+	<issued value="2013-04-03T15:30:10+01:00"/>
+	<valueQuantity>
+		<value value="6.3"/>
+		<unit value="mmol/l"/>
+		<system value="http://unitsofmeasure.org"/>
+		<code value="mmol/L"/>
+	</valueQuantity>
+	<interpretation>
+		<coding>
+			<system value="http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation"/>
+			<code value="H"/>
+			<display value="High"/>
+		</coding>
+	</interpretation>
+	<referenceRange>
+		<low>
+			<value value="3.1"/>
+			<unit value="mmol/l"/>
+			<system value="http://unitsofmeasure.org"/>
+			<code value="mmol/L"/>
+		</low>
+		<high>
+			<value value="6.2"/>
+			<unit value="mmol/l"/>
+			<system value="http://unitsofmeasure.org"/>
+			<code value="mmol/L"/>
+		</high>
+	</referenceRange>
+</Observation>

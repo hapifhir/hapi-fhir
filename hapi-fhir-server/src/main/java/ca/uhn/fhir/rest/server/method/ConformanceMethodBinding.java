@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,14 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
-import java.lang.reflect.Method;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-
-import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.annotation.Metadata;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -42,12 +36,17 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding {
-	private static final long CACHE_MILLIS = 60 * 1000;
-
 	/*
 	 * Note: This caching mechanism should probably be configurable and maybe
 	 * even applicable to other bindings. It's particularly important for this
@@ -55,7 +54,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	 */
 	private final AtomicReference<IBaseResource> myCachedResponse = new AtomicReference<>();
 	private final AtomicLong myCachedResponseExpires = new AtomicLong(0L);
-
+	private long myCacheMillis = 60 * 1000;
 
 	ConformanceMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod.getReturnType(), theMethod, theContext, theProvider);
@@ -66,6 +65,35 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' should return a Conformance resource class, returns: " + theMethod.getReturnType());
 		}
 
+		Metadata metadata = theMethod.getAnnotation(Metadata.class);
+		if (metadata != null) {
+			setCacheMillis(metadata.cacheMillis());
+		}
+
+	}
+
+	/**
+	 * Returns the number of milliseconds to cache the generated CapabilityStatement for. Default is one minute, and can be
+	 * set to 0 to never cache.
+	 *
+	 * @see #setCacheMillis(long)
+	 * @see Metadata#cacheMillis()
+	 * @since 4.1.0
+	 */
+	private long getCacheMillis() {
+		return myCacheMillis;
+	}
+
+	/**
+	 * Returns the number of milliseconds to cache the generated CapabilityStatement for. Default is one minute, and can be
+	 * set to 0 to never cache.
+	 *
+	 * @see #getCacheMillis()
+	 * @see Metadata#cacheMillis()
+	 * @since 4.1.0
+	 */
+	private void setCacheMillis(long theCacheMillis) {
+		myCacheMillis = theCacheMillis;
 	}
 
 	@Override
@@ -77,14 +105,20 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
 		IBaseResource conf;
 
-		conf = myCachedResponse.get();
-		if ("true".equals(System.getProperty("test"))) {
+		CacheControlDirective cacheControlDirective = new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
+
+		if (cacheControlDirective.isNoCache())
 			conf = null;
-		}
-		if (conf != null) {
-			long expires = myCachedResponseExpires.get();
-			if (expires < System.currentTimeMillis()) {
+		else {
+			conf = myCachedResponse.get();
+			if ("true".equals(System.getProperty("test"))) {
 				conf = null;
+			}
+			if (conf != null) {
+				long expires = myCachedResponseExpires.get();
+				if (expires < System.currentTimeMillis()) {
+					conf = null;
+				}
 			}
 		}
 		if (conf != null) {
@@ -108,8 +142,10 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 
 		if (conf == null) {
 			conf = (IBaseResource) invokeServerMethod(theServer, theRequest, theMethodParams);
-			myCachedResponse.set(conf);
-			myCachedResponseExpires.set(System.currentTimeMillis() + CACHE_MILLIS);
+			if (myCacheMillis > 0) {
+				myCachedResponse.set(conf);
+				myCachedResponseExpires.set(System.currentTimeMillis() + getCacheMillis());
+			}
 		}
 
 		return new SimpleBundleProvider(conf);

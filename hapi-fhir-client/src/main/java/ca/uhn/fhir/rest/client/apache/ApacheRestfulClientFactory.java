@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.apache;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,27 +71,25 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	protected ApacheHttpClient getHttpClient(String theServerBase) {
+	protected synchronized ApacheHttpClient getHttpClient(String theServerBase) {
 		return new ApacheHttpClient(getNativeHttpClient(), new StringBuilder(theServerBase), null, null, null, null);
 	}
 
 	@Override
-	public IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
+	public synchronized IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
 			String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
 		return new ApacheHttpClient(getNativeHttpClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType,
 				theHeaders);
 	}
 
-	public synchronized HttpClient getNativeHttpClient() {
+	public HttpClient getNativeHttpClient() {
 		if (myHttpClient == null) {
 
-			//FIXME potential resoource leak
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000,
 					TimeUnit.MILLISECONDS);
 			connectionManager.setMaxTotal(getPoolMaxTotal());
 			connectionManager.setDefaultMaxPerRoute(getPoolMaxPerRoute());
 
-			// @formatter:off
 			//TODO: Use of a deprecated method should be resolved.
 			RequestConfig defaultRequestConfig =
 				RequestConfig.custom()
@@ -114,7 +112,6 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 			}
 
 			myHttpClient = builder.build();
-			// @formatter:on
 
 		}
 
@@ -128,7 +125,7 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 
 	/**
 	 * Only allows to set an instance of type org.apache.http.client.HttpClient
-	 * @see ca.uhn.fhir.rest.client.api.IRestfulClientFactory#setHttpClient(ca.uhn.fhir.rest.client.api.IHttpClient)
+	 * @see ca.uhn.fhir.rest.client.api.IRestfulClientFactory#setHttpClient(Object)
 	 */
 	@Override
 	public synchronized void setHttpClient(Object theHttpClient) {

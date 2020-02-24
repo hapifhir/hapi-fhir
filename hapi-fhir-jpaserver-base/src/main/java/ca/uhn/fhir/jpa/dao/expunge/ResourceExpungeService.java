@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,11 +147,11 @@ class ResourceExpungeService implements IResourceExpungeService {
 		callHooks(theRequestDetails, theRemainingCount, version, id);
 
 		if (version.getProvenance() != null) {
-			myResourceHistoryProvenanceTableDao.delete(version.getProvenance());
+			myResourceHistoryProvenanceTableDao.deleteByPid(version.getProvenance().getId());
 		}
-		
-		myResourceHistoryTagDao.deleteAll(version.getTags());
-		myResourceHistoryTableDao.delete(version);
+
+		myResourceHistoryTagDao.deleteByPid(version.getId());
+		myResourceHistoryTableDao.deleteByPid(version.getId());
 
 		theRemainingCount.decrementAndGet();
 	}
@@ -159,7 +159,7 @@ class ResourceExpungeService implements IResourceExpungeService {
 	private void callHooks(RequestDetails theRequestDetails, AtomicInteger theRemainingCount, ResourceHistoryTable theVersion, IdDt theId) {
 		final AtomicInteger counter = new AtomicInteger();
 		if (JpaInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, myInterceptorBroadcaster, theRequestDetails)) {
-			IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theId.getResourceType());
+			IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theId.getResourceType());
 			IBaseResource resource = resourceDao.toResource(theVersion, false);
 			HookParams params = new HookParams()
 				.add(AtomicInteger.class, counter)
@@ -215,8 +215,12 @@ class ResourceExpungeService implements IResourceExpungeService {
 			myIdHelperService.delete(forcedId);
 		}
 
-		myResourceTableDao.delete(resource);
+		myResourceTableDao.deleteByPid(resource.getId());
 	}
+
+
+	@Autowired
+	private ISearchParamPresentDao mySearchParamPresentDao;
 
 	@Override
 	@Transactional
@@ -228,6 +232,7 @@ class ResourceExpungeService implements IResourceExpungeService {
 		myResourceIndexedSearchParamQuantityDao.deleteByResourceId(theResourceId);
 		myResourceIndexedSearchParamStringDao.deleteByResourceId(theResourceId);
 		myResourceIndexedSearchParamTokenDao.deleteByResourceId(theResourceId);
+		mySearchParamPresentDao.deleteByResourceId(theResourceId);
 		myResourceLinkDao.deleteByResourceId(theResourceId);
 
 		myResourceTagDao.deleteByResourceId(theResourceId);

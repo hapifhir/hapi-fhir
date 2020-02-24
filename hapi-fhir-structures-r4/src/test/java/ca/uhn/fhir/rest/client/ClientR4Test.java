@@ -1,16 +1,27 @@
 package ca.uhn.fhir.rest.client;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.At;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Elements;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.apache.ApacheHttpRequest;
+import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
@@ -29,6 +40,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -47,13 +59,24 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.nio.charset.Charset;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -144,7 +167,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), StandardCharsets.UTF_8));
 		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
@@ -173,7 +196,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 400, "foobar"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("foobar"), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("foobar"), StandardCharsets.UTF_8));
 
 		try {
 			ourCtx.newRestfulClient(ITestClient.class, "http://foo").createPatient(patient);
@@ -197,7 +220,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(ourCtx.newXmlParser().encodeResourceToString(patient)), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(ourCtx.newXmlParser().encodeResourceToString(patient)), StandardCharsets.UTF_8));
 		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
@@ -208,6 +231,80 @@ public class ClientR4Test {
 		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
+	}
+
+	interface MyClient extends IRestfulClient {
+
+		@Search()
+		List<Patient> search(@IncludeParam String theInclude);
+
+
+	}
+
+
+	@Test
+	public void testStringIncludeTest() throws Exception {
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.SEARCHSET);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(ourCtx.newXmlParser().encodeResourceToString(bundle)), StandardCharsets.UTF_8));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[0]);
+
+		MyClient client = ourCtx.newRestfulClient(MyClient.class, "http://foo");
+		List<Patient> response = client.search("Patient:organization");
+
+		assertEquals(HttpGet.class, capt.getValue().getClass());
+		HttpGet post = (HttpGet) capt.getValue();
+		assertEquals("http://foo/Patient?_include=Patient%3Aorganization", post.getURI().toString());
+	}
+
+	@Test
+	public void testCreateWithInvalidType() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:foo").setValue("123");
+		String serialized = ourCtx.newXmlParser().encodeResourceToString(patient);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(serialized), StandardCharsets.UTF_8));
+		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
+
+		try {
+			ourCtx.newRestfulClient(ITestClientWithCreateWithInvalidParameterType.class, "http://foo");
+			fail();
+		} catch (ConfigurationException e) {
+			assertEquals("Method 'createPatient' is annotated with @ResourceParam but has a type that is not an implementation of org.hl7.fhir.instance.model.api.IBaseResource", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testCreateWithValidAndInvalidType() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:foo").setValue("123");
+		String serialized = ourCtx.newXmlParser().encodeResourceToString(patient);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(serialized), StandardCharsets.UTF_8));
+		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
+
+		try {
+			ourCtx.newRestfulClient(ITestClientWithCreateWithValidAndInvalidParameterType.class, "http://foo");
+			fail();
+		} catch (ConfigurationException e) {
+			assertEquals("Parameter #2/2 of method 'createPatient' on type 'ca.uhn.fhir.rest.client.ClientR4Test.ITestClientWithCreateWithValidAndInvalidParameterType' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter", e.getMessage());
+		}
 	}
 
 	@Test
@@ -221,7 +318,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(resp), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(resp), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		MethodOutcome response = client.deletePatient(new IdType("1234"));
@@ -238,7 +335,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 204, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		client.deleteDiagnosticReport(new IdType("1234"));
@@ -259,7 +356,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		CapabilityStatement response = (CapabilityStatement) client.getServerConformanceStatement();
@@ -278,7 +375,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		Bundle response = client.getHistoryPatientInstance(new IdType("111"));
@@ -298,7 +395,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		Bundle response = client.getHistoryPatientType();
@@ -316,7 +413,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		Bundle response = client.getHistoryServer();
@@ -340,7 +437,7 @@ public class ClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -410,7 +507,7 @@ public class ClientR4Test {
 
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		// Patient response = client.findPatientByMrn(new
@@ -422,7 +519,7 @@ public class ClientR4Test {
 
 		assertEquals("http://foo.com/Patient/123/_history/2333", response.getId());
 
-		InstantType lm = (InstantType) response.getMeta().getLastUpdatedElement();
+		InstantType lm = response.getMeta().getLastUpdatedElement();
 		lm.setTimeZoneZulu(true);
 		assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
 
@@ -447,7 +544,7 @@ public class ClientR4Test {
 		headers[0] = new BasicHeader(Constants.HEADER_LAST_MODIFIED, "2011-01-02T22:01:02");
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("Internal Failure"), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("Internal Failure"), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		try {
@@ -474,7 +571,7 @@ public class ClientR4Test {
 		headers[0] = new BasicHeader(Constants.HEADER_LAST_MODIFIED, "2011-01-02T22:01:02");
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		try {
@@ -498,7 +595,7 @@ public class ClientR4Test {
 		headers[0] = new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT");
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		// Patient response = client.findPatientByMrn(new
@@ -508,7 +605,7 @@ public class ClientR4Test {
 		assertEquals("http://foo/Patient/111", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.getIdentifier().get(0).getValueElement().getValue());
 
-		InstantType lm = (InstantType) response.getMeta().getLastUpdatedElement();
+		InstantType lm = response.getMeta().getLastUpdatedElement();
 		lm.setTimeZoneZulu(true);
 		assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
 
@@ -523,7 +620,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", "application/fhir+xml; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		// Patient response = client.findPatientByMrn(new
@@ -544,7 +641,7 @@ public class ClientR4Test {
 
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 
@@ -572,7 +669,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		StringParam str = new StringParam("FOO$BAR");
@@ -592,7 +689,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		DateRangeParam param = new DateRangeParam();
@@ -613,7 +710,7 @@ public class ClientR4Test {
 
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		// httpResponse = new BasicHttpResponse(statusline, catalog, locale)
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -635,7 +732,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		Patient response = client.findPatientQuantity(new QuantityParam(ParamPrefixEnum.GREATERTHAN, 123L, "foo", "bar"));
@@ -654,7 +751,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		Patient response = client.findPatientByMrn(new TokenParam("urn:foo", "123"));
@@ -673,7 +770,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		client.getPatientNoParams();
@@ -691,7 +788,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		client.getPatientOneParam(new StringParam("BB"));
@@ -709,7 +806,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		TokenOrListParam identifiers = new TokenOrListParam();
@@ -730,7 +827,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClientWithCustomType client = ourCtx.newRestfulClient(ITestClientWithCustomType.class, "http://foo");
 		CustomPatient response = client.getPatientByDob(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
@@ -749,7 +846,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClientWithCustomTypeList client = ourCtx.newRestfulClient(ITestClientWithCustomTypeList.class, "http://foo");
 		List<CustomPatient> response = client.getPatientByDob(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
@@ -771,7 +868,7 @@ public class ClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -813,7 +910,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		StringAndListParam andListParam = new StringAndListParam();
@@ -837,7 +934,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		// TODO: document this
 
@@ -845,13 +942,13 @@ public class ClientR4Test {
 		client.getPatientByDob(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 		assertEquals("http://foo/Patient?birthdate=ge2011-01-02", capt.getAllValues().get(0).getURI().toString());
 
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 		client.setEncoding(EncodingEnum.JSON); // this needs to be actually
 		// implemented
 		client.getPatientByDob(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 		assertEquals("http://foo/Patient?birthdate=ge2011-01-02&_format=json", capt.getAllValues().get(1).getURI().toString());
 
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 		client.setPrettyPrint(true);
 		client.getPatientByDob(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 		assertEquals("http://foo/Patient?birthdate=ge2011-01-02&_format=json&_pretty=true", capt.getAllValues().get(2).getURI().toString());
@@ -877,7 +974,7 @@ public class ClientR4Test {
 
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		// httpResponse = new BasicHttpResponse(statusline, catalog, locale)
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -900,7 +997,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		client.setSummary(SummaryEnum.DATA);
@@ -919,12 +1016,51 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
-		client.getPatientWithIncludes(new StringParam("aaa"), Arrays.asList(new Include[]{new Include("inc1"), new Include("inc2", true), new Include("inc3", true)}));
+		client.getPatientWithIncludes(new StringParam("aaa"), Arrays.asList(new Include("inc1"), new Include("inc2", true), new Include("inc3", true)));
 
-		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1&_include%3Arecurse=inc2&_include%3Arecurse=inc3", capt.getValue().getURI().toString());
+		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1&_include%3Aiterate=inc2&_include%3Aiterate=inc3", capt.getValue().getURI().toString());
+
+	}
+
+	@Test
+	public void testSearchWithAt() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
+
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
+		client.getPatientWithAt(new InstantType("2010-10-01T01:02:03.0Z"));
+
+		assertEquals("http://foo/Patient?_at=2010-10-01T01%3A02%3A03.0Z", capt.getValue().getURI().toString());
+
+	}
+
+	@Test
+	public void testUnannotatedMethod() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
+
+		ITestClientWithUnannotatedMethod client = ourCtx.newRestfulClient(ITestClientWithUnannotatedMethod.class, "http://foo");
+		try {
+			client.getPatientWithAt(new InstantType("2010-10-01T01:02:03.0Z"));
+			fail();
+		} catch (UnsupportedOperationException e) {
+			assertEquals("The method 'getPatientWithAt' in type ITestClientWithUnannotatedMethod has no handler. Did you forget to annotate it with a RESTful method annotation?", e.getMessage());
+		}
 
 	}
 
@@ -937,7 +1073,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		Bundle response = client.findPatientByName(new StringParam("AAA"), null);
@@ -950,7 +1086,7 @@ public class ClientR4Test {
 		 * Now with a first name
 		 */
 
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 		client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		response = client.findPatientByName(new StringParam("AAA"), new StringParam("BBB"));
 
@@ -959,7 +1095,6 @@ public class ClientR4Test {
 		assertEquals("PRP1660", resource.getIdentifier().get(0).getValueElement().getValue());
 
 	}
-
 
 	@Test
 	public void testSearchWithStringIncludes() throws Exception {
@@ -970,7 +1105,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClientWithStringIncludes client = ourCtx.newRestfulClient(ITestClientWithStringIncludes.class, "http://foo");
 		client.getPatientWithIncludes(new StringParam("aaa"), "inc1");
@@ -991,7 +1126,7 @@ public class ClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1037,7 +1172,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), StandardCharsets.UTF_8));
 		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
@@ -1065,7 +1200,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), StandardCharsets.UTF_8));
 		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray(Constants.HEADER_LOCATION, "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
@@ -1088,7 +1223,7 @@ public class ClientR4Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), StandardCharsets.UTF_8));
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_409_CONFLICT, "Conflict"));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
@@ -1105,7 +1240,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), StandardCharsets.UTF_8));
 		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
@@ -1129,7 +1264,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_204_NO_CONTENT, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), StandardCharsets.UTF_8));
 		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
@@ -1152,7 +1287,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(response), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(response), StandardCharsets.UTF_8));
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://testValidateServerBaseWithInvalidResponse");
@@ -1164,7 +1299,6 @@ public class ClientR4Test {
 		}
 
 	}
-
 
 	@Test
 	public void testValidateOutcomeResponse() throws Exception {
@@ -1180,7 +1314,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON_NEW + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(resp), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(resp), StandardCharsets.UTF_8));
 		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
@@ -1194,7 +1328,6 @@ public class ClientR4Test {
 		assertEquals("ALL GOOD", ((OperationOutcome) response.getOperationOutcome()).getIssueFirstRep().getDiagnostics());
 		assertNull(response.getResource());
 	}
-
 
 	@Test
 	public void testVRead() throws Exception {
@@ -1215,7 +1348,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		// Patient response = client.findPatientByMrn(new
@@ -1225,6 +1358,67 @@ public class ClientR4Test {
 		assertEquals("http://foo/Patient/111/_history/999", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.getIdentifier().get(0).getValueElement().getValue());
 
+	}
+
+	@Test
+	public void testClientWithAndOrList() throws IOException {
+
+		Bundle response = new Bundle().setType(Bundle.BundleType.SEARCHSET);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity()).thenReturn(new ResourceEntity(ourCtx, response));
+
+		ITestClientWithAndOr client = ourCtx.newRestfulClient(ITestClientWithAndOr.class, "http://foo");
+		StringAndListParam andList = new StringAndListParam();
+		StringOrListParam orListA = new StringOrListParam();
+		orListA.add(new StringParam("A1"));
+		orListA.add(new StringParam("A2"));
+		andList.addAnd(orListA);
+		StringOrListParam orListB = new StringOrListParam();
+		orListB.add(new StringParam("B1"));
+		orListB.add(new StringParam("B2"));
+		andList.addAnd(orListB);
+		client.search(andList);
+
+		assertEquals("http://foo/Patient?foo=A1%2CA2&foo=B1%2CB2", capt.getValue().getURI().toString());
+	}
+
+	@Test
+	public void testClientWithAndOrList2() throws IOException {
+
+		Bundle response = new Bundle().setType(Bundle.BundleType.SEARCHSET);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity()).thenReturn(new ResourceEntity(ourCtx, response));
+
+		try {
+			ourCtx.newRestfulClient(ITestClientWithAndOr2.class, "http://foo");
+		} catch (ConfigurationException e) {
+			assertEquals("Argument #0 of Method 'search' in type 'ca.uhn.fhir.rest.client.ClientR4Test.ITestClientWithAndOr2' is of an invalid generic type (can not be a collection of a collection of a collection)", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testClientWithAndOrList3() throws IOException {
+
+		Bundle response = new Bundle().setType(Bundle.BundleType.SEARCHSET);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity()).thenReturn(new ResourceEntity(ourCtx, response));
+
+		ITestClientWithAndOr3 client = ourCtx.newRestfulClient(ITestClientWithAndOr3.class, "http://foo");
+		Set<Include> orListA = new HashSet<>();
+		orListA.add(new Include("a"));
+		orListA.add(new Include("b"));
+		client.search(orListA);
+
+		assertEquals("http://foo/Patient?_include=a&_include=b", capt.getValue().getURI().toString());
 	}
 
 	private Header[] toHeaderArray(String theName, String theValue) {
@@ -1245,41 +1439,78 @@ public class ClientR4Test {
 		}
 	}
 
+	public interface ITestClientWithCreateWithInvalidParameterType extends IRestfulClient {
+
+		@Create()
+		MethodOutcome createPatient(@ResourceParam int thePatient);
+	}
+
+	public interface ITestClientWithCreateWithValidAndInvalidParameterType extends IRestfulClient {
+
+		@Create()
+		MethodOutcome createPatient(@ResourceParam Patient thePatient, int theInt);
+	}
+
+	interface ITestClientWithAndOr extends IBasicClient {
+
+		@Search()
+		List<Patient> search(@OptionalParam(name = "foo") StringAndListParam theParam);
+
+	}
+
+	interface ITestClientWithAndOr2 extends IBasicClient {
+
+		@Search()
+		List<Patient> search(@OptionalParam(name = "foo") List<List<String>> theParam);
+
+	}
+
+	public interface ITestClientWithAndOr3 extends IBasicClient {
+
+		@Search()
+		List<Patient> search(@IncludeParam Set<Include> theParam);
+
+	}
+
 	private interface ClientWithoutAnnotation extends IBasicClient {
 		Patient read(@IdParam IdType theId);
 	}
 
 	public interface ITestClientWithCustomType extends IBasicClient {
 		@Search()
-		public CustomPatient getPatientByDob(@RequiredParam(name = Patient.SP_BIRTHDATE) DateParam theBirthDate);
+		CustomPatient getPatientByDob(@RequiredParam(name = Patient.SP_BIRTHDATE) DateParam theBirthDate);
 	}
 
 	public interface ITestClientWithCustomTypeList extends IBasicClient {
 		@Search()
-		public List<CustomPatient> getPatientByDob(@RequiredParam(name = Patient.SP_BIRTHDATE) DateParam theBirthDate);
+		List<CustomPatient> getPatientByDob(@RequiredParam(name = Patient.SP_BIRTHDATE) DateParam theBirthDate);
 	}
 
 	public interface ITestClientWithElements extends IBasicClient {
 		@Search()
-		public List<Patient> getPatientWithIncludes(@Elements Set<String> theElements);
+		List<Patient> getPatientWithIncludes(@Elements Set<String> theElements);
 
 		@Search()
-		public List<Patient> getPatientWithIncludes(@Elements String theElements);
+		List<Patient> getPatientWithIncludes(@Elements String theElements);
 
 	}
 
 	public interface ITestClientWithStringIncludes extends IBasicClient {
 		@Search()
-		public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringParam theString, @IncludeParam String theInclude);
+		Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringParam theString, @IncludeParam String theInclude);
 	}
 
 	public interface ITestClientWithSummary extends IBasicClient {
 		@Search()
-		public List<Patient> getPatientWithIncludes(List<SummaryEnum> theSummary);
+		List<Patient> getPatientWithIncludes(List<SummaryEnum> theSummary);
 
 		@Search()
-		public List<Patient> getPatientWithIncludes(SummaryEnum theSummary);
+		List<Patient> getPatientWithIncludes(SummaryEnum theSummary);
 
+	}
+
+	interface ITestClientWithUnannotatedMethod extends IRestfulClient {
+		void getPatientWithAt(@At InstantType theInstantType);
 	}
 
 	@ResourceDef(name = "Patient")

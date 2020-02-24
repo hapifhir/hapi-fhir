@@ -35,6 +35,7 @@ import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.AopTestUtils;
 
@@ -53,11 +54,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 @TestPropertySource(properties = {
-	// Since scheduled tasks can cause searches, which messes up the
-	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
-	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE,
 	"max_db_connections=10"
 })
+@DirtiesContext
 public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 	static {

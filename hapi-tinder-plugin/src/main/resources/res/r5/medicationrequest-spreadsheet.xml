@@ -1376,7 +1376,7 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Reference(Practitioner | PractitionerRole | Organization | Patient | Device |RelatedPerson |CareTeam)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Reference(Practitioner | PractitionerRole | Organization | Patient | Device |RelatedPerson |CareTeam | HealthcareService)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3960,7 +3960,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>16</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>

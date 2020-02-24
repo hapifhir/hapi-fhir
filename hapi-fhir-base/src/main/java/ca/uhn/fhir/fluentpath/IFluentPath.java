@@ -4,7 +4,7 @@ package ca.uhn.fhir.fluentpath;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,5 +47,9 @@ public interface IFluentPath {
 	 */
 	<T extends IBase> Optional<T> evaluateFirst(IBase theInput, String thePath, Class<T> theReturnType);
 
-	
+
+	/**
+	 * Parses the expression and throws an exception if it can not parse correctly
+	 */
+	void parse(String theExpression) throws Exception;
 }

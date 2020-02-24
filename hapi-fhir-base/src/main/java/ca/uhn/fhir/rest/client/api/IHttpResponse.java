@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,6 @@ import java.util.Map;
  * An interface around the HTTP Response.
  */
 public interface IHttpResponse {
-
-	/**
-	 * @deprecated This method was deprecated in HAPI FHIR 2.2 because its name has a typo. Use {@link #bufferEntity()} instead.
-	 */
-	@Deprecated
-	void bufferEntitity() throws IOException;
 
 	/**
 	 * Buffer the message entity data.

@@ -10,6 +10,7 @@ import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -75,11 +76,9 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Override
 	public CodeSystem fetchCodeSystem(FhirContext theCtx, String theSystem) {
 		for (IValidationSupport next : myChain) {
-			if (next.isCodeSystemSupported(theCtx, theSystem)) {
-				CodeSystem retVal = next.fetchCodeSystem(theCtx, theSystem);
-				if (retVal != null) {
-					return retVal;
-				}
+			CodeSystem retVal = next.fetchCodeSystem(theCtx, theSystem);
+			if (retVal != null) {
+				return retVal;
 			}
 		}
 		return null;
@@ -141,13 +140,13 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
+	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 
 		ourLog.debug("Validating code {} in chain with {} items", theCode, myChain.size());
 
 		for (IValidationSupport next : myChain) {
-			if (next.isCodeSystemSupported(theCtx, theCodeSystem)) {
-				CodeValidationResult result = next.validateCode(theCtx, theCodeSystem, theCode, theDisplay);
+			if (theCodeSystem != null && next.isCodeSystemSupported(theCtx, theCodeSystem)) {
+				CodeValidationResult result = next.validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 				if (result != null) {
 					ourLog.debug("Chain item {} returned outcome {}", next, result.isOk());
 					return result;
@@ -156,8 +155,21 @@ public class ValidationSupportChain implements IValidationSupport {
 				ourLog.debug("Chain item {} does not support code system {}", next, theCodeSystem);
 			}
 		}
-		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay);
+		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 	}
+
+	@Override
+	public CodeValidationResult validateCodeInValueSet(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+		CodeValidationResult retVal = null;
+		for (IValidationSupport next : myChain) {
+			retVal = next.validateCodeInValueSet(theContext, theCodeSystem, theCode, theDisplay, theValueSet);
+			if (retVal != null) {
+				break;
+			}
+		}
+		return retVal;
+	}
+
 
 	@Override
 	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {

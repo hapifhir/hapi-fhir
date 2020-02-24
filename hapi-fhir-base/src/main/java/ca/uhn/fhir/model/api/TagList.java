@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -279,6 +279,16 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 	@Override
 	@CoverageIgnore
 	public List<String> getFormatCommentsPost() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Object getUserData(String theName) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setUserData(String theName, Object theValue) {
 		throw new UnsupportedOperationException();
 	}
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -147,13 +146,15 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	private Long myHashExact;
 	@Transient
 	private transient ModelConfig myModelConfig;
+
 	public ResourceIndexedSearchParamString() {
 		super();
 	}
 
-	public ResourceIndexedSearchParamString(ModelConfig theModelConfig, String theName, String theValueNormalized, String theValueExact) {
+	public ResourceIndexedSearchParamString(ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized, String theValueExact) {
 		setModelConfig(theModelConfig);
-		setParamName(theName);
+		setResourceType(theResourceType);
+		setParamName(theParamName);
 		setValueNormalized(theValueNormalized);
 		setValueExact(theValueExact);
 	}
@@ -196,8 +197,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		}
 		ResourceIndexedSearchParamString obj = (ResourceIndexedSearchParamString) theObj;
 		EqualsBuilder b = new EqualsBuilder();
+		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-		b.append(getResource(), obj.getResource());
 		b.append(getValueExact(), obj.getValueExact());
 		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getHashExact(), obj.getHashExact());
@@ -243,29 +244,31 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return myValueExact;
 	}
 
-	public void setValueExact(String theValueExact) {
+	public ResourceIndexedSearchParamString setValueExact(String theValueExact) {
 		if (defaultString(theValueExact).length() > MAX_LENGTH) {
 			throw new IllegalArgumentException("Value is too long: " + theValueExact.length());
 		}
 		myValueExact = theValueExact;
+		return this;
 	}
 
 	public String getValueNormalized() {
 		return myValueNormalized;
 	}
 
-	public void setValueNormalized(String theValueNormalized) {
+	public ResourceIndexedSearchParamString setValueNormalized(String theValueNormalized) {
 		if (defaultString(theValueNormalized).length() > MAX_LENGTH) {
 			throw new IllegalArgumentException("Value is too long: " + theValueNormalized.length());
 		}
 		myValueNormalized = theValueNormalized;
+		return this;
 	}
 
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getResourceType());
 		b.append(getParamName());
-		b.append(getResource());
 		b.append(getValueExact());
 		return b.toHashCode();
 	}
@@ -285,7 +288,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
-		b.append("value", getValueNormalized());
+		b.append("hashNormalizedPrefix", getHashNormalizedPrefix());
+		b.append("valueNormalized", getValueNormalized());
 		return b.build();
 	}
 
@@ -305,7 +309,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			hashPrefixLength = 0;
 		}
 
-		return hash(theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
+		long hash = hash(theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
+		return hash;
 	}
 
 	@Override

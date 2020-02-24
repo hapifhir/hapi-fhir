@@ -265,7 +265,7 @@ public class ClientServerValidationDstu2Test {
 
 	@Test
 	public void testServerReturnsWrongVersionForDstu2() throws Exception {
-		String wrongFhirVersion = "3.0.1";
+		String wrongFhirVersion = FhirVersionEnum.DSTU3.getFhirVersionString();
 		assertThat(wrongFhirVersion, is(FhirVersionEnum.DSTU3.getFhirVersionString())); // asserting that what we assume to be the DSTU3 FHIR version is still correct
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(wrongFhirVersion);
@@ -285,7 +285,7 @@ public class ClientServerValidationDstu2Test {
 			fail();
 		} catch (FhirClientInappropriateForServerException e) {
 			String out = e.toString();
-			String want = "The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"3.0.1\" which corresponds to DSTU3, but this client is configured to use DSTU2 (via the FhirContext)";
+			String want = "The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"" + wrongFhirVersion + "\" which corresponds to DSTU3, but this client is configured to use DSTU2 (via the FhirContext)";
 			ourLog.info(out);
 			ourLog.info(want);
 			assertThat(out, containsString(want));

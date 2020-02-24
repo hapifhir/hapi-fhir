@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,14 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  */
 
 import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
+import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
 import org.springframework.messaging.SubscribableChannel;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class LinkedBlockingQueueSubscribableChannelFactory implements ISubscribableChannelFactory {
 	@Override
-	public SubscribableChannel createSubscribableChannel(String theChannelName, int theConcurrentConsumers) {
+	public SubscribableChannel createSubscribableChannel(String theChannelName, Class theMessageType, int theConcurrentConsumers) {
 		return new LinkedBlockingQueueSubscribableChannel(new LinkedBlockingQueue<>(SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE), theChannelName + "-%d", theConcurrentConsumers);
 	}
 

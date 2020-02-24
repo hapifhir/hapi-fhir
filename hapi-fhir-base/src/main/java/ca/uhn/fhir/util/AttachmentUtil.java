@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,8 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.*;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -35,12 +34,10 @@ public class AttachmentUtil {
 	 * Fetches the base64Binary value of Attachment.data, creating it if it does not
 	 * already exist.
 	 */
-	@SuppressWarnings("unchecked")
 	public static IPrimitiveType<byte[]> getOrCreateData(FhirContext theContext, ICompositeType theAttachment) {
 		return getOrCreateChild(theContext, theAttachment, "data", "base64Binary");
 	}
 
-	@SuppressWarnings("unchecked")
 	public static IPrimitiveType<String> getOrCreateContentType(FhirContext theContext, ICompositeType theAttachment) {
 		return getOrCreateChild(theContext, theAttachment, "contentType", "string");
 	}
@@ -64,6 +61,16 @@ public class AttachmentUtil {
 			});
 	}
 
+	public static void setUrl(FhirContext theContext, ICompositeType theAttachment, String theUrl) {
+		BaseRuntimeChildDefinition entryChild = getChild(theContext, theAttachment, "url");
+		assert entryChild != null : "Version " + theContext + " has no child " + "url";
+		String typeName = "uri";
+		if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+			typeName = "url";
+		}
+		entryChild.getMutator().setValue(theAttachment, newPrimitive(theContext, typeName, theUrl));
+	}
+
 	public static void setContentType(FhirContext theContext, ICompositeType theAttachment, String theContentType) {
 		BaseRuntimeChildDefinition entryChild = getChild(theContext, theAttachment, "contentType");
 		entryChild.getMutator().setValue(theAttachment, newPrimitive(theContext, "code", theContentType));
@@ -78,6 +85,8 @@ public class AttachmentUtil {
 		BaseRuntimeChildDefinition entryChild = getChild(theContext, theAttachment, "size");
 		if (theLength == null) {
 			entryChild.getMutator().setValue(theAttachment, null);
+		} else if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R5)){
+			entryChild.getMutator().setValue(theAttachment, newPrimitive(theContext, "integer64", (long)theLength));
 		} else {
 			entryChild.getMutator().setValue(theAttachment, newPrimitive(theContext, "unsignedInt", theLength));
 		}
@@ -88,7 +97,9 @@ public class AttachmentUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	static <T> IPrimitiveType<T> newPrimitive(FhirContext theContext, String theType, T theValue) {
-		IPrimitiveType<T> primitive = (IPrimitiveType<T>) theContext.getElementDefinition(theType).newInstance();
+		BaseRuntimeElementDefinition<?> elementDefinition = theContext.getElementDefinition(theType);
+		Validate.notNull(elementDefinition, "Unknown type %s for %s", theType, theContext);
+		IPrimitiveType<T> primitive = (IPrimitiveType<T>) elementDefinition.newInstance();
 		primitive.setValue(theValue);
 		return primitive;
 	}
@@ -99,5 +110,9 @@ public class AttachmentUtil {
 	static BaseRuntimeChildDefinition getChild(FhirContext theContext, IBase theElement, String theName) {
 		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theElement.getClass());
 		return def.getChildByName(theName);
+	}
+
+	public static ICompositeType newInstance(FhirContext theFhirCtx) {
+		return (ICompositeType) theFhirCtx.getElementDefinition("Attachment").newInstance();
 	}
 }

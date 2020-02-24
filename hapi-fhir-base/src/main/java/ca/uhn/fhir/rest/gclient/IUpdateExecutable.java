@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.gclient;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package ca.uhn.fhir.rest.gclient;
  */
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferHeader;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
 
 public interface IUpdateExecutable extends IClientExecutable<IUpdateExecutable, MethodOutcome>{
 
@@ -32,6 +32,6 @@ public interface IUpdateExecutable extends IClientExecutable<IUpdateExecutable, 
 	 * 
 	 * @since HAPI 1.1
 	 */
-	IUpdateExecutable prefer(PreferHeader.PreferReturnEnum theReturn);
+	IUpdateExecutable prefer(PreferReturnEnum theReturn);
 
 }

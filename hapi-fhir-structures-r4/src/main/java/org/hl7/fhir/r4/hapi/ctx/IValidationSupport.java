@@ -1,7 +1,6 @@
 package org.hl7.fhir.r4.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
@@ -46,6 +45,7 @@ public interface IValidationSupport
    * @param uri Canonical Uri of the ValueSet
    * @return The valueset (must not be null, but can be an empty ValueSet)
    */
+  @Override
   ValueSet fetchValueSet(FhirContext theContext, String uri);
 
   /**
@@ -76,48 +76,21 @@ public interface IValidationSupport
   boolean isCodeSystemSupported(FhirContext theContext, String theSystem);
 
   /**
+   * Returns <code>true</code> if the given valueset can be validated by the given
+   * validation support module
+   *
+   * @param theContext The FHIR context
+   * @param theValueSetUrl The URL
+   */
+  default boolean isValueSetSupported(FhirContext theContext, String theValueSetUrl) {
+    return false;
+  }
+
+  /**
    * Generate a snapshot from the given differential profile.
    *
    * @return Returns null if this module does not know how to handle this request
    */
   StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName);
-
-  /**
-   * Validates that the given code exists and if possible returns a display
-   * name. This method is called to check codes which are found in "example"
-   * binding fields (e.g. <code>Observation.code</code> in the default profile.
-   *
-   * @param theCodeSystem The code system, e.g. "<code>http://loinc.org</code>"
-   * @param theCode       The code, e.g. "<code>1234-5</code>"
-   * @param theDisplay    The display name, if it should also be validated
-   * @return Returns a validation result object
-   */
-  @Override
-  CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay);
-
-  class CodeValidationResult extends IContextValidationSupport.CodeValidationResult<ConceptDefinitionComponent, IssueSeverity> {
-
-    public CodeValidationResult(ConceptDefinitionComponent theNext) {
-      super(theNext);
-    }
-
-    public CodeValidationResult(IssueSeverity theSeverity, String theMessage) {
-      super(theSeverity, theMessage);
-    }
-
-    public CodeValidationResult(IssueSeverity severity, String message, ConceptDefinitionComponent definition) {
-      super(severity, message, definition);
-    }
-
-    @Override
-    protected String getDisplay() {
-      String retVal = null;
-      if (isOk()) {
-        retVal = asConceptDefinition().getDisplay();
-      }
-      return retVal;
-    }
-
-  }
 
 }

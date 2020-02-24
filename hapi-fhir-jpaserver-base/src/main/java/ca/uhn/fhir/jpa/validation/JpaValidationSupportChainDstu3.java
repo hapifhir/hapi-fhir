@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.validation;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.validation;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.hapi.validation.SnapshotGeneratingValidationSupport;
@@ -38,9 +38,10 @@ public class JpaValidationSupportChainDstu3 extends ValidationSupportChain {
 	@Autowired
 	@Qualifier("myJpaValidationSupportDstu3")
 	public ca.uhn.fhir.jpa.dao.dstu3.IJpaValidationSupportDstu3 myJpaValidationSupportDstu3;
-	private DefaultProfileValidationSupport myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
 	@Autowired
-	private IHapiTerminologySvcDstu3 myTerminologyService;
+	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
+	@Autowired
+	private ITermReadSvcDstu3 myTerminologyService;
 	@Autowired
 	private FhirContext myFhirContext;
 

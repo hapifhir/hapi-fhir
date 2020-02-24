@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,17 +57,16 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	private String myParamName;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID")
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
 	@ContainedIn
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID", insertable = false, updatable = false, nullable = false)
 	private Long myResourcePid;
 
 	@Field()
 	@Column(name = "RES_TYPE", nullable = false, length = Constants.MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
-
 	@Field()
 	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
 	@Temporal(TemporalType.TIMESTAMP)
@@ -111,6 +110,10 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		return myResourceType;
 	}
 
+	public void setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
+	}
+
 	public Date getUpdated() {
 		return myUpdated;
 	}
@@ -129,6 +132,10 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	public abstract IQueryParameterType toQueryParameterType();
+
+	public boolean matches(IQueryParameterType theParam) {
+		throw new UnsupportedOperationException("No parameter matcher for " + theParam);
+	}
 
 	public static long calculateHashIdentity(String theResourceType, String theParamName) {
 		return hash(theResourceType, theParamName);
@@ -153,9 +160,5 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 
 		HashCode hashCode = hasher.hash();
 		return hashCode.asLong();
-	}
-
-	public boolean matches(IQueryParameterType theParam) {
-		throw new UnsupportedOperationException("No parameter matcher for "+theParam);
 	}
 }

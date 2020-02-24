@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.custom;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,6 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.csv.CSVRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -35,6 +33,8 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class HierarchyHandler implements IRecordHandler {
 
+	public static final String PARENT = "PARENT";
+	public static final String CHILD = "CHILD";
 	private final Map<String, TermConcept> myCode2Concept;
 
 	public HierarchyHandler(Map<String, TermConcept> theCode2concept) {
@@ -43,14 +43,15 @@ public class HierarchyHandler implements IRecordHandler {
 
 	@Override
 	public void accept(CSVRecord theRecord) {
-		String parent = trim(theRecord.get("PARENT"));
-		String child = trim(theRecord.get("CHILD"));
+		String parent = trim(theRecord.get(PARENT));
+		String child = trim(theRecord.get(CHILD));
 		if (isNotBlank(parent) && isNotBlank(child)) {
 
-			TermConcept parentConcept = myCode2Concept.get(parent);
-			ValidateUtil.isNotNullOrThrowUnprocessableEntity(parentConcept, "Parent code %s not found", parent);
 			TermConcept childConcept = myCode2Concept.get(child);
-			ValidateUtil.isNotNullOrThrowUnprocessableEntity(childConcept, "Child code %s not found", child);
+			ValidateUtil.isNotNullOrThrowUnprocessableEntity(childConcept, "Child code %s not found in file", child);
+
+			TermConcept parentConcept = myCode2Concept.get(parent);
+			ValidateUtil.isNotNullOrThrowUnprocessableEntity(parentConcept, "Parent code %s not found in file", child);
 
 			parentConcept.addChild(childConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
 		}

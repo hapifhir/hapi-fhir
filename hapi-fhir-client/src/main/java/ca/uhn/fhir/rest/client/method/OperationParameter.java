@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,8 +191,6 @@ public class OperationParameter implements IParameter {
 
 	interface IOperationParamConverter {
 
-		Object incomingServer(Object theObject);
-
 		Object outgoingClient(Object theObject);
 
 	}
@@ -201,13 +199,6 @@ public class OperationParameter implements IParameter {
 
 		public OperationParamConverter() {
 			Validate.isTrue(mySearchParameterBinding != null);
-		}
-
-		@Override
-		public Object incomingServer(Object theObject) {
-			IPrimitiveType<?> obj = (IPrimitiveType<?>) theObject;
-			List<QualifiedParamList> paramList = Collections.singletonList(QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, obj.getValueAsString()));
-			return mySearchParameterBinding.parse(myContext, paramList);
 		}
 
 		@Override

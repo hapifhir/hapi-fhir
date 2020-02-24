@@ -9,6 +9,9 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -19,10 +22,11 @@ import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
-import ca.uhn.fhir.jpa.searchparam.registry.BaseSearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
+import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
+import ca.uhn.fhir.jpa.term.api.*;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
@@ -36,12 +40,12 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
-import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.r4.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
@@ -60,14 +64,18 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
@@ -77,6 +85,16 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private static JpaValidationSupportChainR4 ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
+	@Autowired
+	protected ITermReadSvc myHapiTerminologySvc;
+	@Autowired
+	protected CachingValidationSupport myCachingValidationSupport;
+	@Autowired
+	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	@Autowired
+	protected ISearchDao mySearchEntityDao;
+	@Autowired
+	protected ISearchResultDao mySearchResultDao;
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;
@@ -143,6 +161,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myConditionDaoR4")
 	protected IFhirResourceDao<Condition> myConditionDao;
+	@Autowired
+	@Qualifier("myEpisodeOfCareDaoR4")
+	protected IFhirResourceDao<EpisodeOfCare> myEpisodeOfCareDao;
 	@Autowired
 	protected DaoConfig myDaoConfig;
 	@Autowired
@@ -217,6 +238,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myBinaryDaoR4")
 	protected IFhirResourceDao<Binary> myBinaryDao;
 	@Autowired
+	@Qualifier("myDocumentReferenceDaoR4")
+	protected IFhirResourceDao<DocumentReference> myDocumentReferenceDao;
+	@Autowired
 	@Qualifier("myPatientDaoR4")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
 	@Autowired
@@ -255,7 +279,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("mySearchParameterDaoR4")
 	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
 	@Autowired
-	protected BaseSearchParamRegistry mySearchParamRegistry;
+	protected SearchParamRegistryImpl mySearchParamRegistry;
 	@Autowired
 	protected IStaleSearchDeletingSvc myStaleSearchDeletingSvc;
 	@Autowired
@@ -284,7 +308,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myTaskDaoR4")
 	protected IFhirResourceDao<Task> myTaskDao;
 	@Autowired
-	protected IHapiTerminologySvcR4 myTermSvc;
+	protected ITermReadSvcR4 myTermSvc;
+	@Autowired
+	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
+	@Autowired
+	protected ITermLoaderSvc myTerminologyLoaderSvc;
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
 	@Autowired
@@ -339,12 +367,13 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 
 	@After
 	public void afterClearTerminologyCaches() {
-		BaseHapiTerminologySvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
+		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
 		baseHapiTerminologySvc.clearTranslationCache();
 		baseHapiTerminologySvc.clearTranslationWithReverseCache();
-		baseHapiTerminologySvc.clearDeferred();
-		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationCache();
-		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
+		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationCache();
+		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
+		TermDeferredStorageSvcImpl termDeferredStorageSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
+		termDeferredStorageSvc.clearDeferred();
 	}
 
 	@After()
@@ -364,6 +393,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	}
 
 	@Before
+	public void beforeUnregisterAllSubscriptions() {
+		mySubscriptionRegistry.unregisterAllSubscriptions();
+	}
+
+	@Before
 	public void beforeFlushFT() {
 		runInTransaction(() -> {
 			FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
@@ -377,7 +411,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	}
 
 	@Before
-	@Transactional()
 	public void beforePurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}
@@ -430,10 +463,39 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		dao.update(resourceParsed);
 	}
 
-	protected String loadResource(String theClasspath) throws IOException {
-		return IOUtils.toString(FhirResourceDaoR4ValidateTest.class.getResourceAsStream(theClasspath), Charsets.UTF_8);
+
+	protected void assertHierarchyContains(String... theStrings) {
+		List<String> hierarchy = runInTransaction(() -> {
+			List<String> hierarchyHolder = new ArrayList<>();
+			TermCodeSystem codeSystem = myTermCodeSystemDao.findAll().iterator().next();
+			TermCodeSystemVersion csv = codeSystem.getCurrentVersion();
+			List<TermConcept> codes = myTermConceptDao.findByCodeSystemVersion(csv);
+			List<TermConcept> rootCodes = codes.stream().filter(t -> t.getParents().isEmpty()).collect(Collectors.toList());
+			flattenExpansionHierarchy(hierarchyHolder, rootCodes, "");
+			return hierarchyHolder;
+		});
+		if (theStrings.length == 0) {
+			assertThat("\n" + String.join("\n", hierarchy), hierarchy, empty());
+		} else {
+			assertThat("\n" + String.join("\n", hierarchy), hierarchy, contains(theStrings));
+		}
 	}
 
+	private static void flattenExpansionHierarchy(List<String> theFlattenedHierarchy, List<TermConcept> theCodes, String thePrefix) {
+		theCodes.sort((o1, o2) -> {
+			int s1 = o1.getSequence() != null ? o1.getSequence() : o1.getCode().hashCode();
+			int s2 = o2.getSequence() != null ? o2.getSequence() : o2.getCode().hashCode();
+			return s1 - s2;
+		});
+
+		for (TermConcept nextCode : theCodes) {
+			String hierarchyEntry = thePrefix + nextCode.getCode() + " seq=" + nextCode.getSequence();
+			theFlattenedHierarchy.add(hierarchyEntry);
+
+			List<TermConcept> children = nextCode.getChildCodes();
+			flattenExpansionHierarchy(theFlattenedHierarchy, children, thePrefix + " ");
+		}
+	}
 
 	@AfterClass
 	public static void afterClassClearContextBaseJpaR4Test() {

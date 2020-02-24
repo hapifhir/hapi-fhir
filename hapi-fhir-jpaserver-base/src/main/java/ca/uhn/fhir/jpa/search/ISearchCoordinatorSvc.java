@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.IDao;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -28,13 +29,20 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 public interface ISearchCoordinatorSvc {
 
 	void cancelAllActiveSearches();
 
-	List<Long> getResources(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails);
+	List<ResourcePersistentId> getResources(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails);
 
-	IBundleProvider registerSearch(IDao theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, @Nullable RequestDetails theRequestDetails);
+	IBundleProvider registerSearch(IFhirResourceDao theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, @Nullable RequestDetails theRequestDetails);
+
+	/**
+	 * Fetch the total number of search results for the given currently executing search, if one is currently executing and
+	 * the total is known. Will return empty otherwise
+	 */
+	Optional<Integer> getSearchTotal(String theUuid);
 
 }

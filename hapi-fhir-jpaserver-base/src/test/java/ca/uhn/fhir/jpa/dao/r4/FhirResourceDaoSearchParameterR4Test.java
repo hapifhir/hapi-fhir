@@ -9,25 +9,36 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+@RunWith(MockitoJUnitRunner.class)
 public class FhirResourceDaoSearchParameterR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoSearchParameterR4Test.class);
 	private FhirContext myCtx;
 	private FhirResourceDaoSearchParameterR4 myDao;
+	@Mock
+	private ApplicationContext myApplicationContext;
 
 	@Before
 	public void before() {
 		myCtx = FhirContext.forR4();
+
 		myDao = new FhirResourceDaoSearchParameterR4();
 		myDao.setContext(myCtx);
 		myDao.setConfig(new DaoConfig());
+		myDao.setApplicationContext(myApplicationContext);
+		myDao.start();
 	}
 
 	@Test

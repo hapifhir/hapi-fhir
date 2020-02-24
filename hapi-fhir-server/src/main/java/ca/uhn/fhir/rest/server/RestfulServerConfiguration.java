@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,16 @@ import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 public class RestfulServerConfiguration {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerConfiguration.class);
 	private Collection<ResourceBinding> resourceBindings;
 	private List<BaseMethodBinding<?>> serverBindings;
+    private Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype;
 	private String implementationDescription;
 	private String serverVersion = VersionUtil.getVersion();
 	private String serverName = "HAPI FHIR";
@@ -87,6 +92,15 @@ public class RestfulServerConfiguration {
 		this.serverBindings = theServerBindings;
 		return this;
 	}
+    
+    public Map<String, Class<? extends IBaseResource>> getNameToSharedSupertype() {
+      return resourceNameToSharedSupertype;
+    }
+
+    public RestfulServerConfiguration setNameToSharedSupertype(Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype) {
+      this.resourceNameToSharedSupertype = resourceNameToSharedSupertype;
+      return this;
+    }
 
 	/**
 	 * Get the implementationDescription
@@ -266,6 +280,34 @@ public class RestfulServerConfiguration {
 			resourceToMethods.get(resourceName).add(nextMethodBinding);
 		}
 		return resourceToMethods;
+	}
+
+	/*
+	 * Populates {@link #resourceNameToSharedSupertype} by scanning the given resource providers. Only resource provider getResourceType values
+	 * are taken into account. {@link ProvidesResources} and method return types are deliberately ignored.
+	 *
+	 * Given a resource name, the common superclass for all getResourceType return values for that name's providers is the common superclass
+	 * for all returned/received resources with that name. Since {@link ProvidesResources} resources and method return types must also be
+	 * subclasses of this common supertype, they can't affect the result of this method.
+	 */
+	public void computeSharedSupertypeForResourcePerName(Collection<IResourceProvider> providers) {
+		Map<String, CommonResourceSupertypeScanner> resourceNameToScanner = new HashMap<>();
+
+		List<Class<? extends IBaseResource>> providedResourceClasses = providers.stream()
+			.map(provider -> provider.getResourceType())
+			.collect(Collectors.toList());
+		providedResourceClasses.stream()
+			.forEach(resourceClass -> {
+				RuntimeResourceDefinition baseDefinition = getFhirContext().getResourceDefinition(resourceClass).getBaseDefinition();
+				CommonResourceSupertypeScanner scanner = resourceNameToScanner.computeIfAbsent(baseDefinition.getName(), key -> new CommonResourceSupertypeScanner());
+				scanner.register(resourceClass);
+			});
+
+		resourceNameToSharedSupertype = resourceNameToScanner.entrySet().stream()
+			.filter(entry -> entry.getValue().getLowestCommonSuperclass().isPresent())
+			.collect(Collectors.toMap(
+				entry -> entry.getKey(),
+				entry -> entry.getValue().getLowestCommonSuperclass().get()));
 	}
 
 	private String createOperationName(OperationMethodBinding theMethodBinding) {

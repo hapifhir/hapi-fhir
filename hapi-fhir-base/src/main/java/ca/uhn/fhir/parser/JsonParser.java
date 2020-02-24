@@ -4,7 +4,7 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,9 +224,28 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 			case PRIMITIVE_DATATYPE: {
 				final IPrimitiveType<?> value = (IPrimitiveType<?>) theNextValue;
-				if (isBlank(value.getValueAsString())) {
+				final String valueStr = value.getValueAsString();
+				if (isBlank(valueStr)) {
 					if (theForceEmpty) {
 						theEventWriter.writeNull();
+					}
+					break;
+				}
+
+				// check for the common case first - String value types
+				Object valueObj = value.getValue();
+				if (valueObj instanceof String) {
+					if (theChildName != null) {
+						theEventWriter.write(theChildName, valueStr);
+					} else {
+						theEventWriter.write(valueStr);
+					}
+					break;
+				} else if (valueObj instanceof Long) {
+					if (theChildName != null) {
+						theEventWriter.write(theChildName, (long)valueObj);
+					} else {
+						theEventWriter.write((long)valueObj);
 					}
 					break;
 				}
@@ -262,7 +281,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 						}
 					}
 				} else {
-					String valueStr = value.getValueAsString();
 					if (theChildName != null) {
 						write(theEventWriter, theChildName, valueStr);
 					} else {
@@ -459,7 +477,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 						if (nextValue instanceof IBaseHasModifierExtensions) {
 							IBaseHasModifierExtensions element = (IBaseHasModifierExtensions) nextValue;
 							List<? extends IBaseExtension<?, ?>> ext = element.getModifierExtension();
-							force |= addToHeldExtensions(valueIdx, ext, extensions, true, nextChildElem, theParent, theEncodeContext, theContainedResource, theElement);
+							force |= addToHeldExtensions(valueIdx, ext, modifierExtensions, true, nextChildElem, theParent, theEncodeContext, theContainedResource, theElement);
 						}
 					}
 					if (nextValue.hasFormatComment()) {
@@ -477,7 +495,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					if (inArray) {
 						theEventWriter.endArray();
 					}
-					if (nextChild.getMax() > 1 || nextChild.getMax() == Child.MAX_UNLIMITED) {
+					BaseRuntimeChildDefinition replacedParentDefinition = nextChild.getReplacedParentDefinition();
+					if (isMultipleCardinality(nextChild.getMax()) || (replacedParentDefinition != null && isMultipleCardinality(replacedParentDefinition.getMax()))) {
 						beginArray(theEventWriter, nextChildSpecificName);
 						inArray = true;
 						encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, null, theContainedResource, nextChildElem, force, theEncodeContext);
@@ -569,6 +588,10 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				}
 			}
 		}
+	}
+
+	private boolean isMultipleCardinality(int maxCardinality) {
+		return maxCardinality > 1 || maxCardinality == Child.MAX_UNLIMITED;
 	}
 
 	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theNextValue, JsonLikeWriter theEventWriter, boolean theContainedResource, 																	  CompositeChildElement theParent, EncodeContext theEncodeContext) throws IOException, DataFormatException {

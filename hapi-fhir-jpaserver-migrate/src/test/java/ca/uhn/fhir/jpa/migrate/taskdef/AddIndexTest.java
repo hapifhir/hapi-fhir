@@ -16,7 +16,7 @@ public class AddIndexTest extends BaseTest {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 		executeSql("ALTER TABLE SOMETABLE ADD CONSTRAINT IDX_ANINDEX UNIQUE(TEXTCOL)");
 
-		AddIndexTask task = new AddIndexTask();
+		AddIndexTask task = new AddIndexTask("1", "1");
 		task.setIndexName("IDX_ANINDEX");
 		task.setTableName("SOMETABLE");
 		task.setColumns("TEXTCOL");
@@ -38,7 +38,7 @@ public class AddIndexTest extends BaseTest {
 		executeSql("create unique index IDX_ANINDEX on SOMETABLE (PID, TEXTCOL)");
 		executeSql("create unique index IDX_DIFINDEX on SOMETABLE (TEXTCOL)");
 
-		AddIndexTask task = new AddIndexTask();
+		AddIndexTask task = new AddIndexTask("1", "1");
 		task.setIndexName("IDX_ANINDEX");
 		task.setTableName("SOMETABLE");
 		task.setColumns("PID", "TEXTCOL");
@@ -59,7 +59,7 @@ public class AddIndexTest extends BaseTest {
 		executeSql("create index IDX_ANINDEX on SOMETABLE (PID, TEXTCOL)");
 		executeSql("create index IDX_DIFINDEX on SOMETABLE (TEXTCOL)");
 
-		AddIndexTask task = new AddIndexTask();
+		AddIndexTask task = new AddIndexTask("1", "1");
 		task.setIndexName("IDX_ANINDEX");
 		task.setTableName("SOMETABLE");
 		task.setColumns("PID", "TEXTCOL");
@@ -79,7 +79,7 @@ public class AddIndexTest extends BaseTest {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 		executeSql("create unique index IDX_DIFINDEX on SOMETABLE (TEXTCOL)");
 
-		AddIndexTask task = new AddIndexTask();
+		AddIndexTask task = new AddIndexTask("1", "1");
 		task.setIndexName("IDX_ANINDEX");
 		task.setTableName("SOMETABLE");
 		task.setColumns("PID", "TEXTCOL");

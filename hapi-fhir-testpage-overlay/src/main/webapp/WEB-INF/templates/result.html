@@ -62,7 +62,7 @@
 									</td>
 									<td>
 										<th:block th:text="${action}"/>
-										<a th:href="${requestUrl}" th:utext="${requestUrlText}"/>
+										<a th:href="${requestUrl}" th:utext="${requestUrlText}" id="requestUrlAnchor"/>
 									</td>
 								</tr>
 								<tr th:if="${requestHeaders.length} > 0">
@@ -130,7 +130,7 @@
 													<h4 class="panel-title">
 														<th:block th:if="${#lists.isEmpty(bundle.entries)}">Bundle contains no entries</th:block>
 														<a th:unless="${#lists.isEmpty(bundle.entries)}" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
-															<i id="collapseOneIcon" class="fa fa-minus-square-o"></i>
+                                             <i id="collapseOneIcon" class="far fa-minus-square"></i>
 															<span th:if="${bundle.totalResults.empty}" th:text="'Bundle contains ' + ${#lists.size(bundle.entries)} + ' entries'"/>
 															<span th:unless="${bundle.totalResults.empty}" th:text="'Bundle contains ' + ${#lists.size(bundle.entries)} + ' / ' + ${bundle.totalResults.value} + ' entries'"/>
 														</a>
@@ -195,8 +195,8 @@
 															<tr th:each="entry : ${bundle.entries}">
 																<td style="white-space: nowrap;">
 																	<th:block th:if="${entry.resource} != null">
-																		<button class="btn btn-primary btn-xs" th:data1="${entry.resource.id.resourceType}" th:data2="${entry.resource.id.idPart}" th:data3="${#strings.defaultString(entry.resource.id.versionIdPart,'')}" onclick="readFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="read"><i class="fa fa-book"></i> Read</button>
-																		<button class="btn btn-primary btn-xs" th:data1="${entry.resource.id.resourceType}" th:data2="${entry.resource.id.idPart}" th:data3="${#strings.defaultString(entry.resource.id.versionIdPart,'')}" onclick="updateFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="home"><i class="fa fa-pencil"></i> Update</button>
+																		<button class="btn btn-primary btn-xs" th:data1="${entry.resource.id.resourceType}" th:data2="${entry.resource.id.idPart}" th:data3="${#strings.defaultString(entry.resource.id.versionIdPart,'')}" onclick="readFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="read"><i class="fas fa-book"></i> Read</button>
+																		<button class="btn btn-primary btn-xs" th:data1="${entry.resource.id.resourceType}" th:data2="${entry.resource.id.idPart}" th:data3="${#strings.defaultString(entry.resource.id.versionIdPart,'')}" onclick="updateFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="home"><i class="far fa-edit"></i> Update</button>
 																	</th:block>
 																</td>
 																<td>
@@ -214,13 +214,15 @@
 													</div>
 												</div>
 												<script type="text/javascript">
+                                       /*
 													$('#collapseOne').on('hidden.bs.collapse', function () {
-													   $("#collapseOneIcon").removeClass("fa-minus-square-o").addClass("fa-plus-square-o");
+													   $("#collapseOneIcon").removeClass("fa-minus-square").addClass("fa-plus-square");
 													});
 	
 													$('#collapseOne').on('shown.bs.collapse', function () {
-													   $("#collapseOneIcon").removeClass("fa-plus-square-o").addClass("fa-minus-square-o");
+													   $("#collapseOneIcon").removeClass("fa-plus-square").addClass("fa-minus-square");
 													});
+                                        */
 												</script>
 											</div>
 										</div>
@@ -240,7 +242,7 @@
 													<h4 class="panel-title">
 														<th:block th:if="${#lists.isEmpty(riBundle.entry)}">Bundle contains no entries</th:block>
 														<a th:unless="${#lists.isEmpty(riBundle.entry)}" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
-															<i id="collapseOneIcon" class="fa fa-minus-square-o"></i>
+                                             <i id="collapseOneIcon" class="far fa-minus-square"></i>
 															<span th:if="${riBundle.totalElement.empty}" th:text="'Bundle contains ' + ${#lists.size(riBundle.entry)} + ' entries'"/>
 															<span th:unless="${riBundle.totalElement.empty}" th:text="'Bundle contains ' + ${#lists.size(riBundle.entry)} + ' / ' + ${riBundle.totalElement.value} + ' entries'"/>
 														</a>
@@ -307,8 +309,8 @@
 															<tr th:each="entry : ${riBundle.entry}">
 																<td style="white-space: nowrap;">
 																	<th:block th:if="${entry.resource} != null">
-                                                      <button class="btn btn-primary btn-xs" th:data1="${entry.resource.idElement.resourceType}" th:data2="${entry.resource.idElement.idPart}" th:data3="${#strings.defaultString(entry.resource.idElement.versionIdPart,'')}" onclick="readFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="read"><i class="fa fa-book"></i> Read</button>
-                                                      <button class="btn btn-primary btn-xs" th:data1="${entry.resource.idElement.resourceType}" th:data2="${entry.resource.idElement.idPart}" th:data3="${#strings.defaultString(entry.resource.idElement.versionIdPart,'')}" onclick="updateFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="home"><i class="fa fa-pencil"></i> Update</button>
+                                                      <button class="btn btn-primary btn-xs" th:data1="${entry.resource.idElement.resourceType}" th:data2="${entry.resource.idElement.idPart}" th:data3="${#strings.defaultString(entry.resource.idElement.versionIdPart,'')}" onclick="readFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="read"><i class="fas fa-book"></i> Read</button>
+                                                      <button class="btn btn-primary btn-xs" th:data1="${entry.resource.idElement.resourceType}" th:data2="${entry.resource.idElement.idPart}" th:data3="${#strings.defaultString(entry.resource.idElement.versionIdPart,'')}" onclick="updateFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="home"><i class="far fa-edit"></i> Update</button>
 																	</th:block>
 																</td>
 																<td>
@@ -328,13 +330,15 @@
 													</div>
 												</div>
 												<script type="text/javascript">
+                                       /*
 													$('#collapseOne').on('hidden.bs.collapse', function () {
-													   $("#collapseOneIcon").removeClass("fa-minus-square-o").addClass("fa-plus-square-o");
+													   $("#collapseOneIcon").removeClass("fa-minus-square").addClass("fa-plus-square");
 													});
 	
 													$('#collapseOne').on('shown.bs.collapse', function () {
-													   $("#collapseOneIcon").removeClass("fa-plus-square-o").addClass("fa-minus-square-o");
+													   $("#collapseOneIcon").removeClass("fa-plus-square").addClass("fa-minus-square");
 													});
+                                        */
 												</script>
 											</div>
 										</div>

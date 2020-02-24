@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -33,7 +34,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +62,8 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
@@ -119,6 +122,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 			if (isNotBlank(theMsg.getSubscriptionId())) {
 				if (!theMsg.getSubscriptionId().equals(nextSubscriptionId)) {
+					// TODO KHS we should use a hash to look it up instead of this full table scan
 					ourLog.debug("Ignoring subscription {} because it is not {}", nextSubscriptionId, theMsg.getSubscriptionId());
 					continue;
 				}
@@ -133,7 +137,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				continue;
 			}
 			ourLog.debug("Subscription {} was matched by resource {} {}",
-				nextActiveSubscription.getSubscription().getIdElement(myFhirContext).getValue(),
+				nextActiveSubscription.getId(),
 				resourceId.toUnqualifiedVersionless().getValue(),
 				matchResult.isInMemory() ? "in-memory" : "by querying the repository");
 
@@ -177,12 +181,12 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	private boolean sendToDeliveryChannel(ActiveSubscription nextActiveSubscription, ResourceDeliveryMessage theDeliveryMsg) {
 		boolean retval = false;
 		ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(theDeliveryMsg);
-		MessageChannel deliveryChannel = nextActiveSubscription.getSubscribableChannel();
+		MessageChannel deliveryChannel = mySubscriptionChannelRegistry.get(nextActiveSubscription.getChannelName()).getChannel();
 		if (deliveryChannel != null) {
 			retval = true;
 			trySendToDeliveryChannel(wrappedMsg, deliveryChannel);
 		} else {
-			ourLog.warn("Do not have delivery channel for subscription {}", nextActiveSubscription.getIdElement(myFhirContext));
+			ourLog.warn("Do not have delivery channel for subscription {}", nextActiveSubscription.getId());
 		}
 		return retval;
 	}
@@ -200,7 +204,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	}
 
 	private String getId(ActiveSubscription theActiveSubscription) {
-		return theActiveSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue();
+		return theActiveSubscription.getId();
 	}
 
 	private boolean validCriteria(ActiveSubscription theActiveSubscription, IIdType theResourceId) {

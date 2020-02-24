@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.dbcache;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,10 @@ package ca.uhn.fhir.jpa.subscription.dbcache;
 
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingInterceptor;
 import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionProvider;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

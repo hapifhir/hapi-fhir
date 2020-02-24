@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.delete.DeleteConflictList;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -154,8 +155,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequestDetails);
 
-	Set<Long> processMatchUrl(String theMatchUrl, RequestDetails theRequest);
-
 	/**
 	 * Read a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
 	 * therefore can not fire any interceptors. Use only for internal system calls
@@ -165,7 +164,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Read a resource by its internal PID
 	 */
-	IBaseResource readByPid(Long thePid);
+	IBaseResource readByPid(ResourcePersistentId thePid);
 
 	/**
 	 * @param theId
@@ -205,7 +204,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	@Transactional(propagation = Propagation.SUPPORTS)
 	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
 
-	Set<Long> searchForIds(SearchParameterMap theParams, RequestDetails theRequest);
+	Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest);
 
 	/**
 	 * Takes a map of incoming raw search parameters and translates/parses them into

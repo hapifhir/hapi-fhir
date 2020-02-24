@@ -6,7 +6,7 @@ import java.io.Serializable;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,21 +24,26 @@ import java.io.Serializable;
 
 public interface IBaseEnumFactory<T extends Enum<?>> extends Serializable {
 
-    /**
-     * Read an enumeration value from the string that represents it on the XML or JSON
-     *
-     * @param codeString the value found in the XML or JSON
-     * @return the enumeration value
-     * @throws IllegalArgumentException is the value is not known
-     */
-    public T fromCode(String codeString) throws IllegalArgumentException;
+	/**
+	 * Read an enumeration value from the string that represents it on the XML or JSON
+	 *
+	 * @param codeString the value found in the XML or JSON
+	 * @return the enumeration value
+	 * @throws IllegalArgumentException is the value is not known
+	 */
+	T fromCode(String codeString) throws IllegalArgumentException;
 
-    /**
-     * Get the XML/JSON representation for an enumerated value
-     *
-     * @param code - the enumeration value
-     * @return the XML/JSON representation
-     */
-    public String toCode(T code);
+	/**
+	 * Get the XML/JSON representation for an enumerated value
+	 *
+	 * @param code - the enumeration value
+	 * @return the XML/JSON representation
+	 */
+	String toCode(T code);
+
+	/**
+	 * Get the system for a given enum value
+	 */
+	default String toSystem(T theValue) { return null; }
 
 }

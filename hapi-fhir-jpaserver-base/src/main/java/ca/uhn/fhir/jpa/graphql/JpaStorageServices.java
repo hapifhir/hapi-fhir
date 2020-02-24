@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.graphql;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.hl7.fhir.utilities.graphql.Value;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implements IGraphQLStorageServices {
@@ -50,7 +51,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 
 	private IFhirResourceDao<? extends IBaseResource> getDao(String theResourceType) {
 		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theResourceType);
-		return getDao(typeDef.getImplementingClass());
+		return myDaoRegistry.getResourceDaoOrNull(typeDef.getImplementingClass());
 	}
 
 	@Transactional(propagation = Propagation.NEVER)
@@ -58,7 +59,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 	public void listResources(Object theAppInfo, String theType, List<Argument> theSearchParams, List<IBaseResource> theMatches) throws FHIRException {
 
 		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theType);
-		IFhirResourceDao<? extends IBaseResource> dao = getDao(typeDef.getImplementingClass());
+		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDaoOrNull(typeDef.getImplementingClass());
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(MAX_SEARCH_SIZE);
@@ -144,5 +145,11 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 	@Override
 	public IBaseBundle search(Object theAppInfo, String theType, List<Argument> theSearchParams) throws FHIRException {
 		throw new NotImplementedOperationException("Not yet able to handle this GraphQL request");
+	}
+
+	@Nullable
+	@Override
+	protected String getResourceName() {
+		return null;
 	}
 }

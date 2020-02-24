@@ -171,14 +171,6 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
-					<classFolders>
-						<classFolder>${basedir}/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-base/target/classes</classFolder>
-					</classFolders>
-					<sourceFolders>
-						<sourceFolder>${basedir}/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-base/src/main/java</sourceFolder>
-					</sourceFolders>
 					<dumpOnExit>true</dumpOnExit>
 				</configuration>
 				<executions>
@@ -194,7 +186,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
+					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
 				</configuration>
 			</plugin>
 			<plugin>

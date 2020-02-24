@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.binstore;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.binstore;
 
 import ca.uhn.fhir.jpa.dao.data.IBinaryStorageEntityDao;
 import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.hash.HashingInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
@@ -57,13 +58,13 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 	@Override
 	@Transactional(Transactional.TxType.SUPPORTS)
-	public StoredDetails storeBlob(IIdType theResourceId, String theContentType, InputStream theInputStream) {
+	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) {
 		Date publishedDate = new Date();
 
 		HashingInputStream hashingInputStream = createHashingInputStream(theInputStream);
 		CountingInputStream countingInputStream = createCountingInputStream(hashingInputStream);
 
-		String id = newRandomId();
+		String id = super.provideIdForNewBlob(theBlobIdOrNull);
 
 		BinaryStorageEntity entity = new BinaryStorageEntity();
 		entity.setResourceId(theResourceId.toUnqualifiedVersionless().getValue());
@@ -80,7 +81,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		txTemplate.execute(t->{
+		txTemplate.execute(t -> {
 			myEntityManager.persist(entity);
 			return null;
 		});
@@ -88,7 +89,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		// Update the entity with the final byte count and hash
 		long bytes = countingInputStream.getCount();
 		String hash = hashingInputStream.hash().toString();
-		txTemplate.execute(t-> {
+		txTemplate.execute(t -> {
 			myBinaryStorageEntityDao.setSize(id, (int) bytes);
 			myBinaryStorageEntityDao.setHash(id, hash);
 			return null;
@@ -126,12 +127,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 			return false;
 		}
 
-		try {
-			InputStream inputStream = entityOpt.get().getBlob().getBinaryStream();
-			IOUtils.copy(inputStream, theOutputStream);
-		} catch (SQLException e) {
-			throw new IOException(e);
-		}
+		copyBlobToOutputStream(theOutputStream, entityOpt.get());
 
 		return true;
 	}
@@ -139,6 +135,32 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	@Override
 	public void expungeBlob(IIdType theResourceId, String theBlobId) {
 		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
-		entityOpt.ifPresent(theBinaryStorageEntity -> myBinaryStorageEntityDao.delete(theBinaryStorageEntity));
+		entityOpt.ifPresent(theBinaryStorageEntity -> myBinaryStorageEntityDao.deleteByPid(theBinaryStorageEntity.getBlobId()));
+	}
+
+	@Override
+	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) throws IOException {
+		BinaryStorageEntity entityOpt = myBinaryStorageEntityDao
+			.findByIdAndResourceId(theBlobId, theResourceId.toUnqualifiedVersionless().getValue())
+			.orElseThrow(() -> new ResourceNotFoundException("Unknown blob ID: " + theBlobId + " for resource ID " + theResourceId));
+
+		return copyBlobToByteArray(entityOpt);
+	}
+
+	void copyBlobToOutputStream(OutputStream theOutputStream, BinaryStorageEntity theEntity) throws IOException {
+		try (InputStream inputStream = theEntity.getBlob().getBinaryStream()) {
+			IOUtils.copy(inputStream, theOutputStream);
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
+	}
+
+	byte[] copyBlobToByteArray(BinaryStorageEntity theEntity) throws IOException {
+		int size = theEntity.getSize();
+		try {
+			return IOUtils.toByteArray(theEntity.getBlob().getBinaryStream(), size);
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
 	}
 }

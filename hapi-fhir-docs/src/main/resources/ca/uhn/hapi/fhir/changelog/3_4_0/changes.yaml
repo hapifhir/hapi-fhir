@@ -1,0 +1,145 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Commons-Lang3 (All): 3.6 -&gt; 3.7</li> <li>Hibernate (JPA): 5.2.12.Final -&gt; 5.2.16.Final</li> <li>Javassist (JPA): 3.20.0-GA -&gt; 3.22.0-GA</li> </ul>"
+- item:
+    type: "add"
+    title: "Several enhancements have been made to the JPA server index tables. These enhancements consist of new colums that will be used in a future version of HAPI FHIR to significantly decrease the amount of space required for indexes on token and string index types. <br/><br/> These new columns are not yet used in HAPI FHIR 3.4.0 but will be enabled in HAPI FHIR 3.5.0. Anyone upgrading to HAPI FHIR 3.4.0 (or above) is recommended to invoke the following SQL statement on their database in order to reindex all data in a background job: <br/> <code>update HFJ_RESOURCE set SP_INDEX_STATUS = null;</code> <br/> Note that if you do this reindex now, you will not have any downtime while you upgrade to HAPI FHIR 3.5.0. If you need to perform the reindex at the time that you upgrade to HAPI FHIR 3.5.0 some indexes may not be available. <br/> In addition, the following schema changes should be made while upgrading: <br/> <code>update table TRM_CODESYSTEM_VER drop column RES_VERSION_ID;</code><br/> <code>alter table TRM_CODESYSTEM_VER drop constraint IDX_CSV_RESOURCEPID_AND_VER</code><br/>"
+- item:
+    type: "add"
+    title: "R4 structures have been updated to the latest definitions (SVN 13732)"
+- item:
+    issue: "846"
+    type: "fix"
+    title: "When calling a getter on a DSTU3/R4 structure for a choice type (e.g. Observation#getValueString()), a NullPointerException was thrown if there was no value in this field, and the NPE had no useful error message. Now this method call will simply return null. method"
+- item:
+    type: "fix"
+    title: "When performing a FHIR resource update in the JPA server where the update happens within a transaction, and the resource being updated contains placeholder IDs, and the resource has not actually changed, a new version was created even though there was not actually any change. This particular combination of circumstances seems very specific and improbable, but it is quite common for some types of solutions (e.g. mapping HL7v2 data) so this fix can prevent significant wasted space in some cases."
+- item:
+    type: "fix"
+    title: "JPA server index tables did not have a column length specified on the resource type column. This caused the default of 255 to be used, which wasted a lot of space since resource names are all less than 30 chars long and a single resource can have 10-100+ index rows depending on configuration. This has now been set to a much more sensible 30."
+- item:
+    type: "fix"
+    title: "The LOINC uploader for the JPA Terminology Server has been significantly beefed up so that it now takes in the full set of LOINC distribution artifacts, and creates not only the LOINC CodeSystem but a complete set of concept properties, a number of LOINC ValueSets, and a number of LOINC ConceptMaps. This work was sponsored by the Regenstrief Institute. Thanks to Regenstrief for their support!"
+- item:
+    type: "add"
+    title: "The DSTU2 validator has been refactored to use the same codebase as the DSTU3/R4 validator (which were harmonized in HAPI FHIR 3.3.0). This means that we now have a single codebase for all validators, which improves maintainability and brings a number of improvements to the accuracy of DSTU2 resource validation."
+- item:
+    type: "fix"
+    title: "When encoding a resource that had contained resources with user-supplied local IDs (e.g. resource.setId(\"#1\")) as well as contained resources with no IDs (meaning HAPI should automatically assign a local ID for these resources) it was possible for HAPI to generate a local ID that already existed, making the resulting serialization invalid. This has been corrected."
+- item:
+    type: "add"
+    title: "The REST Generic Client now supports invoking an operation on a specific version of a resource instance."
+- item:
+    type: "add"
+    title: "A new operation has been added to the JPA server called \"$expunge\". This operation can be used to physically delete old versions of resources, logically deleted resources, or even all resources in the database."
+- item:
+    type: "add"
+    title: "An experimental new feature has been added to AuthorizationInterceptor which allows user-supplied checkers to add additional checking logic to determine whether a particular rule applies. This could be used for example to restrict an auth rule to particular source IPs, or to only allow operations with specific parameter values."
+- item:
+    type: "add"
+    title: "A new qualifier has been added to the AuthorizationInterceptor RuleBuilder that allows a rule on an operation to match <code>atAnyLevel()</code> , meaning that the rule applies to the operation by name whether it is at the server, type, or instance level."
+- item:
+    type: "add"
+    title: "Calling <code>IdType#withVersion(String)</code> with a null/blank parameter will now return a copy of the ID with the version removed. Previously this call would deliberately cause an IllegalArgumentException."
+- item:
+    type: "fix"
+    title: "When updating resources on the JPA server, tags did not always consistently follow FHIR's recommended rules for tag retention. According to FHIR's rules, if a tag is not explicitly present on an update but was present on the previous version, it should be carried forward anyhow. Due to a bug, this happened when more than one tag was present but not when only one was present. This has been corrected. In addition, a new request header called <code>X-Meta-Snapshot-Mode</code> has been added that can be used by the client to override this behaviour."
+- item:
+    type: "fix"
+    title: "The JPA server's resource counts query has been optimized to give the database a bit more flexibility to optimize, which should increase performance for this query."
+- item:
+    type: "add"
+    title: "The JPA server CapabilityStatement generator has been tuned so that resource counts are no longer calculated synchronously as a part of building the CapabilityStatement response. With this change, counts are calculated in the background and cached which can yield significant performance improvements on hevaily loaded servers."
+- item:
+    type: "fix"
+    title: "Fix a significant performance regression in 3.3.0 when validating DSTU3 content using the InstanceValidator. From 3.3.0 onward, StructureDefinitions are converted to FHIR R4 content on the fly in order to reduct duplication in the codebase. These conversions happened upon every validation however, instead of only happening once which adversely affected performance. A cache has been added."
+- item:
+    issue: "903"
+    type: "add"
+    title: "Fix a bug in the DSTU2 QuestionnaireResponseValidator which prevented validation on groups with only one question. Thanks David Gileadi for the pull request!"
+- item:
+    issue: "709"
+    type: "add"
+    title: "The <code>ConceptMap</code> operation <code>$translate</code> has been implemented."
+- item:
+    issue: "927"
+    type: "add"
+    title: "HAPI-FHIR_CLI now includes two new commands: one for importing and populating a <code>ConceptMap</code> resource from a CSV; and one for exporting a <code>ConceptMap</code> resource to a CSV."
+- item:
+    type: "add"
+    title: "Operation methods on a plain server may now use parameters of type String (i.e. plain Java strings), and any FHIR primitive datatype will be automatically coerced into a String."
+- item:
+    type: "add"
+    title: "The HAPI FHIR CLI now supports importing an IGPack file as an import to the validation process."
+- item:
+    type: "add"
+    title: "When two threads attempt to update the same resource at the same time, previously an unspecified error was thrown by the JPA server. An HTTP 409 (Conflict) with an informative error message is now thrown."
+- item:
+    type: "fix"
+    title: "A bug in the JPA server's DSTU2 transaction processing routine caused it to occasionally consume two database connections, which could lead to deadlocks under heavy load. This has been fixed."
+- item:
+    type: "fix"
+    title: "AuthorizationInterceptor sometimes incorrectly identified an operation invocation at the type level as being at the instance level if the method indicated that the IdParam parameter was optional. This has been fixed."
+- item:
+    type: "add"
+    title: "StructureDefinitions for the FHIR standard extensions have been added to the hapi-fhir-validation-resources-XXXX modules. Thanks to Patrick Werner for the pull request! These have also been added to the list of definitions uploaded by the CLI \"upload-definitions\" command."
+- item:
+    type: "fix"
+    title: "A workaround for an invalid search parameter path in the R4 consent resource has been implemented. This path was preventing some Consent resources from successfully being uploaded to the JPA server. Thanks to Anthony Sute for identifying this."
+- item:
+    issue: "937"
+    type: "fix"
+    title: "A hard-to-understand validation message was fixed in the validator when validating against profiles that declare some elements as mustSupport but have others used but not declared as mustSupport. Thanks to Patrick Werner for the PR!"
+- item:
+    issue: "926"
+    type: "add"
+    title: "The HAPI FHIR CLI is now available for installation on OSX using the (really excellent) Homebrew package manager thanks to an effort by John Grimes to get it added. Thanks John!"
+- item:
+    issue: "953"
+    type: "add"
+    title: "When the REST Server experiences an expected error (such as a NullPointerException) in a resource provider class, a simple message of \"Failed to call access method\" is returned to the user. This has been enhanced to also include the message from the underlying exception."
+- item:
+    issue: "836"
+    type: "fix"
+    title: "A bug in the plain server was fixed that prevented some includes from correctly causing their targets to be included in the response bundle. Thanks to GitHub user @RuthAlk for the pull request!"
+- item:
+    issue: "857"
+    type: "add"
+    title: "DateRangeParameter was enhanced to support convenient method chanining, and the parameter validation was improved to only change state after validating that parameters were valid. Thanks to Gaetano Gallo for the pull request!"
+- item:
+    issue: "867"
+    type: "fix"
+    title: "The HumanName DSTU3+ datatype had convenience methods for testing whether the name has a specific given name or not, but these methods did not work. Thanks to Jason Owen for reporting and providing a test case!"
+- item:
+    issue: "874"
+    type: "fix"
+    title: "An issue was corrected in the validator where Questionnaire references that used contained resources caused an unexpected crash. Thanks to Heinz-Dieter Conradi for the pull request!"
+- item:
+    issue: "875"
+    type: "add"
+    title: "An issue in the narrative generator template for the CodeableConcept datatype was corrected. Thanks to @RuthAlk for the pull request!"
+- item:
+    type: "add"
+    title: "The JPA server automatic reindexing process has been tweaked so that it no longer runs once per minute (this was a heavy strain on large databases) but will instead run once an hour unless triggered for some reason. In addition, the number of threads allocated to reindexing may now be adjusted via a setting in the DaoConfig."
+- item:
+    type: "fix"
+    title: "AuthorizationInterceptor did not correctly grant access to resources by compartment when the reference on the target resource that pointed to the compartment owner was defined using a resource object (ResourceReference#setResource) instead of a reference (ResourceReference#setReference)."
+- item:
+    issue: "880"
+    type: "add"
+    title: "Several tests were added to ensure accurate validation of QuestionnaireResponse resources. Thanks to Heinz-Dieter Conradi for the pull request!"
+- item:
+    issue: "886"
+    type: "add"
+    title: "A NullPointerException when validating some QuestionnaireResponse reousrces was fixed in the validator. Thanks to Heinz-Dieter Conradi for the pull request!"
+- item:
+    issue: "892"
+    type: "add"
+    title: "QuestionnaireResponse answers of type \"text\" may now be validated by the FhirInstanceValidator. Thanks to Heinz-Dieter Conradi for the pull request!"
+- item:
+    type: "fix"
+    title: "The REST server has been modified so that the <code>Location</code> header is no longer returned by the server on read or update responses. This header was returned in the past, but this header is actually inappropriate for any response that is not a create operation. The <code>Content-Location</code> will still be returned, and will hold the same contents."
+- item:
+    type: "fix"
+    title: "The Postgres sample JPA project was fixed to use the current version of HAPI FHIR (it was previously stuck on 2.2). Thanks to Kai Liu for the pull request!"

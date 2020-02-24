@@ -364,11 +364,11 @@ public class GenericOkHttpClientDstu2Test {
 		Patient p = new Patient();
 		p.addName().addFamily("FOOFAMILY");
 
-		client.create().resource(p).prefer(PreferHeader.PreferReturnEnum.MINIMAL).execute();
+		client.create().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 
-		client.create().resource(p).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
+		client.create().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 	}
@@ -876,6 +876,16 @@ public class GenericOkHttpClientDstu2Test {
 			@Override
 			public List<String> getFormatCommentsPost() {
 				return null;
+			}
+
+			@Override
+			public Object getUserData(String theName) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void setUserData(String theName, Object theValue) {
+				throw new UnsupportedOperationException();
 			}
 		};
 
@@ -1531,53 +1541,6 @@ public class GenericOkHttpClientDstu2Test {
 	}
 
 	@Test
-	public void testTransactionWithListOfResources() throws Exception {
-		ca.uhn.fhir.model.dstu2.resource.Bundle resp = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		resp.addEntry().getResponse().setLocation("Patient/1/_history/1");
-		resp.addEntry().getResponse().setLocation("Patient/2/_history/2");
-		String respString = ourCtx.newJsonParser().encodeResourceToString(resp);
-
-		ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
-		ourResponseBody = respString;
-
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
-
-		List<IBaseResource> input = new ArrayList<IBaseResource>();
-
-		Patient p1 = new Patient(); // No ID
-		p1.addName().addFamily("PATIENT1");
-		input.add(p1);
-
-		Patient p2 = new Patient(); // Yes ID
-		p2.addName().addFamily("PATIENT2");
-		p2.setId("Patient/2");
-		input.add(p2);
-
-		List<IBaseResource> response = client.transaction()
-				.withResources(input)
-				.encodedJson()
-				.execute();
-
-		assertEquals("http://localhost:" + ourPort + "/fhir", ourRequestUri);
-		assertEquals(2, response.size());
-
-		String requestString = ourRequestBodyString;
-		ca.uhn.fhir.model.dstu2.resource.Bundle requestBundle = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, requestString);
-		assertEquals(2, requestBundle.getEntry().size());
-		assertEquals("POST", requestBundle.getEntry().get(0).getRequest().getMethod());
-		assertEquals("PUT", requestBundle.getEntry().get(1).getRequest().getMethod());
-		assertEquals("Patient/2", requestBundle.getEntry().get(1).getRequest().getUrl());
-
-		p1 = (Patient) response.get(0);
-		assertEquals(new IdDt("Patient/1/_history/1"), p1.getId().toUnqualified());
-		// assertEquals("PATIENT1", p1.getName().get(0).getFamily().get(0).getValue());
-
-		p2 = (Patient) response.get(1);
-		assertEquals(new IdDt("Patient/2/_history/2"), p2.getId().toUnqualified());
-		// assertEquals("PATIENT2", p2.getName().get(0).getFamily().get(0).getValue());
-	}
-
-	@Test
 	public void testTransactionWithString() throws Exception {
 		ca.uhn.fhir.model.dstu2.resource.Bundle req = new ca.uhn.fhir.model.dstu2.resource.Bundle();
 		Patient patient = new Patient();
@@ -1735,11 +1698,11 @@ public class GenericOkHttpClientDstu2Test {
 		p.setId(new IdDt("1"));
 		p.addName().addFamily("FOOFAMILY");
 
-		client.update().resource(p).prefer(PreferHeader.PreferReturnEnum.MINIMAL).execute();
+		client.update().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 
-		client.update().resource(p).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
+		client.update().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 	}

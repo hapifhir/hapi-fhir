@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.module.interceptor;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,12 @@ public class SubscriptionDebugLogInterceptor {
 	public void step10_resourceModified(ResourceModifiedMessage theMessage) {
 		String value = Long.toString(System.currentTimeMillis());
 		theMessage.setAttribute(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK, value);
-		log(EventCodeEnum.SUBS1, "Resource {} was submitted to the processing pipeline (op={})", theMessage.getPayloadId(), theMessage.getOperationType());
+		String resourceId = theMessage.getPayloadId();
+		if (resourceId == null) {
+			// Delete operations have no payload
+			resourceId = theMessage.getId();
+		}
+		log(EventCodeEnum.SUBS1, "Resource {} was submitted to the processing pipeline (op={})", resourceId, theMessage.getOperationType());
 	}
 
 	/*

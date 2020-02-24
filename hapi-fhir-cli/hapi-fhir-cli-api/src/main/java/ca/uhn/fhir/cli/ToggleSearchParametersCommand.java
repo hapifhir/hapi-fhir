@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -44,7 +44,7 @@ public class ToggleSearchParametersCommand extends BaseCommand {
 		Options options = new Options();
 		addFhirVersionOption(options);
 		addBaseUrlOption(options);
-		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + IHapiTerminologyLoaderSvc.SCT_URI + ")");
+		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
 		addBasicAuthOption(options);
 		return options;
 	}

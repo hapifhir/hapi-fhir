@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.util;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,12 @@ import org.hl7.fhir.dstu3.model.InstantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Queue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,7 +50,14 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 
 	private static final int CAPACITY = 1000;
 	private static final Logger ourLog = LoggerFactory.getLogger(CircularQueueCaptureQueriesListener.class);
-	private final Queue<SqlQuery> myQueries = Queues.synchronizedQueue(new CircularFifoQueue<>(CAPACITY));
+	private Queue<SqlQuery> myQueries;
+
+	/**
+	 * Constructor
+	 */
+	public CircularQueueCaptureQueriesListener() {
+		startCollecting();
+	}
 
 	@Override
 	protected Queue<SqlQuery> provideQueryList() {
@@ -57,6 +69,20 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 */
 	public void clear() {
 		myQueries.clear();
+	}
+
+	/**
+	 * Start collecting queries (this is the default)
+	 */
+	public void startCollecting() {
+		myQueries = Queues.synchronizedQueue(new CircularFifoQueue<>(CAPACITY));
+	}
+
+	/**
+	 * Stop collecting queries and discard any collected ones
+	 */
+	public void stopCollecting() {
+		myQueries = null;
 	}
 
 	/**
@@ -304,7 +330,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	}
 
 
-	private static String formatQueryAsSql(SqlQuery theQuery) {
+	static String formatQueryAsSql(SqlQuery theQuery) {
 		String formattedSql = theQuery.getSql(true, true);
 		StringBuilder b = new StringBuilder();
 		b.append("SqlQuery at ");
@@ -316,7 +342,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 			b.append("\nStack:\n   ");
 			Stream<String> stackTraceStream = Arrays.stream(theQuery.getStackTrace())
 				.map(StackTraceElement::toString)
-				.filter(t->t.startsWith("ca."));
+				.filter(t -> t.startsWith("ca."));
 			b.append(stackTraceStream.collect(Collectors.joining("\n   ")));
 		}
 		b.append("\n");

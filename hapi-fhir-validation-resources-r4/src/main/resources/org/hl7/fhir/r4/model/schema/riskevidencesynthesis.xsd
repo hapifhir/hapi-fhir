@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Fri, Nov 1, 2019 09:29+1100 for FHIR v4.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="RiskEvidenceSynthesis" type="RiskEvidenceSynthesis">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The RiskEvidenceSynthesis resource describes the likelihood of an outcome in a population plus exposure state where the risk estimate is derived from a combination of research studies.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="RiskEvidenceSynthesis">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The RiskEvidenceSynthesis resource describes the likelihood of an outcome in a population plus exposure state where the risk estimate is derived from a combination of research studies.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="url" minOccurs="0" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An absolute URI that is used to identify this risk evidence synthesis when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this risk evidence synthesis is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the risk evidence synthesis is stored on different servers.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A formal identifier that is used to identify this risk evidence synthesis when it is represented in other formats, or referenced in a specification, model, design or an instance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="version" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The identifier that is used to identify this version of the risk evidence synthesis when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the risk evidence synthesis author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A natural language name identifying the risk evidence synthesis. This name should be usable as an identifier for the module by machine processing applications such as code generation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="title" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A short, descriptive, user-friendly title for the risk evidence synthesis.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="status" minOccurs="1" maxOccurs="1" type="PublicationStatus">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The status of this risk evidence synthesis. Enables tracking the life-cycle of the content.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="date" minOccurs="0" maxOccurs="1" type="dateTime">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The date  (and optionally time) when the risk evidence synthesis was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the risk evidence synthesis changes.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="publisher" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The name of the organization or individual that published the risk evidence synthesis.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="contact" minOccurs="0" maxOccurs="unbounded" type="ContactDetail">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Contact details to assist a user in finding and communicating with the publisher.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="markdown">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A free text natural language description of the risk evidence synthesis from a consumer's perspective.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="note" minOccurs="0" maxOccurs="unbounded" type="Annotation">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A human-readable string to clarify or explain concepts about the resource.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="useContext" minOccurs="0" maxOccurs="unbounded" type="UsageContext">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate risk evidence synthesis instances.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="jurisdiction" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A legal or geographic region in which the risk evidence synthesis is intended to be used.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="copyright" minOccurs="0" maxOccurs="1" type="markdown">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A copyright statement relating to the risk evidence synthesis and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the risk evidence synthesis.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="approvalDate" minOccurs="0" maxOccurs="1" type="date">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="lastReviewDate" minOccurs="0" maxOccurs="1" type="date">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="effectivePeriod" minOccurs="0" maxOccurs="1" type="Period">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The period during which the risk evidence synthesis content was or is planned to be in active use.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="topic" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Descriptive topics related to the content of the RiskEvidenceSynthesis. Topics provide a high-level categorization grouping types of EffectEvidenceSynthesiss that can be useful for filtering and searching.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="author" minOccurs="0" maxOccurs="unbounded" type="ContactDetail">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An individiual or organization primarily involved in the creation and maintenance of the content.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="editor" minOccurs="0" maxOccurs="unbounded" type="ContactDetail">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An individual or organization primarily responsible for internal coherence of the content.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="reviewer" minOccurs="0" maxOccurs="unbounded" type="ContactDetail">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An individual or organization primarily responsible for review of some aspect of the content.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="endorser" minOccurs="0" maxOccurs="unbounded" type="ContactDetail">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An individual or organization responsible for officially endorsing the content for use in some setting.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="relatedArtifact" minOccurs="0" maxOccurs="unbounded" type="RelatedArtifact">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Related artifacts such as additional documentation, justification, or bibliographic references.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="synthesisType" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Type of synthesis eg meta-analysis.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="studyType" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Type of study eg randomized trial.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="population" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A reference to a EvidenceVariable resource that defines the population for the research.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="exposure" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A reference to a EvidenceVariable resource that defines the exposure for the research.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="outcome" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A reference to a EvidenceVariable resomece that defines the outcome for the research.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="sampleSize" type="RiskEvidenceSynthesis.SampleSize" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A description of the size of the sample involved in the synthesis.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="riskEstimate" type="RiskEvidenceSynthesis.RiskEstimate" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The estimated risk of the outcome.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="certainty" type="RiskEvidenceSynthesis.Certainty" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A description of the certainty of the risk estimate.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RiskEvidenceSynthesis.SampleSize">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The RiskEvidenceSynthesis resource describes the likelihood of an outcome in a population plus exposure state where the risk estimate is derived from a combination of research studies.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Human-readable summary of sample size.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="numberOfStudies" minOccurs="0" maxOccurs="1" type="integer">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Number of studies included in this evidence synthesis.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="numberOfParticipants" minOccurs="0" maxOccurs="1" type="integer">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Number of participants included in this evidence synthesis.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RiskEvidenceSynthesis.RiskEstimate">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The RiskEvidenceSynthesis resource describes the likelihood of an outcome in a population plus exposure state where the risk estimate is derived from a combination of research studies.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Human-readable summary of risk estimate.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="type" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Examples include proportion and mean.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="value" minOccurs="0" maxOccurs="1" type="decimal">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The point estimate of the risk estimate.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="unitOfMeasure" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Specifies the UCUM unit for the outcome.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="denominatorCount" minOccurs="0" maxOccurs="1" type="integer">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The sample size for the group that was measured for this risk estimate.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="numeratorCount" minOccurs="0" maxOccurs="1" type="integer">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The number of group members with the outcome of interest.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="precisionEstimate" type="RiskEvidenceSynthesis.PrecisionEstimate" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A description of the precision of the estimate for the effect.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RiskEvidenceSynthesis.PrecisionEstimate">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The RiskEvidenceSynthesis resource describes the likelihood of an outcome in a population plus exposure state where the risk estimate is derived from a combination of research studies.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="type" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Examples include confidence interval and interquartile range.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="level" minOccurs="0" maxOccurs="1" type="decimal">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Use 95 for a 95% confidence interval.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="from" minOccurs="0" maxOccurs="1" type="decimal">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Lower bound of confidence interval.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="to" minOccurs="0" maxOccurs="1" type="decimal">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Upper bound of confidence interval.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RiskEvidenceSynthesis.Certainty">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The RiskEvidenceSynthesis resource describes the likelihood of an outcome in a population plus exposure state where the risk estimate is derived from a combination of research studies.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="rating" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A rating of the certainty of the effect estimate.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="note" minOccurs="0" maxOccurs="unbounded" type="Annotation">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A human-readable string to clarify or explain concepts about the resource.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="certaintySubcomponent" type="RiskEvidenceSynthesis.CertaintySubcomponent" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A description of a component of the overall certainty.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RiskEvidenceSynthesis.CertaintySubcomponent">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The RiskEvidenceSynthesis resource describes the likelihood of an outcome in a population plus exposure state where the risk estimate is derived from a combination of research studies.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="type" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Type of subcomponent of certainty rating.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="rating" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A rating of a subcomponent of rating certainty.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="note" minOccurs="0" maxOccurs="unbounded" type="Annotation">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A human-readable string to clarify or explain concepts about the resource.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

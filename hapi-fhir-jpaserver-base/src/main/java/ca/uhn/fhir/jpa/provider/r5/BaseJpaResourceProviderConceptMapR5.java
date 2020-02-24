@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider.r5;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ public class BaseJpaResourceProviderConceptMapR5 extends JpaResourceProviderR5<C
 			IFhirResourceDaoConceptMap<ConceptMap> dao = (IFhirResourceDaoConceptMap<ConceptMap>) getDao();
 			TranslationResult result = dao.translate(translationRequest, theRequestDetails);
 			org.hl7.fhir.r4.model.Parameters parameters = result.toParameters();
-			return org.hl7.fhir.convertors.conv40_50.Parameters.convertParameters(parameters);
+			return org.hl7.fhir.convertors.conv40_50.Parameters40_50.convertParameters(parameters);
 		} finally {
 			endRequest(theServletRequest);
 		}

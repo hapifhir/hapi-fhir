@@ -1,6 +1,8 @@
 package org.hl7.fhir.dstu3.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +14,8 @@ import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
+import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
@@ -260,7 +264,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
         nextCandidate = nextCandidate.toUpperCase();
       }
       if (nextCandidate.equals(code)) {
-        retVal = new CodeValidationResult(next);
+        retVal = new CodeValidationResult(null, null, next, next.getDisplay());
         break;
       }
 
@@ -280,18 +284,45 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
   }
 
   @Override
-  public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-    CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
-    if (cs != null) {
-      boolean caseSensitive = true;
-      if (cs.hasCaseSensitive()) {
-        caseSensitive = cs.getCaseSensitive();
+  public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+    if (isNotBlank(theValueSetUrl)) {
+      HapiWorkerContext workerContext = new HapiWorkerContext(theContext, this);
+      ValueSetExpander expander = new ValueSetExpanderSimple(workerContext, workerContext);
+      try {
+        ValueSet valueSet = fetchValueSet(theContext, theValueSetUrl);
+        if (valueSet != null) {
+          ValueSetExpander.ValueSetExpansionOutcome expanded = expander.expand(valueSet, null);
+          Optional<ValueSet.ValueSetExpansionContainsComponent> haveMatch = expanded
+            .getValueset()
+            .getExpansion()
+            .getContains()
+            .stream()
+            .filter(t -> (Constants.codeSystemNotNeeded(theCodeSystem) || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
+            .findFirst();
+          if (haveMatch.isPresent()) {
+            return new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(theCode)));
+          }
+        }
+      } catch (Exception e) {
+        return new CodeValidationResult(IssueSeverity.WARNING, e.getMessage());
       }
 
-      CodeValidationResult retVal = testIfConceptIsInList(cs, theCode, cs.getConcept(), caseSensitive);
+      return null;
+    }
 
-      if (retVal != null) {
-        return retVal;
+    if (theCodeSystem != null) {
+      CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
+      if (cs != null) {
+        boolean caseSensitive = true;
+        if (cs.hasCaseSensitive()) {
+          caseSensitive = cs.getCaseSensitive();
+        }
+
+        CodeValidationResult retVal = testIfConceptIsInList(cs, theCode, cs.getConcept(), caseSensitive);
+
+        if (retVal != null) {
+          return retVal;
+        }
       }
     }
 
@@ -300,7 +331,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
   @Override
   public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
-    return validateCode(theContext, theSystem, theCode, null).asLookupCodeResult(theSystem, theCode);
+    return validateCode(theContext, theSystem, theCode, null, (String)null).asLookupCodeResult(theSystem, theCode);
   }
 
   @Override

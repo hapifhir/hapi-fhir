@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +53,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private boolean myOmitResourceId = false;
 	private Map<String, List<String>> myParams;
 	private final IBaseResource myResource;
-	private final List<? extends IBaseResource> myResources;
+	private final List<IBaseResource> myResources;
 	private final String myUrlPath;
 	private IIdType myForceResourceId;
 
@@ -70,7 +71,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		super(theContext);
 		myResource = null;
 		myUrlPath = null;
-		myResources = theResources;
+		myResources = new ArrayList<>(theResources);
 		myContents = null;
 		myBundleType = theBundleType;
 	}
@@ -172,11 +173,8 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		parser.setOmitResourceId(myOmitResourceId);
 		if (myResources != null) {
 			IVersionSpecificBundleFactory bundleFactory = getContext().newBundleFactory();
-			bundleFactory.initializeBundleFromResourceList("", myResources, "", "", myResources.size(), myBundleType);
-			IBaseResource bundle = bundleFactory.getResourceBundle();
-			if (bundle != null) {
-				return parser.encodeResourceToString(bundle);
-			}
+			bundleFactory.addRootPropertiesToBundle(null, null, null, null, null, myResources.size(), myBundleType, null);
+			bundleFactory.addResourcesToBundle(myResources, myBundleType, null, null, null);
 			IBaseResource bundleRes = bundleFactory.getResourceBundle();
 			return parser.encodeResourceToString(bundleRes);
 		} else if (myContents != null) {

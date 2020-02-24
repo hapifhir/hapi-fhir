@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,8 @@ public class SearchParamPresent implements Serializable {
 	@ManyToOne()
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_RESPARMPRES_RESID"))
 	private ResourceTable myResource;
+	@Column(name="RES_ID", nullable = false, insertable = false, updatable = false)
+	private Long myResourcePid;
 	@Transient
 	private transient String myParamName;
 	@Column(name = "HASH_PRESENCE")

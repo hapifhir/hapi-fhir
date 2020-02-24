@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -248,26 +248,30 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 
 	@Override
 	public boolean equals(Object theO) {
-		if (this == theO) return true;
+		if (this == theO) {
+			return true;
+		}
 
-		if (theO == null || getClass() != theO.getClass()) return false;
+		if (theO == null || getClass() != theO.getClass()) {
+			return false;
+		}
 
 		TokenParam that = (TokenParam) theO;
 
-		return new EqualsBuilder()
-			.append(myModifier, that.myModifier)
-			.append(mySystem, that.mySystem)
-			.append(myValue, that.myValue)
-			.isEquals();
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(myModifier, that.myModifier);
+		b.append(mySystem, that.mySystem);
+		b.append(myValue, that.myValue);
+		return b.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myModifier)
-			.append(mySystem)
-			.append(myValue)
-			.toHashCode();
+		HashCodeBuilder b = new HashCodeBuilder(17, 37);
+		b.append(myModifier);
+		b.append(mySystem);
+		b.append(myValue);
+		return b.toHashCode();
 	}
 
 	private static String toSystemValue(UriDt theSystem) {

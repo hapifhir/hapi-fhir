@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,6 @@ public class BinaryStorageEntity {
 	private String myHash;
 
 	public Date getPublished() {
-		if (myPublished == null) {
-			return null;
-		}
 		return new Date(myPublished.getTime());
 	}
 
@@ -61,20 +58,8 @@ public class BinaryStorageEntity {
 		return myHash;
 	}
 
-	public void setHash(String theHash) {
-		myHash = theHash;
-	}
-
-	public String getBlobId() {
-		return myBlobId;
-	}
-
 	public void setBlobId(String theBlobId) {
 		myBlobId = theBlobId;
-	}
-
-	public String getResourceId() {
-		return myResourceId;
 	}
 
 	public void setResourceId(String theResourceId) {
@@ -83,10 +68,6 @@ public class BinaryStorageEntity {
 
 	public int getSize() {
 		return mySize;
-	}
-
-	public void setSize(int theSize) {
-		mySize = theSize;
 	}
 
 	public String getBlobContentType() {
@@ -103,5 +84,9 @@ public class BinaryStorageEntity {
 
 	public void setBlob(Blob theBlob) {
 		myBlob = theBlob;
+	}
+
+	public String getBlobId() {
+		return myBlobId;
 	}
 }

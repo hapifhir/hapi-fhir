@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,33 +21,61 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import org.apache.commons.lang3.Validate;
+import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Set;
 
 public class DropTableTask extends BaseTableTask<DropTableTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropTableTask.class);
 
+	public DropTableTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
+
 	@Override
-	public void execute() throws SQLException {
+	public void validate() {
+		super.validate();
+		setDescription("Drop table " + getTableName());
+	}
+
+	@Override
+	public void doExecute() throws SQLException {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		if (!tableNames.contains(getTableName())) {
 			return;
 		}
 
+		Set<String> foreignKeys = JdbcUtils.getForeignKeys(getConnectionProperties(), null, getTableName());
+		logInfo(ourLog, "Table {} has the following foreign keys: {}", getTableName(), foreignKeys);
+
 		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
-		for (String nextIndex : indexNames) {
-			String sql = DropIndexTask.createDropIndexSql(getConnectionProperties(), getTableName(), nextIndex, getDriverType());
-			ourLog.info("Dropping index {} on table {} in preparation for table delete", nextIndex, getTableName());
-			executeSql(getTableName(), sql);
+		logInfo(ourLog, "Table {} has the following indexes: {}", getTableName(), indexNames);
+
+		for (String next : foreignKeys) {
+			List<String> sql = DropForeignKeyTask.generateSql(getTableName(), next, getDriverType());
+			for (@Language("SQL") String nextSql : sql) {
+				executeSql(getTableName(), nextSql);
+			}
 		}
 
-		ourLog.info("Dropping table: {}", getTableName());
+		for (String nextIndex : indexNames) {
+			List<String> sqls = DropIndexTask.createDropIndexSql(getConnectionProperties(), getTableName(), nextIndex, getDriverType());
+			if (!sqls.isEmpty()) {
+				logInfo(ourLog, "Dropping index {} on table {} in preparation for table delete", nextIndex, getTableName());
+			}
+			for (@Language("SQL") String sql : sqls) {
+				executeSql(getTableName(), sql);
+			}
+		}
 
+		logInfo(ourLog, "Dropping table: {}", getTableName());
+
+		@Language("SQL")
 		String sql = "DROP TABLE " + getTableName();
 		executeSql(getTableName(), sql);
 

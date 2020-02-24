@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.*;
 
-public class FhirResourceDaoPatientDstu3 extends FhirResourceDaoDstu3<Patient>implements IFhirResourceDaoPatient<Patient> {
+public class FhirResourceDaoPatientDstu3 extends BaseHapiFhirResourceDao<Patient>implements IFhirResourceDaoPatient<Patient> {
 
 	private IBundleProvider doEverythingOperation(IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequest) {
 		SearchParameterMap paramMap = new SearchParameterMap();

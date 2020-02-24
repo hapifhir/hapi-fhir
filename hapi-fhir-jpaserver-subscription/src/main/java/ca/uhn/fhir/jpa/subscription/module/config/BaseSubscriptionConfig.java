@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.module.config;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.subscription.module.config;
  */
 
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
-import ca.uhn.fhir.jpa.subscription.module.cache.ISubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribableChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

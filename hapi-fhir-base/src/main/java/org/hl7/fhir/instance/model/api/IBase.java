@@ -7,7 +7,7 @@ import java.util.List;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,5 +60,15 @@ public interface IBase extends Serializable {
 	 * Returns the FHIR type name for the given element, e.g. "Patient" or "unsignedInt"
 	 */
 	default String fhirType() { return null; }
+
+	/**
+	 * Retrieves any user suplied data in this element
+	 */
+	Object getUserData(String theName);
+
+	/**
+	 * Sets a user supplied data value in this element
+	 */
+	void setUserData(String theName, Object theValue);
 
 }

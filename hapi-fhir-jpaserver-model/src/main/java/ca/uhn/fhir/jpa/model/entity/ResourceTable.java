@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.IndexNonDeletedInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -46,17 +48,11 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
 	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
 })
-public class ResourceTable extends BaseHasResource implements Serializable {
-	public static final int RESTYPE_LEN = 35;
+public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource {
+	public static final int RESTYPE_LEN = 40;
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final int MAX_PROFILE_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
-
-//	@Transient
-//	private transient byte[] myResource;
-//
-//	@Transient
-//	private transient ResourceEncodingEnum myEncoding;
 
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
@@ -199,32 +195,35 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinksAsTarget;
+
 	@Column(name = "RES_TYPE", length = RESTYPE_LEN, nullable = false)
 	@Field
 	@OptimisticLock(excluded = true)
 	private String myResourceType;
+
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
 	private Collection<SearchParamPresent> mySearchParamPresents;
+
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
 	private Set<ResourceTag> myTags;
+
 	@Transient
 	private transient boolean myUnchangedInCurrentOperation;
+
 	@Version
 	@Column(name = "RES_VER")
 	private long myVersion;
+
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
 	private Collection<ResourceHistoryProvenanceEntity> myProvenance;
+
 	@Transient
 	private transient ResourceHistoryTable myCurrentVersionEntity;
 
-	public Collection<ResourceLink> getResourceLinksAsTarget() {
-		if (myResourceLinksAsTarget == null) {
-			myResourceLinksAsTarget = new ArrayList<>();
-		}
-		return myResourceLinksAsTarget;
-	}
+	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false, mappedBy = "myResource")
+	private ForcedId myForcedId;
 
 	@Override
 	public ResourceTag addTag(TagDefinition theTag) {
@@ -238,14 +237,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return tag;
 	}
 
-//	public ResourceEncodingEnum getEncoding() {
-//		Validate.notNull(myEncoding, "myEncoding is null");
-//		return myEncoding;
-//	}
-//
-//	public void setEncoding(ResourceEncodingEnum theEncoding) {
-//		myEncoding = theEncoding;
-//	}
 
 	public String getHashSha256() {
 		return myHashSha256;
@@ -288,10 +279,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 			myParamsCompositeStringUnique = new ArrayList<>();
 		}
 		return myParamsCompositeStringUnique;
-	}
-
-	public void setParamsCompositeStringUnique(Collection<ResourceIndexedCompositeStringUnique> theParamsCompositeStringUnique) {
-		myParamsCompositeStringUnique = theParamsCompositeStringUnique;
 	}
 
 	public Collection<ResourceIndexedSearchParamCoords> getParamsCoords() {
@@ -414,15 +401,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	public Long getResourceId() {
 		return getId();
 	}
-
-//	public byte[] getResource() {
-//		Validate.notNull(myEncoding, "myEncoding is null");
-//		return myResource;
-//	}
-//
-//	public void setResource(byte[] theResource) {
-//		myResource = theResource;
-//	}
 
 	public Collection<ResourceLink> getResourceLinks() {
 		if (myResourceLinks == null) {
@@ -577,7 +555,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		retVal.setUpdated(getUpdated());
 		retVal.setFhirVersion(getFhirVersion());
 		retVal.setDeleted(getDeleted());
-		retVal.setForcedId(getForcedId());
+		retVal.setResourceTable(this);
 
 		retVal.getTags().clear();
 
@@ -629,4 +607,33 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	public ResourceHistoryTable getCurrentVersionEntity() {
 		return myCurrentVersionEntity;
 	}
+
+	@Override
+	public ResourcePersistentId getPersistentId() {
+		return new ResourcePersistentId(getId());
+	}
+
+	@Override
+	public ForcedId getForcedId() {
+		return myForcedId;
+	}
+
+	@Override
+	public void setForcedId(ForcedId theForcedId) {
+		myForcedId = theForcedId;
+	}
+
+	@Override
+	public IdDt getIdDt() {
+		if (getForcedId() == null) {
+			Long id = getResourceId();
+			return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else {
+			// Avoid a join query if possible
+			String forcedId = getTransientForcedId() != null ? getTransientForcedId() : getForcedId().getForcedId();
+			return new IdDt(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		}
+	}
+
+
 }

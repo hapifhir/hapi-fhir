@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider.r5;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class JpaResourceProviderR5<T extends IAnyResource> extends BaseJpaResour
 		RequestDetails theRequest) {
 
 		org.hl7.fhir.r4.model.Parameters parameters = super.doExpunge(theIdParam, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null, theRequest);
-		return org.hl7.fhir.convertors.conv40_50.Parameters.convertParameters(parameters);
+		return org.hl7.fhir.convertors.conv40_50.Parameters40_50.convertParameters(parameters);
 
 	}
 
@@ -99,7 +99,7 @@ public class JpaResourceProviderR5<T extends IAnyResource> extends BaseJpaResour
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanType theExpungeOldVersions,
 		RequestDetails theRequest) {
 		org.hl7.fhir.r4.model.Parameters parameters = super.doExpunge(null, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null, theRequest);
-		return org.hl7.fhir.convertors.conv40_50.Parameters.convertParameters(parameters);
+		return org.hl7.fhir.convertors.conv40_50.Parameters40_50.convertParameters(parameters);
 	}
 
 	@Operation(name = OPERATION_META, idempotent = true, returnParameters = {

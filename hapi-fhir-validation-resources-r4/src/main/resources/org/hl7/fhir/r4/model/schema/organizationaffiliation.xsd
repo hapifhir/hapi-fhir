@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Fri, Nov 1, 2019 09:29+1100 for FHIR v4.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="OrganizationAffiliation" type="OrganizationAffiliation">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Defines an affiliation/assotiation/relationship between 2 distinct oganizations, that is not a part-of relationship/sub-division relationship.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="OrganizationAffiliation">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Defines an affiliation/assotiation/relationship between 2 distinct oganizations, that is not a part-of relationship/sub-division relationship.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Business identifiers that are specific to this role.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="active" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Whether this organization affiliation record is in active use.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="period" minOccurs="0" maxOccurs="1" type="Period">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The period during which the participatingOrganization is affiliated with the primary organization.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="organization" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Organization where the role is available (primary organization/has members).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="participatingOrganization" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The Participating Organization provides/performs the role(s) defined by the code to the Primary Organization (e.g. providing services or is a member of).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="network" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Health insurance provider network in which the participatingOrganization provides the role's services (if defined) at the indicated locations (if defined).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="code" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Definition of the role the participatingOrganization plays in the association.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="specialty" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Specific specialty of the participatingOrganization in the context of the role.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="location" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The location(s) at which the role occurs.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="healthcareService" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Healthcare services provided through the role.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="telecom" minOccurs="0" maxOccurs="unbounded" type="ContactPoint">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Contact details at the participatingOrganization relevant to this Affiliation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="endpoint" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Technical endpoints providing access to services operated for this role.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

@@ -1,10 +1,32 @@
 package ca.uhn.fhir.jpa.entity;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2020 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.jpa.bulk.BulkJobStatusEnum;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r5.model.InstantType;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -17,7 +39,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 }, indexes = {
 	@Index(name = "IDX_BLKEX_EXPTIME", columnList = "EXP_TIME")
 })
-public class BulkExportJobEntity {
+public class BulkExportJobEntity implements Serializable {
 
 	public static final int REQUEST_LENGTH = 500;
 	public static final int STATUS_MESSAGE_LEN = 500;
@@ -44,7 +66,7 @@ public class BulkExportJobEntity {
 	private Date myExpiry;
 	@Column(name = "REQUEST", nullable = false, length = REQUEST_LENGTH)
 	private String myRequest;
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myJob")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myJob", orphanRemoval = false)
 	private Collection<BulkExportCollectionEntity> myCollections;
 	@Version
 	@Column(name = "OPTLOCK", nullable = false)
@@ -100,7 +122,8 @@ public class BulkExportJobEntity {
 
 	@Override
 	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this);
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("pid", myId);
 		if (isNotBlank(myJobId)) {
 			b.append("jobId", myJobId);
 		}

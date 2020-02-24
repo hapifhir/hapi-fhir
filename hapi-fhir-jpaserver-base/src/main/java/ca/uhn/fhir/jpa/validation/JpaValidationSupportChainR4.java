@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.validation;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,8 @@ package ca.uhn.fhir.jpa.validation;
  * #L%
  */
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.SnapshotGeneratingValidationSupport;
@@ -32,11 +30,13 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 public class JpaValidationSupportChainR4 extends ValidationSupportChain {
 
-	private DefaultProfileValidationSupport myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
+	@Autowired
+	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -46,7 +46,7 @@ public class JpaValidationSupportChainR4 extends ValidationSupportChain {
 	public ca.uhn.fhir.jpa.dao.r4.IJpaValidationSupportR4 myJpaValidationSupportR4;
 	
 	@Autowired
-	private IHapiTerminologySvcR4 myTerminologyService;
+	private ITermReadSvcR4 myTerminologyService;
 	
 	public JpaValidationSupportChainR4() {
 		super();

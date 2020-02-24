@@ -5,13 +5,12 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>4.1.0-SNAPSHOT</version>
+		<version>4.3.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-converter</artifactId>
-	<!-- TODO: BND changed to jar temporarily -->
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<dependencies>
 		<dependency>
@@ -152,10 +151,6 @@
 			</resource>
 		</resources>
 		<plugins>
-			<!--
-			TODO: BND
-			With this enabled, JAR file contains a bunch of .class files that
-			seem to get copied in from org.hl7.fhir.convertors
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
@@ -170,7 +165,33 @@
 					</instructions>
 				</configuration>
 			</plugin>
-			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<includeDependencySources>true</includeDependencySources>
+					<dependencySourceIncludes>
+						<include>ca.uhn.hapi.fhir:org.hl7.fhir.convertors</include>
+					</dependencySourceIncludes>
+				</configuration>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<dumpOnExit>true</dumpOnExit>
+				</configuration>
+				<executions>
+					<execution>
+						<id>default-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>

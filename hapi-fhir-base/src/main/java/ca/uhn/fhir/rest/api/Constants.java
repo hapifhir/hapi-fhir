@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,9 @@ import java.util.*;
 
 public class Constants {
 
+	public static final String CT_TEXT_CSV = "text/csv";
 	public static final String HEADER_REQUEST_ID = "X-Request-ID";
+	public static final String HEADER_REQUEST_SOURCE = "X-Request-Source";
 	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
 	public static final String CACHE_CONTROL_NO_CACHE = "no-cache";
 	public static final String CACHE_CONTROL_NO_STORE = "no-store";
@@ -151,6 +153,8 @@ public class Constants {
 	public static final String PARAM_INCLUDE = "_include";
 	public static final String PARAM_INCLUDE_QUALIFIER_RECURSE = ":recurse";
 	public static final String PARAM_INCLUDE_RECURSE = "_include" + PARAM_INCLUDE_QUALIFIER_RECURSE;
+	public static final String PARAM_INCLUDE_QUALIFIER_ITERATE = ":iterate";
+	public static final String PARAM_INCLUDE_ITERATE = "_include" + PARAM_INCLUDE_QUALIFIER_ITERATE;
 	public static final String PARAM_LASTUPDATED = "_lastUpdated";
 	public static final String PARAM_NARRATIVE = "_narrative";
 	public static final String PARAM_PAGINGACTION = "_getpages";
@@ -163,6 +167,7 @@ public class Constants {
 	public static final String PARAM_RESPONSE_URL = "response-url"; //Used in messaging
 	public static final String PARAM_REVINCLUDE = "_revinclude";
 	public static final String PARAM_REVINCLUDE_RECURSE = PARAM_REVINCLUDE + PARAM_INCLUDE_QUALIFIER_RECURSE;
+	public static final String PARAM_REVINCLUDE_ITERATE = PARAM_REVINCLUDE + PARAM_INCLUDE_QUALIFIER_ITERATE;
 	public static final String PARAM_SEARCH = "_search";
 	public static final String PARAM_SECURITY = "_security";
 	public static final String PARAM_SINCE = "_since";
@@ -234,6 +239,20 @@ public class Constants {
 	public static final int STATUS_HTTP_202_ACCEPTED = 202;
 	public static final String HEADER_X_PROGRESS = "X-Progress";
 	public static final String HEADER_RETRY_AFTER = "Retry-After";
+	/**
+	 * Operation name for the $lastn operation
+	 */
+	public static final String OPERATION_LASTN = "$lastn";
+	/**
+	 * <p>
+	 * This extension represents the equivalent of the
+	 * <code>Resource.meta.source</code> field within R4+ resources, and is for
+	 * use in DSTU3 resources. It should contain a value of type <code>uri</code>
+	 * and will be located on the Resource.meta
+	 * </p>
+	 */
+	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
+	public static final String CODESYSTEM_VALIDATE_NOT_NEEDED = UUID.randomUUID().toString();
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
@@ -335,4 +354,16 @@ public class Constants {
 		CORS_ALLWED_METHODS = Collections.unmodifiableSet(corsAllowedMethods);
 	}
 
+	public static boolean codeSystemNotNeeded(String theCodeSystem) {
+		return Constants.CODESYSTEM_VALIDATE_NOT_NEEDED.equals(theCodeSystem);
+	}
+
+
+	public static String codeSystemWithDefaultDescription(String theSystem) {
+		if (codeSystemNotNeeded(theSystem)) {
+			return "(none)";
+		} else {
+			return theSystem;
+		}
+	}
 }

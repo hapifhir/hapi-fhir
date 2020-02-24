@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.config;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ package ca.uhn.fhir.jpa.searchparam.config;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -28,5 +31,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @ComponentScan(basePackages = {"ca.uhn.fhir.jpa.searchparam"})
 abstract public class BaseSearchParamConfig {
+
+	@Bean
+	public ISearchParamRegistry searchParamRegistry() {
+		return new SearchParamRegistryImpl();
+	}
 
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -398,7 +398,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	}
 
 	protected IGenericClient newClientWithBaseUrl(CommandLine theCommandLine, String theBaseUrl, String theBasicAuthOptionName, String theBearerTokenOptionName) throws ParseException {
-		myFhirCtx.getRestfulClientFactory().setSocketTimeout(10 * 60 * 1000);
+		myFhirCtx.getRestfulClientFactory().setSocketTimeout((int) DateUtils.MILLIS_PER_HOUR);
 		IGenericClient retVal = myFhirCtx.newRestfulGenericClient(theBaseUrl);
 
 		String basicAuthHeaderValue = getAndParseOptionBasicAuthHeader(theCommandLine, theBasicAuthOptionName);

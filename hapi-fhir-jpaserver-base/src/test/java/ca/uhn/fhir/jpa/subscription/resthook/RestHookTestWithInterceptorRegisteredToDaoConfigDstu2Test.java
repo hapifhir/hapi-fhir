@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -19,7 +20,9 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -30,6 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.Assert.fail;
 
 /**
  * Test the rest-hook subscriptions
@@ -43,7 +48,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
 	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
-
+	@Autowired
+	protected SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
@@ -76,6 +82,22 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		mySubscriptionTestUtil.waitForQueueToDrain();
 	}
 
+	protected void waitForActivatedSubscriptionCount(int theSize) throws Exception {
+		for (int i = 0; ; i++) {
+			if (i == 10) {
+				fail("Failed to init subscriptions");
+			}
+			try {
+				mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
+				break;
+			} catch (ResourceVersionConflictException e) {
+				Thread.sleep(250);
+			}
+		}
+
+		TestUtil.waitForSize(theSize, () -> mySubscriptionRegistry.size());
+		Thread.sleep(500);
+	}
 
 	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {
 		Subscription subscription = new Subscription();
@@ -125,6 +147,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 
 		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
 		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
+		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
@@ -198,11 +221,11 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 
 		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
 		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
+		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
 		// Should see 1 subscription notification
-		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 
@@ -302,8 +325,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 
 		ourListenerServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourListenerServer);
-        ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
-        ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
+		ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
+		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
 	@AfterClass

@@ -1,21 +1,7 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -26,7 +12,6 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
@@ -38,23 +23,27 @@ import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
-import org.hl7.fhir.dstu3.utils.StructureMapUtilities;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.junit.*;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
+import org.mockito.internal.matchers.Any;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 public class FhirInstanceValidatorDstu3Test {
 
@@ -158,23 +147,25 @@ public class FhirInstanceValidatorDstu3Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.validateCode(nullable(FhirContext.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<CodeValidationResult>() {
+		when(myMockSupport.validateCode(nullable(FhirContext.class), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IContextValidationSupport.CodeValidationResult>() {
 			@Override
-			public CodeValidationResult answer(InvocationOnMock theInvocation) {
-				FhirContext ctx = (FhirContext) theInvocation.getArguments()[0];
-				String system = (String) theInvocation.getArguments()[1];
-				String code = (String) theInvocation.getArguments()[2];
-				CodeValidationResult retVal;
+			public IContextValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
+				FhirContext ctx = theInvocation.getArgument(0, FhirContext.class);
+				String system = theInvocation.getArgument(1, String.class);
+				String code = theInvocation.getArgument(2, String.class);
+				String display = theInvocation.getArgument(3, String.class);
+				String valueSetUrl = theInvocation.getArgument(4, String.class);
+				IContextValidationSupport.CodeValidationResult retVal;
 				if (myValidConcepts.contains(system + "___" + code)) {
-					retVal = new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(code)));
+					retVal = new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(new CodeType(code)));
 				} else if (myCodeSystems.containsKey(system)) {
 					CodeSystem cs = myCodeSystems.get(system);
 					Optional<ConceptDefinitionComponent> found = cs.getConcept().stream().filter(t -> t.getCode().equals(code)).findFirst();
-					retVal = found.map(t->new CodeValidationResult(t)).orElse(null);
+					retVal = found.map(t->new IContextValidationSupport.CodeValidationResult(t)).orElse(null);
 				} else {
-					retVal = myDefaultValidationSupport.validateCode(ctx, system, code, (String) theInvocation.getArguments()[2]);
+					retVal = myDefaultValidationSupport.validateCode(ctx, system, code, display, valueSetUrl);
 				}
-				ourLog.debug("validateCode({}, {}, {}) : {}", new Object[] {system, code, theInvocation.getArguments()[2], retVal});
+				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
 				return retVal;
 			}
 		});
@@ -241,7 +232,7 @@ public class FhirInstanceValidatorDstu3Test {
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {
 			ourLog.info("Result {}: {} - {}:{} {} - {}",
-				new Object[] {index, next.getSeverity(), defaultString(next.getLocationLine()), defaultString(next.getLocationCol()), next.getLocationString(), next.getMessage()});
+				index, next.getSeverity(), defaultString(next.getLocationLine()), defaultString(next.getLocationCol()), next.getLocationString(), next.getMessage());
 			index++;
 
 			retVal.add(next);
@@ -255,7 +246,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {
-			ourLog.info("Result {}: {} - {} - {}", new Object[] {index, next.getSeverity(), next.getLocationString(), next.getMessage()});
+			ourLog.info("Result {}: {} - {} - {}", index, next.getSeverity(), next.getLocationString(), next.getMessage());
 			index++;
 
 			if (next.getSeverity() != ResultSeverityEnum.INFORMATION) {
@@ -536,7 +527,7 @@ public class FhirInstanceValidatorDstu3Test {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
 		String vsContents;
-		vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/profile/" + name + ".xml"), "UTF-8");
+		vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/profile/" + name + ".xml"), StandardCharsets.UTF_8);
 
 		TreeSet<String> ids = new TreeSet<String>();
 
@@ -566,7 +557,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateBundleWithNoType() throws Exception {
-		String vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/dstu3/bundle-with-no-type.json"), "UTF-8");
+		String vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/dstu3/bundle-with-no-type.json"), StandardCharsets.UTF_8);
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
@@ -579,7 +570,7 @@ public class FhirInstanceValidatorDstu3Test {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
 		String inputString;
-		inputString = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/brian_reinhold_bundle.json"), "UTF-8");
+		inputString = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/brian_reinhold_bundle.json"), StandardCharsets.UTF_8);
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, inputString);
 
 		FHIRPathEngine fp = new FHIRPathEngine(new HapiWorkerContext(ourCtx, myDefaultValidationSupport));
@@ -631,7 +622,7 @@ public class FhirInstanceValidatorDstu3Test {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
 		String vsContents;
-		vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/crucible-condition.xml"), "UTF-8");
+		vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/crucible-condition.xml"), StandardCharsets.UTF_8);
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
@@ -639,7 +630,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateDocument() throws Exception {
-		String vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/sample-document.xml"), "UTF-8");
+		String vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/sample-document.xml"), StandardCharsets.UTF_8);
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
@@ -684,7 +675,7 @@ public class FhirInstanceValidatorDstu3Test {
 		assertEquals(output.toString(), 1, output.getMessages().size());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
-		assertEquals("/Patient", output.getMessages().get(0).getLocationString());
+		assertEquals("Patient", output.getMessages().get(0).getLocationString());
 		assertEquals("Unrecognised property '@foo'", output.getMessages().get(0).getMessage());
 	}
 
@@ -857,7 +848,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.toString(), 1, output.getMessages().size());
-		assertEquals("This cannot be parsed as a FHIR object (no namespace)", output.getMessages().get(0).getMessage());
+		assertEquals("This 'Patient' cannot be parsed as a FHIR object (no namespace)", output.getMessages().get(0).getMessage());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 	}
 
@@ -985,7 +976,7 @@ public class FhirInstanceValidatorDstu3Test {
 		myInstanceVal.setValidationSupport(myMockSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.toString(), containsString("StructureDefinition reference \"http://foo/structuredefinition/myprofile\" could not be resolved"));
+		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked"));
 	}
 
 	@Test
@@ -1029,7 +1020,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertEquals(
-			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code[notvalidcode] in system[null])",
+			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code[notvalidcode] in system[(none)])",
 			output.getMessages().get(0).getMessage());
 	}
 
@@ -1153,6 +1144,20 @@ public class FhirInstanceValidatorDstu3Test {
 		assertEquals(output.toString(), 3, output.getMessages().size());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
+	}
+
+	@Test
+	public void testInvocationOfValidatorFetcher() throws IOException {
+		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/dstu3-rick-test.json"), Charsets.UTF_8);
+
+		IResourceValidator.IValidatorResourceFetcher resourceFetcher = mock(IResourceValidator.IValidatorResourceFetcher.class);
+		when(resourceFetcher.validationPolicy(any(),anyString(), anyString())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
+		myVal.validateWithResult(input);
+
+		verify(resourceFetcher, times(3)).resolveURL(any(), anyString(), anyString());
+		verify(resourceFetcher, times(4)).validationPolicy(any(), anyString(), anyString());
+		verify(resourceFetcher, times(4)).fetch(any(), anyString());
 	}
 
 	@Test

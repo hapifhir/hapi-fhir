@@ -13,6 +13,7 @@ import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.InstantType;
@@ -30,9 +31,6 @@ import java.util.UUID;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
-@TestPropertySource(properties = {
-	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
-})
 public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImplR4Test.class);
@@ -92,7 +90,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Check that things were deleted
 		runInTransaction(() -> {
 			assertEquals(0, myResourceTableDao.count());
-			assertEquals(0, myBulkExportJobDao.count());
+			assertThat(myBulkExportJobDao.findAll(), Matchers.empty());
 			assertEquals(0, myBulkExportCollectionDao.count());
 			assertEquals(0, myBulkExportCollectionFileDao.count());
 		});

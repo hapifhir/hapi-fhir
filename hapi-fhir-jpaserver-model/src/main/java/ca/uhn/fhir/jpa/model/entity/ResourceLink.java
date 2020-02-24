@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,10 +138,6 @@ public class ResourceLink extends BaseResourceIndex {
 		mySourceResourceType = theSourceResource.getResourceType();
 	}
 
-	public Long getSourceResourcePid() {
-		return mySourceResourcePid;
-	}
-
 	public ResourceTable getTargetResource() {
 		return myTargetResource;
 	}
@@ -155,10 +151,6 @@ public class ResourceLink extends BaseResourceIndex {
 
 	public Long getTargetResourcePid() {
 		return myTargetResourcePid;
-	}
-
-	public String getTargetResourceUrl() {
-		return myTargetResourceUrl;
 	}
 
 	public void setTargetResourceUrl(IIdType theTargetResourceUrl) {

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.api.server;
 
 import ca.uhn.fhir.context.api.BundleInclusionRule;
-import ca.uhn.fhir.rest.api.PreferHeader;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 
@@ -9,7 +9,7 @@ import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,6 @@ public interface IRestfulServer<T extends RequestDetails> extends IRestfulServer
 
 	BundleInclusionRule getBundleInclusionRule();
 
-	PreferHeader.PreferReturnEnum getDefaultPreferReturn();
+	PreferReturnEnum getDefaultPreferReturn();
 
 }

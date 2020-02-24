@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Wed, Apr 19, 2017 07:44+1000 for FHIR v3.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="Procedure" type="Procedure">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">An action that is or was performed on a patient. This can be a physical intervention like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="Procedure">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">An action that is or was performed on a patient. This can be a physical intervention like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">This records identifiers associated with this procedure that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="definition" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A protocol, guideline, orderset or other definition that was adhered to in whole or in part by this procedure.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="basedOn" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A reference to a resource that contains details of the request for this procedure.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="partOf" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A larger event of which this particular procedure is a component or step.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="status" minOccurs="1" maxOccurs="1" type="EventStatus">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A code specifying the state of the procedure. Generally this will be in-progress or completed state.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="notDone" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Set this to true if the record is saying that the procedure was NOT performed.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="notDoneReason" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A code indicating why the procedure was not performed.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="category" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A code that classifies the procedure for searching, sorting and display purposes (e.g. &quot;Surgical Procedure&quot;).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="code" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The specific procedure that is performed. Use text if the exact nature of the procedure cannot be coded (e.g. &quot;Laparoscopic Appendectomy&quot;).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="subject" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The person, animal or group on which the procedure was performed.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="context" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The encounter during which the procedure was performed.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:choice minOccurs="0" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The date(time)/period over which the procedure was performed. Allows a period to support complex procedures that span more than one date, and also allows for the length of the procedure to be captured.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="performedDateTime" type="dateTime"/>
+            <xs:element name="performedPeriod" type="Period"/>
+          </xs:choice>
+          <xs:element name="performer" type="Procedure.Performer" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Limited to 'real' people rather than equipment.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="location" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The location where the procedure actually happened.  E.g. a newborn at home, a tracheostomy at a restaurant.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="reasonCode" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The coded reason why the procedure was performed. This may be coded entity of some type, or may simply be present as text.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="reasonReference" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The condition that is the reason why the procedure was performed.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="bodySite" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Detailed and structured anatomical location information. Multiple locations are allowed - e.g. multiple punch biopsies of a lesion.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="outcome" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The outcome of the procedure - did it resolve reasons for the procedure being performed?</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="report" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">This could be a histology result, pathology report, surgical report, etc..</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="complication" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Any complications that occurred during the procedure, or in the immediate post-performance period. These are generally tracked separately from the notes, which will typically describe the procedure itself rather than any 'post procedure' issues.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="complicationDetail" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Any complications that occurred during the procedure, or in the immediate post-performance period.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="followUp" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or could potentially be more complex in which case the CarePlan resource can be used.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="note" minOccurs="0" maxOccurs="unbounded" type="Annotation">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Any other notes about the procedure.  E.g. the operative notes.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="focalDevice" type="Procedure.FocalDevice" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A device that is implanted, removed or otherwise manipulated (calibration, battery replacement, fitting a prosthesis, attaching a wound-vac, etc.) as a focal portion of the Procedure.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="usedReference" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies medications, devices and any other substance used as part of the procedure.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="usedCode" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies coded items that were used as part of the procedure.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Procedure.Performer">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">An action that is or was performed on a patient. This can be a physical intervention like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="role" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">For example: surgeon, anaethetist, endoscopist.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="actor" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The practitioner who was involved in the procedure.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="onBehalfOf" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The organization the device or practitioner was acting on behalf of.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Procedure.FocalDevice">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">An action that is or was performed on a patient. This can be a physical intervention like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="action" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The kind of change that happened to the device during the procedure.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="manipulated" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The device that was manipulated (changed) during the procedure.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

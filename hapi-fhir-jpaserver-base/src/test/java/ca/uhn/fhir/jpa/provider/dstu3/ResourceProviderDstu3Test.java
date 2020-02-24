@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.provider.r4.ResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.util.CoordCalculatorTest;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -65,6 +66,7 @@ import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -91,6 +93,36 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
+
+	}
+
+
+	@Test
+	public void testSearchBySourceTransactionId() {
+
+		Patient p1 = new Patient();
+		p1.setActive(true);
+		ourClient
+			.create()
+			.resource(p1)
+			.withAdditionalHeader(Constants.HEADER_REQUEST_ID, "11111")
+			.execute();
+
+		Patient p2 = new Patient();
+		p2.setActive(true);
+		ourClient
+			.create()
+			.resource(p2)
+			.withAdditionalHeader(Constants.HEADER_REQUEST_ID, "22222")
+			.execute();
+
+		Bundle results = ourClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=%2311111")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(1, results.getEntry().size());
 
 	}
 
@@ -2507,7 +2539,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(toUnqualifiedVersionlessIds(found), containsInAnyOrder(id1));
+		assertThat(toUnqualifiedVersionlessIdValues(found).toString(), toUnqualifiedVersionlessIds(found), containsInAnyOrder(id1));
 
 		found = ourClient
 			.search()
@@ -2973,7 +3005,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.count(5)
 			.returnBundle(Bundle.class)
 			.execute();
-		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
 		Search search1 = newTxTemplate().execute(new TransactionCallback<Search>() {
@@ -2982,7 +3013,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				return mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new InternalErrorException(""));
 			}
 		});
-		Date lastReturned1 = search1.getSearchLastReturned();
+		Date created1 = search1.getCreated();
 
 		Bundle result2 = ourClient
 			.search()
@@ -2991,7 +3022,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.count(5)
 			.returnBundle(Bundle.class)
 			.execute();
-		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
 		Search search2 = newTxTemplate().execute(new TransactionCallback<Search>() {
@@ -3000,9 +3030,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				return mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(() -> new InternalErrorException(""));
 			}
 		});
-		Date lastReturned2 = search2.getSearchLastReturned();
+		Date created2 = search2.getCreated();
 
-		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
+		assertEquals(created2.getTime(), created1.getTime());
 
 		Thread.sleep(1500);
 
@@ -3037,24 +3067,22 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.forResource("Organization")
 			.returnBundle(Bundle.class)
 			.execute();
-		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
 		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new InternalErrorException("")));
-		Date lastReturned1 = search1.getSearchLastReturned();
+		Date created1 = search1.getCreated();
 
 		Bundle result2 = ourClient
 			.search()
 			.forResource("Organization")
 			.returnBundle(Bundle.class)
 			.execute();
-		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
 		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(() -> new InternalErrorException("")));
-		Date lastReturned2 = search2.getSearchLastReturned();
+		Date created2 = search2.getCreated();
 
-		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
+		assertEquals(created2.getTime(), created1.getTime());
 
 		assertEquals(uuid1, uuid2);
 	}
@@ -3914,6 +3942,31 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
+	public void testUpdateWithSource() {
+		Patient patient = new Patient();
+		patient.setActive(false);
+		IIdType patientid = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+		{
+			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
+			assertThat(readPatient.getMeta().getExtensionString(Constants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
+		}
+
+		patient.setId(patientid);
+		patient.setActive(true);
+		ourClient.update().resource(patient).execute();
+		{
+			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
+			assertThat(readPatient.getMeta().getExtensionString(Constants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
+
+			readPatient.addName().setFamily("testUpdateWithSource");
+			ourClient.update().resource(readPatient).execute();
+			readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
+			assertThat(readPatient.getMeta().getExtensionString(Constants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
+		}
+	}
+
+	@Test
 	public void testUpdateWithETag() throws Exception {
 		String methodName = "testUpdateWithETag";
 
@@ -4025,23 +4078,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Patient patient = new Patient();
 		patient.addName().addGiven("James");
 		patient.setBirthDateElement(new DateType("2011-02-02"));
-		patient.addContact().setGender(AdministrativeGender.MALE);
 
 		String inputStr = myFhirCtx.newXmlParser().encodeResourceToString(patient);
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
+		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(412, response.getStatusLine().getStatusCode());
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(resp, not(containsString("Resource has no id")));
-			assertThat(resp,
-				stringContainsInOrder(">ERROR<", "[Patient.contact[0]]", "<pre>SHALL at least contain a contact's details or a reference to an organization", "<issue><severity value=\"error\"/>"));
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
 		}
 	}
 
@@ -4230,6 +4276,55 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
+		}
+
+	}
+
+	@Test
+	public void testNearSearchApproximate() {
+		Location loc = new Location();
+		double latitude = CoordCalculatorTest.LATITUDE_UHN;
+		double longitude = CoordCalculatorTest.LONGITUDE_UHN;
+		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		loc.setPosition(position);
+		IIdType locId = ourClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
+
+		{ // In the box
+			double bigEnoughDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN * 2;
+			String url = "/Location?" +
+				Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + URLEncoder.encode(":") + CoordCalculatorTest.LONGITUDE_CHIN +
+				"&" +
+				Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
+
+			Bundle actual = ourClient
+				.search()
+				.byUrl(ourServerBase + "/" + url)
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+
+			assertEquals(1, actual.getEntry().size());
+			assertEquals(locId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
+		}
+		{ // Outside the box
+			double tooSmallDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN / 2;
+			String url = "/Location?" +
+				Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + URLEncoder.encode(":") + CoordCalculatorTest.LONGITUDE_CHIN +
+				"&" +
+				Location.SP_NEAR_DISTANCE + "=" + tooSmallDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
+
+			myCaptureQueriesListener.clear();
+			Bundle actual = ourClient
+				.search()
+				.byUrl(ourServerBase + "/" + url)
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+			myCaptureQueriesListener.logSelectQueries();
+
+			assertEquals(0, actual.getEntry().size());
 		}
 
 	}

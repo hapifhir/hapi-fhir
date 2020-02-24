@@ -1,0 +1,104 @@
+---
+- item:
+    type: "add"
+    title: "Add support for reference implementation structures."
+- item:
+    type: "fix"
+    title: "Parsers did not encode the resource meta element if the resource had tags but no other meta elements. Thanks to Bill de Beaubien and Claude Nanjo for finding this."
+- item:
+    issue: "164"
+    type: "fix"
+    title: "Correct performance issue with :missing=true search requests where the parameter is a resource link. Thanks to wanghaisheng for all his help in testing this."
+- item:
+    issue: "149"
+    type: "fix"
+    title: "The self link in the Bundle returned by searches on the server does not respect the server's address strategy (which resulted in an internal IP being shown on fhirtest.uhn.ca)"
+- item:
+    type: "add"
+    title: "Introduce ResponseHighlighterInterceptor, which provides syntax highlighting on RESTful server responses if the server detects that the request is coming from a browser. This interceptor has been added to fhirtest.uhn.ca responses."
+- item:
+    type: "fix"
+    title: "Performing a create operation in a client used an incorrect URL if the resource had an ID set. ID should be ignored for creates. Thanks to Peter Girard for reporting!"
+- item:
+    issue: "170"
+    type: "add"
+    title: "Add better addXXX() methods to structures, which take the datatype being added as a parameter. Thanks to Claude Nanjo for the suggestion!"
+- item:
+    issue: "152"
+    type: "add"
+    title: "Add a new parser validation mechanism (see the validation page for info) which can be used to validate resources as they are being parsed, and optionally fail if invalid/unexpected elements are found in resource bodies during parsing."
+- item:
+    type: "fix"
+    title: "IParser#parseResource(Class, String) method, which is used to parse a resource into the given structure will now throw a DataFormatException if the structure is for the wrong type of resource for the one actually found in the input String (or Reader). For example, if a Patient resource is being parsed into Organization.class this will now cause an error. Previously, the XML parser would ignore the type and the JSON parser would fail. This also caused operations to not parse correctly if they returned a resource type other than parameters with JSON encoding (e.g. the $everything operation on UHN's test server). Thanks to Avinash Shanbhag for reporting!"
+- item:
+    type: "add"
+    title: "Web tester UI now supports _revinclude"
+- item:
+    issue: "178"
+    type: "fix"
+    title: "Support link elements in Bundle.entry when parsing in DSTU2 mode using the old (non-resource) Bundle class. Thanks to GitHub user @joedai for reporting!"
+- item:
+    type: "add"
+    title: "LoggingInterceptor for server now supports logging DSTU2 extended operations by name"
+- item:
+    type: "fix"
+    title: "Woodstox XML parser has a default setting to limit the maximum length of an attribute to 512kb. This caused issues handling large attachments, so this setting has been increased to 100Mb. Thanks to Nikos Kyriakoulakos for reporting!"
+- item:
+    issue: "175"
+    type: "fix"
+    title: "Some HTML entities were not correctly converted during parsing. Thanks to Nick Kitto for reporting!"
+- item:
+    type: "fix"
+    title: "In the JPA Server: Transactions creating resources with temporary/placeholder resource IDs and other resources with references to those placeholder IDs previously did not work if the reference did not contain the resource type (e.g. Patient/urn:oid:0.1.2.3 instead of urn:oid:0.1.2.3). The latter is actually the correct way of specifying a reference to a placeholder, but the former was the only way that worked. Both forms now work, in order to be lenient. Thanks to Bill De Beaubien for reporting!"
+- item:
+    type: "fix"
+    title: "When parsing Bundles, if Bundle.entry.base is set to \"cid:\" (for DSTU1) or \"urn:uuid:\" / \"urn:oid:\" (for DSTU2) this is now correctly passed as the base in resource.getId(). Conversely, when encoding bundles, if a resource ID has a base defined, and Bundle.entry.base is empty, it will now be automatically set by the parser."
+- item:
+    issue: "179"
+    type: "add"
+    title: "Add fluent client method for validate operation, and support the new DSTU2 style extended operation for $validate if the client is in DSTU2 mode. Thanks to Eric from the FHIR Skype Implementers chat for reporting."
+- item:
+    type: "add"
+    title: "Server now supports complete Accept header content negotiation, including q values specifying order of preference. Previously the q value was ignored."
+- item:
+    type: "add"
+    title: "Server in DSTU2 mode now indicates that whether it has support for Transaction operation or not. Thanks to Kevin Paschke for pointing out that this wasn't working!"
+- item:
+    issue: "166"
+    type: "add"
+    title: "Questionnaire.title now gets correctly indexed in JPA server (it has no path, so it is a special case)"
+- item:
+    type: "add"
+    title: "JPA server now supports ifNoneMatch in GET within a transaction request."
+- item:
+    type: "add"
+    title: "DateRangeParam now supports null values in the constructor for lower or upper bounds (but still not both)"
+- item:
+    type: "add"
+    title: "Generic/fluent client and JPA server now both support _lastUpdated search parameter which was added in DSTU2"
+- item:
+    issue: "188"
+    type: "fix"
+    title: "JPA server now supports sorting on reference parameters. Thanks to Vishal Kachroo for reporting that this wasn't working!"
+- item:
+    type: "fix"
+    title: "Prevent Last-Updated header in responses coming back to the client from overwriting the 'lastUpdated' value in the meta element in DSTU2 resources. This is important because 'lastUpdated' can have more precision than the equivalent header, but the client previously gave the header priority."
+- item:
+    type: "fix"
+    title: "JPA server supports _count parameter in transaction containing search URL (nested search)"
+- item:
+    type: "fix"
+    title: "DSTU2 servers now indicate support for conditional create/update/delete in their conformance statement."
+- item:
+    type: "fix"
+    title: "Support for the Prefer header has been added to the server, client, and JPA modules."
+- item:
+    issue: "196"
+    type: "fix"
+    title: "JPA server failed to search for deep chained parameters across multiple references, e.g. \"Location.partof.partof.organization\". Thanks to Ismael Sarmento Jr for reporting!"
+- item:
+    type: "fix"
+    title: "Prevent crash when encoding resources with contained resources if the contained resources contained a circular reference to each other"
+- item:
+    type: "add"
+    title: "Add $meta, $meta-add, and $meta-delete operations to generic client"

@@ -10,7 +10,7 @@ import javax.ws.rs.client.ClientBuilder;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	public IHttpClient getHttpClient(StringBuilder url, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
+	public synchronized IHttpClient getHttpClient(StringBuilder url, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
 		Client client = getNativeClientClient();
 		return new JaxRsHttpClient(client, url, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
@@ -112,7 +112,7 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 
 
 	@Override
-	protected JaxRsHttpClient getHttpClient(String theServerBase) {
+	protected synchronized JaxRsHttpClient getHttpClient(String theServerBase) {
 		return new JaxRsHttpClient(getNativeClientClient(), new StringBuilder(theServerBase), null, null, null, null);
 	}
   

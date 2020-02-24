@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider.r4;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +19,25 @@ package ca.uhn.fhir.jpa.provider.r4;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
-
-import javax.servlet.http.HttpServletRequest;
-
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.CapabilityStatement.*;
-import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CapabilityStatement.*;
+import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -50,17 +51,17 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
-	
+
 	/**
 	 * Constructor
 	 */
 	@CoverageIgnore
-	public JpaConformanceProviderR4(){
+	public JpaConformanceProviderR4() {
 		super();
 		super.setCache(false);
 		setIncludeResourceCounts(true);
 	}
-	
+
 	/**
 	 * Constructor
 	 */
@@ -94,7 +95,7 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 			for (CapabilityStatementRestResourceComponent nextResource : nextRest.getResource()) {
 
 				nextResource.setVersioning(ResourceVersionPolicy.VERSIONEDUPDATE);
-				
+
 				ConditionalDeleteStatus conditionalDelete = nextResource.getConditionalDelete();
 				if (conditionalDelete == ConditionalDeleteStatus.MULTIPLE && myDaoConfig.isAllowMultipleDelete() == false) {
 					nextResource.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
@@ -109,7 +110,7 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 				nextResource.getSearchParam().clear();
 				String resourceName = nextResource.getType();
 				RuntimeResourceDefinition resourceDef = myRestfulServer.getFhirContext().getResourceDefinition(resourceName);
-				Collection<RuntimeSearchParam> searchParams =  mySearchParamRegistry.getSearchParamsByResourceType(resourceDef);
+				Collection<RuntimeSearchParam> searchParams = mySearchParamRegistry.getSearchParamsByResourceType(resourceDef);
 				for (RuntimeSearchParam runtimeSp : searchParams) {
 					CapabilityStatementRestResourceSearchParamComponent confSp = nextResource.addSearchParam();
 
@@ -117,37 +118,40 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 					confSp.setDocumentation(runtimeSp.getDescription());
 					confSp.setDefinition(runtimeSp.getUri());
 					switch (runtimeSp.getParamType()) {
-					case COMPOSITE:
-						confSp.setType(SearchParamType.COMPOSITE);
-						break;
-					case DATE:
-						confSp.setType(SearchParamType.DATE);
-						break;
-					case NUMBER:
-						confSp.setType(SearchParamType.NUMBER);
-						break;
-					case QUANTITY:
-						confSp.setType(SearchParamType.QUANTITY);
-						break;
-					case REFERENCE:
-						confSp.setType(SearchParamType.REFERENCE);
-						break;
-					case STRING:
-						confSp.setType(SearchParamType.STRING);
-						break;
-					case TOKEN:
-						confSp.setType(SearchParamType.TOKEN);
-						break;
-					case URI:
-						confSp.setType(SearchParamType.URI);
-						break;
-					case HAS:
-						// Shouldn't happen
-						break;
+						case COMPOSITE:
+							confSp.setType(SearchParamType.COMPOSITE);
+							break;
+						case DATE:
+							confSp.setType(SearchParamType.DATE);
+							break;
+						case NUMBER:
+							confSp.setType(SearchParamType.NUMBER);
+							break;
+						case QUANTITY:
+							confSp.setType(SearchParamType.QUANTITY);
+							break;
+						case REFERENCE:
+							confSp.setType(SearchParamType.REFERENCE);
+							break;
+						case STRING:
+							confSp.setType(SearchParamType.STRING);
+							break;
+						case TOKEN:
+							confSp.setType(SearchParamType.TOKEN);
+							break;
+						case URI:
+							confSp.setType(SearchParamType.URI);
+							break;
+						case SPECIAL:
+							confSp.setType(SearchParamType.SPECIAL);
+							break;
+						case HAS:
+							// Shouldn't happen
+							break;
 					}
-					
+
 				}
-				
+
 			}
 		}
 
@@ -161,7 +165,7 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 		}
 
 		massage(retVal);
-		
+
 		retVal.getImplementation().setDescription(myImplementationDescription);
 		myCachedValue = retVal;
 		return retVal;
@@ -170,7 +174,11 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 	public boolean isIncludeResourceCounts() {
 		return myIncludeResourceCounts;
 	}
-	
+
+	public void setIncludeResourceCounts(boolean theIncludeResourceCounts) {
+		myIncludeResourceCounts = theIncludeResourceCounts;
+	}
+
 	/**
 	 * Subclasses may override
 	 */
@@ -185,10 +193,6 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 	@CoverageIgnore
 	public void setImplementationDescription(String theImplDesc) {
 		myImplementationDescription = theImplDesc;
-	}
-
-	public void setIncludeResourceCounts(boolean theIncludeResourceCounts) {
-		myIncludeResourceCounts = theIncludeResourceCounts;
 	}
 
 	@Override

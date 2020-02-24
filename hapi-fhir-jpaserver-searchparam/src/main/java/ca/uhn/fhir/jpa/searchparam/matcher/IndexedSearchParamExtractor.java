@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class IndexedSearchParamExtractor {
 		String resourceType = myContext.getResourceDefinition(theResource).getName();
 		entity.setResourceType(resourceType);
 		ResourceIndexedSearchParams resourceIndexedSearchParams = new ResourceIndexedSearchParams();
-		mySearchParamExtractorService.extractFromResource(resourceIndexedSearchParams, entity, theResource);
+		mySearchParamExtractorService.extractFromResource(theRequest, resourceIndexedSearchParams, entity, theResource);
 		myResourceLinkExtractor.extractResourceLinks(resourceIndexedSearchParams, entity, theResource, theResource.getMeta().getLastUpdated(), myInlineResourceLinkResolver, false, theRequest);
 		return resourceIndexedSearchParams;
 	}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,17 +62,13 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	@Id
 	@Column(name = "PID")
 	private Long myId;
-
 	@Column(name = "RES_ID")
 	private Long myResourceId;
-
 	@Column(name = "RES_TYPE", length = Constants.MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
-
 	@Column(name = "RES_VERSION")
 	@Enumerated(EnumType.STRING)
 	private FhirVersionEnum myFhirVersion;
-
 	@Column(name = "RES_VER")
 	private Long myResourceVersion;
 	@Column(name = "PROV_REQUEST_ID", length = Constants.REQUEST_ID_LENGTH)

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jaxrs.server;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.util.ReflectionUtil;
+import java.util.stream.Collectors;
 
 /**
  * This is the conformance provider for the jax rs servers. It requires all providers to be registered during startup because the conformance profile is generated during the postconstruct phase.
@@ -119,7 +120,8 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 			return;
 		}
 
-		for (Entry<Class<? extends IResourceProvider>, IResourceProvider> provider : getProviders().entrySet()) {
+		ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> providers = getProviders();
+		for (Entry<Class<? extends IResourceProvider>, IResourceProvider> provider : providers.entrySet()) {
 			addProvider(provider.getValue(), provider.getKey());
 		}
 		List<BaseMethodBinding<?>> serverBindings = new ArrayList<BaseMethodBinding<?>>();
@@ -128,6 +130,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		}
 		serverConfiguration.setServerBindings(serverBindings);
 		serverConfiguration.setResourceBindings(new LinkedList<ResourceBinding>(myResourceNameToBinding.values()));
+		serverConfiguration.computeSharedSupertypeForResourcePerName(providers.values());
 		HardcodedServerAddressStrategy hardcodedServerAddressStrategy = new HardcodedServerAddressStrategy();
 		hardcodedServerAddressStrategy.setValue(getBaseForServer());
 		serverConfiguration.setServerAddressStrategy(hardcodedServerAddressStrategy);

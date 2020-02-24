@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -54,7 +55,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	private List<String> myObservationIdsEvenOnly;
 	private List<String> myObservationIdsWithVersions;
 	private List<String> myPatientIdsEvenOnly;
-	private List<String> myObservationIdsEvenOnlyWithVersions;
 
 	@After
 	public void after() {
@@ -99,6 +99,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(myObservationIds.subList(0, 20), interceptedResourceIds);
 
 		// Fetch the next 30 (do cross a fetch boundary)
+		outcome = myPagingProvider.retrieveResultList(mySrd, outcome.getUuid());
 		resources = outcome.getResources(10, 40);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIds.subList(10, 40), returnedIdValues);
@@ -127,12 +128,22 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsEvenOnly.subList(0, 10), returnedIdValues);
 		assertEquals(1, hitCount.get());
-		assertEquals(myObservationIds.subList(0, 20), interceptedResourceIds);
+		assertEquals("Wrong response from " + outcome.getClass(), myObservationIds.subList(0, 20), interceptedResourceIds);
 
 		// Fetch the next 30 (do cross a fetch boundary)
+		String searchId = outcome.getUuid();
+		outcome = myPagingProvider.retrieveResultList(mySrd, searchId);
 		resources = outcome.getResources(10, 40);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertEquals(myObservationIdsEvenOnly.subList(10, 25), returnedIdValues);
+		if (!myObservationIdsEvenOnly.subList(10,25).equals(returnedIdValues)) {
+			if (resources.size() != 1) {
+				runInTransaction(() -> {
+					Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).get();
+					fail("Failed to load - " + mySearchResultDao.countForSearch(search.getId()) + " results in " + search);
+				});
+			}
+		}
+		assertEquals("Wrong response from " + outcome.getClass(), myObservationIdsEvenOnly.subList(10, 25), returnedIdValues);
 		assertEquals(2, hitCount.get());
 	}
 
@@ -305,15 +316,18 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.info("Search UUID: {}", outcome.getUuid());
 
 		// Fetch the first 10 (don't cross a fetch boundary)
+		outcome = myPagingProvider.retrieveResultList(mySrd, outcome.getUuid());
 		List<IBaseResource> resources = outcome.getResources(0, 10);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
+		ourLog.info("Returned values: {}", returnedIdValues);
+
 		/*
 		 * Note: Each observation in the observation list will appear twice in the actual
 		 * returned results because we create it then update it in create50Observations()
 		 */
 		assertEquals(1, hitCount.get());
 		assertEquals(myObservationIdsWithVersions.subList(90, myObservationIdsWithVersions.size()), sort(interceptedResourceIds));
-		assertEquals(myObservationIdsEvenOnlyWithVersions.subList(44, 50), sort(returnedIdValues));
+		returnedIdValues.forEach(t-> assertTrue(new IdType(t).getIdPartAsLong() % 2 == 0));
 
 	}
 
@@ -390,11 +404,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 		myObservationIdsEvenOnly =
 			myObservationIds
-				.stream()
-				.filter(t -> Long.parseLong(t.substring(t.indexOf('/') + 1)) % 2 == 0)
-				.collect(Collectors.toList());
-		myObservationIdsEvenOnlyWithVersions =
-			myObservationIdsWithVersions
 				.stream()
 				.filter(t -> Long.parseLong(t.substring(t.indexOf('/') + 1)) % 2 == 0)
 				.collect(Collectors.toList());

@@ -1,0 +1,6 @@
+{
+  "resourceType": "CustomResource",
+  "id1": "customResource",
+  "active": "true",
+  "name": "needle"
+}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.module;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Subscription;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.*;
 
@@ -165,6 +166,7 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 		}
 	}
 
+	@Nullable
 	public IIdType getIdElement(FhirContext theContext) {
 		IIdType retVal = null;
 		if (isNotBlank(myIdElement)) {

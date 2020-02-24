@@ -4,7 +4,7 @@ package ca.uhn.fhir.interceptor.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import java.util.*;
 public enum Pointcut {
 
 	/**
-	 * <b>Registry Hook: </b>
+	 * <b>Interceptor Framework Hook:</b>
 	 * This pointcut will be called once when a given interceptor is registered
 	 */
 	INTERCEPTOR_REGISTERED(void.class),
@@ -89,7 +89,7 @@ public enum Pointcut {
 	),
 
 	/**
-	 * <b>Server Hook: </b>
+	 * <b>Server Hook:</b>
 	 * This hook is called before any other processing takes place for each incoming request. It may be used to provide
 	 * alternate handling for some requests, or to screen requests before they are handled, etc.
 	 * <p>
@@ -117,10 +117,10 @@ public enum Pointcut {
 	),
 
 	/**
-	 * <b>Server Hook: </b>
+	 * <b>Server Hook:</b>
 	 * This hook is invoked upon any exception being thrown within the server's request processing code. This includes
 	 * any exceptions thrown within resource provider methods (e.g. {@link Search} and {@link Read} methods) as well as
-	 * any runtime exceptions thrown by the server itself. This also includes any {@link AuthenticationException}s
+	 * any runtime exceptions thrown by the server itself. This also includes any {@link AuthenticationException}
 	 * thrown.
 	 * <p>
 	 * Hooks may accept the following parameters:
@@ -543,6 +543,7 @@ public enum Pointcut {
 	),
 
 	/**
+	 * <b>Subscription Hook:</b>
 	 * Invoked whenever a persisted resource has been modified and is being submitted to the
 	 * subscription processing pipeline. This method is called before the resource is placed
 	 * on any queues for processing and executes synchronously during the resource modification
@@ -563,6 +564,7 @@ public enum Pointcut {
 
 
 	/**
+	 * <b>Subscription Hook:</b>
 	 * Invoked any time that a resource is matched by an individual subscription, and
 	 * is about to be queued for delivery.
 	 * <p>
@@ -585,6 +587,7 @@ public enum Pointcut {
 	SUBSCRIPTION_RESOURCE_MATCHED(boolean.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage", "ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult"),
 
 	/**
+	 * <b>Subscription Hook:</b>
 	 * Invoked whenever a persisted resource was checked against all active subscriptions, and did not
 	 * match any.
 	 * <p>
@@ -600,6 +603,7 @@ public enum Pointcut {
 	SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS(void.class, "ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
 
 	/**
+	 * <b>Subscription Hook:</b>
 	 * Invoked immediately before the delivery of a subscription, and right before any channel-specific
 	 * hooks are invoked (e.g. {@link #SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY}.
 	 * <p>
@@ -621,6 +625,7 @@ public enum Pointcut {
 	SUBSCRIPTION_BEFORE_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
 
 	/**
+	 * <b>Subscription Hook:</b>
 	 * Invoked immediately after the delivery of a subscription, and right before any channel-specific
 	 * hooks are invoked (e.g. {@link #SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY}.
 	 * <p>
@@ -638,6 +643,7 @@ public enum Pointcut {
 
 
 	/**
+	 * <b>Subscription Hook:</b>
 	 * Invoked immediately after the attempted delivery of a subscription, if the delivery
 	 * failed.
 	 * <p>
@@ -660,6 +666,7 @@ public enum Pointcut {
 	SUBSCRIPTION_AFTER_DELIVERY_FAILED(boolean.class, "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage", "java.lang.Exception"),
 
 	/**
+	 * <b>Subscription Hook:</b>
 	 * Invoked immediately after the delivery of a REST HOOK subscription.
 	 * <p>
 	 * When this hook is called, all processing is complete so this hook should not
@@ -677,6 +684,7 @@ public enum Pointcut {
 	SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY(void.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
 
 	/**
+	 * <b>Subscription Hook:</b>
 	 * Invoked immediately before the delivery of a REST HOOK subscription.
 	 * <p>
 	 * Hooks may make changes to the delivery payload, or make changes to the
@@ -697,6 +705,7 @@ public enum Pointcut {
 	SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
 
 	/**
+	 * <b>Subscription Hook:</b>
 	 * Invoked whenever a persisted resource (a resource that has just been stored in the
 	 * database via a create/update/patch/etc.) is about to be checked for whether any subscriptions
 	 * were triggered as a result of the operation.
@@ -716,6 +725,7 @@ public enum Pointcut {
 
 
 	/**
+	 * <b>Subscription Hook:</b>
 	 * Invoked whenever a persisted resource (a resource that has just been stored in the
 	 * database via a create/update/patch/etc.) has been checked for whether any subscriptions
 	 * were triggered as a result of the operation.
@@ -733,6 +743,7 @@ public enum Pointcut {
 
 
 	/**
+	 * <b>Subscription Hook:</b>
 	 * Invoked immediately after an active subscription is "registered". In HAPI FHIR, when
 	 * a subscription
 	 * <p>
@@ -752,6 +763,7 @@ public enum Pointcut {
 
 
 	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when a resource is being deleted in a cascaded delete. This means that
 	 * some other resource is being deleted, but per use request or other
 	 * policy, the given resource (the one supplied as a parameter to this hook)
@@ -797,6 +809,7 @@ public enum Pointcut {
 	),
 
 	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when one or more resources may be returned to the user, whether as a part of a READ,
 	 * a SEARCH, or even as the response to a CREATE/UPDATE, etc.
 	 * <p>
@@ -843,6 +856,7 @@ public enum Pointcut {
 	),
 
 	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when the storage engine is about to check for the existence of a pre-cached search
 	 * whose results match the given search parameters.
 	 * <p>
@@ -880,6 +894,7 @@ public enum Pointcut {
 	),
 
 	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when a search is starting, prior to creating a record for the search.
 	 * <p>
 	 * Hooks may accept the following parameters:
@@ -915,6 +930,7 @@ public enum Pointcut {
 	),
 
 	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when one or more resources may be returned to the user, whether as a part of a READ,
 	 * a SEARCH, or even as the response to a CREATE/UPDATE, etc.
 	 * <p>
@@ -963,6 +979,7 @@ public enum Pointcut {
 	),
 
 	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked before a resource will be created, immediately before the resource
 	 * is persisted to the database.
 	 * <p>
@@ -998,6 +1015,7 @@ public enum Pointcut {
 	),
 
 	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked before a resource will be updated, immediately before the resource
 	 * is persisted to the database.
 	 * <p>
@@ -1036,6 +1054,7 @@ public enum Pointcut {
 	),
 
 	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked before a resource will be created, immediately before the resource
 	 * is persisted to the database.
 	 * <p>
@@ -1072,6 +1091,7 @@ public enum Pointcut {
 
 
 	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked before a resource will be created, immediately before the transaction
 	 * is committed (after all validation and other business rules have successfully
 	 * completed, and any other database activity is complete.
@@ -1109,6 +1129,7 @@ public enum Pointcut {
 	),
 
 	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked before a resource will be updated, immediately before the transaction
 	 * is committed (after all validation and other business rules have successfully
 	 * completed, and any other database activity is complete.
@@ -1149,6 +1170,7 @@ public enum Pointcut {
 
 
 	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked before a resource will be created
 	 * <p>
 	 * Hooks will have access to the contents of the resource being deleted
@@ -1182,6 +1204,7 @@ public enum Pointcut {
 	),
 
 	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when a resource delete operation is about to fail due to referential integrity conflicts.
 	 * <p>
 	 * Hooks will have access to the list of resources that have references to the resource being deleted.
@@ -1219,6 +1242,7 @@ public enum Pointcut {
 	),
 
 	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked before a resource is about to be expunged via the <code>$expunge</code> operation.
 	 * <p>
 	 * Hooks will be passed a reference to a counter containing the current number of records that have been deleted.
@@ -1261,7 +1285,8 @@ public enum Pointcut {
 	),
 
 	/**
-	 * Invoked before expungeEverything is called.
+	 * <b>Storage Hook:</b>
+	 * Invoked before an <code>$expunge</code> operation on all data (expungeEverything) is called.
 	 * <p>
 	 * Hooks will be passed a reference to a counter containing the current number of records that have been deleted.
 	 * If the hook deletes any records, the hook is expected to increment this counter by the number of records deleted.
@@ -1297,12 +1322,13 @@ public enum Pointcut {
 	),
 
 	/**
-	 * Note that this is a performance tracing hook. Use with caution in production
-	 * systems, since calling it may (or may not) carry a cost.
-	 * <p>
+	 * <b>Performance Tracing Hook:</b>
 	 * This hook is invoked when any informational messages generated by the
 	 * SearchCoordinator are created. It is typically used to provide logging
 	 * or capture details related to a specific request.
+	 * <p>
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -1334,12 +1360,13 @@ public enum Pointcut {
 	),
 
 	/**
-	 * Note that this is a performance tracing hook. Use with caution in production
-	 * systems, since calling it may (or may not) carry a cost.
-	 * <p>
+	 * <b>Performance Tracing Hook:</b>
 	 * This hook is invoked when any warning messages generated by the
 	 * SearchCoordinator are created. It is typically used to provide logging
 	 * or capture details related to a specific request.
+	 * <p>
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -1371,12 +1398,13 @@ public enum Pointcut {
 	),
 
 	/**
-	 * Note that this is a performance tracing hook. Use with caution in production
-	 * systems, since calling it may (or may not) carry a cost.
-	 * <p>
+	 * <b>Performance Tracing Hook:</b>
 	 * This hook is invoked when a search has returned the very first result
 	 * from the database. The timing on this call can be a good indicator of how
 	 * performant a query is in general.
+	 * <p>
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -1409,14 +1437,15 @@ public enum Pointcut {
 	),
 
 	/**
-	 * Note that this is a performance tracing hook. Use with caution in production
-	 * systems, since calling it may (or may not) carry a cost.
-	 * <p>
+	 * <b>Performance Tracing Hook:</b>
 	 * This hook is invoked when an individual search query SQL SELECT statement
 	 * has completed and no more results are available from that query. Note that this
 	 * doesn't necessarily mean that no more matching results exist in the database,
 	 * since HAPI FHIR JPA batch loads results in to the query cache in chunks in order
 	 * to provide predicable results without overloading memory or the database.
+	 * <p>
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -1450,11 +1479,12 @@ public enum Pointcut {
 
 
 	/**
-	 * Note that this is a performance tracing hook. Use with caution in production
-	 * systems, since calling it may (or may not) carry a cost.
-	 * <p>
+	 * <b>Performance Tracing Hook:</b>
 	 * This hook is invoked when a search has failed for any reason. When this pointcut
 	 * is invoked, the search has completed unsuccessfully and will not be continued.
+	 * <p>
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -1487,13 +1517,14 @@ public enum Pointcut {
 	),
 
 	/**
-	 * Note that this is a performance tracing hook. Use with caution in production
-	 * systems, since calling it may (or may not) carry a cost.
-	 * <p>
+	 * <b>Performance Tracing Hook:</b>
 	 * This hook is invoked when a search has failed for any reason. When this pointcut
 	 * is invoked, a pass in the Search Coordinator has completed successfully, but
 	 * not all possible resources have been loaded yet so a future paging request
 	 * may trigger a new task that will load further resources.
+	 * <p>
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -1526,8 +1557,13 @@ public enum Pointcut {
 	),
 
 	/**
+	 * <b>Performance Tracing Hook:</b>
 	 * Invoked when the storage engine is about to reuse the results of
 	 * a previously cached search.
+	 * <p>
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
+	 * </p>
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * </p>
@@ -1561,12 +1597,13 @@ public enum Pointcut {
 	),
 
 	/**
-	 * Note that this is a performance tracing hook. Use with caution in production
-	 * systems, since calling it may (or may not) carry a cost.
-	 * <p>
+	 * <b>Performance Tracing Hook:</b>
 	 * This hook is invoked when a search has failed for any reason. When this pointcut
 	 * is invoked, a pass in the Search Coordinator has completed successfully, and all
 	 * possible results have been fetched and loaded into the query cache.
+	 * <p>
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -1600,13 +1637,49 @@ public enum Pointcut {
 
 
 	/**
+	 * <b>Performance Tracing Hook:</b>
+	 * <p>
+	 * This hook is invoked when a search has found an individual ID.
+	 * </p>
+	 * <p>
+	 * THIS IS AN EXPERIMENTAL HOOK AND MAY BE REMOVED OR CHANGED WITHOUT WARNING.
+	 *	</p>
+	 *	<p>
 	 * Note that this is a performance tracing hook. Use with caution in production
 	 * systems, since calling it may (or may not) carry a cost.
+	 *	</p>
+	 *	<p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * java.lang.Integer - The query ID
+	 * </li>
+	 * <li>
+	 * java.lang.Object - The ID
+	 * </li>
+	 * </ul>
 	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	JPA_PERFTRACE_SEARCH_FOUND_ID(void.class,
+		"java.lang.Integer",
+		"java.lang.Object"
+	),
+
+
+	/**
+	 * <b>Performance Tracing Hook:</b>
 	 * This hook is invoked when a query has executed, and includes the raw SQL
 	 * statements that were executed against the database.
+	 * <p>
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
 	 * </p>
+	 * <p>
 	 * Hooks may accept the following parameters:
+	 * </p>
 	 * <ul>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the

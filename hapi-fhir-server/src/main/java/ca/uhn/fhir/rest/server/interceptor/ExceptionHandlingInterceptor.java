@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
@@ -48,13 +51,14 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 
-public class ExceptionHandlingInterceptor extends InterceptorAdapter {
+@Interceptor
+public class ExceptionHandlingInterceptor {
 
 	public static final String PROCESSING = Constants.OO_INFOSTATUS_PROCESSING;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionHandlingInterceptor.class);
 	private Class<?>[] myReturnStackTracesForExceptionTypes;
 
-	@Override
+	@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
 	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
 		Closeable writer = (Closeable) handleException(theRequestDetails, theException);
 		writer.close();
@@ -100,7 +104,7 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 		
 	}
 
-	@Override
+	@Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
 	public BaseServerResponseException preProcessOutgoingException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest) throws ServletException {
 		BaseServerResponseException retVal;
 		if (theException instanceof DataFormatException) {

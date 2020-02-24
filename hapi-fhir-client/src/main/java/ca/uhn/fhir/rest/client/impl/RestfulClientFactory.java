@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.impl;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,52 +71,52 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	}
 
 	@Override
-	public int getConnectionRequestTimeout() {
+	public synchronized int getConnectionRequestTimeout() {
 		return myConnectionRequestTimeout;
 	}
 
 	@Override
-	public int getConnectTimeout() {
+	public synchronized int getConnectTimeout() {
 		return myConnectTimeout;
 	}
 
 	/**
 	 * Return the proxy username to authenticate with the HTTP proxy
 	 */
-	protected String getProxyUsername() {
+	protected synchronized String getProxyUsername() {
 		return myProxyUsername;
 	}
 
 	/**
 	 * Return the proxy password to authenticate with the HTTP proxy
 	 */
-	protected String getProxyPassword() {
+	protected synchronized String getProxyPassword() {
 		return myProxyPassword;
 	}
 
 	@Override
-	public void setProxyCredentials(String theUsername, String thePassword) {
+	public synchronized void setProxyCredentials(String theUsername, String thePassword) {
 		myProxyUsername = theUsername;
 		myProxyPassword = thePassword;
 	}
 
 	@Override
-	public ServerValidationModeEnum getServerValidationMode() {
+	public synchronized ServerValidationModeEnum getServerValidationMode() {
 		return myServerValidationMode;
 	}
 
 	@Override
-	public int getSocketTimeout() {
+	public synchronized int getSocketTimeout() {
 		return mySocketTimeout;
 	}
 
 	@Override
-	public int getPoolMaxTotal() {
+	public synchronized int getPoolMaxTotal() {
 		return myPoolMaxTotal;
 	}
 
 	@Override
-	public int getPoolMaxPerRoute() {
+	public synchronized int getPoolMaxPerRoute() {
 		return myPoolMaxPerRoute;
 	}
 
@@ -217,7 +217,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	}
 
 	@Override
-	public void setServerValidationMode(ServerValidationModeEnum theServerValidationMode) {
+	public synchronized void setServerValidationMode(ServerValidationModeEnum theServerValidationMode) {
 		Validate.notNull(theServerValidationMode, "theServerValidationMode may not be null");
 		myServerValidationMode = theServerValidationMode;
 	}
@@ -242,13 +242,13 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 
 	@Deprecated // override deprecated method
 	@Override
-	public ServerValidationModeEnum getServerValidationModeEnum() {
+	public synchronized ServerValidationModeEnum getServerValidationModeEnum() {
 		return getServerValidationMode();
 	}
 
 	@Deprecated // override deprecated method
 	@Override
-	public void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode) {
+	public synchronized void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode) {
 		setServerValidationMode(theServerValidationMode);
 	}
 

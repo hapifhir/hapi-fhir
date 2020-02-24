@@ -15,6 +15,7 @@ import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.utils.IResourceValidator;
@@ -88,6 +89,33 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		}
 
 	}
+
+
+	@Test
+	public void testValidateQuestionnaireResponseWithValueSetIncludingCompleteCodeSystem() throws IOException {
+		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/dstu3/iar/CodeSystem-iar-citizenship-status.xml");
+		myCodeSystemDao.create(cs);
+
+		ValueSet vs = loadResourceFromClasspath(ValueSet.class, "/dstu3/iar/ValueSet-iar-citizenship-status.xml");
+		myValueSetDao.create(vs);
+
+		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+
+//		Questionnaire q = loadResourceFromClasspath(Questionnaire.class,"/dstu3/iar/Questionnaire-iar-test.xml" );
+//		myQuestionnaireDao.create(q);
+//
+//
+//
+//		Bundle bundleForValidation = loadResourceFromClasspath(Bundle.class, "/dstu3/iar/Bundle-for-validation.xml");
+//		try {
+//			MethodOutcome outcome = myBundleDao.validate(bundleForValidation, null, null, null, null, null, null);
+//			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome()));
+//		} catch (PreconditionFailedException e) {
+//			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+//		}
+	}
+
 
 	@After
 	public void after() {
@@ -295,15 +323,11 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
 		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
-		try {
-			myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
-			fail();
-		} catch (PreconditionFailedException e) {
-			String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
-			ourLog.info(ooString);
-			assertThat(ooString, containsString("StructureDefinition reference \\\"" + profileUri + "\\\" could not be resolved"));
-		}
-
+		MethodOutcome output = myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
+		OperationOutcome oo = (OperationOutcome) output.getOperationOutcome();
+		String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+		ourLog.info(outputString);
+		assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' could not be resolved, so has not been checked"));
 	}
 
 	@Test

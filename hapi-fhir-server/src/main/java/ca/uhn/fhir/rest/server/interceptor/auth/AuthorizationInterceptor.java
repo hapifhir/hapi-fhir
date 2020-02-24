@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,10 +108,14 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			theRequestDetails.getUserData().put(myRequestRuleListKey, rules);
 		}
 		Set<AuthorizationFlagsEnum> flags = getFlags();
-		ourLog.trace("Applying {} rules to render an auth decision for operation {}", rules.size(), theOperation);
+		ourLog.trace("Applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={} ", rules.size(), theOperation,
+			((theInputResource != null) && (theInputResource.getIdElement() != null)) ? theInputResource.getIdElement().getResourceType() : "",
+			((theOutputResource != null) && (theOutputResource.getIdElement() != null)) ? theOutputResource.getIdElement().getResourceType() : "");
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
+			ourLog.trace("Rule being applied - {}",
+				nextRule);
 			verdict = nextRule.applyRule(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, this, flags, thePointcut);
 			if (verdict != null) {
 				ourLog.trace("Rule {} returned decision {}", nextRule, verdict.getDecision());
@@ -419,7 +423,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		private final IAuthRule myDecidingRule;
 		private final PolicyEnum myDecision;
 
-		Verdict(PolicyEnum theDecision, IAuthRule theDecidingRule) {
+		public Verdict(PolicyEnum theDecision, IAuthRule theDecidingRule) {
 			Validate.notNull(theDecision);
 
 			myDecision = theDecision;

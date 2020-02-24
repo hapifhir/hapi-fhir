@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,9 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private Slice<Long> findHistoricalVersionsOfDeletedResources() {
-		return myExpungeDaoService.findHistoricalVersionsOfDeletedResources(myResourceName, myResourceId, myRemainingCount.get());
+		Slice<Long> retVal = myExpungeDaoService.findHistoricalVersionsOfDeletedResources(myResourceName, myResourceId, myRemainingCount.get());
+		ourLog.debug("Found {} historical versions", retVal.getSize());
+		return retVal;
 	}
 
 	private Slice<Long> findHistoricalVersionsOfNonDeletedResources() {

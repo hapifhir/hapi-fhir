@@ -17,8 +17,11 @@ import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
-import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
@@ -32,7 +35,6 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -57,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
 import static org.junit.Assert.fail;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -66,6 +69,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	private static JpaValidationSupportChainDstu3 ourJpaValidationSupportChainDstu3;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
+	@Autowired
+	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;
@@ -104,6 +109,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu3")
 	protected IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
+	@Autowired
+	protected ITermConceptDao myConceptDao;
 	@Autowired
 	@Qualifier("myConditionDaoDstu3")
 	protected IFhirResourceDao<Condition> myConditionDao;
@@ -240,7 +247,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
 	@Autowired
-	protected IHapiTerminologySvc myTermSvc;
+	protected ITermReadSvc myTermSvc;
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
 	@Autowired
@@ -259,6 +266,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
+	@Autowired
+	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 
 	@After()
 	public void afterCleanupDao() {
@@ -275,12 +284,13 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	@After
 	public void afterClearTerminologyCaches() {
-		BaseHapiTerminologySvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
+		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
 		baseHapiTerminologySvc.clearTranslationCache();
 		baseHapiTerminologySvc.clearTranslationWithReverseCache();
-		baseHapiTerminologySvc.clearDeferred();
-		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationCache();
-		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
+		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationCache();
+		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
+		TermDeferredStorageSvcImpl deferredSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
+		deferredSvc.clearDeferred();
 	}
 
 	@After()
@@ -376,7 +386,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	 */
 	public static ConceptMap createConceptMap() {
 		try {
-			return VersionConvertor_30_40.convertConceptMap(BaseJpaR4Test.createConceptMap());
+			return convertConceptMap(BaseJpaR4Test.createConceptMap());
 		} catch (FHIRException fe) {
 			throw new InternalErrorException(fe);
 		}

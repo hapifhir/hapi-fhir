@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.util;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,13 @@ package ca.uhn.fhir.jpa.model.util;
 import ca.uhn.fhir.rest.api.Constants;
 
 public class JpaConstants {
+
+	/**
+	 * Non-instantiable
+	 */
+	private JpaConstants() {
+		// nothing
+	}
 
 	/**
 	 * Operation name for the $apply-codesystem-delta-add operation
@@ -239,14 +246,15 @@ public class JpaConstants {
 	public static final String EXT_EXTERNALIZED_BINARY_ID = "http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id";
 
 	/**
-	 * <p>
-	 * This extension represents the equivalent of the
-	 * <code>Resource.meta.source</code> field within R4+ resources, and is for
-	 * use in DSTU3 resources. It should contain a value of type <code>uri</code>
-	 * and will be located on the Resource.meta
-	 * </p>
+	 * Placed in system-generated extensions
 	 */
-	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
+	public static final String EXTENSION_EXT_SYSTEMDEFINED = JpaConstants.class.getName() + "_EXTENSION_EXT_SYSTEMDEFINED";
+
+	/**
+	 * Message added to expansion valueset
+	 */
+	public static final String EXT_VALUESET_EXPANSION_MESSAGE = "http://hapifhir.io/fhir/StructureDefinition/valueset-expansion-message";
+
 
 	/**
 	 * Parameter for the $export operation

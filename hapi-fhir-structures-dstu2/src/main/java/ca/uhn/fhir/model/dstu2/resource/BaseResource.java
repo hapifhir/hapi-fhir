@@ -9,7 +9,7 @@ import java.util.List;
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,6 +169,16 @@ public abstract class BaseResource extends BaseElement implements IResource {
 			}
 
 			@Override
+			public Object getUserData(String theName) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void setUserData(String theName, Object theValue) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
 			public List<String> getFormatCommentsPre() {
 				return Collections.emptyList();
 			}
@@ -303,10 +313,12 @@ public abstract class BaseResource extends BaseElement implements IResource {
 		myContained = theContained;
 	}
 	
+	@Override
 	public void setId(IdDt theId) {
 		myId = theId;
 	}
 
+	@Override
 	public BaseResource setId(IIdType theId) {
 		if (theId instanceof IdDt) {
 			myId = (IdDt) theId;
@@ -318,6 +330,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 		return this;
 	}
 
+	@Override
 	public BaseResource setId(String theId) {
 		if (theId == null) {
 			myId = null;

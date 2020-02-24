@@ -1,0 +1,129 @@
+---
+- item:
+    type: "add"
+    title: "Bump the version of a few dependencies to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Hibernate (JPA): 5.1.0 -&gt; 5.2.7</li> <li>Hibernate Search (JPA): 5.5.4 -&gtp; 5.7.0.CR1</li> <li>Hibernate Validator (JPA): 5.2.4 -&gtp; 5.3.4</li> <li>Spring (JPA): 4.3.1 -&gt; 4.3.6</li> </ul>"
+- item:
+    type: "add"
+    title: "The JPA server now supports custom search parameters in DSTU3 mode. This allows users to create search parameters which contain custom paths, or even override and disable existing search parameters."
+- item:
+    type: "fix"
+    title: "CLI example uploader couldn't find STU3 examples after CI server was moved to build.fhir.org"
+- item:
+    type: "fix"
+    title: "Fix issue in JPA subscription module that prevented purging stale subscriptions when many were present on Postgres"
+- item:
+    issue: "532"
+    type: "fix"
+    title: "Server interceptor methods were being called twice unnecessarily by the JPA server, and the DaoConfig interceptor registration framework was not actually useful. Thanks to GitHub user @mattiuusitalo for reporting!"
+- item:
+    issue: "503"
+    type: "fix"
+    title: "AuthorizationInterceptor on JPA server did not correctly apply rules on deleting resources in a specific compartment because the resource metadata was stripped by the JPA server before the interceptor could see it. Thanks to Eeva Turkka for reporting!"
+- item:
+    issue: "519"
+    type: "fix"
+    title: "JPA server exported CapabilityStatement includes double entries for the _id parameter and uses the wrong type (string instead of token). Thanks to Robert Lichtenberger for reporting!"
+- item:
+    issue: "504"
+    type: "add"
+    title: "Custom resource types which extend Binary must not have declared extensions since this is invalid in FHIR (and HAPI would just ignore them anyhow). Thanks to Thomas S Berg for reporting!"
+- item:
+    type: "add"
+    title: "Standard HAPI zip/tar distributions did not include the project sources and JavaDoc JARs. Thanks to Keith Boone for pointing this out!"
+- item:
+    type: "fix"
+    title: "Server AuthorizationInterceptor always rejects history operation at the type level even if rules should allow it."
+- item:
+    type: "fix"
+    title: "JPA server terminology service was not correctly validating or expanding codes in SNOMED CT or LOINC code systems. Thanks to David Hay for reporting!"
+- item:
+    issue: "539"
+    type: "fix"
+    title: "Attempting to search for an invalid resource type (e.g. GET base/FooResource) should return an HTTP 404 and not a 400, per the HTTP spec. Thanks to GitHub user @CarthageKing for the pull request!"
+- item:
+    issue: "544"
+    type: "fix"
+    title: "When parsing a Bundle containing placeholder fullUrls and references (e.g. \"urn:uuid:0000-0000\") the resource reference targets did not get populated with the given resources. Note that as a part of this change, <code>IdType</code> and <code>IdDt</code> have been modified so that when parsing a placeholder ID, the complete placeholder including the \"urn:uuid:\" or \"urn:oid:\" prefix will be placed into the ID part. Previously, the prefix was treated as the base URL, which led to strange behaviour like the placeholder being treated as a real IDs. Thanks to GitHub user @jodue for reporting!"
+- item:
+    type: "add"
+    title: "Declared extensions with multiple type() options listed in the @Child annotation caused a crash on startup. Now this is supported."
+- item:
+    type: "add"
+    title: "STU3 XHTML parser for narrative choked if the narrative contained an <code>&amp;rsquot;</code> entity string."
+- item:
+    issue: "538"
+    type: "fix"
+    title: "When parsing a quantity parameter on the server with a value and units but no system (e.g. <code>GET [base]/Observation?value=5.4||mg</code> ) the unit was incorrectly treated as the system. Thanks to @CarthageKing for the pull request!"
+- item:
+    issue: "533"
+    type: "fix"
+    title: "Correct a typo in the JPA ValueSet ResourceProvider which prevented successful operation under Spring 4.3. Thanks to Robbert van Waveren for the pull request!"
+- item:
+    type: "remove"
+    title: "Deprecate the method <code>ICompositeElement#getAllPopulatedChildElementsOfType(Class)</code> as it is no longer used by HAPI and is just an annoying step in creating custom structures. Thanks to Allan Bro Hansen for pointing this out."
+- item:
+    issue: "547"
+    type: "fix"
+    title: "CapturingInterceptor did not buffer the response meaning that in many circumstances it did not actually capture the response. Thanks to Jenny Syed of Cerner for the pull request and contribution!"
+- item:
+    issue: "548"
+    type: "fix"
+    title: "Clean up dependencies and remove Eclipse project files from git. Thanks to @sekaijin for the pull request!"
+- item:
+    type: "fix"
+    title: "When performing a conditional create in a transaction in JPA server, if a resource already existed matching the conditional expression, the server did not change the version of the resource but did update the body with the passed in body. Thanks to Artem Sopin for reporting and providing a test case for this!"
+- item:
+    type: "fix"
+    title: "Client revincludes did not include the :recurse modifier. Thanks to Jenny Meinsma for pointing this out on Zulip!"
+- item:
+    type: "add"
+    title: "JPA server did not return an OperationOutcome in the response for a normal delete operation."
+- item:
+    type: "fix"
+    title: "Fix an issue in JPA server where _history results were kept in memory instead of being spooled to the database as they should be. Note that as a part of this fix a new method was added to <code>IBundleProvider</code> called <code>getUuid()</code> . This method may return <code>null</code> in any current cases."
+- item:
+    type: "fix"
+    title: "Expanding a ValueSet in JPA server did not correctly apply <code>?filter=</code> parameter when the ValueSet being expanded had codes included explicitly (i.e. not by is-a relationship). Thanks to David Hay for reporting!"
+- item:
+    type: "fix"
+    title: "JPA validator incorrectly returned an HTTP 400 instead of an HTTP 422 when the resource ID was not present and required, or vice versa. Thanks to Brian Postlethwaite for reporting!"
+- item:
+    type: "fix"
+    title: "When using an annotation based client, a ClassCastException would occur under certain circumstances when the response contained contained resources"
+- item:
+    type: "fix"
+    title: "JPA server interceptor methods for create/update/delete provided the wrong version ID to the interceptors"
+- item:
+    type: "add"
+    title: "A post-processing hook for subclasses of BaseValidatingInterceptor is now available."
+- item:
+    issue: "585"
+    type: "add"
+    title: "AuthorizationInterceptor can now authorize (allow/deny) extended operations on instances and types by wildcard (on any type, or on any instance)"
+- item:
+    issue: "595"
+    type: "add"
+    title: "When RequestValidatingInterceptor is used, the validation results are now populated into the OperationOutcome produced by create and update operations"
+- item:
+    issue: "542"
+    type: "add"
+    title: "Add support for the $process-message operation to fluent client. Thanks to Hugo Soares for the pull request!"
+- item:
+    issue: "543"
+    type: "add"
+    title: "Parser can now be configured when encoding to use a specific base URL for extensions. Thanks to Sebastien Riviere for the pull request!"
+- item:
+    issue: "568"
+    type: "fix"
+    title: "Correct the resource paths for the DSTU2.1 validation resources, allowing the validator to correctly work against those structures. Thanks to Michael Lawley for the pull request!"
+- item:
+    issue: "551"
+    type: "fix"
+    title: "XML Parser failed to parse large field values (greater than 512 Kb) on certain platforms where the StAX parser was overridden. Thanks to GitHub user @Jodue for the pull request!"
+- item:
+    issue: "575"
+    type: "add"
+    title: "Remove an unneccesary database flush when saving large code systems to the JPA database, improving performance of this operation. Thanks to Joel Schneider for the pull request and analysis!"
+- item:
+    type: "add"
+    title: "A new post-processing hook for subclasses of BaseValidatingInterceptor is now available. The hook exposes the request details on validation failure prior to throwing an UnprocessableEntityException."

@@ -92,7 +92,7 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 		addToMap(theStructureDefinition, myStructureDefinitions, theStructureDefinition.getUrl());
 	}
 
-	private <T extends MetadataResource> void addToMap(T theStructureDefinition, Map<String, T> map, String theUrl) {
+	private <T extends IBaseResource> void addToMap(T theStructureDefinition, Map<String, T> map, String theUrl) {
 		if (isNotBlank(theUrl)) {
 			map.put(theUrl, theStructureDefinition);
 
@@ -188,7 +188,7 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 
