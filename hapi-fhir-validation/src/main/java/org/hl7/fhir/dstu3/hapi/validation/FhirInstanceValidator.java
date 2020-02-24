@@ -28,6 +28,7 @@ import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.formats.IParser;
 import org.hl7.fhir.r5.formats.ParserType;
@@ -49,7 +50,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -305,7 +305,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 
 	private static class WorkerContextWrapper implements IWorkerContext {
-		private final HapiWorkerContext myWrap;
+		private final IContextValidationSupport myWrap;
 		private final VersionConvertor_30_50 myConverter;
 		private volatile List<org.hl7.fhir.r5.model.StructureDefinition> myAllStructures;
 		private LoadingCache<ResourceKey, org.hl7.fhir.r5.model.Resource> myFetchResourceCache;
@@ -401,9 +401,9 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			List<org.hl7.fhir.r5.model.StructureDefinition> retVal = myAllStructures;
 			if (retVal == null) {
 				retVal = new ArrayList<>();
-				for (StructureDefinition next : myWrap.allStructures()) {
+				for (IBaseResource next : myWrap.fetchAllStructureDefinitions()) {
 					try {
-						retVal.add(convertStructureDefinition(next));
+						retVal.add(convertStructureDefinition((StructureDefinition) next));
 					} catch (FHIRException e) {
 						throw new InternalErrorException(e);
 					}
@@ -425,7 +425,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Nonnull
-		private ValidationResult convertValidationResult(@Nullable  org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult theResult) {
+		private ValidationResult convertValidationResult(@Nullable IContextValidationSupport.CodeValidationResult theResult) {
 			ValidationResult retVal = null;
 			if (theResult != null) {
 				IssueSeverity issueSeverity = theResult.getSeverity();
@@ -457,12 +457,12 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
 			}
-			org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcome expanded = myWrap.expandVS(convertedSource, cacheOk, Hierarchical);
+			IContextValidationSupport.ValueSetExpansionOutcome expanded = myWrap.expandValueSet(myWrap, convertedSource);
 
 			org.hl7.fhir.r5.model.ValueSet convertedResult = null;
-			if (expanded.getValueset() != null) {
+			if (expanded.getValueSet() != null) {
 				try {
-					convertedResult = convertValueSet(expanded.getValueset());
+					convertedResult = convertValueSet((ValueSet) expanded.getValueSet());
 				} catch (FHIRException e) {
 					throw new InternalErrorException(e);
 				}
@@ -481,33 +481,36 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 		@Override
 		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent inc, boolean heirarchical) throws TerminologyServiceException {
-			ValueSet.ConceptSetComponent convertedInc = null;
-			if (inc != null) {
-				try {
-					convertedInc = convertConceptSetComponent(inc);
-				} catch (FHIRException e) {
-					throw new InternalErrorException(e);
-				}
-			}
+			throw new UnsupportedOperationException();
 
-			ValueSet.ValueSetExpansionComponent expansion = myWrap.expandVS(convertedInc, heirarchical);
-			org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent valueSetExpansionComponent = null;
-			if (expansion != null) {
-				try {
-					valueSetExpansionComponent = convertValueSetExpansionComponent(expansion);
-				} catch (FHIRException e) {
-					throw new InternalErrorException(e);
-				}
-			}
-
-			ValueSetExpander.ValueSetExpansionOutcome outcome = new ValueSetExpander.ValueSetExpansionOutcome(new org.hl7.fhir.r5.model.ValueSet());
-			outcome.getValueset().setExpansion(valueSetExpansionComponent);
-			return outcome;
+			// FIXME: remove
+//			ValueSet.ConceptSetComponent convertedInc = null;
+//			if (inc != null) {
+//				try {
+//					convertedInc = convertConceptSetComponent(inc);
+//				} catch (FHIRException e) {
+//					throw new InternalErrorException(e);
+//				}
+//			}
+//
+//			ValueSet.ValueSetExpansionComponent expansion = myWrap.expandValueSet(myWrap, convertedInc);
+//			org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent valueSetExpansionComponent = null;
+//			if (expansion != null) {
+//				try {
+//					valueSetExpansionComponent = convertValueSetExpansionComponent(expansion);
+//				} catch (FHIRException e) {
+//					throw new InternalErrorException(e);
+//				}
+//			}
+//
+//			ValueSetExpander.ValueSetExpansionOutcome outcome = new ValueSetExpander.ValueSetExpansionOutcome(new org.hl7.fhir.r5.model.ValueSet());
+//			outcome.getValueset().setExpansion(valueSetExpansionComponent);
+//			return outcome;
 		}
 
 		@Override
 		public org.hl7.fhir.r5.model.CodeSystem fetchCodeSystem(String system) {
-			CodeSystem fetched = myWrap.fetchCodeSystem(system);
+			CodeSystem fetched = (CodeSystem) myWrap.fetchCodeSystem(system);
 			if (fetched == null) {
 				return null;
 			}
@@ -549,7 +552,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 		@Override
 		public String getAbbreviation(String name) {
-			return myWrap.getAbbreviation(name);
+			throw new UnsupportedOperationException();
 		}
 
 		public VersionConvertor_30_50 getConverter() {
@@ -573,12 +576,12 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 		@Override
 		public List<String> getResourceNames() {
-			return myWrap.getResourceNames();
+			return new ArrayList<>(myWrap.getFhirContext().getResourceNames());
 		}
 
 		@Override
 		public Set<String> getResourceNamesAsSet() {
-			return new HashSet<>(myWrap.getResourceNames());
+			return myWrap.getFhirContext().getResourceNames();
 		}
 
 		@Override
@@ -608,7 +611,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 		@Override
 		public List<String> getTypeNames() {
-			return myWrap.getTypeNames();
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -623,12 +626,12 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 		@Override
 		public String getVersion() {
-			return myWrap.getVersion();
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public boolean hasCache() {
-			return myWrap.hasCache();
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -638,7 +641,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 		@Override
 		public boolean isNoTerminologyServer() {
-			return myWrap.isNoTerminologyServer();
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -663,7 +666,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 		@Override
 		public String oid2Uri(String code) {
-			return myWrap.oid2Uri(code);
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -678,7 +681,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 		@Override
 		public boolean supportsSystem(String system) {
-			return myWrap.supportsSystem(system);
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -688,7 +691,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 		@Override
 		public ValidationResult validateCode(ValidationOptions theOptions, String system, String code, String display) {
-			org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult result = myWrap.validateCode(system, code, display);
+			IContextValidationSupport.CodeValidationResult result = myWrap.validateCode(myWrap, theOptions, system, code, display, null);
 			return convertValidationResult(result);
 		}
 
