@@ -3992,7 +3992,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		createObservationWithEffective("YES22", "2011-01-02T00:00:00+10:00");
 		createObservationWithEffective("YES23", "2011-01-02T00:00:00+11:00");
 
-	
+
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Observation.SP_DATE, new DateParam("2011-01-02"));
