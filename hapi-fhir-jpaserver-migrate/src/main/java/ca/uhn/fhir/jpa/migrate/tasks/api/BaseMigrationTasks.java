@@ -81,6 +81,13 @@ public class BaseMigrationTasks<T extends Enum> {
 		return retval;
 	}
 
+	protected BaseTask getTaskWithVersion(String theFlywayVersion) {
+		return myTasks.values().stream()
+			.filter(task -> theFlywayVersion.equals(task.getFlywayVersion()))
+			.findFirst()
+			.get();
+	}
+
 	void validate(Collection<BaseTask> theTasks) {
 		for (BaseTask task: theTasks) {
 			task.validateVersion();
