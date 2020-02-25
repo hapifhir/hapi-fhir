@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -142,7 +143,13 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		DateParam upperBound = theRange.getUpperBound();
 		Integer lowerBoundAsOrdinal = theRange.getLowerBoundAsDateInteger();
 		Integer upperBoundAsOrdinal = theRange.getUpperBoundAsDateInteger();
+
+		/**
+		 * If all present search parameters are of DAY precision, and {@link DaoConfig#getUseOrdinalDatesForDayPrecisionSearches()} is true,
+		 * then we attempt to use the ordinal field for date comparisons instead of the date field.
+		 */
 		boolean isOrdinalComparison = isNullOrDayPrecision(lowerBound) && isNullOrDayPrecision(upperBound) && myDaoConfig.getUseOrdinalDatesForDayPrecisionSearches();
+
 		Predicate lt = null;
 		Predicate gt = null;
 		Predicate lb = null;
