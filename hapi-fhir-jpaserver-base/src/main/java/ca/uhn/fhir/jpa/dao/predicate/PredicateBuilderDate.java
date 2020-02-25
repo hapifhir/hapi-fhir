@@ -164,7 +164,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 			}
 			//im like 80% sure this should be ub and not lb, as it is an UPPER bound.
 			if (isOrdinalComparison) {
-				lb = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHighDateOrdinal"), theRange.getUpperBoundAsDateInteger());
+				lb = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHighDateOrdinal"), upperBoundAsOrdinal);
 			} else {
 				lb = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHigh"), upperBoundInstant);
 			}
@@ -173,7 +173,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 				throw new InvalidRequestException("upperBound value not correctly specified for compare operation");
 			}
 			if (isOrdinalComparison) {
-				lb = theBuilder.greaterThan(theFrom.get("myValueHighDateOrdinal"), theRange.getUpperBoundAsDateInteger());
+				lb = theBuilder.greaterThan(theFrom.get("myValueHighDateOrdinal"), upperBoundAsOrdinal);
 			} else {
 				lb = theBuilder.greaterThan(theFrom.get("myValueHigh"), upperBoundInstant);
 			}
@@ -182,7 +182,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 					throw new InvalidRequestException("lowerBound value not correctly specified for compare operation");
 				}
 				if (isOrdinalComparison) {
-					lb = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLowDateOrdinal"), theRange.getLowerBoundAsDateInteger());
+					lb = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLowDateOrdinal"), lowerBoundAsOrdinal);
 				} else {
 					lb = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLow"), lowerBoundInstant);
 				}
@@ -192,8 +192,8 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 				throw new InvalidRequestException("lowerBound and/or upperBound value not correctly specified for compare operation");
 			}
 			if (isOrdinalComparison){
-				lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLowDateOrdinal"), theRange.getLowerBoundAsDateInteger());
-				gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHighDateOrdinal"), theRange.getUpperBoundAsDateInteger());
+				lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLowDateOrdinal"), lowerBoundAsOrdinal);
+				gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHighDateOrdinal"), upperBoundAsOrdinal);
 			} else {
 				lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLow"), lowerBoundInstant);
 				gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHigh"), upperBoundInstant);
@@ -203,8 +203,8 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		} else if ((operation == SearchFilterParser.CompareOperation.eq) || (operation == null)) {
 			if (lowerBoundInstant != null) {
 				if (isOrdinalComparison) {
-					gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLowDateOrdinal"), theRange.getLowerBoundAsDateInteger());
-					lt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHighDateOrdinal"), theRange.getLowerBoundAsDateInteger());
+					gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLowDateOrdinal"), lowerBoundAsOrdinal);
+					lt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHighDateOrdinal"), lowerBoundAsOrdinal);
 					//also try a strict equality here.
 				}
 				else {
@@ -220,8 +220,8 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 			if (upperBoundInstant != null) {
 				if (isOrdinalComparison) {
-					gt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLowDateOrdinal"), theRange.getUpperBoundAsDateInteger());
-					lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHighDateOrdinal"), theRange.getUpperBoundAsDateInteger());
+					gt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLowDateOrdinal"), upperBoundAsOrdinal);
+					lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHighDateOrdinal"), upperBoundAsOrdinal);
 				} else {
 					gt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLow"), upperBoundInstant);
 					lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHigh"), upperBoundInstant);
@@ -238,7 +238,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 				operation.name()));
 		}
 		if (isOrdinalComparison) {
-			ourLog.trace("Ordinal date range is {} - {} ", theRange.getLowerBoundAsDateInteger(), theRange.getUpperBoundAsDateInteger());
+			ourLog.trace("Ordinal date range is {} - {} ", lowerBoundAsOrdinal, upperBoundAsOrdinal);
 		}
 		ourLog.trace("Date range is {} - {}", lowerBoundInstant, upperBoundInstant);
 
