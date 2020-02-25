@@ -208,7 +208,7 @@ public class InMemoryResourceMatcherR5Test {
 	private ResourceIndexedSearchParams extractDateSearchParam(Observation theObservation) {
 		ResourceIndexedSearchParams retval = new ResourceIndexedSearchParams();
 		BaseDateTimeType dateValue = (BaseDateTimeType) theObservation.getEffective();
-		ResourceIndexedSearchParamDate dateParam = new ResourceIndexedSearchParamDate("Patient", "date", dateValue.getValue(), dateValue.getValue(), dateValue.getValueAsString());
+		ResourceIndexedSearchParamDate dateParam = new ResourceIndexedSearchParamDate("Patient", "date", dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValueAsString());
 		retval.myDateParams.add(dateParam);
 		return retval;
 	}

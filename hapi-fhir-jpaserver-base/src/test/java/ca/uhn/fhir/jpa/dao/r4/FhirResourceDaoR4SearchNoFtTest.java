@@ -3960,7 +3960,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(1, results.getResources(0, 10).size());
 		// We expect a new one because we don't cache the search URL for very long search URLs
 		assertEquals(2, mySearchEntityDao.count());
-
 	}
 
 	@Test
@@ -4094,6 +4093,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		obs.setId(theId);
 		obs.setEffective(new DateTimeType(theEffective));
 		myObservationDao.update(obs);
+
 		ourLog.info("Obs {} has time {}", theId, obs.getEffectiveDateTimeType().getValue().toString());
 	}
 

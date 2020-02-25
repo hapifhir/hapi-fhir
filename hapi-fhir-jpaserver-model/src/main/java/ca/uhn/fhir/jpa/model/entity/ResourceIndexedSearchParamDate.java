@@ -88,24 +88,26 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamDate(String theResourceType, String theParamName, Date theLow, Date theHigh, String theOriginalValue) {
+	public ResourceIndexedSearchParamDate(String theResourceType, String theParamName, Date theLow, String theLowString, Date theHigh, String theHighString, String theOriginalValue) {
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValueLow(theLow);
 		setValueHigh(theHigh);
-		computeValueHighDateOrdinal(theHigh);
-		computeValueLowDateOrdinal(theLow);
+		computeValueHighDateOrdinal(theHighString);
+		computeValueLowDateOrdinal(theLowString);
 		myOriginalValue = theOriginalValue;
 	}
 
-	private void computeValueHighDateOrdinal(Date theHigh) {
+	private void computeValueHighDateOrdinal(String theHigh) {
 		this.myValueHighDateOrdinal = generateOrdinalDateInteger(theHigh);
 	}
-	private int generateOrdinalDateInteger(Date theDate) {
-		return ca.uhn.fhir.util.DateUtils.convertDatetoDayInteger(theDate);
+	private int generateOrdinalDateInteger(String theDateString){
+		String t = theDateString.substring(0, theDateString.indexOf("T"));
+		t = t.replace("-", "");
+		return Integer.valueOf(t);
 	}
 
-	private void computeValueLowDateOrdinal(Date theLow) {
+	private void computeValueLowDateOrdinal(String theLow) {
 		this.myValueLowDateOrdinal = generateOrdinalDateInteger(theLow);
 	}
 

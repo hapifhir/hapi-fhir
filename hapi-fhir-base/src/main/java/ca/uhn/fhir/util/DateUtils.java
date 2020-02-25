@@ -65,6 +65,8 @@ public final class DateUtils {
 	@SuppressWarnings("WeakerAccess")
 	public static final String PATTERN_ASCTIME = "EEE MMM d HH:mm:ss yyyy";
 
+	private static final String PATTERN_INTEGER_DATE = "yyyyMMdd";
+
 	private static final String[] DEFAULT_PATTERNS = new String[]{
 		PATTERN_RFC1123,
 		PATTERN_RFC1036,
@@ -173,8 +175,11 @@ public final class DateUtils {
 	public static int convertDatetoDayInteger(final Date theDateValue) {
 		notNull(theDateValue, "Date value");
 		Calendar cal = org.apache.commons.lang3.time.DateUtils.toCalendar(theDateValue);
+		SimpleDateFormat format = new SimpleDateFormat(PATTERN_INTEGER_DATE);
+		String theDateString = format.format(theDateValue);
+
 		String s = String.valueOf(cal.get(Calendar.YEAR)) + cal.get(Calendar.MONTH) + cal.get(Calendar.DAY_OF_MONTH);
-		return Integer.parseInt(s);
+		return Integer.parseInt(theDateString);
 	}
 
 	/**

@@ -71,8 +71,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		//
 
 		// Add support for integer comparisons during day-granularity date search.
-		version.onTable("HFJ_SPIDX_DATE").addColumn("20200225.1", "SP_VALUE_LOW_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_SPIDX_DATE").addColumn("20200225.1", "SP_VALUE_HIGH_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
+		spidxDate.addColumn("20200225.1", "SP_VALUE_LOW_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		spidxDate.addColumn("20200225.2", "SP_VALUE_HIGH_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		spidxDate.addTask(new CalculateHashesTask(VersionEnum.V4_3_0, "20200225.3")
+			.setColumnName("HASH_IDENTITY")
+			.addCalculator("SP_VALUE_LOW_DATE_ORDINAL", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
+			.addCalculator("SP_VALUE_HIGH_DATE_ORDINAL", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
+		);
 		//
 	}
 
