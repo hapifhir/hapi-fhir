@@ -41,6 +41,11 @@ public class InitializeSchemaTaskTest extends BaseTest {
 		}
 
 		@Override
+		public String getSchemaDescription() {
+			return "TEST";
+		}
+
+		@Override
 		public boolean equals(Object theO) {
 			if (this == theO) return true;
 

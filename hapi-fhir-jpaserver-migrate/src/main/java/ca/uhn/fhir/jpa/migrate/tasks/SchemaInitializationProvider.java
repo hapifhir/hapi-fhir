@@ -38,13 +38,16 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class SchemaInitializationProvider implements ISchemaInitializationProvider {
 
 	private String mySchemaFileClassPath;
+
+	private String mySchemaDescription;
 	private final String mySchemaExistsIndicatorTable;
 
 	/**
 	 * @param theSchemaFileClassPath        pathname to script used to initialize schema
 	 * @param theSchemaExistsIndicatorTable a table name we can use to determine if this schema has already been initialized
 	 */
-	public SchemaInitializationProvider(String theSchemaFileClassPath, String theSchemaExistsIndicatorTable) {
+	public SchemaInitializationProvider(String theSchemaDescription, String theSchemaFileClassPath, String theSchemaExistsIndicatorTable) {
+		mySchemaDescription = theSchemaDescription;
 		mySchemaFileClassPath = theSchemaFileClassPath;
 		mySchemaExistsIndicatorTable = theSchemaExistsIndicatorTable;
 	}
@@ -113,6 +116,17 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 
 	public SchemaInitializationProvider setSchemaFileClassPath(String theSchemaFileClassPath) {
 		mySchemaFileClassPath = theSchemaFileClassPath;
+		return this;
+	}
+
+	@Override
+	public String getSchemaDescription() {
+		return mySchemaDescription;
+	}
+
+	@Override
+	public SchemaInitializationProvider setSchemaDescription(String theSchemaDescription) {
+		mySchemaDescription = theSchemaDescription;
 		return this;
 	}
 }
