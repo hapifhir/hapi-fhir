@@ -3277,17 +3277,31 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		// Dates are reversed on these two observations
 		IIdType obsId1;
 		{
-			Observation obs1 = new Observation();
-			obs1.setIssuedElement(new InstantType("2020-06-06T12:00:00Z"));
-			obs1.setEffective(new InstantType("2019-06-06T12:00:00Z"));
-			obsId1 = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
+			Observation obs = new Observation();
+			obs.setIssuedElement(new InstantType("2020-06-06T12:00:00Z"));
+			obs.setEffective(new InstantType("2019-06-06T12:00:00Z"));
+			obsId1 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 		}
 		IIdType obsId2;
 		{
-			Observation obs1 = new Observation();
-			obs1.setIssuedElement(new InstantType("2019-06-06T12:00:00Z"));
-			obs1.setEffective(new InstantType("2020-06-06T12:00:00Z"));
-			obsId2 = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
+			Observation obs = new Observation();
+			obs.setIssuedElement(new InstantType("2019-06-06T12:00:00Z"));
+			obs.setEffective(new InstantType("2020-06-06T12:00:00Z"));
+			obsId2 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		}
+
+		// Add two with a period
+		IIdType obsId3;
+		{
+			Observation obs = new Observation();
+			obs.setEffective(new Period().setStartElement(new DateTimeType("2000-06-06T12:00:00Z")).setEndElement(new DateTimeType("2001-06-06T12:00:00Z")));
+			obsId3 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		}
+		IIdType obsId4;
+		{
+			Observation obs = new Observation();
+			obs.setEffective(new Period().setStartElement(new DateTimeType("2001-01-01T12:00:00Z")).setEndElement(new DateTimeType("2002-01-01T12:00:00Z")));
+			obsId4 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 		}
 
 		// Two AND instances of 1 SP
@@ -3298,7 +3312,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			params.add("issued", new DateParam("ge2020-06-05"));
 			params.add("issued", new DateParam("lt2020-06-07"));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
-			assertThat(patients, contains(obsId1));
+			assertThat(patients.toString(), patients, contains(obsId1));
 			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search query:\n{}", searchQuery);
 			assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toLowerCase(), "join"));
@@ -3316,14 +3330,32 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			params.add("date", new DateParam("gt2019-06-05"));
 			params.add("date", new DateParam("lt2019-06-07"));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
-			assertThat(patients, contains(obsId1));
+			assertThat(patients.toString(), patients, contains(obsId1));
 			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search query:\n{}", searchQuery);
 			assertEquals(searchQuery, 2, StringUtils.countMatches(searchQuery.toLowerCase(), "join"));
 			assertEquals(searchQuery, 2, StringUtils.countMatches(searchQuery.toLowerCase(), "hash_identity"));
 			assertEquals(searchQuery, 4, StringUtils.countMatches(searchQuery.toLowerCase(), "sp_value_low"));
 		}
+
+		// Period search
+		{
+			myCaptureQueriesListener.clear();
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			params.add("date", new DateParam("lt2002-01-01T12:00:00Z"));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
+			assertThat(patients.toString(), patients, containsInAnyOrder(obsId3, obsId4));
+			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+			ourLog.info("Search query:\n{}", searchQuery);
+			assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toLowerCase(), "join"));
+			assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toLowerCase(), "hash_identity"));
+			assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toLowerCase(), "sp_value_low"));
+		}
+
 	}
+
+
 
 	@Test
 	public void testSearchWithFetchSizeDefaultMaximum() {
