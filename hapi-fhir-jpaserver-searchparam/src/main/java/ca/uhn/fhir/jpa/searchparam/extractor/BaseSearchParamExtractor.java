@@ -642,6 +642,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					String endString = extractValueAsString(myPeriodEndValueChild, bounds.get());
 					dates.add(start);
 					dates.add(end);
+					//TODO Check if this logic is valid. Does the start of the first period indicate a lower bound??
+					if (firstValue == null) {
+						firstValue = extractValueAsString(myPeriodStartValueChild, bounds.get());
+					}
 					finalValue = endString;
 				}
 			}

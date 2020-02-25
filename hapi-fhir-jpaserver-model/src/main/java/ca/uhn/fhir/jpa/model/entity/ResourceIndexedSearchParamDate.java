@@ -102,9 +102,11 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		this.myValueHighDateOrdinal = generateOrdinalDateInteger(theHigh);
 	}
 	private int generateOrdinalDateInteger(String theDateString){
-		String t = theDateString.substring(0, theDateString.indexOf("T"));
-		t = t.replace("-", "");
-		return Integer.valueOf(t);
+		if (theDateString.contains("T")) {
+			theDateString = theDateString.substring(0, theDateString.indexOf("T"));
+		}
+		theDateString = theDateString.replace("-", "");
+		return Integer.valueOf(theDateString);
 	}
 
 	private void computeValueLowDateOrdinal(String theLow) {
