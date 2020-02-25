@@ -165,7 +165,7 @@ public abstract class BaseTask<T extends BaseTask> {
 		doExecute();
 	}
 
-	public abstract void doExecute() throws SQLException;
+	protected abstract void doExecute() throws SQLException;
 
 	public void setFailureAllowed(boolean theFailureAllowed) {
 		myFailureAllowed = theFailureAllowed;

@@ -21,19 +21,13 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  */
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
-import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
-import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
-import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.*;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.util.VersionEnum;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
@@ -74,10 +68,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
 		spidxDate.addColumn("20200225.1", "SP_VALUE_LOW_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 		spidxDate.addColumn("20200225.2", "SP_VALUE_HIGH_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		spidxDate.addTask(new CalculateHashesTask(VersionEnum.V4_3_0, "20200225.3")
-			.setColumnName("HASH_IDENTITY")
-			.addCalculator("SP_VALUE_LOW_DATE_ORDINAL", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
-			.addCalculator("SP_VALUE_HIGH_DATE_ORDINAL", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
+		spidxDate.addTask(new CalculateOrdinalDatesTask(VersionEnum.V4_3_0, "20200225.3")
+			.setColumnName("SP_VALUE_LOW_DATE_ORDINAL") //It doesn't matter which of the two we choose as they will both be null.
+			.addCalculator("SP_VALUE_LOW_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_LOW")))
+			.addCalculator("SP_VALUE_HIGH_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_HIGH")))
 		);
 		//
 	}

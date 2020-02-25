@@ -38,11 +38,11 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
-public class CalculateOrdinalDateTask extends BaseTableColumnTask<CalculateOrdinalDateTask> {
+public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask<BaseColumnCalculatorTask> {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(CalculateOrdinalDateTask.class);
+	protected static final Logger ourLog = LoggerFactory.getLogger(BaseColumnCalculatorTask.class);
 	private int myBatchSize = 10000;
-	private Map<String, Function<MandatoryKeyMap<String, Object>, Long>> myCalculators = new HashMap<>();
+	private Map<String, Function<MandatoryKeyMap<String, Object>, Object>> myCalculators = new HashMap<>();
 	private ThreadPoolExecutor myExecutor;
 
 	public void setBatchSize(int theBatchSize) {
@@ -52,19 +52,24 @@ public class CalculateOrdinalDateTask extends BaseTableColumnTask<CalculateOrdin
 	/**
 	 * Constructor
 	 */
-	public CalculateOrdinalDateTask(VersionEnum theRelease, String theVersion) {
+	public BaseColumnCalculatorTask(VersionEnum theRelease, String theVersion) {
 		super(theRelease.toString(), theVersion);
-		setDescription("Calculate resource search parameter index hashes");
 	}
+
+	/**
+	 * Allows concrete implementations to decide if they should be skipped.
+	 * @return a boolean indicating whether or not to skip execution of the task.
+	 */
+	protected abstract boolean shouldSkipTask();
 
 	@Override
 	public synchronized void doExecute() throws SQLException {
-		if (isDryRun()) {
+		if (isDryRun() || shouldSkipTask()) {
 			return;
 		}
 
-		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		initializeExecutor();
+
 		try {
 
 			while(true) {
@@ -73,7 +78,7 @@ public class CalculateOrdinalDateTask extends BaseTableColumnTask<CalculateOrdin
 					JdbcTemplate jdbcTemplate = newJdbcTemplate();
 					jdbcTemplate.setMaxRows(100000);
 					String sql = "SELECT * FROM " + getTableName() + " WHERE " + getColumnName() + " IS NULL";
-					logInfo(ourLog, "Finding up to {} rows in {} that requires hashes", myBatchSize, getTableName());
+					logInfo(ourLog, "Finding up to {} rows in {} that requires calculations", myBatchSize, getTableName());
 
 					jdbcTemplate.query(sql, rch);
 					rch.done();
@@ -149,24 +154,24 @@ public class CalculateOrdinalDateTask extends BaseTableColumnTask<CalculateOrdin
 				assert theRows != null;
 				for (Map<String, Object> nextRow : theRows) {
 
-					Map<String, Long> newValues = new HashMap<>();
+					Map<String, Object> newValues = new HashMap<>();
 					MandatoryKeyMap<String, Object> nextRowMandatoryKeyMap = new MandatoryKeyMap<>(nextRow);
 
 					// Apply calculators
-					for (Map.Entry<String, Function<MandatoryKeyMap<String, Object>, Long>> nextCalculatorEntry : myCalculators.entrySet()) {
+					for (Map.Entry<String, Function<MandatoryKeyMap<String, Object>, Object>> nextCalculatorEntry : myCalculators.entrySet()) {
 						String nextColumn = nextCalculatorEntry.getKey();
-						Function<MandatoryKeyMap<String, Object>, Long> nextCalculator = nextCalculatorEntry.getValue();
-						Long value = nextCalculator.apply(nextRowMandatoryKeyMap);
+						Function<MandatoryKeyMap<String, Object>, Object> nextCalculator = nextCalculatorEntry.getValue();
+						Object value = nextCalculator.apply(nextRowMandatoryKeyMap);
 						newValues.put(nextColumn, value);
 					}
 
 					// Generate update SQL
 					StringBuilder sqlBuilder = new StringBuilder();
-					List<Number> arguments = new ArrayList<>();
+					List<Object> arguments = new ArrayList<>();
 					sqlBuilder.append("UPDATE ");
 					sqlBuilder.append(getTableName());
 					sqlBuilder.append(" SET ");
-					for (Map.Entry<String, Long> nextNewValueEntry : newValues.entrySet()) {
+					for (Map.Entry<String, Object> nextNewValueEntry : newValues.entrySet()) {
 						if (arguments.size() > 0) {
 							sqlBuilder.append(", ");
 						}
@@ -178,9 +183,7 @@ public class CalculateOrdinalDateTask extends BaseTableColumnTask<CalculateOrdin
 
 					// Apply update SQL
 					newJdbcTemplate().update(sqlBuilder.toString(), arguments.toArray());
-
 				}
-
 				return theRows.size();
 			});
 			logInfo(ourLog, "Updated {} rows on {} in {}", theRows.size(), getTableName(), sw.toString());
@@ -188,7 +191,7 @@ public class CalculateOrdinalDateTask extends BaseTableColumnTask<CalculateOrdin
 		return myExecutor.submit(task);
 	}
 
-	public CalculateOrdinalDateTask addCalculator(String theColumnName, Function<MandatoryKeyMap<String, Object>, Long> theConsumer) {
+	public BaseColumnCalculatorTask addCalculator(String theColumnName, Function<MandatoryKeyMap<String, Object>, Object> theConsumer) {
 		Validate.isTrue(myCalculators.containsKey(theColumnName) == false);
 		myCalculators.put(theColumnName, theConsumer);
 		return this;
@@ -246,6 +249,10 @@ public class CalculateOrdinalDateTask extends BaseTableColumnTask<CalculateOrdin
 
 		public String getString(String theKey) {
 			return (String) get(theKey);
+		}
+
+		public Date getDate(String theKey) {
+			return (Date) get(theKey);
 		}
 
 		@Override

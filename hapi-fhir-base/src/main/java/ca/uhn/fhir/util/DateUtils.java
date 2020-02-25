@@ -177,8 +177,6 @@ public final class DateUtils {
 		Calendar cal = org.apache.commons.lang3.time.DateUtils.toCalendar(theDateValue);
 		SimpleDateFormat format = new SimpleDateFormat(PATTERN_INTEGER_DATE);
 		String theDateString = format.format(theDateValue);
-
-		String s = String.valueOf(cal.get(Calendar.YEAR)) + cal.get(Calendar.MONTH) + cal.get(Calendar.DAY_OF_MONTH);
 		return Integer.parseInt(theDateString);
 	}
 

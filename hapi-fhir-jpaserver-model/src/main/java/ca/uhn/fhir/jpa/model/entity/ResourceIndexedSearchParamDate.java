@@ -25,6 +25,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.util.DateUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -57,8 +58,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 
 	/**
 	 * Field which stores an integer representation of YYYYMDD as calculated by Calendar
-	 * e.g. 2019-01-20 -> 2019020
-	 * (note that the month is 0 since calendar month counting starts at 0.
+	 * e.g. 2019-01-20 -> 20190120
 	 */
 	@Column(name="SP_VALUE_LOW_DATE_ORDINAL")
 	public Integer myValueLowDateOrdinal;
@@ -241,5 +241,9 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		}
 		return result;
 	}
+
+	public static Long calculateOrdinalValue(Date theDate) {
+		return (long) DateUtils.convertDatetoDayInteger(theDate);
+	};
 
 }
