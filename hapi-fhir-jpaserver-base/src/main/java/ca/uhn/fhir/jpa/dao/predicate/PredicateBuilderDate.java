@@ -41,12 +41,16 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @Scope("prototype")
 public class PredicateBuilderDate extends BasePredicateBuilder implements IPredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderDate.class);
+
+	private Map<String, Join<ResourceTable, ResourceIndexedSearchParamDate>> myJoinMap;
 
 	PredicateBuilderDate(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
@@ -58,7 +62,18 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation operation) {
 
-		Join<ResourceTable, ResourceIndexedSearchParamDate> join = createJoin(SearchBuilderJoinEnum.DATE, theParamName);
+		boolean newJoin = false;
+		if (myJoinMap == null) {
+			myJoinMap = new HashMap<>();
+		}
+		String key = theResourceName + " " + theParamName;
+
+		Join<ResourceTable, ResourceIndexedSearchParamDate> join = myJoinMap.get(key);
+		if (join == null) {
+			join = createJoin(SearchBuilderJoinEnum.DATE, theParamName);
+			myJoinMap.put(key, join);
+			newJoin = true;
+		}
 
 		if (theList.get(0).getMissing() != null) {
 			Boolean missing = theList.get(0).getMissing();
@@ -79,7 +94,14 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		}
 
 		Predicate orPredicates = myBuilder.or(toArray(codePredicates));
-		myQueryRoot.addPredicate(orPredicates);
+
+		if (newJoin) {
+			Predicate identityAndValuePredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicates);
+			myQueryRoot.addPredicate(identityAndValuePredicate);
+		} else {
+			myQueryRoot.addPredicate(orPredicates);
+		}
+
 		return orPredicates;
 	}
 
@@ -88,12 +110,13 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 													 String theParamName,
 													 CriteriaBuilder theBuilder,
 													 From<?, ResourceIndexedSearchParamDate> theFrom) {
-		return createPredicateDate(theParam,
+		Predicate predicateDate = createPredicateDate(theParam,
 			theResourceName,
 			theParamName,
 			theBuilder,
 			theFrom,
 			null);
+		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, predicateDate);
 	}
 
 	private Predicate createPredicateDate(IQueryParameterType theParam,
@@ -101,7 +124,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 													  String theParamName,
 													  CriteriaBuilder theBuilder,
 													  From<?, ResourceIndexedSearchParamDate> theFrom,
-													  SearchFilterParser.CompareOperation operation) {
+													  SearchFilterParser.CompareOperation theOperation) {
 
 		Predicate p;
 		if (theParam instanceof DateParam) {
@@ -111,7 +134,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 				p = createPredicateDateFromRange(theBuilder,
 					theFrom,
 					range,
-					operation);
+					theOperation);
 			} else {
 				// TODO: handle missing date param?
 				p = null;
@@ -121,12 +144,12 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 			p = createPredicateDateFromRange(theBuilder,
 				theFrom,
 				range,
-				operation);
+				theOperation);
 		} else {
 			throw new IllegalArgumentException("Invalid token type: " + theParam.getClass());
 		}
 
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, p);
+		return p;
 	}
 
 	private boolean isNullOrDayPrecision(DateParam theDateParam) {
