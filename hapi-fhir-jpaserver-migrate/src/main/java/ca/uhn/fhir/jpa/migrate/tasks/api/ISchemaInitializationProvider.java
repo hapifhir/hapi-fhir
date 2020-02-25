@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
  */
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.tasks.SchemaInitializationProvider;
 
 import java.util.List;
 
