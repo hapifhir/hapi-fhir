@@ -153,6 +153,30 @@ public final class DateUtils {
 		return null;
 	}
 
+
+	public static Date getHighestInstantFromDate(Date theDateValue) {
+		return getInstantFromDateWithTimezone(theDateValue, TimeZone.getTimeZone("GMT+11:30"));
+
+	}
+	public static Date getLowestInstantFromDate(Date theDateValue) {
+		return getInstantFromDateWithTimezone(theDateValue, TimeZone.getTimeZone("GMT-11:30"));
+	}
+
+	public static Date getInstantFromDateWithTimezone(Date theDateValue, TimeZone theTimezone) {
+		Calendar cal = org.apache.commons.lang3.time.DateUtils.toCalendar(theDateValue);
+		cal.setTimeZone(theTimezone);
+		cal = org.apache.commons.lang3.time.DateUtils.truncate(cal, Calendar.DATE);
+		return cal.getTime();
+	}
+
+
+	public static int convertDatetoDayInteger(final Date theDateValue) {
+		notNull(theDateValue, "Date value");
+		Calendar cal = org.apache.commons.lang3.time.DateUtils.toCalendar(theDateValue);
+		String s = String.valueOf(cal.get(Calendar.YEAR)) + cal.get(Calendar.MONTH) + cal.get(Calendar.DAY_OF_MONTH);
+		return Integer.parseInt(s);
+	}
+
 	/**
 	 * Formats the given date according to the RFC 1123 pattern.
 	 *

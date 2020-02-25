@@ -6,7 +6,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.apache.commons.lang3.time.DateUtils;
+import ca.uhn.fhir.util.DateUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.*;
@@ -262,21 +262,29 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		validateAndSet(myLowerBound, new DateParam(ParamPrefixEnum.LESSTHAN, theUpperBound));
 		return this;
 	}
-	public Integer getLowerBoundAsDateOrdinal() {
+
+	/**
+	 * Return the current lower bound as an integer representative of the date.
+	 *
+	 * e.g. 2019-02-22T04:22:00-0500 -> 20120922
+	 */
+	public Integer getLowerBoundAsDateInteger() {
 		if (myLowerBound == null || myLowerBound.getValue() == null) {
 			return null;
 		}
-		Calendar cal = DateUtils.toCalendar(myLowerBound.getValue());
-		String s = new StringBuilder().append(cal.get(Calendar.YEAR)).append(cal.get(Calendar.MONTH)).append(cal.get(Calendar.DAY_OF_MONTH)).toString();
-		return Integer.parseInt(s);
+		return DateUtils.convertDatetoDayInteger(myLowerBound.getValue());
 	}
-	public Integer getUpperBoundAsDateOrdinal() {
+
+	/**
+	 * Return the current upper bound as an integer representative of the date
+	 *
+	 * e.g. 2019-02-22T04:22:00-0500 -> 2019122
+	 */
+	public Integer getUpperBoundAsDateInteger() {
 		if (myUpperBound == null || myUpperBound.getValue() == null) {
 			return null;
 		}
-		Calendar cal = DateUtils.toCalendar(myUpperBound.getValue());
-		String s = new StringBuilder().append(cal.get(Calendar.YEAR)).append(cal.get(Calendar.MONTH)).append(cal.get(Calendar.DAY_OF_MONTH)).toString();
-		return Integer.parseInt(s);
+		return DateUtils.convertDatetoDayInteger(myUpperBound.getValue());
 	}
 
 	public Date getLowerBoundAsInstant() {
@@ -286,10 +294,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		Date retVal = myLowerBound.getValue();
 
 		if (myLowerBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
-			Calendar cal = DateUtils.toCalendar(retVal);
-			cal.setTimeZone(TimeZone.getTimeZone("GMT-11:30"));
-			cal = DateUtils.truncate(cal, Calendar.DATE);
-			retVal = cal.getTime();
+			retVal = DateUtils.getLowestInstantFromDate(retVal);
 		}
 
 		if (myLowerBound.getPrefix() != null) {
@@ -350,17 +355,8 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 		Date retVal = myUpperBound.getValue();
 
-
-		//if (myUpperBound.getPrecision().ordinal() == TemporalPrecisionEnum.DAY.ordinal()) {
-	//		DateUtils.setHours(retVal, 23);
-	//		DateUtils.setMinutes(retVal, 59);
-//			DateUtils.setSeconds(retVal, 59);
-//		}
 		if (myUpperBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
-			Calendar cal = DateUtils.toCalendar(retVal);
-			cal.setTimeZone(TimeZone.getTimeZone("GMT+11:30"));
-			cal = DateUtils.truncate(cal, Calendar.DATE);
-			retVal = cal.getTime();
+			retVal = DateUtils.getHighestInstantFromDate(retVal);
 		}
 
 		if (myUpperBound.getPrefix() != null) {
