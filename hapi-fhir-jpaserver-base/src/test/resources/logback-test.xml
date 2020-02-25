@@ -27,7 +27,7 @@
 		<appender-ref ref="STDOUT" />
 	</logger>
 
-	<logger name="ca.uhn.fhir.jpa.dao" additivity="false" level="info">
+	<logger name="ca.uhn.fhir.jpa.dao" additivity="false" level="trace">
 		<appender-ref ref="STDOUT" />
 	</logger>
 	

@@ -262,6 +262,22 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		validateAndSet(myLowerBound, new DateParam(ParamPrefixEnum.LESSTHAN, theUpperBound));
 		return this;
 	}
+	public Integer getLowerBoundAsDateOrdinal() {
+		if (myLowerBound == null || myLowerBound.getValue() == null) {
+			return null;
+		}
+		Calendar cal = DateUtils.toCalendar(myLowerBound.getValue());
+		String s = new StringBuilder().append(cal.get(Calendar.YEAR)).append(cal.get(Calendar.MONTH)).append(cal.get(Calendar.DAY_OF_MONTH)).toString();
+		return Integer.parseInt(s);
+	}
+	public Integer getUpperBoundAsDateOrdinal() {
+		if (myUpperBound == null || myUpperBound.getValue() == null) {
+			return null;
+		}
+		Calendar cal = DateUtils.toCalendar(myUpperBound.getValue());
+		String s = new StringBuilder().append(cal.get(Calendar.YEAR)).append(cal.get(Calendar.MONTH)).append(cal.get(Calendar.DAY_OF_MONTH)).toString();
+		return Integer.parseInt(s);
+	}
 
 	public Date getLowerBoundAsInstant() {
 		if (myLowerBound == null || myLowerBound.getValue() == null) {
@@ -334,6 +350,12 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 		Date retVal = myUpperBound.getValue();
 
+
+		//if (myUpperBound.getPrecision().ordinal() == TemporalPrecisionEnum.DAY.ordinal()) {
+	//		DateUtils.setHours(retVal, 23);
+	//		DateUtils.setMinutes(retVal, 59);
+//			DateUtils.setSeconds(retVal, 59);
+//		}
 		if (myUpperBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
 			Calendar cal = DateUtils.toCalendar(retVal);
 			cal.setTimeZone(TimeZone.getTimeZone("GMT+11:30"));

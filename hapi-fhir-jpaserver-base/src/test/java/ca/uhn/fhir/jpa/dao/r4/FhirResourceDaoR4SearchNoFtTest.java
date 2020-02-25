@@ -4094,7 +4094,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		obs.setId(theId);
 		obs.setEffective(new DateTimeType(theEffective));
 		myObservationDao.update(obs);
-
 		ourLog.info("Obs {} has time {}", theId, obs.getEffectiveDateTimeType().getValue().toString());
 	}
 

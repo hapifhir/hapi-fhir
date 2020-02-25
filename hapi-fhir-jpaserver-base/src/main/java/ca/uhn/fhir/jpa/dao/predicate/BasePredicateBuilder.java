@@ -126,7 +126,6 @@ abstract class BasePredicateBuilder {
 	}
 
 	void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing, Join<ResourceTable, ? extends BaseResourceIndexedSearchParam> theJoin) {
-
 		myQueryRoot.addPredicate(myBuilder.equal(theJoin.get("myResourceType"), theResourceName));
 		myQueryRoot.addPredicate(myBuilder.equal(theJoin.get("myParamName"), theParamName));
 		myQueryRoot.addPredicate(myBuilder.equal(theJoin.get("myMissing"), theMissing));

@@ -29,10 +29,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.search.annotations.Field;
 import org.hl7.fhir.r4.model.DateTimeType;
 
 import javax.persistence.*;
+import java.util.Calendar;
 import java.util.Date;
 
 @Embeddable
@@ -54,6 +56,12 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@Temporal(TemporalType.TIMESTAMP)
 	@Field
 	public Date myValueLow;
+
+	@Column(name="SP_VALUE_LOW_DATE_ORDINAL")
+	public int myValueLowDateOrdinal;
+	@Column(name="SP_VALUE_HIGH_DATE_ORDINAL")
+	public int myValueHighDateOrdinal;
+
 	@Transient
 	private transient String myOriginalValue;
 	@Id
@@ -82,7 +90,26 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		setParamName(theParamName);
 		setValueLow(theLow);
 		setValueHigh(theHigh);
+		computeValueHighDateOrdinal(theHigh);
+		computeValueLowDateOrdinal(theLow);
 		myOriginalValue = theOriginalValue;
+	}
+
+	private void computeValueHighDateOrdinal(Date theHigh) {
+		this.myValueHighDateOrdinal = generateOrdinalDateInteger(theHigh);
+	}
+	private int generateOrdinalDateInteger(Date theDate) {
+		Calendar calendar = DateUtils.toCalendar(theDate);
+		String ordinalDateString = new StringBuilder()
+			.append(calendar.get(Calendar.YEAR))
+			.append(calendar.get(Calendar.MONTH))
+			.append(calendar.get(Calendar.DAY_OF_MONTH))
+			.toString();
+		return Integer.parseInt(ordinalDateString);
+	}
+
+	private void computeValueLowDateOrdinal(Date theLow) {
+		this.myValueLowDateOrdinal = generateOrdinalDateInteger(theLow);
 	}
 
 	@Override
