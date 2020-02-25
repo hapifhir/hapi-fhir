@@ -69,6 +69,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RES_VER").addForeignKey("20200218.3", "FK_RESOURCE_HISTORY_RESOURCE").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 		version.onTable("HFJ_RES_VER").modifyColumn("20200220.1", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 		//
+
+		// Add support for integer comparisons during day-granularity date search.
+		version.onTable("HFJ_SPIDX_DATE").addColumn("20200225.1", "SP_VALUE_LOW_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_DATE").addColumn("20200225.1", "SP_VALUE_HIGH_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		//
 	}
 
 	protected void init420() { // 20191015 - 20200217
