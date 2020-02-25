@@ -140,7 +140,9 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 		DateParam lowerBound = theRange.getLowerBound();
 		DateParam upperBound = theRange.getUpperBound();
-		boolean isOrdinalComparison = isNullOrDayPrecision(lowerBound) && isNullOrDayPrecision(upperBound);
+		Integer lowerBoundAsOrdinal = theRange.getLowerBoundAsDateInteger();
+		Integer upperBoundAsOrdinal = theRange.getUpperBoundAsDateInteger();
+		boolean isOrdinalComparison = isNullOrDayPrecision(lowerBound) && isNullOrDayPrecision(upperBound) && myDaoConfig.getUseOrdinalDatesForDayPrecisionSearches();
 		Predicate lt = null;
 		Predicate gt = null;
 		Predicate lb = null;
@@ -152,7 +154,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 			}
 			//im like 80% sure this should be ub and not lb, as it is an UPPER bound.
 			if (isOrdinalComparison) {
-				lb = theBuilder.lessThan(theFrom.get("myValueLowDateOrdinal"), theRange.getLowerBoundAsDateInteger());
+				lb = theBuilder.lessThan(theFrom.get("myValueLowDateOrdinal"), lowerBoundAsOrdinal);
 			} else {
 				lb = theBuilder.lessThan(theFrom.get("myValueLow"), lowerBoundInstant);
 			}

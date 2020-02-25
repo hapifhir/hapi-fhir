@@ -64,10 +64,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RES_VER").modifyColumn("20200220.1", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 		//
 
-		// Add support for integer comparisons during day-granularity date search.
+		// Add support for integer comparisons during day-precision date search.
 		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
 		spidxDate.addColumn("20200225.1", "SP_VALUE_LOW_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 		spidxDate.addColumn("20200225.2", "SP_VALUE_HIGH_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+
 		spidxDate.addTask(new CalculateOrdinalDatesTask(VersionEnum.V4_3_0, "20200225.3")
 			.setColumnName("SP_VALUE_LOW_DATE_ORDINAL") //It doesn't matter which of the two we choose as they will both be null.
 			.addCalculator("SP_VALUE_LOW_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_LOW")))

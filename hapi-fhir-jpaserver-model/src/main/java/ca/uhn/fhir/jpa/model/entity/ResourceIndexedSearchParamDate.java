@@ -111,6 +111,14 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		this.myValueLowDateOrdinal = generateOrdinalDateInteger(theLow);
 	}
 
+	public Integer getValueLowDateOrdinal() {
+		return myValueLowDateOrdinal;
+	}
+
+	public Integer getValueHighDateOrdinal() {
+		return myValueHighDateOrdinal;
+	}
+
 	@Override
 	@PrePersist
 	public void calculateHashes() {
