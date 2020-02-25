@@ -133,6 +133,38 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
+
+	@Test
+	public void testCreateWithClientAssignedId() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.getMaritalStatus().setText("123");
+			return myPatientDao.create(p).getId().toUnqualified();
+		});
+
+		myCaptureQueriesListener.clear();
+
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setId("AAA");
+			p.getMaritalStatus().setText("123");
+			return myPatientDao.update(p).getId().toUnqualified();
+		});
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

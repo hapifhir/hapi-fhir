@@ -39,7 +39,6 @@ import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -61,6 +60,7 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
+import static org.hl7.fhir.convertors.conv30_40.CodeSystem30_40.convertCodeSystem;
 
 public class TerminologyUploaderProvider extends BaseJpaProvider {
 
@@ -272,10 +272,10 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		CodeSystem nextCodeSystem;
 		switch (getContext().getVersion().getVersion()) {
 			case DSTU3:
-				nextCodeSystem = VersionConvertor_30_40.convertCodeSystem((org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem);
+				nextCodeSystem = convertCodeSystem((org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem);
 				break;
 			case R5:
-				nextCodeSystem = org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem);
+				nextCodeSystem = org.hl7.fhir.convertors.conv40_50.CodeSystem40_50.convertCodeSystem((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem);
 				break;
 			default:
 				nextCodeSystem = (CodeSystem) theCodeSystem;

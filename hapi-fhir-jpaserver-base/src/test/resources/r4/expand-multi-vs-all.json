@@ -1,0 +1,92 @@
+{
+	"resourceType" : "ValueSet",
+	"id" : "message-category",
+	"text" : {
+		"status" : "generated",
+		"div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>MessageCategory</h2><div><p>The set of possible message types</p>\n</div><p>This value set includes codes from the following code systems:</p><ul><li>Include these codes as defined in <a href=\"CodeSystem-ehealth-message-category.html\"><code>http://ehealth.sundhed.dk/cs/message-category</code></a><table class=\"none\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td></tr><tr><td><a href=\"CodeSystem-ehealth-message-category.html#ehealth-message-category-message\">message</a></td><td>Message</td><td/></tr><tr><td><a href=\"CodeSystem-ehealth-message-category.html#ehealth-message-category-notification\">notification</a></td><td>Notification</td><td/></tr><tr><td><a href=\"CodeSystem-ehealth-message-category.html#ehealth-message-category-advice\">advice</a></td><td>Advice</td><td/></tr><tr><td><a href=\"CodeSystem-ehealth-message-category.html#ehealth-message-category-note\">note</a></td><td>Note</td><td/></tr></table></li></ul><p><b>Additional Language Displays</b></p><table class=\"codes\"><tr><td><b>Code</b></td><td><b>Dansk (Danish, da)</b></td><td><b>English (United States) (English (United States), en)</b></td></tr><tr><td>message</td><td>Besked</td><td>Message</td></tr><tr><td>notification</td><td>Notifikation</td><td>Notification</td></tr><tr><td>advice</td><td>Advisering</td><td>Advice</td></tr><tr><td>note</td><td>Note</td><td>Note</td></tr></table></div>"
+	},
+	"url" : "http://ehealth.sundhed.dk/vs/message-category",
+	"version" : "0.0.1",
+	"name" : "MessageCategory",
+	"status" : "active",
+	"experimental" : true,
+	"date" : "2019-02-08T00:00:00+00:00",
+	"publisher" : "ehealth.sundhed.dk",
+	"contact" : [
+		{
+			"name" : "FUT",
+			"telecom" : [
+				{
+					"system" : "url",
+					"value" : "https://digst.dk/digital-service/digital-velfaerd/telemedicin-kol/faelles-udbud-af-telemedicin-fut/"
+				}
+			]
+		}
+	],
+	"description" : "The set of possible message types",
+	"compose" : {
+		"include" : [
+			{
+				"system" : "http://ehealth.sundhed.dk/cs/message-category",
+				"concept" : [
+					{
+						"code" : "message",
+						"display" : "Message",
+						"designation" : [
+							{
+								"language" : "en-US",
+								"value" : "Message"
+							},
+							{
+								"language" : "da",
+								"value" : "Besked"
+							}
+						]
+					},
+					{
+						"code" : "notification",
+						"display" : "Notification",
+						"designation" : [
+							{
+								"language" : "en-US",
+								"value" : "Notification"
+							},
+							{
+								"language" : "da",
+								"value" : "Notifikation"
+							}
+						]
+					},
+					{
+						"code" : "advice",
+						"display" : "Advice",
+						"designation" : [
+							{
+								"language" : "en-US",
+								"value" : "Advice"
+							},
+							{
+								"language" : "da",
+								"value" : "Advisering"
+							}
+						]
+					},
+					{
+						"code" : "note",
+						"display" : "Note",
+						"designation" : [
+							{
+								"language" : "en-US",
+								"value" : "Note"
+							},
+							{
+								"language" : "da",
+								"value" : "Note"
+							}
+						]
+					}
+				]
+			}
+		]
+	}
+}

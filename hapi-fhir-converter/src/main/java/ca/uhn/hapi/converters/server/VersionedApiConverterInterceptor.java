@@ -31,7 +31,11 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import org.hl7.fhir.converter.NullVersionConverterAdvisor30;
 import org.hl7.fhir.converter.NullVersionConverterAdvisor40;
-import org.hl7.fhir.convertors.*;
+import org.hl7.fhir.convertors.VersionConvertorAdvisor30;
+import org.hl7.fhir.convertors.VersionConvertorAdvisor40;
+import org.hl7.fhir.convertors.VersionConvertor_10_30;
+import org.hl7.fhir.convertors.VersionConvertor_10_40;
+import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -40,7 +44,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.StringTokenizer;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * <b>This is an experimental interceptor! Use with caution as
@@ -54,16 +60,12 @@ import static org.apache.commons.lang3.StringUtils.*;
 public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 	private final FhirContext myCtxDstu2;
 	private final FhirContext myCtxDstu2Hl7Org;
-	private VersionConvertor_30_40 myVersionConvertor_30_40;
-	private VersionConvertor_10_40 myVersionConvertor_10_40;
-	private VersionConvertor_10_30 myVersionConvertor_10_30;
+	private final NullVersionConverterAdvisor40 advisor40;
+	private final NullVersionConverterAdvisor30 advisor30;
 
 	public VersionedApiConverterInterceptor() {
-		myVersionConvertor_30_40 = new VersionConvertor_30_40();
-		VersionConvertorAdvisor40 advisor40 = new NullVersionConverterAdvisor40();
-		myVersionConvertor_10_40 = new VersionConvertor_10_40(advisor40);
-		VersionConvertorAdvisor30 advisor30 = new NullVersionConverterAdvisor30();
-		myVersionConvertor_10_30 = new VersionConvertor_10_30(advisor30);
+		advisor40 = new NullVersionConverterAdvisor40();
+		advisor30 = new NullVersionConverterAdvisor30();
 
 		myCtxDstu2 = FhirContext.forDstu2();
 		myCtxDstu2Hl7Org = FhirContext.forDstu2Hl7Org();
@@ -104,17 +106,17 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 		IBaseResource converted = null;
 		try {
 			if (wantVersion == FhirVersionEnum.R4 && haveVersion == FhirVersionEnum.DSTU3) {
-				converted = myVersionConvertor_30_40.convertResource(toDstu3(responseResource), true);
+				converted = VersionConvertor_30_40.convertResource(toDstu3(responseResource), true);
 			} else if (wantVersion == FhirVersionEnum.DSTU3 && haveVersion == FhirVersionEnum.R4) {
-				converted = myVersionConvertor_30_40.convertResource(toR4(responseResource), true);
+				converted = VersionConvertor_30_40.convertResource(toR4(responseResource), true);
 			} else if (wantVersion == FhirVersionEnum.DSTU2 && haveVersion == FhirVersionEnum.R4) {
-				converted = myVersionConvertor_10_40.convertResource(toR4(responseResource));
+				converted = VersionConvertor_10_40.convertResource(toR4(responseResource), advisor40);
 			} else if (wantVersion == FhirVersionEnum.R4 && haveVersion == FhirVersionEnum.DSTU2) {
-				converted = myVersionConvertor_10_40.convertResource(toDstu2(responseResource));
+				converted = VersionConvertor_10_40.convertResource(toDstu2(responseResource), advisor40);
 			} else if (wantVersion == FhirVersionEnum.DSTU2 && haveVersion == FhirVersionEnum.DSTU3) {
-				converted = myVersionConvertor_10_30.convertResource(toDstu3(responseResource));
+				converted = VersionConvertor_10_30.convertResource(toDstu3(responseResource), advisor30);
 			} else if (wantVersion == FhirVersionEnum.DSTU3 && haveVersion == FhirVersionEnum.DSTU2) {
-				converted = myVersionConvertor_10_30.convertResource(toDstu2(responseResource));
+				converted = VersionConvertor_10_30.convertResource(toDstu2(responseResource), advisor30);
 			}
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);

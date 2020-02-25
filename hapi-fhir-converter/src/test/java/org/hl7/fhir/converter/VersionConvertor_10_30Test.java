@@ -16,13 +16,10 @@ public class VersionConvertor_10_30Test {
 	@Test
 	public void testConvert() throws FHIRException {
 		
-		NullVersionConverterAdvisor30 advisor = new NullVersionConverterAdvisor30();
-		VersionConvertor_10_30 converter = new VersionConvertor_10_30(advisor);
-		
 		org.hl7.fhir.dstu2.model.Observation input = new org.hl7.fhir.dstu2.model.Observation();
 		input.setEncounter(new org.hl7.fhir.dstu2.model.Reference("Encounter/123"));
 		
-		org.hl7.fhir.dstu3.model.Observation output = converter.convertObservation(input);
+		org.hl7.fhir.dstu3.model.Observation output = (Observation) VersionConvertor_10_30.convertResource(input);
 		String context = output.getContext().getReference();
 		
 		assertEquals("Encounter/123", context);
@@ -30,9 +27,6 @@ public class VersionConvertor_10_30Test {
 
 	@Test
 	public void testConvertSpecimen() throws FHIRException {
-
-		NullVersionConverterAdvisor30 advisor = new NullVersionConverterAdvisor30();
-		VersionConvertor_10_30 converter = new VersionConvertor_10_30(advisor);
 
 		Specimen spec = new Specimen();
 		CodeableConcept cc = new CodeableConcept();
@@ -58,7 +52,7 @@ public class VersionConvertor_10_30Test {
 		Specimen.SpecimenContainerComponent specimenContainerComponent = new Specimen.SpecimenContainerComponent();
 		specimenContainerComponent.getExtension().add(new Extension().setUrl("some_url").setValue(new StringType("some_value")));
 		spec.setContainer(Collections.singletonList(specimenContainerComponent));
-		Resource resource = converter.convertResource(spec);
+		Resource resource = VersionConvertor_10_30.convertResource(spec);
 	}
 
 	

@@ -704,7 +704,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		coding.setCode("1293");
 		QuestionnaireResponseItemAnswerComponent answer = qrItem.addAnswer();
 		answer.setValue(coding);
-		coding.addExtension("http://hl7.org/fhir/StructureDefinition/questionnaire-hidden", new BooleanType(true));
+		coding.addExtension("http://hl7.org/fhir/StructureDefinition/iso21090-CO-value", new DecimalType("1.0"));
 		qr.addItem().setLinkId("2B").addAnswer().setValue(new BooleanType(true));
 				
 		String reference = qr.getQuestionnaire().getReference();

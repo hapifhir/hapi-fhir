@@ -29,4 +29,6 @@ public interface IResultIterator extends Iterator<ResourcePersistentId>, Closeab
 
 	int getSkippedCount();
 
+    int getNonSkippedCount();
+
 }

@@ -23,6 +23,7 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ImplementationGuide;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -56,6 +57,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import static org.hl7.fhir.convertors.conv30_50.CodeSystem30_50.convertCodeSystem;
+import static org.hl7.fhir.convertors.conv30_50.CodeSystem30_50.convertConceptDefinitionComponent;
+import static org.hl7.fhir.convertors.conv30_50.StructureDefinition30_50.convertStructureDefinition;
+import static org.hl7.fhir.convertors.conv30_50.ValueSet30_50.convertConceptSetComponent;
+import static org.hl7.fhir.convertors.conv30_50.ValueSet30_50.convertValueSet;
+import static org.hl7.fhir.convertors.conv30_50.ValueSet30_50.convertValueSetExpansionComponent;
+
 @SuppressWarnings({"PackageAccessibility", "Duplicates"})
 public class FhirInstanceValidator extends BaseValidatorBridge implements IInstanceValidatorModule {
 
@@ -66,10 +74,12 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private StructureDefinition myStructureDefintion;
 	private IValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
+	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
 
 	private boolean errorForUnknownProfiles;
 	private List<String> myExtensionDomains = Collections.emptyList();
+	private boolean assumeValidRestReferences;
 
 	/**
 	 * Constructor
@@ -285,8 +295,26 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			.setErrorForUnknownProfiles(isErrorForUnknownProfiles())
 			.setExtensionDomains(getExtensionDomains())
 			.setNoTerminologyChecks(isNoTerminologyChecks())
+			.setValidatorResourceFetcher(getValidatorResourceFetcher())
+			.setAssumeValidRestReferences(isAssumeValidRestReferences())
 			.validate(wrappedWorkerContext, theValidationCtx);
 
+	}
+
+	public IResourceValidator.IValidatorResourceFetcher getValidatorResourceFetcher() {
+		return validatorResourceFetcher;
+	}
+
+	public void setValidatorResourceFetcher(IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher) {
+		this.validatorResourceFetcher = validatorResourceFetcher;
+	}
+
+	public boolean isAssumeValidRestReferences() {
+		return assumeValidRestReferences;
+	}
+
+	public void setAssumeValidRestReferences(boolean assumeValidRestReferences) {
+		this.assumeValidRestReferences = assumeValidRestReferences;
 	}
 
 
@@ -326,6 +354,9 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 							break;
 						case "ImplementationGuide":
 							fetched = myWrap.fetchResource(ImplementationGuide.class, key.getUri());
+							break;
+						case "SearchParameter":
+							fetched = myWrap.fetchResource(SearchParameter.class, key.getUri());
 							break;
 						default:
 							throw new UnsupportedOperationException("Don't know how to fetch " + key.getResourceName());
@@ -386,7 +417,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 				retVal = new ArrayList<>();
 				for (StructureDefinition next : myWrap.allStructures()) {
 					try {
-						retVal.add(VersionConvertor_30_50.convertStructureDefinition(next));
+						retVal.add(convertStructureDefinition(next));
 					} catch (FHIRException e) {
 						throw new InternalErrorException(e);
 					}
@@ -416,7 +447,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 				org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent conceptDefinition = null;
 				if (theResult.asConceptDefinition() != null) {
 					try {
-						conceptDefinition = VersionConvertor_30_50.convertConceptDefinitionComponent(theResult.asConceptDefinition());
+						conceptDefinition = convertConceptDefinitionComponent(theResult.asConceptDefinition());
 					} catch (FHIRException e) {
 						throw new InternalErrorException(e);
 					}
@@ -436,7 +467,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ValueSet source, boolean cacheOk, boolean heiarchical) {
 			ValueSet convertedSource;
 			try {
-				convertedSource = VersionConvertor_30_50.convertValueSet(source);
+				convertedSource = convertValueSet(source);
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
 			}
@@ -445,7 +476,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			org.hl7.fhir.r5.model.ValueSet convertedResult = null;
 			if (expanded.getValueset() != null) {
 				try {
-					convertedResult = VersionConvertor_30_50.convertValueSet(expanded.getValueset());
+					convertedResult = convertValueSet(expanded.getValueset());
 				} catch (FHIRException e) {
 					throw new InternalErrorException(e);
 				}
@@ -467,7 +498,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			ValueSet.ConceptSetComponent convertedInc = null;
 			if (inc != null) {
 				try {
-					convertedInc = VersionConvertor_30_50.convertConceptSetComponent(inc);
+					convertedInc = convertConceptSetComponent(inc);
 				} catch (FHIRException e) {
 					throw new InternalErrorException(e);
 				}
@@ -477,7 +508,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent valueSetExpansionComponent = null;
 			if (expansion != null) {
 				try {
-					valueSetExpansionComponent = VersionConvertor_30_50.convertValueSetExpansionComponent(expansion);
+					valueSetExpansionComponent = convertValueSetExpansionComponent(expansion);
 				} catch (FHIRException e) {
 					throw new InternalErrorException(e);
 				}
@@ -495,7 +526,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 				return null;
 			}
 			try {
-				return VersionConvertor_30_50.convertCodeSystem(fetched);
+				return convertCodeSystem(fetched);
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
 			}
@@ -582,6 +613,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		@Override
 		public org.hl7.fhir.r5.model.StructureDefinition fetchTypeDefinition(String typeName) {
 			return fetchResource(org.hl7.fhir.r5.model.StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
+		}
+
+		@Override
+		public org.hl7.fhir.r5.model.StructureDefinition fetchRawProfile(String url) {
+			return fetchResource(org.hl7.fhir.r5.model.StructureDefinition.class, url);
 		}
 
 		@Override
@@ -676,7 +712,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 			try {
 				if (vs != null) {
-					convertedVs = VersionConvertor_30_50.convertValueSet(vs);
+					convertedVs = convertValueSet(vs);
 				}
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
@@ -691,7 +727,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			ValueSet convertedVs = null;
 			try {
 				if (vs != null) {
-					convertedVs = VersionConvertor_30_50.convertValueSet(vs);
+					convertedVs = convertValueSet(vs);
 				}
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
@@ -711,7 +747,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 					convertedCode = VersionConvertor_30_50.convertCoding(code);
 				}
 				if (vs != null) {
-					convertedVs = VersionConvertor_30_50.convertValueSet(vs);
+					convertedVs = convertValueSet(vs);
 				}
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
@@ -731,7 +767,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 					convertedCode = VersionConvertor_30_50.convertCodeableConcept(code);
 				}
 				if (vs != null) {
-					convertedVs = VersionConvertor_30_50.convertValueSet(vs);
+					convertedVs = convertValueSet(vs);
 				}
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
