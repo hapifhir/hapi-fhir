@@ -176,15 +176,15 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 				lb = theBuilder.greaterThan(theFrom.get("myValueHigh"), upperBoundInstant);
 			}
 			} else if (operation == SearchFilterParser.CompareOperation.ge) {
-			if (lowerBoundInstant == null) {
-				throw new InvalidRequestException("lowerBound value not correctly specified for compare operation");
-			}
-			if (isOrdinalComparison) {
-				lb = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLowDateOrdinal"), theRange.getLowerBoundAsDateInteger());
-			} else {
-				lb = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLow"), lowerBoundInstant);
-			}
-		} else if (operation == SearchFilterParser.CompareOperation.ne) {
+				if (lowerBoundInstant == null) {
+					throw new InvalidRequestException("lowerBound value not correctly specified for compare operation");
+				}
+				if (isOrdinalComparison) {
+					lb = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLowDateOrdinal"), theRange.getLowerBoundAsDateInteger());
+				} else {
+					lb = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLow"), lowerBoundInstant);
+				}
+			} else if (operation == SearchFilterParser.CompareOperation.ne) {
 			if ((lowerBoundInstant == null) ||
 				(upperBoundInstant == null)) {
 				throw new InvalidRequestException("lowerBound and/or upperBound value not correctly specified for compare operation");
@@ -224,6 +224,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 					gt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLow"), upperBoundInstant);
 					lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHigh"), upperBoundInstant);
 				}
+
 				if (theRange.getUpperBound().getPrefix() == ParamPrefixEnum.ENDS_BEFORE || theRange.getUpperBound().getPrefix() == ParamPrefixEnum.EQUAL) {
 					ub = lt;
 				} else {
