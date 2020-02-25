@@ -87,8 +87,10 @@ public class ResourceLinkExtractor {
 
 		theParams.myPopulatedResourceLinkParameters.add(thePathAndRef.getSearchParamName());
 
-		if (LogicalReferenceHelper.isLogicalReference(myModelConfig, nextId)) {
-			ResourceLink resourceLink = new ResourceLink(thePathAndRef.getPath(), theEntity, nextId, theUpdateTime);
+		boolean canonical = thePathAndRef.isCanonical();
+		if (LogicalReferenceHelper.isLogicalReference(myModelConfig, nextId) || canonical) {
+			String value = nextId.getValue();
+			ResourceLink resourceLink = ResourceLink.forLogicalReference(thePathAndRef.getPath(), theEntity, value, theUpdateTime);
 			if (theParams.myLinks.add(resourceLink)) {
 				ourLog.debug("Indexing remote resource reference URL: {}", nextId);
 			}
@@ -130,7 +132,7 @@ public class ResourceLinkExtractor {
 				String msg = myContext.getLocalizer().getMessage(BaseSearchParamExtractor.class, "externalReferenceNotAllowed", nextId.getValue());
 				throw new InvalidRequestException(msg);
 			} else {
-				ResourceLink resourceLink = new ResourceLink(thePathAndRef.getPath(), theEntity, nextId, theUpdateTime);
+				ResourceLink resourceLink = ResourceLink.forAbsoluteReference(thePathAndRef.getPath(), theEntity, nextId, theUpdateTime);
 				if (theParams.myLinks.add(resourceLink)) {
 					ourLog.debug("Indexing remote resource reference URL: {}", nextId);
 				}
@@ -165,7 +167,7 @@ public class ResourceLinkExtractor {
 			return null;
 		}
 
-		return new ResourceLink(nextPathAndRef.getPath(), theEntity, targetResource, theUpdateTime);
+		return ResourceLink.forLocalReference(nextPathAndRef.getPath(), theEntity, targetResource, theUpdateTime);
 	}
 
 }
