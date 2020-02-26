@@ -24,7 +24,9 @@ import org.hl7.fhir.dstu3.utils.INarrativeGenerator;
 import org.hl7.fhir.dstu3.utils.IResourceValidator;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
+import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+// FIXME: can we remove the ValueSetExpander and ValueSetExpanderFactory interfaces?
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
   private static final Logger ourLog = LoggerFactory.getLogger(HapiWorkerContext.class);
   private final FhirContext myCtx;
@@ -299,7 +302,8 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, , theSystem, theCode, theDisplay, null);
+    ValidationOptions options = new ValidationOptions();
+    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, options, theSystem, theCode, theDisplay, null);
     if (result == null) {
       return null;
     }
@@ -341,10 +345,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     }
 
     IValidationSupport.CodeValidationResult outcome;
+    ValidationOptions options = new ValidationOptions();
     if (isNotBlank(theVs.getUrl())) {
-      outcome = myValidationSupport.validateCode(myValidationSupport, , theSystem, theCode, theDisplay, theVs.getUrl());
+      outcome = myValidationSupport.validateCode(myValidationSupport, options, theSystem, theCode, theDisplay, theVs.getUrl());
     } else {
-      outcome = myValidationSupport.validateCodeInValueSet(theSystem, theCode, theDisplay, theVs);
+      outcome = myValidationSupport.validateCodeInValueSet(myValidationSupport, options, theSystem, theCode, theDisplay, theVs);
     }
 
     if (outcome != null && outcome.isOk()) {
