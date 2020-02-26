@@ -242,8 +242,9 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		if (!(theParam instanceof DateParam)) {
 			return false;
 		}
-		DateParam date = (DateParam) theParam;
-		DateRangeParam range = new DateRangeParam(date);
+		DateParam dateParam = (DateParam) theParam;
+		DateRangeParam range = new DateRangeParam(dateParam);
+
 		Date lowerBound = range.getLowerBoundAsInstant();
 		Date upperBound = range.getUpperBoundAsInstant();
 
