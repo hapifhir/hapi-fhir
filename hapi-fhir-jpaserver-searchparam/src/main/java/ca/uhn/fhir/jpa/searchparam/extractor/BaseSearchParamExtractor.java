@@ -125,23 +125,29 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				case "uri":
 				case "canonical":
 					String typeName = toTypeName(value);
+					IPrimitiveType<?> valuePrimitive = (IPrimitiveType<?>) value;
+					IBaseReference fakeReference = (IBaseReference) myContext.getElementDefinition("Reference").newInstance();
+					fakeReference.setReference(valuePrimitive.getValueAsString());
 
 					// Canonical has a root type of "uri"
 					if ("canonical".equals(typeName)) {
-						IPrimitiveType<?> valuePrimitive = (IPrimitiveType<?>) value;
-						IBaseReference fakeReference = (IBaseReference) myContext.getElementDefinition("Reference").newInstance();
-						fakeReference.setReference(valuePrimitive.getValueAsString());
 
 						/*
 						 * See #1583
 						 * Technically canonical fields should not allow local references (e.g.
 						 * Questionnaire/123) but it seems reasonable for us to interpret a canonical
-						 * containing a local reference for what it is, and allow people to seaerch
+						 * containing a local reference for what it is, and allow people to search
 						 * based on that.
 						 */
 						IIdType parsed = fakeReference.getReferenceElement();
 						if (parsed.hasIdPart() && parsed.hasResourceType() && !parsed.isAbsolute()) {
-							PathAndRef ref = new PathAndRef(searchParam.getName(), path, fakeReference);
+							PathAndRef ref = new PathAndRef(searchParam.getName(), path, fakeReference, false);
+							params.add(ref);
+							break;
+						}
+
+						if (parsed.isAbsolute()) {
+							PathAndRef ref = new PathAndRef(searchParam.getName(), path, fakeReference, true);
 							params.add(ref);
 							break;
 						}
@@ -165,7 +171,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 						return;
 					}
 
-					PathAndRef ref = new PathAndRef(searchParam.getName(), path, valueRef);
+					PathAndRef ref = new PathAndRef(searchParam.getName(), path, valueRef, false);
 					params.add(ref);
 					break;
 				default:
