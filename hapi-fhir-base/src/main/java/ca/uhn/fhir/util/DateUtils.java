@@ -171,13 +171,17 @@ public final class DateUtils {
 		return cal.getTime();
 	}
 
-
 	public static int convertDatetoDayInteger(final Date theDateValue) {
 		notNull(theDateValue, "Date value");
-		Calendar cal = org.apache.commons.lang3.time.DateUtils.toCalendar(theDateValue);
 		SimpleDateFormat format = new SimpleDateFormat(PATTERN_INTEGER_DATE);
 		String theDateString = format.format(theDateValue);
 		return Integer.parseInt(theDateString);
+	}
+
+	public static String convertDateToIso8601String(final Date theDateValue){
+		notNull(theDateValue, "Date value");
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+		return format.format(theDateValue);
 	}
 
 	/**

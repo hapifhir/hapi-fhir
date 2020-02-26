@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -45,8 +46,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsTrueForMatchingDates() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, date1A.toString(), date2A, date2A.toString(), "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1B, date1B.toString(), date2B, date2B.toString(), "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1B, null, date2B, null, "SomeValue");
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
@@ -55,8 +56,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsTrueForMatchingTimeStampsThatMatch() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1A, timestamp1A.toString(), timestamp2A, timestamp2A.toString(), "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1B, timestamp1B.toString(), timestamp2B, timestamp2B.toString(), "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1B, null, timestamp2B, null, "SomeValue");
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
@@ -67,8 +68,8 @@ public class ResourceIndexedSearchParamDateTest {
 	// other will be equivalent but will be a java.sql.Timestamp. Equals should work in both directions.
 	@Test
 	public void equalsIsTrueForMixedTimestampsAndDates() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, date1A.toString(), date2A, date2A.toString(), "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1A, timestamp1A.toString(), timestamp2A, timestamp2A.toString(), "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
@@ -77,8 +78,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForNonMatchingDates() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, date1A.toString(), date2A, date2A.toString(), "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date2A, date2A.toString(), date1A, date1A.toString(), "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date2A, null, date1A, null, "SomeValue");
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
@@ -87,7 +88,7 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForNonMatchingDatesNullCase() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, date1A.toString(), date2A, date2A.toString(), "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", null, null, null, null, "SomeValue");
 
 		assertFalse(param.equals(param2));
@@ -97,8 +98,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForNonMatchingTimeStamps() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1A, timestamp1A.toString(), timestamp2A, timestamp2A.toString(), "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp2A, timestamp2A.toString(), timestamp1A, timestamp1A.toString(), "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp2A, null, timestamp1A, null, "SomeValue");
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
@@ -107,8 +108,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForMixedTimestampsAndDatesThatDoNotMatch() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, date1A.toString(), date2A, date2A.toString(), "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp2A, timestamp2A.toString(), timestamp1A, timestamp1A.toString(), "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp2A, null, timestamp1A, null, "SomeValue");
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));

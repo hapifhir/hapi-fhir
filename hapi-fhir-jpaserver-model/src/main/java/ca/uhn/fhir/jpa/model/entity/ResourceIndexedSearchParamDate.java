@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.util.DateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -34,6 +35,7 @@ import org.hibernate.search.annotations.Field;
 import org.hl7.fhir.r4.model.DateTimeType;
 
 import javax.persistence.*;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Embeddable
@@ -93,13 +95,21 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		setParamName(theParamName);
 		setValueLow(theLow);
 		setValueHigh(theHigh);
+		if (theHigh != null && theHighString == null) {
+			theHighString = DateUtils.convertDateToIso8601String(theHigh);
+		}
+		if (theLow != null && theLowString == null) {
+			theLowString = DateUtils.convertDateToIso8601String(theLow);
+		}
 		computeValueHighDateOrdinal(theHighString);
 		computeValueLowDateOrdinal(theLowString);
 		myOriginalValue = theOriginalValue;
 	}
 
 	private void computeValueHighDateOrdinal(String theHigh) {
-		this.myValueHighDateOrdinal = generateOrdinalDateInteger(theHigh);
+		if (!StringUtils.isBlank(theHigh)) {
+			this.myValueHighDateOrdinal = generateOrdinalDateInteger(theHigh);
+		}
 	}
 	private int generateOrdinalDateInteger(String theDateString){
 		if (theDateString.contains("T")) {
@@ -110,7 +120,9 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	}
 
 	private void computeValueLowDateOrdinal(String theLow) {
-		this.myValueLowDateOrdinal = generateOrdinalDateInteger(theLow);
+		if (StringUtils.isNotBlank(theLow)) {
+			this.myValueLowDateOrdinal = generateOrdinalDateInteger(theLow);
+		}
 	}
 
 	public Integer getValueLowDateOrdinal() {
