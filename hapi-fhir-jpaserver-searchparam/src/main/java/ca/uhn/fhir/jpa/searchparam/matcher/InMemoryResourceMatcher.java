@@ -202,7 +202,7 @@ public class InMemoryResourceMatcher {
 					if (theSearchParams == null) {
 						return InMemoryMatchResult.successfulMatch();
 					} else {
-						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theResourceName, theParamName, theParamDef, nextAnd, theSearchParams)));
+						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theResourceName, theParamName, theParamDef, nextAnd, theSearchParams, myModelConfig.getUseOrdinalDatesForDayPrecisionSearches())));
 					}
 				case COMPOSITE:
 				case HAS:
@@ -219,11 +219,11 @@ public class InMemoryResourceMatcher {
 		}
 	}
 
-	private boolean matchParams(String theResourceName, String theParamName, RuntimeSearchParam paramDef, List<? extends IQueryParameterType> theNextAnd, ResourceIndexedSearchParams theSearchParams) {
+	private boolean matchParams(String theResourceName, String theParamName, RuntimeSearchParam paramDef, List<? extends IQueryParameterType> theNextAnd, ResourceIndexedSearchParams theSearchParams, boolean theUseOrdinalDatesForDayComparison) {
 		if (paramDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 			stripBaseUrlsFromReferenceParams(theNextAnd);
 		}
-		return theNextAnd.stream().anyMatch(token -> theSearchParams.matchParam(theResourceName, theParamName, paramDef, token));
+		return theNextAnd.stream().anyMatch(token -> theSearchParams.matchParam(theResourceName, theParamName, paramDef, token, theUseOrdinalDatesForDayComparison));
 	}
 
 	private void stripBaseUrlsFromReferenceParams(List<? extends IQueryParameterType> theNextAnd) {

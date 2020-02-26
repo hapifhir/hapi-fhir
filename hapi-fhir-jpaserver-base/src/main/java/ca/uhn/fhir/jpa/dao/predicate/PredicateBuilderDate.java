@@ -171,7 +171,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		 * If all present search parameters are of DAY precision, and {@link DaoConfig#getUseOrdinalDatesForDayPrecisionSearches()} is true,
 		 * then we attempt to use the ordinal field for date comparisons instead of the date field.
 		 */
-		boolean isOrdinalComparison = isNullOrDayPrecision(lowerBound) && isNullOrDayPrecision(upperBound) && myDaoConfig.getUseOrdinalDatesForDayPrecisionSearches();
+		boolean isOrdinalComparison = isNullOrDayPrecision(lowerBound) && isNullOrDayPrecision(upperBound) && myDaoConfig.getModelConfig().getUseOrdinalDatesForDayPrecisionSearches();
 
 		Predicate lt = null;
 		Predicate gt = null;

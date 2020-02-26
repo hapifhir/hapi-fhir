@@ -884,10 +884,10 @@ public class InMemorySubscriptionMatcherR4Test {
 	public void testDateSearchParametersShouldBeTimezoneIndependent() {
 
 		List<Observation> nlist = new ArrayList<>();
-		nlist.add(createObservationWithEffective("NO1", "2011-01-02T23:00:00-11:30"));
 		nlist.add(createObservationWithEffective("NO2", "2011-01-03T00:00:00+01:00"));
 
 		List<Observation> ylist = new ArrayList<>();
+		nlist.add(createObservationWithEffective("YES00", "2011-01-02T23:00:00-11:30"));
 		ylist.add(createObservationWithEffective("YES01", "2011-01-02T00:00:00-11:30"));
 		ylist.add(createObservationWithEffective("YES02", "2011-01-02T00:00:00-10:00"));
 		ylist.add(createObservationWithEffective("YES03", "2011-01-02T00:00:00-09:00"));

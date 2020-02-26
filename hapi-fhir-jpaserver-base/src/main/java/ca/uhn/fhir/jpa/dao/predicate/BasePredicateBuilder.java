@@ -50,6 +50,7 @@ abstract class BasePredicateBuilder {
 	@Autowired
 	DaoConfig myDaoConfig;
 
+
 	boolean myDontUseHashesForSearch;
 	final IDao myCallingDao;
 	final CriteriaBuilder myBuilder;

@@ -133,7 +133,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 
 	public abstract IQueryParameterType toQueryParameterType();
 
-	public boolean matches(IQueryParameterType theParam) {
+	public boolean matches(IQueryParameterType theParam, boolean theUseOrdinalDatesForDayComparison) {
 		throw new UnsupportedOperationException("No parameter matcher for " + theParam);
 	}
 

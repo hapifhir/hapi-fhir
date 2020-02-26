@@ -35,7 +35,6 @@ import org.hibernate.search.annotations.Field;
 import org.hl7.fhir.r4.model.DateTimeType;
 
 import javax.persistence.*;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Embeddable
@@ -238,21 +237,33 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	}
 
 	@Override
-	public boolean matches(IQueryParameterType theParam) {
+	public boolean matches(IQueryParameterType theParam, boolean theUseOrdinalDatesForDayComparison) {
 		if (!(theParam instanceof DateParam)) {
 			return false;
 		}
 		DateParam dateParam = (DateParam) theParam;
 		DateRangeParam range = new DateRangeParam(dateParam);
 
+
+
+
+		boolean result;
+		if (theUseOrdinalDatesForDayComparison) {
+			result = matchesOrdinalDateBounds(range);
+		} else {
+			result =  matchesDateBounds(range);
+		}
+
+		return result;
+	}
+
+	private boolean matchesDateBounds(DateRangeParam range) {
 		Date lowerBound = range.getLowerBoundAsInstant();
 		Date upperBound = range.getUpperBoundAsInstant();
-
 		if (lowerBound == null && upperBound == null) {
 			// should never happen
 			return false;
 		}
-
 		boolean result = true;
 		if (lowerBound != null) {
 			result &= (myValueLow.after(lowerBound) || myValueLow.equals(lowerBound));
@@ -265,8 +276,27 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		return result;
 	}
 
+	private boolean matchesOrdinalDateBounds(DateRangeParam range) {
+		boolean result = true;
+		Integer lowerBoundAsDateInteger = range.getLowerBoundAsDateInteger();
+		Integer upperBoundAsDateInteger = range.getUpperBoundAsDateInteger();
+		if (upperBoundAsDateInteger == null && lowerBoundAsDateInteger == null) {
+			return false;
+		}
+		if (lowerBoundAsDateInteger != null) {
+			result &= (myValueLowDateOrdinal.equals(lowerBoundAsDateInteger) || myValueLowDateOrdinal > lowerBoundAsDateInteger);
+			result &= (myValueHighDateOrdinal.equals(lowerBoundAsDateInteger) || myValueHighDateOrdinal > lowerBoundAsDateInteger);
+		}
+		if (upperBoundAsDateInteger != null) {
+			result &= (myValueHighDateOrdinal.equals(upperBoundAsDateInteger) || myValueHighDateOrdinal < upperBoundAsDateInteger);
+			result &= (myValueLowDateOrdinal.equals(upperBoundAsDateInteger) || myValueLowDateOrdinal < upperBoundAsDateInteger);
+		}
+		return result;
+	}
+
+
 	public static Long calculateOrdinalValue(Date theDate) {
 		return (long) DateUtils.convertDatetoDayInteger(theDate);
-	};
+	}
 
 }
