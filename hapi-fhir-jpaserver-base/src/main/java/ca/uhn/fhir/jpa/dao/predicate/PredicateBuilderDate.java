@@ -222,8 +222,8 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 				throw new InvalidRequestException("lowerBound and/or upperBound value not correctly specified for compare operation");
 			}
 			if (isOrdinalComparison){
-				lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLowDateOrdinal"), lowerBoundAsOrdinal);
-				gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHighDateOrdinal"), upperBoundAsOrdinal);
+				lt = theBuilder.lessThan(theFrom.get("myValueLowDateOrdinal"), lowerBoundAsOrdinal);
+				gt = theBuilder.greaterThan(theFrom.get("myValueHighDateOrdinal"), upperBoundAsOrdinal);
 			} else {
 				lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLow"), lowerBoundInstant);
 				gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHigh"), upperBoundInstant);
