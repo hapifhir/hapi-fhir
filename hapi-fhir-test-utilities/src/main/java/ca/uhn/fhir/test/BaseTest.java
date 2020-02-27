@@ -68,6 +68,11 @@ public class BaseTest {
 		return loadResource(theClasspath, streamTransform);
 	}
 
+    protected IBaseResource loadResource(FhirContext theCtx, String theClasspath) throws IOException {
+        String raw = loadResource(theClasspath);
+        return EncodingEnum.detectEncodingNoDefault(raw).newParser(theCtx).parseResource(raw);
+    }
+
 	protected <T extends IBaseResource> T loadResource(FhirContext theCtx, Class<T> theType, String theClasspath) throws IOException {
 		String raw = loadResource(theClasspath);
 		return EncodingEnum.detectEncodingNoDefault(raw).newParser(theCtx).parseResource(theType, raw);

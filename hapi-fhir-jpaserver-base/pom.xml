@@ -299,14 +299,12 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-		<!--
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-catalina</artifactId>
-			<scope>test</scope>
-		</dependency>
-		 -->
-		 
+        <dependency>
+            <groupId>org.hl7.fhir.testcases</groupId>
+            <artifactId>fhir-test-cases</artifactId>
+            <version>1.0.42-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>

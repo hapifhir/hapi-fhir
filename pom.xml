@@ -91,6 +91,12 @@
 			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 
 	<developers>
@@ -679,7 +685,10 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 
-		<!-- Site properties -->
+        <!-- Junit Jupiter -->
+        <junit.jupiter.version>5.6.0</junit.jupiter.version>
+
+        <!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
 	</properties>
 
