@@ -148,8 +148,8 @@ public class InMemoryResourceMatcherR5Test {
 
 	@Test
 	public void testDateSupportedOps() {
-		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, true, true, false);
 		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN, true, false, false);
+		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, true, true, false);
 		testDateSupportedOp(ParamPrefixEnum.EQUAL, false, true, false);
 		testDateSupportedOp(ParamPrefixEnum.LESSTHAN_OR_EQUALS, false, true, true);
 		testDateSupportedOp(ParamPrefixEnum.LESSTHAN, false, false, true);
@@ -165,7 +165,7 @@ public class InMemoryResourceMatcherR5Test {
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + OBSERVATION_DATE, myObservation, mySearchParams);
 			assertTrue(result.getUnsupportedReason(), result.supported());
-			assertEquals(result.matched(), theSame);
+			assertEquals(theSame, result.matched());
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + LATE_DATE, myObservation, mySearchParams);

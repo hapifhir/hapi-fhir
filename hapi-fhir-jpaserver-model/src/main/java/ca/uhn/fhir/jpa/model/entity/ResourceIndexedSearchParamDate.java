@@ -250,6 +250,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		boolean result;
 		if (theUseOrdinalDatesForDayComparison) {
 			result = matchesOrdinalDateBounds(range);
+			result = matchesDateBounds(range);
 		} else {
 			result =  matchesDateBounds(range);
 		}
@@ -284,6 +285,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 			return false;
 		}
 		if (lowerBoundAsDateInteger != null) {
+			//TODO as we run into equality issues
 			result &= (myValueLowDateOrdinal.equals(lowerBoundAsDateInteger) || myValueLowDateOrdinal > lowerBoundAsDateInteger);
 			result &= (myValueHighDateOrdinal.equals(lowerBoundAsDateInteger) || myValueHighDateOrdinal > lowerBoundAsDateInteger);
 		}

@@ -272,7 +272,27 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		if (myLowerBound == null || myLowerBound.getValue() == null) {
 			return null;
 		}
-		return DateUtils.convertDatetoDayInteger(myLowerBound.getValue());
+		//TODO LOOK AT THE DATE VERSION, WHERE PRECISION OCCASIONALLY CHANGES THE STUPID THING. ESSENTIALLY ADD A SWITCH
+		int retVal = DateUtils.convertDatetoDayInteger(myLowerBound.getValue());
+
+		if (myLowerBound.getPrefix() != null) {
+			switch (myLowerBound.getPrefix()) {
+				case GREATERTHAN:
+				case STARTS_AFTER:
+					retVal += 1;
+					break;
+				case EQUAL:
+				case GREATERTHAN_OR_EQUALS:
+					break;
+				case LESSTHAN:
+				case APPROXIMATE:
+				case LESSTHAN_OR_EQUALS:
+				case ENDS_BEFORE:
+				case NOT_EQUAL:
+					throw new IllegalStateException("Invalid lower bound comparator: " + myLowerBound.getPrefix());
+			}
+		}
+		return retVal;
 	}
 
 	/**
@@ -284,7 +304,25 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		if (myUpperBound == null || myUpperBound.getValue() == null) {
 			return null;
 		}
-		return DateUtils.convertDatetoDayInteger(myUpperBound.getValue());
+		int retVal = DateUtils.convertDatetoDayInteger(myUpperBound.getValue());
+		if (myUpperBound.getPrefix() != null) {
+			switch (myUpperBound.getPrefix()) {
+				case LESSTHAN:
+				case ENDS_BEFORE:
+					retVal -= 1;
+					break;
+				case EQUAL:
+				case LESSTHAN_OR_EQUALS:
+					break;
+				case GREATERTHAN_OR_EQUALS:
+				case GREATERTHAN:
+				case APPROXIMATE:
+				case NOT_EQUAL:
+				case STARTS_AFTER:
+					throw new IllegalStateException("Invalid upper bound comparator: " + myUpperBound.getPrefix());
+			}
+		}
+		return retVal;
 	}
 
 	public Date getLowerBoundAsInstant() {
