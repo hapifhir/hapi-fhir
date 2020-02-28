@@ -166,7 +166,8 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		DateParam upperBound = theRange.getUpperBound();
 		Integer lowerBoundAsOrdinal = theRange.getLowerBoundAsDateInteger();
 		Integer upperBoundAsOrdinal = theRange.getUpperBoundAsDateInteger();
-
+		Comparable genericLowerBound;
+		Comparable genericUpperBound;
 		/**
 		 * If all present search parameters are of DAY precision, and {@link DaoConfig#getUseOrdinalDatesForDayPrecisionSearches()} is true,
 		 * then we attempt to use the ordinal field for date comparisons instead of the date field.
@@ -177,70 +178,56 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		Predicate gt = null;
 		Predicate lb = null;
 		Predicate ub = null;
+		String lowValueField;
+		String highValueField;
+
+		if (isOrdinalComparison) {
+			lowValueField = "myValueLowDateOrdinal";
+			highValueField = "myValueHighDateOrdinal";
+			genericLowerBound = lowerBoundAsOrdinal;
+			genericUpperBound = upperBoundAsOrdinal;
+		} else {
+			lowValueField = "myValueLow";
+			highValueField = "myValueHigh";
+			genericLowerBound = lowerBoundInstant;
+			genericUpperBound = upperBoundInstant;
+		}
 
 		if (operation == SearchFilterParser.CompareOperation.lt) {
 			if (lowerBoundInstant == null) {
 				throw new InvalidRequestException("lowerBound value not correctly specified for compare operation");
 			}
 			//im like 80% sure this should be ub and not lb, as it is an UPPER bound.
-			if (isOrdinalComparison) {
-				lb = theBuilder.lessThan(theFrom.get("myValueLowDateOrdinal"), lowerBoundAsOrdinal);
-			} else {
-				lb = theBuilder.lessThan(theFrom.get("myValueLow"), lowerBoundInstant);
-			}
+			lb = theBuilder.lessThan(theFrom.get(lowValueField), genericLowerBound);
 		} else if (operation == SearchFilterParser.CompareOperation.le) {
 			if (upperBoundInstant == null) {
 				throw new InvalidRequestException("upperBound value not correctly specified for compare operation");
 			}
 			//im like 80% sure this should be ub and not lb, as it is an UPPER bound.
-			if (isOrdinalComparison) {
-				lb = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHighDateOrdinal"), upperBoundAsOrdinal);
-			} else {
-				lb = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHigh"), upperBoundInstant);
-			}
+			lb = theBuilder.lessThanOrEqualTo(theFrom.get(highValueField), genericUpperBound);
 		} else if (operation == SearchFilterParser.CompareOperation.gt) {
 			if (upperBoundInstant == null) {
 				throw new InvalidRequestException("upperBound value not correctly specified for compare operation");
 			}
-			if (isOrdinalComparison) {
-				lb = theBuilder.greaterThan(theFrom.get("myValueHighDateOrdinal"), upperBoundAsOrdinal);
-			} else {
-				lb = theBuilder.greaterThan(theFrom.get("myValueHigh"), upperBoundInstant);
-			}
+			lb = theBuilder.greaterThan(theFrom.get(highValueField), genericUpperBound);
 			} else if (operation == SearchFilterParser.CompareOperation.ge) {
 				if (lowerBoundInstant == null) {
 					throw new InvalidRequestException("lowerBound value not correctly specified for compare operation");
 				}
-				if (isOrdinalComparison) {
-					lb = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLowDateOrdinal"), lowerBoundAsOrdinal);
-				} else {
-					lb = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLow"), lowerBoundInstant);
-				}
+				lb = theBuilder.greaterThanOrEqualTo(theFrom.get(lowValueField), genericLowerBound);
 			} else if (operation == SearchFilterParser.CompareOperation.ne) {
 			if ((lowerBoundInstant == null) ||
 				(upperBoundInstant == null)) {
 				throw new InvalidRequestException("lowerBound and/or upperBound value not correctly specified for compare operation");
 			}
-			if (isOrdinalComparison){
-				lt = theBuilder.lessThan(theFrom.get("myValueLowDateOrdinal"), lowerBoundAsOrdinal);
-				gt = theBuilder.greaterThan(theFrom.get("myValueHighDateOrdinal"), upperBoundAsOrdinal);
-			} else {
-				lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLow"), lowerBoundInstant);
-				gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHigh"), upperBoundInstant);
-			}
+			lt = theBuilder.lessThan(theFrom.get(lowValueField), genericLowerBound);
+			gt = theBuilder.greaterThan(theFrom.get(highValueField), genericUpperBound);
 			lb = theBuilder.or(lt,
 				gt);
 		} else if ((operation == SearchFilterParser.CompareOperation.eq) || (operation == null)) {
 			if (lowerBoundInstant != null) {
-				if (isOrdinalComparison) {
-					gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLowDateOrdinal"), lowerBoundAsOrdinal);
-					lt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHighDateOrdinal"), lowerBoundAsOrdinal);
-					//also try a strict equality here.
-				}
-				else {
-					gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLow"), lowerBoundInstant);
-					lt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHigh"), lowerBoundInstant);
-				}
+				gt = theBuilder.greaterThanOrEqualTo(theFrom.get(lowValueField), genericLowerBound);
+				lt = theBuilder.greaterThanOrEqualTo(theFrom.get(highValueField), genericLowerBound);
 				if (lowerBound.getPrefix() == ParamPrefixEnum.STARTS_AFTER || lowerBound.getPrefix() == ParamPrefixEnum.EQUAL) {
 					lb = gt;
 				} else {
@@ -249,13 +236,9 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 			}
 
 			if (upperBoundInstant != null) {
-				if (isOrdinalComparison) {
-					gt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLowDateOrdinal"), upperBoundAsOrdinal);
-					lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHighDateOrdinal"), upperBoundAsOrdinal);
-				} else {
-					gt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLow"), upperBoundInstant);
-					lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHigh"), upperBoundInstant);
-				}
+				gt = theBuilder.lessThanOrEqualTo(theFrom.get(lowValueField), genericUpperBound);
+				lt = theBuilder.lessThanOrEqualTo(theFrom.get(highValueField), genericUpperBound);
+
 
 				if (theRange.getUpperBound().getPrefix() == ParamPrefixEnum.ENDS_BEFORE || theRange.getUpperBound().getPrefix() == ParamPrefixEnum.EQUAL) {
 					ub = lt;
