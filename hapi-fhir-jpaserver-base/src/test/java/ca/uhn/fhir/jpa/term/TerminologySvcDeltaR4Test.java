@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -16,12 +18,15 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -29,11 +34,17 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcDeltaR4Test.class);
+
+	@After
+	public void after() {
+		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+	}
 
 
 	@Test
@@ -347,6 +358,49 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		IContextValidationSupport.LookupCodeResult lookup = myTermSvc.lookupCode(myFhirCtx, "http://foo", "CBC");
 		assertEquals("Complete Blood Count", lookup.getCodeDisplay());
 	}
+
+
+	@Test
+	public void testAddLargeHierarchy() {
+		myDaoConfig.setDeferIndexingForCodesystemsOfSize(5);
+
+		createNotPresentCodeSystem();
+		ValueSet vs;
+		vs = expandNotPresentCodeSystem();
+		assertEquals(0, vs.getExpansion().getContains().size());
+
+		CustomTerminologySet delta = new CustomTerminologySet();
+
+		// Create a nice deep hierarchy
+		TermConcept concept = delta.addRootConcept("Root", "Root");
+		int nestedDepth = 10;
+		for (int i = 0; i < nestedDepth; i++) {
+			String name = concept.getCode();
+			concept = concept.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode(name + "0").setDisplay(name + "0");
+		}
+
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
+
+		assertFalse(myTermDeferredStorageSvc.isStorageQueueEmpty());
+		while (!myTermDeferredStorageSvc.isStorageQueueEmpty()) {
+			myTermDeferredStorageSvc.saveDeferred();
+		}
+
+		List<String> expectedHierarchy = new ArrayList<>();
+		for (int i = 0; i < nestedDepth + 1; i++) {
+			String expected = leftPad("", i, " ") +
+				"Root" +
+				leftPad("", i, "0") +
+				" seq=0";
+			expectedHierarchy.add(expected);
+		}
+
+		assertHierarchyContains(expectedHierarchy.toArray(new String[0]));
+
+	}
+
+	@Autowired
+	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 
 	@Test
