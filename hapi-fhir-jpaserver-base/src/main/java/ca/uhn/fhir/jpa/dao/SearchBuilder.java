@@ -504,6 +504,9 @@ public class SearchBuilder implements ISearchBuilder {
 
 		ResourcePersistentId resourceId;
 		for (ResourceSearchView next : resourceSearchViewList) {
+			if (next.getDeleted() != null) {
+				continue;
+			}
 
 			Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(next.getResourceType()).getImplementingClass();
 
