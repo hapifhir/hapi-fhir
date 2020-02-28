@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.parser.json;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 
@@ -48,5 +49,5 @@ public interface JsonLikeStructure {
 	public JsonLikeObject getRootObject () throws DataFormatException;
 	public JsonLikeArray getRootArray () throws DataFormatException;
 	public JsonLikeWriter getJsonLikeWriter ();
-	public JsonLikeWriter getJsonLikeWriter (Writer writer);
+	public JsonLikeWriter getJsonLikeWriter (Writer writer) throws IOException;
 }

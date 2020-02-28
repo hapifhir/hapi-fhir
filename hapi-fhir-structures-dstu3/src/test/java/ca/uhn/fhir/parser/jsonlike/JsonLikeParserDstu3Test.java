@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -42,7 +43,7 @@ public class JsonLikeParserDstu3Test {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(encoded);
 		
-		JsonLikeStructure jsonLikeStructure = new GsonStructure();
+		JsonLikeStructure jsonLikeStructure = new JacksonStructure();
 		jsonLikeStructure.load(new StringReader(encoded));
 		
 		IJsonLikeParser jsonLikeparser = (IJsonLikeParser)ourCtx.newJsonParser();
@@ -189,17 +190,6 @@ public class JsonLikeParserDstu3Test {
 			blockStack.push(currentBlock);
 			currentBlock = new Block(BlockType.OBJECT);
 			currentBlock.setObject(newObject);
-			return this;
-		}
-
-		@Override
-		public JsonLikeWriter beginArray() throws IOException {
-			if (currentBlock.getType() == BlockType.NONE) {
-				throw new IOException("JsonLikeStreamWriter.beginArray() called but only beginObject() is allowed here.");
-			}
-			blockStack.push(currentBlock);
-			currentBlock = new Block(BlockType.ARRAY);
-			currentBlock.setArray(new ArrayList<Object>());
 			return this;
 		}
 
@@ -364,15 +354,6 @@ public class JsonLikeParserDstu3Test {
 		}
 
 		@Override
-		public JsonLikeWriter writeNull(String name) throws IOException {
-			if (currentBlock.getType() == BlockType.ARRAY) {
-				throw new IOException("Named JSON elements can only be created in JSON objects");
-			}
-			currentBlock.getObject().put(name, null);
-			return this;
-		}
-
-		@Override
 		public JsonLikeWriter endObject() throws IOException {
 			if (currentBlock.getType() == BlockType.NONE) {
 				ourLog.error("JsonLikeStreamWriter.endObject(); called with no active JSON document");
@@ -399,7 +380,7 @@ public class JsonLikeParserDstu3Test {
 		}
 
 		@Override
-		public JsonLikeWriter endBlock() throws IOException {
+		public JsonLikeWriter endBlock() {
 			if (currentBlock.getType() == BlockType.NONE) {
 				ourLog.error("JsonLikeStreamWriter.endBlock(); called with no active JSON document");
 			} else {

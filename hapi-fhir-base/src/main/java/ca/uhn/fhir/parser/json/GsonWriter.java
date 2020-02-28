@@ -39,7 +39,7 @@ public class GsonWriter extends JsonLikeWriter {
 		NONE, OBJECT, ARRAY
 	}
 	private BlockType blockType = BlockType.NONE;
-	private Stack<BlockType> blockStack = new Stack<BlockType>(); 
+	private Stack<BlockType> blockStack = new Stack<>();
 
 	public GsonWriter () {
 		super();
@@ -49,7 +49,7 @@ public class GsonWriter extends JsonLikeWriter {
 	}
 
 	@Override
-	public JsonLikeWriter init() throws IOException {
+	public JsonLikeWriter init() {
 		eventWriter = new JsonWriter(getWriter());
 		eventWriter.setSerializeNulls(true);
 		if (isPrettyPrint()) {
@@ -81,14 +81,6 @@ public class GsonWriter extends JsonLikeWriter {
 		blockStack.push(blockType);
 		blockType = BlockType.OBJECT;
 		eventWriter.beginObject();
-		return this;
-	}
-
-	@Override
-	public JsonLikeWriter beginArray() throws IOException {
-		blockStack.push(blockType);
-		blockType = BlockType.ARRAY;
-		eventWriter.beginArray();
 		return this;
 	}
 
@@ -203,13 +195,6 @@ public class GsonWriter extends JsonLikeWriter {
 	public JsonLikeWriter write(String name, boolean value) throws IOException {
 		eventWriter.name(name);
 		eventWriter.value(value);
-		return this;
-	}
-
-	@Override
-	public JsonLikeWriter writeNull(String name) throws IOException {
-		eventWriter.name(name);
-		eventWriter.nullValue();
 		return this;
 	}
 

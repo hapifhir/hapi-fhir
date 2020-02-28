@@ -215,12 +215,6 @@
 
 		<!-- UNIT TEST DEPENDENCIES -->
 		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>apache-jena-libs</artifactId>
-			<type>pom</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>net.sf.json-lib</groupId>
 			<artifactId>json-lib</artifactId>
 			<classifier>jdk15</classifier>

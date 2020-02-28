@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.Writer;
@@ -95,7 +96,7 @@ public class JacksonStructure implements JsonLikeStructure {
     }
 
     @Override
-    public JsonLikeWriter getJsonLikeWriter(Writer writer) {
+    public JsonLikeWriter getJsonLikeWriter(Writer writer) throws IOException {
         if (null == jacksonWriter) {
             jacksonWriter = new JacksonWriter(writer);
         }

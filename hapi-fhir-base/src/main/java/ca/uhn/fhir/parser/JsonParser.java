@@ -148,10 +148,9 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		theEventWriter.beginObject(arrayName);
 	}
 
-	private JsonLikeWriter createJsonWriter(Writer theWriter) {
+	private JsonLikeWriter createJsonWriter(Writer theWriter) throws IOException {
 		JsonLikeStructure jsonStructure = new JacksonStructure();
-		JsonLikeWriter retVal = jsonStructure.getJsonLikeWriter(theWriter);
-		return retVal;
+		return jsonStructure.getJsonLikeWriter(theWriter);
 	}
 
 	public void doEncodeResourceToJsonLikeWriter(IBaseResource theResource, JsonLikeWriter theEventWriter, EncodeContext theEncodeContext) throws IOException {
@@ -169,6 +168,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	protected void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext) throws IOException {
 		JsonLikeWriter eventWriter = createJsonWriter(theWriter);
 		doEncodeResourceToJsonLikeWriter(theResource, eventWriter, theEncodeContext);
+		eventWriter.close();
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -55,7 +56,7 @@ public class JsonLikeParserTest {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(encoded);
 		
-		JsonLikeStructure jsonLikeStructure = new GsonStructure();
+		JsonLikeStructure jsonLikeStructure = new JacksonStructure();
 		jsonLikeStructure.load(new StringReader(encoded));
 		
 		IJsonLikeParser jsonLikeparser = (IJsonLikeParser)ourCtx.newJsonParser();
@@ -259,17 +260,6 @@ public class JsonLikeParserTest {
 		}
 
 		@Override
-		public JsonLikeWriter beginArray() throws IOException {
-			if (currentBlock.getType() == BlockType.NONE) {
-				throw new IOException("JsonLikeStreamWriter.beginArray() called but only beginObject() is allowed here.");
-			}
-			blockStack.push(currentBlock);
-			currentBlock = new Block(BlockType.ARRAY);
-			currentBlock.setArray(new ArrayList<Object>());
-			return this;
-		}
-
-		@Override
 		public JsonLikeWriter beginObject(String name) throws IOException {
 			if (currentBlock.getType() == BlockType.ARRAY) {
 				throw new IOException("Named JSON elements can only be created in JSON objects");
@@ -430,15 +420,6 @@ public class JsonLikeParserTest {
 		}
 
 		@Override
-		public JsonLikeWriter writeNull(String name) throws IOException {
-			if (currentBlock.getType() == BlockType.ARRAY) {
-				throw new IOException("Named JSON elements can only be created in JSON objects");
-			}
-			currentBlock.getObject().put(name, null);
-			return this;
-		}
-
-		@Override
 		public JsonLikeWriter endObject() throws IOException {
 			if (currentBlock.getType() == BlockType.NONE) {
 				ourLog.error("JsonLikeStreamWriter.endObject(); called with no active JSON document");
@@ -452,7 +433,7 @@ public class JsonLikeParserTest {
 		}
 
 		@Override
-		public JsonLikeWriter endArray() throws IOException {
+		public JsonLikeWriter endArray() {
 			if (currentBlock.getType() == BlockType.NONE) {
 				ourLog.error("JsonLikeStreamWriter.endArray(); called with no active JSON document");
 			} else {
@@ -465,11 +446,11 @@ public class JsonLikeParserTest {
 		}
 
 		@Override
-		public JsonLikeWriter endBlock() throws IOException {
+		public JsonLikeWriter endBlock() {
 			if (currentBlock.getType() == BlockType.NONE) {
 				ourLog.error("JsonLikeStreamWriter.endBlock(); called with no active JSON document");
 			} else {
-				Object toPut = null;
+				Object toPut;
 				if (currentBlock.getType() == BlockType.ARRAY) {
 					toPut = currentBlock.getArray();
 				} else {
@@ -551,7 +532,7 @@ public class JsonLikeParserTest {
 
 		private class JsonMapObject extends JsonLikeObject {
 			private Map<String,Object> nativeObject;
-			private Map<String,JsonLikeValue> jsonLikeMap = new LinkedHashMap<String,JsonLikeValue>();
+			private Map<String,JsonLikeValue> jsonLikeMap = new LinkedHashMap<>();
 			
 			public JsonMapObject (Map<String,Object> json) {
 				this.nativeObject = json;
@@ -585,7 +566,7 @@ public class JsonLikeParserTest {
 		
 		private class JsonMapArray extends JsonLikeArray {
 			private List<Object> nativeArray;
-			private Map<Integer,JsonLikeValue> jsonLikeMap = new LinkedHashMap<Integer,JsonLikeValue>();
+			private Map<Integer,JsonLikeValue> jsonLikeMap = new LinkedHashMap<>();
 			
 			public JsonMapArray (List<Object> json) {
 				this.nativeArray = json;
@@ -603,7 +584,7 @@ public class JsonLikeParserTest {
 
 			@Override
 			public JsonLikeValue get(int index) {
-				Integer key = Integer.valueOf(index);
+				Integer key = index;
 				JsonLikeValue result = null;
 				if (jsonLikeMap.containsKey(key)) {
 					result = jsonLikeMap.get(key); 
@@ -694,7 +675,7 @@ public class JsonLikeParserTest {
 			@Override
 			public boolean getAsBoolean() {
 				if (nativeValue != null && isBoolean()) {
-					return ((Boolean)nativeValue).booleanValue();
+					return (Boolean) nativeValue;
 				}
 				return super.getAsBoolean();
 			}

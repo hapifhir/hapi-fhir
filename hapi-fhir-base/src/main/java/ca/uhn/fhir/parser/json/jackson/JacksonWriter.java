@@ -1,9 +1,10 @@
 package ca.uhn.fhir.parser.json.jackson;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.parser.json.JsonLikeWriter;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -12,209 +13,161 @@ import java.math.BigInteger;
 
 public class JacksonWriter extends JsonLikeWriter {
 
-    private JsonGenerator jsonGenerator;
+	private static final JsonFactory JSON_FACTORY = new JsonFactory();
 
-    private enum BlockType {
-        NONE, OBJECT, ARRAY
-    }
+	private JsonGenerator myJsonGenerator;
 
-    private BlockType blockType = BlockType.NONE;
+	public JacksonWriter(Writer writer) throws IOException {
+		myJsonGenerator = JSON_FACTORY.createGenerator(writer);
+		setWriter(writer);
+	}
 
-    public JacksonWriter(Writer writer) {
-        try {
-            this.jsonGenerator = new JsonFactory().createGenerator(writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new ConfigurationException(e.getMessage());
-        }
+	public JacksonWriter() {
+	}
 
-        setWriter(writer);
-    }
+	@Override
+	public JsonLikeWriter init() {
+		if (isPrettyPrint()) {
+			PrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+			myJsonGenerator.setPrettyPrinter(prettyPrinter);
+		}
+		return this;
+	}
 
-    public JacksonWriter() {}
+	@Override
+	public JsonLikeWriter flush() {
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter init() {
-        blockType = BlockType.NONE;
-        return this;
-    }
+	@Override
+	public void close() throws IOException {
+		myJsonGenerator.close();
+		getWriter().close();
+	}
 
-    @Override
-    public JsonLikeWriter flush() {
-        return this;
-    }
+	@Override
+	public JsonLikeWriter beginObject() throws IOException {
+		myJsonGenerator.writeStartObject();
+		return this;
+	}
 
-    @Override
-    public void close() throws IOException {
-        getWriter().close();
-    }
+	@Override
+	public JsonLikeWriter beginObject(String name) throws IOException {
+		myJsonGenerator.writeObjectFieldStart(name);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter beginObject() throws IOException {
-        blockType = BlockType.OBJECT;
-        jsonGenerator.writeStartObject();
-        return this;
-    }
+	@Override
+	public JsonLikeWriter beginArray(String name) throws IOException {
+		myJsonGenerator.writeArrayFieldStart(name);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter beginArray() throws IOException {
-        blockType = BlockType.ARRAY;
-        jsonGenerator.writeStartArray();
-        return this;
-    }
+	@Override
+	public JsonLikeWriter write(String value) throws IOException {
+		myJsonGenerator.writeObject(value);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter beginObject(String name) throws IOException {
-        blockType = BlockType.OBJECT;
-        jsonGenerator.writeObjectFieldStart(name);
-        return this;
-    }
+	@Override
+	public JsonLikeWriter write(BigInteger value) throws IOException {
+		myJsonGenerator.writeObject(value);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter beginArray(String name) throws IOException {
-        blockType = BlockType.ARRAY;
-        jsonGenerator.writeArrayFieldStart(name);
-        return this;
-    }
+	@Override
+	public JsonLikeWriter write(BigDecimal value) throws IOException {
+		myJsonGenerator.writeObject(value);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter write(String value) throws IOException {
-        jsonGenerator.writeObject(value);
-        return this;
-    }
+	@Override
+	public JsonLikeWriter write(long value) throws IOException {
+		myJsonGenerator.writeObject(value);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter write(BigInteger value) throws IOException {
-        jsonGenerator.writeObject(value);
-        return this;
-    }
+	@Override
+	public JsonLikeWriter write(double value) throws IOException {
+		myJsonGenerator.writeObject(value);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter write(BigDecimal value) throws IOException {
-        jsonGenerator.writeObject(value);
-        return this;
-    }
+	@Override
+	public JsonLikeWriter write(Boolean value) throws IOException {
+		myJsonGenerator.writeObject(value);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter write(long value) throws IOException {
-        jsonGenerator.writeObject(value);
-        return this;
-    }
+	@Override
+	public JsonLikeWriter write(boolean value) throws IOException {
+		myJsonGenerator.writeObject(value);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter write(double value) throws IOException {
-        jsonGenerator.writeObject(value);
-        return this;
-    }
+	@Override
+	public JsonLikeWriter writeNull() throws IOException {
+		myJsonGenerator.writeNull();
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter write(Boolean value) throws IOException {
-        jsonGenerator.writeObject(value);
-        return this;
-    }
+	@Override
+	public JsonLikeWriter write(String name, String value) throws IOException {
+		myJsonGenerator.writeObjectField(name, value);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter write(boolean value) throws IOException {
-        jsonGenerator.writeObject(value);
-        return this;
-    }
+	@Override
+	public JsonLikeWriter write(String name, BigInteger value) throws IOException {
+		myJsonGenerator.writeObjectField(name, value);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter writeNull() throws IOException {
-        jsonGenerator.writeNull();
-        return this;
-    }
+	@Override
+	public JsonLikeWriter write(String name, BigDecimal value) throws IOException {
+		myJsonGenerator.writeObjectField(name, value);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter write(String name, String value) throws IOException {
-        jsonGenerator.writeObjectField(name, value);
-        return this;
-    }
+	@Override
+	public JsonLikeWriter write(String name, long value) throws IOException {
+		myJsonGenerator.writeObjectField(name, value);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter write(String name, BigInteger value) throws IOException {
-        jsonGenerator.writeObjectField(name, value);
-        return this;
-    }
+	@Override
+	public JsonLikeWriter write(String name, double value) throws IOException {
+		myJsonGenerator.writeObjectField(name, value);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter write(String name, BigDecimal value) throws IOException {
-        jsonGenerator.writeObjectField(name, value);
-        return this;
-    }
+	@Override
+	public JsonLikeWriter write(String name, Boolean value) throws IOException {
+		myJsonGenerator.writeObjectField(name, value);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter write(String name, long value) throws IOException {
-        jsonGenerator.writeObjectField(name, value);
-        return this;
-    }
+	@Override
+	public JsonLikeWriter write(String name, boolean value) throws IOException {
+		myJsonGenerator.writeObjectField(name, value);
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter write(String name, double value) throws IOException {
-        jsonGenerator.writeObjectField(name, value);
-        return this;
-    }
+	@Override
+	public JsonLikeWriter endObject() throws IOException {
+		myJsonGenerator.writeEndObject();
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter write(String name, Boolean value) throws IOException {
-        jsonGenerator.writeObjectField(name, value);
-        return this;
-    }
+	@Override
+	public JsonLikeWriter endArray() throws IOException {
+		myJsonGenerator.writeEndArray();
+		return this;
+	}
 
-    @Override
-    public JsonLikeWriter write(String name, boolean value) throws IOException {
-        jsonGenerator.writeObjectField(name, value);
-        return this;
-    }
-
-    @Override
-    public JsonLikeWriter writeNull(String name) throws IOException {
-        jsonGenerator.writeNullField(name);
-        return this;
-    }
-
-    @Override
-    public JsonLikeWriter endObject() throws IOException {
-        if (blockType != BlockType.OBJECT) {
-            jsonGenerator.writeEndArray();
-        } else {
-            jsonGenerator.writeEndObject();
-        }
-
-        if (blockType == BlockType.NONE) {
-            jsonGenerator.close();
-        }
-
-        return this;
-    }
-
-    @Override
-    public JsonLikeWriter endArray() throws IOException {
-        if (blockType == BlockType.OBJECT) {
-            jsonGenerator.writeEndObject();
-        } else {
-            jsonGenerator.writeEndArray();
-        }
-
-        if (blockType == BlockType.NONE) {
-            jsonGenerator.close();
-        }
-
-        return this;
-    }
-
-    @Override
-    public JsonLikeWriter endBlock() throws IOException {
-        if (blockType == BlockType.ARRAY) {
-            jsonGenerator.writeEndArray();
-        } else {
-            jsonGenerator.writeEndObject();
-        }
-
-        if (blockType == BlockType.NONE) {
-            jsonGenerator.close();
-        }
-
-        return this;
-    }
+	@Override
+	public JsonLikeWriter endBlock() throws IOException {
+		myJsonGenerator.writeEndObject();
+		return this;
+	}
 }
