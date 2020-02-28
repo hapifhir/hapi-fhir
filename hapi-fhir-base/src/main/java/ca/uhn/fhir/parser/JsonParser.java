@@ -1122,7 +1122,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		} else {
 			// must be a SCALAR
 			theState.enteringNewElement(null, theName);
-			theState.attributeValue("value", theJsonVal.getAsString());
+			String asString = theJsonVal.getAsString();
+			theState.attributeValue("value", asString);
 			parseAlternates(theAlternateVal, theState, theAlternateName, theAlternateName);
 			theState.endingElement();
 		}

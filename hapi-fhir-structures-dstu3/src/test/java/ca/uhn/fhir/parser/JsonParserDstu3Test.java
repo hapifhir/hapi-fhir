@@ -72,7 +72,8 @@ public class JsonParserDstu3Test {
 			p.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Found incorrect type for element subject - Expected OBJECT and found SCALAR (STRING)", e.getMessage());
+			assertEquals("Failed to parse JSON encoded FHIR content: Unexpected character ('=' (code 61)): was expecting a colon to separate field name and value\n" +
+				" at [Source: (PushbackReader); line: 4, column: 18]", e.getMessage());
 		}
 	}
 
@@ -488,32 +489,25 @@ public class JsonParserDstu3Test {
 		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
 
-		//@formatter:off
 		assertEquals("{\n" +
 			"  \"resourceType\": \"Patient\",\n" +
 			"  \"meta\": {\n" +
-			"    \"security\": [\n" +
-			"      {\n" +
-			"        \"system\": \"SYSTEM1\",\n" +
-			"        \"version\": \"VERSION1\",\n" +
-			"        \"code\": \"CODE1\",\n" +
-			"        \"display\": \"DISPLAY1\"\n" +
-			"      },\n" +
-			"      {\n" +
-			"        \"system\": \"SYSTEM2\",\n" +
-			"        \"version\": \"VERSION2\",\n" +
-			"        \"code\": \"CODE2\",\n" +
-			"        \"display\": \"DISPLAY2\"\n" +
-			"      }\n" +
-			"    ]\n" +
+			"    \"security\": [ {\n" +
+			"      \"system\": \"SYSTEM1\",\n" +
+			"      \"version\": \"VERSION1\",\n" +
+			"      \"code\": \"CODE1\",\n" +
+			"      \"display\": \"DISPLAY1\"\n" +
+			"    }, {\n" +
+			"      \"system\": \"SYSTEM2\",\n" +
+			"      \"version\": \"VERSION2\",\n" +
+			"      \"code\": \"CODE2\",\n" +
+			"      \"display\": \"DISPLAY2\"\n" +
+			"    } ]\n" +
 			"  },\n" +
-			"  \"name\": [\n" +
-			"    {\n" +
-			"      \"family\": \"FAMILY\"\n" +
-			"    }\n" +
-			"  ]\n" +
+			"  \"name\": [ {\n" +
+			"    \"family\": \"FAMILY\"\n" +
+			"  } ]\n" +
 			"}", enc.trim());
-		//@formatter:on
 
 		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
 		List<Coding> gotLabels = parsed.getMeta().getSecurity();
@@ -1993,13 +1987,13 @@ public class JsonParserDstu3Test {
 			ourCtx.newJsonParser().parseResource("FOO");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON content, error was: Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
+			assertEquals("Failed to parse JSON encoded FHIR content: Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
 		}
 		try {
 			ourCtx.newJsonParser().parseResource("[\"aaa\"]");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON content, error was: Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
+			assertEquals("Failed to parse JSON encoded FHIR content: Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
 		}
 
 		assertEquals(Bundle.class, ourCtx.newJsonParser().parseResource("  {\"resourceType\" : \"Bundle\"}").getClass());
@@ -2235,8 +2229,8 @@ public class JsonParserDstu3Test {
 	@Test(expected = DataFormatException.class)
 	public void testParseWithTrailingContent() {
 		String bundle = "{\n" +
-			"  \"resourceType\" : \"Bundle\",\n" +
-			"  \"total\" : 1\n" +
+			"  \"resourceType\": \"Bundle\",\n" +
+			"  \"total\": 1\n" +
 			"}}";
 
 		ourCtx.newJsonParser().parseResource(Bundle.class, bundle);

@@ -6,9 +6,11 @@ import ca.uhn.fhir.parser.json.JsonLikeObject;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import ca.uhn.fhir.parser.json.JsonLikeValue;
 import ca.uhn.fhir.parser.json.JsonLikeWriter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
@@ -26,332 +28,345 @@ import java.util.stream.StreamSupport;
 
 public class JacksonStructure implements JsonLikeStructure {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private JacksonWriter jacksonWriter;
-    private enum ROOT_TYPE {OBJECT, ARRAY};
-    private ROOT_TYPE rootType = null;
-    private JsonNode nativeRoot = null;
-    private JsonNode jsonLikeRoot = null;
+	{
+		OBJECT_MAPPER.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+	}
 
-    public void setNativeObject (ObjectNode objectNode) {
-        this.rootType = ROOT_TYPE.OBJECT;
-        this.nativeRoot = objectNode;
-    }
+	private JacksonWriter jacksonWriter;
+	private ROOT_TYPE rootType = null;
 
-    public void setNativeArray (ArrayNode arrayNode) {
-        this.rootType = ROOT_TYPE.ARRAY;
-        this.nativeRoot = arrayNode;
-    }
+	;
+	private JsonNode nativeRoot = null;
+	private JsonNode jsonLikeRoot = null;
 
-    @Override
-    public JsonLikeStructure getInstance() {
-        return new JacksonStructure();
-    }
+	public void setNativeObject(ObjectNode objectNode) {
+		this.rootType = ROOT_TYPE.OBJECT;
+		this.nativeRoot = objectNode;
+	}
 
-    @Override
-    public void load(Reader theReader) throws DataFormatException {
-        this.load(theReader, false);
-    }
+	public void setNativeArray(ArrayNode arrayNode) {
+		this.rootType = ROOT_TYPE.ARRAY;
+		this.nativeRoot = arrayNode;
+	}
 
-    @Override
-    public void load(Reader theReader, boolean allowArray) throws DataFormatException {
-        PushbackReader pbr = new PushbackReader(theReader);
-        int nextInt;
-        try {
-            while(true) {
-                nextInt = pbr.read();
-                if (nextInt == -1) {
-                    throw new DataFormatException("Did not find any content to parse");
-                }
-                if (nextInt == '{') {
-                    pbr.unread(nextInt);
-                    break;
-                }
-                if (Character.isWhitespace(nextInt)) {
-                    continue;
-                }
-                if (allowArray) {
-                    if (nextInt == '[') {
-                        pbr.unread(nextInt);
-                        break;
-                    }
-                    throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char)nextInt + "' (must be '{' or '[')");
-                }
-                throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char)nextInt + "' (must be '{')");
-            }
+	@Override
+	public JsonLikeStructure getInstance() {
+		return new JacksonStructure();
+	}
 
-            if (nextInt == '{') {
-                setNativeObject((ObjectNode) OBJECT_MAPPER.readTree(pbr));
-            } else {
-                setNativeArray((ArrayNode) OBJECT_MAPPER.readTree(pbr));
-            }
-        } catch (Exception e) {
-            if (e.getMessage().startsWith("Unexpected char 39")) {
-                throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage() + " - " +
-                        "This may indicate that single quotes are being used as JSON escapes where double quotes are required", e);
-            }
-            throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage(), e);
-        }
-    }
+	@Override
+	public void load(Reader theReader) throws DataFormatException {
+		this.load(theReader, false);
+	}
 
-    @Override
-    public JsonLikeWriter getJsonLikeWriter(Writer writer) throws IOException {
-        if (null == jacksonWriter) {
-            jacksonWriter = new JacksonWriter(writer);
-        }
+	@Override
+	public void load(Reader theReader, boolean allowArray) throws DataFormatException {
+		PushbackReader pbr = new PushbackReader(theReader);
+		int nextInt;
+		try {
+			while (true) {
+				nextInt = pbr.read();
+				if (nextInt == -1) {
+					throw new DataFormatException("Did not find any content to parse");
+				}
+				if (nextInt == '{') {
+					pbr.unread(nextInt);
+					break;
+				}
+				if (Character.isWhitespace(nextInt)) {
+					continue;
+				}
+				if (allowArray) {
+					if (nextInt == '[') {
+						pbr.unread(nextInt);
+						break;
+					}
+					throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char) nextInt + "' (must be '{' or '[')");
+				}
+				throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char) nextInt + "' (must be '{')");
+			}
 
-        return jacksonWriter;
-    }
+			if (nextInt == '{') {
+				setNativeObject((ObjectNode) OBJECT_MAPPER.readTree(pbr));
+			} else {
+				setNativeArray((ArrayNode) OBJECT_MAPPER.readTree(pbr));
+			}
+		} catch (Exception e) {
+			if (e.getMessage().startsWith("Unexpected char 39")) {
+				throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage() + " - " +
+					"This may indicate that single quotes are being used as JSON escapes where double quotes are required", e);
+			}
+			throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage(), e);
+		}
+	}
 
-    @Override
-    public JsonLikeWriter getJsonLikeWriter() {
-        if (null == jacksonWriter) {
-            jacksonWriter = new JacksonWriter();
-        }
-        return jacksonWriter;
-    }
+	@Override
+	public JsonLikeWriter getJsonLikeWriter(Writer writer) throws IOException {
+		if (null == jacksonWriter) {
+			jacksonWriter = new JacksonWriter(writer);
+		}
 
-    @Override
-    public JsonLikeObject getRootObject() throws DataFormatException {
-        if (rootType == ROOT_TYPE.OBJECT) {
-            if (null == jsonLikeRoot) {
-                jsonLikeRoot = nativeRoot;
-            }
+		return jacksonWriter;
+	}
 
-            return new JacksonJsonObject((ObjectNode) jsonLikeRoot);
-        }
+	@Override
+	public JsonLikeWriter getJsonLikeWriter() {
+		if (null == jacksonWriter) {
+			jacksonWriter = new JacksonWriter();
+		}
+		return jacksonWriter;
+	}
 
-        throw new DataFormatException("Content must be a valid JSON Object. It must start with '{'.");
-    }
+	@Override
+	public JsonLikeObject getRootObject() throws DataFormatException {
+		if (rootType == ROOT_TYPE.OBJECT) {
+			if (null == jsonLikeRoot) {
+				jsonLikeRoot = nativeRoot;
+			}
 
-    @Override
-    public JsonLikeArray getRootArray() throws DataFormatException {
-        if (rootType == ROOT_TYPE.ARRAY) {
-            if (null == jsonLikeRoot) {
-                jsonLikeRoot = nativeRoot;
-            }
-            return new JacksonJsonArray((ArrayNode) nativeRoot);
-        }
-        throw new DataFormatException("Content must be a valid JSON Array. It must start with '['.");
-    }
+			return new JacksonJsonObject((ObjectNode) jsonLikeRoot);
+		}
 
-    private static class JacksonJsonObject extends JsonLikeObject {
-        private final ObjectNode nativeObject;
-        private final Map<String, JsonLikeValue> jsonLikeMap = new LinkedHashMap<>();
-        private Set<String> keySet = null;
+		throw new DataFormatException("Content must be a valid JSON Object. It must start with '{'.");
+	}
 
-        public JacksonJsonObject(ObjectNode json) {
-            this.nativeObject = json;
-        }
+	@Override
+	public JsonLikeArray getRootArray() throws DataFormatException {
+		if (rootType == ROOT_TYPE.ARRAY) {
+			if (null == jsonLikeRoot) {
+				jsonLikeRoot = nativeRoot;
+			}
+			return new JacksonJsonArray((ArrayNode) nativeRoot);
+		}
+		throw new DataFormatException("Content must be a valid JSON Array. It must start with '['.");
+	}
 
-        @Override
-        public Object getValue() {
-            return null;
-        }
+	private enum ROOT_TYPE {OBJECT, ARRAY}
 
-        @Override
-        public Set<String> keySet() {
-            if (null == keySet) {
-                final Iterable<Map.Entry<String, JsonNode>> iterable = nativeObject::fields;
-                keySet = StreamSupport.stream(iterable.spliterator(), false)
-                                      .map(Map.Entry::getKey)
-                                      .collect(Collectors.toCollection(EntryOrderedSet::new));
-            }
+	private static class JacksonJsonObject extends JsonLikeObject {
+		private final ObjectNode nativeObject;
+		private final Map<String, JsonLikeValue> jsonLikeMap = new LinkedHashMap<>();
+		private Set<String> keySet = null;
 
-            return keySet;
-        }
+		public JacksonJsonObject(ObjectNode json) {
+			this.nativeObject = json;
+		}
 
-        @Override
-        public JsonLikeValue get(String key) {
-            JsonLikeValue result = null;
-            if (jsonLikeMap.containsKey(key)) {
-                result = jsonLikeMap.get(key);
-            } else {
-                JsonNode child = nativeObject.get(key);
-                if (child != null) {
-                    result = new JacksonJsonValue(child);
-                }
-                jsonLikeMap.put(key, result);
-            }
-            return result;
-        }
-    }
+		@Override
+		public Object getValue() {
+			return null;
+		}
 
-    private static class EntryOrderedSet<T> extends AbstractSet<T> {
-        private final transient ArrayList<T> data;
+		@Override
+		public Set<String> keySet() {
+			if (null == keySet) {
+				final Iterable<Map.Entry<String, JsonNode>> iterable = nativeObject::fields;
+				keySet = StreamSupport.stream(iterable.spliterator(), false)
+					.map(Map.Entry::getKey)
+					.collect(Collectors.toCollection(EntryOrderedSet::new));
+			}
 
-        public EntryOrderedSet () {
-            data = new ArrayList<>();
-        }
+			return keySet;
+		}
 
-        @Override
-        public int size() {
-            return data.size();
-        }
+		@Override
+		public JsonLikeValue get(String key) {
+			JsonLikeValue result = null;
+			if (jsonLikeMap.containsKey(key)) {
+				result = jsonLikeMap.get(key);
+			} else {
+				JsonNode child = nativeObject.get(key);
+				if (child != null) {
+					result = new JacksonJsonValue(child);
+				}
+				jsonLikeMap.put(key, result);
+			}
+			return result;
+		}
+	}
 
-        @Override
-        public boolean contains(Object o) {
-            return data.contains(o);
-        }
+	private static class EntryOrderedSet<T> extends AbstractSet<T> {
+		private final transient ArrayList<T> data;
 
-        public T get(int index) {
-            return data.get(index);
-        }
+		public EntryOrderedSet() {
+			data = new ArrayList<>();
+		}
 
-        @Override
-        public boolean add(T element) {
-            if (data.contains(element)) {
-                return false;
-            }
-            return data.add(element);
-        }
+		@Override
+		public int size() {
+			return data.size();
+		}
 
-        @Override
-        public boolean remove(Object o) {
-            return data.remove(o);
-        }
+		@Override
+		public boolean contains(Object o) {
+			return data.contains(o);
+		}
 
-        @Override
-        public void clear() {
-            data.clear();
-        }
+		public T get(int index) {
+			return data.get(index);
+		}
 
-        @Override
-        public Iterator<T> iterator() {
-            return data.iterator();
-        }
-    }
+		@Override
+		public boolean add(T element) {
+			if (data.contains(element)) {
+				return false;
+			}
+			return data.add(element);
+		}
 
-    private static class JacksonJsonArray extends JsonLikeArray {
-        private final ArrayNode nativeArray;
-        private final Map<Integer, JsonLikeValue> jsonLikeMap = new LinkedHashMap<Integer, JsonLikeValue>();
+		@Override
+		public boolean remove(Object o) {
+			return data.remove(o);
+		}
 
-        public JacksonJsonArray(ArrayNode json) {
-            this.nativeArray = json;
-        }
+		@Override
+		public void clear() {
+			data.clear();
+		}
 
-        @Override
-        public Object getValue() {
-            return null;
-        }
+		@Override
+		public Iterator<T> iterator() {
+			return data.iterator();
+		}
+	}
 
-        @Override
-        public int size() {
-            return nativeArray.size();
-        }
+	private static class JacksonJsonArray extends JsonLikeArray {
+		private final ArrayNode nativeArray;
+		private final Map<Integer, JsonLikeValue> jsonLikeMap = new LinkedHashMap<Integer, JsonLikeValue>();
 
-        @Override
-        public JsonLikeValue get(int index) {
-            Integer key = index;
-            JsonLikeValue result = null;
-            if (jsonLikeMap.containsKey(key)) {
-                result = jsonLikeMap.get(key);
-            } else {
-                JsonNode child = nativeArray.get(index);
-                if (child != null) {
-                    result = new JacksonJsonValue(child);
-                }
-                jsonLikeMap.put(key, result);
-            }
-            return result;
-        }
-    }
+		public JacksonJsonArray(ArrayNode json) {
+			this.nativeArray = json;
+		}
 
-    private static class JacksonJsonValue extends JsonLikeValue {
-        private final JsonNode nativeValue;
-        private JsonLikeObject jsonLikeObject = null;
-        private JsonLikeArray jsonLikeArray = null;
+		@Override
+		public Object getValue() {
+			return null;
+		}
 
-        public JacksonJsonValue(JsonNode jsonNode) {
-            this.nativeValue = jsonNode;
-        }
+		@Override
+		public int size() {
+			return nativeArray.size();
+		}
 
-        @Override
-        public Object getValue() {
-            if (nativeValue != null && nativeValue.isValueNode()) {
-                if (nativeValue.isNumber()) {
-                    return nativeValue.numberValue();
-                }
+		@Override
+		public JsonLikeValue get(int index) {
+			Integer key = index;
+			JsonLikeValue result = null;
+			if (jsonLikeMap.containsKey(key)) {
+				result = jsonLikeMap.get(key);
+			} else {
+				JsonNode child = nativeArray.get(index);
+				if (child != null) {
+					result = new JacksonJsonValue(child);
+				}
+				jsonLikeMap.put(key, result);
+			}
+			return result;
+		}
+	}
 
-                if (nativeValue.isBoolean()) {
-                    return nativeValue.booleanValue();
-                }
+	private static class JacksonJsonValue extends JsonLikeValue {
+		private final JsonNode nativeValue;
+		private JsonLikeObject jsonLikeObject = null;
+		private JsonLikeArray jsonLikeArray = null;
 
-                return nativeValue.asText();
-            }
-            return null;
-        }
+		public JacksonJsonValue(JsonNode jsonNode) {
+			this.nativeValue = jsonNode;
+		}
 
-        @Override
-        public ValueType getJsonType() {
-            if (null == nativeValue || nativeValue.isNull()) {
-                return ValueType.NULL;
-            }
-            if (nativeValue.isObject()) {
-                return ValueType.OBJECT;
-            }
-            if (nativeValue.isArray()) {
-                return ValueType.ARRAY;
-            }
-            if (nativeValue.isValueNode()) {
-                return ValueType.SCALAR;
-            }
-            return null;
-        }
+		@Override
+		public Object getValue() {
+			if (nativeValue != null && nativeValue.isValueNode()) {
+				if (nativeValue.isNumber()) {
+					return nativeValue.numberValue();
+				}
 
-        @Override
-        public ScalarType getDataType() {
-            if (nativeValue != null && nativeValue.isValueNode()) {
-                if (nativeValue.isNumber()) {
-                    return ScalarType.NUMBER;
-                }
-                if (nativeValue.isTextual()) {
-                    return ScalarType.STRING;
-                }
-                if (nativeValue.isBoolean()) {
-                    return ScalarType.BOOLEAN;
-                }
-            }
-            return null;
-        }
+				if (nativeValue.isBoolean()) {
+					return nativeValue.booleanValue();
+				}
 
-        @Override
-        public JsonLikeArray getAsArray() {
-            if (nativeValue != null && nativeValue.isArray()) {
-                if (null == jsonLikeArray) {
-                    jsonLikeArray = new JacksonJsonArray((ArrayNode) nativeValue);
-                }
-            }
-            return jsonLikeArray;
-        }
+				return nativeValue.asText();
+			}
+			return null;
+		}
 
-        @Override
-        public JsonLikeObject getAsObject() {
-            if (nativeValue != null && nativeValue.isObject()) {
-                if (null == jsonLikeObject) {
-                    jsonLikeObject = new JacksonJsonObject((ObjectNode) nativeValue);
-                }
-            }
-            return jsonLikeObject;
-        }
+		@Override
+		public ValueType getJsonType() {
+			if (null == nativeValue || nativeValue.isNull()) {
+				return ValueType.NULL;
+			}
+			if (nativeValue.isObject()) {
+				return ValueType.OBJECT;
+			}
+			if (nativeValue.isArray()) {
+				return ValueType.ARRAY;
+			}
+			if (nativeValue.isValueNode()) {
+				return ValueType.SCALAR;
+			}
+			return null;
+		}
 
-        @Override
-        public Number getAsNumber() {
-            return nativeValue != null ? nativeValue.numberValue() : null;
-        }
+		@Override
+		public ScalarType getDataType() {
+			if (nativeValue != null && nativeValue.isValueNode()) {
+				if (nativeValue.isNumber()) {
+					return ScalarType.NUMBER;
+				}
+				if (nativeValue.isTextual()) {
+					return ScalarType.STRING;
+				}
+				if (nativeValue.isBoolean()) {
+					return ScalarType.BOOLEAN;
+				}
+			}
+			return null;
+		}
 
-        @Override
-        public String getAsString() {
-            return nativeValue != null ? nativeValue.asText() : null;
-        }
+		@Override
+		public JsonLikeArray getAsArray() {
+			if (nativeValue != null && nativeValue.isArray()) {
+				if (null == jsonLikeArray) {
+					jsonLikeArray = new JacksonJsonArray((ArrayNode) nativeValue);
+				}
+			}
+			return jsonLikeArray;
+		}
 
-        @Override
-        public boolean getAsBoolean() {
-            if (nativeValue != null && nativeValue.isValueNode() && nativeValue.isBoolean()) {
-                return nativeValue.asBoolean();
-            }
-            return super.getAsBoolean();
-        }
-    }
+		@Override
+		public JsonLikeObject getAsObject() {
+			if (nativeValue != null && nativeValue.isObject()) {
+				if (null == jsonLikeObject) {
+					jsonLikeObject = new JacksonJsonObject((ObjectNode) nativeValue);
+				}
+			}
+			return jsonLikeObject;
+		}
+
+		@Override
+		public Number getAsNumber() {
+			return nativeValue != null ? nativeValue.numberValue() : null;
+		}
+
+		@Override
+		public String getAsString() {
+			if (nativeValue != null) {
+				if (nativeValue instanceof DoubleNode) {
+					return nativeValue.asText();
+				}
+				return nativeValue.asText();
+			}
+			return null;
+		}
+
+		@Override
+		public boolean getAsBoolean() {
+			if (nativeValue != null && nativeValue.isValueNode() && nativeValue.isBoolean()) {
+				return nativeValue.asBoolean();
+			}
+			return super.getAsBoolean();
+		}
+	}
 }

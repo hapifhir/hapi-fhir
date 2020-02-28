@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.core.util.Separators;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -28,7 +29,30 @@ public class JacksonWriter extends JsonLikeWriter {
 	@Override
 	public JsonLikeWriter init() {
 		if (isPrettyPrint()) {
-			PrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+			PrettyPrinter prettyPrinter = new DefaultPrettyPrinter() {
+
+				/**
+				 * Objects should serialize as
+				 * <pre>
+				 * {
+				 *    "key": "value"
+				 * }
+				 * </pre>
+				 * in order to be consistent with Gson behaviour, instead of the jackson default
+				 * <pre>
+				 * {
+				 *    "key" : "value"
+				 * }
+				 * </pre>
+				 */
+				@Override
+				public DefaultPrettyPrinter withSeparators(Separators separators) {
+					_separators = separators;
+					_objectFieldValueSeparatorWithSpaces = separators.getObjectFieldValueSeparator() + " ";
+					return this;
+				}
+
+			};
 			myJsonGenerator.setPrettyPrinter(prettyPrinter);
 		}
 		return this;
