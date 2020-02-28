@@ -67,6 +67,10 @@
 		</dependency>
 		<!--<dependency> <groupId>ca.uhn.hapi.fhir</groupId> <artifactId>hapi-fhir-structures-dev</artifactId> <version>0.9</version> </dependency> -->
 		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.thymeleaf</groupId>
 			<artifactId>thymeleaf</artifactId>
 		</dependency>

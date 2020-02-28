@@ -1,5 +1,26 @@
 package ca.uhn.fhir.parser.jsonlike;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IJsonLikeParser;
+import ca.uhn.fhir.parser.json.JsonLikeArray;
+import ca.uhn.fhir.parser.json.JsonLikeObject;
+import ca.uhn.fhir.parser.json.JsonLikeStructure;
+import ca.uhn.fhir.parser.json.JsonLikeValue;
+import ca.uhn.fhir.parser.json.JsonLikeWriter;
+import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
+import ca.uhn.fhir.parser.view.ExtPatient;
+import ca.uhn.fhir.util.TestUtil;
+import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -13,32 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-
-import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
-import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Extension;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IJsonLikeParser;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.json.GsonStructure;
-import ca.uhn.fhir.parser.json.JsonLikeArray;
-import ca.uhn.fhir.parser.json.JsonLikeObject;
-import ca.uhn.fhir.parser.json.JsonLikeStructure;
-import ca.uhn.fhir.parser.json.JsonLikeValue;
-import ca.uhn.fhir.parser.json.JsonLikeWriter;
-import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
-import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
-import ca.uhn.fhir.parser.view.ExtPatient;
-import ca.uhn.fhir.util.TestUtil;
 
 public class JsonLikeParserTest {
 	private static FhirContext ourCtx = FhirContext.forR4();

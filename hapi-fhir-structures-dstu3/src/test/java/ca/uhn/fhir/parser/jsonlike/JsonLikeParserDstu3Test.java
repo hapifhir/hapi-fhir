@@ -1,5 +1,19 @@
 package ca.uhn.fhir.parser.jsonlike;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IJsonLikeParser;
+import ca.uhn.fhir.parser.json.JsonLikeStructure;
+import ca.uhn.fhir.parser.json.JsonLikeWriter;
+import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
+import ca.uhn.fhir.util.TestUtil;
+import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigDecimal;
@@ -9,23 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-
-import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
-import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IJsonLikeParser;
-import ca.uhn.fhir.parser.json.GsonStructure;
-import ca.uhn.fhir.parser.json.JsonLikeStructure;
-import ca.uhn.fhir.parser.json.JsonLikeWriter;
-import ca.uhn.fhir.util.TestUtil;
 
 public class JsonLikeParserDstu3Test {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
