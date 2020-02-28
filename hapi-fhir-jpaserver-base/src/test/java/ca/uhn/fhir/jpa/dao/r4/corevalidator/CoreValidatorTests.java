@@ -1,33 +1,30 @@
 package ca.uhn.fhir.jpa.dao.r4.corevalidator;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4ValidateTest;
+import ca.uhn.fhir.jpa.dao.r4.corevalidator.utils.ConvertorHelper;
+import ca.uhn.fhir.jpa.dao.r4.corevalidator.utils.CoreValidatorTestUtils;
+import ca.uhn.fhir.jpa.dao.r4.corevalidator.utils.XMLUtils;
 import ca.uhn.fhir.jpa.dao.r4.jupiter.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.ValidationModeEnum;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import org.hl7.fhir.convertors.VersionConvertor_10_40;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.elementmodel.Manager;
+import org.hl7.fhir.r4.formats.XmlParser;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.codesystems.FHIRVersion;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.w3c.dom.Document;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,106 +33,25 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static org.hl7.fhir.r4.model.codesystems.FHIRVersion._1_6_0;
-import static org.junit.Assert.fail;
-
 public class CoreValidatorTests extends BaseJpaR4Test {
 
     private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ValidateTest.class);
-
-    public static final String TEST_FILES_BASE_PATH = "/org/hl7/fhir/testcases/validator/";
-    public static final String TEST_MANIFEST_PATH = TEST_FILES_BASE_PATH + "manifest.json";
+    private static final String TEST_FILES_BASE_PATH = "/org/hl7/fhir/testcases/validator/";
+    private static final String TEST_MANIFEST_PATH = TEST_FILES_BASE_PATH + "manifest.json";
 
     @Autowired
     protected DaoRegistry daoRegistry;
 
-    private FhirContext myCtx = FhirContext.forR4();
+    protected FhirContext myCtx = FhirContext.forR4();
 
-    @ParameterizedTest(name = "Testing validation for file {0}")
-    @MethodSource("data")
-    public void runCoreValidationTests(String testFile, TestEntry testEntry) throws IOException {
-        myDaoConfig.setAllowExternalReferences(true);
-        String temp = testFile;
-        TestEntry te = testEntry;
-
-        if (testEntry.getVersion() != null) {
-            System.out.println("Resource Version :: " + testEntry.getVersion());
-        }
-
-        EncodingEnum encoding = getEncoding(testFile);
-
-        IBaseResource baseResource = loadResource(myCtx, TEST_FILES_BASE_PATH + testFile);
-        IFhirResourceDao<? extends IBaseResource> resourceDao = daoRegistry.getResourceDaoOrNull(baseResource.getIdElement().getResourceType());
-        getR4Version(baseResource, testEntry.getVersion());
-        baseResource.setId(new IdDt());
-        OperationOutcome oo = validate(baseResource, encoding, resourceDao, mySrd, myCtx);
-
-        testOutputs(testEntry.getTestResult(), oo);
-        System.out.println();
-
-    }
-
-    private static void testOutputs(TestResult result, OperationOutcome oo) {
-
-        int errorCount = 0;
-        int warningCount = 0;
-
-        List<OperationOutcome.OperationOutcomeIssueComponent> issues = oo.getIssue();
-        for (OperationOutcome.OperationOutcomeIssueComponent o : issues) {
-            switch (o.getSeverity()) {
-                case ERROR:
-                    errorCount++;
-                    break;
-                case WARNING:
-                    warningCount++;
-                    break;
-                case INFORMATION:
-                case FATAL:
-                case NULL:
-                default:
-                    break;
-            }
-        }
-
-        Assertions.assertEquals(result.getErrorCount(), errorCount);
-        Assertions.assertEquals(result.getWarningCount(), warningCount);
-    }
-
-    private static EncodingEnum getEncoding(String testFile) {
-        EncodingEnum encoding;
-        if (testFile.endsWith(".json")) {
-            encoding = EncodingEnum.JSON;
-        } else {
-            encoding = EncodingEnum.XML;
-        }
-        return encoding;
-    }
-
-    private static <T extends IBaseResource> OperationOutcome validate(T input, EncodingEnum enc, IFhirResourceDao resourceDao, ServletRequestDetails mySrd, FhirContext myFhirCtx) {
-        String encoded = null;
-        MethodOutcome outcome = null;
-        ValidationModeEnum mode = ValidationModeEnum.CREATE;
-        switch (enc) {
-            case JSON:
-                encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
-                try {
-                    resourceDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
-                } catch (PreconditionFailedException e) {
-                    return (OperationOutcome) e.getOperationOutcome();
-                }
-                break;
-            case XML:
-                encoded = myFhirCtx.newXmlParser().encodeResourceToString(input);
-                try {
-                    resourceDao.validate(input, null, encoded, EncodingEnum.XML, mode, null, mySrd);
-                } catch (PreconditionFailedException e) {
-                    return (OperationOutcome) e.getOperationOutcome();
-                }
-                break;
-        }
-        return null;
-    }
-
+    /**
+     * This is the method data source for the testing data for used in the {@link CoreValidatorTests#runCoreValidationTests(String, TestEntry)}
+     * method. It loads the main manifest.json file and parses it into a {@link Stream} of filenames as {@link String}
+     * and corresponding test data as {@link TestEntry}.
+     *
+     * @return {@link Stream} of test data.
+     * @throws IOException If no manifest file can be found in resources.
+     */
     private static Stream<Object[]> data() throws IOException {
 
         Gson gson = new Gson();
@@ -153,11 +69,18 @@ public class CoreValidatorTests extends BaseJpaR4Test {
 
         List<Object[]> objects = new ArrayList<>(examples.size());
         for (String id : names) {
-            objects.add(new Object[] { id, examples.get(id)});
+            objects.add(new Object[]{id, examples.get(id)});
         }
         return objects.stream();
     }
 
+    /**
+     * Loads the string data from the file at the given resource path.
+     *
+     * @param resourcePath Path location for the resource file to read in.
+     * @return {@link String} of the file contents.
+     * @throws IOException if no such file exists at the given path.
+     */
     public static String loadStringFromResourceFile(String resourcePath) throws IOException {
         InputStream inputStream = CoreValidatorTests.class.getResourceAsStream(resourcePath);
         //creating an InputStreamReader object
@@ -166,57 +89,55 @@ public class CoreValidatorTests extends BaseJpaR4Test {
         BufferedReader reader = new BufferedReader(isReader);
         StringBuffer sb = new StringBuffer();
         String str;
-        while((str = reader.readLine())!= null){
+        while ((str = reader.readLine()) != null) {
             sb.append(str);
         }
         return sb.toString();
     }
 
-    private IBaseResource getR4Version(IBaseResource resource, String version) {
-        if (version != null && version.equals("4.0")) version = "4.0.0";
+    @DisplayName("Core Library Validation")
+    @ParameterizedTest(name = "Test #{index} -> Testing validation for file {0}")
+    @MethodSource("data")
+    public void runCoreValidationTests(String testFile, TestEntry testEntry) throws Exception {
+        myDaoConfig.setAllowExternalReferences(true);
+        String temp = testFile;
+        TestEntry te = testEntry;
 
-        FHIRVersion fhirVersion = version == null ? FHIRVersion.NULL : FHIRVersion.fromCode(version);
-        switch (fhirVersion) {
-            case _0_01:
-            case _0_0_80:
-            case _0_0_81:
-            case _0_0_82:
-                // DSTU 1
-                throw new IllegalStateException("DSTU1 structure passed in for validation.");
-            case _0_4_0:
-            case _0_5_0:
-            case _0_05:
-            case _0_06:
-            case _0_11:
-            case _1_0_0:
-            case _1_0_1:
-                return VersionConvertor_10_40.convertResource((org.hl7.fhir.dstu2.model.Resource) resource);
-            case _1_0_2:
-            case _1_1_0:
-            case _1_4_0:
-            case _1_6_0:
-            case _1_8_0:
-            case _3_0_0:
-                return VersionConvertor_30_40.convertResource((org.hl7.fhir.dstu3.model.Resource) resource, false);
-            case _3_0_1:
-            case _3_3_0:
-            case _3_5_0:
-            case _4_0_0:
-                return resource;
-            case NULL:
-            default:
-                return resource;
+        if (testEntry.getVersion() != null) {
+            System.out.println("Resource Version :: " + testEntry.getVersion());
         }
-    }
 
-//    @After
-//    public void after() {
-//        FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
-//        val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
+        EncodingEnum encoding = CoreValidatorTestUtils.getEncoding(testFile);
+
+//        if (testFile.contains("bundle")) {
+//            System.out.println("!!!!!!!!!!!!! THIS IS A BUNDLE TEST");
+//            String loadedFile = loadResource(TEST_FILES_BASE_PATH + testFile);
+//            switch (encoding) {
+//                case XML:
+//                    Manager.makeParser()
+//                    XMLUtils.TestMethod(TEST_FILES_BASE_PATH + testFile);
+//                    break;
+//                case JSON:
 //
-//        myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-//        myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
-//        myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
-//    }
+//                    break;
+//                default:
+//                    throw new IllegalStateException("Document type not one of JSON or XML");
+//            }
+//        }
+
+            IBaseResource baseResource = loadResource(myCtx, TEST_FILES_BASE_PATH + testFile);
+
+            String s = loadResource(TEST_FILES_BASE_PATH + testFile);
+            String name = myCtx.getResourceDefinition(baseResource).getName();
+            IFhirResourceDao<? extends IBaseResource> resourceDao = daoRegistry.getResourceDaoOrNull(name);
+            IBaseResource r4Version = ConvertorHelper.getR4Version(baseResource, testEntry);
+            baseResource.setId(new IdDt());
+            OperationOutcome oo = CoreValidatorTestUtils.validate(baseResource, s, encoding, resourceDao, mySrd, myCtx);
+
+            CoreValidatorTestUtils.testOutputs(testEntry.getTestResult(), oo);
+
+
+        System.out.println();
+    }
 
 }

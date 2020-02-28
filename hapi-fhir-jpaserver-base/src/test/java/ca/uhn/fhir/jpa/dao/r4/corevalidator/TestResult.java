@@ -1,18 +1,18 @@
 package ca.uhn.fhir.jpa.dao.r4.corevalidator;
 
-import java.util.List;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
 
 public class TestResult {
 
     @SerializedName("errorCount")
     @Expose
-    private Integer errorCount;
+    private Integer errorCount = 0;
     @SerializedName("warningCount")
     @Expose
-    private Integer warningCount;
+    private Integer warningCount = 0;
     @SerializedName("output")
     @Expose
     private List<String> output = null;
