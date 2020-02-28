@@ -80,7 +80,6 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		}
 		myExactMatch = theExactMatch;
 		createLatch(theCount);
-		createLatch(theCount);
 		if (theExactMatch) {
 			ourLog.info("Expecting exactly {} calls to {} latch", theCount, name);
 		} else {

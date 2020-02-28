@@ -45,7 +45,6 @@ public class FhirClientResourceRetriever implements IResourceRetriever {
 	public IBaseResource getResource(IIdType payloadId) throws ResourceGoneException {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(payloadId.getResourceType());
 
-		IBaseResource retval = myClient.read().resource(resourceDef.getName()).withId(payloadId).execute();
-		return retval;
+		return myClient.read().resource(resourceDef.getName()).withId(payloadId).execute();
 	}
 }
