@@ -51,6 +51,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	private int myDefaultTimeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
 	private final Pointcut myPointcut;
 	private int myInitialCount;
+	private boolean myExactMatch;
 
 
 	public PointcutLatch(Pointcut thePointcut) {
@@ -69,19 +70,33 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	}
 
 	@Override
-	public void setExpectedCount(int count) {
+	public void setExpectedCount(int theCount) {
+		this.setExpectedCount(theCount, true);
+	}
+
+	public void setExpectedCount(int theCount, boolean theExactMatch) {
 		if (myCountdownLatch.get() != null) {
 			throw new PointcutLatchException("setExpectedCount() called before previous awaitExpected() completed.");
 		}
-		createLatch(count);
-		ourLog.info("Expecting {} calls to {} latch", count, name);
+		myExactMatch = theExactMatch;
+		createLatch(theCount);
+		createLatch(theCount);
+		if (theExactMatch) {
+			ourLog.info("Expecting exactly {} calls to {} latch", theCount, name);
+		} else {
+			ourLog.info("Expecting at least {} calls to {} latch", theCount, name);
+		}
 	}
 
-	private void createLatch(int count) {
+	public void setExpectAtLeast(int theCount) {
+		setExpectedCount(theCount, false);
+	}
+
+	private void createLatch(int theCount) {
 		myFailures.set(Collections.synchronizedList(new ArrayList<>()));
 		myCalledWith.set(Collections.synchronizedList(new ArrayList<>()));
-		myCountdownLatch.set(new CountDownLatch(count));
-		myInitialCount = count;
+		myCountdownLatch.set(new CountDownLatch(theCount));
+		myInitialCount = theCount;
 	}
 
 	private void addFailure(String failure) {
@@ -153,10 +168,14 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	@Override
 	public void invoke(Pointcut thePointcut, HookParams theArgs) {
 		CountDownLatch latch = myCountdownLatch.get();
-		if (latch == null) {
-			throw new PointcutLatchException("invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke() arrived.", theArgs);
-		} else if (latch.getCount() <= 0) {
-			addFailure("invoke() called when countdown was zero.");
+		if (myExactMatch) {
+			if (latch == null) {
+				throw new PointcutLatchException("invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke() arrived.", theArgs);
+			} else if (latch.getCount() <= 0) {
+				addFailure("invoke() called when countdown was zero.");
+			}
+		} else if (latch == null || latch.getCount() <= 0) {
+			return;
 		}
 
 		if (myCalledWith.get() != null) {
