@@ -109,7 +109,6 @@ public class JacksonStructure implements JsonLikeStructure {
 		return jacksonWriter;
 	}
 
-	// FIXME: try removing this - is it needed?
 	@Override
 	public JsonLikeWriter getJsonLikeWriter() {
 		if (null == jacksonWriter) {
