@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.subscription.dbmatcher.CompositeInMemoryDaoSubscriptionMa
 import ca.uhn.fhir.jpa.subscription.dbmatcher.DaoSubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
@@ -204,8 +205,13 @@ public abstract class BaseConfig {
 	 * Create a @Primary @Bean if you need a different implementation
 	 */
 	@Bean
-	public ISubscribableChannelFactory linkedBlockingQueueSubscribableChannelFactory() {
+	public ISubscribableChannelFactory subscribableChannelFactory() {
 		return new LinkedBlockingQueueSubscribableChannelFactory();
+	}
+
+	@Bean
+	public SubscriptionChannelFactory subscriptionChannelFactory() {
+		return new SubscriptionChannelFactory();
 	}
 
 	@Bean
@@ -280,6 +286,4 @@ public abstract class BaseConfig {
 	private static HapiFhirHibernateJpaDialect hibernateJpaDialect(HapiLocalizer theLocalizer) {
 		return new HapiFhirHibernateJpaDialect(theLocalizer);
 	}
-
-
 }

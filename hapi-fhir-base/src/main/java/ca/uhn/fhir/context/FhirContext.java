@@ -395,9 +395,8 @@ public class FhirContext {
 	 */
 	public RuntimeResourceDefinition getResourceDefinition(final Class<? extends IBaseResource> theResourceType) {
 		validateInitialized();
-		if (theResourceType == null) {
-			throw new NullPointerException("theResourceType can not be null");
-		}
+		Validate.notNull(theResourceType, "theResourceType can not be null");
+
 		if (Modifier.isAbstract(theResourceType.getModifiers())) {
 			throw new IllegalArgumentException("Can not scan abstract or interface class (resource definitions must be concrete classes): " + theResourceType.getName());
 		}

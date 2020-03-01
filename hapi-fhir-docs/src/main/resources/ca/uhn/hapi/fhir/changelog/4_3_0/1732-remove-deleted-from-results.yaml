@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1732
+title: In the JPA server, quickly deleting a resource and then performing a query that had recently returned that
+   search result could cause a cached stub resource (containing no data but with an ID and metadata populated) to
+   be returned. This has been corrected.
