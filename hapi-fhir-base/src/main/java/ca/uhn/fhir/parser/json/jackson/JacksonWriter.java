@@ -4,6 +4,7 @@ import ca.uhn.fhir.parser.json.JsonLikeWriter;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.core.util.Separators;
 
@@ -14,13 +15,11 @@ import java.math.BigInteger;
 
 public class JacksonWriter extends JsonLikeWriter {
 
-	private static final JsonFactory JSON_FACTORY = new JsonFactory();
-
 	private JsonGenerator myJsonGenerator;
 
-	public JacksonWriter(Writer writer) throws IOException {
-		myJsonGenerator = JSON_FACTORY.createGenerator(writer);
-		setWriter(writer);
+	public JacksonWriter(JsonFactory theJsonFactory, Writer theWriter) throws IOException {
+		myJsonGenerator = theJsonFactory.createGenerator(theWriter);
+		setWriter(theWriter);
 	}
 
 	public JacksonWriter() {
@@ -29,7 +28,7 @@ public class JacksonWriter extends JsonLikeWriter {
 	@Override
 	public JsonLikeWriter init() {
 		if (isPrettyPrint()) {
-			PrettyPrinter prettyPrinter = new DefaultPrettyPrinter() {
+			DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter() {
 
 				/**
 				 * Objects should serialize as
@@ -53,6 +52,8 @@ public class JacksonWriter extends JsonLikeWriter {
 				}
 
 			};
+			prettyPrinter = prettyPrinter.withObjectIndenter(new DefaultIndenter("  ", "\n"));
+
 			myJsonGenerator.setPrettyPrinter(prettyPrinter);
 		}
 		return this;
@@ -66,7 +67,6 @@ public class JacksonWriter extends JsonLikeWriter {
 	@Override
 	public void close() throws IOException {
 		myJsonGenerator.close();
-		getWriter().close();
 	}
 
 	@Override

@@ -433,10 +433,10 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			String currentChildName = null;
 			boolean inArray = false;
 
-			ArrayList<ArrayList<HeldExtension>> extensions = new ArrayList<ArrayList<HeldExtension>>(0);
-			ArrayList<ArrayList<HeldExtension>> modifierExtensions = new ArrayList<ArrayList<HeldExtension>>(0);
-			ArrayList<ArrayList<String>> comments = new ArrayList<ArrayList<String>>(0);
-			ArrayList<String> ids = new ArrayList<String>(0);
+			ArrayList<ArrayList<HeldExtension>> extensions = new ArrayList<>(0);
+			ArrayList<ArrayList<HeldExtension>> modifierExtensions = new ArrayList<>(0);
+			ArrayList<ArrayList<String>> comments = new ArrayList<>(0);
+			ArrayList<String> ids = new ArrayList<>(0);
 
 			int valueIdx = 0;
 			for (IBase nextValue : values) {

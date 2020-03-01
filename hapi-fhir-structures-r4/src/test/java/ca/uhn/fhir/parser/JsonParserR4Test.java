@@ -238,14 +238,20 @@ public class JsonParserR4Test extends BaseTest {
 
 		ourLog.info("Encoded: {}", encoded);
 		assertThat(encoded, stringContainsInOrder(
-			"\"fullUrl\" : \"urn:uuid:0.0.0.0\"",
-			"\"id\" : \"1.1.1.1\""
+			"\"fullUrl\": \"urn:uuid:0.0.0.0\"",
+			"\"id\": \"1.1.1.1\""
 		));
 
 		input = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
 		assertEquals("urn:uuid:0.0.0.0", input.getEntry().get(0).getFullUrl());
 		assertEquals("MessageHeader/1.1.1.1", input.getEntry().get(0).getResource().getId());
 
+	}
+
+	@Test
+	public void testParseSingleQuotes() {
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, "{ 'resourceType': 'Bundle', 'id': '123' }");
+		assertEquals("123", bundle.getIdElement().getIdPart());
 	}
 
 
@@ -258,6 +264,18 @@ public class JsonParserR4Test extends BaseTest {
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(false);
 		String output = parser.encodeResourceToString(b);
 		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"application/octet-stream\",\"data\":\"AAECAwQ=\"}", output);
+	}
+
+
+	@Test
+	public void testAlwaysUseUnixNewlines() {
+		Patient p = new Patient();
+		p.setId("1");
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		assertEquals("{\n" +
+			"  \"resourceType\": \"Patient\",\n" +
+			"  \"id\": \"1\"\n" +
+			"}", encoded);
 	}
 
 	@Test

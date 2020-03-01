@@ -6,17 +6,22 @@ import ca.uhn.fhir.parser.json.JsonLikeObject;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import ca.uhn.fhir.parser.json.JsonLikeValue;
 import ca.uhn.fhir.parser.json.JsonLikeWriter;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.DoubleNode;
+import com.fasterxml.jackson.databind.node.DecimalNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.jena.tdb.setup.BuilderStdDB;
 
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.Writer;
+import java.math.BigDecimal;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,16 +33,9 @@ import java.util.stream.StreamSupport;
 
 public class JacksonStructure implements JsonLikeStructure {
 
-	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-	{
-		OBJECT_MAPPER.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
-	}
-
+	private static final ObjectMapper OBJECT_MAPPER = createObjectMapper();
 	private JacksonWriter jacksonWriter;
 	private ROOT_TYPE rootType = null;
-
-	;
 	private JsonNode nativeRoot = null;
 	private JsonNode jsonLikeRoot = null;
 
@@ -105,12 +103,13 @@ public class JacksonStructure implements JsonLikeStructure {
 	@Override
 	public JsonLikeWriter getJsonLikeWriter(Writer writer) throws IOException {
 		if (null == jacksonWriter) {
-			jacksonWriter = new JacksonWriter(writer);
+			jacksonWriter = new JacksonWriter(OBJECT_MAPPER.getFactory(), writer);
 		}
 
 		return jacksonWriter;
 	}
 
+	// FIXME: try removing this - is it needed?
 	@Override
 	public JsonLikeWriter getJsonLikeWriter() {
 		if (null == jacksonWriter) {
@@ -353,8 +352,9 @@ public class JacksonStructure implements JsonLikeStructure {
 		@Override
 		public String getAsString() {
 			if (nativeValue != null) {
-				if (nativeValue instanceof DoubleNode) {
-					return nativeValue.asText();
+				if (nativeValue instanceof DecimalNode) {
+					BigDecimal value = nativeValue.decimalValue();
+					return value.toPlainString();
 				}
 				return nativeValue.asText();
 			}
@@ -368,5 +368,17 @@ public class JacksonStructure implements JsonLikeStructure {
 			}
 			return super.getAsBoolean();
 		}
+	}
+
+	private static ObjectMapper createObjectMapper() {
+		ObjectMapper retVal = new ObjectMapper();
+		retVal = retVal.setNodeFactory(new JsonNodeFactory(true));
+		retVal = retVal.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+		retVal = retVal.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+		retVal = retVal.disable(JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION);
+		retVal = retVal.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
+		retVal = retVal.disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
+		retVal = retVal.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+		return retVal;
 	}
 }

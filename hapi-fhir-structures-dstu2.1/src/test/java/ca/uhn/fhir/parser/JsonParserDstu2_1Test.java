@@ -1518,13 +1518,13 @@ public class JsonParserDstu2_1Test {
 			ourCtx.newJsonParser().parseResource("FOO");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON content, error was: Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
+			assertEquals("Failed to parse JSON encoded FHIR content: Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
 		}
 		try {
 			ourCtx.newJsonParser().parseResource("[\"aaa\"]");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON content, error was: Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
+			assertEquals("Failed to parse JSON encoded FHIR content: Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
 		}
 
 		assertEquals(Bundle.class, ourCtx.newJsonParser().parseResource("  {\"resourceType\" : \"Bundle\"}").getClass());
