@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 
 /**
@@ -62,7 +63,7 @@ public class ResponseValidatingInterceptor extends BaseValidatingInterceptor<IBa
 	}
 
 	@Override
-	ValidationResult doValidate(FhirValidator theValidator, IBaseResource theRequest) {
+	protected ValidationResult doValidate(FhirValidator theValidator, IBaseResource theRequest, ValidationOptions options) {
 		return theValidator.validateWithResult(theRequest);
 	}
 
@@ -80,7 +81,7 @@ public class ResponseValidatingInterceptor extends BaseValidatingInterceptor<IBa
 	}
 
 	@Override
-	String provideDefaultResponseHeaderName() {
+	protected String provideDefaultResponseHeaderName() {
 		return DEFAULT_RESPONSE_HEADER_NAME;
 	}
 
