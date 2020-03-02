@@ -50,8 +50,6 @@ public class CoreValidatorTestUtils {
             }
         }
 
-        System.out.println("");
-
         int finalErrorCount = errorCount;
         int finalWarningCount = warningCount;
         Assertions.assertAll("Error counts and warnings should match test results from manifest.xml file...",
@@ -81,17 +79,14 @@ public class CoreValidatorTestUtils {
      * {@link OperationOutcome} of the result.
      *
      * @param input The {@link IBaseResource} to validate.
-     * @param enc {@link EncodingEnum}
      * @param resourceDao The {@link IFhirResourceDao} to use to validate the passed in {@link IBaseResource}
-     * @param mySrd {@link ServletRequestDetails}
-     * @param myFhirCtx Current {@link FhirContext}
      *
      * @return The resulting {@link OperationOutcome} from validating the resource.
      */
-    public static <T extends IBaseResource> OperationOutcome validate(IBaseResource resource, String input, EncodingEnum enc, IFhirResourceDao resourceDao, ServletRequestDetails mySrd, FhirContext myFhirCtx) {
-
+    public static <T extends IBaseResource> OperationOutcome validate(String input, IFhirResourceDao resourceDao) {
         try {
-            return (OperationOutcome) resourceDao.validate(resource, null, input, EncodingEnum.detectEncoding(input), null, null, null).getOperationOutcome();
+            return (OperationOutcome) resourceDao.validate(null, null, input,
+                    EncodingEnum.detectEncoding(input), null, null, null).getOperationOutcome();
         } catch (PreconditionFailedException e) {
             return (OperationOutcome) e.getOperationOutcome();
         }
