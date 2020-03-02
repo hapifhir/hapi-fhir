@@ -27,20 +27,24 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.converter.NullVersionConverterAdvisor50;
 import org.hl7.fhir.convertors.VersionConvertor_10_50;
+import org.hl7.fhir.convertors.VersionConvertor_30_50;
 import org.hl7.fhir.convertors.conv10_50.ValueSet10_50;
 import org.hl7.fhir.dstu2.model.CodeableConcept;
 import org.hl7.fhir.dstu2.model.Coding;
 import org.hl7.fhir.dstu2.model.Questionnaire;
 import org.hl7.fhir.dstu2.model.StructureDefinition;
 import org.hl7.fhir.dstu2.model.ValueSet;
+import org.hl7.fhir.dstu3.hapi.validation.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.formats.IParser;
 import org.hl7.fhir.r5.formats.ParserType;
 import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.INarrativeGenerator;
@@ -63,13 +67,13 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.convertors.VersionConvertor_10_50.convertCoding;
 import static org.hl7.fhir.convertors.conv10_50.StructureDefinition10_50.convertStructureDefinition;
 import static org.hl7.fhir.convertors.conv10_50.ValueSet10_50.convertConceptSetComponent;
@@ -88,7 +92,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private final IContextValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
 	private boolean assumeValidRestReferences;
-	private volatile WorkerContextWrapper myWrappedWorkerContext;
+	private volatile VersionSpecificWorkerContextWrapper myWrappedWorkerContext;
 	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
 	/**
 	 * Constructor
@@ -287,10 +291,20 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	protected List<ValidationMessage> validate(final FhirContext theCtx, String theInput, EncodingEnum theEncoding) {
 
-		WorkerContextWrapper wrappedWorkerContext = myWrappedWorkerContext;
+		VersionSpecificWorkerContextWrapper wrappedWorkerContext = myWrappedWorkerContext;
 		if (wrappedWorkerContext == null) {
-			HapiWorkerContext workerContext = new HapiWorkerContext(theCtx, myValidationSupport);
-			wrappedWorkerContext = new WorkerContextWrapper(workerContext);
+			VersionSpecificWorkerContextWrapper.IVersionTypeConverter converter = new VersionSpecificWorkerContextWrapper.IVersionTypeConverter() {
+				@Override
+				public Resource toCanonical(IBaseResource theNonCanonical) {
+					return VersionConvertor_10_50.convertResource((org.hl7.fhir.dstu2.model.Resource)theNonCanonical);
+				}
+
+				@Override
+				public IBaseResource fromCanonical(Resource theCanonical) {
+					return VersionConvertor_10_50.convertResource(theCanonical);
+				}
+			};
+			wrappedWorkerContext = new VersionSpecificWorkerContextWrapper(myValidationSupport, converter);
 		}
 		myWrappedWorkerContext = wrappedWorkerContext;
 
@@ -416,521 +430,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		return validate(theCtx.getFhirContext(), theCtx.getResourceAsString(), theCtx.getResourceAsStringEncoding());
 	}
 
-	private class WorkerContextWrapper implements IWorkerContext {
-		private final HapiWorkerContext myWrap;
-		private final VersionConvertor_10_50 myConverter;
-		private volatile List<org.hl7.fhir.r5.model.StructureDefinition> myAllStructures;
-		private LoadingCache<ResourceKey, org.hl7.fhir.r5.model.Resource> myFetchResourceCache
-			= Caffeine.newBuilder()
-			.expireAfterWrite(10, TimeUnit.SECONDS)
-			.maximumSize(10000)
-			.build(new CacheLoader<ResourceKey, org.hl7.fhir.r5.model.Resource>() {
-				@Override
-				public org.hl7.fhir.r5.model.Resource load(FhirInstanceValidator.ResourceKey key) throws Exception {
-					org.hl7.fhir.dstu2.model.Resource fetched;
-					switch (key.getResourceName()) {
-						case "StructureDefinition":
-							fetched = myWrap.fetchResource(StructureDefinition.class, key.getUri());
-							break;
-						case "CodeSystem":
-						case "ValueSet":
-							fetched = myWrap.fetchResource(ValueSet.class, key.getUri());
-
-							ValueSet fetchedVs = (ValueSet) fetched;
-							if (!fetchedVs.hasCompose()) {
-								if (fetchedVs.hasCodeSystem()) {
-									fetchedVs.getCompose().addInclude().setSystem(fetchedVs.getCodeSystem().getSystem());
-								}
-							}
-
-							break;
-						case "Questionnaire":
-							fetched = myWrap.fetchResource(Questionnaire.class, key.getUri());
-							break;
-						default:
-							throw new UnsupportedOperationException("Don't know how to fetch " + key.getResourceName());
-					}
-
-					if (fetched == null) {
-						if (key.getUri().equals("http://hl7.org/fhir/StructureDefinition/xhtml")) {
-							return null;
-						}
-					}
-
-					try {
-						org.hl7.fhir.r5.model.Resource converted;
-						if ("CodeSystem".equals(key.getUri())) {
-							NullVersionConverterAdvisor50 advisor = new NullVersionConverterAdvisor50();
-							converted = ValueSet10_50.convertValueSet((ValueSet) fetched, advisor);
-							converted = advisor.getCodeSystem((org.hl7.fhir.r5.model.ValueSet) converted);
-						} else {
-							converted = VersionConvertor_10_50.convertResource(fetched);
-						}
-
-
-						if (fetched instanceof StructureDefinition) {
-							StructureDefinition fetchedSd = (StructureDefinition) fetched;
-							StructureDefinition.StructureDefinitionKind kind = fetchedSd.getKind();
-							if (kind == StructureDefinition.StructureDefinitionKind.DATATYPE) {
-								BaseRuntimeElementDefinition<?> element = FHIR_CONTEXT.getElementDefinition(fetchedSd.getName());
-								if (element instanceof RuntimePrimitiveDatatypeDefinition) {
-									org.hl7.fhir.r5.model.StructureDefinition convertedSd = (org.hl7.fhir.r5.model.StructureDefinition) converted;
-									convertedSd.setKind(org.hl7.fhir.r5.model.StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE);
-								}
-							}
-						}
-
-						return converted;
-					} catch (FHIRException e) {
-						throw new InternalErrorException(e);
-					}
-				}
-			});
-		private Parameters myExpansionProfile;
-
-		public WorkerContextWrapper(HapiWorkerContext theWorkerContext) {
-			myWrap = theWorkerContext;
-			myConverter = new VersionConvertor_10_50();
-		}
-
-		@Override
-		public List<CanonicalResource> allConformanceResources() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void generateSnapshot(org.hl7.fhir.r5.model.StructureDefinition p) throws FHIRException {
-
-		}
-
-		@Override
-		public void generateSnapshot(org.hl7.fhir.r5.model.StructureDefinition theStructureDefinition, boolean theB) {
-
-		}
-
-		@Override
-		public String getLinkForUrl(String corePath, String url) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public Map<String, byte[]> getBinaries() {
-			return null;
-		}
-
-		@Override
-		public Parameters getExpansionParameters() {
-			return myExpansionProfile;
-		}
-
-		@Override
-		public void setExpansionProfile(Parameters expParameters) {
-			myExpansionProfile = expParameters;
-		}
-
-		@Override
-		public List<org.hl7.fhir.r5.model.StructureDefinition> allStructures() {
-
-			List<org.hl7.fhir.r5.model.StructureDefinition> retVal = myAllStructures;
-			if (retVal == null) {
-				retVal = new ArrayList<>();
-				for (StructureDefinition next : myWrap.allStructures()) {
-					try {
-						org.hl7.fhir.r5.model.StructureDefinition converted = convertStructureDefinition(next);
-						if (converted != null) {
-							retVal.add(converted);
-						}
-					} catch (FHIRException e) {
-						throw new InternalErrorException(e);
-					}
-				}
-				myAllStructures = retVal;
-			}
-
-			return retVal;
-		}
-
-		@Override
-		public List<org.hl7.fhir.r5.model.StructureDefinition> getStructures() {
-			return allStructures();
-		}
-
-		@Override
-		public void cacheResource(org.hl7.fhir.r5.model.Resource res) throws FHIRException {
-			throw new UnsupportedOperationException();
-		}
-
-		private ValidationResult convertValidationResult(org.hl7.fhir.dstu2.utils.IWorkerContext.ValidationResult theResult) {
-			IssueSeverity issueSeverity = theResult.getSeverity();
-			String message = theResult.getMessage();
-			org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent conceptDefinition = null;
-			if (theResult.asConceptDefinition() != null) {
-				conceptDefinition = convertConceptDefinition(theResult.asConceptDefinition());
-			}
-
-			ValidationResult retVal = new ValidationResult(issueSeverity, message, conceptDefinition);
-			return retVal;
-		}
-
-		@Override
-		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ValueSet source, boolean cacheOk, boolean Hierarchical) {
-			ValueSet convertedSource = null;
-			try {
-				convertedSource = convertValueSet(source);
-			} catch (FHIRException e) {
-				throw new InternalErrorException(e);
-			}
-			org.hl7.fhir.dstu2.terminologies.ValueSetExpander.ValueSetExpansionOutcome expanded = myWrap.expandVS(convertedSource, cacheOk);
-
-			org.hl7.fhir.r5.model.ValueSet convertedResult = null;
-			if (expanded.getValueset() != null) {
-				try {
-					convertedResult = convertValueSet(expanded.getValueset());
-				} catch (FHIRException e) {
-					throw new InternalErrorException(e);
-				}
-			}
-
-			String error = expanded.getError();
-			ValueSetExpander.TerminologyServiceErrorClass result = null;
-
-			return new ValueSetExpander.ValueSetExpansionOutcome(convertedResult, error, result);
-		}
-
-		@Override
-		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent binding, boolean cacheOk, boolean Hierarchical) throws FHIRException {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent inc, boolean heirarchical) throws TerminologyServiceException {
-			ValueSet.ConceptSetComponent convertedInc = null;
-			if (inc != null) {
-				try {
-					convertedInc = convertConceptSetComponent(inc);
-				} catch (FHIRException e) {
-					throw new InternalErrorException(e);
-				}
-			}
-
-			ValueSet.ValueSetExpansionComponent expansion = myWrap.expandVS(convertedInc);
-			org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent valueSetExpansionComponent = null;
-			if (expansion != null) {
-				try {
-					valueSetExpansionComponent = convertValueSetExpansionComponent(expansion);
-				} catch (FHIRException e) {
-					throw new InternalErrorException(e);
-				}
-			}
-
-			ValueSetExpander.ValueSetExpansionOutcome outcome = new ValueSetExpander.ValueSetExpansionOutcome(new org.hl7.fhir.r5.model.ValueSet());
-			outcome.getValueset().setExpansion(valueSetExpansionComponent);
-			return outcome;
-		}
-
-		@Override
-		public org.hl7.fhir.r5.model.CodeSystem fetchCodeSystem(String system) {
-			ValueSet fetched = myWrap.fetchCodeSystem(system);
-			if (fetched == null) {
-				return null;
-			}
-
-			return convertCodeSystem(fetched);
-		}
-
-		@Override
-		public <T extends org.hl7.fhir.r5.model.Resource> T fetchResource(Class<T> class_, String uri) {
-
-			ResourceKey key = new ResourceKey(class_.getSimpleName(), uri);
-			@SuppressWarnings("unchecked")
-			T retVal = (T) myFetchResourceCache.get(key);
-
-			return retVal;
-		}
-
-		@Override
-		public org.hl7.fhir.r5.model.Resource fetchResourceById(String type, String uri) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public <T extends org.hl7.fhir.r5.model.Resource> T fetchResourceWithException(Class<T> class_, String uri) throws FHIRException {
-			T retVal = fetchResource(class_, uri);
-			if (retVal == null) {
-				throw new FHIRException("Can not find resource of type " + class_.getSimpleName() + " with uri " + uri);
-			}
-			return retVal;
-		}
-
-		@Override
-		public List<org.hl7.fhir.r5.model.ConceptMap> findMapsForSource(String url) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public String getAbbreviation(String name) {
-			return myWrap.getAbbreviation(name);
-		}
-
-		public VersionConvertor_10_50 getConverter() {
-			return myConverter;
-		}
-
-
-		@Override
-		public INarrativeGenerator getNarrativeGenerator(String prefix, String basePath) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public IParser getParser(ParserType type) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public IParser getParser(String type) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public List<String> getResourceNames() {
-			return myWrap.getResourceNames();
-		}
-
-		@Override
-		public Set<String> getResourceNamesAsSet() {
-			return new HashSet<>(myWrap.getResourceNames());
-		}
-
-		@Override
-		public org.hl7.fhir.r5.model.StructureMap getTransform(String url) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public String getOverrideVersionNs() {
-			return null;
-		}
-
-		@Override
-		public void setOverrideVersionNs(String value) {
-
-		}
-
-		@Override
-		public org.hl7.fhir.r5.model.StructureDefinition fetchTypeDefinition(String typeName) {
-			return fetchResource(org.hl7.fhir.r5.model.StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
-		}
-
-		@Override
-		public org.hl7.fhir.r5.model.StructureDefinition fetchRawProfile(String url) {
-			return fetchResource(org.hl7.fhir.r5.model.StructureDefinition.class, url);
-		}
-
-		@Override
-		public List<String> getTypeNames() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public String getVersion() {
-			return FhirVersionEnum.DSTU2.getFhirVersionString();
-		}
-
-		@Override
-		public UcumService getUcumService() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setUcumService(UcumService ucumService) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean hasCache() {
-			return false;
-		}
-
-		@Override
-		public <T extends org.hl7.fhir.r5.model.Resource> boolean hasResource(Class<T> class_, String uri) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean isNoTerminologyServer() {
-			return true;
-		}
-
-		@Override
-		public List<org.hl7.fhir.r5.model.StructureMap> listTransforms() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public IParser newJsonParser() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public IResourceValidator newValidator() throws FHIRException {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public IParser newXmlParser() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public String oid2Uri(String code) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public ILoggingService getLogger() {
-			return null;
-		}
-
-		@Override
-		public void setLogger(ILoggingService logger) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean supportsSystem(String system) throws TerminologyServiceException {
-			return myWrap.supportsSystem(system);
-		}
-
-		@Override
-		public TranslationServices translator() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public ValidationResult validateCode(ValidationOptions theOptions, String system, String code, String display) {
-			org.hl7.fhir.dstu2.utils.IWorkerContext.ValidationResult result = myWrap.validateCode(system, code, display);
-			return convertValidationResult(result);
-		}
-
-		@Override
-		public ValidationResult validateCode(ValidationOptions theOptions, String system, String code, String display, org.hl7.fhir.r5.model.ValueSet vs) {
-			ValueSet convertedVs = null;
-
-			try {
-				if (vs != null) {
-					convertedVs = convertValueSet(vs);
-				}
-			} catch (FHIRException e) {
-				throw new InternalErrorException(e);
-			}
-
-			org.hl7.fhir.dstu2.utils.IWorkerContext.ValidationResult result = myWrap.validateCode(system, code, display, convertedVs);
-			return convertValidationResult(result);
-		}
-
-		@Override
-		public ValidationResult validateCode(ValidationOptions theOptions, String code, org.hl7.fhir.r5.model.ValueSet vs) {
-			ValueSet convertedVs = null;
-			try {
-				if (vs != null) {
-					convertedVs = convertValueSet(vs);
-				}
-			} catch (FHIRException e) {
-				throw new InternalErrorException(e);
-			}
-
-			org.hl7.fhir.dstu2.utils.IWorkerContext.ValidationResult result = myWrap.validateCode(Constants.CODESYSTEM_VALIDATE_NOT_NEEDED, code, null, convertedVs);
-			return convertValidationResult(result);
-		}
-
-		@Override
-		public ValidationResult validateCode(ValidationOptions theOptions, org.hl7.fhir.r5.model.Coding code, org.hl7.fhir.r5.model.ValueSet vs) {
-			Coding convertedCode = null;
-			ValueSet convertedVs = null;
-
-			try {
-				if (code != null) {
-					convertedCode = convertCoding(code);
-				}
-				if (vs != null) {
-					convertedVs = convertValueSet(vs);
-				}
-			} catch (FHIRException e) {
-				throw new InternalErrorException(e);
-			}
-
-			org.hl7.fhir.dstu2.utils.IWorkerContext.ValidationResult result = myWrap.validateCode(convertedCode, convertedVs);
-			return convertValidationResult(result);
-		}
-
-		@Override
-		public ValidationResult validateCode(ValidationOptions theOptions, org.hl7.fhir.r5.model.CodeableConcept code, org.hl7.fhir.r5.model.ValueSet vs) {
-			CodeableConcept convertedCode = null;
-			ValueSet convertedVs = null;
-
-			try {
-				if (code != null) {
-					convertedCode = VersionConvertor_10_50.convertCodeableConcept(code);
-				}
-				if (vs != null) {
-					convertedVs = convertValueSet(vs);
-				}
-			} catch (FHIRException e) {
-				throw new InternalErrorException(e);
-			}
-
-			org.hl7.fhir.dstu2.utils.IWorkerContext.ValidationResult result = myWrap.validateCode(convertedCode, convertedVs);
-			return convertValidationResult(result);
-		}
-
-	}
-
-	private static class ResourceKey {
-		private final int myHashCode;
-		private String myResourceName;
-		private String myUri;
-
-		private ResourceKey(String theResourceName, String theUri) {
-			myResourceName = theResourceName;
-			myUri = theUri;
-			myHashCode = new HashCodeBuilder(17, 37)
-				.append(myResourceName)
-				.append(myUri)
-				.toHashCode();
-		}
-
-		@Override
-		public boolean equals(Object theO) {
-			if (this == theO) {
-				return true;
-			}
-
-			if (theO == null || getClass() != theO.getClass()) {
-				return false;
-			}
-
-			ResourceKey that = (ResourceKey) theO;
-
-			return new EqualsBuilder()
-				.append(myResourceName, that.myResourceName)
-				.append(myUri, that.myUri)
-				.isEquals();
-		}
-
-		public String getResourceName() {
-			return myResourceName;
-		}
-
-		public String getUri() {
-			return myUri;
-		}
-
-		@Override
-		public int hashCode() {
-			return myHashCode;
-		}
-	}
 
 	static FhirContext getHl7OrgDstu2Ctx(FhirContext theCtx) {
 		if (theCtx.getVersion().getVersion() == FhirVersionEnum.DSTU2_HL7ORG) {

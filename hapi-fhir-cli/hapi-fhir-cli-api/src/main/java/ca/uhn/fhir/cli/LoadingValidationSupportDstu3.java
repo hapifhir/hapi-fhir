@@ -52,4 +52,9 @@ public class LoadingValidationSupportDstu3 implements IValidationSupport {
 		return result;
 	}
 
+	@Override
+	public FhirContext getFhirContext() {
+		return myCtx;
+	}
+
 }

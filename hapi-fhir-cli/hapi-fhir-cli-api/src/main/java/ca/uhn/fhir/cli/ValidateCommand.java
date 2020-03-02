@@ -37,11 +37,10 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.fusesource.jansi.Ansi.Color;
-import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.File;
@@ -157,8 +156,6 @@ public class ValidateCommand extends BaseCommand {
 		if (theCommandLine.hasOption("p")) {
 			switch (ctx.getVersion().getVersion()) {
 				case DSTU2: {
-					org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator instanceValidator = new org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator(ctx);
-					val.registerValidatorModule(instanceValidator);
 					ValidationSupportChain validationSupport = new ValidationSupportChain(
 						new DefaultProfileValidationSupport(ctx));
 					if (igPack != null) {
@@ -169,14 +166,13 @@ public class ValidateCommand extends BaseCommand {
 						validationSupport.addValidationSupport(igValidationSupport);
 					}
 
-					if (localProfileResource != null) {
-						org.hl7.fhir.dstu2.model.StructureDefinition convertedSd = FhirContext.forDstu2Hl7Org().newXmlParser().parseResource(org.hl7.fhir.dstu2.model.StructureDefinition.class, ctx.newXmlParser().encodeResourceToString(localProfileResource));
-						instanceValidator.setStructureDefintion(convertedSd);
-					}
 					if (theCommandLine.hasOption("r")) {
 						validationSupport.addValidationSupport(new LoadingValidationSupportDstu2());
 					}
-					instanceValidator.setValidationSupport(validationSupport);
+					org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator instanceValidator;
+					instanceValidator = new org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator(validationSupport);
+					val.registerValidatorModule(instanceValidator);
+
 					break;
 				}
 				case DSTU3: {
@@ -189,9 +185,6 @@ public class ValidateCommand extends BaseCommand {
 						validationSupport.addValidationSupport(igValidationSupport);
 					}
 
-					if (localProfileResource != null) {
-						instanceValidator.setStructureDefintion((StructureDefinition) localProfileResource);
-					}
 					if (theCommandLine.hasOption("r")) {
 						validationSupport.addValidationSupport(new LoadingValidationSupportDstu3());
 					}

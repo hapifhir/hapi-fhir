@@ -39,7 +39,7 @@ public class IgPackParserDstu3 extends BaseIgPackParser<IValidationSupport> {
 
 	@Override
 	protected IValidationSupport createValidationSupport(Map<IIdType, IBaseResource> theIgResources) {
-		return new IgPackValidationSupportDstu3(theIgResources);
+		return new IgPackValidationSupportDstu3(getCtx(), theIgResources);
 	}
 
 	@Override

@@ -1,11 +1,11 @@
 package org.hl7.fhir.common.hapi.validation;
 
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.ValidationOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,15 +63,15 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(String theSystem) {
+	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
 		String key = "isCodeSystemSupported " + theSystem;
-		Boolean retVal = loadFromCache(myCache, key, t -> super.isCodeSystemSupported(theSystem));
+		Boolean retVal = loadFromCache(myCache, key, t -> super.isCodeSystemSupported(theRootValidationSupport, theSystem));
 		assert retVal != null;
 		return retVal;
 	}
 
 	@Override
-	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		String key = "validateCode " + theCodeSystem + " " + theCode + " " + defaultIfBlank(theValueSetUrl, "NO_VS");
 		return loadFromCache(myValidateCodeCache, key, t -> super.validateCode(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl));
 	}

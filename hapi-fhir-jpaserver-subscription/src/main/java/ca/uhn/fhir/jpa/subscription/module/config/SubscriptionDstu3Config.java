@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.subscription.module.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamDstu3Config;
-import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;

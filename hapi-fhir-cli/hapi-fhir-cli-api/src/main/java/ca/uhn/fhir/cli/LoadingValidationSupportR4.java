@@ -49,5 +49,10 @@ public class LoadingValidationSupportR4 implements org.hl7.fhir.r4.hapi.ctx.IVal
 		return result;
 	}
 
+	@Override
+	public FhirContext getFhirContext() {
+		return myCtx;
+	}
+
 
 }

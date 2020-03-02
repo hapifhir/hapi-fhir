@@ -20,6 +20,8 @@ package ca.uhn.fhir.igpacks.parser;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.hl7.fhir.dstu2.model.ConceptMap;
 import org.hl7.fhir.dstu2.model.StructureDefinition;
 import org.hl7.fhir.dstu2.model.ValueSet;
@@ -31,8 +33,10 @@ import java.util.Map;
 
 public class IgPackValidationSupportDstu2 implements IValidationSupport {
 	private final Map<IIdType, IBaseResource> myIgResources;
+	private FhirContext myCtx;
 
-	public IgPackValidationSupportDstu2(Map<IIdType, IBaseResource> theIgResources) {
+	public IgPackValidationSupportDstu2(FhirContext theCtx, Map<IIdType, IBaseResource> theIgResources) {
+		myCtx = theCtx;
 		myIgResources = theIgResources;
 	}
 
@@ -72,8 +76,13 @@ public class IgPackValidationSupportDstu2 implements IValidationSupport {
 
 
 	@Override
-	public boolean isCodeSystemSupported(String theSystem) {
+	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
 		return false;
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myCtx;
 	}
 
 }

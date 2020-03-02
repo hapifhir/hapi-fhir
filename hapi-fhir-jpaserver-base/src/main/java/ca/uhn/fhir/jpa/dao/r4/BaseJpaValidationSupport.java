@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -36,7 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 
-public abstract class BaseJpaValidationSupport {
+public abstract class BaseJpaValidationSupport implements IContextValidationSupport {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseJpaValidationSupport.class);
 
@@ -50,6 +51,7 @@ public abstract class BaseJpaValidationSupport {
 	private IFhirResourceDao<?> myCodeSystemDao;
 	private IFhirResourceDao<?> myImplementationGuideDao;
 
+	@Override
 	@SuppressWarnings({"unchecked", "unused"})
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
 		IdType id = new IdType(theUri);
@@ -123,6 +125,11 @@ public abstract class BaseJpaValidationSupport {
 		}
 
 		return (T) search.getResources(0, 1).get(0);
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myR4Ctx;
 	}
 
 	@PostConstruct

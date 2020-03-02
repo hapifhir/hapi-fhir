@@ -1,10 +1,10 @@
 package org.hl7.fhir.common.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.ValidationOptions;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -41,12 +41,12 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(String theSystem) {
-		return myWrap.isCodeSystemSupported(theSystem);
+	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
+		return myWrap.isCodeSystemSupported(myWrap, theSystem);
 	}
 
 	@Override
-	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return myWrap.validateCode(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 	}
 
@@ -56,8 +56,8 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 	}
 
 	@Override
-	public boolean isValueSetSupported(String theValueSetUrl) {
-		return myWrap.isValueSetSupported(theValueSetUrl);
+	public boolean isValueSetSupported(IContextValidationSupport theRootValidationSupport, String theValueSetUrl) {
+		return myWrap.isValueSetSupported(myWrap, theValueSetUrl);
 	}
 
 	@Override
@@ -87,8 +87,8 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 	}
 
 	@Override
-	public IContextValidationSupport.CodeValidationResult validateCodeInValueSet(String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-		return myWrap.validateCodeInValueSet(theCodeSystem, theCode, theDisplay, theValueSet);
+	public IContextValidationSupport.CodeValidationResult validateCodeInValueSet(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theValidationOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+		return myWrap.validateCodeInValueSet(theRootValidationSupport, theValidationOptions, theCodeSystem, theCode, theDisplay, theValueSet);
 	}
 
 

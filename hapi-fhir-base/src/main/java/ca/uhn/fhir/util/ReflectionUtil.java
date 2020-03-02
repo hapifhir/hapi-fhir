@@ -21,8 +21,6 @@ package ca.uhn.fhir.util;
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.apache.commons.lang3.Validate;
 
 import java.lang.reflect.Constructor;
@@ -42,16 +40,16 @@ public class ReflectionUtil {
 	private static final ConcurrentHashMap<String, Object> ourFhirServerVersions = new ConcurrentHashMap<>();
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReflectionUtil.class);
+	public static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
+	public static final Class<?>[] EMPTY_CLASS_ARRAY = new Class[0];
 
 	public static LinkedHashSet<Method> getDeclaredMethods(Class<?> theClazz) {
-		LinkedHashSet<Method> retVal = new LinkedHashSet<Method>();
+		LinkedHashSet<Method> retVal = new LinkedHashSet<>();
 		for (Method next : theClazz.getDeclaredMethods()) {
 			try {
 				Method method = theClazz.getMethod(next.getName(), next.getParameterTypes());
 				retVal.add(method);
-			} catch (NoSuchMethodException e) {
-				retVal.add(next);
-			} catch (SecurityException e) {
+			} catch (NoSuchMethodException | SecurityException e) {
 				retVal.add(next);
 			}
 		}
@@ -151,14 +149,6 @@ public class ReflectionUtil {
 		return newInstanceOfType(theType, theType, errorMessage, wantedType, new Class[0], new Object[0]);
 	}
 
-	@SuppressWarnings("unchecked")
-	public static ca.uhn.fhir.context.support.IContextValidationSupport newInstanceOfFhirProfileValidationSupport(String theType, FhirContext theContext) {
-		String errorMessage = "Unable to instantiate validation support! Please make sure that hapi-fhir-validation and the appropriate structures JAR are on your classpath!";
-		String wantedType = "ca.uhn.fhir.context.support.IContextValidationSupport";
-		Object fhirServerVersion = newInstanceOfType(wantedType + theContext.getVersion().getVersion().name(), theType, errorMessage, wantedType, new Class[]{FhirContext.class}, new Object[]{theContext});
-		return (IContextValidationSupport) fhirServerVersion;
-	}
-
 	private static Object newInstanceOfType(String theKey, String theType, String errorMessage, String wantedType, Class<?>[] theParameterArgTypes, Object[] theConstructorArgs) {
 		Object fhirServerVersion = ourFhirServerVersions.get(theKey);
 		if (fhirServerVersion == null) {
@@ -176,14 +166,18 @@ public class ReflectionUtil {
 		return fhirServerVersion;
 	}
 
-	@SuppressWarnings("unchecked")
 	public static <T> T newInstanceOrReturnNull(String theClassName, Class<T> theType) {
+		return newInstanceOrReturnNull(theClassName, theType, EMPTY_CLASS_ARRAY, EMPTY_OBJECT_ARRAY);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T newInstanceOrReturnNull(String theClassName, Class<T> theType, Class<?>[] theArgTypes, Object[] theArgs) {
 		try {
 			Class<?> clazz = Class.forName(theClassName);
 			if (!theType.isAssignableFrom(clazz)) {
 				throw new ConfigurationException(theClassName + " is not assignable to " + theType);
 			}
-			return (T) clazz.newInstance();
+			return (T) clazz.getConstructor(theArgTypes).newInstance(theArgs);
 		} catch (ConfigurationException e) {
 			throw e;
 		} catch (Exception e) {
@@ -192,4 +186,12 @@ public class ReflectionUtil {
 		}
 	}
 
+	public static boolean typeExists(String theName) {
+		try {
+			Class.forName(theName);
+			return true;
+		} catch (ClassNotFoundException theE) {
+			return false;
+		}
+	}
 }

@@ -1,6 +1,7 @@
 package org.hl7.fhir.dstu3.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -24,7 +25,6 @@ import org.hl7.fhir.dstu3.utils.INarrativeGenerator;
 import org.hl7.fhir.dstu3.utils.IResourceValidator;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
-import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.slf4j.Logger;
@@ -269,7 +269,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     if (myValidationSupport == null) {
       return false;
     } else {
-      return myValidationSupport.isCodeSystemSupported(theSystem);
+      return myValidationSupport.isCodeSystemSupported(myValidationSupport, theSystem);
     }
   }
 
@@ -303,7 +303,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   @Override
   public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
     ValidationOptions options = new ValidationOptions();
-    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, options, theSystem, theCode, theDisplay, null);
+    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(options), theSystem, theCode, theDisplay, null);
     if (result == null) {
       return null;
     }
@@ -314,6 +314,14 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     }
     ConceptDefinitionComponent definition = new ConceptDefinitionComponent().setCode(result.getCode());
     return new ValidationResult(severity, result.getMessage(), definition);
+  }
+
+  public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {
+    ConceptValidationOptions retVal = new ConceptValidationOptions();
+    if (theOptions.isGuessSystem()) {
+      retVal = retVal.setInferSystem(true);
+    }
+    return retVal;
   }
 
   @Override
@@ -347,9 +355,9 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     IValidationSupport.CodeValidationResult outcome;
     ValidationOptions options = new ValidationOptions();
     if (isNotBlank(theVs.getUrl())) {
-      outcome = myValidationSupport.validateCode(myValidationSupport, options, theSystem, theCode, theDisplay, theVs.getUrl());
+      outcome = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(options), theSystem, theCode, theDisplay, theVs.getUrl());
     } else {
-      outcome = myValidationSupport.validateCodeInValueSet(myValidationSupport, options, theSystem, theCode, theDisplay, theVs);
+      outcome = myValidationSupport.validateCodeInValueSet(myValidationSupport, convertConceptValidationOptions(options), theSystem, theCode, theDisplay, theVs);
     }
 
     if (outcome != null && outcome.isOk()) {

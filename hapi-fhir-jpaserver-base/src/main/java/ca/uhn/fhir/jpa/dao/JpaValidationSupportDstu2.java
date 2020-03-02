@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -108,8 +109,13 @@ public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
-	public boolean isCodeSystemSupported(String theSystem) {
+	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
 		return false;
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myDstu2Ctx;
 	}
 
 }

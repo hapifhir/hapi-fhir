@@ -1,9 +1,8 @@
-package org.hl7.fhir.common.hapi.validation;
+package ca.uhn.fhir.context.support;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,11 +24,12 @@ import java.util.Optional;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class DefaultProfileValidationSupport extends BaseStaticResourceValidationSupport implements IContextValidationSupport {
+public class DefaultProfileValidationSupport implements IContextValidationSupport {
 
 	private static final String URL_PREFIX_STRUCTURE_DEFINITION = "http://hl7.org/fhir/StructureDefinition/";
 	private static final String URL_PREFIX_STRUCTURE_DEFINITION_BASE = "http://hl7.org/fhir/";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultProfileValidationSupport.class);
+	private final FhirContext myCtx;
 
 	private Map<String, IBaseResource> myCodeSystems;
 	private Map<String, IBaseResource> myStructureDefinitions;
@@ -42,7 +43,7 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 	 * @param theFhirContext The context to use
 	 */
 	public DefaultProfileValidationSupport(FhirContext theFhirContext) {
-		super(theFhirContext);
+		myCtx = theFhirContext;
 	}
 
 
@@ -181,30 +182,8 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(String theSystem) {
-		if (isBlank(theSystem) || Constants.codeSystemNotNeeded(theSystem)) {
-			return false;
-		}
-
-		IBaseResource cs = fetchCodeSystem(theSystem);
-
-		if (!myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU2_1)) {
-			return cs != null;
-		}
-
-		if (cs != null) {
-			IPrimitiveType<?> content = getFhirContext().newTerser().getSingleValueOrNull(cs, "content", IPrimitiveType.class);
-			if (!"not-present".equals(content.getValueAsString())) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	@Override
-	public boolean isValueSetSupported(String theValueSetUrl) {
-		return isNotBlank(theValueSetUrl) && fetchValueSet(theValueSetUrl) != null;
+	public FhirContext getFhirContext() {
+		return myCtx;
 	}
 
 	private Map<String, IBaseResource> provideStructureDefinitionMap() {
@@ -334,6 +313,11 @@ public class DefaultProfileValidationSupport extends BaseStaticResourceValidatio
 		Class<? extends IBaseResource> bundleType = getFhirContext().getResourceDefinition("Bundle").getImplementingClass();
 		IBaseBundle bundle = (IBaseBundle) getFhirContext().newXmlParser().parseResource(bundleType, theReader);
 		return BundleUtil.toListOfResources(getFhirContext(), bundle);
+	}
+
+	static <T extends IBaseResource> List<T> toList(Map<String, IBaseResource> theMap) {
+		ArrayList<IBaseResource> retVal = new ArrayList<>(theMap.values());
+		return (List<T>) Collections.unmodifiableList(retVal);
 	}
 
 }

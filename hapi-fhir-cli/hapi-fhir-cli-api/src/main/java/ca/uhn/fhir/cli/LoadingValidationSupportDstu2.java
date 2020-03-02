@@ -21,6 +21,7 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -53,8 +54,13 @@ public class LoadingValidationSupportDstu2 implements IValidationSupport {
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(String theSystem) {
+	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
 		return false;
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myCtx;
 	}
 
 }

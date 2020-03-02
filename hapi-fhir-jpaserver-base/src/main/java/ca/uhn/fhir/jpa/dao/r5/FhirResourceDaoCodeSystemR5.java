@@ -106,7 +106,7 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 
 		ourLog.info("Looking up {} / {}", system, code);
 
-		if (myValidationSupport.isCodeSystemSupported(system)) {
+		if (myValidationSupport.isCodeSystemSupported(, system)) {
 
 			ourLog.info("Code system {} is supported", system);
 			IContextValidationSupport.LookupCodeResult retVal = myValidationSupport.lookupCode(myValidationSupport, system, code);

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
@@ -11,10 +13,13 @@ import ca.uhn.fhir.util.VersionIndependentConcept;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.utilities.ValidationOptions;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -128,7 +133,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	@Override
 	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = myValidationSupport.fetchCodeSystem(theSystem);
+		CodeSystem system = (CodeSystem) myValidationSupport.fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
 		}
@@ -153,7 +158,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	@Override
 	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = myValidationSupport.fetchCodeSystem(theSystem);
+		CodeSystem system = (CodeSystem) myValidationSupport.fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}
@@ -162,7 +167,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 
 	@Override
 	public CodeSystem getCodeSystemFromContext(String theSystem) {
-		return myValidationSupport.fetchCodeSystem(theSystem);
+		return (CodeSystem) myValidationSupport.fetchCodeSystem(theSystem);
 	}
 
 	@Override
@@ -171,13 +176,18 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(String theSystem) {
+	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
 		return supportsSystem(theSystem);
 	}
 
 	@Override
-	public boolean isValueSetSupported(String theValueSetUrl) {
+	public boolean isValueSetSupported(IContextValidationSupport theRootValidationSupport, String theValueSetUrl) {
 		return myValidationSupport.fetchResource(ValueSet.class, theValueSetUrl) != null;
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myContext;
 	}
 
 
@@ -188,12 +198,12 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 
 	@CoverageIgnore
 	@Override
-	public IValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public IValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		Optional<VersionIndependentConcept> codeOpt = Optional.empty();
 		boolean haveValidated = false;
 
 		if (isNotBlank(theValueSetUrl)) {
-			codeOpt = super.validateCodeInValueSet(theValueSetUrl, theCodeSystem, theCode);
+			codeOpt = super.validateCodeInValueSet(theOptions, theValueSetUrl, theCodeSystem, theCode);
 			haveValidated = true;
 		}
 
@@ -205,26 +215,27 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 
 		if (codeOpt != null && codeOpt.isPresent()) {
 			VersionIndependentConcept code = codeOpt.get();
-				ConceptDefinitionComponent def = new ConceptDefinitionComponent();
-				def.setCode(code.getCode());
-				IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult(def);
+				IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult()
+					.setCode(code.getCode());
 				return retVal;
 			}
 
-			return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR.toCode(), "Unknown code {" + theCodeSystem + "}" + theCode);
+			return new IValidationSupport.CodeValidationResult()
+		.setSeverity(IssueSeverity.ERROR.toCode())
+		.setMessage("Unknown code {" + theCodeSystem + "}" + theCode);
 	}
 
 	@Override
 	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, String theSystem, String theCode) {
-		return super.lookupCode(theContext, theSystem, theCode);
+		return super.lookupCode(theSystem, theCode);
 	}
 
 	@Override
-	public ValidateCodeResult validateCodeIsInPreExpandedValueSet(IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
+	public ValidateCodeResult validateCodeIsInPreExpandedValueSet(ValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 		ValueSet valueSet = (ValueSet) theValueSet;
 		Coding coding = (Coding) theCoding;
 		CodeableConcept codeableConcept = (CodeableConcept) theCodeableConcept;
-		return super.validateCodeIsInPreExpandedValueSet(valueSet, theSystem, theCode, theDisplay, coding, codeableConcept);
+		return super.validateCodeIsInPreExpandedValueSet(theOptions, valueSet, theSystem, theCode, theDisplay, coding, codeableConcept);
 	}
 
 	@Override

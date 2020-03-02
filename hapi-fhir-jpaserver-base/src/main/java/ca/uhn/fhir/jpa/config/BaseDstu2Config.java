@@ -12,7 +12,7 @@ import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.common.hapi.validation.CachingValidationSupport;
-import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r5.utils.IResourceValidator;
@@ -82,9 +82,8 @@ public class BaseDstu2Config extends BaseConfig {
 	@Bean(name = "myInstanceValidatorDstu2")
 	@Lazy
 	public IInstanceValidatorModule instanceValidatorDstu2() {
-		FhirInstanceValidator retVal = new FhirInstanceValidator(fhirContext());
+		FhirInstanceValidator retVal = new FhirInstanceValidator(new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(fhirContext()), jpaValidationSupportDstu2())));
 		retVal.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
-		retVal.setValidationSupport(new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(fhirContext()), jpaValidationSupportDstu2())));
 		return retVal;
 	}
 

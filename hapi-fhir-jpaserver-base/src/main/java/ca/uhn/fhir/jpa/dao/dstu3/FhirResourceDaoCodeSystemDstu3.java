@@ -109,7 +109,7 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 
 		ourLog.debug("Looking up {} / {}", system, code);
 
-		if (myValidationSupport.isCodeSystemSupported(system)) {
+		if (myValidationSupport.isCodeSystemSupported(, system)) {
 			ourLog.debug("Code system {} is supported", system);
 			IContextValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(myValidationSupport, system, code);
 			if (result != null) {

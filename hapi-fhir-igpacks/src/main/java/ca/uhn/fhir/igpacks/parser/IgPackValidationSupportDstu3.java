@@ -20,6 +20,8 @@ package ca.uhn.fhir.igpacks.parser;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -28,7 +30,6 @@ import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.utilities.ValidationOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +37,11 @@ import java.util.Map;
 
 public class IgPackValidationSupportDstu3 implements IValidationSupport {
 	private final Map<IIdType, IBaseResource> myIgResources;
+	private FhirContext myCtx;
 
-	public IgPackValidationSupportDstu3(Map<IIdType, IBaseResource> theIgResources) {
+	public IgPackValidationSupportDstu3(FhirContext theCtx, Map<IIdType, IBaseResource> theIgResources) {
 		myIgResources = theIgResources;
+		myCtx = theCtx;
 	}
 
 
@@ -100,18 +103,23 @@ public class IgPackValidationSupportDstu3 implements IValidationSupport {
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(String theSystem) {
+	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
 		return false;
 	}
 
 	@Override
-	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 
 	@Override
 	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, String theSystem, String theCode) {
 		return null;
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myCtx;
 	}
 
 }

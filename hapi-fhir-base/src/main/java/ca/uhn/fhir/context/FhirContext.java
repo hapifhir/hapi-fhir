@@ -1,6 +1,7 @@
 package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.i18n.HapiLocalizer;
@@ -569,8 +570,18 @@ public class FhirContext {
 	public IContextValidationSupport getValidationSupport() {
 		IContextValidationSupport retVal = myValidationSupport;
 		if (retVal == null) {
-			String className = "org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport";
-			retVal = ReflectionUtil.newInstanceOfFhirProfileValidationSupport(className, this);
+			retVal = new DefaultProfileValidationSupport(this);
+
+			String name = "org.hl7.fhir.common.hapi.validation.StaticResourceTerminologyServerValidationSupport";
+			if (ReflectionUtil.typeExists(name)) {
+				IContextValidationSupport staticResourceValidationSupport = ReflectionUtil.newInstanceOrReturnNull(name, IContextValidationSupport.class, new Class<?>[]{FhirContext.class}, new Object[]{this});
+				retVal = ReflectionUtil.newInstanceOrReturnNull("org.hl7.fhir.common.hapi.validation.ValidationSupportChain", IContextValidationSupport.class, new Class<?>[]{IContextValidationSupport[].class}, new Object[]{new IContextValidationSupport[]{
+					retVal, staticResourceValidationSupport
+				}});
+				assert retVal != null : "Failed to instantiate " + "org.hl7.fhir.common.hapi.validation.ValidationSupportChain";
+			}
+
+
 			myValidationSupport = retVal;
 		}
 		return retVal;

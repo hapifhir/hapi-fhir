@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 
@@ -38,18 +39,18 @@ public class JpaValidationSupportR4 extends BaseJpaValidationSupport implements 
 	}
 
 	@Override
-	public <T extends IBaseResource> T fetchCodeSystem(String theSystem) {
-		return fetchResource(theContext, theCodeSystemType, theSystem);
+	public IBaseResource fetchCodeSystem(String theSystem) {
+		return fetchResource(CodeSystem.class, theSystem);
 	}
 
 	@Override
 	public ValueSet fetchValueSet(String theSystem) {
-		return fetchResource(theCtx, ValueSet.class, theSystem);
+		return fetchResource(ValueSet.class, theSystem);
 	}
 
 	@Override
 	public StructureDefinition fetchStructureDefinition(String theUrl) {
-		return fetchResource(theCtx, StructureDefinition.class, theUrl);
+		return fetchResource(StructureDefinition.class, theUrl);
 	}
 
 }

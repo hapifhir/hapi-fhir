@@ -31,13 +31,6 @@
 			<optional>true</optional>
 		</dependency>
 
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>org.hl7.fhir.utilities</artifactId>
-			<version>${fhir_core_version}</version>
-			<optional>true</optional>
-		</dependency>
-
 		<!-- Only required for narrative generator support -->
 		<dependency>
 			<groupId>org.thymeleaf</groupId>

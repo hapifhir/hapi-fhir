@@ -1,6 +1,7 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -142,7 +143,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		if (myValidationSupport == null) {
 			return false;
 		} else {
-			return myValidationSupport.isCodeSystemSupported(theSystem);
+			return myValidationSupport.isCodeSystemSupported(myValidationSupport, theSystem);
 		}
 	}
 
@@ -175,16 +176,15 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, , theSystem, theCode, theDisplay, null);
+		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, new ConceptValidationOptions(), theSystem, theCode, theDisplay, null);
 		if (result == null) {
 			return null;
 		}
-		String message = result.getMessage();
 		OperationOutcome.IssueSeverity severity = null;
 		if (result.getSeverity() != null) {
 			severity = OperationOutcome.IssueSeverity.fromCode(result.getSeverity());
 		}
-		ConceptDefinitionComponent definition = new ConceptDefinitionComponent().setCode(result.getCode());
+		ConceptDefinitionComponent definition = result.getCode() != null ? new ConceptDefinitionComponent().setCode(result.getCode()) : null;
 		return new ValidationResult(severity, result.getMessage(), definition);
 	}
 

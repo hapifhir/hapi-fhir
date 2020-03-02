@@ -28,7 +28,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.utilities.validation.ValidationOptions;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -129,11 +128,12 @@ public interface IContextValidationSupport {
 	 * Returns <code>true</code> if codes in the given code system can be expanded
 	 * or validated
 	 *
+	 *
 	 * @param theSystem The URI for the code system, e.g. <code>"http://loinc.org"</code>
 	 * @return Returns <code>true</code> if codes in the given code system can be
 	 * validated
 	 */
-	default boolean isCodeSystemSupported(String theSystem) {
+	default boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
 		return false;
 	}
 
@@ -156,7 +156,7 @@ public interface IContextValidationSupport {
 	 * @param theDisplay               The display name, if it should also be validated
 	 * @return Returns a validation result object
 	 */
-	default CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	default CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 
@@ -171,7 +171,7 @@ public interface IContextValidationSupport {
 	 * @param theValueSet   The ValueSet to validate against. Must not be null, and must be a ValueSet resource.
 	 * @return Returns a validation result object, or <code>null</code> if this validation support module can not handle this kind of request
 	 */
-	default CodeValidationResult validateCodeInValueSet(IContextValidationSupport theRootValidationSupport, ValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	default CodeValidationResult validateCodeInValueSet(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		return null;
 	}
 
@@ -192,7 +192,7 @@ public interface IContextValidationSupport {
 	 *
 	 * @param theValueSetUrl The URL
 	 */
-	default boolean isValueSetSupported(String theValueSetUrl) {
+	default boolean isValueSetSupported(IContextValidationSupport theRootValidationSupport, String theValueSetUrl) {
 		return false;
 	}
 

@@ -1,9 +1,12 @@
 package ca.uhn.fhir.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.common.hapi.validation.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.StaticResourceTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.ConceptMap;
@@ -23,7 +26,7 @@ public class ParserWithValidationDstu3Test {
 	public void testActivityDefinitionElementsOrder() {
 		final String origContent = "{\"resourceType\":\"ActivityDefinition\",\"id\":\"x1\",\"url\":\"http://testing.org\",\"status\":\"draft\",\"timingDateTime\":\"2011-02-03\"}";
 		final IParser parser = ourCtx.newJsonParser();
-		DefaultProfileValidationSupport validationSupport = new DefaultProfileValidationSupport(ourCtx);
+		IContextValidationSupport validationSupport = getValidationSupport();
 
 		// verify that InstanceValidator likes the format
 		{
@@ -62,7 +65,7 @@ public class ParserWithValidationDstu3Test {
 	public void testChildOrderWithChoiceTypeXml() {
 		final String origContent = "<ActivityDefinition xmlns=\"http://hl7.org/fhir\"><id value=\"x1\"/><url value=\"http://testing.org\"/><status value=\"draft\"/><timingDateTime value=\"2011-02-03\"/></ActivityDefinition>";
 		final IParser parser = ourCtx.newXmlParser();
-		DefaultProfileValidationSupport validationSupport = new DefaultProfileValidationSupport(ourCtx);
+		IContextValidationSupport validationSupport = getValidationSupport();
 
 		// verify that InstanceValidator likes the format
 		{
@@ -98,7 +101,7 @@ public class ParserWithValidationDstu3Test {
 	public void testConceptMapElementsOrder() {
 		final String origContent = "{\"resourceType\":\"ConceptMap\",\"id\":\"x1\",\"url\":\"http://testing.org\",\"status\":\"draft\",\"sourceUri\":\"http://y1\"}";
 		final IParser parser = ourCtx.newJsonParser();
-		DefaultProfileValidationSupport validationSupport = new DefaultProfileValidationSupport(ourCtx);
+		IContextValidationSupport validationSupport = getValidationSupport();
 
 		// verify that InstanceValidator likes the format
 		{
@@ -130,11 +133,15 @@ public class ParserWithValidationDstu3Test {
 		Assert.assertEquals(origContent, content);
 	}
 
+	private IContextValidationSupport getValidationSupport() {
+		return new ValidationSupportChain(new DefaultProfileValidationSupport(ourCtx), new StaticResourceTerminologyServerValidationSupport(ourCtx));
+	}
+
 	@Test
 	public void testConceptMapElementsOrderXml() {
 		final String origContent = "<ConceptMap xmlns=\"http://hl7.org/fhir\"><id value=\"x1\"/><url value=\"http://testing.org\"/><status value=\"draft\"/><sourceUri value=\"http://url1\"/></ConceptMap>";
 		final IParser parser = ourCtx.newXmlParser();
-		DefaultProfileValidationSupport validationSupport = new DefaultProfileValidationSupport(ourCtx);
+		IContextValidationSupport validationSupport = getValidationSupport();
 
 		// verify that InstanceValidator likes the format
 		{

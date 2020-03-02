@@ -178,12 +178,12 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(String theSystem) {
+	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
 		return myCodeSystems.containsKey(theSystem);
 	}
 
 	@Override
-	public boolean isValueSetSupported(String theValueSetUrl) {
+	public boolean isValueSetSupported(IContextValidationSupport theRootValidationSupport, String theValueSetUrl) {
 		return myValueSets.containsKey(theValueSetUrl);
 	}
 
