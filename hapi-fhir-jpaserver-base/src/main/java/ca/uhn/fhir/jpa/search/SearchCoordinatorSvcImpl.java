@@ -845,8 +845,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		@Override
 		public Void call() {
 			StopWatch sw = new StopWatch();
-			Span span = myParentTransaction.startSpan("db", "H2", "search");
-			span.setName("search2!");
+			Span span = myParentTransaction.startSpan("db", "query", "search");
+			span.setName("FHIR Database Search");
 			try {
 				// Create an initial search in the DB and give it an ID
 				saveSearch();
