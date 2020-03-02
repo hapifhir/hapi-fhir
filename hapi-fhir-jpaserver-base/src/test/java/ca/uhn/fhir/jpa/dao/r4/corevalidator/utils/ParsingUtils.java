@@ -19,6 +19,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
 
 public class ParsingUtils {
 
@@ -95,9 +96,7 @@ public class ParsingUtils {
             DocumentBuilder db = dbf.newDocumentBuilder();
             InputSource is = new InputSource(new StringReader(in));
             return db.parse(is);
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        } catch (SAXException e) {
+        } catch (ParserConfigurationException | MalformedURLException | SAXException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             e.printStackTrace();

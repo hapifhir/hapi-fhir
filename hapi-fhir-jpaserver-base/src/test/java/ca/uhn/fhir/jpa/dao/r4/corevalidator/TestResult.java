@@ -3,7 +3,9 @@ package ca.uhn.fhir.jpa.dao.r4.corevalidator;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TestResult {
 
@@ -15,7 +17,7 @@ public class TestResult {
     private Integer warningCount = 0;
     @SerializedName("output")
     @Expose
-    private List<String> output = null;
+    private List<String> output = new ArrayList<>();
 
     public Integer getErrorCount() {
         return errorCount;
@@ -44,4 +46,12 @@ public class TestResult {
         return this;
     }
 
+    @Override
+    public String toString() {
+        return "TestResult {" +
+                "\nerrorCount=" + errorCount +
+                "\nwarningCount=" + warningCount +
+                "\noutput=\n" + output.stream().collect(Collectors.joining("\n", "{", "}")) +
+                '}';
+    }
 }

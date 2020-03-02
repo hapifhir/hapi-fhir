@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4ValidateTest;
+import ca.uhn.fhir.jpa.dao.r4.corevalidator.utils.ConvertorHelper;
 import ca.uhn.fhir.jpa.dao.r4.corevalidator.utils.CoreValidatorTestUtils;
 import ca.uhn.fhir.jpa.dao.r4.corevalidator.utils.ParsingUtils;
 import ca.uhn.fhir.jpa.dao.r4.jupiter.BaseJpaR4Test;
@@ -26,6 +27,7 @@ public class CoreValidatorTests extends BaseJpaR4Test {
     private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ValidateTest.class);
     private static final String TEST_FILES_BASE_PATH = "/org/hl7/fhir/testcases/validator/";
     private static final String TEST_MANIFEST_PATH = TEST_FILES_BASE_PATH + "manifest.json";
+    private static TestEntry value;
 
     @Autowired
     protected DaoRegistry daoRegistry;
@@ -48,7 +50,8 @@ public class CoreValidatorTests extends BaseJpaR4Test {
         Map<String, TestEntry> examples = new HashMap<>();
         JsonObject manifest = (JsonObject) new JsonParser().parse(contents);
         for (Map.Entry<String, JsonElement> e : manifest.getAsJsonObject("test-cases").entrySet()) {
-            examples.put(e.getKey(), gson.fromJson(e.getValue().toString(), TestEntry.class));
+            value = gson.fromJson(e.getValue().toString(), TestEntry.class);
+            examples.put(e.getKey(), value);
         }
 
         List<String> names = new ArrayList<>(examples.size());
@@ -87,38 +90,37 @@ public class CoreValidatorTests extends BaseJpaR4Test {
     @ParameterizedTest(name = "Test #{index} -> Testing validation for file {0}")
     @MethodSource("data")
     public void runCoreValidationTests(String testFile, TestEntry testEntry) throws IOException {
+
         myDaoConfig.setAllowExternalReferences(true);
+
         String temp = testFile;
         TestEntry te = testEntry;
 
-        if (testEntry.getVersion() != null) {
-            System.out.println("Resource Version :: " + testEntry.getVersion());
+        if (testEntry.getUsesTest()) {
+            String resourceName = null;
+            String resourceAsString = loadResource(TEST_FILES_BASE_PATH + testFile);
+            Assertions.assertNotNull(resourceAsString, "Could not load resource string from file <" + testFile + ">");
+            OperationOutcome operationOutcome = null;
+
+            String profileFilename = CoreValidatorTestUtils.getProfileFilename(testEntry);
+            String testProfile = profileFilename == null ? null : loadResource(TEST_FILES_BASE_PATH + CoreValidatorTestUtils.getProfileFilename(testEntry));
+
+            try {
+                resourceName = extractResourceName(testFile, resourceAsString);
+            } catch (Exception e) {
+                operationOutcome = new OperationOutcome();
+                operationOutcome.addIssue().setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(e.getMessage());
+            }
+
+            if (resourceName != null) {
+                IFhirResourceDao<? extends IBaseResource> resourceDao = daoRegistry.getResourceDaoOrNull(resourceName);
+                operationOutcome = CoreValidatorTestUtils.validate(myCtx, testProfile, resourceName, resourceAsString, resourceDao);
+            }
+
+            if (ConvertorHelper.shouldTest(testEntry)) {
+                CoreValidatorTestUtils.testOutputs(testEntry.getTestResult(), operationOutcome);
+            }
         }
-
-        //TODO Use your own JSON/XML parser to get the name of the class you need to get the Dao
-
-        String resourceName = null;
-        String resourceAsString = loadResource(TEST_FILES_BASE_PATH + testFile);
-        Assertions.assertNotNull(resourceAsString, "Could not load resource string from file <" + testFile + ">");
-        OperationOutcome operationOutcome = null;
-
-        try {
-            resourceName = extractResourceName(testFile, resourceAsString);
-        } catch (Exception e) {
-            operationOutcome = new OperationOutcome();
-            operationOutcome.addIssue().setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(e.getMessage());
-        }
-
-        if (resourceName != null) {
-            IFhirResourceDao<? extends IBaseResource> resourceDao = daoRegistry.getResourceDaoOrNull(resourceName);
-            //IBaseResource r4Version = ConvertorHelper.getR4Version(baseResource, testEntry);
-            operationOutcome = CoreValidatorTestUtils.validate(resourceAsString, resourceDao);
-        }
-
-        CoreValidatorTestUtils.testOutputs(testEntry.getTestResult(), operationOutcome);
-
-
-        System.out.println();
     }
 
     protected String extractResourceName(String testFile, String resourceAsString) throws RuntimeException {
@@ -133,7 +135,7 @@ public class CoreValidatorTests extends BaseJpaR4Test {
 
         if (resourceName == null) {
             EncodingEnum encoding = CoreValidatorTestUtils.getEncoding(testFile);
-            ParsingUtils.getResourceName(encoding, resourceAsString);
+            resourceName = ParsingUtils.getResourceName(encoding, resourceAsString);
         }
         return resourceName;
     }

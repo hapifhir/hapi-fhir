@@ -7,6 +7,9 @@ import java.util.List;
 
 public class Profile {
 
+    @SerializedName("errorCount")
+    @Expose
+    private String errorCount;
     @SerializedName("source")
     @Expose
     private String source;
@@ -16,6 +19,15 @@ public class Profile {
     @SerializedName("java")
     @Expose
     private TestResult testResult;
+
+    public String getErrorCount() {
+        return errorCount;
+    }
+
+    public Profile setErrorCount(String errorCount) {
+        this.errorCount = errorCount;
+        return this;
+    }
 
     public String getSource() {
         return source;

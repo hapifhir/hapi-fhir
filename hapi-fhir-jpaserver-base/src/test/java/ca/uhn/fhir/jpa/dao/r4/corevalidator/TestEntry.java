@@ -13,9 +13,12 @@ public class TestEntry {
     @SerializedName("explanation")
     @Expose
     private String explaination;
+    @SerializedName("errorCount")
+    @Expose
+    private Integer errorCount;
     @SerializedName("profile")
     @Expose
-    private Profile profile;
+    private Profile profile = new Profile();
     @SerializedName("java")
     @Expose
     private TestResult testResult;
@@ -25,6 +28,9 @@ public class TestEntry {
     @SerializedName("codesystems")
     @Expose
     private List<String> codesystems = null;
+    @SerializedName("use-test")
+    @Expose
+    private Boolean usesTest = true;
 
     public String getVersion() {
         return version;
@@ -40,6 +46,15 @@ public class TestEntry {
 
     public TestEntry setExplaination(String explaination) {
         this.explaination = explaination;
+        return this;
+    }
+
+    public Integer getErrorCount() {
+        return errorCount;
+    }
+
+    public TestEntry setErrorCount(Integer errorCount) {
+        this.errorCount = errorCount;
         return this;
     }
 
@@ -75,4 +90,12 @@ public class TestEntry {
         this.codesystems = codesystems;
     }
 
+    public Boolean getUsesTest() {
+        return usesTest;
+    }
+
+    public TestEntry setUsesTest(Boolean usesTest) {
+        this.usesTest = usesTest;
+        return this;
+    }
 }

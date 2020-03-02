@@ -18,14 +18,7 @@ import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ImplementationGuide;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.formats.IParser;
 import org.hl7.fhir.r5.formats.ParserType;
@@ -288,6 +281,9 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 						case "ImplementationGuide":
 							fetched = myWrap.fetchResource(ImplementationGuide.class, key.getUri());
 							break;
+                        case "SearchParameter":
+                            fetched = myWrap.fetchResource(SearchParameter.class, key.getUri());
+                            break;
 						default:
 							throw new UnsupportedOperationException("Don't know how to fetch " + key.getResourceName());
 					}
