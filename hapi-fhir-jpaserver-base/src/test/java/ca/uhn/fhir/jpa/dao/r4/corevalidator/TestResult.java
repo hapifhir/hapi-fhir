@@ -51,7 +51,7 @@ public class TestResult {
         return "TestResult {" +
                 "\nerrorCount=" + errorCount +
                 "\nwarningCount=" + warningCount +
-                "\noutput=\n" + output.stream().collect(Collectors.joining("\n", "{", "}")) +
-                '}';
+                "\noutput=\n" + output.stream().collect(Collectors.joining("\n")) +
+                "\n}";
     }
 }

@@ -7,12 +7,15 @@ import ca.uhn.fhir.jpa.dao.r4.corevalidator.TestResult;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.jupiter.api.Assertions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CoreValidatorTestUtils {
 
@@ -70,11 +73,22 @@ public class CoreValidatorTestUtils {
     }
 
     private static String prettyPrint(OperationOutcome oo) {
+        HashMap<OperationOutcome.IssueSeverity, ArrayList<String>> issuesMap = new HashMap<>();
+
         String output = "";
+
         for (OperationOutcome.OperationOutcomeIssueComponent i : oo.getIssue()) {
-            output += i.getSeverity() + "\n";
-            output += i.getDiagnostics() + "\n";
+            if (!issuesMap.containsKey(i.getSeverity())) {
+                issuesMap.put(i.getSeverity(), new ArrayList<>());
+            }
+            issuesMap.get(i.getSeverity()).add(i.getDiagnostics());
         }
+
+        for (OperationOutcome.IssueSeverity i : issuesMap.keySet()) {
+            output += i + ", count: " + issuesMap.get(i).size() + "\n";
+            output += String.join("\n", issuesMap.get(i)) + "\n";
+        }
+
         return output;
     }
 
