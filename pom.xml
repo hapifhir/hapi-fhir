@@ -606,7 +606,7 @@
 
 	<properties>
 
-		<fhir_core_version>4.2.1-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>4.2.4-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>

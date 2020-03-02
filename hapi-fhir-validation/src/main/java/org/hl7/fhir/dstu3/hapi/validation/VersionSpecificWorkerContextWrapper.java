@@ -346,7 +346,7 @@ public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 
 	@Override
 	public boolean isNoTerminologyServer() {
-		throw new UnsupportedOperationException();
+		return false;
 	}
 
 	@Override

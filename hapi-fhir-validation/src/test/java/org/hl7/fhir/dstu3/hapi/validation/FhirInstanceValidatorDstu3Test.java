@@ -83,7 +83,6 @@ public class FhirInstanceValidatorDstu3Test {
 		}
 	};
 	private FhirInstanceValidator myInstanceVal;
-	private IValidationSupport myMockSupport;
 	private Map<String, ValueSetExpansionComponent> mySupportedCodeSystemsForExpansion;
 	private FhirValidator myVal;
 	private ArrayList<String> myValidConcepts;
@@ -92,6 +91,7 @@ public class FhirInstanceValidatorDstu3Test {
 	private HashMap<String, CodeSystem> myCodeSystems;
 	private HashMap<String, ValueSet> myValueSets;
 	private HashMap<String, Questionnaire> myQuestionnaires;
+	private CachingValidationSupport myValidationSupport;
 
 	private void addValidConcept(String theSystem, String theCode) {
 		myValidSystems.add(theSystem);
@@ -105,10 +105,10 @@ public class FhirInstanceValidatorDstu3Test {
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
 
-		myMockSupport = mock(IValidationSupport.class);
-		when(myMockSupport.getFhirContext()).thenReturn(ourCtx);
-		CachingValidationSupport validationSupport = new CachingValidationSupport(new ValidationSupportChain(myMockSupport, myDefaultValidationSupport, new StaticResourceTerminologyServerValidationSupport()));
-		myInstanceVal = new FhirInstanceValidator(validationSupport);
+		IValidationSupport mockSupport = mock(IValidationSupport.class);
+		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
+		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(mockSupport, myDefaultValidationSupport, new StaticResourceTerminologyServerValidationSupport(ourCtx)));
+		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
 
@@ -116,7 +116,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		myValidConcepts = new ArrayList<>();
 
-		when(myMockSupport.expandValueSet(any(), nullable(IBaseResource.class))).thenAnswer(new Answer<ValueSetExpansionComponent>() {
+		when(mockSupport.expandValueSet(any(), nullable(IBaseResource.class))).thenAnswer(new Answer<ValueSetExpansionComponent>() {
 			@Override
 			public ValueSetExpansionComponent answer(InvocationOnMock theInvocation) {
 				ValueSet arg = (ValueSet) theInvocation.getArgument(0, IBaseResource.class);
@@ -129,7 +129,7 @@ public class FhirInstanceValidatorDstu3Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.isCodeSystemSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
+		when(mockSupport.isCodeSystemSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
 			public Boolean answer(InvocationOnMock theInvocation) {
 				String url = (String) theInvocation.getArguments()[1];
@@ -141,7 +141,7 @@ public class FhirInstanceValidatorDstu3Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.fetchResource(nullable(Class.class), nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
+		when(mockSupport.fetchResource(nullable(Class.class), nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
 			@Override
 			public IBaseResource answer(InvocationOnMock theInvocation) throws Throwable {
 				IBaseResource retVal = null;
@@ -174,7 +174,7 @@ public class FhirInstanceValidatorDstu3Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.validateCode(any(), any(), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IContextValidationSupport.CodeValidationResult>() {
+		when(mockSupport.validateCode(any(), any(), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IContextValidationSupport.CodeValidationResult>() {
 			@Override
 			public IContextValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
 				ConceptValidationOptions options = theInvocation.getArgument(1, ConceptValidationOptions.class);
@@ -198,7 +198,7 @@ public class FhirInstanceValidatorDstu3Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.fetchCodeSystem(nullable(String.class))).thenAnswer(new Answer<CodeSystem>() {
+		when(mockSupport.fetchCodeSystem(nullable(String.class))).thenAnswer(new Answer<CodeSystem>() {
 			@Override
 			public CodeSystem answer(InvocationOnMock theInvocation) {
 				CodeSystem retVal;
@@ -220,7 +220,7 @@ public class FhirInstanceValidatorDstu3Test {
 		myValueSets = new HashMap<>();
 		myCodeSystems = new HashMap<>();
 		myQuestionnaires = new HashMap<>();
-		when(myMockSupport.fetchStructureDefinition(nullable(String.class))).thenAnswer(new Answer<StructureDefinition>() {
+		when(mockSupport.fetchStructureDefinition(nullable(String.class))).thenAnswer(new Answer<StructureDefinition>() {
 			@Override
 			public StructureDefinition answer(InvocationOnMock theInvocation) {
 				String url = (String) theInvocation.getArguments()[1];
@@ -232,7 +232,7 @@ public class FhirInstanceValidatorDstu3Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.fetchAllStructureDefinitions()).thenAnswer(new Answer<List<StructureDefinition>>() {
+		when(mockSupport.fetchAllStructureDefinitions()).thenAnswer(new Answer<List<StructureDefinition>>() {
 			@Override
 			public List<StructureDefinition> answer(InvocationOnMock theInvocation) {
 				List<StructureDefinition> retVal = myDefaultValidationSupport.fetchAllStructureDefinitions();
@@ -637,9 +637,9 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult results = myVal.validateWithResult(is);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertEquals(2, outcome.size());
-		assertEquals("Unknown code for 'http://dicom.nema.org/resources/ontology/DCM#BAR'", outcome.get(0).getMessage());
-		assertEquals("The Coding provided is not in the value set http://hl7.org/fhir/ValueSet/dicom-cid29, and a code should come from this value set unless it has no suitable code.  (error message = Unknown code[BAR] in system[http://dicom.nema.org/resources/ontology/DCM])", outcome.get(1).getMessage());
+		assertEquals(1, outcome.size());
+		assertEquals("Unknown code 'http://dicom.nema.org/resources/ontology/DCM#BAR' for 'http://dicom.nema.org/resources/ontology/DCM#BAR'", outcome.get(0).getMessage());
+//		assertEquals("The Coding provided is not in the value set http://hl7.org/fhir/ValueSet/dicom-cid29, and a code should come from this value set unless it has no suitable code.  (error message = Unknown code[BAR] in system[http://dicom.nema.org/resources/ontology/DCM])", outcome.get(1).getMessage());
 
 	}
 
@@ -963,7 +963,7 @@ public class FhirInstanceValidatorDstu3Test {
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 
@@ -983,7 +983,7 @@ public class FhirInstanceValidatorDstu3Test {
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
@@ -1003,7 +1003,7 @@ public class FhirInstanceValidatorDstu3Test {
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 		input.setStatus(ObservationStatus.FINAL);
 
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked"));
@@ -1038,7 +1038,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateResourceWithDefaultValuesetBadCode() {
-		//@formatter:off
+
 		String input =
 			"<Observation xmlns=\"http://hl7.org/fhir\">\n" +
 				"   <status value=\"notvalidcode\"/>\n" +
@@ -1046,11 +1046,11 @@ public class FhirInstanceValidatorDstu3Test {
 				"      <text value=\"No code here!\"/>\n" +
 				"   </code>\n" +
 				"</Observation>";
-		//@formatter:on
+
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertEquals(
-			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code[notvalidcode] in system[(none)])",
+			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code 'notvalidcode')",
 			output.getMessages().get(0).getMessage());
 	}
 
@@ -1058,7 +1058,7 @@ public class FhirInstanceValidatorDstu3Test {
 	public void testValidateResourceWithExampleBindingCodeValidationFailing() {
 		Observation input = new Observation();
 
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
@@ -1073,7 +1073,7 @@ public class FhirInstanceValidatorDstu3Test {
 	public void testValidateResourceWithExampleBindingCodeValidationFailingNonLoinc() {
 		Observation input = new Observation();
 
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 		addValidConcept("http://acme.org", "12345");
 
 		input.setStatus(ObservationStatus.FINAL);
@@ -1090,7 +1090,7 @@ public class FhirInstanceValidatorDstu3Test {
 	public void testValidateResourceWithExampleBindingCodeValidationPassingLoinc() {
 		Observation input = new Observation();
 
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 		addValidConcept("http://loinc.org", "12345");
 
 		input.setStatus(ObservationStatus.FINAL);
@@ -1109,7 +1109,7 @@ public class FhirInstanceValidatorDstu3Test {
 		expansionComponent.addContains().setSystem("http://loinc.org").setCode("12345").setDisplay("Some display code");
 
 		mySupportedCodeSystemsForExpansion.put("http://loinc.org", expansionComponent);
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 		addValidConcept("http://loinc.org", "12345");
 
 		input.setStatus(ObservationStatus.FINAL);
@@ -1125,7 +1125,7 @@ public class FhirInstanceValidatorDstu3Test {
 	public void testValidateResourceWithExampleBindingCodeValidationPassingNonLoinc() {
 		Observation input = new Observation();
 
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 		addValidConcept("http://acme.org", "12345");
 
 		input.setStatus(ObservationStatus.FINAL);

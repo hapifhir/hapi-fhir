@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -174,7 +175,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 		boolean caseSensitive = true;
 		IBaseResource system = null;
 		if (!theOptions.isInferSystem() && isNotBlank(theCodeSystem)) {
-			system =  theRootValidationSupport.fetchCodeSystem(theCodeSystem);
+			system = theRootValidationSupport.fetchCodeSystem(theCodeSystem);
 			if (system == null) {
 				return null;
 			}
@@ -253,9 +254,12 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 			}
 		}
 
+		ValidationMessage.IssueSeverity severity = ValidationMessage.IssueSeverity.ERROR;
+
+		String message = "Unknown code '" + (isNotBlank(theCodeSystem) ? theCodeSystem + "#" : "") + theCode + "'";
 		return new CodeValidationResult()
-			.setSeverity(ValidationMessage.IssueSeverity.WARNING.toCode())
-			.setMessage("Unknown code for '" + theCodeSystem + "#" + theCode + "'");
+			.setSeverity(severity.toCode())
+			.setMessage(message);
 	}
 
 	@Override
