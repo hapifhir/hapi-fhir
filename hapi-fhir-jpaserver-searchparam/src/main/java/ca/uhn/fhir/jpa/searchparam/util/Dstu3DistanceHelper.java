@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.Collection;
 import java.util.List;
 
 
@@ -68,19 +69,17 @@ public class Dstu3DistanceHelper {
 	}
 
 	private static QuantityParam getNearDistanceParam(List<List<IQueryParameterType>> theParamAndList) {
-		if (theParamAndList.isEmpty()) {
+		long sum = theParamAndList.stream().mapToLong(Collection::size).sum();
+
+		// No near-distance Param
+		if (sum == 0) {
 			return null;
-		}
-		if (theParamAndList.size() > 1) {
+		// A single near-distance Param
+		} else if (sum == 1) {
+			return (QuantityParam) theParamAndList.get(0).get(0);
+		// Too many near-distance params
+		} else {
 			throw new IllegalArgumentException("Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
 		}
-		List<IQueryParameterType> paramOrList = theParamAndList.get(0);
-		if (paramOrList.isEmpty()) {
-			return null;
-		}
-		if (paramOrList.size() > 1) {
-			throw new IllegalArgumentException("Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
-		}
-		return (QuantityParam) paramOrList.get(0);
 	}
 }
