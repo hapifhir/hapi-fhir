@@ -9,15 +9,12 @@ import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hl7.fhir.dstu3.model.Location;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.Serializable;
 import java.util.*;
@@ -505,73 +502,6 @@ public class SearchParameterMap implements Serializable {
 
 	public QuantityParam getNearDistanceParam() {
 		return myNearDistanceParam;
-	}
-
-	// FIXME KHS extract to helper class
-	public void setNearDistance(Class<? extends IBaseResource> theResourceType) {
-		if (theResourceType == Location.class && containsKey(Location.SP_NEAR_DISTANCE)) {
-			List<List<IQueryParameterType>> paramAndList = get(Location.SP_NEAR_DISTANCE);
-			QuantityParam quantityParam = getNearDistanceParam(paramAndList);
-			setNearDistanceParam(quantityParam);
-
-			// Need to remove near-distance or it we'll get a hashcode predicate for it
-			remove(Location.SP_NEAR_DISTANCE);
-		} else if (containsKey("location")) {
-			List<List<IQueryParameterType>> paramAndList = get("location");
-			ReferenceParam referenceParam = getChainedLocationNearDistanceParam(paramAndList);
-			if (referenceParam != null) {
-				QuantityParam quantityParam = new QuantityParam(referenceParam.getValue());
-				setNearDistanceParam(quantityParam);
-			}
-		}
-	}
-
-	private ReferenceParam getChainedLocationNearDistanceParam(List<List<IQueryParameterType>> theParamAndList) {
-		ReferenceParam retval = null;
-		List<IQueryParameterType> andParamToRemove = null;
-		for (List<IQueryParameterType> paramOrList : theParamAndList) {
-			IQueryParameterType orParamToRemove = null;
-			for (IQueryParameterType param : paramOrList) {
-				if (param instanceof ReferenceParam) {
-					ReferenceParam referenceParam = (ReferenceParam) param;
-					if (Location.SP_NEAR_DISTANCE.equals(referenceParam.getChain())) {
-						if (retval != null) {
-							throw new IllegalArgumentException("Only one " + ca.uhn.fhir.model.dstu2.resource.Location.SP_NEAR_DISTANCE + " parameter may be present");
-						} else {
-							retval = referenceParam;
-							orParamToRemove = param;
-						}
-					}
-				}
-			}
-			if (orParamToRemove != null) {
-				paramOrList.remove(orParamToRemove);
-				if (paramOrList.isEmpty()) {
-					andParamToRemove = paramOrList;
-				}
-			}
-		}
-		if (andParamToRemove != null) {
-			theParamAndList.remove(andParamToRemove);
-		}
-		return retval;
-	}
-
-	private QuantityParam getNearDistanceParam(List<List<IQueryParameterType>> theParamAndList) {
-		if (theParamAndList.isEmpty()) {
-			return null;
-		}
-		if (theParamAndList.size() > 1) {
-			throw new IllegalArgumentException("Only one " + ca.uhn.fhir.model.dstu2.resource.Location.SP_NEAR_DISTANCE + " parameter may be present");
-		}
-		List<IQueryParameterType> paramOrList = theParamAndList.get(0);
-		if (paramOrList.isEmpty()) {
-			return null;
-		}
-		if (paramOrList.size() > 1) {
-			throw new IllegalArgumentException("Only one " + ca.uhn.fhir.model.dstu2.resource.Location.SP_NEAR_DISTANCE + " parameter may be present");
-		}
-		return (QuantityParam) paramOrList.get(0);
 	}
 
 	public enum EverythingModeEnum {
