@@ -666,6 +666,10 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				qp = new ReferenceParam();
 				break;
 			case SPECIAL:
+				if ("Location.position".equals(theParam.getPath())) {
+					qp = new SpecialParam();
+					break;
+				}
 			case URI:
 			case HAS:
 			default:
