@@ -164,6 +164,8 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		}
 
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 	}
 
 	private void createLocalCsAndVs() {

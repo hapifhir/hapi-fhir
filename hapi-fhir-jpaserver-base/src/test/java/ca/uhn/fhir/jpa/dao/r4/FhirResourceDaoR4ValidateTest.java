@@ -147,6 +147,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
 
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
 		// Create a valueset
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
@@ -399,12 +401,11 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
-			ourLog.info(ooString);
-			assertThat(ooString, containsString("StructureDefinition reference \\\"" + profileUri + "\\\" could not be resolved"));
+			org.hl7.fhir.r4.model.OperationOutcome oo = (org.hl7.fhir.r4.model.OperationOutcome) e.getOperationOutcome();
+			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			ourLog.info(outputString);
+			assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' could not be resolved, so has not been checked"));
 		}
-
-
 	}
 
 	@Test
@@ -617,6 +618,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		upload("/r4/uscore/ValueSet-omb-ethnicity-category.json");
 		upload("/r4/uscore/ValueSet-omb-race-category.json");
 		upload("/r4/uscore/ValueSet-us-core-usps-state.json");
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		{
 			String resource = loadResource("/r4/uscore/patient-resource-badcode.json");
