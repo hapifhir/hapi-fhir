@@ -100,6 +100,8 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
 		return id;
 	}
 
