@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -160,8 +161,10 @@ public class SearchBuilder implements ISearchBuilder {
 		// Remove any empty parameters
 		theParams.clean();
 
-		// Pull out near-distance first so when it comes time to evaluate near, we already know the distance
-		DistanceHelper.setNearDistance(myResourceType, theParams);
+		// For DSTU3, pull out near-distance first so when it comes time to evaluate near, we already know the distance
+		if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
+			DistanceHelper.setNearDistance(myResourceType, theParams);
+		}
 
 		/*
 		 * Check if there is a unique key associated with the set
