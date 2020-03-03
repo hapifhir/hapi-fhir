@@ -347,14 +347,14 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_SINCE).append("=").append(new InstantType(since).setTimeZoneZulu(true).getValueAsString());
 		}
 		if (theFilters != null && theFilters.size() > 0) {
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", theFilters));
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(String.join(",", theFilters));
 		}
 		String request = requestBuilder.toString();
 
 		Date cutoff = DateUtils.addMilliseconds(new Date(), -myReuseBulkExportForMillis);
 		Pageable page = PageRequest.of(0, 10);
 		Slice<BulkExportJobEntity> existing = myBulkExportJobDao.findExistingJob(page, request, cutoff, BulkJobStatusEnum.ERROR);
-		if (existing.isEmpty() == false) {
+		if (!existing.isEmpty()) {
 			return toSubmittedJobInfo(existing.iterator().next());
 		}
 
