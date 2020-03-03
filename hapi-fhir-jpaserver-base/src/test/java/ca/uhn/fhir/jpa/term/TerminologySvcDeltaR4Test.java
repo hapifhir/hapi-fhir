@@ -31,8 +31,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -126,17 +128,23 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			ourLog.info("All concepts: {}", myTermConceptDao.findAll());
 		});
 
+		myCaptureQueriesListener.clear();
+
 		delta = new CustomTerminologySet();
 		TermConcept root = delta.addRootConcept("RootA", "Root A");
 		root.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAA").setDisplay("Child AA");
 		root.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAB").setDisplay("Child AB");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
+
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+
 		assertHierarchyContains(
 			"RootA seq=0",
 			" ChildAA seq=0",
 			" ChildAB seq=1",
 			"RootB seq=0"
 		);
+
 	}
 
 	@Test
@@ -174,6 +182,12 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			"  ChildAAA seq=0"
 		);
 		assertEquals(2, outcome.getUpdatedConceptCount());
+
+		runInTransaction(() -> {
+			TermConcept concept = myTermSvc.findCode("http://foo/cs", "ChildAA").orElseThrow(() -> new IllegalStateException());
+			assertEquals(2, concept.getParents().size());
+			assertThat(concept.getParentPidsAsString(), matchesPattern("^[0-9]+ [0-9+]$"));
+		});
 
 	}
 
@@ -538,9 +552,15 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAAA").isPresent()));
 
 		// Remove CodeA
-		delta = new CustomTerminologySet();
-		delta.addRootConcept("codeA");
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo/cs", delta);
+		myCaptureQueriesListener.clear();
+		runInTransaction(()->{
+			CustomTerminologySet delta2 = new CustomTerminologySet();
+			delta2.addRootConcept("codeA");
+			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo/cs", delta2);
+		});
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+
+		ourLog.info("*** Done removing");
 
 		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeB").isPresent()));
 		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeA").isPresent()));
