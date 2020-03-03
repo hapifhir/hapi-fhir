@@ -9,7 +9,15 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
 
-public class DistanceHelper {
+
+/**
+ * In DSTU3, the near-distance search parameter is separate from near.  In this utility method,
+ * we search for near-distance search parameters and if we find any, remove them from the list
+ * of search parameters and store it in a dedicated field in {@link SearchParameterMap}.  This is so that
+ * when the "near" search parameter is processed, we have access to this near-distance value.
+ * This requires at most one near-distance parameter.  If more are found, we throw an {@link IllegalArgumentException}.
+ */
+public class Dstu3DistanceHelper {
 	public static void setNearDistance(Class<? extends IBaseResource> theResourceType, SearchParameterMap theParams) {
 		if (theResourceType == Location.class && theParams.containsKey(Location.SP_NEAR_DISTANCE)) {
 			List<List<IQueryParameterType>> paramAndList = theParams.get(Location.SP_NEAR_DISTANCE);
@@ -38,7 +46,7 @@ public class DistanceHelper {
 					ReferenceParam referenceParam = (ReferenceParam) param;
 					if (Location.SP_NEAR_DISTANCE.equals(referenceParam.getChain())) {
 						if (retval != null) {
-							throw new IllegalArgumentException("Only one " + ca.uhn.fhir.model.dstu2.resource.Location.SP_NEAR_DISTANCE + " parameter may be present");
+							throw new IllegalArgumentException("Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
 						} else {
 							retval = referenceParam;
 							orParamToRemove = param;
@@ -64,14 +72,14 @@ public class DistanceHelper {
 			return null;
 		}
 		if (theParamAndList.size() > 1) {
-			throw new IllegalArgumentException("Only one " + ca.uhn.fhir.model.dstu2.resource.Location.SP_NEAR_DISTANCE + " parameter may be present");
+			throw new IllegalArgumentException("Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
 		}
 		List<IQueryParameterType> paramOrList = theParamAndList.get(0);
 		if (paramOrList.isEmpty()) {
 			return null;
 		}
 		if (paramOrList.size() > 1) {
-			throw new IllegalArgumentException("Only one " + ca.uhn.fhir.model.dstu2.resource.Location.SP_NEAR_DISTANCE + " parameter may be present");
+			throw new IllegalArgumentException("Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
 		}
 		return (QuantityParam) paramOrList.get(0);
 	}

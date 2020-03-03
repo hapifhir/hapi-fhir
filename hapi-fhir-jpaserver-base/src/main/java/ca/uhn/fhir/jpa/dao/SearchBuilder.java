@@ -40,7 +40,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.searchparam.util.DistanceHelper;
+import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.util.*;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
@@ -163,7 +163,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		// For DSTU3, pull out near-distance first so when it comes time to evaluate near, we already know the distance
 		if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
-			DistanceHelper.setNearDistance(myResourceType, theParams);
+			Dstu3DistanceHelper.setNearDistance(myResourceType, theParams);
 		}
 
 		/*
