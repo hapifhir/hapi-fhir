@@ -252,8 +252,9 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		}
 		if (isOrdinalComparison) {
 			ourLog.trace("Ordinal date range is {} - {} ", lowerBoundAsOrdinal, upperBoundAsOrdinal);
+		} else {
+			ourLog.trace("Date range is {} - {}", lowerBoundInstant, upperBoundInstant);
 		}
-		ourLog.trace("Date range is {} - {}", lowerBoundInstant, upperBoundInstant);
 
 		if (lb != null && ub != null) {
 			return (theBuilder.and(lb, ub));
