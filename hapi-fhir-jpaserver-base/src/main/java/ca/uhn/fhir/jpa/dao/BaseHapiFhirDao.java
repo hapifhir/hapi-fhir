@@ -153,8 +153,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired
-	protected ISearchParamRegistry mySerarchParamRegistry;
-	@Autowired
 	protected ITermReadSvc myTerminologySvc;
 	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
@@ -162,8 +160,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
-	@Autowired
-	protected ISearchParamRegistry mySearchParamRegistry;
+
 	@Autowired
 	protected DeleteConflictService myDeleteConflictService;
 	@Autowired
@@ -1550,4 +1547,5 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				"Resource with ID " + theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName + ", found resource of type " + theEntity.getResourceType());
 		}
 	}
+
 }

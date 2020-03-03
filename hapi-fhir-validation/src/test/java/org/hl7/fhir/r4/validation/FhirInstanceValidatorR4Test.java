@@ -66,8 +66,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class FhirInstanceValidatorR4Test extends BaseTest {
@@ -280,6 +284,33 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	/**
+	 * See #1740
+	 */
+	@Ignore
+	@Test
+	public void testValidateScalarInRepeatableField() {
+		String operationDefinition = "{\n" +
+			"  \"resourceType\": \"OperationDefinition\",\n" +
+			"  \"name\": \"Questionnaire\",\n" +
+			"  \"status\": \"draft\",\n" +
+			"  \"kind\" : \"operation\",\n" +
+			"  \"code\": \"populate\",\n" +
+			"  \"resource\": \"Patient\",\n" + // should be array
+			"  \"system\": false,\n" + " " +
+			" \"type\": false,\n" +
+			"  \"instance\": true\n" +
+			"}";
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+
+		ValidationResult result = val.validateWithResult(operationDefinition);
+		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
+		assertFalse(result.isSuccessful());
+		assertEquals("Primitive types must have a value that is not empty", all.get(0).getMessage());
+	}
+
+	/**
 	 * See #1676 - We should ignore schema location
 	 */
 	@Test
@@ -397,7 +428,11 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ValidationResult output = myVal.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(46, errors.size());
+		errors = errors
+			.stream()
+			.filter(t -> t.getMessage().contains("Bundle entry missing fullUrl"))
+			.collect(Collectors.toList());
+		assertEquals(5, errors.size());
 	}
 
 	@Test
@@ -633,8 +668,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport));
 
 		// Prepopulate SDs
-		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/dstu3/myconsent-profile.xml"));
-		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/dstu3/myconsent-ext.xml"));
+		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/r4/myconsent-profile.xml"));
+		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/r4/myconsent-ext.xml"));
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new FhirInstanceValidator(support));
@@ -651,6 +686,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			.getCodingFirstRep()
 			.setSystem("http://terminology.hl7.org/CodeSystem/consentcategorycodes")
 			.setCode("acd");
+
 
 		// Should pass
 		ValidationResult output = val.validateWithResult(input);
@@ -1031,7 +1067,10 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidationSupport(myMockSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.toString(), containsString("StructureDefinition reference \"http://foo/structuredefinition/myprofile\" could not be resolved"));
+
+		assertEquals(1, errors.size());
+		assertEquals("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked", errors.get(0).getMessage());
+		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
 	}
 
 	@Test
@@ -1087,7 +1126,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	@Ignore
 	public void testValidateDecimalWithTrailingDot() {
 		String input = "{" +
-				" \"resourceType\": \"Observation\"," +
+			" \"resourceType\": \"Observation\"," +
 			" \"status\": \"final\"," +
 			" \"subject\": {\"reference\":\"Patient/123\"}," +
 			" \"code\": { \"coding\": [{ \"system\":\"http://foo\", \"code\":\"123\" }] }," +
@@ -1103,8 +1142,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			"            },\n" +
 			"            \"text\": \"210.0-925.\"\n" +
 			"          }\n" +
-			"        ]"+
-				"}";
+			"        ]" +
+			"}";
 		ourLog.info(input);
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
@@ -1248,6 +1287,21 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myVal.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(0, all.size());
+	}
+
+	@Test
+	public void testInvocationOfValidatorFetcher() throws IOException {
+
+		String encoded = loadResource("/r4/r4-caredove-bundle.json");
+
+		IResourceValidator.IValidatorResourceFetcher resourceFetcher = mock(IResourceValidator.IValidatorResourceFetcher.class);
+		when(resourceFetcher.validationPolicy(any(), anyString(), anyString())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
+		myVal.validateWithResult(encoded);
+
+		verify(resourceFetcher, times(14)).resolveURL(any(), anyString(), anyString());
+		verify(resourceFetcher, times(12)).validationPolicy(any(), anyString(), anyString());
+		verify(resourceFetcher, times(12)).fetch(any(), anyString());
 	}
 
 	@Test

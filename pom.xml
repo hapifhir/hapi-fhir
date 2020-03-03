@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>4.2.0-SNAPSHOT</version>
+	<version>4.3.0-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -606,7 +606,7 @@
 
 	<properties>
 
-		<fhir_core_version>4.1.42-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>4.2.1-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -679,6 +679,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 
+		<elastic_apm_version>1.13.0</elastic_apm_version>
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
 	</properties>
@@ -1035,6 +1036,11 @@
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
 				<version>${httpcore_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>co.elastic.apm</groupId>
+				<artifactId>apm-agent-api</artifactId>
+				<version>${elastic_apm_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>

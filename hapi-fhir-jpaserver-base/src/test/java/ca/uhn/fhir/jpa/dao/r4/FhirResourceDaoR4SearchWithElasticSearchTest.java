@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
@@ -37,8 +38,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
@@ -144,6 +147,53 @@ public class FhirResourceDaoR4SearchWithElasticSearchTest extends BaseJpaTest {
 		assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
 
 
+	}
+
+
+	@Test
+	public void testExpandVsWithMultiInclude_All() throws IOException {
+		CodeSystem cs = loadResource(myFhirCtx, CodeSystem.class, "/r4/expand-multi-cs.json");
+		myCodeSystemDao.update(cs);
+
+		ValueSet vs = loadResource(myFhirCtx, ValueSet.class, "/r4/expand-multi-vs-all.json");
+		ValueSet expanded = myValueSetDao.expand(vs, null);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+
+		// All codes
+		List<String> codes = expanded
+			.getExpansion()
+			.getContains()
+			.stream()
+			.map(t -> t.getCode())
+			.sorted()
+			.collect(Collectors.toList());
+		assertThat(codes.toString(), codes, Matchers.contains("advice", "message", "note", "notification"));
+	}
+
+
+	@Test
+	public void testExpandVsWithMultiInclude_Some() throws IOException {
+		CodeSystem cs = loadResource(myFhirCtx, CodeSystem.class, "/r4/expand-multi-cs.json");
+		myCodeSystemDao.update(cs);
+
+		ValueSet vs = loadResource(myFhirCtx, ValueSet.class, "/r4/expand-multi-vs-all.json");
+		vs.getCompose().getInclude().get(0).getConcept().remove(0);
+		vs.getCompose().getInclude().get(0).getConcept().remove(0);
+
+		ValueSet expanded = myValueSetDao.expand(vs, null);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+
+		// All codes
+		List<String> codes = expanded
+			.getExpansion()
+			.getContains()
+			.stream()
+			.map(t -> t.getCode())
+			.sorted()
+			.collect(Collectors.toList());
+		assertThat(codes.toString(), codes, Matchers.contains("advice", "note"));
 	}
 
 	private CodeSystem createExternalCs() {

@@ -106,14 +106,22 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public <T extends Resource> T fetchResource(Class<T> theClass, String theUri) {
+    Validate.notBlank(theUri, "theUri must not be null or blank");
     if (myValidationSupport == null) {
       return null;
     } else {
-      @SuppressWarnings("unchecked")
-      T retVal = (T) myFetchedResourceCache.get(theUri, t->{
-        return myValidationSupport.fetchResource(myCtx, theClass, theUri);
-      });
-      return retVal;
+        try {
+          //noinspection unchecked
+          return (T) myFetchedResourceCache.get(theUri, t -> {
+            T resource = myValidationSupport.fetchResource(myCtx, theClass, theUri);
+            if (resource == null) {
+              throw new IllegalArgumentException();
+            }
+            return resource;
+          });
+        } catch (IllegalArgumentException e) {
+          return null;
+        }
     }
   }
 

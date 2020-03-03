@@ -29,17 +29,29 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.dao.predicate.*;
+import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilder;
+import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderFactory;
+import ca.uhn.fhir.jpa.dao.predicate.QueryRoot;
+import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
+import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.util.*;
+import ca.uhn.fhir.jpa.util.BaseIterator;
+import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
+import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -80,10 +92,27 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
-import java.util.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * The SearchBuilder is responsible for actually forming the SQL query that handles
@@ -103,14 +132,17 @@ public class SearchBuilder implements ISearchBuilder {
 	private static final List<ResourcePersistentId> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 	private static ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
-	@Autowired
-	private DaoConfig myDaoConfig;
+	private final QueryRoot myQueryRoot = new QueryRoot();
+	private final String myResourceName;
+	private final Class<? extends IBaseResource> myResourceType;
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
+	@Autowired
+	private DaoConfig myDaoConfig;
 	@Autowired
 	private IResourceSearchViewDao myResourceSearchViewDao;
 	@Autowired
@@ -123,7 +155,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private PredicateBuilderFactory myPredicateBuilderFactory;
-
 	private List<ResourcePersistentId> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
 	private IDao myCallingDao;
@@ -133,9 +164,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private Integer myMaxResultsToFetch;
 	private Set<ResourcePersistentId> myPidSet;
 	private PredicateBuilder myPredicateBuilder;
-	private final QueryRoot myQueryRoot = new QueryRoot();
-	private final String myResourceName;
-	private final Class<? extends IBaseResource> myResourceType;
 
 	/**
 	 * Constructor
@@ -254,7 +282,8 @@ public class SearchBuilder implements ISearchBuilder {
 				outerQuery.multiselect(myBuilder.countDistinct(myQueryRoot.getRoot()));
 			} else {
 				outerQuery.multiselect(myQueryRoot.get("myId").as(Long.class));
-				outerQuery.distinct(true);
+				// KHS This distinct call is causing performance issues in large installations
+//				outerQuery.distinct(true);
 			}
 
 		}
@@ -475,6 +504,9 @@ public class SearchBuilder implements ISearchBuilder {
 
 		ResourcePersistentId resourceId;
 		for (ResourceSearchView next : resourceSearchViewList) {
+			if (next.getDeleted() != null) {
+				continue;
+			}
 
 			Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(next.getResourceType()).getImplementingClass();
 
@@ -594,6 +626,7 @@ public class SearchBuilder implements ISearchBuilder {
 			return new HashSet<>();
 		}
 		String searchFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
+		String findFieldName = theReverseMode ? "mySourceResourcePid" : "myTargetResourcePid";
 
 		Collection<ResourcePersistentId> nextRoundMatches = theMatches;
 		HashSet<ResourcePersistentId> allAdded = new HashSet<>();
@@ -618,17 +651,17 @@ public class SearchBuilder implements ISearchBuilder {
 				boolean matchAll = "*".equals(nextInclude.getValue());
 				if (matchAll) {
 					String sql;
-					sql = "SELECT r FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids) ";
+					sql = "SELECT r." + findFieldName + " FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids) ";
 					List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, MAXIMUM_PAGE_SIZE);
 					for (Collection<ResourcePersistentId> nextPartition : partitions) {
-						TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
+						TypedQuery<Long> q = theEntityManager.createQuery(sql, Long.class);
 						q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
-						List<ResourceLink> results = q.getResultList();
-						for (ResourceLink resourceLink : results) {
+						List<Long> results = q.getResultList();
+						for (Long resourceLink : results) {
 							if (theReverseMode) {
-								pidsToInclude.add(new ResourcePersistentId(resourceLink.getSourceResourcePid()));
+								pidsToInclude.add(new ResourcePersistentId(resourceLink));
 							} else {
-								pidsToInclude.add(new ResourcePersistentId(resourceLink.getTargetResourcePid()));
+								pidsToInclude.add(new ResourcePersistentId(resourceLink));
 							}
 						}
 					}
@@ -665,16 +698,16 @@ public class SearchBuilder implements ISearchBuilder {
 
 						boolean haveTargetTypesDefinedByParam = param.hasTargets();
 						if (targetResourceType != null) {
-							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
+							sql = "SELECT r." + findFieldName + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
 						} else if (haveTargetTypesDefinedByParam) {
-							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType in (:target_resource_types)";
+							sql = "SELECT r." + findFieldName + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType in (:target_resource_types)";
 						} else {
-							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
+							sql = "SELECT r." + findFieldName + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
 						}
 
 						List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, MAXIMUM_PAGE_SIZE);
 						for (Collection<ResourcePersistentId> nextPartition : partitions) {
-							TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
+							TypedQuery<Long> q = theEntityManager.createQuery(sql, Long.class);
 							q.setParameter("src_path", nextPath);
 							q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
 							if (targetResourceType != null) {
@@ -682,18 +715,10 @@ public class SearchBuilder implements ISearchBuilder {
 							} else if (haveTargetTypesDefinedByParam) {
 								q.setParameter("target_resource_types", param.getTargets());
 							}
-							List<ResourceLink> results = q.getResultList();
-							for (ResourceLink resourceLink : results) {
-								if (theReverseMode) {
-									Long pid = resourceLink.getSourceResourcePid();
-									if (pid != null) {
-										pidsToInclude.add(new ResourcePersistentId(pid));
-									}
-								} else {
-									Long pid = resourceLink.getTargetResourcePid();
-									if (pid != null) {
-										pidsToInclude.add(new ResourcePersistentId(pid));
-									}
+							List<Long> results = q.getResultList();
+							for (Long resourceLink : results) {
+								if (resourceLink != null) {
+									pidsToInclude.add(new ResourcePersistentId(resourceLink));
 								}
 							}
 						}
@@ -965,6 +990,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private SortSpec mySort;
 		private boolean myStillNeedToFetchIncludes;
 		private int mySkipCount = 0;
+		private int myNonSkipCount = 0;
 
 		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
 			mySearchRuntimeDetails = theSearchRuntimeDetails;
@@ -994,14 +1020,7 @@ public class SearchBuilder implements ISearchBuilder {
 						myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();
 					}
 
-					final TypedQuery<Long> query = createQuery(mySort, myMaxResultsToFetch, false, myRequest);
-
-					mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
-
-					Query<Long> hibernateQuery = (Query<Long>) query;
-					hibernateQuery.setFetchSize(myFetchSize);
-					ScrollableResults scroll = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-					myResultsIterator = new ScrollableResultsIterator<>(scroll);
+					initializeIteratorQuery(myMaxResultsToFetch);
 
 					// If the query resulted in extra results being requested
 					if (myAlsoIncludePids != null) {
@@ -1036,9 +1055,30 @@ public class SearchBuilder implements ISearchBuilder {
 								ResourcePersistentId next = new ResourcePersistentId(nextLong);
 								if (myPidSet.add(next)) {
 									myNext = next;
+									myNonSkipCount++;
 									break;
 								} else {
 									mySkipCount++;
+								}
+							}
+
+							if (!myResultsIterator.hasNext()) {
+								if (myMaxResultsToFetch != null && (mySkipCount + myNonSkipCount == myMaxResultsToFetch)) {
+									if (mySkipCount > 0 && myNonSkipCount == 0) {
+										myMaxResultsToFetch += 1000;
+
+										StorageProcessingMessage message = new StorageProcessingMessage();
+										String msg = "Pass completed with no matching results. This indicates an inefficient query! Retrying with new max count of " + myMaxResultsToFetch;
+										ourLog.warn(msg);
+										message.setMessage(msg);
+										HookParams params = new HookParams()
+											.add(RequestDetails.class, myRequest)
+											.addIfMatchesType(ServletRequestDetails.class, myRequest)
+											.add(StorageProcessingMessage.class, message);
+										JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
+
+										initializeIteratorQuery(myMaxResultsToFetch);
+									}
 								}
 							}
 						}
@@ -1100,6 +1140,20 @@ public class SearchBuilder implements ISearchBuilder {
 
 		}
 
+		private void initializeIteratorQuery(Integer theMaxResultsToFetch) {
+			final TypedQuery<Long> query = createQuery(mySort, theMaxResultsToFetch, false, myRequest);
+
+			mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
+
+			Query<Long> hibernateQuery = (Query<Long>) query;
+			hibernateQuery.setFetchSize(myFetchSize);
+			ScrollableResults scroll = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+			myResultsIterator = new ScrollableResultsIterator<>(scroll);
+
+			mySkipCount = 0;
+			myNonSkipCount = 0;
+		}
+
 		@Override
 		public boolean hasNext() {
 			if (myNext == null) {
@@ -1120,6 +1174,11 @@ public class SearchBuilder implements ISearchBuilder {
 		@Override
 		public int getSkippedCount() {
 			return mySkipCount;
+		}
+
+		@Override
+		public int getNonSkippedCount() {
+			return myNonSkipCount;
 		}
 
 		@Override

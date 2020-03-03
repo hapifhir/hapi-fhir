@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.IndexNonDeletedInterceptor;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -201,25 +203,35 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinksAsTarget;
+
 	@Column(name = "RES_TYPE", length = RESTYPE_LEN, nullable = false)
 	@Field
 	@OptimisticLock(excluded = true)
 	private String myResourceType;
+
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
 	private Collection<SearchParamPresent> mySearchParamPresents;
+
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
 	private Set<ResourceTag> myTags;
+
 	@Transient
 	private transient boolean myUnchangedInCurrentOperation;
+
 	@Version
 	@Column(name = "RES_VER")
 	private long myVersion;
+
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
 	private Collection<ResourceHistoryProvenanceEntity> myProvenance;
+
 	@Transient
 	private transient ResourceHistoryTable myCurrentVersionEntity;
+
+	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false, mappedBy = "myResource")
+	private ForcedId myForcedId;
 
 	/**
 	 * Constructor
@@ -558,6 +570,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		retVal.setUpdated(getUpdated());
 		retVal.setFhirVersion(getFhirVersion());
 		retVal.setDeleted(getDeleted());
+		retVal.setResourceTable(this);
 		retVal.setForcedId(getForcedId());
 		retVal.setTenantId(getTenantId());
 
@@ -600,20 +613,44 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * This is a convenience to avoid loading the version a second time within a single transaction. It is
 	 * not persisted.
 	 */
-	public ResourceHistoryTable getCurrentVersionEntity() {
-		return myCurrentVersionEntity;
+	public void setCurrentVersionEntity(ResourceHistoryTable theCurrentVersionEntity) {
+		myCurrentVersionEntity = theCurrentVersionEntity;
 	}
 
 	/**
 	 * This is a convenience to avoid loading the version a second time within a single transaction. It is
 	 * not persisted.
 	 */
-	public void setCurrentVersionEntity(ResourceHistoryTable theCurrentVersionEntity) {
-		myCurrentVersionEntity = theCurrentVersionEntity;
+	public ResourceHistoryTable getCurrentVersionEntity() {
+		return myCurrentVersionEntity;
 	}
 
 	@Override
 	public ResourcePersistentId getPersistentId() {
 		return new ResourcePersistentId(getId());
 	}
+
+	@Override
+	public ForcedId getForcedId() {
+		return myForcedId;
+	}
+
+	@Override
+	public void setForcedId(ForcedId theForcedId) {
+		myForcedId = theForcedId;
+	}
+
+	@Override
+	public IdDt getIdDt() {
+		if (getForcedId() == null) {
+			Long id = getResourceId();
+			return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else {
+			// Avoid a join query if possible
+			String forcedId = getTransientForcedId() != null ? getTransientForcedId() : getForcedId().getForcedId();
+			return new IdDt(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		}
+	}
+
+
 }

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1728
+title: "Fields of type `canonical` were not previously indexed by the JPA server, meaning that some
+   default search parameters could not be honoured (e.g. StructureDefinition:valueset). This is now corrected."

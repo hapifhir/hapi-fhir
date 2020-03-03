@@ -162,12 +162,18 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myConditionDaoR4")
 	protected IFhirResourceDao<Condition> myConditionDao;
 	@Autowired
+	@Qualifier("myEpisodeOfCareDaoR4")
+	protected IFhirResourceDao<EpisodeOfCare> myEpisodeOfCareDao;
+	@Autowired
 	protected DaoConfig myDaoConfig;
 	@Autowired
 	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoR4")
 	protected IFhirResourceDao<Device> myDeviceDao;
+	@Autowired
+	@Qualifier("myProvenanceDaoR4")
+	protected IFhirResourceDao<Provenance> myProvenanceDao;
 	@Autowired
 	@Qualifier("myDiagnosticReportDaoR4")
 	protected IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;

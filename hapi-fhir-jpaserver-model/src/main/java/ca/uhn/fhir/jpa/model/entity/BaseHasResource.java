@@ -44,11 +44,6 @@ public abstract class BaseHasResource implements IBaseResourceEntity, IBasePersi
 	@OptimisticLock(excluded = true)
 	private FhirVersionEnum myFhirVersion;
 
-	@OneToOne(optional = true, fetch = FetchType.LAZY, cascade = {}, orphanRemoval = false)
-	@JoinColumn(name = "FORCED_ID_PID")
-	@OptimisticLock(excluded = true)
-	private ForcedId myForcedId;
-
 	@Column(name = "HAS_TAGS", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myHasTags;
@@ -106,28 +101,12 @@ public abstract class BaseHasResource implements IBaseResourceEntity, IBasePersi
 		myFhirVersion = theFhirVersion;
 	}
 
-	public ForcedId getForcedId() {
-		return myForcedId;
-	}
+	abstract public ForcedId getForcedId();
 
-	public void setForcedId(ForcedId theForcedId) {
-		myForcedId = theForcedId;
-	}
+	abstract public void setForcedId(ForcedId theForcedId);
 
 	@Override
 	public abstract Long getId();
-
-	@Override
-	public IdDt getIdDt() {
-		if (getForcedId() == null) {
-			Long id = getResourceId();
-			return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-		} else {
-			// Avoid a join query if possible
-			String forcedId = getTransientForcedId() != null ? getTransientForcedId() : getForcedId().getForcedId();
-			return new IdDt(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-		}
-	}
 
 	@Override
 	public boolean isDeleted() {

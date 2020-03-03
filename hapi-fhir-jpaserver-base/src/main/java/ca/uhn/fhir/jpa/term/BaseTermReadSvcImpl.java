@@ -66,6 +66,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RegexpQuery;
+import org.apache.lucene.search.TermQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.search.jpa.FullTextEntityManager;
@@ -600,11 +601,16 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 					.map(t -> new Term("myCode", t))
 					.collect(Collectors.toList());
 				if (codes.size() > 0) {
-					MultiPhraseQuery query = new MultiPhraseQuery();
-					query.add(codes.toArray(new Term[0]));
+
+					BooleanQuery.Builder builder = new BooleanQuery.Builder();
+					builder.setMinimumNumberShouldMatch(1);
+					for (Term nextCode : codes) {
+						builder.add(new TermQuery(nextCode), BooleanClause.Occur.SHOULD);
+					}
+
 					luceneQuery = new BooleanQuery.Builder()
 						.add(luceneQuery, BooleanClause.Occur.MUST)
-						.add(query, BooleanClause.Occur.MUST)
+						.add(builder.build(), BooleanClause.Occur.MUST)
 						.build();
 				}
 
@@ -1240,6 +1246,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		return retVal;
 	}
 
+	@Transactional
 	@Override
 	public List<VersionIndependentConcept> findCodesAbove(String theSystem, String theCode) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
@@ -1271,6 +1278,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		return retVal;
 	}
 
+	@Transactional
 	@Override
 	public List<VersionIndependentConcept> findCodesBelow(String theSystem, String theCode) {
 		TermCodeSystem cs = getCodeSystem(theSystem);

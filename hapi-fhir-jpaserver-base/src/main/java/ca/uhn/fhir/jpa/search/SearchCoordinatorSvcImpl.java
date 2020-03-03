@@ -56,6 +56,9 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.StopWatch;
+import co.elastic.apm.api.ElasticApm;
+import co.elastic.apm.api.Span;
+import co.elastic.apm.api.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -601,7 +604,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		private List<ResourcePersistentId> myPreviouslyAddedResourcePids;
 		private Integer myMaxResultsToFetch;
 		private SearchRuntimeDetails mySearchRuntimeDetails;
-
+		private Transaction myParentTransaction;
 		/**
 		 * Constructor
 		 */
@@ -614,6 +617,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			mySearchRuntimeDetails = new SearchRuntimeDetails(theRequest, mySearch.getUuid());
 			mySearchRuntimeDetails.setQueryString(theParams.toNormalizedQueryString(theCallingDao.getContext()));
 			myRequest = theRequest;
+			myParentTransaction = ElasticApm.currentTransaction();
 		}
 
 		/**
@@ -774,10 +778,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 						if (theResultIter.hasNext() == false) {
 							int skippedCount = theResultIter.getSkippedCount();
+							int nonSkippedCount = theResultIter.getNonSkippedCount();
 							int totalFetched = skippedCount + myCountSavedThisPass + myCountBlockedThisPass;
 							ourLog.trace("MaxToFetch[{}] SkippedCount[{}] CountSavedThisPass[{}] CountSavedThisTotal[{}] AdditionalPrefetchRemaining[{}]", myMaxResultsToFetch, skippedCount, myCountSavedThisPass, myCountSavedTotal, myAdditionalPrefetchThresholdsRemaining);
 
-							if (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch) {
+							if (nonSkippedCount == 0 || (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch)) {
 								ourLog.trace("Setting search status to FINISHED");
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
 								mySearch.setTotalCount(myCountSavedTotal);
@@ -840,7 +845,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		@Override
 		public Void call() {
 			StopWatch sw = new StopWatch();
-
+			Span span = myParentTransaction.startSpan("db", "query", "search");
+			span.setName("FHIR Database Search");
 			try {
 				// Create an initial search in the DB and give it an ID
 				saveSearch();
@@ -896,7 +902,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					ourLog.error("Failed during search loading after {}ms", sw.getMillis(), t);
 				}
 				myUnsyncedPids.clear();
-
 				Throwable rootCause = ExceptionUtils.getRootCause(t);
 				rootCause = defaultIfNull(rootCause, t);
 
@@ -923,12 +928,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FAILED, params);
 
 				saveSearch();
-
+				span.captureException(t);
 			} finally {
 
 				myIdToSearchTask.remove(mySearch.getUuid());
 				myInitialCollectionLatch.countDown();
 				markComplete();
+				span.end();
 
 			}
 			return null;
