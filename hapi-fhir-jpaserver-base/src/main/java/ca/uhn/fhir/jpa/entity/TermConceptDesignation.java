@@ -39,7 +39,7 @@ public class TermConceptDesignation implements Serializable {
 	public static final int MAX_LENGTH = 500;
 	public static final int MAX_VAL_LENGTH = 2000;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CONCEPT_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CONCEPT"))
 	private TermConcept myConcept;
 	@Id()
@@ -62,7 +62,7 @@ public class TermConceptDesignation implements Serializable {
 	 *
 	 * @since 3.5.0
 	 */
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CS_VER_PID", nullable = true, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CSV"))
 	private TermCodeSystemVersion myCodeSystemVersion;
 

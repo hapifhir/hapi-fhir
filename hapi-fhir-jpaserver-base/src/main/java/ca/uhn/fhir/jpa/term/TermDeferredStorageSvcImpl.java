@@ -99,6 +99,13 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	@Override
+	public void saveAllDeferred() {
+		while (!isStorageQueueEmpty()) {
+			saveDeferred();
+		}
+	}
+
+	@Override
 	public void setProcessDeferred(boolean theProcessDeferred) {
 		myProcessDeferred = theProcessDeferred;
 	}

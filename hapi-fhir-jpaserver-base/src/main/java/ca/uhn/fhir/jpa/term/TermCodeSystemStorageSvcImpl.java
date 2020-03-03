@@ -45,7 +45,6 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
-import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -53,11 +52,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.ValidateUtil;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -78,11 +73,6 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -165,11 +155,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		IIdType codeSystemId = cs.getResource().getIdDt();
 
 		UploadStatistics retVal = new UploadStatistics(codeSystemId);
+		HashMap<String, TermConcept> codeToConcept = new HashMap<>();
 
 		// Add root concepts
 		for (TermConcept nextRootConcept : theAdditions.getRootConcepts()) {
 			List<String> parentCodes = Collections.emptyList();
-			addConcept(csv, parentCodes, nextRootConcept, retVal, true, 0);
+			addConceptInHierarchy(csv, parentCodes, nextRootConcept, retVal, codeToConcept, 0);
 		}
 
 		return retVal;
@@ -232,7 +223,15 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		 * save parent concepts first (it's way too slow to do that)
 		 */
 		if (theConcept.getId() == null) {
-			retVal += ensureParentsSaved(theConcept.getParents());
+			boolean needToSaveParents = false;
+			for (TermConceptParentChildLink next : theConcept.getParents()) {
+				if (next.getParent().getId() == null) {
+					needToSaveParents = true;
+				}
+			}
+			if (needToSaveParents) {
+				retVal += ensureParentsSaved(theConcept.getParents());
+			}
 		}
 
 		if (theConcept.getId() == null || theConcept.getIndexStatus() == null) {
@@ -445,66 +444,68 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		Validate.isTrue(myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3), "Terminology operations only supported in DSTU3+ mode");
 	}
 
-	private void addConcept(TermCodeSystemVersion theCsv, Collection<String> theParentCodes, TermConcept theConceptToAdd, UploadStatistics theStatisticsTracker, boolean theRootConcept, int theSequence) {
+	private void addConceptInHierarchy(TermCodeSystemVersion theCsv, Collection<String> theParentCodes, TermConcept theConceptToAdd, UploadStatistics theStatisticsTracker, Map<String, TermConcept> theCodeToConcept, int theSequence) {
 		TermConcept conceptToAdd = theConceptToAdd;
 		List<TermConceptParentChildLink> childrenToAdd = theConceptToAdd.getChildren();
 
 		String nextCodeToAdd = conceptToAdd.getCode();
 		String parentDescription = "(root concept)";
-		Set<TermConcept> parentConcepts = new HashSet<>();
-
-		if (!theParentCodes.isEmpty()) {
-			parentDescription = "[" + String.join(", ", theParentCodes) + "]";
-			for (String nextParentCode : theParentCodes) {
-				Optional<TermConcept> nextParentOpt = myConceptDao.findByCodeSystemAndCode(theCsv, nextParentCode);
-				if (nextParentOpt.isPresent() == false) {
-					throw new InvalidRequestException("Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + nextParentCode);
-				}
-				parentConcepts.add(nextParentOpt.get());
-			}
-		}
 
 		ourLog.info("Saving concept {} with parent {}", theStatisticsTracker.getUpdatedConceptCount(), parentDescription);
 
 		Optional<TermConcept> existingCodeOpt = myConceptDao.findByCodeSystemAndCode(theCsv, nextCodeToAdd);
+		List<TermConceptParentChildLink> existingParentLinks;
 		if (existingCodeOpt.isPresent()) {
 			TermConcept existingCode = existingCodeOpt.get();
 			existingCode.setIndexStatus(null);
 			existingCode.setDisplay(conceptToAdd.getDisplay());
 			conceptToAdd = existingCode;
+			existingParentLinks = conceptToAdd.getParents();
+		} else {
+			existingParentLinks = Collections.emptyList();
+		}
+
+		Set<TermConcept> parentConceptsWeShouldLinkTo = new HashSet<>();
+		for (String nextParentCode : theParentCodes) {
+
+			// Don't add parent links that already exist for the code
+			if (existingParentLinks.stream().anyMatch(t -> t.getParent().getCode().equals(nextParentCode))) {
+				continue;
+			}
+
+			TermConcept nextParentOpt = theCodeToConcept.get(nextParentCode);
+			if (nextParentOpt == null) {
+				nextParentOpt = myConceptDao.findByCodeSystemAndCode(theCsv, nextParentCode).orElse(null);
+			}
+			if (nextParentOpt == null) {
+				throw new InvalidRequestException("Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + nextParentCode);
+			}
+			parentConceptsWeShouldLinkTo.add(nextParentOpt);
 		}
 
 		if (conceptToAdd.getSequence() == null) {
 			conceptToAdd.setSequence(theSequence);
 		}
 
-		// Drop any old parent-child links if they aren't explicitly specified in the
-		// hierarchy being added
-		if (!theRootConcept) {
-			for (Iterator<TermConceptParentChildLink> iter = conceptToAdd.getParents().iterator(); iter.hasNext(); ) {
-				TermConceptParentChildLink nextLink = iter.next();
-				String parentCode = nextLink.getParent().getCode();
-				ourLog.info("Dropping existing parent/child link from {} -> {}", parentCode, nextCodeToAdd);
-				myConceptParentChildLinkDao.delete(nextLink);
-				iter.remove();
-
-				List<TermConceptParentChildLink> parentChildrenList = nextLink.getParent().getChildren();
-				parentChildrenList.remove(nextLink);
-			}
-		}
-
 		// Null out the hierarchy PIDs for this concept always. We do this because we're going to
 		// force a reindex, and it'll be regenerated then
 		conceptToAdd.setParentPids(null);
 		conceptToAdd.setCodeSystemVersion(theCsv);
-		conceptToAdd = myConceptDao.save(conceptToAdd);
 
-		Long nextConceptPid = conceptToAdd.getId();
-		Validate.notNull(nextConceptPid);
+		if (theStatisticsTracker.getUpdatedConceptCount() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
+			saveConcept(conceptToAdd);
+			Long nextConceptPid = conceptToAdd.getId();
+			Validate.notNull(nextConceptPid);
+		} else {
+			myDeferredStorageSvc.addConceptToStorageQueue(conceptToAdd);
+		}
+
+		theCodeToConcept.put(conceptToAdd.getCode(), conceptToAdd);
+
 		theStatisticsTracker.incrementUpdatedConceptCount();
 
 		// Add link to new child to the parent
-		for (TermConcept nextParentConcept : parentConcepts) {
+		for (TermConcept nextParentConcept : parentConceptsWeShouldLinkTo) {
 			TermConceptParentChildLink parentLink = new TermConceptParentChildLink();
 			parentLink.setParent(nextParentConcept);
 			parentLink.setChild(conceptToAdd);
@@ -513,7 +514,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			nextParentConcept.getChildren().add(parentLink);
 			conceptToAdd.getParents().add(parentLink);
 			ourLog.info("Saving parent/child link - Parent[{}] Child[{}]", parentLink.getParent().getCode(), parentLink.getChild().getCode());
-			myConceptParentChildLinkDao.save(parentLink);
+
+			if (theStatisticsTracker.getUpdatedConceptCount() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
+				myConceptParentChildLinkDao.save(parentLink);
+			} else {
+				myDeferredStorageSvc.addConceptLinkToStorageQueue(parentLink);
+			}
+
 		}
 
 		ourLog.trace("About to save parent-child links");
@@ -527,13 +534,20 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			for (int i = 0; i < nextChild.getParents().size(); i++) {
 				if (nextChild.getParents().get(i).getId() == null) {
 					String parentCode = nextChild.getParents().get(i).getParent().getCode();
-					TermConcept parentConcept = myConceptDao.findByCodeSystemAndCode(theCsv, parentCode).orElseThrow(() -> new IllegalArgumentException("Unknown parent code: " + parentCode));
+					TermConcept parentConcept = theCodeToConcept.get(parentCode);
+					if (parentConcept == null) {
+						parentConcept = myConceptDao.findByCodeSystemAndCode(theCsv, parentCode).orElse(null);
+					}
+					if (parentConcept == null) {
+						throw new IllegalArgumentException("Unknown parent code: " + parentCode);
+					}
+
 					nextChild.getParents().get(i).setParent(parentConcept);
 				}
 			}
 
 			Collection<String> parentCodes = nextChild.getParents().stream().map(t -> t.getParent().getCode()).collect(Collectors.toList());
-			addConcept(theCsv, parentCodes, nextChild, theStatisticsTracker, false, childIndex);
+			addConceptInHierarchy(theCsv, parentCodes, nextChild, theStatisticsTracker, theCodeToConcept, childIndex);
 
 			childIndex++;
 		}
@@ -649,12 +663,15 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private void deleteConceptChildrenAndConcept(TermConcept theConcept, AtomicInteger theRemoveCounter) {
 		for (TermConceptParentChildLink nextChildLink : theConcept.getChildren()) {
 			deleteConceptChildrenAndConcept(nextChildLink.getChild(), theRemoveCounter);
-			myConceptParentChildLinkDao.delete(nextChildLink);
 		}
+
+		myConceptParentChildLinkDao.deleteByConceptPid(theConcept.getId());
 
 		myConceptDesignationDao.deleteAll(theConcept.getDesignations());
 		myConceptPropertyDao.deleteAll(theConcept.getProperties());
-		myConceptDao.delete(theConcept);
+
+		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
+		myConceptDao.deleteByPid(theConcept.getId());
 		theRemoveCounter.incrementAndGet();
 	}
 

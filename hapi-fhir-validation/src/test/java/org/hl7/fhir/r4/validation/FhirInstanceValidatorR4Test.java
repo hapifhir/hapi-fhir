@@ -1031,7 +1031,10 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidationSupport(myMockSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.toString(), containsString("StructureDefinition reference \"http://foo/structuredefinition/myprofile\" could not be resolved"));
+
+		assertEquals(1, errors.size());
+		assertEquals("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked", errors.get(0).getMessage());
+		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
 	}
 
 	@Test
@@ -1087,7 +1090,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	@Ignore
 	public void testValidateDecimalWithTrailingDot() {
 		String input = "{" +
-				" \"resourceType\": \"Observation\"," +
+			" \"resourceType\": \"Observation\"," +
 			" \"status\": \"final\"," +
 			" \"subject\": {\"reference\":\"Patient/123\"}," +
 			" \"code\": { \"coding\": [{ \"system\":\"http://foo\", \"code\":\"123\" }] }," +
@@ -1103,8 +1106,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			"            },\n" +
 			"            \"text\": \"210.0-925.\"\n" +
 			"          }\n" +
-			"        ]"+
-				"}";
+			"        ]" +
+			"}";
 		ourLog.info(input);
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
