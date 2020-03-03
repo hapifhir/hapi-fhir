@@ -32,7 +32,7 @@ public class ResourceIndexedSearchParamsTest {
 		myTarget.setResourceType("Organization");
 
 		myParams = new ResourceIndexedSearchParams(source);
-		ResourceLink link = new ResourceLink("organization", source, myTarget, new Date());
+		ResourceLink link = ResourceLink.forLocalReference("organization", source, myTarget, new Date());
 		myParams.getResourceLinks().add(link);
 	}
 

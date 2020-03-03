@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.LoggingRule;
+import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
@@ -45,6 +46,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -67,6 +69,11 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+@TestPropertySource(properties = {
+	// Since scheduled tasks can cause searches, which messes up the
+	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
+	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
+})
 public abstract class BaseJpaTest extends BaseTest {
 
 	protected static final String CM_URL = "http://example.com/my_concept_map";

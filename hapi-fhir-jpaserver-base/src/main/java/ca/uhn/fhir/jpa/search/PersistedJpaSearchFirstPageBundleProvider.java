@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl.SearchTask;
 import ca.uhn.fhir.model.api.IResource;
@@ -50,8 +51,9 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	private Search mySearch;
 	private PlatformTransactionManager myTxManager;
 
-	public PersistedJpaSearchFirstPageBundleProvider(Search theSearch, IDao theDao, SearchTask theSearchTask, ISearchBuilder theSearchBuilder, PlatformTransactionManager theTxManager, RequestDetails theRequest) {
-		super(theRequest, theSearch.getUuid(), theDao);
+	// TODO KHS too many collaborators.  This should be a prototype bean
+	public PersistedJpaSearchFirstPageBundleProvider(Search theSearch, IDao theDao, SearchBuilderFactory theSearchBuilderFactory, SearchTask theSearchTask, ISearchBuilder theSearchBuilder, PlatformTransactionManager theTxManager, RequestDetails theRequest) {
+		super(theRequest, theSearch.getUuid(), theDao, theSearchBuilderFactory);
 		setSearchEntity(theSearch);
 		mySearchTask = theSearchTask;
 		mySearchBuilder = theSearchBuilder;

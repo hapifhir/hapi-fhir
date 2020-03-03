@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.graphql;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 
 	private IFhirResourceDao<? extends IBaseResource> getDao(String theResourceType) {
 		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theResourceType);
-		return getDao(typeDef.getImplementingClass());
+		return myDaoRegistry.getResourceDaoOrNull(typeDef.getImplementingClass());
 	}
 
 	@Transactional(propagation = Propagation.NEVER)
@@ -59,7 +59,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 	public void listResources(Object theAppInfo, String theType, List<Argument> theSearchParams, List<IBaseResource> theMatches) throws FHIRException {
 
 		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theType);
-		IFhirResourceDao<? extends IBaseResource> dao = getDao(typeDef.getImplementingClass());
+		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDaoOrNull(typeDef.getImplementingClass());
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(MAX_SEARCH_SIZE);

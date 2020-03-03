@@ -4,11 +4,14 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.rest.annotation.At;
+import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Elements;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -18,6 +21,7 @@ import ca.uhn.fhir.rest.client.apache.ApacheHttpRequest;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
@@ -36,6 +40,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -226,6 +231,80 @@ public class ClientR4Test {
 		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
+	}
+
+	interface MyClient extends IRestfulClient {
+
+		@Search()
+		List<Patient> search(@IncludeParam String theInclude);
+
+
+	}
+
+
+	@Test
+	public void testStringIncludeTest() throws Exception {
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.SEARCHSET);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(ourCtx.newXmlParser().encodeResourceToString(bundle)), StandardCharsets.UTF_8));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[0]);
+
+		MyClient client = ourCtx.newRestfulClient(MyClient.class, "http://foo");
+		List<Patient> response = client.search("Patient:organization");
+
+		assertEquals(HttpGet.class, capt.getValue().getClass());
+		HttpGet post = (HttpGet) capt.getValue();
+		assertEquals("http://foo/Patient?_include=Patient%3Aorganization", post.getURI().toString());
+	}
+
+	@Test
+	public void testCreateWithInvalidType() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:foo").setValue("123");
+		String serialized = ourCtx.newXmlParser().encodeResourceToString(patient);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(serialized), StandardCharsets.UTF_8));
+		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
+
+		try {
+			ourCtx.newRestfulClient(ITestClientWithCreateWithInvalidParameterType.class, "http://foo");
+			fail();
+		} catch (ConfigurationException e) {
+			assertEquals("Method 'createPatient' is annotated with @ResourceParam but has a type that is not an implementation of org.hl7.fhir.instance.model.api.IBaseResource", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testCreateWithValidAndInvalidType() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:foo").setValue("123");
+		String serialized = ourCtx.newXmlParser().encodeResourceToString(patient);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(serialized), StandardCharsets.UTF_8));
+		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
+
+		try {
+			ourCtx.newRestfulClient(ITestClientWithCreateWithValidAndInvalidParameterType.class, "http://foo");
+			fail();
+		} catch (ConfigurationException e) {
+			assertEquals("Parameter #2/2 of method 'createPatient' on type 'ca.uhn.fhir.rest.client.ClientR4Test.ITestClientWithCreateWithValidAndInvalidParameterType' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter", e.getMessage());
+		}
 	}
 
 	@Test
@@ -947,6 +1026,45 @@ public class ClientR4Test {
 	}
 
 	@Test
+	public void testSearchWithAt() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
+
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
+		client.getPatientWithAt(new InstantType("2010-10-01T01:02:03.0Z"));
+
+		assertEquals("http://foo/Patient?_at=2010-10-01T01%3A02%3A03.0Z", capt.getValue().getURI().toString());
+
+	}
+
+	@Test
+	public void testUnannotatedMethod() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
+
+		ITestClientWithUnannotatedMethod client = ourCtx.newRestfulClient(ITestClientWithUnannotatedMethod.class, "http://foo");
+		try {
+			client.getPatientWithAt(new InstantType("2010-10-01T01:02:03.0Z"));
+			fail();
+		} catch (UnsupportedOperationException e) {
+			assertEquals("The method 'getPatientWithAt' in type ITestClientWithUnannotatedMethod has no handler. Did you forget to annotate it with a RESTful method annotation?", e.getMessage());
+		}
+
+	}
+
+	@Test
 	public void testSearchWithOptionalParam() throws Exception {
 
 		String msg = getPatientFeedWithOneResult();
@@ -977,7 +1095,6 @@ public class ClientR4Test {
 		assertEquals("PRP1660", resource.getIdentifier().get(0).getValueElement().getValue());
 
 	}
-
 
 	@Test
 	public void testSearchWithStringIncludes() throws Exception {
@@ -1183,7 +1300,6 @@ public class ClientR4Test {
 
 	}
 
-
 	@Test
 	public void testValidateOutcomeResponse() throws Exception {
 
@@ -1212,7 +1328,6 @@ public class ClientR4Test {
 		assertEquals("ALL GOOD", ((OperationOutcome) response.getOperationOutcome()).getIssueFirstRep().getDiagnostics());
 		assertNull(response.getResource());
 	}
-
 
 	@Test
 	public void testVRead() throws Exception {
@@ -1324,6 +1439,18 @@ public class ClientR4Test {
 		}
 	}
 
+	public interface ITestClientWithCreateWithInvalidParameterType extends IRestfulClient {
+
+		@Create()
+		MethodOutcome createPatient(@ResourceParam int thePatient);
+	}
+
+	public interface ITestClientWithCreateWithValidAndInvalidParameterType extends IRestfulClient {
+
+		@Create()
+		MethodOutcome createPatient(@ResourceParam Patient thePatient, int theInt);
+	}
+
 	interface ITestClientWithAndOr extends IBasicClient {
 
 		@Search()
@@ -1380,6 +1507,10 @@ public class ClientR4Test {
 		@Search()
 		List<Patient> getPatientWithIncludes(SummaryEnum theSummary);
 
+	}
+
+	interface ITestClientWithUnannotatedMethod extends IRestfulClient {
+		void getPatientWithAt(@At InstantType theInstantType);
 	}
 
 	@ResourceDef(name = "Patient")

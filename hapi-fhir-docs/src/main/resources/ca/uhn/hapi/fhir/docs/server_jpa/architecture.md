@@ -18,5 +18,5 @@ The HAPI JPA Server has the following components:
 
 # Schema
 
-This implementation uses a fairly simple table design, with a single table being used to hold resource bodies (which are stored as CLOBs, optionally GZipped to save space) and a set of tables to hold search indexes, tags, history details, etc. This design has proven to be very scalable and flexible, and has been successfully used in large scale production architectures. That said, 
+This implementation uses a fairly simple table design, with a single table being used to hold resource bodies (which are stored as CLOBs, optionally GZipped to save space) and a set of tables to hold search indexes, tags, history details, etc. This design has proven to be very scalable and flexible, and has been successfully used in large scale production architectures. That said, this design is still only one of many possible ways of designing a FHIR server so it is worth considering whether it is appropriate for the problem you are trying to solve.
 

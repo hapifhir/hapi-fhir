@@ -41,9 +41,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class IncludeDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IncludeDstu2Test.class);
@@ -310,9 +307,6 @@ public class IncludeDstu2Test {
 
 	}
 
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Search(queryName = "containedInclude")

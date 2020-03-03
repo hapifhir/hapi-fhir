@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1679
+title: "An issue with the new flyway migrator hashCode generation was resolved. 
+   Thanks to Jafer Khan for the pull request!"

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,7 @@ package ca.uhn.fhir.jpa.bulk;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IResultIterator;
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
@@ -95,6 +92,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	private FhirContext myContext;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+	@Autowired
+	private SearchBuilderFactory mySearchBuilderFactory;
 	private TransactionTemplate myTxTemplate;
 
 	private long myFileMaxChars = 500 * FileUtils.ONE_KB;
@@ -213,9 +212,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 			ourLog.info("Bulk export assembling export of type {} for job {}", nextType, theJobUuid);
 
-			ISearchBuilder sb = dao.newSearchBuilder();
 			Class<? extends IBaseResource> nextTypeClass = myContext.getResourceDefinition(nextType).getImplementingClass();
-			sb.setType(nextTypeClass, nextType);
+			ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, nextType, nextTypeClass);
 
 			SearchParameterMap map = new SearchParameterMap();
 			map.setLoadSynchronous(true);
@@ -225,8 +223,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 			IResultIterator resultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, theJobUuid), null);
 			storeResultsToFiles(nextCollection, sb, resultIterator, jobResourceCounter, jobStopwatch);
-
-
 		}
 
 		job.setStatus(BulkJobStatusEnum.COMPLETE);

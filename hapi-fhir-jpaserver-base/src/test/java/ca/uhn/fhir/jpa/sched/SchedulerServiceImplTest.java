@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.AopTestUtils;
@@ -34,6 +35,7 @@ import static org.junit.Assert.fail;
 
 @ContextConfiguration(classes = SchedulerServiceImplTest.TestConfiguration.class)
 @RunWith(SpringJUnit4ClassRunner.class)
+@DirtiesContext
 public class SchedulerServiceImplTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SchedulerServiceImplTest.class);

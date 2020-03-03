@@ -37,7 +37,7 @@ import java.util.Map.Entry;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -377,9 +377,8 @@ public class FhirContext {
 	 */
 	public RuntimeResourceDefinition getResourceDefinition(final Class<? extends IBaseResource> theResourceType) {
 		validateInitialized();
-		if (theResourceType == null) {
-			throw new NullPointerException("theResourceType can not be null");
-		}
+		Validate.notNull(theResourceType, "theResourceType can not be null");
+
 		if (Modifier.isAbstract(theResourceType.getModifiers())) {
 			throw new IllegalArgumentException("Can not scan abstract or interface class (resource definitions must be concrete classes): " + theResourceType.getName());
 		}

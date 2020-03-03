@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,7 +16,7 @@ import java.util.Optional;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,15 +37,11 @@ public interface ISearchDao extends JpaRepository<Search, Long> {
 	@Query("SELECT s FROM Search s LEFT OUTER JOIN FETCH s.myIncludes WHERE s.myUuid = :uuid")
 	Optional<Search> findByUuidAndFetchIncludes(@Param("uuid") String theUuid);
 
-	@Query("SELECT s.myId FROM Search s WHERE (s.mySearchLastReturned < :cutoff) AND (s.myExpiryOrNull IS NULL OR s.myExpiryOrNull < :now)")
-	Slice<Long> findWhereLastReturnedBefore(@Param("cutoff") Date theCutoff, @Param("now") Date theNow, Pageable thePage);
+	@Query("SELECT s.myId FROM Search s WHERE (s.myCreated < :cutoff) AND (s.myExpiryOrNull IS NULL OR s.myExpiryOrNull < :now)")
+	Slice<Long> findWhereCreatedBefore(@Param("cutoff") Date theCutoff, @Param("now") Date theNow, Pageable thePage);
 
 	@Query("SELECT s FROM Search s WHERE s.myResourceType = :type AND mySearchQueryStringHash = :hash AND (s.myCreated > :cutoff) AND s.myDeleted = false AND s.myStatus <> 'FAILED'")
 	Collection<Search> findWithCutoffOrExpiry(@Param("type") String theResourceType, @Param("hash") int theHashCode, @Param("cutoff") Date theCreatedCutoff);
-
-	@Modifying
-	@Query("UPDATE Search s SET s.mySearchLastReturned = :last WHERE s.myId = :pid")
-	void updateSearchLastReturned(@Param("pid") long thePid, @Param("last") Date theDate);
 
 	@Modifying
 	@Query("UPDATE Search s SET s.myDeleted = :deleted WHERE s.myId = :pid")

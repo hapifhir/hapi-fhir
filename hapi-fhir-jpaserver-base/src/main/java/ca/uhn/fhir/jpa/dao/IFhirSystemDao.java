@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nullable;
 import java.util.Date;
@@ -42,9 +41,6 @@ import java.util.Map;
 public interface IFhirSystemDao<T, MT> extends IDao {
 
 	ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails);
-
-	@SuppressWarnings("unchecked")
-	<R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType);
 
 	Map<String, Long> getResourceCounts();
 

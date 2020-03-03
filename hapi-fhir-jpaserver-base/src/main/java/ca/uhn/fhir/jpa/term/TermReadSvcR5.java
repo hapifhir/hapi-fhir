@@ -32,7 +32,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,21 +90,21 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 			super.throwInvalidValueSet(theValueSet);
 		}
 
-		return expandValueSetAndReturnVersionIndependentConcepts(org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSetR5), null);
+		return expandValueSetAndReturnVersionIndependentConcepts(org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetR5), null);
 	}
 
 	@Override
 	public IBaseResource expandValueSet(IBaseResource theInput) {
 		org.hl7.fhir.r4.model.ValueSet valueSetToExpand = toCanonicalValueSet(theInput);
 		org.hl7.fhir.r4.model.ValueSet valueSetR4 = super.expandValueSetInMemory(valueSetToExpand, null);
-		return org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSetR4);
+		return org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetR4);
 	}
 
 	@Override
 	public IBaseResource expandValueSet(IBaseResource theInput, int theOffset, int theCount) {
 		org.hl7.fhir.r4.model.ValueSet valueSetToExpand = toCanonicalValueSet(theInput);
 		org.hl7.fhir.r4.model.ValueSet valueSetR4 = super.expandValueSet(valueSetToExpand, theOffset, theCount);
-		return org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSetR4);
+		return org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetR4);
 	}
 
 	@Override
@@ -117,8 +117,8 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
 		ValueSet valueSetToExpand = new ValueSet();
 		valueSetToExpand.getCompose().addInclude(theInclude);
-		org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSetToExpand), null);
-		return new ValueSetExpander.ValueSetExpansionOutcome(org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(expandedR4));
+		org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetToExpand), null);
+		return new ValueSetExpander.ValueSetExpansionOutcome(org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(expandedR4));
 	}
 
 	@Override
@@ -199,13 +199,13 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	@Override
 	public org.hl7.fhir.r4.model.CodeSystem getCodeSystemFromContext(String theSystem) {
 		CodeSystem codeSystemR5 = myValidationSupport.fetchCodeSystem(myContext, theSystem);
-		return org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem(codeSystemR5);
+		return org.hl7.fhir.convertors.conv40_50.CodeSystem40_50.convertCodeSystem(codeSystemR5);
 	}
 
 	@Override
 	protected org.hl7.fhir.r4.model.ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
 		ValueSet valueSetR5 = myValueSetResourceDao.toResource(ValueSet.class, theResourceTable, null, false);
-		return org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSetR5);
+		return org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetR5);
 	}
 
 	@Override
@@ -277,7 +277,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 
 	@Override
 	protected org.hl7.fhir.r4.model.ValueSet toCanonicalValueSet(IBaseResource theValueSet) throws org.hl7.fhir.exceptions.FHIRException {
-		return org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet((ValueSet) theValueSet);
+		return org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet((ValueSet) theValueSet);
 	}
 
 	@Override

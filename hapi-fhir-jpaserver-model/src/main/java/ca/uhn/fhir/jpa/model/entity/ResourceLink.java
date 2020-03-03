@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,22 +84,6 @@ public class ResourceLink extends BaseResourceIndex {
 		super();
 	}
 
-	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {
-		super();
-		setSourcePath(theSourcePath);
-		setSourceResource(theSourceResource);
-		setTargetResourceUrl(theTargetResourceUrl);
-		setUpdated(theUpdated);
-	}
-
-	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, ResourceTable theTargetResource, Date theUpdated) {
-		super();
-		setSourcePath(theSourcePath);
-		setSourceResource(theSourceResource);
-		setTargetResource(theTargetResource);
-		setUpdated(theUpdated);
-	}
-
 	@Override
 	public boolean equals(Object theObj) {
 		if (this == theObj) {
@@ -138,10 +122,6 @@ public class ResourceLink extends BaseResourceIndex {
 		mySourceResourceType = theSourceResource.getResourceType();
 	}
 
-	public Long getSourceResourcePid() {
-		return mySourceResourcePid;
-	}
-
 	public ResourceTable getTargetResource() {
 		return myTargetResource;
 	}
@@ -157,25 +137,28 @@ public class ResourceLink extends BaseResourceIndex {
 		return myTargetResourcePid;
 	}
 
-	public String getTargetResourceUrl() {
-		return myTargetResourceUrl;
-	}
-
 	public void setTargetResourceUrl(IIdType theTargetResourceUrl) {
 		Validate.isTrue(theTargetResourceUrl.hasBaseUrl());
 		Validate.isTrue(theTargetResourceUrl.hasResourceType());
 
 //		if (theTargetResourceUrl.hasIdPart()) {
-			// do nothing
+		// do nothing
 //		} else {
-			// Must have set an url like http://example.org/something
-			// We treat 'something' as the resource type because of fix for #659. Prior to #659 fix, 'something' was
-			// treated as the id and 'example.org' was treated as the resource type
-			// TODO: log a warning?
+		// Must have set an url like http://example.org/something
+		// We treat 'something' as the resource type because of fix for #659. Prior to #659 fix, 'something' was
+		// treated as the id and 'example.org' was treated as the resource type
+		// TODO: log a warning?
 //		}
 
 		myTargetResourceType = theTargetResourceUrl.getResourceType();
 		myTargetResourceUrl = theTargetResourceUrl.getValue();
+	}
+
+	public void setTargetResourceUrlCanonical(String theTargetResourceUrl) {
+		Validate.notBlank(theTargetResourceUrl);
+
+		myTargetResourceType = "(unknown)";
+		myTargetResourceUrl = theTargetResourceUrl;
 	}
 
 	public Date getUpdated() {
@@ -222,6 +205,36 @@ public class ResourceLink extends BaseResourceIndex {
 
 		b.append("]");
 		return b.toString();
+	}
+
+	public static ResourceLink forAbsoluteReference(String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {
+		ResourceLink retVal = new ResourceLink();
+		retVal.setSourcePath(theSourcePath);
+		retVal.setSourceResource(theSourceResource);
+		retVal.setTargetResourceUrl(theTargetResourceUrl);
+		retVal.setUpdated(theUpdated);
+		return retVal;
+	}
+
+	/**
+	 * Factory for canonical URL
+	 */
+	public static ResourceLink forLogicalReference(String theSourcePath, ResourceTable theSourceResource, String theTargetResourceUrl, Date theUpdated) {
+		ResourceLink retVal = new ResourceLink();
+		retVal.setSourcePath(theSourcePath);
+		retVal.setSourceResource(theSourceResource);
+		retVal.setTargetResourceUrlCanonical(theTargetResourceUrl);
+		retVal.setUpdated(theUpdated);
+		return retVal;
+	}
+
+	public static ResourceLink forLocalReference(String theSourcePath, ResourceTable theSourceResource, ResourceTable theTargetResource, Date theUpdated) {
+		ResourceLink retVal = new ResourceLink();
+		retVal.setSourcePath(theSourcePath);
+		retVal.setSourceResource(theSourceResource);
+		retVal.setTargetResource(theTargetResource);
+		retVal.setUpdated(theUpdated);
+		return retVal;
 	}
 
 }

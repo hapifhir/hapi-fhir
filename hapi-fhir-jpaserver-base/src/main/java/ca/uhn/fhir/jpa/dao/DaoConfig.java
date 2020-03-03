@@ -15,13 +15,18 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,12 +59,6 @@ public class DaoConfig {
 	 */
 	public static final String DISABLE_STATUS_BASED_REINDEX = "disable_status_based_reindex";
 	/**
-	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
-	 *
-	 * @see #setMaximumSearchResultCountInTransaction(Integer)
-	 */
-	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
-	/**
 	 * Default {@link #setBundleTypesAllowedForStorage(Set)} value:
 	 * <ul>
 	 * <li>collection</li>
@@ -73,12 +72,16 @@ public class DaoConfig {
 		Bundle.BundleType.DOCUMENT.toCode(),
 		Bundle.BundleType.MESSAGE.toCode()
 	)));
-	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
-	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
-
 	// update setter javadoc if default changes
 	public static final int DEFAULT_MAX_EXPANSION_SIZE = 1000;
-
+	/**
+	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
+	 *
+	 * @see #setMaximumSearchResultCountInTransaction(Integer)
+	 */
+	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
+	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
+	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 
 	/**
@@ -174,6 +177,11 @@ public class DaoConfig {
 	 * @since 4.1.0
 	 */
 	private int myPreExpandValueSetsMaxCount = 1000;
+
+	/**
+	 * @since 4.2.0
+	 */
+	private boolean myPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets;
 
 	/**
 	 * Constructor
@@ -570,7 +578,7 @@ public class DaoConfig {
 	 * the operation will be failed as too costly. Note that this setting applies only to
 	 * in-memory expansions and does not apply to expansions that are being pre-calculated.
 	 * <p>
-	 *    The default value for this setting is 1000.
+	 * The default value for this setting is 1000.
 	 * </p>
 	 */
 	public void setMaximumExpansionSize(int theMaximumExpansionSize) {
@@ -991,6 +999,108 @@ public class DaoConfig {
 	 */
 	public void setAutoCreatePlaceholderReferenceTargets(boolean theAutoCreatePlaceholderReferenceTargets) {
 		myAutoCreatePlaceholderReferenceTargets = theAutoCreatePlaceholderReferenceTargets;
+	}
+
+	/**
+	 * When {@link #setAutoCreatePlaceholderReferenceTargets(boolean)} is enabled, if this
+	 * setting is set to <code>true</code> (default is <code>false</code>) and the source
+	 * reference has an identifier populated, the identifier will be copied to the target
+	 * resource.
+	 * <p>
+	 * When enabled, if an Observation contains a reference like the one below,
+	 * and no existing resource was found that matches the given ID, a new
+	 * one will be created and its <code>Patient.identifier</code> value will be
+	 * populated using the value from <code>Observation.subject.identifier</code>.
+	 * </p>
+	 * <pre>
+	 * {
+	 *   "resourceType": "Observation",
+	 *   "subject": {
+	 *     "reference": "Patient/ABC",
+	 *     "identifier": {
+	 *       "system": "http://foo",
+	 *       "value": "123"
+	 *     }
+	 *   }
+	 * }
+	 * </pre>
+	 * <p>
+	 * This method is often combined with {@link #setAllowInlineMatchUrlReferences(boolean)}.
+	 * </p>
+	 * <p>
+	 * In other words if an Observation contains a reference like the one below,
+	 * and no existing resource was found that matches the given match URL, a new
+	 * one will be created and its <code>Patient.identifier</code> value will be
+	 * populated using the value from <code>Observation.subject.identifier</code>.
+	 * </p>
+	 * <pre>
+	 * {
+	 *   "resourceType": "Observation",
+	 *   "subject": {
+	 *     "reference": "Patient?identifier=http://foo|123",
+	 *     "identifier": {
+	 *       "system": "http://foo",
+	 *       "value": "123"
+	 *     }
+	 *   }
+	 * }
+	 * </pre>
+	 *
+	 * @since 4.2.0
+	 */
+	public boolean isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets() {
+		return myPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets;
+	}
+
+	/**
+	 * When {@link #setAutoCreatePlaceholderReferenceTargets(boolean)} is enabled, if this
+	 * setting is set to <code>true</code> (default is <code>false</code>) and the source
+	 * reference has an identifier populated, the identifier will be copied to the target
+	 * resource.
+	 * <p>
+	 * When enabled, if an Observation contains a reference like the one below,
+	 * and no existing resource was found that matches the given ID, a new
+	 * one will be created and its <code>Patient.identifier</code> value will be
+	 * populated using the value from <code>Observation.subject.identifier</code>.
+	 * </p>
+	 * <pre>
+	 * {
+	 *   "resourceType": "Observation",
+	 *   "subject": {
+	 *     "reference": "Patient/ABC",
+	 *     "identifier": {
+	 *       "system": "http://foo",
+	 *       "value": "123"
+	 *     }
+	 *   }
+	 * }
+	 * </pre>
+	 * <p>
+	 * This method is often combined with {@link #setAllowInlineMatchUrlReferences(boolean)}.
+	 * </p>
+	 * <p>
+	 * In other words if an Observation contains a reference like the one below,
+	 * and no existing resource was found that matches the given match URL, a new
+	 * one will be created and its <code>Patient.identifier</code> value will be
+	 * populated using the value from <code>Observation.subject.identifier</code>.
+	 * </p>
+	 * <pre>
+	 * {
+	 *   "resourceType": "Observation",
+	 *   "subject": {
+	 *     "reference": "Patient?identifier=http://foo|123",
+	 *     "identifier": {
+	 *       "system": "http://foo",
+	 *       "value": "123"
+	 *     }
+	 *   }
+	 * }
+	 * </pre>
+	 *
+	 * @since 4.2.0
+	 */
+	public void setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(boolean thePopulateIdentifierInAutoCreatedPlaceholderReferenceTargets) {
+		myPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets = thePopulateIdentifierInAutoCreatedPlaceholderReferenceTargets;
 	}
 
 	/**
@@ -1682,29 +1792,6 @@ public class DaoConfig {
 		myStoreMetaSourceInformation = theStoreMetaSourceInformation;
 	}
 
-	public enum StoreMetaSourceInformationEnum {
-		NONE(false, false),
-		SOURCE_URI(true, false),
-		REQUEST_ID(false, true),
-		SOURCE_URI_AND_REQUEST_ID(true, true);
-
-		private final boolean myStoreSourceUri;
-		private final boolean myStoreRequestId;
-
-		StoreMetaSourceInformationEnum(boolean theStoreSourceUri, boolean theStoreRequestId) {
-			myStoreSourceUri = theStoreSourceUri;
-			myStoreRequestId = theStoreRequestId;
-		}
-
-		public boolean isStoreSourceUri() {
-			return myStoreSourceUri;
-		}
-
-		public boolean isStoreRequestId() {
-			return myStoreRequestId;
-		}
-	}
-
 	/**
 	 * <p>
 	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
@@ -1818,6 +1905,29 @@ public class DaoConfig {
 	public void setPreExpandValueSetsMaxCount(int thePreExpandValueSetsMaxCount) {
 		myPreExpandValueSetsMaxCount = thePreExpandValueSetsMaxCount;
 		setPreExpandValueSetsDefaultCount(Math.min(getPreExpandValueSetsDefaultCount(), getPreExpandValueSetsMaxCount()));
+	}
+
+	public enum StoreMetaSourceInformationEnum {
+		NONE(false, false),
+		SOURCE_URI(true, false),
+		REQUEST_ID(false, true),
+		SOURCE_URI_AND_REQUEST_ID(true, true);
+
+		private final boolean myStoreSourceUri;
+		private final boolean myStoreRequestId;
+
+		StoreMetaSourceInformationEnum(boolean theStoreSourceUri, boolean theStoreRequestId) {
+			myStoreSourceUri = theStoreSourceUri;
+			myStoreRequestId = theStoreRequestId;
+		}
+
+		public boolean isStoreSourceUri() {
+			return myStoreSourceUri;
+		}
+
+		public boolean isStoreRequestId() {
+			return myStoreRequestId;
+		}
 	}
 
 	public enum IndexEnabledEnum {

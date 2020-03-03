@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.provider.r4.ResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.util.CoordCalculatorTest;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -65,6 +66,7 @@ import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -3003,7 +3005,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.count(5)
 			.returnBundle(Bundle.class)
 			.execute();
-		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
 		Search search1 = newTxTemplate().execute(new TransactionCallback<Search>() {
@@ -3012,7 +3013,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				return mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new InternalErrorException(""));
 			}
 		});
-		Date lastReturned1 = search1.getSearchLastReturned();
+		Date created1 = search1.getCreated();
 
 		Bundle result2 = ourClient
 			.search()
@@ -3021,7 +3022,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.count(5)
 			.returnBundle(Bundle.class)
 			.execute();
-		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
 		Search search2 = newTxTemplate().execute(new TransactionCallback<Search>() {
@@ -3030,9 +3030,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				return mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(() -> new InternalErrorException(""));
 			}
 		});
-		Date lastReturned2 = search2.getSearchLastReturned();
+		Date created2 = search2.getCreated();
 
-		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
+		assertEquals(created2.getTime(), created1.getTime());
 
 		Thread.sleep(1500);
 
@@ -3067,24 +3067,22 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.forResource("Organization")
 			.returnBundle(Bundle.class)
 			.execute();
-		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
 		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new InternalErrorException("")));
-		Date lastReturned1 = search1.getSearchLastReturned();
+		Date created1 = search1.getCreated();
 
 		Bundle result2 = ourClient
 			.search()
 			.forResource("Organization")
 			.returnBundle(Bundle.class)
 			.execute();
-		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
 		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(() -> new InternalErrorException("")));
-		Date lastReturned2 = search2.getSearchLastReturned();
+		Date created2 = search2.getCreated();
 
-		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
+		assertEquals(created2.getTime(), created1.getTime());
 
 		assertEquals(uuid1, uuid2);
 	}
@@ -4278,6 +4276,55 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
+		}
+
+	}
+
+	@Test
+	public void testNearSearchApproximate() {
+		Location loc = new Location();
+		double latitude = CoordCalculatorTest.LATITUDE_UHN;
+		double longitude = CoordCalculatorTest.LONGITUDE_UHN;
+		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		loc.setPosition(position);
+		IIdType locId = ourClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
+
+		{ // In the box
+			double bigEnoughDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN * 2;
+			String url = "/Location?" +
+				Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + URLEncoder.encode(":") + CoordCalculatorTest.LONGITUDE_CHIN +
+				"&" +
+				Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
+
+			Bundle actual = ourClient
+				.search()
+				.byUrl(ourServerBase + "/" + url)
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+
+			assertEquals(1, actual.getEntry().size());
+			assertEquals(locId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
+		}
+		{ // Outside the box
+			double tooSmallDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN / 2;
+			String url = "/Location?" +
+				Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + URLEncoder.encode(":") + CoordCalculatorTest.LONGITUDE_CHIN +
+				"&" +
+				Location.SP_NEAR_DISTANCE + "=" + tooSmallDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
+
+			myCaptureQueriesListener.clear();
+			Bundle actual = ourClient
+				.search()
+				.byUrl(ourServerBase + "/" + url)
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+			myCaptureQueriesListener.logSelectQueries();
+
+			assertEquals(0, actual.getEntry().size());
 		}
 
 	}

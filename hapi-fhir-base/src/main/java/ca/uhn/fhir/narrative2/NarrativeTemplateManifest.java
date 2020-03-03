@@ -4,7 +4,7 @@ package ca.uhn.fhir.narrative2;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,18 +155,6 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 					.map(t -> t.trim())
 					.filter(t -> isNotBlank(t))
 					.forEach(t -> nextTemplate.addAppliesToDatatype(t));
-			} else if (nextKey.endsWith(".class")) {
-				String className = file.getProperty(nextKey);
-				Class<? extends IBase> clazz;
-				try {
-					clazz = (Class<? extends IBase>) Class.forName(className);
-				} catch (ClassNotFoundException e) {
-					ourLog.debug("Unknown datatype class '{}' identified in manifest", name);
-					clazz = null;
-				}
-				if (clazz != null) {
-					nextTemplate.addAppliesToResourceClass(clazz);
-				}
 			} else if (nextKey.endsWith(".style")) {
 				String templateTypeName = file.getProperty(nextKey).toUpperCase();
 				TemplateTypeEnum templateType = TemplateTypeEnum.valueOf(templateTypeName);
@@ -183,7 +171,9 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 			} else if (nextKey.endsWith(".title")) {
 				ourLog.debug("Ignoring title property as narrative generator no longer generates titles: {}", nextKey);
 			} else {
-				throw new ConfigurationException("Invalid property name: " + nextKey);
+				throw new ConfigurationException("Invalid property name: " + nextKey 
+															+ " - the key must end in one of the expected extensions "
+															+ "'.profile', '.resourceType', '.dataType', '.style', '.contextPath', '.narrative', '.title'");
 			}
 
 		}

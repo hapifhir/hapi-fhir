@@ -1,14 +1,10 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.validation.IValidationContext;
+import ca.uhn.fhir.validation.IValidatorModule;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.apache.commons.lang3.Validate;
@@ -18,26 +14,45 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.common.hapi.validation.ValidatorWrapper;
 import org.hl7.fhir.convertors.VersionConvertor_14_50;
-import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpander;
+import org.hl7.fhir.convertors.conv14_50.CodeSystem14_50;
+import org.hl7.fhir.convertors.conv14_50.StructureDefinition14_50;
+import org.hl7.fhir.convertors.conv14_50.ValueSet14_50;
+import org.hl7.fhir.dstu2016may.model.CodeSystem;
+import org.hl7.fhir.dstu2016may.model.CodeableConcept;
+import org.hl7.fhir.dstu2016may.model.Coding;
+import org.hl7.fhir.dstu2016may.model.ImplementationGuide;
+import org.hl7.fhir.dstu2016may.model.Questionnaire;
+import org.hl7.fhir.dstu2016may.model.StructureDefinition;
+import org.hl7.fhir.dstu2016may.model.ValueSet;
+import org.hl7.fhir.exceptions.DefinitionException;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.formats.IParser;
 import org.hl7.fhir.r5.formats.ParserType;
+import org.hl7.fhir.r5.model.CanonicalResource;
+import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.utils.INarrativeGenerator;
 import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.hl7.fhir.r5.model.Resource;
-import org.hl7.fhir.dstu2016may.model.*;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
-import org.w3c.dom.*;
+import org.hl7.fhir.utilities.validation.ValidationOptions;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.validation.IValidationContext;
-import ca.uhn.fhir.validation.IValidatorModule;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class FhirInstanceValidator extends BaseValidatorBridge implements IValidatorModule {
 
@@ -326,8 +341,13 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public List<org.hl7.fhir.r5.model.MetadataResource> allConformanceResources() {
+		public List<CanonicalResource> allConformanceResources() {
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void generateSnapshot(org.hl7.fhir.r5.model.StructureDefinition theStructureDefinition) throws DefinitionException, FHIRException {
+			// nothing yet
 		}
 
 		@Override
@@ -336,7 +356,12 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public void generateSnapshot(org.hl7.fhir.r5.model.StructureDefinition p) throws FHIRException {
+		public Map<String, byte[]> getBinaries() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void generateSnapshot(org.hl7.fhir.r5.model.StructureDefinition p, boolean theb) throws FHIRException {
 			// nothing yet
 		}
 
@@ -370,7 +395,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		public org.hl7.fhir.r5.model.StructureDefinition convert(StructureDefinition next) {
-			org.hl7.fhir.r5.model.StructureDefinition structureDefinition = VersionConvertor_14_50.convertStructureDefinition(next);
+			org.hl7.fhir.r5.model.StructureDefinition structureDefinition = StructureDefinition14_50.convertStructureDefinition(next);
 			if (next.getDerivation() != org.hl7.fhir.dstu2016may.model.StructureDefinition.TypeDerivationRule.CONSTRAINT) {
 				structureDefinition.setType(next.getName());
 			}
@@ -396,7 +421,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 				org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent conceptDefinition = null;
 				if (theResult.asConceptDefinition() != null) {
 					try {
-						conceptDefinition = VersionConvertor_14_50.convertConceptDefinitionComponent(theResult.asConceptDefinition());
+						conceptDefinition = CodeSystem14_50.convertConceptDefinitionComponent(theResult.asConceptDefinition());
 					} catch (FHIRException e) {
 						throw new InternalErrorException(e);
 					}
@@ -416,7 +441,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		public org.hl7.fhir.r5.terminologies.ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ValueSet source, boolean cacheOk, boolean heiarchical) {
 			ValueSet convertedSource;
 			try {
-				convertedSource = VersionConvertor_14_50.convertValueSet(source);
+				convertedSource = ValueSet14_50.convertValueSet(source);
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
 			}
@@ -425,7 +450,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			org.hl7.fhir.r5.model.ValueSet convertedResult = null;
 			if (expanded.getValueset() != null) {
 				try {
-					convertedResult = VersionConvertor_14_50.convertValueSet(expanded.getValueset());
+					convertedResult = ValueSet14_50.convertValueSet(expanded.getValueset());
 				} catch (FHIRException e) {
 					throw new InternalErrorException(e);
 				}
@@ -446,7 +471,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			ValueSet.ConceptSetComponent convertedInc = null;
 			if (inc != null) {
 				try {
-					convertedInc = VersionConvertor_14_50.convertConceptSetComponent(inc);
+					convertedInc = ValueSet14_50.convertConceptSetComponent(inc);
 				} catch (FHIRException e) {
 					throw new InternalErrorException(e);
 				}
@@ -456,7 +481,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent valueSetExpansionComponent = null;
 			if (expansion != null) {
 				try {
-					valueSetExpansionComponent = VersionConvertor_14_50.convertValueSetExpansionComponent(expansion);
+					valueSetExpansionComponent = ValueSet14_50.convertValueSetExpansionComponent(expansion);
 				} catch (FHIRException e) {
 					throw new InternalErrorException(e);
 				}
@@ -469,7 +494,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public ValidationResult validateCode(TerminologyServiceOptions options, String system, String code, String display) {
+		public ValidationResult validateCode(ValidationOptions options, String system, String code, String display) {
 			return null;
 		}
 
@@ -480,7 +505,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 				return null;
 			}
 			try {
-				return VersionConvertor_14_50.convertCodeSystem(fetched);
+				return CodeSystem14_50.convertCodeSystem(fetched);
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
 			}
@@ -558,6 +583,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		@Override
 		public org.hl7.fhir.r5.model.StructureDefinition fetchTypeDefinition(String typeName) {
 			return fetchResource(org.hl7.fhir.r5.model.StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
+		}
+
+		@Override
+		public org.hl7.fhir.r5.model.StructureDefinition fetchRawProfile(String url) {
+			return fetchResource(org.hl7.fhir.r5.model.StructureDefinition.class, url);
 		}
 
 
@@ -646,19 +676,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			return myWrap.supportsSystem(system);
 		}
 
-		@Override
-		public Set<String> typeTails() {
-			return myWrap.typeTails();
-		}
-
 
 		@Override
-		public ValidationResult validateCode(TerminologyServiceOptions theOptions, String system, String code, String display, org.hl7.fhir.r5.model.ValueSet vs) {
+		public ValidationResult validateCode(ValidationOptions theOptions, String system, String code, String display, org.hl7.fhir.r5.model.ValueSet vs) {
 			ValueSet convertedVs = null;
 
 			try {
 				if (vs != null) {
-					convertedVs = VersionConvertor_14_50.convertValueSet(vs);
+					convertedVs = ValueSet14_50.convertValueSet(vs);
 				}
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
@@ -669,11 +694,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public ValidationResult validateCode(TerminologyServiceOptions theOptions, String code, org.hl7.fhir.r5.model.ValueSet vs) {
+		public ValidationResult validateCode(ValidationOptions theOptions, String code, org.hl7.fhir.r5.model.ValueSet vs) {
 			ValueSet convertedVs = null;
 			try {
 				if (vs != null) {
-					convertedVs = VersionConvertor_14_50.convertValueSet(vs);
+					convertedVs = ValueSet14_50.convertValueSet(vs);
 				}
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
@@ -684,7 +709,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public ValidationResult validateCode(TerminologyServiceOptions theOptions, org.hl7.fhir.r5.model.Coding code, org.hl7.fhir.r5.model.ValueSet vs) {
+		public ValidationResult validateCode(ValidationOptions theOptions, org.hl7.fhir.r5.model.Coding code, org.hl7.fhir.r5.model.ValueSet vs) {
 			Coding convertedCode = null;
 			ValueSet convertedVs = null;
 
@@ -693,7 +718,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 					convertedCode = VersionConvertor_14_50.convertCoding(code);
 				}
 				if (vs != null) {
-					convertedVs = VersionConvertor_14_50.convertValueSet(vs);
+					convertedVs = ValueSet14_50.convertValueSet(vs);
 				}
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
@@ -704,7 +729,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public ValidationResult validateCode(TerminologyServiceOptions theOptions, org.hl7.fhir.r5.model.CodeableConcept code, org.hl7.fhir.r5.model.ValueSet vs) {
+		public ValidationResult validateCode(ValidationOptions theOptions, org.hl7.fhir.r5.model.CodeableConcept code, org.hl7.fhir.r5.model.ValueSet vs) {
 			CodeableConcept convertedCode = null;
 			ValueSet convertedVs = null;
 
@@ -713,28 +738,13 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 					convertedCode = VersionConvertor_14_50.convertCodeableConcept(code);
 				}
 				if (vs != null) {
-					convertedVs = VersionConvertor_14_50.convertValueSet(vs);
+					convertedVs = ValueSet14_50.convertValueSet(vs);
 				}
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
 			}
 
 			org.hl7.fhir.dstu2016may.utils.IWorkerContext.ValidationResult result = myWrap.validateCode(convertedCode, convertedVs);
-			return convertValidationResult(result);
-		}
-
-		@Override
-		public ValidationResult validateCode(TerminologyServiceOptions theOptions, String system, String code, String display, org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent vsi) {
-			ValueSet.ConceptSetComponent conceptSetComponent = null;
-			if (vsi != null) {
-				try {
-					conceptSetComponent = VersionConvertor_14_50.convertConceptSetComponent(vsi);
-				} catch (FHIRException e) {
-					throw new InternalErrorException(e);
-				}
-			}
-
-			org.hl7.fhir.dstu2016may.utils.IWorkerContext.ValidationResult result = myWrap.validateCode(system, code, display, conceptSetComponent);
 			return convertValidationResult(result);
 		}
 

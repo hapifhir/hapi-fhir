@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,15 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ElementUtil;
 import org.apache.commons.codec.binary.StringUtils;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.IntegerType;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetFilterComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
@@ -51,7 +54,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Collections;
 import java.util.Date;
@@ -59,6 +61,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.convertors.conv30_40.ValueSet30_40.convertValueSet;
 
 public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoValueSetDstu3.class);
@@ -420,7 +423,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 			if (retVal.getDeleted() == null) {
 				try {
 					ValueSet valueSet = (ValueSet) theResource;
-					org.hl7.fhir.r4.model.ValueSet converted = VersionConvertor_30_40.convertValueSet(valueSet);
+					org.hl7.fhir.r4.model.ValueSet converted = convertValueSet(valueSet);
 					myHapiTerminologySvc.storeTermValueSet(retVal, converted);
 				} catch (FHIRException fe) {
 					throw new InternalErrorException(fe);

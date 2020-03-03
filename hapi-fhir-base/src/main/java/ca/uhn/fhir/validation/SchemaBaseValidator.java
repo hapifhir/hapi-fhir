@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,12 +39,17 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class SchemaBaseValidator implements IValidatorModule {
 	public static final String RESOURCES_JAR_NOTE = "Note that as of HAPI FHIR 1.2, DSTU2 validation files are kept in a separate JAR (hapi-fhir-validation-resources-XXX.jar) which must be added to your classpath. See the HAPI FHIR download page for more information.";
@@ -179,18 +184,20 @@ public class SchemaBaseValidator implements IValidatorModule {
 				input.setPublicId(thePublicId);
 				input.setSystemId(theSystemId);
 				input.setBaseURI(theBaseURI);
-				// String pathToBase = "ca/uhn/fhir/model/" + myVersion + "/schema/" + theSystemId;
 				String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theSystemId;
 
 				ourLog.debug("Loading referenced schema file: " + pathToBase);
 
-				InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
-				if (baseIs == null) {
-					throw new InternalErrorException("Schema file not found: " + pathToBase);
-				}
+				try (InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase)) {
+					if (baseIs == null) {
+						throw new InternalErrorException("Schema file not found: " + pathToBase);
+					}
 
-				input.setByteStream(baseIs);
-				//FIXME resource leak
+					byte[] bytes = IOUtils.toByteArray(baseIs);
+					input.setByteStream(new ByteArrayInputStream(bytes));
+				} catch (IOException e) {
+					throw new InternalErrorException(e);
+				}
 				return input;
 
 			}

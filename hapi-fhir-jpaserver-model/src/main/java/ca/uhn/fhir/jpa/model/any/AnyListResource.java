@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.any;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -298,7 +298,7 @@ public class AnyListResource {
 
 	private boolean removeItemR5(String theReferenceId) {
 		boolean removed = false;
-		for (org.hl7.fhir.r5.model.ListResource.ListEntryComponent entry : getR5().getEntry()) {
+		for (org.hl7.fhir.r5.model.ListResource.ListResourceEntryComponent entry : getR5().getEntry()) {
 			if (theReferenceId.equals(entry.getItem().getReference()) && !entry.getDeleted()) {
 				entry.setDeleted(true);
 				removed = true;

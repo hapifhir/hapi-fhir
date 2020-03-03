@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,19 +22,12 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.delete.DeleteConflictList;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
-import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.model.entity.BaseTag;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.entity.TagDefinition;
-import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
@@ -45,51 +38,20 @@ import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.jsonpatch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.util.xmlpatch.XmlPatchUtils;
-import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.CacheControlDirective;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PatchTypeEnum;
-import ca.uhn.fhir.rest.api.QualifiedParamList;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.ValidationModeEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
-import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
-import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
-import ca.uhn.fhir.rest.param.ParameterUtil;
-import ca.uhn.fhir.rest.param.QualifierDetails;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.*;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.IInstanceValidatorModule;
-import ca.uhn.fhir.validation.IValidationContext;
-import ca.uhn.fhir.validation.IValidatorModule;
-import ca.uhn.fhir.validation.ValidationOptions;
-import ca.uhn.fhir.validation.ValidationResult;
+import ca.uhn.fhir.validation.*;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -124,6 +86,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private MatchResourceUrlService myMatchResourceUrlService;
 	@Autowired
 	private IResourceReindexingSvc myResourceReindexingSvc;
+	@Autowired
+	private SearchBuilderFactory mySearchBuilderFactory;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
 	private IInstanceValidatorModule myInstanceValidator;
 	private String myResourceName;
 	private Class<T> myResourceType;
@@ -1125,11 +1092,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
+		theParams.setLoadSynchronousUpTo(10000);
 
-		SearchBuilder builder = newSearchBuilder();
-		builder.setType(getResourceType(), getResourceName());
-
-		// FIXME: fail if too many results
+		ISearchBuilder builder = mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
 
 		HashSet<ResourcePersistentId> retVal = new HashSet<>();
 
@@ -1179,38 +1144,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		return retVal;
-	}
-
-	@Transactional(propagation = Propagation.SUPPORTS)
-	@Override
-	public void translateRawParameters(Map<String, List<String>> theSource, SearchParameterMap theTarget) {
-		if (theSource == null || theSource.isEmpty()) {
-			return;
-		}
-
-		Map<String, RuntimeSearchParam> searchParams = mySerarchParamRegistry.getActiveSearchParams(getResourceName());
-
-		Set<String> paramNames = theSource.keySet();
-		for (String nextParamName : paramNames) {
-			QualifierDetails qualifiedParamName = SearchMethodBinding.extractQualifiersFromParameterName(nextParamName);
-			RuntimeSearchParam param = searchParams.get(qualifiedParamName.getParamName());
-			if (param == null) {
-				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", qualifiedParamName.getParamName(), new TreeSet<>(searchParams.keySet()));
-				throw new InvalidRequestException(msg);
-			}
-
-			// Should not be null since the check above would have caught it
-			RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceName);
-			RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(resourceDef, qualifiedParamName.getParamName());
-
-			for (String nextValue : theSource.get(nextParamName)) {
-				QualifiedParamList qualifiedParam = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifiedParamName.getWholeQualifier(), nextValue);
-				List<QualifiedParamList> paramList = Collections.singletonList(qualifiedParam);
-				IQueryParameterAnd<?> parsedParam = ParameterUtil.parseQueryParams(getContext(), paramDef, nextParamName, paramList);
-				theTarget.add(qualifiedParamName.getParamName(), parsedParam);
-			}
-
-		}
 	}
 
 	@Override
@@ -1367,7 +1300,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IBaseResource resourceToValidateById = null;
 		if (theId != null && theId.hasResourceType() && theId.hasIdPart()) {
 			Class<? extends IBaseResource> type = getContext().getResourceDefinition(theId.getResourceType()).getImplementingClass();
-			IFhirResourceDao<? extends IBaseResource> dao = getDao(type);
+			IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDaoOrNull(type);
 			resourceToValidateById = dao.read(theId, theRequest);
 		}
 

@@ -600,7 +600,11 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 				.executeUpdate();
 		});
 
-		assertEquals(0, myPatientDao.search(searchParamMap).size().intValue());
+		myCaptureQueriesListener.clear();
+		Integer found = myPatientDao.search(searchParamMap).size();
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		assertEquals(0, found.intValue());
 
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();

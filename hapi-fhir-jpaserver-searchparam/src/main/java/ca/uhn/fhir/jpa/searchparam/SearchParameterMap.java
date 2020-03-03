@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.dstu3.model.Location;
 
 import java.io.Serializable;
 import java.util.*;
@@ -26,7 +27,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +60,7 @@ public class SearchParameterMap implements Serializable {
 	private SortSpec mySort;
 	private SummaryEnum mySummaryMode;
 	private SearchTotalModeEnum mySearchTotalMode;
+	private QuantityParam myNearDistanceParam;
 
 	/**
 	 * Constructor
@@ -495,6 +497,38 @@ public class SearchParameterMap implements Serializable {
 		}
 	}
 
+	public void setNearDistanceParam(QuantityParam theQuantityParam) {
+		myNearDistanceParam = theQuantityParam;
+	}
+
+	public QuantityParam getNearDistanceParam() {
+		return myNearDistanceParam;
+	}
+
+	public void setLocationDistance() {
+		if (containsKey(Location.SP_NEAR_DISTANCE)) {
+			List<List<IQueryParameterType>> paramAndList = get(Location.SP_NEAR_DISTANCE);
+
+			if (paramAndList.isEmpty()) {
+				return;
+			}
+			if (paramAndList.size() > 1) {
+				throw new IllegalArgumentException("Only one " + ca.uhn.fhir.model.dstu2.resource.Location.SP_NEAR_DISTANCE + " parameter may be present");
+			}
+			List<IQueryParameterType> paramOrList =  paramAndList.get(0);
+			if (paramOrList.isEmpty()) {
+				return;
+			}
+			if (paramOrList.size() > 1) {
+				throw new IllegalArgumentException("Only one " + ca.uhn.fhir.model.dstu2.resource.Location.SP_NEAR_DISTANCE + " parameter may be present");
+			}
+			setNearDistanceParam((QuantityParam) paramOrList.get(0));
+
+			// Need to remove near-distance or it we'll get a hashcode predicate for it
+			remove(Location.SP_NEAR_DISTANCE);
+		}
+	}
+
 	public enum EverythingModeEnum {
 		/*
 		 * Don't reorder! We rely on the ordinals
@@ -636,5 +670,9 @@ public class SearchParameterMap implements Serializable {
 
 	public List<List<IQueryParameterType>> remove(String theName) {
 		return mySearchParameterMap.remove(theName);
+	}
+
+	public int size() {
+		return mySearchParameterMap.size();
 	}
 }

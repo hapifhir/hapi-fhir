@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
@@ -45,8 +47,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -421,6 +425,81 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		}
 	}
 
+	@Test
+	public void testInterceptorExpandsSearch() {
+
+		@Interceptor
+		class SearchExpandingInterceptor {
+			
+			@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
+			public void enrich(RequestDetails theRequestDetails) {
+
+				String[] subjectValues = theRequestDetails.getParameters().get("subject");
+				if (subjectValues != null) {
+					for (int index = 0; index < subjectValues.length; index++) {
+						String nextValue = subjectValues[index];
+						if (nextValue.equals("Patient/p1")) {
+							nextValue = "Patient/p1,Patient/p2";
+							subjectValues[index] = nextValue;
+						}
+					}
+				}
+
+			}
+			
+		}
+
+		Patient p1 = new Patient();
+		p1.setId("p1");
+		p1.addIdentifier().setValue("p1");
+		myPatientDao.update(p1);
+
+		Observation o1 = new Observation();
+		o1.setId("o1");
+		o1.getSubject().setReference("Patient/p1");
+		myObservationDao.update(o1);
+		
+		Patient p2 = new Patient();
+		p2.setId("p2");
+		p2.addIdentifier().setValue("p2");
+		myPatientDao.update(p2);
+
+		Observation o2 = new Observation();
+		o2.setId("o2");
+		o2.getSubject().setReference("Patient/p2");
+		myObservationDao.update(o2);
+
+		Patient p3 = new Patient();
+		p3.setId("p3");
+		p3.addIdentifier().setValue("p3");
+		myPatientDao.update(p3);
+
+		Observation o3 = new Observation();
+		o3.setId("o3");
+		o3.getSubject().setReference("Patient/p3");
+		myObservationDao.update(o3);
+
+		SearchExpandingInterceptor interceptor = new SearchExpandingInterceptor();
+		try {
+			ourRestServer.registerInterceptor(interceptor);
+
+			Bundle bundle = ourClient
+				.search()
+				.forResource(Observation.class)
+				.where(Observation.SUBJECT.hasId("Patient/p1"))
+				.returnBundle(Bundle.class)
+				.execute();
+			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
+			assertThat(ids, containsInAnyOrder("Observation/o1", "Observation/o2"));
+
+		} finally {
+			ourRestServer.unregisterInterceptor(interceptor);
+		}
+		
+		
+	}
+	
+	
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

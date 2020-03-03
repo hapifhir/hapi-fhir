@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,12 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import java.util.List;
 
 public interface ISchemaInitializationProvider {
+
 	List<String> getSqlStatements(DriverTypeEnum theDriverType);
 
 	String getSchemaExistsIndicatorTable();
+
+    String getSchemaDescription();
+
+	ISchemaInitializationProvider setSchemaDescription(String theSchemaDescription);
 }

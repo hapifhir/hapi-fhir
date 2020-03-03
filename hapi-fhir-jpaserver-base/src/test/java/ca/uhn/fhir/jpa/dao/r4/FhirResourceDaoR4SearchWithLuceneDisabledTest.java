@@ -3,14 +3,17 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestR4WithLuceneDisabledConfig;
-import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.BaseJpaTest;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
-import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -27,10 +30,12 @@ import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -47,6 +52,7 @@ import static org.junit.Assert.fail;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4WithLuceneDisabledConfig.class})
+@DirtiesContext
 public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchWithLuceneDisabledTest.class);
 	@Autowired
@@ -195,7 +201,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	}
 
 	@Test
-		public void testExpandValueSet() {
+	public void testExpandValueSet() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://fooCS");
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
@@ -223,6 +229,33 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 		assertEquals("CODEA", outcome.getExpansion().getContains().get(0).getCode());
 	}
 
+
+	@Test
+	@Ignore
+	public void testExpandValueSetWithFilter() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://fooCS");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("CODEA");
+		cs.addConcept().setCode("CODEB");
+		myCodeSystemDao.create(cs);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://fooVS");
+		vs.getCompose()
+			.addInclude()
+			.setSystem("http://fooCS")
+			.addFilter()
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setProperty("code")
+			.setValue("CODEA");
+
+		try {
+			myValueSetDao.expand(vs, null);
+		} catch (NullPointerException e) {
+			assertEquals("", e.getMessage());
+		}
+	}
 
 	@Test
 	public void testSearchByCodeIn() {

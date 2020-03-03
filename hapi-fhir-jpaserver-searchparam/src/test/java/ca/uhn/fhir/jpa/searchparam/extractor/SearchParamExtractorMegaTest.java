@@ -163,6 +163,7 @@ public class SearchParamExtractorMegaTest {
 			case "instant":
 				leaf.setValueAsString("2019-10-10T11:11:11Z");
 				break;
+			case "integer64":
 			case "integer":
 			case "decimal":
 				leaf.setValueAsString("1");
@@ -177,10 +178,6 @@ public class SearchParamExtractorMegaTest {
 
 		ISearchParamExtractor.SearchParamSet<?> set;
 
-		set = theExtractor.extractSearchParamCoords(resource);
-		assertEquals(0, set.getWarnings().size());
-		theIndexesCounter.addAndGet(set.size());
-
 		set = theExtractor.extractSearchParamDates(resource);
 		assertEquals(0, set.getWarnings().size());
 		theIndexesCounter.addAndGet(set.size());
@@ -194,7 +191,7 @@ public class SearchParamExtractorMegaTest {
 		theIndexesCounter.addAndGet(set.size());
 
 		set = theExtractor.extractSearchParamQuantity(resource);
-		assertEquals(0, set.getWarnings().size());
+		assertEquals(String.join("\n", set.getWarnings()), 0, set.getWarnings().size());
 		theIndexesCounter.addAndGet(set.size());
 
 		set = theExtractor.extractSearchParamTokens(resource);

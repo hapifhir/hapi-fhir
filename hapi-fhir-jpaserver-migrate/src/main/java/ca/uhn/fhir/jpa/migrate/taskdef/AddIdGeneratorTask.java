@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,9 +88,9 @@ public class AddIdGeneratorTask extends BaseTask<AddIdGeneratorTask> {
 		if (isNotBlank(sql)) {
 			Set<String> sequenceNames =
 				JdbcUtils.getSequenceNames(getConnectionProperties())
-				.stream()
-				.map(String::toLowerCase)
-				.collect(Collectors.toSet());
+					.stream()
+					.map(String::toLowerCase)
+					.collect(Collectors.toSet());
 			ourLog.debug("Currently have sequences: {}", sequenceNames);
 			if (sequenceNames.contains(myGeneratorName.toLowerCase())) {
 				logInfo(ourLog, "Sequence {} already exists - No action performed", myGeneratorName);
@@ -103,22 +103,13 @@ public class AddIdGeneratorTask extends BaseTask<AddIdGeneratorTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (!(theO instanceof AddIdGeneratorTask)) return false;
-
-		AddIdGeneratorTask that = (AddIdGeneratorTask) theO;
-
-		return new EqualsBuilder()
-			.append(myGeneratorName, that.myGeneratorName)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<AddIdGeneratorTask> theOtherObject) {
+		AddIdGeneratorTask otherObject = (AddIdGeneratorTask) theOtherObject;
+		theBuilder.append(myGeneratorName, otherObject.myGeneratorName);
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myGeneratorName)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		theBuilder.append(myGeneratorName);
 	}
 }

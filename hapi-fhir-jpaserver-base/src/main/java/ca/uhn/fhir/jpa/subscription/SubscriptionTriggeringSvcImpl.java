@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider.RESOURCE_ID;
@@ -136,8 +142,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		SubscriptionTriggeringJobDetails jobDetails = new SubscriptionTriggeringJobDetails();
 		jobDetails.setJobId(UUID.randomUUID().toString());
-		jobDetails.setRemainingResourceIds(resourceIds.stream().map(t->t.getValue()).collect(Collectors.toList()));
-		jobDetails.setRemainingSearchUrls(searchUrls.stream().map(t->t.getValue()).collect(Collectors.toList()));
+		jobDetails.setRemainingResourceIds(resourceIds.stream().map(t -> t.getValue()).collect(Collectors.toList()));
+		jobDetails.setRemainingSearchUrls(searchUrls.stream().map(t -> t.getValue()).collect(Collectors.toList()));
 		if (theSubscriptionId != null) {
 			jobDetails.setSubscriptionId(theSubscriptionId.getIdPart());
 		}
@@ -386,7 +392,13 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(DateUtils.MILLIS_PER_SECOND, jobDetail);
+		// Currently jobs ae kept in a local ArrayList so this should be a local job, and
+		// it can fire frequently without adding load
+		mySchedulerService.scheduleLocalJob(5 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+	}
+
+	public int getActiveJobCount() {
+		return myActiveJobs.size();
 	}
 
 	public static class Job implements HapiJob {

@@ -7,7 +7,7 @@ import java.util.List;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.model.entity.ForcedId;
 
 public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 
-	// FIXME: JA We should log a performance warning if this is used since it's not indexed
 	@Query("SELECT f.myResourcePid FROM ForcedId f WHERE myForcedId IN (:forced_id)")
 	List<Long> findByForcedId(@Param("forced_id") Collection<String> theForcedId);
 

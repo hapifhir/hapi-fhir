@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,28 +97,21 @@ public class AddIndexTask extends BaseTableTask<AddIndexTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<AddIndexTask> theOtherObject) {
+		super.generateEquals(theBuilder, theOtherObject);
 
-		if (theO == null || getClass() != theO.getClass()) return false;
+		AddIndexTask otherObject = (AddIndexTask) theOtherObject;
+		theBuilder.append(myIndexName, otherObject.myIndexName);
+		theBuilder.append(myColumns, otherObject.myColumns);
+		theBuilder.append(myUnique, otherObject.myUnique);
 
-		AddIndexTask that = (AddIndexTask) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myIndexName, that.myIndexName)
-			.append(myColumns, that.myColumns)
-			.append(myUnique, that.myUnique)
-			.isEquals();
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myIndexName)
-			.append(myColumns)
-			.append(myUnique)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myIndexName);
+		theBuilder.append(myColumns);
+		theBuilder.append(myUnique);
 	}
 }

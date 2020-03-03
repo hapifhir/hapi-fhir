@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.thymeleaf.util.StringUtils;
 
 import java.util.Locale;
 
-public abstract class BaseTableColumnTask<T extends BaseTableTask> extends BaseTableTask<T> {
+public abstract class BaseTableColumnTask<T extends BaseTableTask<T>> extends BaseTableTask<T> {
 
 	private String myColumnName;
 
@@ -53,24 +53,15 @@ public abstract class BaseTableColumnTask<T extends BaseTableTask> extends BaseT
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (!(theO instanceof BaseTableColumnTask)) return false;
-
-		BaseTableColumnTask<?> that = (BaseTableColumnTask<?>) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myColumnName, that.myColumnName)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<T> theOtherObject) {
+		BaseTableColumnTask<T> otherObject = (BaseTableColumnTask<T>) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(myColumnName, otherObject.myColumnName);
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myColumnName)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myColumnName);
 	}
 }

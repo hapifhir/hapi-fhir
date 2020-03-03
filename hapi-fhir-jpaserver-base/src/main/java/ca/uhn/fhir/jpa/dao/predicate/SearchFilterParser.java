@@ -1,10 +1,10 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.dao.predicate;
 
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -544,7 +544,7 @@ public class SearchFilterParser {
 			return FValueType;
 		}
 
-		public void setValueType(FilterValueType FValueType) {
+		void setValueType(FilterValueType FValueType) {
 
 			this.FValueType = FValueType;
 		}
@@ -602,7 +602,7 @@ public class SearchFilterParser {
 		}
 	}
 
-	static class FilterSyntaxException extends Exception {
+	public static class FilterSyntaxException extends Exception {
 		FilterSyntaxException(String theMessage) {
 			super(theMessage);
 		}

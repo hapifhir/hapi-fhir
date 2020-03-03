@@ -1,0 +1,30 @@
+{
+	"resourceType": "Parameters",
+	"parameter": [
+		{
+			"name": "system",
+			"valueUri": "https://good.health"
+		},
+		{
+			"name": "codeSystem",
+			"resource": {
+				"resourceType": "CodeSystem",
+				"status": "active",
+				"content": "not-present",
+				"url": "https://good.health",
+				"concept": [
+					{
+						"code": "1111222233",
+						"display": "Some label for the parent - with a dash too",
+						"concept": [
+							{
+								"code": "1111222234",
+								"display": "Some very very very very very looooooong child label with a coma, another one, one more, more and final one"
+							}
+						]
+					}
+				]
+			}
+		}
+	]
+}

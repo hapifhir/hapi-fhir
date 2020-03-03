@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.*;
 import org.apache.commons.lang3.Validate;
 import org.intellij.lang.annotations.Language;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class Builder {
 
@@ -47,9 +50,10 @@ public class Builder {
 		return new BuilderAddTableRawSql(theVersion, theTableName);
 	}
 
-	public Builder executeRawSql(String theVersion, @Language("SQL") String theSql) {
-		mySink.addTask(new ExecuteRawSqlTask(myRelease, theVersion).addSql(theSql));
-		return this;
+	public BuilderCompleteTask executeRawSql(String theVersion, @Language("SQL") String theSql) {
+		ExecuteRawSqlTask task = new ExecuteRawSqlTask(myRelease, theVersion).addSql(theSql);
+		mySink.addTask(task);
+		return new BuilderCompleteTask(task);
 	}
 
 	public Builder initializeSchema(String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
@@ -69,6 +73,7 @@ public class Builder {
 		return this;
 	}
 
+
 	// Flyway doesn't support these kinds of migrations
 	@Deprecated
 	public Builder startSectionWithMessage(String theMessage) {
@@ -76,8 +81,8 @@ public class Builder {
 		return this;
 	}
 
-	public BuilderAddTableByColumns addTableByColumns(String theVersion, String theTableName, String thePkColumnName) {
-		return new BuilderAddTableByColumns(myRelease, theVersion, mySink, theTableName, thePkColumnName);
+	public BuilderAddTableByColumns addTableByColumns(String theVersion, String theTableName, String... thePkColumnNames) {
+		return new BuilderAddTableByColumns(myRelease, theVersion, mySink, theTableName, Arrays.asList(thePkColumnNames));
 	}
 
 	public void addIdGenerator(String theVersion, String theGeneratorName) {
@@ -115,12 +120,12 @@ public class Builder {
 		private final String myVersion;
 		private final AddTableByColumnTask myTask;
 
-		public BuilderAddTableByColumns(String theRelease, String theVersion, BaseMigrationTasks.IAcceptsTasks theSink, String theTableName, String thePkColumnName) {
+		public BuilderAddTableByColumns(String theRelease, String theVersion, BaseMigrationTasks.IAcceptsTasks theSink, String theTableName, List<String> thePkColumnNames) {
 			super(theRelease, theSink, theTableName);
 			myVersion = theVersion;
 			myTask = new AddTableByColumnTask(myRelease, theVersion);
 			myTask.setTableName(theTableName);
-			myTask.setPkColumn(thePkColumnName);
+			myTask.setPkColumns(thePkColumnNames);
 			theSink.addTask(myTask);
 		}
 
@@ -153,20 +158,22 @@ public class Builder {
 			return myTableName;
 		}
 
-		public void dropIndex(String theVersion, String theIndexName) {
-			dropIndexOptional(false, theVersion, theIndexName);
+		public BuilderCompleteTask dropIndex(String theVersion, String theIndexName) {
+			BaseTask task = dropIndexOptional(false, theVersion, theIndexName);
+			return new BuilderCompleteTask(task);
 		}
 
 		public void dropIndexStub(String theVersion, String theIndexName) {
 			dropIndexOptional(true, theVersion, theIndexName);
 		}
 
-		private void dropIndexOptional(boolean theDoNothing, String theVersion, String theIndexName) {
+		private DropIndexTask dropIndexOptional(boolean theDoNothing, String theVersion, String theIndexName) {
 			DropIndexTask task = new DropIndexTask(myRelease, theVersion);
 			task.setIndexName(theIndexName);
 			task.setTableName(myTableName);
 			task.setDoNothing(theDoNothing);
 			addTask(task);
+			return task;
 		}
 
 		public void renameIndex(String theVersion, String theOldIndexName, String theNewIndexName) {
@@ -281,11 +288,12 @@ public class Builder {
 					withColumnsOptional(true, theColumnNames);
 				}
 
-				public void withColumns(String... theColumnNames) {
-					withColumnsOptional(false, theColumnNames);
+				public BuilderCompleteTask withColumns(String... theColumnNames) {
+					BaseTask task = withColumnsOptional(false, theColumnNames);
+					return new BuilderCompleteTask(task);
 				}
 
-				private void withColumnsOptional(boolean theDoNothing, String... theColumnNames) {
+				private AddIndexTask withColumnsOptional(boolean theDoNothing, String... theColumnNames) {
 					AddIndexTask task = new AddIndexTask(myRelease, myVersion);
 					task.setTableName(myTableName);
 					task.setIndexName(myIndexName);
@@ -293,6 +301,7 @@ public class Builder {
 					task.setColumns(theColumnNames);
 					task.setDoNothing(theDoNothing);
 					addTask(task);
+					return task;
 				}
 			}
 		}
@@ -392,7 +401,7 @@ public class Builder {
 			}
 		}
 
-		public static class BuilderAddColumnWithName {
+		public class BuilderAddColumnWithName {
 			private final String myRelease;
 			private final String myVersion;
 			private final String myColumnName;
@@ -424,11 +433,11 @@ public class Builder {
 					myNullable = theNullable;
 				}
 
-				public void type(AddColumnTask.ColumnTypeEnum theColumnType) {
-					type(theColumnType, null);
+				public BuilderCompleteTask type(AddColumnTask.ColumnTypeEnum theColumnType) {
+					return type(theColumnType, null);
 				}
 
-				public void type(AddColumnTask.ColumnTypeEnum theColumnType, Integer theLength) {
+				public BuilderCompleteTask type(AddColumnTask.ColumnTypeEnum theColumnType, Integer theLength) {
 					AddColumnTask task = new AddColumnTask(myRelease, myVersion);
 					task.setColumnName(myColumnName);
 					task.setNullable(myNullable);
@@ -437,9 +446,33 @@ public class Builder {
 						task.setColumnLength(theLength);
 					}
 					myTaskSink.addTask(task);
+
+					return new BuilderCompleteTask(task);
 				}
+
 			}
 		}
+	}
+
+
+	public static class BuilderCompleteTask {
+
+		private final BaseTask<?> myTask;
+
+		public BuilderCompleteTask(BaseTask<?> theTask) {
+			myTask = theTask;
+		}
+
+		public BuilderCompleteTask failureAllowed() {
+			myTask.setFailureAllowed(true);
+			return this;
+		}
+
+		public BuilderCompleteTask doNothing() {
+			myTask.setDoNothing(true);
+			return this;
+		}
+
 	}
 
 }

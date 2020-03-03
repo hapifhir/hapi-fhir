@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 
@@ -87,24 +91,15 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		AddTableRawSqlTask that = (AddTableRawSqlTask) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myDriverNeutralSqls, that.myDriverNeutralSqls)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<AddTableRawSqlTask> theOtherObject) {
+		super.generateEquals(theBuilder, theOtherObject);
+		AddTableRawSqlTask otherObject = (AddTableRawSqlTask) theOtherObject;
+		theBuilder.append(myDriverNeutralSqls, otherObject.myDriverNeutralSqls);
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myDriverNeutralSqls)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myDriverNeutralSqls);
 	}
 }

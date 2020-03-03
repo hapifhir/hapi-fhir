@@ -121,7 +121,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		questionnaireItemTypes[14] = QuestionnaireItemType.REFERENCE;
 		questionnaireItemTypes[15] = QuestionnaireItemType.QUANTITY;
 
-		Type[] answerValues = new Type[itemCnt];
+		DataType[] answerValues = new DataType[itemCnt];
 		answerValues[0] = new BooleanType(true);
 		answerValues[1] = new DecimalType(42.0);
 		answerValues[2] = new IntegerType(42);
@@ -359,7 +359,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(valueSetRef)))
 			.thenReturn(options);
 		when(myValSupport.validateCode(any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(new CodeType(codeValue))));
+			.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(codeValue)));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String qXml = xmlParser.encodeResourceToString(q);
@@ -416,7 +416,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(valueSetRef)))
 			.thenReturn(options);
 		when(myValSupport.validateCode(any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(new CodeType(codeValue))));
+			.thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent((codeValue))));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String qXml = xmlParser.encodeResourceToString(q);
@@ -679,7 +679,7 @@ public class QuestionnaireResponseValidatorR5Test {
 
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire()))).thenReturn(questionnaire);
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(ID_VS_SCHOOLTYPE))).thenReturn(iccSchoolTypeVs);
-		when(myValSupport.validateCodeInValueSet(any(), any(), any(), any(), any(ValueSet.class) )).thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(new CodeType(CODE_ICC_SCHOOLTYPE_PT))));
+		when(myValSupport.validateCodeInValueSet(any(), any(), any(), any(), any(ValueSet.class) )).thenReturn(new IContextValidationSupport.CodeValidationResult(new ConceptDefinitionComponent(CODE_ICC_SCHOOLTYPE_PT)));
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());

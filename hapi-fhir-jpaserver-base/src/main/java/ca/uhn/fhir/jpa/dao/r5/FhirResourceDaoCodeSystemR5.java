@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 			CodeSystem cs = (CodeSystem) theResource;
 			addPidToResource(theEntity, theResource);
 
-			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem(cs), (ResourceTable) theEntity);
+			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(org.hl7.fhir.convertors.conv40_50.CodeSystem40_50.convertCodeSystem(cs), (ResourceTable) theEntity);
 		}
 
 		return retVal;

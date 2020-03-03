@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,6 +81,21 @@ public class RenameIndexTask extends BaseTableTask<RenameIndexTask> {
 		return this;
 	}
 
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		RenameIndexTask otherObject = (RenameIndexTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(myOldIndexName, otherObject.myOldIndexName);
+		theBuilder.append(myNewIndexName, otherObject.myNewIndexName);
+	}
+
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myOldIndexName);
+		theBuilder.append(myNewIndexName);
+	}
+
 	static List<String> createRenameIndexSql(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theOldIndexName, String theNewIndexName, DriverTypeEnum theDriverType) throws SQLException {
 		Validate.notBlank(theOldIndexName, "theOldIndexName must not be blank");
 		Validate.notBlank(theNewIndexName, "theNewIndexName must not be blank");
@@ -109,29 +124,5 @@ public class RenameIndexTask extends BaseTableTask<RenameIndexTask> {
 				break;
 		}
 		return sql;
-	}
-
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		RenameIndexTask that = (RenameIndexTask) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myOldIndexName, that.myOldIndexName)
-			.append(myNewIndexName, that.myNewIndexName)
-			.isEquals();
-	}
-
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myOldIndexName)
-			.append(myNewIndexName)
-			.toHashCode();
 	}
 }

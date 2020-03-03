@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -25,8 +24,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.contains;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class SearchParamExtractorDstu3Test {
 
@@ -185,6 +184,24 @@ public class SearchParamExtractorDstu3Test {
 		}
 	}
 
+	@Test
+	public void testParamCoords() {
+		Location loc = new Location();
+		double latitude = 40.0;
+		double longitude = 80.0;
+		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		loc.setPosition(position);
+
+		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
+
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		extractor.start();
+		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> coords = extractor.extractSearchParamTokens(loc);
+		assertEquals(1, coords.size());
+		ResourceIndexedSearchParamCoords coord = (ResourceIndexedSearchParamCoords) coords.iterator().next();
+		assertEquals(latitude, coord.getLatitude(), 0.0);
+		assertEquals(longitude, coord.getLongitude(), 0.0);
+	}
 
 	private static class MySearchParamRegistry implements ISearchParamRegistry {
 

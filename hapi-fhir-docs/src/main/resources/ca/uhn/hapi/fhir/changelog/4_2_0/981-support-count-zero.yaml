@@ -1,0 +1,5 @@
+---
+type: add
+issue: 981
+title: "Support has been added to the server (plain and JPA) for querying with 
+    `_count=0` as a URL parameter."

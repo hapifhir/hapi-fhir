@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,7 +160,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		IBundleProvider retVal = toResourceList(response);
 
 
-		if (retVal.size() == 1) {
+		if (Integer.valueOf(1).equals(retVal.size())) {
 			List<IBaseResource> responseResources = retVal.getResources(0, 1);
 			IBaseResource responseResource = responseResources.get(0);
 

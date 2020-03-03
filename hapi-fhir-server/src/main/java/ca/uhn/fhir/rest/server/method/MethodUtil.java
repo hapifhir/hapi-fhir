@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,7 +192,7 @@ public class MethodUtil {
 							b.append(theMethod.getName());
 							b.append("' is annotated with @");
 							b.append(ResourceParam.class.getSimpleName());
-							b.append(" but has a type that is not an implemtation of ");
+							b.append(" but has a type that is not an implementation of ");
 							b.append(IBaseResource.class.getCanonicalName());
 							b.append(" or String or byte[]");
 							throw new ConfigurationException(b.toString());

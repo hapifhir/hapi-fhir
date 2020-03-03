@@ -64,7 +64,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
@@ -162,6 +161,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myConditionDaoR4")
 	protected IFhirResourceDao<Condition> myConditionDao;
+	@Autowired
+	@Qualifier("myEpisodeOfCareDaoR4")
+	protected IFhirResourceDao<EpisodeOfCare> myEpisodeOfCareDao;
 	@Autowired
 	protected DaoConfig myDaoConfig;
 	@Autowired
@@ -409,7 +411,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	}
 
 	@Before
-	@Transactional()
 	public void beforePurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}
