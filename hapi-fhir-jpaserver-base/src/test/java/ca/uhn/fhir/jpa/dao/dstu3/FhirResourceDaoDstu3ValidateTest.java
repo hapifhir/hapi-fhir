@@ -15,7 +15,6 @@ import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.utils.IResourceValidator;
@@ -323,11 +322,15 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
 		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
-		MethodOutcome output = myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
-		OperationOutcome oo = (OperationOutcome) output.getOperationOutcome();
-		String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
-		ourLog.info(outputString);
-		assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' could not be resolved, so has not been checked"));
+		try {
+			myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
+			fail();
+		} catch (PreconditionFailedException e) {
+			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			ourLog.info(outputString);
+			assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' could not be resolved, so has not been checked"));
+		}
 	}
 
 	@Test

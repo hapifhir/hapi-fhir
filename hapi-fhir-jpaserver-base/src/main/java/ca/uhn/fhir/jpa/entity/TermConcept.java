@@ -65,7 +65,7 @@ public class TermConcept implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CONCEPT_UPDATED", nullable = true)
 	private Date myUpdated;
-	@ManyToOne()
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
 	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
@@ -79,11 +79,11 @@ public class TermConcept implements Serializable {
 		@Field(name = "myDisplayPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
 	})
 	private String myDisplay;
-	@OneToMany(mappedBy = "myConcept", orphanRemoval = false)
+	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
 	@Field(name = "PROPmyProperties", analyzer = @Analyzer(definition = "termConceptPropertyAnalyzer"))
 	@FieldBridge(impl = TermConceptPropertyFieldBridge.class)
 	private Collection<TermConceptProperty> myProperties;
-	@OneToMany(mappedBy = "myConcept", orphanRemoval = false)
+	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
 	private Collection<TermConceptDesignation> myDesignations;
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_PID", sequenceName = "SEQ_CONCEPT_PID")

@@ -50,4 +50,8 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, Long> {
 	@Query("SELECT t FROM TermConcept t WHERE t.myIndexStatus = null")
 	Page<TermConcept> findResourcesRequiringReindexing(Pageable thePageRequest);
 
+	@Modifying
+	@Query("DELETE FROM TermConcept t WHERE t.myId = :pid")
+	void deleteByPid(@Param("pid") Long theId);
+
 }

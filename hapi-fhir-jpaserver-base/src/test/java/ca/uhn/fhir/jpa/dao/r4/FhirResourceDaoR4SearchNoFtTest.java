@@ -590,6 +590,41 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testHasLimitsByType() {
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		Encounter encounter = new Encounter();
+		encounter.setStatus(Encounter.EncounterStatus.ARRIVED);
+		IIdType encounterId = myEncounterDao.create(encounter).getId().toUnqualifiedVersionless();
+
+		Device device = new Device();
+		device.setManufacturer("Acme");
+		IIdType deviceId = myDeviceDao.create(device).getId().toUnqualifiedVersionless();
+
+		Provenance provenance = new Provenance();
+		provenance.addTarget().setReferenceElement(patientId);
+		provenance.addTarget().setReferenceElement(encounterId);
+		provenance.addAgent().setWho(new Reference(deviceId));
+		myProvenanceDao.create(provenance);
+
+		String criteria = "_has:Provenance:target:agent=" + deviceId.getValue();
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Encounter.class));
+
+		map.setLoadSynchronous(true);
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myEncounterDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids, containsInAnyOrder(encounterId.getValue()));
+
+	}
+
+	@Test
 	public void testHasParameter() {
 		IIdType pid0;
 		{
