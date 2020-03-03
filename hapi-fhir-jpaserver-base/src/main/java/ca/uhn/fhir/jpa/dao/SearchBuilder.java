@@ -229,7 +229,7 @@ public class SearchBuilder implements ISearchBuilder {
 		return orPredicates;
 	}
 
-	private void addPredicateHas(List<List<IQueryParameterType>> theHasParameters, RequestDetails theRequest) {
+	private void addPredicateHas(List<List<IQueryParameterType>> theHasParameters, RequestDetails theRequest, String theResourceType) {
 
 		for (List<? extends IQueryParameterType> nextOrList : theHasParameters) {
 
@@ -284,9 +284,11 @@ public class SearchBuilder implements ISearchBuilder {
 
 			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
 			Predicate pathPredicate = createResourceLinkPathPredicate(targetResourceType, paramReference, join);
+			Predicate sourceTypePredicate = myBuilder.equal(join.get("myTargetResourceType"), theResourceType);
 			Predicate pidPredicate = join.get("mySourceResourcePid").in(subQ);
-			Predicate andPredicate = myBuilder.and(pathPredicate, pidPredicate);
+			Predicate andPredicate = myBuilder.and(pathPredicate, pidPredicate, sourceTypePredicate);
 			myPredicates.add(andPredicate);
+
 		}
 	}
 
@@ -2882,7 +2884,7 @@ public class SearchBuilder implements ISearchBuilder {
 				break;
 
 			case Constants.PARAM_HAS:
-			addPredicateHas(theAndOrParams, theRequest);
+			addPredicateHas(theAndOrParams, theRequest, theResourceName);
 				break;
 
 			case Constants.PARAM_TAG:
