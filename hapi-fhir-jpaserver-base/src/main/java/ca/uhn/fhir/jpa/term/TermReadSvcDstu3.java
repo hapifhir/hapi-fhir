@@ -64,7 +64,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 	@Qualifier("myValueSetDaoDstu3")
 	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
 	@Autowired
-	private IValidationSupport myValidationSupport;
+	private IContextValidationSupport myValidationSupport;
 	@Autowired
 	private ITermReadSvc myTerminologySvc;
 	@Autowired

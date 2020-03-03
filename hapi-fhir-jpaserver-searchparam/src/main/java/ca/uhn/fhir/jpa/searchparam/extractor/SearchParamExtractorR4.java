@@ -86,7 +86,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	public void start() {
 		super.start();
 		if (myFhirPathEngine == null) {
-			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
+			IContextValidationSupport support = myApplicationContext.getBean(IContextValidationSupport.class);
 			initFhirPath(support);
 		}
 	}

@@ -67,7 +67,7 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 	@Autowired
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 
-	private IValidationSupport myValidationSupport;
+	private IContextValidationSupport myValidationSupport;
 
 	@Autowired
 	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;

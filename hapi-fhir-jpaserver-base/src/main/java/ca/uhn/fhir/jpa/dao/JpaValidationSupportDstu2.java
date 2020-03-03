@@ -115,7 +115,7 @@ public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 
 	@Override
 	public FhirContext getFhirContext() {
-		return myDstu2Ctx;
+		return myRiCtx;
 	}
 
 }

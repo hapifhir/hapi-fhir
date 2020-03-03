@@ -53,7 +53,7 @@ public class QuestionnaireResponseValidatorR5Test {
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
-	private IValidationSupport myValSupport;
+	private IContextValidationSupport myValSupport;
 	private HapiWorkerContext myWorkerCtx;
 
 	@Before

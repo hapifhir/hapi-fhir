@@ -73,7 +73,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 	@Autowired
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 
-	private IValidationSupport myValidationSupport;
+	private IContextValidationSupport myValidationSupport;
 
 	@Autowired
 	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;

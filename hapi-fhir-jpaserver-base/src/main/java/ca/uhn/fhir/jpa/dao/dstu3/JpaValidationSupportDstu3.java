@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -34,11 +36,19 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Transactional(value = TxType.REQUIRED)
 public class JpaValidationSupportDstu3 extends BaseJpaValidationSupport implements IJpaValidationSupportDstu3 {
 
+	@Autowired
+	private FhirContext myFhirContext;
+
 	/**
 	 * Constructor
 	 */
 	public JpaValidationSupportDstu3() {
 		super();
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
 	}
 
 	@Override

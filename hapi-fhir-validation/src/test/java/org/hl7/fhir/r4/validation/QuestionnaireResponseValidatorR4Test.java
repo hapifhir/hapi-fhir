@@ -52,7 +52,7 @@ public class QuestionnaireResponseValidatorR4Test {
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
-	private IValidationSupport myValSupport;
+	private IContextValidationSupport myValSupport;
 
 	@Before
 	public void before() {

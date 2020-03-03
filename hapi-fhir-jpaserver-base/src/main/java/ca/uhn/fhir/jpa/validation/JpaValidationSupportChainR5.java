@@ -52,6 +52,12 @@ public class JpaValidationSupportChainR5 extends ValidationSupportChain {
 		super();
 	}
 
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+
 	@PreDestroy
 	public void flush() {
 		myDefaultProfileValidationSupport.flush();

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoStructureDefinition;
 import org.apache.commons.lang3.Validate;
@@ -30,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class FhirResourceDaoStructureDefinitionDstu3 extends BaseHapiFhirResourceDao<StructureDefinition> implements IFhirResourceDaoStructureDefinition<StructureDefinition> {
 
 	@Autowired
-	private IValidationSupport myValidationSupport;
+	private IContextValidationSupport myValidationSupport;
 
 	@Override
 	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theName) {

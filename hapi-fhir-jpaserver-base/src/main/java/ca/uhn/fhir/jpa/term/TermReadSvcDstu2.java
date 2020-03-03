@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.VersionIndependentConcept;
@@ -39,7 +40,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 
 	@Autowired
-	private IValidationSupport myValidationSupport;
+	private IContextValidationSupport myValidationSupport;
 
 	private void addAllChildren(String theSystemString, org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
 		if (isNotBlank(theCode.getCode())) {

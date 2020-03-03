@@ -62,7 +62,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	@Qualifier("myValueSetDaoR5")
 	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
 	@Autowired
-	private IValidationSupport myValidationSupport;
+	private IContextValidationSupport myValidationSupport;
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
 

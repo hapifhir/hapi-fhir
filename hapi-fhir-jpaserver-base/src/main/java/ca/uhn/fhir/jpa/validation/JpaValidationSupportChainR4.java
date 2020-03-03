@@ -47,7 +47,12 @@ public class JpaValidationSupportChainR4 extends ValidationSupportChain {
 	
 	@Autowired
 	private ITermReadSvcR4 myTerminologyService;
-	
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
 	public JpaValidationSupportChainR4() {
 		super();
 	}

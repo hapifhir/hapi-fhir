@@ -75,7 +75,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	public void start() {
 		super.start();
 		if (myFhirPathEngine == null) {
-			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
+			IContextValidationSupport support = myApplicationContext.getBean(IContextValidationSupport.class);
 			initFhirPathEngine(support);
 		}
 	}
