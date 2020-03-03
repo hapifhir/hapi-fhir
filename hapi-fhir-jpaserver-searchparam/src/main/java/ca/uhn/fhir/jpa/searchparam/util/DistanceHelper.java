@@ -9,7 +9,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
 
-// FIXME KHS write unit test
 public class DistanceHelper {
 	public static void setNearDistance(Class<? extends IBaseResource> theResourceType, SearchParameterMap theParams) {
 		if (theResourceType == Location.class && theParams.containsKey(Location.SP_NEAR_DISTANCE)) {

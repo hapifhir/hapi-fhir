@@ -101,8 +101,6 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 		}
 	}
 
-	// FIXME KHS add chaining test
-
 	@Override
 	protected FhirContext getContext() {
 		return ourCtx;
