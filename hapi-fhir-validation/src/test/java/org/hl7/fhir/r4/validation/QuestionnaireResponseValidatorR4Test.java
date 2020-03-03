@@ -9,6 +9,7 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.StaticResourceTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
@@ -61,7 +62,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
 
-		ValidationSupportChain validationSupport = new ValidationSupportChain(myDefaultValidationSupport, myValSupport);
+		ValidationSupportChain validationSupport = new ValidationSupportChain(myDefaultValidationSupport, myValSupport, new StaticResourceTerminologyServerValidationSupport(ourCtx));
 		myInstanceVal = new FhirInstanceValidator(validationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
@@ -245,7 +246,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Unknown code 'http://codesystems.com/system#code1' - QuestionnaireResponse.item[0].answer[0].value.ofType(Coding)"));
+		assertThat(errors.toString(), containsString("Unknown code for \"http://codesystems.com/system#code1\""));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
@@ -256,7 +257,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Validation failed for 'http://codesystems.com/system2#code3'"));
+		assertThat(errors.toString(), containsString("Unknown code 'http://codesystems.com/system2#code3' for \"http://codesystems.com/system2#code3\""));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 	}
@@ -616,6 +617,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new IntegerType(123));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
+		// FIXME: localize this
 		assertThat(errors.toString(), containsString("Cannot validate integer answer option because no option list is provided"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 

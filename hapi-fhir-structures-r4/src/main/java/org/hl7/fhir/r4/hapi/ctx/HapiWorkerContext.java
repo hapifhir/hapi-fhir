@@ -25,7 +25,6 @@ import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.r4.utils.IResourceValidator;
-import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
@@ -159,7 +158,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, CodeableConcept theCode, ValueSet theVs) {
+  public ValidationResult validateCode(ValidationOptions theOptions, CodeableConcept theCode, ValueSet theVs) {
     for (Coding next : theCode.getCoding()) {
       ValidationResult retVal = validateCode(theOptions, next, theVs);
       if (retVal.isOk()) {
@@ -171,7 +170,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, Coding theCode, ValueSet theVs) {
+  public ValidationResult validateCode(ValidationOptions theOptions, Coding theCode, ValueSet theVs) {
     String system = theCode.getSystem();
     String code = theCode.getCode();
     String display = theCode.getDisplay();
@@ -179,7 +178,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay) {
+  public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay) {
     IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, null);
     if (result == null) {
       return null;
@@ -195,13 +194,13 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay, ConceptSetComponent theVsi) {
+  public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay, ConceptSetComponent theVsi) {
     throw new UnsupportedOperationException();
   }
 
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
+  public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
 
     /*
      * The following valueset is a special case, since the BCP codesystem is very difficult to expand
@@ -241,7 +240,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String code, ValueSet vs) {
+  public ValidationResult validateCode(ValidationOptions theOptions, String code, ValueSet vs) {
     ValidationOptions options = theOptions.guessSystem();
     return validateCode(options, null, code, null, vs);
   }

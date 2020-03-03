@@ -24,6 +24,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+
 public class Constants {
 
 	public static final String CT_TEXT_CSV = "text/csv";
@@ -364,6 +366,6 @@ public class Constants {
 
 	// FIXME: should we handle "guess" and null nicely?
 	public static String codeSystemWithDefaultDescription(String theSystem) {
-			return theSystem;
+			return defaultIfBlank(theSystem, "(none)");
 	}
 }

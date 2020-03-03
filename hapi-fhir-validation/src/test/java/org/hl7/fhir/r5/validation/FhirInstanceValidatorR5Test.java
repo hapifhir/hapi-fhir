@@ -80,6 +80,7 @@ public class FhirInstanceValidatorR5Test {
 	private FhirValidator myVal;
 	private ArrayList<String> myValidConcepts;
 	private Set<String> myValidSystems = new HashSet<>();
+	private CachingValidationSupport myValidationSupport;
 
 	private void addValidConcept(String theSystem, String theCode) {
 		myValidSystems.add(theSystem);
@@ -111,8 +112,8 @@ public class FhirInstanceValidatorR5Test {
 
 		myMockSupport = mock(IValidationSupport.class);
 		when(myMockSupport.getFhirContext()).thenReturn(ourCtx);
-		CachingValidationSupport validationSupport = new CachingValidationSupport(new ValidationSupportChain(myMockSupport, myDefaultValidationSupport, new StaticResourceTerminologyServerValidationSupport(ourCtx)));
-		myInstanceVal = new FhirInstanceValidator(validationSupport);
+		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(myMockSupport, myDefaultValidationSupport, new StaticResourceTerminologyServerValidationSupport(ourCtx)));
+		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
 
@@ -232,12 +233,12 @@ public class FhirInstanceValidatorR5Test {
 			.setCode("AA  ");
 
 		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
 		ValidationResult result = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(0).getMessage());
+		assertEquals("The code \"AA  \" is not valid (whitespace rules)", all.get(0).getMessage());
 
 	}
 
@@ -255,12 +256,12 @@ public class FhirInstanceValidatorR5Test {
 			"</Patient>";
 
 		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("Primitive types must have a value that is not empty", all.get(0).getMessage());
+		assertEquals("@value cannot be empty", all.get(0).getMessage());
 	}
 
 	/**
@@ -280,7 +281,7 @@ public class FhirInstanceValidatorR5Test {
 
 		// With BPs disabled
 		val = ourCtx.newValidator();
-		instanceModule = new FhirInstanceValidator(myDefaultValidationSupport);
+		instanceModule = new FhirInstanceValidator(myValidationSupport);
 		val.registerValidatorModule(instanceModule);
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
@@ -289,7 +290,7 @@ public class FhirInstanceValidatorR5Test {
 
 		// With BPs enabled
 		val = ourCtx.newValidator();
-		instanceModule = new FhirInstanceValidator(myDefaultValidationSupport);
+		instanceModule = new FhirInstanceValidator(myValidationSupport);
 		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Error;
 		instanceModule.setBestPracticeWarningLevel(level);
 		val.registerValidatorModule(instanceModule);
@@ -387,7 +388,7 @@ public class FhirInstanceValidatorR5Test {
 		procedure.setOccurrence(period);
 
 		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
 		ValidationResult result = val.validateWithResult(procedure);
 
@@ -756,7 +757,7 @@ public class FhirInstanceValidatorR5Test {
 		input.setStatus(Enumerations.ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 
@@ -777,7 +778,7 @@ public class FhirInstanceValidatorR5Test {
 		input.setStatus(Enumerations.ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
@@ -798,10 +799,10 @@ public class FhirInstanceValidatorR5Test {
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 		input.setStatus(Enumerations.ObservationStatus.FINAL);
 
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked"));
+		assertThat(errors.toString(), containsString("Profile reference \"http://foo/structuredefinition/myprofile\" could not be resolved, so has not been checked"));
 	}
 
 	@Test
@@ -849,7 +850,7 @@ public class FhirInstanceValidatorR5Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertEquals(
-			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.2.0 (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code[notvalidcode] in system[(none)])",
+			"The value provided (\"notvalidcode\") is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.2.0 (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code 'notvalidcode')",
 			output.getMessages().get(0).getMessage());
 	}
 
@@ -858,7 +859,7 @@ public class FhirInstanceValidatorR5Test {
 		Observation input = new Observation();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 
 		input.setStatus(Enumerations.ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
@@ -874,7 +875,7 @@ public class FhirInstanceValidatorR5Test {
 		Observation input = new Observation();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 		addValidConcept("http://acme.org", "12345");
 
 		input.setStatus(Enumerations.ObservationStatus.FINAL);
@@ -892,7 +893,7 @@ public class FhirInstanceValidatorR5Test {
 		Observation input = new Observation();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 		addValidConcept("http://loinc.org", "12345");
 
 		input.setStatus(Enumerations.ObservationStatus.FINAL);
@@ -912,7 +913,7 @@ public class FhirInstanceValidatorR5Test {
 		expansionComponent.addContains().setSystem("http://loinc.org").setCode("12345").setDisplay("Some display code");
 
 		mySupportedCodeSystemsForExpansion.put("http://loinc.org", expansionComponent);
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 		addValidConcept("http://loinc.org", "12345");
 
 		input.setStatus(Enumerations.ObservationStatus.FINAL);
@@ -929,7 +930,7 @@ public class FhirInstanceValidatorR5Test {
 		Observation input = new Observation();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
-		myInstanceVal.setValidationSupport(myMockSupport);
+		myInstanceVal.setValidationSupport(myValidationSupport);
 		addValidConcept("http://acme.org", "12345");
 
 		input.setStatus(Enumerations.ObservationStatus.FINAL);

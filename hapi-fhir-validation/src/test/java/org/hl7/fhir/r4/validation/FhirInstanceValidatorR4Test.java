@@ -257,12 +257,12 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			.setCode("AA  ");
 
 		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
 		ValidationResult result = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(0).getMessage());
+		assertEquals("The code \"AA  \" is not valid (whitespace rules)", all.get(0).getMessage());
 
 	}
 
@@ -280,12 +280,12 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			"</Patient>";
 
 		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("Primitive types must have a value that is not empty", all.get(0).getMessage());
+		assertEquals("@value cannot be empty", all.get(0).getMessage());
 	}
 
 	/**
@@ -302,7 +302,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			"</Patient>";
 
 		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
 		ValidationResult result = val.validateWithResult(input);
 		logResultsAndReturnAll(result);
@@ -326,7 +326,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		// With BPs disabled
 		val = ourCtx.newValidator();
-		instanceModule = new FhirInstanceValidator(myDefaultValidationSupport);
+		instanceModule = new FhirInstanceValidator(myValidationSupport);
 		val.registerValidatorModule(instanceModule);
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
@@ -335,7 +335,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		// With BPs enabled
 		val = ourCtx.newValidator();
-		instanceModule = new FhirInstanceValidator(myDefaultValidationSupport);
+		instanceModule = new FhirInstanceValidator(myValidationSupport);
 		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Error;
 		instanceModule.setBestPracticeWarningLevel(level);
 		val.registerValidatorModule(instanceModule);
@@ -609,7 +609,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		inputString = loadResource("/brian_reinhold_bundle.json");
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, inputString);
 
-		FHIRPathEngine fp = new FHIRPathEngine(new HapiWorkerContext(ourCtx, myDefaultValidationSupport));
+		FHIRPathEngine fp = new FHIRPathEngine(new HapiWorkerContext(ourCtx, myValidationSupport));
 		List<Base> fpOutput;
 		BooleanType bool;
 
@@ -643,7 +643,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	public void testValidateProfileWithExtension() throws IOException, FHIRException {
 		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport(ourCtx);
 		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ourCtx);
-		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport));
+		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport, new StaticResourceTerminologyServerValidationSupport(ourCtx)));
 
 		// Prepopulate SDs
 		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/r4/myconsent-profile.xml"));
@@ -1045,7 +1045,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked"));
+		assertThat(errors.toString(), containsString("Profile reference \"http://foo/structuredefinition/myprofile\" could not be resolved, so has not been checked"));
 	}
 
 	@Test
@@ -1093,7 +1093,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertEquals(
-			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.0.0 (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code[notvalidcode] in system[(none)])",
+			"The value provided (\"notvalidcode\") is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.0.0 (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code 'notvalidcode')",
 			output.getMessages().get(0).getMessage());
 	}
 

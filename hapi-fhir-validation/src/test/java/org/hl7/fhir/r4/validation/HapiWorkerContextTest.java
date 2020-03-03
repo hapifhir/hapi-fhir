@@ -7,12 +7,14 @@ import com.google.common.base.Charsets;
 import org.apache.commons.lang.Validate;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.StaticResourceTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.TerminologyServiceOptions;
+import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.junit.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -45,7 +47,8 @@ public class HapiWorkerContextTest extends BaseTest {
 
 		ValidationSupportChain validationSupportChain = new ValidationSupportChain(
 			new DefaultProfileValidationSupport(myCtx),
-			prePopulatedValidationSupport
+			prePopulatedValidationSupport,
+			new StaticResourceTerminologyServerValidationSupport(myCtx)
 		);
 		HapiWorkerContext workerCtx = new HapiWorkerContext(myCtx, validationSupportChain);
 
@@ -55,20 +58,21 @@ public class HapiWorkerContextTest extends BaseTest {
 		// Built-in Codes
 
 		vs.setUrl("http://hl7.org/fhir/ValueSet/fm-status");
-		outcome = workerCtx.validateCode(new TerminologyServiceOptions(), "active", vs);
+		ValidationOptions options = new ValidationOptions().guessSystem();
+		outcome = workerCtx.validateCode(options, "active", vs);
 		assertEquals(outcome.getMessage(), true, outcome.isOk());
 
-		outcome = workerCtx.validateCode(new TerminologyServiceOptions(), "active2", vs);
+		outcome = workerCtx.validateCode(options, "active2", vs);
 		assertEquals(outcome.getMessage(), false, outcome.isOk());
 		assertEquals("Unknown code[active2] in system[(none)]", outcome.getMessage());
 
 		// PrePopulated codes
 
 		vs.setUrl("http://hl7.org/fhir/us/core/ValueSet/birthsex");
-		outcome = workerCtx.validateCode(new TerminologyServiceOptions(), "F", vs);
+		outcome = workerCtx.validateCode(options, "F", vs);
 		assertEquals(outcome.getMessage(), true, outcome.isOk());
 
-		outcome = workerCtx.validateCode(new TerminologyServiceOptions(), "F2", vs);
+		outcome = workerCtx.validateCode(options, "F2", vs);
 		assertEquals(outcome.getMessage(), false, outcome.isOk());
 		assertEquals("Unknown code[F2] in system[(none)]", outcome.getMessage());
 

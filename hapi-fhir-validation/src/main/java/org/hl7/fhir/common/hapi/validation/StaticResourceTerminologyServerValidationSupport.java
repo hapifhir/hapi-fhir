@@ -125,7 +125,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		IBaseResource vs;
 		if (isNotBlank(theValueSetUrl)) {
-			vs = fetchValueSet(theValueSetUrl);
+			vs = theRootValidationSupport.fetchValueSet(theValueSetUrl);
 			if (vs == null) {
 				return null;
 			}

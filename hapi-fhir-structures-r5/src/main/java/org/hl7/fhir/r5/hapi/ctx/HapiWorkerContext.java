@@ -32,6 +32,7 @@ import org.hl7.fhir.utilities.validation.ValidationOptions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -289,6 +290,16 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		input.getCompose().addInclude(theInc);
 		IContextValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(myValidationSupport, input);
 		return new ValueSetExpansionOutcome((ValueSet) output.getValueSet(), output.getError(), null);
+	}
+
+	@Override
+	public Locale getLocale() {
+		return Locale.getDefault();
+	}
+
+	@Override
+	public void setLocale(Locale locale) {
+		// ignore
 	}
 
 	@Override

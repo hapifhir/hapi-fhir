@@ -529,7 +529,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("HELLO"));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Item has answer, even though it is not enabled (item id = 'link1')"));
+		assertThat(errors.toString(), containsString("Item has answer, even though it is not enabled (item id = \"link1\")"));
 
 		// link0 has an answer, and it's the right one
 		qa = new QuestionnaireResponse();
@@ -1048,7 +1048,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Unknown code 'http://codesystems.com/system#code1' - QuestionnaireResponse.item[0].answer[0].value.ofType(Coding)"));
+		assertThat(errors.toString(), containsString("Unknown code for \"http://codesystems.com/system#code1\""));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		// Partial code
@@ -1090,6 +1090,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new IntegerType(123));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
+		// FIXME: This needs to be localized
 		assertThat(errors.toString(), containsString("Cannot validate integer answer option because no option list is provided"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 

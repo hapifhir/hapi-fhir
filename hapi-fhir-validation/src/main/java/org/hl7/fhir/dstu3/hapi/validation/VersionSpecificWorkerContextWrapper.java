@@ -33,6 +33,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -215,6 +216,16 @@ public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 	@Override
 	public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent inc, boolean heirarchical) throws TerminologyServiceException {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Locale getLocale() {
+		return myValidationSupport.getFhirContext().getLocalizer().getLocale();
+	}
+
+	@Override
+	public void setLocale(Locale locale) {
+		// ignore
 	}
 
 	@Override
