@@ -206,6 +206,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myLocationDaoR4")
 	protected IFhirResourceDao<Location> myLocationDao;
 	@Autowired
+	@Qualifier("myPractitionerRoleDaoR4")
+	protected IFhirResourceDao<PractitionerRole> myPractitionerRoleDao;
+	@Autowired
 	@Qualifier("myMediaDaoR4")
 	protected IFhirResourceDao<Media> myMediaDao;
 	@Autowired
