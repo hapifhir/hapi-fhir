@@ -272,7 +272,6 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		if (myLowerBound == null || myLowerBound.getValue() == null) {
 			return null;
 		}
-		//TODO LOOK AT THE DATE VERSION, WHERE PRECISION OCCASIONALLY CHANGES THE STUPID THING. ESSENTIALLY ADD A SWITCH
 		int retVal = DateUtils.convertDatetoDayInteger(myLowerBound.getValue());
 
 		if (myLowerBound.getPrefix() != null) {
