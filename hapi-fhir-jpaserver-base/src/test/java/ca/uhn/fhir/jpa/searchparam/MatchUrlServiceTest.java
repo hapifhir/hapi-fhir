@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.TestUtil;
@@ -58,7 +59,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 				Location.SP_NEAR + "=1000.0:2000.0" +
 				"&" +
 				Location.SP_NEAR_DISTANCE + "=" + kmDistance + "|http://unitsofmeasure.org|km", ourCtx.getResourceDefinition("Location"));
-		map.setLocationDistance();
+		Dstu3DistanceHelper.setNearDistance(Location.class, map);
 
 		QuantityParam nearDistanceParam = map.getNearDistanceParam();
 		assertEquals(1, map.size());
@@ -75,7 +76,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 					"&" +
 					Location.SP_NEAR_DISTANCE + "=2|http://unitsofmeasure.org|km",
 				ourCtx.getResourceDefinition("Location"));
-			map.setLocationDistance();
+			Dstu3DistanceHelper.setNearDistance(Location.class, map);
 
 			fail();
 		} catch (IllegalArgumentException e) {
@@ -92,7 +93,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 					"," +
 					"2|http://unitsofmeasure.org|km",
 				ourCtx.getResourceDefinition("Location"));
-			map.setLocationDistance();
+			Dstu3DistanceHelper.setNearDistance(Location.class, map);
 
 			fail();
 		} catch (IllegalArgumentException e) {
