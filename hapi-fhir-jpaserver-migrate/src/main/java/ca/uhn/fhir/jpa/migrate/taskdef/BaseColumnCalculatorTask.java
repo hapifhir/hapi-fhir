@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.VersionEnum;
 import com.google.common.collect.ForwardingMap;
@@ -77,8 +76,9 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask<BaseC
 				getTxTemplate().execute(t -> {
 					JdbcTemplate jdbcTemplate = newJdbcTemplate();
 					jdbcTemplate.setMaxRows(100000);
-					String sql = "SELECT * FROM " + getTableName() + " WHERE " + getColumnName() + " IS NULL";
-					logInfo(ourLog, "Finding up to {} rows in {} that requires calculations", myBatchSize, getTableName());
+
+					String sql = "SELECT * FROM " + getTableName() + " WHERE " + getWhereClause();
+					logInfo(ourLog, "Finding up to {} rows in {} that requires calculations, using query: {}", myBatchSize, getTableName(), sql);
 
 					jdbcTemplate.query(sql, rch);
 					rch.done();

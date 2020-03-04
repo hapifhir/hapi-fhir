@@ -30,6 +30,8 @@ import java.util.Locale;
 public abstract class BaseTableColumnTask<T extends BaseTableTask<T>> extends BaseTableTask<T> {
 
 	private String myColumnName;
+	//If a concrete class decides to, they can define a custom WHERE clause for the task.
+	private String myWhereClause;
 
 	public BaseTableColumnTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -41,9 +43,19 @@ public abstract class BaseTableColumnTask<T extends BaseTableTask<T>> extends Ba
 		return (T) this;
 	}
 
-
 	public String getColumnName() {
 		return myColumnName;
+	}
+
+	protected void setWhereClause(String theWhereClause) {
+		this.myWhereClause = theWhereClause;
+	}
+	protected String getWhereClause() {
+		if (myWhereClause == null) {
+			return getColumnName() + " IS NULL";
+		} else {
+			return myWhereClause;
+		}
 	}
 
 	@Override

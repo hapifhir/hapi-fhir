@@ -27,6 +27,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 public abstract class BaseTableTask<T extends BaseTableTask<T>> extends BaseTask<T> {
 	private String myTableName;
 
+
+
 	public BaseTableTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
 	}
@@ -34,7 +36,6 @@ public abstract class BaseTableTask<T extends BaseTableTask<T>> extends BaseTask
 	public String getTableName() {
 		return myTableName;
 	}
-
 	public T setTableName(String theTableName) {
 		Validate.notBlank(theTableName);
 		myTableName = theTableName;

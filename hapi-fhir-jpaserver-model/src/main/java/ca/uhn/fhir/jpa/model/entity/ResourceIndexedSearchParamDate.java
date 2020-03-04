@@ -298,6 +298,9 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 
 
 	public static Long calculateOrdinalValue(Date theDate) {
+		if (theDate == null) {
+			return null;
+		}
 		return (long) DateUtils.convertDatetoDayInteger(theDate);
 	}
 
