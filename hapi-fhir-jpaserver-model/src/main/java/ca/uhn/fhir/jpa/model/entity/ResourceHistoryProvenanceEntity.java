@@ -47,6 +47,9 @@ public class ResourceHistoryProvenanceEntity {
 	private String mySourceUri;
 	@Column(name = "REQUEST_ID", length = Constants.REQUEST_ID_LENGTH, nullable = true)
 	private String myRequestId;
+	// FIXME: make sure this gets populated
+	@Embedded
+	private TenantId myTenantId;
 
 	public ResourceTable getResourceTable() {
 		return myResourceTable;
