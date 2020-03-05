@@ -148,8 +148,12 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * Constructor
 	 */
 	public RestfulServer(FhirContext theCtx) {
+		this(theCtx, new InterceptorService());
+	}
+
+	public RestfulServer(FhirContext theCtx, IInterceptorService theInterceptorService)	{
 		myFhirContext = theCtx;
-		setInterceptorService(new InterceptorService());
+		setInterceptorService(theInterceptorService);
 	}
 
 	private void addContentLocationHeaders(RequestDetails theRequest, HttpServletResponse servletResponse, MethodOutcome response, String resourceName) {
