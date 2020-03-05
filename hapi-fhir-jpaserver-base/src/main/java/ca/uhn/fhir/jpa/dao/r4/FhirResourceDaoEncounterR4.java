@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,7 +42,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 public class FhirResourceDaoEncounterR4 extends BaseHapiFhirResourceDao<Encounter> implements IFhirResourceDaoEncounter<Encounter> {
 
 	@Override
-	public IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort) {
+	public IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, RequestDetails theRequestDetails) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
@@ -55,13 +56,13 @@ public class FhirResourceDaoEncounterR4 extends BaseHapiFhirResourceDao<Encounte
 		if (theId != null) {
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 		}
-		IBundleProvider retVal = search(paramMap);
+		IBundleProvider retVal = search(paramMap, theRequestDetails);
 		return retVal;
 	}
 
 	@Override
-	public IBundleProvider encounterTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort) {
-		return encounterInstanceEverything(theServletRequest, null, theCount, theLastUpdated, theSort);
+	public IBundleProvider encounterTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, RequestDetails theRequestDetails) {
+		return encounterInstanceEverything(theServletRequest, null, theCount, theLastUpdated, theSort, theRequestDetails);
 	}
 
 }
