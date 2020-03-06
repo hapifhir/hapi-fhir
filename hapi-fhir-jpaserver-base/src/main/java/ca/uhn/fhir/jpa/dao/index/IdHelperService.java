@@ -43,6 +43,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -68,6 +69,9 @@ public class IdHelperService {
 	}
 
 	/**
+	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
+	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
+	 *
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
@@ -96,6 +100,8 @@ public class IdHelperService {
 		List<ResourcePersistentId> retVal = new ArrayList<>();
 
 		ListMultimap<String, String> typeToIds = MultimapBuilder.hashKeys().arrayListValues().build();
+		//If the PID is fully numeric and we aren't in ClientIdStrategyEnum.ANY, add it to return value.
+		//Otherwise, add it to a map of resource type -> ID.
 		for (IIdType nextId : theId) {
 			if (theDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY && isValidPid(nextId)) {
 				retVal.add(new ResourcePersistentId(nextId.getIdPartAsLong()));
@@ -108,9 +114,11 @@ public class IdHelperService {
 			}
 		}
 
+		// For every resource type, fetch all of the requested ids against the forcedPidDao, and add them to the return value.
 		for (Map.Entry<String, Collection<String>> nextEntry : typeToIds.asMap().entrySet()) {
 			String nextResourceType = nextEntry.getKey();
 			Collection<String> nextIds = nextEntry.getValue();
+			List<Long> convertedPidStream;
 			if (isBlank(nextResourceType)) {
 
 				StorageProcessingMessage msg = new StorageProcessingMessage()
@@ -121,23 +129,15 @@ public class IdHelperService {
 					.add(StorageProcessingMessage.class, msg);
 				JpaInterceptorBroadcaster.doCallHooks(theInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 
-				theForcedIdDao
-					.findByForcedId(nextIds)
-					.stream()
-					.map(t->new ResourcePersistentId(t))
-					.forEach(t->retVal.add(t));
-
+				convertedPidStream =  theForcedIdDao.findByForcedId(nextIds);
 			} else {
-
-				theForcedIdDao
-					.findByTypeAndForcedId(nextResourceType, nextIds)
-					.stream()
-					.map(t->new ResourcePersistentId(t))
-					.forEach(t->retVal.add(t));
-
+				convertedPidStream = theForcedIdDao.findByTypeAndForcedId(nextResourceType, nextIds);
 			}
+			convertedPidStream
+				.stream()
+				.map(ResourcePersistentId::new)
+				.forEach(retVal::add);
 		}
-
 			return retVal;
 	}
 
