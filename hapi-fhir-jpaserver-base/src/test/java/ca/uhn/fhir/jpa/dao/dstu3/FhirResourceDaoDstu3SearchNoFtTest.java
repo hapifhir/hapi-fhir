@@ -366,11 +366,34 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 		SearchParameterMap params;
 
-		// Not currently working
-//		params = new SearchParameterMap();
-//		params.setLoadSynchronous(true);
-//		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
-//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
+		params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
+		//This is the tested query:
+		// Patient?_has:Observation:subject:device.identifier=urn:system|DEVICEID
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
+	}
+
+	@Test
+	public void testHasParameterReverseChained() {
+		IIdType pid0;
+		{
+			Device device = new Device();
+			device.addIdentifier().setSystem("urn:system").setValue("DEVICEID");
+			IIdType devId = myDeviceDao.create(device, mySrd).getId().toUnqualifiedVersionless();
+
+			Patient patient = new Patient();
+			patient.setGender(AdministrativeGender.MALE);
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.setDevice(new Reference(devId));
+			obs.setSubject(new Reference(pid0));
+			myObservationDao.create(obs, mySrd).getId();
+		}
+
+		SearchParameterMap params;
 
 		// No targets exist
 		params = new SearchParameterMap();
@@ -384,7 +407,6 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		params.add("_has", new HasParam("Observation", "subject", "identifier", "urn:system|NOLINK"));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), empty());
 	}
-
 	@Test
 	public void testHasParameterInvalidResourceType() {
 		SearchParameterMap params = new SearchParameterMap();
