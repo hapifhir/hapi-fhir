@@ -324,6 +324,17 @@
 			"city": "Germany",
 			"lat": 51.165691,
 			"lon": 10.451526
+		},
+		{
+			"title": "VEIG",
+			"description": "Vietnam Ehealth Innovation Group",
+			"link": "http://emr.com.vn",
+			"contactName": "Nguyen Hai Phong",
+			"contactEmail": "haiphong.nguyen@gmail.com",
+			"city": "Hanoi,Vietnam",
+			"lat": 21.026058,
+			"lon": 105.822715,
+			"added": "2020-03-06"
 		}
 
 	]
