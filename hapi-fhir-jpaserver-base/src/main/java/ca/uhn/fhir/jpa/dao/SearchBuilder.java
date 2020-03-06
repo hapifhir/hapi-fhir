@@ -166,15 +166,8 @@ public class SearchBuilder implements ISearchBuilder {
 			Dstu3DistanceHelper.setNearDistance(myResourceType, theParams);
 		}
 
-		/*
-		 * Check if there is a unique key associated with the set
-		 * of parameters passed in
-		 */
-		boolean couldBeEligibleForCompositeUniqueSpProcessing =
-			myDaoConfig.isUniqueIndexesEnabled() &&
-				myParams.getEverythingMode() == null &&
-				myParams.isAllParametersHaveNoModifier();
-		if (couldBeEligibleForCompositeUniqueSpProcessing) {
+		// Attempt to lookup via composite unique key.
+		if (isCompositeUniqueSpCandidate()) {
 			attemptCompositeUniqueSpProcessing(theParams, theRequest);
 		}
 
@@ -185,6 +178,16 @@ public class SearchBuilder implements ISearchBuilder {
 			searchForIdsWithAndOr(myResourceName, nextParamName, andOrParams, theRequest);
 		}
 
+	}
+
+	/**
+	 * A search is a candidate for Composite Unique SP if unique indexes are enabled, we are not in
+	 * @return
+	 */
+	private boolean isCompositeUniqueSpCandidate() {
+		return myDaoConfig.isUniqueIndexesEnabled() &&
+			myParams.getEverythingMode() == null &&
+			myParams.isAllParametersHaveNoModifier();
 	}
 
 	@Override
