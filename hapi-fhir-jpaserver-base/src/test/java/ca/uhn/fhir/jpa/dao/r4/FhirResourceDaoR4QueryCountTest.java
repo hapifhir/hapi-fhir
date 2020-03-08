@@ -164,6 +164,30 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	}
 
 
+	@Test
+	public void testReferenceToForcedId() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
+		Patient patient = new Patient();
+		patient.setId("P");
+		patient.setActive(true);
+
+		myCaptureQueriesListener.clear();
+		myPatientDao.update(patient);
+
+		Observation observation = new Observation();
+		observation.getSubject().setReference("Patient/P");
+		myObservationDao.create(observation);
+
+		myCaptureQueriesListener.clear();
+		observation = new Observation();
+		observation.getSubject().setReference("Patient/P");
+		myObservationDao.create(observation);
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+
+	}
+
+
 
 	@AfterClass
 	public static void afterClassClearContext() {

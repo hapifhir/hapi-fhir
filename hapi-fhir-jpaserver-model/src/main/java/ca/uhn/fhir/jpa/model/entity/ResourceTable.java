@@ -212,6 +212,10 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Transient
 	private transient boolean myUnchangedInCurrentOperation;
 
+	// FIXME: remove?
+	@Transient
+	private transient boolean myCreatedInCurrentOperation;
+
 	@Version
 	@Column(name = "RES_VER")
 	private long myVersion;
