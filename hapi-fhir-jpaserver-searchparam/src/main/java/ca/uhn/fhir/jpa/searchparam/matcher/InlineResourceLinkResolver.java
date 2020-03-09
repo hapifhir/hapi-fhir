@@ -21,9 +21,11 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  */
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -34,18 +36,20 @@ import org.springframework.stereotype.Service;
 public class InlineResourceLinkResolver implements IResourceLinkResolver {
 
 	@Override
-	public ResourceTable findTargetResource(RuntimeSearchParam theNextSpDef, String theNextPathsUnsplit, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
+	public IResourceLookup findTargetResource(RuntimeSearchParam theNextSpDef, String theNextPathsUnsplit, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
 		ResourceTable target;
 		target = new ResourceTable();
 		target.setResourceType(theTypeString);
 		if (theNextId.isIdPartValidLong()) {
-			target.setId(theNextId.getIdPartAsLong());
+
+			// FIXME: handle type=any
+			return new ResourceLookup(theTypeString, theNextId.getIdPartAsLong(), null);
+
 		} else {
-			ForcedId forcedId = new ForcedId();
-			forcedId.setForcedId(theNextId.getIdPart());
-			target.setForcedId(forcedId);
+
+			return new ResourceLookup(theTypeString, null, null);
+
 		}
-		return target;
 	}
 
 	@Override

@@ -33,6 +33,7 @@ import java.util.Map.Entry;
 import java.util.function.Predicate;
 
 import static org.apache.commons.lang3.StringUtils.compare;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class ResourceIndexedSearchParams {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceIndexedSearchParams.class);
@@ -271,27 +272,27 @@ public final class ResourceIndexedSearchParams {
 	}
 
 	private boolean resourceIdMatches(ResourceLink theResourceLink, ReferenceParam theReference) {
-		ResourceTable target = theResourceLink.getTargetResource();
-		IdDt idDt = target.getIdDt();
-		if (idDt.isIdPartValidLong()) {
-			if (theReference.isIdPartValidLong()) {
-				return theReference.getIdPartAsLong().equals(idDt.getIdPartAsLong());
-			} else {
-				return false;
-			}
-		} else {
-			ForcedId forcedId = target.getForcedId();
-			if (forcedId != null) {
-				return forcedId.getForcedId().equals(theReference.getValue());
-			} else {
+		String targetType = theResourceLink.getTargetResourceType();
+		String targetId = theResourceLink.getTargetResourceId();
+
+		assert isNotBlank(targetType);
+		assert isNotBlank(targetId);
+
+		if (theReference.hasResourceType()) {
+			if (!theReference.getResourceType().equals(targetType)) {
 				return false;
 			}
 		}
+
+		if (!targetId.equals(theReference.getIdPart())) {
+			return false;
+		}
+
+		return true;
 	}
 
 	private boolean resourceLinkMatches(String theResourceName, ResourceLink theResourceLink, String theParamName, String theParamPath) {
-		return theResourceLink.getTargetResource().getResourceType().equalsIgnoreCase(theParamName) ||
-			theResourceLink.getSourcePath().equalsIgnoreCase(theParamPath);
+		return theResourceLink.getSourcePath().equalsIgnoreCase(theParamPath);
 	}
 
 	@Override

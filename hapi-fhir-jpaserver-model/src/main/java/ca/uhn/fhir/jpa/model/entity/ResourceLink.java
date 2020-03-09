@@ -60,28 +60,38 @@ public class ResourceLink extends BaseResourceIndex {
 	private String mySourceResourceType;
 
 	@ManyToOne(optional = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = true, foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET"))
+	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = true, insertable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET"))
 	private ResourceTable myTargetResource;
 
-	@Column(name = "TARGET_RESOURCE_ID", insertable = false, updatable = false, nullable = true)
+	@Column(name = "TARGET_RESOURCE_ID", insertable = true, updatable = true, nullable = true)
 	@Field()
 	private Long myTargetResourcePid;
-
 	@Column(name = "TARGET_RESOURCE_TYPE", nullable = false, length = ResourceTable.RESTYPE_LEN)
 	@Field()
 	private String myTargetResourceType;
-
 	@Column(name = "TARGET_RESOURCE_URL", length = 200, nullable = true)
 	@Field()
 	private String myTargetResourceUrl;
-
 	@Field()
 	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
+	@Transient
+	private transient String myTargetResourceId;
 
 	public ResourceLink() {
 		super();
+	}
+
+	public String getTargetResourceId() {
+		if (myTargetResourceId == null && myTargetResource != null) {
+			myTargetResourceId = myTargetResource.getIdDt().getIdPart();
+		}
+		return myTargetResourceId;
+	}
+
+	public String getTargetResourceType() {
+		return myTargetResourceType;
 	}
 
 	@Override
@@ -99,8 +109,9 @@ public class ResourceLink extends BaseResourceIndex {
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(mySourcePath, obj.mySourcePath);
 		b.append(mySourceResource, obj.mySourceResource);
-		b.append(myTargetResourcePid, obj.myTargetResourcePid);
 		b.append(myTargetResourceUrl, obj.myTargetResourceUrl);
+		b.append(myTargetResourceType, obj.myTargetResourceType);
+		b.append(getTargetResourceId(), obj.getTargetResourceId());
 		return b.isEquals();
 	}
 
@@ -126,11 +137,12 @@ public class ResourceLink extends BaseResourceIndex {
 		return myTargetResource;
 	}
 
-	public void setTargetResource(ResourceTable theTargetResource) {
-		Validate.notNull(theTargetResource);
-		myTargetResource = theTargetResource;
-		myTargetResourcePid = theTargetResource.getId();
-		myTargetResourceType = theTargetResource.getResourceType();
+	public void setTargetResource(String theResourceType, Long theResourcePid, String theTargetResourceId) {
+		Validate.notBlank(theResourceType);
+
+		myTargetResourceType = theResourceType;
+		myTargetResourcePid = theResourcePid;
+		myTargetResourceId = theTargetResourceId;
 	}
 
 	public Long getTargetResourcePid() {
@@ -189,8 +201,9 @@ public class ResourceLink extends BaseResourceIndex {
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(mySourcePath);
 		b.append(mySourceResource);
-		b.append(myTargetResourcePid);
 		b.append(myTargetResourceUrl);
+		b.append(getTargetResourceType());
+		b.append(getTargetResourceId());
 		return b.toHashCode();
 	}
 
@@ -205,6 +218,10 @@ public class ResourceLink extends BaseResourceIndex {
 
 		b.append("]");
 		return b.toString();
+	}
+
+	public void setTargetResourceForUnitTest(ResourceTable theTarget) {
+		myTargetResource = theTarget;
 	}
 
 	public static ResourceLink forAbsoluteReference(String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {
@@ -228,11 +245,11 @@ public class ResourceLink extends BaseResourceIndex {
 		return retVal;
 	}
 
-	public static ResourceLink forLocalReference(String theSourcePath, ResourceTable theSourceResource, ResourceTable theTargetResource, Date theUpdated) {
+	public static ResourceLink forLocalReference(String theSourcePath, ResourceTable theSourceResource, String theTargetResourceType, Long theTargetResourcePid, String theTargetResourceId, Date theUpdated) {
 		ResourceLink retVal = new ResourceLink();
 		retVal.setSourcePath(theSourcePath);
 		retVal.setSourceResource(theSourceResource);
-		retVal.setTargetResource(theTargetResource);
+		retVal.setTargetResource(theTargetResourceType, theTargetResourcePid, theTargetResourceId);
 		retVal.setUpdated(theUpdated);
 		return retVal;
 	}

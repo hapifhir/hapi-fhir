@@ -1,29 +1,20 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
-import org.junit.*;
-import org.springframework.test.context.TestPropertySource;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.util.*;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.reset;
+import static org.hamcrest.Matchers.empty;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
@@ -32,6 +23,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	public void afterResetDao() {
 		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
 	}
 
 	@Before
@@ -53,7 +45,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 			Patient p = new Patient();
 			p.setId(id.getIdPart());
 			p.addIdentifier().setSystem("urn:system").setValue("2");
-			myPatientDao.update(p).getResource();
+			myPatientDao.update(p);
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
@@ -175,19 +167,168 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		myPatientDao.update(patient);
 
+		/*
+		 * Add a resource with a forced ID target link
+		 */
+
+		myCaptureQueriesListener.clear();
 		Observation observation = new Observation();
 		observation.getSubject().setReference("Patient/P");
 		myObservationDao.create(observation);
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+		// select: lookup forced ID
+		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		// insert to: HFJ_RESOURCE, HFJ_RES_VER, HFJ_RES_LINK
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+
+		/*
+		 * Add another
+		 */
 
 		myCaptureQueriesListener.clear();
 		observation = new Observation();
 		observation.getSubject().setReference("Patient/P");
 		myObservationDao.create(observation);
-		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+		// select: lookup forced ID
+		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		// insert to: HFJ_RESOURCE, HFJ_RES_VER, HFJ_RES_LINK
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 
 	}
 
 
+	@Test
+	public void testReferenceToForcedId_DeletesDisabled() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myDaoConfig.setDeleteEnabled(false);
+
+		Patient patient = new Patient();
+		patient.setId("P");
+		patient.setActive(true);
+
+		myCaptureQueriesListener.clear();
+		myPatientDao.update(patient);
+
+		/*
+		 * Add a resource with a forced ID target link
+		 */
+
+		myCaptureQueriesListener.clear();
+		Observation observation = new Observation();
+		observation.getSubject().setReference("Patient/P");
+		myObservationDao.create(observation);
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+		// select: lookup forced ID
+		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		// insert to: HFJ_RESOURCE, HFJ_RES_VER, HFJ_RES_LINK
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+
+		/*
+		 * Add another
+		 */
+
+		myCaptureQueriesListener.clear();
+		observation = new Observation();
+		observation.getSubject().setReference("Patient/P");
+		myObservationDao.create(observation);
+		// select: no lookups needed because of cache
+		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		// insert to: HFJ_RESOURCE, HFJ_RES_VER, HFJ_RES_LINK
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+
+	}
+
+
+	@Test
+	public void testSearchUsingForcedIdReference() {
+
+		Patient patient = new Patient();
+		patient.setId("P");
+		patient.setActive(true);
+		myPatientDao.update(patient);
+
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient/P");
+		myObservationDao.update(obs);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add("subject", new ReferenceParam("Patient/P"));
+
+		myCaptureQueriesListener.clear();
+		assertEquals(1, myObservationDao.search(map).size().intValue());
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+		// Resolve forced ID, Perform search, load result
+		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		/*
+		 * Again
+		 */
+
+		myCaptureQueriesListener.clear();
+		assertEquals(1, myObservationDao.search(map).size().intValue());
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+		// Resolve forced ID, Perform search, load result
+		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+	}
+
+
+	@Test
+	public void testSearchUsingForcedIdReference_DeletedDisabled() {
+		myDaoConfig.setDeleteEnabled(false);
+
+		Patient patient = new Patient();
+		patient.setId("P");
+		patient.setActive(true);
+		myPatientDao.update(patient);
+
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient/P");
+		myObservationDao.update(obs);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add("subject", new ReferenceParam("Patient/P"));
+
+		myCaptureQueriesListener.clear();
+		assertEquals(1, myObservationDao.search(map).size().intValue());
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+		// Resolve forced ID, Perform search, load result
+		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		/*
+		 * Again
+		 */
+
+		myCaptureQueriesListener.clear();
+		assertEquals(1, myObservationDao.search(map).size().intValue());
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+		// (NO resolve forced ID), Perform search, load result
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+	}
+
+
+	// FIXME: clear IdHelperService caches between tests
 
 	@AfterClass
 	public static void afterClassClearContext() {

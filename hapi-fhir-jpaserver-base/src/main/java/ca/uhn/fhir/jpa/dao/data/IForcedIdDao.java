@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /*
  * #%L
@@ -35,8 +36,11 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 	@Query("SELECT f.myResourcePid FROM ForcedId f WHERE myForcedId IN (:forced_id)")
 	List<Long> findByForcedId(@Param("forced_id") Collection<String> theForcedId);
 
-	@Query("SELECT f.myResourcePid FROM ForcedId f WHERE myResourceType = :resource_type AND myForcedId IN (:forced_id)")
-	List<Long> findByTypeAndForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedId);
+	@Query("SELECT f.myResourcePid FROM ForcedId f WHERE myResourceType = :resource_type AND myForcedId = :forced_id")
+	Optional<Long> findByTypeAndForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") String theForcedId);
+
+	@Query("SELECT f.myResourcePid FROM ForcedId f WHERE myResourceType = :resource_type AND myForcedId IN ( :forced_id )")
+	Collection<Long> findByTypeAndForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedId);
 
 	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid = :resource_pid")
 	ForcedId findByResourcePid(@Param("resource_pid") Long theResourcePid);
@@ -44,4 +48,20 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 	@Modifying
 	@Query("DELETE FROM ForcedId t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
+
+	@Query("" +
+		"SELECT " +
+		"   f.myResourceType, f.myResourcePid, f.myForcedId, t.myDeleted " +
+		"FROM ForcedId f " +
+		"JOIN ResourceTable t ON t.myId = f.myResourcePid " +
+		"WHERE f.myForcedId IN ( :forced_id )")
+	Collection<Object[]> findAndResolveByTypeAndForcedId(@Param("forced_id") Collection<String> theForcedIds);
+
+	@Query("" +
+		"SELECT " +
+		"   f.myResourceType, f.myResourcePid, f.myForcedId, t.myDeleted " +
+		"FROM ForcedId f " +
+		"JOIN ResourceTable t ON t.myId = f.myResourcePid " +
+		"WHERE f.myResourceType = :resource_type AND f.myForcedId IN ( :forced_id )")
+	Collection<Object[]> findAndResolveByTypeAndForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedIds);
 }

@@ -89,7 +89,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 				if (isNotBlank(value)) {
 					haveValue = true;
 					try {
-						ResourcePersistentId pid = myIdHelperService.translateForcedIdToPid(theResourceName, valueAsId.getIdPart(), theRequest);
+						ResourcePersistentId pid = myIdHelperService.translateForcedIdToPid_(theResourceName, valueAsId.getIdPart(), theRequest);
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {
 						// This is not an error in a search, it just results in no matchesFhirResourceDaoR4InterceptorTest
