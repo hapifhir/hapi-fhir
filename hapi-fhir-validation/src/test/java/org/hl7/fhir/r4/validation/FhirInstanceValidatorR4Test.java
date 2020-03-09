@@ -289,6 +289,33 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	/**
+	 * See #1740
+	 */
+	@Ignore
+	@Test
+	public void testValidateScalarInRepeatableField() {
+		String operationDefinition = "{\n" +
+			"  \"resourceType\": \"OperationDefinition\",\n" +
+			"  \"name\": \"Questionnaire\",\n" +
+			"  \"status\": \"draft\",\n" +
+			"  \"kind\" : \"operation\",\n" +
+			"  \"code\": \"populate\",\n" +
+			"  \"resource\": \"Patient\",\n" + // should be array
+			"  \"system\": false,\n" + " " +
+			" \"type\": false,\n" +
+			"  \"instance\": true\n" +
+			"}";
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+
+		ValidationResult result = val.validateWithResult(operationDefinition);
+		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
+		assertFalse(result.isSuccessful());
+		assertEquals("Primitive types must have a value that is not empty", all.get(0).getMessage());
+	}
+
+	/**
 	 * See #1676 - We should ignore schema location
 	 */
 	@Test
@@ -1045,7 +1072,10 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.toString(), containsString("Profile reference \"http://foo/structuredefinition/myprofile\" could not be resolved, so has not been checked"));
+
+		assertEquals(1, errors.size());
+		assertEquals("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked", errors.get(0).getMessage());
+		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
 	}
 
 	@Test

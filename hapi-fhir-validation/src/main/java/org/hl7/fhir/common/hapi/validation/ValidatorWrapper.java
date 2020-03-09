@@ -171,11 +171,18 @@ public class ValidatorWrapper {
 		for (int i = 0; i < messages.size(); i++) {
 			ValidationMessage next = messages.get(i);
 			String message = next.getMessage();
+
+			// TODO: are these still needed?
 			if ("Binding has no source, so can't be checked".equals(message) ||
 				"ValueSet http://hl7.org/fhir/ValueSet/mimetypes not found".equals(message)) {
 				messages.remove(i);
 				i--;
 			}
+
+			if (message.endsWith("' could not be resolved, so has not been checked") && next.getLevel() == ValidationMessage.IssueSeverity.WARNING) {
+				next.setLevel(ValidationMessage.IssueSeverity.ERROR);
+			}
+
 		}
 
 		return messages;

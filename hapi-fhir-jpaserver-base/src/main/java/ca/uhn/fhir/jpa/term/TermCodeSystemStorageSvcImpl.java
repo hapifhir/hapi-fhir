@@ -223,7 +223,15 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		 * save parent concepts first (it's way too slow to do that)
 		 */
 		if (theConcept.getId() == null) {
-			retVal += ensureParentsSaved(theConcept.getParents());
+			boolean needToSaveParents = false;
+			for (TermConceptParentChildLink next : theConcept.getParents()) {
+				if (next.getParent().getId() == null) {
+					needToSaveParents = true;
+				}
+			}
+			if (needToSaveParents) {
+				retVal += ensureParentsSaved(theConcept.getParents());
+			}
 		}
 
 		if (theConcept.getId() == null || theConcept.getIndexStatus() == null) {
@@ -485,7 +493,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		conceptToAdd.setCodeSystemVersion(theCsv);
 
 		if (theStatisticsTracker.getUpdatedConceptCount() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
-			conceptToAdd = myConceptDao.save(conceptToAdd);
+			saveConcept(conceptToAdd);
 			Long nextConceptPid = conceptToAdd.getId();
 			Validate.notNull(nextConceptPid);
 		} else {
@@ -508,7 +516,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			ourLog.info("Saving parent/child link - Parent[{}] Child[{}]", parentLink.getParent().getCode(), parentLink.getChild().getCode());
 
 			if (theStatisticsTracker.getUpdatedConceptCount() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
-			myConceptParentChildLinkDao.save(parentLink);
+				myConceptParentChildLinkDao.save(parentLink);
 			} else {
 				myDeferredStorageSvc.addConceptLinkToStorageQueue(parentLink);
 			}
@@ -655,12 +663,15 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private void deleteConceptChildrenAndConcept(TermConcept theConcept, AtomicInteger theRemoveCounter) {
 		for (TermConceptParentChildLink nextChildLink : theConcept.getChildren()) {
 			deleteConceptChildrenAndConcept(nextChildLink.getChild(), theRemoveCounter);
-			myConceptParentChildLinkDao.delete(nextChildLink);
 		}
+
+		myConceptParentChildLinkDao.deleteByConceptPid(theConcept.getId());
 
 		myConceptDesignationDao.deleteAll(theConcept.getDesignations());
 		myConceptPropertyDao.deleteAll(theConcept.getProperties());
-		myConceptDao.delete(theConcept);
+
+		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
+		myConceptDao.deleteByPid(theConcept.getId());
 		theRemoveCounter.incrementAndGet();
 	}
 

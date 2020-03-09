@@ -679,6 +679,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 
+		<elastic_apm_version>1.13.0</elastic_apm_version>
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
 	</properties>
@@ -1035,6 +1036,11 @@
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
 				<version>${httpcore_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>co.elastic.apm</groupId>
+				<artifactId>apm-agent-api</artifactId>
+				<version>${elastic_apm_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
