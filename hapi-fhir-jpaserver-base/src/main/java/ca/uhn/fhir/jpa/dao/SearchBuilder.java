@@ -177,7 +177,6 @@ public class SearchBuilder implements ISearchBuilder {
 			List<List<IQueryParameterType>> andOrParams = nextParamEntry.getValue();
 			searchForIdsWithAndOr(myResourceName, nextParamName, andOrParams, theRequest);
 		}
-
 	}
 
 	/**

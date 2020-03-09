@@ -465,8 +465,6 @@ public class SearchParameterMap implements Serializable {
 		}
 	}
 
-
-
 	/*
 	 * Given a particular named parameter, e.g. `name`, iterate over AndOrParams and remove any which are empty.
 	 */

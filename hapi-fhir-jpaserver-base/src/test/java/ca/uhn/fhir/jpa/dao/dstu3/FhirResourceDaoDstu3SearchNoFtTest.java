@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.method.SearchParameter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
@@ -364,14 +365,20 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			myObservationDao.create(obs, mySrd).getId();
 		}
 
-		SearchParameterMap params;
+		SearchParameterMap standardStringQuery = new SearchParameterMap();
 
-		params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
+		standardStringQuery.setLoadSynchronous(true);
+		//params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
+		standardStringQuery.add("gender", new TokenParam("male"));
 		//This is the tested query:
 		// Patient?_has:Observation:subject:device.identifier=urn:system|DEVICEID
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
+		//assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(standardStringQuery)), contains(pid0.getValue()));
+
+		SearchParameterMap chainQuery = new SearchParameterMap();
+		chainQuery.setLoadSynchronous(true);
+		chainQuery.add(Observation.SP_DEVICE, new ReferenceParam("device", "urn:system|FOO").setChain("identifier"));
+		IBundleProvider chainSearch = myObservationDao.search(chainQuery);
+		assertThat(chainQuery.size(), is(equalTo(1)));
 	}
 
 	@Test
