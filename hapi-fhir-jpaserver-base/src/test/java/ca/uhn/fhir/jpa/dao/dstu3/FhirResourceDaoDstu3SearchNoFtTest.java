@@ -380,7 +380,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		chainQuery.add(Observation.SP_DEVICE, new ReferenceParam("device", "urn:system|FOO").setChain("identifier"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider chainSearch = myObservationDao.search(chainQuery);
-		List<SqlQuery> selectueriesForCurrentThread = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		List<SqlQuery> selectqueriesForCurrentThread = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		assertThat(chainQuery.size(), is(equalTo(1)));
 	}
 
