@@ -1915,7 +1915,9 @@ public class DaoConfig {
 	/**
 	 * This setting should be disabled (set to <code>false</code>) on servers that are not allowing
 	 * deletes. Default is <code>true</code>. If deletes are disabled, some checks for resource
-	 * deletion can be skipped, which improves performance.
+	 * deletion can be skipped, which improves performance. This is particularly helpful when large
+	 * amounts of data containing client-assigned IDs are being loaded, but it can also improve
+	 * search performance.
 	 *
 	 * @since 5.0.0
 	 */
@@ -1926,7 +1928,9 @@ public class DaoConfig {
 	/**
 	 * This setting should be disabled (set to <code>false</code>) on servers that are not allowing
 	 * deletes. Default is <code>true</code>. If deletes are disabled, some checks for resource
-	 * deletion can be skipped, which improves performance.
+	 * deletion can be skipped, which improves performance. This is particularly helpful when large
+	 * amounts of data containing client-assigned IDs are being loaded, but it can also improve
+	 * search performance.
 	 *
 	 * @since 5.0.0
 	 */
