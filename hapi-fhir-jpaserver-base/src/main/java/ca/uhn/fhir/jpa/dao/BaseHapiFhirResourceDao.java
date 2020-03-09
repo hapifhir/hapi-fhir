@@ -181,8 +181,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public DaoMethodOutcome delete(IIdType theId, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
 		validateIdPresentForDelete(theId);
+		validateDeleteEnabled();
 
-		final ResourceTable entity = readEntityLatestVersion(theId, theRequest);
+		final ResourceTable entity = readEntityLatestVersion(theId);
 		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
 			throw new ResourceVersionConflictException("Trying to delete " + theId + " but this is not the current version");
 		}
@@ -258,6 +259,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public DaoMethodOutcome delete(IIdType theId, RequestDetails theRequestDetails) {
 		validateIdPresentForDelete(theId);
+		validateDeleteEnabled();
 
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
 		if (isNotBlank(theId.getValue())) {
@@ -280,6 +282,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 */
 	@Override
 	public DeleteMethodOutcome deleteByUrl(String theUrl, DeleteConflictList deleteConflicts, RequestDetails theRequest) {
+		validateDeleteEnabled();
+
 		StopWatch w = new StopWatch();
 
 		Set<ResourcePersistentId> resourceIds = myMatchResourceUrlService.processMatchUrl(theUrl, myResourceType, theRequest);
@@ -355,6 +359,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DeleteMethodOutcome deleteByUrl(String theUrl, RequestDetails theRequestDetails) {
+		validateDeleteEnabled();
+
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
 
 		DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequestDetails);
@@ -362,6 +368,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
 
 		return outcome;
+	}
+
+	private void validateDeleteEnabled() {
+		if (!myDaoConfig.isDeleteEnabled()) {
+			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "deleteBlockedBecauseDisabled");
+			throw new PreconditionFailedException(msg);
+		}
 	}
 
 	private void validateIdPresentForDelete(IIdType theId) {
@@ -683,7 +696,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(theResourceId);
 		}
 
-		ResourceTable latestVersion = readEntityLatestVersion(theResourceId, theRequest);
+		ResourceTable latestVersion = readEntityLatestVersion(theResourceId);
 		if (latestVersion.getVersion() != entity.getVersion()) {
 			doMetaAdd(theMetaAdd, entity);
 		} else {
@@ -715,7 +728,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(theResourceId);
 		}
 
-		ResourceTable latestVersion = readEntityLatestVersion(theResourceId, theRequest);
+		ResourceTable latestVersion = readEntityLatestVersion(theResourceId);
 		if (latestVersion.getVersion() != entity.getVersion()) {
 			doMetaDelete(theMetaDel, entity);
 		} else {
@@ -791,7 +804,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 
 		} else {
-			entityToUpdate = readEntityLatestVersion(theId, theRequest);
+			entityToUpdate = readEntityLatestVersion(theId);
 			if (theId.hasVersionIdPart()) {
 				if (theId.getVersionIdPartAsLong() != entityToUpdate.getVersion()) {
 					throw new ResourceVersionConflictException("Version " + theId.getVersionIdPart() + " is not the most recent version of this resource, unable to apply patch");
@@ -926,7 +939,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
-		ResourcePersistentId pid = myIdHelperService.translateForcedIdToPid_(getResourceName(), theId.getIdPart(), theRequest);
+		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(getResourceName(), theId.getIdPart());
 		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid.getIdAsLong());
 
 		if (entity == null) {
@@ -964,8 +977,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return entity;
 	}
 
-	protected ResourceTable readEntityLatestVersion(IIdType theId, RequestDetails theRequest) {
-		ResourcePersistentId persistentId = myIdHelperService.translateForcedIdToPid_(getResourceName(), theId.getIdPart(), theRequest);
+	protected ResourceTable readEntityLatestVersion(IIdType theId) {
+		ResourcePersistentId persistentId = myIdHelperService.resolveResourcePersistentIds(getResourceName(), theId.getIdPart());
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
@@ -1206,7 +1219,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			resourceId = theResource.getIdElement();
 
 			try {
-				entity = readEntityLatestVersion(resourceId, theRequest);
+				entity = readEntityLatestVersion(resourceId);
 			} catch (ResourceNotFoundException e) {
 				return doCreate(theResource, null, thePerformIndexing, new Date(), theRequest);
 			}
@@ -1278,7 +1291,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (theId == null || theId.hasIdPart() == false) {
 				throw new InvalidRequestException("No ID supplied. ID is required when validating with mode=DELETE");
 			}
-			final ResourceTable entity = readEntityLatestVersion(theId, theRequest);
+			final ResourceTable entity = readEntityLatestVersion(theId);
 
 			// Validate that there are no resources pointing to the candidate that
 			// would prevent deletion

@@ -43,7 +43,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,10 +59,28 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+/**
+ * This class is used to convert between PIDs (the internal primary key for a particular resource as
+ * stored in the {@link ca.uhn.fhir.jpa.model.entity.ResourceTable HFJ_RESOURCE} table), and the
+ * public ID that a resource has.
+ * <p>
+ * These IDs are sometimes one and the same (by default, a resource that the server assigns the ID of
+ * <code>Patient/1</code> will simply use a PID of 1 and and ID of 1. However, they may also be different
+ * in cases where a forced ID is used (an arbitrary client-assigned ID).
+ * </p>
+ * <p>
+ * This service is highly optimized in order to minimize the number of DB calls as much as possible,
+ * since ID resolution is fundamental to many basic operations. This service returns either
+ * {@link IResourceLookup} or {@link ResourcePersistentId} depending on the method being called.
+ * The former involves an extra database join that the latter does not require, so selecting the
+ * right method here is important.
+ * </p>
+ */
 @Service
 public class IdHelperService {
 	private static final Logger ourLog = LoggerFactory.getLogger(IdHelperService.class);
@@ -75,30 +93,31 @@ public class IdHelperService {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	private Cache<String, Long> myPersistentIdCache;
 	private Cache<String, IResourceLookup> myResourceLookupCache;
 
 	@PostConstruct
 	public void start() {
-		myPersistentIdCache = Caffeine
-			.newBuilder()
-			.maximumSize(10000)
-			.build();
-		myResourceLookupCache = Caffeine
-			.newBuilder()
-			.maximumSize(10000)
-			.build();
+		myPersistentIdCache = newCache();
+		myResourceLookupCache = newCache();
 	}
+
 
 	public void delete(ForcedId forcedId) {
 		myForcedIdDao.deleteByPid(forcedId.getId());
 	}
 
 	/**
+	 * Given a resource type and ID, looks up the resource and returns a {@link IResourceLookup}. This
+	 * object contains the internal PID for the resource and the resource deletion status, making it sufficient
+	 * for persisting resource links between resources without adding any further database calls after the
+	 * single one performed by this call.
+	 *
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	public IResourceLookup translateForcedIdToPid(String theResourceName, String theResourceId, RequestDetails theRequestDetails) throws ResourceNotFoundException {
+	public IResourceLookup resolveResourceIdentity(String theResourceName, String theResourceId, RequestDetails theRequestDetails) throws ResourceNotFoundException {
 		// We only pass 1 input in so only 0..1 will come back
 		IdDt id = new IdDt(theResourceName, theResourceId);
 		Collection<IResourceLookup> matches = translateForcedIdToPids(theRequestDetails, Collections.singletonList(id));
@@ -109,31 +128,20 @@ public class IdHelperService {
 		return matches.iterator().next();
 	}
 
-	public IIdType translatePidIdToForcedId(FhirContext theCtx, String theResourceType, ResourcePersistentId theId) {
-		IIdType retVal = theCtx.getVersion().newIdType();
-		retVal.setValue(translatePidIdToForcedId(theResourceType, theId));
-		return retVal;
-	}
-
-	public String translatePidIdToForcedId(String theResourceType, ResourcePersistentId theId) {
-		ForcedId forcedId = myForcedIdDao.findByResourcePid(theId.getIdAsLong());
-		if (forcedId != null) {
-			return forcedId.getResourceType() + '/' + forcedId.getForcedId();
-		} else {
-			return theResourceType + '/' + theId.toString();
-		}
-	}
-
-	// FIXME: rename methods in this
+	/**
+	 * Given a resource type and ID, determines the internal persistent ID for the resource.
+	 *
+	 * @throws ResourceNotFoundException If the ID can not be found
+	 */
 	@Nonnull
-	public ResourcePersistentId translateForcedIdToPid_(String theResourceType, String theId, RequestDetails theRequest) {
+	public ResourcePersistentId resolveResourcePersistentIds(String theResourceType, String theId) {
 		Long retVal;
 		if (myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId)) {
 			if (myDaoConfig.isDeleteEnabled()) {
-				retVal = translateForcedIdToPid(theResourceType, theId);
+				retVal = resolveResourceIdentity(theResourceType, theId);
 			} else {
 				String key = theResourceType + "/" + theId;
-				retVal = myPersistentIdCache.get(key, t -> translateForcedIdToPid(theResourceType, theId));
+				retVal = myPersistentIdCache.get(key, t -> resolveResourceIdentity(theResourceType, theId));
 			}
 
 		} else {
@@ -143,15 +151,11 @@ public class IdHelperService {
 		return new ResourcePersistentId(retVal);
 	}
 
-	public Long translateForcedIdToPid(String theResourceType, String theId) {
-		Long retVal;
-		retVal = myForcedIdDao
-			.findByTypeAndForcedId(theResourceType, theId)
-			.orElseThrow(() -> new ResourceNotFoundException(new IdDt(theResourceType, theId)));
-		return retVal;
-	}
-
-	public List<ResourcePersistentId> translateForcedIdToPids_(List<IIdType> theIds, RequestDetails theRequest) {
+	/**
+	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs
+	 */
+	@Nonnull
+	public List<ResourcePersistentId> resolveResourcePersistentIds(List<IIdType> theIds, RequestDetails theRequest) {
 		theIds.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
 		if (theIds.isEmpty()) {
@@ -169,16 +173,7 @@ public class IdHelperService {
 				.forEach(t -> retVal.add(t));
 		}
 
-		ListMultimap<String, String> typeToIds = MultimapBuilder.hashKeys().arrayListValues().build();
-		for (IIdType nextId : theIds) {
-			if (myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(nextId)) {
-				if (nextId.hasResourceType()) {
-					typeToIds.put(nextId.getResourceType(), nextId.getIdPart());
-				} else {
-					typeToIds.put("", nextId.getIdPart());
-				}
-			}
-		}
+		ListMultimap<String, String> typeToIds = organizeIdsByResourceType(theIds);
 
 		for (Map.Entry<String, Collection<String>> nextEntry : typeToIds.asMap().entrySet()) {
 			String nextResourceType = nextEntry.getKey();
@@ -187,6 +182,7 @@ public class IdHelperService {
 
 				StorageProcessingMessage msg = new StorageProcessingMessage()
 					.setMessage("This search uses unqualified resource IDs (an ID without a resource type). This is less efficient than using a qualified type.");
+				ourLog.debug(msg.getMessage());
 				HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)
@@ -230,6 +226,48 @@ public class IdHelperService {
 		return retVal;
 	}
 
+
+	/**
+	 * Given a persistent ID, returns the associated resource ID
+	 */
+	@Nonnull
+	public IIdType translatePidIdToForcedId(FhirContext theCtx, String theResourceType, ResourcePersistentId theId) {
+		IIdType retVal = theCtx.getVersion().newIdType();
+		retVal.setValue(translatePidIdToForcedId(theResourceType, theId));
+		return retVal;
+	}
+
+	private String translatePidIdToForcedId(String theResourceType, ResourcePersistentId theId) {
+		ForcedId forcedId = myForcedIdDao.findByResourcePid(theId.getIdAsLong());
+		if (forcedId != null) {
+			return forcedId.getResourceType() + '/' + forcedId.getForcedId();
+		} else {
+			return theResourceType + '/' + theId.toString();
+		}
+	}
+
+	private ListMultimap<String, String> organizeIdsByResourceType(Collection<IIdType> theIds) {
+		ListMultimap<String, String> typeToIds = MultimapBuilder.hashKeys().arrayListValues().build();
+		for (IIdType nextId : theIds) {
+			if (myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(nextId)) {
+				if (nextId.hasResourceType()) {
+					typeToIds.put(nextId.getResourceType(), nextId.getIdPart());
+				} else {
+					typeToIds.put("", nextId.getIdPart());
+				}
+			}
+		}
+		return typeToIds;
+	}
+
+	private Long resolveResourceIdentity(String theResourceType, String theId) {
+		Long retVal;
+		retVal = myForcedIdDao
+			.findByTypeAndForcedId(theResourceType, theId)
+			.orElseThrow(() -> new ResourceNotFoundException(new IdDt(theResourceType, theId)));
+		return retVal;
+	}
+
 	private Collection<IResourceLookup> translateForcedIdToPids(RequestDetails theRequest, Collection<IIdType> theId) {
 		theId.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
@@ -258,17 +296,7 @@ public class IdHelperService {
 			}
 		}
 
-		ListMultimap<String, String> typeToIds = MultimapBuilder.hashKeys().arrayListValues().build();
-		for (IIdType nextId : theId) {
-			if (myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(nextId)) {
-				if (nextId.hasResourceType()) {
-					typeToIds.put(nextId.getResourceType(), nextId.getIdPart());
-				} else {
-					typeToIds.put("", nextId.getIdPart());
-				}
-			}
-		}
-
+		ListMultimap<String, String> typeToIds = organizeIdsByResourceType(theId);
 		for (Map.Entry<String, Collection<String>> nextEntry : typeToIds.asMap().entrySet()) {
 			String nextResourceType = nextEntry.getKey();
 			Collection<String> nextIds = nextEntry.getValue();
@@ -328,6 +356,14 @@ public class IdHelperService {
 	public void clearCache() {
 		myPersistentIdCache.invalidateAll();
 		myResourceLookupCache.invalidateAll();
+	}
+
+	private <T, V> @NonNull Cache<T, V> newCache() {
+		return Caffeine
+			.newBuilder()
+			.maximumSize(10000)
+			.expireAfterWrite(10, TimeUnit.MINUTES)
+			.build();
 	}
 
 	public static boolean isValidPid(IIdType theId) {

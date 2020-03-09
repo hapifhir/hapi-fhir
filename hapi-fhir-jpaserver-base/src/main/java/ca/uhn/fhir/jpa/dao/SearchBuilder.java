@@ -266,7 +266,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 				StringParam idParm = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-				ResourcePersistentId pid = myIdHelperService.translateForcedIdToPid_(myResourceName, idParm.getValue(), theRequest);
+				ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(myResourceName, idParm.getValue());
 				if (myAlsoIncludePids == null) {
 					myAlsoIncludePids = new ArrayList<>(1);
 				}

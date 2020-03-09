@@ -268,9 +268,9 @@ public class SearchParamWithInlineReferencesExtractor {
 					match = matches.iterator().next();
 				}
 
-				String newId = myIdHelperService.translatePidIdToForcedId(resourceTypeString, match);
+				IIdType newId = myIdHelperService.translatePidIdToForcedId(myContext, resourceTypeString, match);
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
-				nextRef.setReference(newId);
+				nextRef.setReference(newId.getValue());
 			}
 		}
 	}
