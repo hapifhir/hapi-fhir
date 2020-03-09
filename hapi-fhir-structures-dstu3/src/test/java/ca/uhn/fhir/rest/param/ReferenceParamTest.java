@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ReferenceParamTest {
 
@@ -200,6 +201,101 @@ public class ReferenceParamTest {
 		assertEquals(":Patient.identifier", rp.getQueryParameterQualifier());
 		assertEquals("identifier", rp.getChain());
 
+	}
+
+	@Test
+	public void testGetIdPartAsBigDecimal() {
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, null, "123");
+
+		assertEquals("123", rp.getIdPartAsBigDecimal().toPlainString());
+	}
+
+	@Test
+	public void testGetIdPart() {
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, null, "123");
+
+		assertTrue(rp.isIdPartValidLong());
+		assertEquals("123", rp.getIdPart());
+		assertEquals(null, rp.getResourceType(ourCtx));
+	}
+
+	@Test
+	public void testGetIdPartWithType() {
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, ":Patient", "123");
+
+		assertEquals("123", rp.getIdPart());
+		assertEquals("Patient", rp.getResourceType(ourCtx).getSimpleName());
+	}
+
+	@Test
+	public void testSetValueWithType() {
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValue("Patient/123");
+
+		assertEquals("123", rp.getIdPart());
+		assertEquals("Patient", rp.getResourceType(ourCtx).getSimpleName());
+	}
+
+	@Test
+	public void testSetValueWithoutType() {
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValue("123");
+
+		assertEquals("123", rp.getIdPart());
+		assertEquals(null, rp.getResourceType(ourCtx));
+	}
+
+	@Test
+	public void testGetIdPartAsLong() {
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, null, "123");
+
+		assertEquals(123L, rp.getIdPartAsLong().longValue());
+	}
+
+	@Test
+	public void testToStringParam() {
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, null, "123");
+
+		assertEquals("123", rp.toStringParam(ourCtx).getValue());
+	}
+
+	@Test
+	public void testToTokenParam() {
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, null, "123");
+
+		assertEquals("123", rp.toTokenParam(ourCtx).getValue());
+	}
+
+	@Test
+	public void testToDateParam() {
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, null, "2020-10-01");
+
+		assertEquals("2020-10-01", rp.toDateParam(ourCtx).getValueAsString());
+	}
+
+	@Test
+	public void testToNumberParam() {
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, null, "1.23");
+
+		assertEquals("1.23", rp.toNumberParam(ourCtx).getValue().toPlainString());
+	}
+
+	@Test
+	public void testToQuantityParam() {
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, null, "1.23|http://unitsofmeasure.org|cm");
+
+		assertEquals("1.23", rp.toQuantityParam(ourCtx).getValue().toPlainString());
+		assertEquals("http://unitsofmeasure.org", rp.toQuantityParam(ourCtx).getSystem());
+		assertEquals("cm", rp.toQuantityParam(ourCtx).getUnits());
 	}
 
 	@AfterClass
