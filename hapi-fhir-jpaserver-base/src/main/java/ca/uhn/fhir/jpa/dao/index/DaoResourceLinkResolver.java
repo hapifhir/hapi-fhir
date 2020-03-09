@@ -72,7 +72,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			ourLog.trace("Translated {}/{} to resource PID {}", theType, idPart, valueOf);
 		} catch (ResourceNotFoundException e) {
 
-			Optional<IResourceLookup> pidOpt = createPlaceholderTargetIfConfiguredToDoSo(theType, theReference, idPart);
+			Optional<ResourceTable> pidOpt = createPlaceholderTargetIfConfiguredToDoSo(theType, theReference, idPart);
 			if (!pidOpt.isPresent()) {
 
 				if (myDaoConfig.isEnforceReferentialIntegrityOnWrite() == false) {
@@ -95,7 +95,6 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		}
 
 		if (valueOf.getDeleted() != null) {
-			// FIXME: this may not be populated for non-forced IDs
 			String resName = valueOf.getResourceType();
 			throw new InvalidRequestException("Resource " + resName + "/" + idPart + " is deleted, specified in path: " + theNextPathsUnsplit);
 		}
@@ -110,8 +109,8 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	/**
 	 * @param theIdToAssignToPlaceholder If specified, the placeholder resource created will be given a specific ID
 	 */
-	public <T extends IBaseResource> Optional<IResourceLookup> createPlaceholderTargetIfConfiguredToDoSo(Class<T> theType, IBaseReference theReference, @Nullable String theIdToAssignToPlaceholder) {
-		IResourceLookup valueOf = null;
+	public <T extends IBaseResource> Optional<ResourceTable> createPlaceholderTargetIfConfiguredToDoSo(Class<T> theType, IBaseReference theReference, @Nullable String theIdToAssignToPlaceholder) {
+		ResourceTable valueOf = null;
 
 		if (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
 			RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(theType);

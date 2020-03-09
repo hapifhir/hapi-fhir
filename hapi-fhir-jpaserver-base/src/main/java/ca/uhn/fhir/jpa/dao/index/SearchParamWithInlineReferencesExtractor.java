@@ -253,14 +253,14 @@ public class SearchParamWithInlineReferencesExtractor {
 				ResourcePersistentId match;
 				if (matches.isEmpty()) {
 
-					Optional<IResourceLookup> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null);
+					Optional<ResourceTable> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null);
 					if (placeholderOpt.isPresent()) {
-						// FIXME: this seems suboptimal
 						match = new ResourcePersistentId(placeholderOpt.get().getResourceId());
 					} else {
 						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
 						throw new ResourceNotFoundException(msg);
 					}
+
 				} else if (matches.size() > 1) {
 					String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlMultipleMatches", nextId.getValue());
 					throw new PreconditionFailedException(msg);

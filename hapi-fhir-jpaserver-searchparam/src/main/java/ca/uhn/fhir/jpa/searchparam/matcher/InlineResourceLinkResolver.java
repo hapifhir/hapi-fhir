@@ -21,11 +21,10 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  */
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
-import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -37,19 +36,23 @@ public class InlineResourceLinkResolver implements IResourceLinkResolver {
 
 	@Override
 	public IResourceLookup findTargetResource(RuntimeSearchParam theNextSpDef, String theNextPathsUnsplit, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
+
+		/*
+		 * TODO: JA - This gets used during runtime in-memory matching for subscription. It's not
+		 * really clear if it's useful or not.
+		 */
+
+		if (true) throw new UnsupportedOperationException();
+
 		ResourceTable target;
 		target = new ResourceTable();
 		target.setResourceType(theTypeString);
 		if (theNextId.isIdPartValidLong()) {
-
-			// FIXME: handle type=any
 			return new ResourceLookup(theTypeString, theNextId.getIdPartAsLong(), null);
-
 		} else {
-
 			return new ResourceLookup(theTypeString, null, null);
-
 		}
+
 	}
 
 	@Override

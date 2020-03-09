@@ -46,9 +46,15 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 	@Query("DELETE FROM ForcedId t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
 
+	/**
+	 * This method returns an object array, where the order matters. Be careful if you change this query in any way.
+	 */
 	@Query("SELECT f.myForcedId, f.myResourcePid FROM ForcedId f WHERE myResourceType = :resource_type AND myForcedId IN ( :forced_id )")
 	Collection<Object[]> findByTypeAndForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedId);
 
+	/**
+	 * This method returns an object array, where the order matters. Be careful if you change this query in any way.
+	 */
 	@Query("" +
 		"SELECT " +
 		"   f.myResourceType, f.myResourcePid, f.myForcedId, t.myDeleted " +
@@ -57,6 +63,9 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 		"WHERE f.myForcedId IN ( :forced_id )")
 	Collection<Object[]> findAndResolveByTypeAndForcedId(@Param("forced_id") Collection<String> theForcedIds);
 
+	/**
+	 * This method returns an object array, where the order matters. Be careful if you change this query in any way.
+	 */
 	@Query("" +
 		"SELECT " +
 		"   f.myResourceType, f.myResourcePid, f.myForcedId, t.myDeleted " +
