@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -377,7 +378,9 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		SearchParameterMap chainQuery = new SearchParameterMap();
 		chainQuery.setLoadSynchronous(true);
 		chainQuery.add(Observation.SP_DEVICE, new ReferenceParam("device", "urn:system|FOO").setChain("identifier"));
+		myCaptureQueriesListener.clear();
 		IBundleProvider chainSearch = myObservationDao.search(chainQuery);
+		List<SqlQuery> selectueriesForCurrentThread = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		assertThat(chainQuery.size(), is(equalTo(1)));
 	}
 
