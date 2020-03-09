@@ -39,15 +39,15 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 	@Query("SELECT f.myResourcePid FROM ForcedId f WHERE myResourceType = :resource_type AND myForcedId = :forced_id")
 	Optional<Long> findByTypeAndForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") String theForcedId);
 
-	@Query("SELECT f.myResourcePid FROM ForcedId f WHERE myResourceType = :resource_type AND myForcedId IN ( :forced_id )")
-	Collection<Long> findByTypeAndForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedId);
-
 	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid = :resource_pid")
 	ForcedId findByResourcePid(@Param("resource_pid") Long theResourcePid);
 
 	@Modifying
 	@Query("DELETE FROM ForcedId t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
+
+	@Query("SELECT f.myForcedId, f.myResourcePid FROM ForcedId f WHERE myResourceType = :resource_type AND myForcedId IN ( :forced_id )")
+	Collection<Object[]> findByTypeAndForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedId);
 
 	@Query("" +
 		"SELECT " +

@@ -43,6 +43,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -197,10 +198,31 @@ public class IdHelperService {
 
 			} else {
 
-				for (Itera)
+				if (!myDaoConfig.isDeleteEnabled()) {
+					for (Iterator<String> idIterator = nextIds.iterator(); idIterator.hasNext(); ) {
+						String nextId = idIterator.next();
+						String key = nextResourceType + "/" + nextId;
+						Long nextCachedPid = myPersistentIdCache.getIfPresent(key);
+						if (nextCachedPid != null) {
+							idIterator.remove();
+							retVal.add(new ResourcePersistentId(nextCachedPid));
+						}
+					}
+				}
 
-				Collection<Long> views = myForcedIdDao.findByTypeAndForcedId(nextResourceType, nextIds);
-				views.forEach(t -> retVal.add(new ResourcePersistentId(t)));
+				if (nextIds.size() > 0) {
+					Collection<Object[]> views = myForcedIdDao.findByTypeAndForcedId(nextResourceType, nextIds);
+					for (Object[] nextView : views) {
+						String forcedId = (String) nextView[0];
+						Long pid = (Long) nextView[1];
+						retVal.add(new ResourcePersistentId(pid));
+
+						if (!myDaoConfig.isDeleteEnabled()) {
+							String key = nextResourceType + "/" + forcedId;
+							myPersistentIdCache.put(key, pid);
+						}
+					}
+				}
 
 			}
 		}
@@ -301,6 +323,11 @@ public class IdHelperService {
 		}
 
 		return retVal;
+	}
+
+	public void clearCache() {
+		myPersistentIdCache.invalidateAll();
+		myResourceLookupCache.invalidateAll();
 	}
 
 	public static boolean isValidPid(IIdType theId) {

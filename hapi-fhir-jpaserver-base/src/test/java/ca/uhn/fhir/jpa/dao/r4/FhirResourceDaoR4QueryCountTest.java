@@ -265,7 +265,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		assertEquals(1, myObservationDao.search(map).size().intValue());
-		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+//		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 		// Resolve forced ID, Perform search, load result
 		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
@@ -327,8 +327,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 	}
 
-
-	// FIXME: clear IdHelperService caches between tests
 
 	@AfterClass
 	public static void afterClassClearContext() {
