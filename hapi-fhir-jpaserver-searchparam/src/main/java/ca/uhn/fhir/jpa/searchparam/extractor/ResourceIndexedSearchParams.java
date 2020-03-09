@@ -292,7 +292,8 @@ public final class ResourceIndexedSearchParams {
 	}
 
 	private boolean resourceLinkMatches(String theResourceName, ResourceLink theResourceLink, String theParamName, String theParamPath) {
-		return theResourceLink.getSourcePath().equalsIgnoreCase(theParamPath);
+		String sourcePath = theResourceLink.getSourcePath();
+		return sourcePath.equalsIgnoreCase(theParamPath);
 	}
 
 	@Override

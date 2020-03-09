@@ -133,10 +133,6 @@ public class ResourceLink extends BaseResourceIndex {
 		mySourceResourceType = theSourceResource.getResourceType();
 	}
 
-	public ResourceTable getTargetResource() {
-		return myTargetResource;
-	}
-
 	public void setTargetResource(String theResourceType, Long theResourcePid, String theTargetResourceId) {
 		Validate.notBlank(theResourceType);
 
