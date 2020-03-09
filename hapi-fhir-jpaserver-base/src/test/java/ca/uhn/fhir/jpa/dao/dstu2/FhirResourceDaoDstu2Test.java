@@ -1801,7 +1801,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			myPatientDao.read(new IdDt("Patient/9999999999999/_history/1"), mySrd);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Resource Patient/9999999999999 is not known", e.getMessage());
+			assertEquals("Resource Patient/9999999999999/_history/1 is not known", e.getMessage());
 		}
 
 	}
