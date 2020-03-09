@@ -363,6 +363,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.setDevice(new Reference(devId));
 			obs.setSubject(new Reference(pid0));
+			obs.setCode(new CodeableConcept(new Coding("sys", "val", "disp")));
 			myObservationDao.create(obs, mySrd).getId();
 		}
 
@@ -382,6 +383,16 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		IBundleProvider chainSearch = myObservationDao.search(chainQuery);
 		List<SqlQuery> selectqueriesForCurrentThread = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		assertThat(chainQuery.size(), is(equalTo(1)));
+
+		SearchParameterMap hasQuery = new SearchParameterMap();
+		hasQuery.setLoadSynchronous(true);
+		hasQuery.add("_has", new HasParam("Observation", "subject", "code", "sys|val"));
+		//hasQuery.add(Observation.SP_DEVICE, new ReferenceParam("device", "urn:system|FOO").setChain("identifier"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider hasSearch = myPatientDao.search(hasQuery);
+		selectqueriesForCurrentThread = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		assertThat(hasQuery.size(), is(equalTo(1)));
+
 	}
 
 	@Test

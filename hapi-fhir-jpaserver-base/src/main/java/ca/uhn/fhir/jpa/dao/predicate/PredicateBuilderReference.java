@@ -809,11 +809,17 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			}
 
 			assert parameterName != null;
+
+			//Ensure that the name of the search param
+			// (e.g. the `code` in Patient?_has:Observation:subject:code=sys|val)
+			// exists on the target resource type.
 			RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
 			if (owningParameterDef == null) {
 				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + parameterName);
 			}
 
+			//Ensure that the name of the back-referenced search param on the target (e.g. the `subject` in Patient?_has:Observation:subject:code=sys|val)
+			//exists on the target resource.
 			owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramReference);
 			if (owningParameterDef == null) {
 				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + paramReference);
