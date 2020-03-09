@@ -30,7 +30,6 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
@@ -146,7 +145,7 @@ public class InMemoryResourceMatcher {
 			case Constants.PARAM_SOURCE:
 				return InMemoryMatchResult.fromBoolean(matchSourcesAndOr(theAndOrParams, theResource));
 			default:
-				return matchResourceParam(theParamName, theAndOrParams, theSearchParams, resourceName, paramDef);
+				return matchResourceParam(myModelConfig, theParamName, theAndOrParams, theSearchParams, resourceName, paramDef);
 		}
 	}
 
@@ -189,7 +188,7 @@ public class InMemoryResourceMatcher {
 		return theValue.equals(theId.getValue()) || theValue.equals(theId.getIdPart());
 	}
 
-	private InMemoryMatchResult matchResourceParam(String theParamName, List<List<IQueryParameterType>> theAndOrParams, ResourceIndexedSearchParams theSearchParams, String theResourceName, RuntimeSearchParam theParamDef) {
+	private InMemoryMatchResult matchResourceParam(ModelConfig theModelConfig, String theParamName, List<List<IQueryParameterType>> theAndOrParams, ResourceIndexedSearchParams theSearchParams, String theResourceName, RuntimeSearchParam theParamDef) {
 		if (theParamDef != null) {
 			switch (theParamDef.getParamType()) {
 				case QUANTITY:
@@ -202,7 +201,7 @@ public class InMemoryResourceMatcher {
 					if (theSearchParams == null) {
 						return InMemoryMatchResult.successfulMatch();
 					} else {
-						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theResourceName, theParamName, theParamDef, nextAnd, theSearchParams)));
+						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theModelConfig, theResourceName, theParamName, theParamDef, nextAnd, theSearchParams)));
 					}
 				case COMPOSITE:
 				case HAS:
@@ -219,28 +218,8 @@ public class InMemoryResourceMatcher {
 		}
 	}
 
-	private boolean matchParams(String theResourceName, String theParamName, RuntimeSearchParam paramDef, List<? extends IQueryParameterType> theNextAnd, ResourceIndexedSearchParams theSearchParams) {
-		if (paramDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-			stripBaseUrlsFromReferenceParams(theNextAnd);
-		}
-		return theNextAnd.stream().anyMatch(token -> theSearchParams.matchParam(theResourceName, theParamName, paramDef, token));
-	}
-
-	private void stripBaseUrlsFromReferenceParams(List<? extends IQueryParameterType> theNextAnd) {
-		if (myModelConfig.getTreatBaseUrlsAsLocal().isEmpty()) {
-			return;
-		}
-
-		for (IQueryParameterType param : theNextAnd) {
-			ReferenceParam ref = (ReferenceParam) param;
-			IIdType dt = new IdDt(ref.getBaseUrl(), ref.getResourceType(), ref.getIdPart(), null);
-
-			if (dt.hasBaseUrl()) {
-				if (myModelConfig.getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())) {
-					ref.setValue(dt.toUnqualified().getValue());
-				}
-			}
-		}
+	private boolean matchParams(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam paramDef, List<? extends IQueryParameterType> theNextAnd, ResourceIndexedSearchParams theSearchParams) {
+		return theNextAnd.stream().anyMatch(token -> theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, paramDef, token));
 	}
 
 	private boolean hasChain(List<List<IQueryParameterType>> theAndOrParams) {
@@ -256,7 +235,7 @@ public class InMemoryResourceMatcher {
 			for (List<IQueryParameterType> theAndOrParam : theAndOrParams) {
 				for (IQueryParameterType param : theAndOrParam) {
 					if (param instanceof BaseParamWithPrefix) {
-						ParamPrefixEnum prefix = ((BaseParamWithPrefix) param).getPrefix();
+						ParamPrefixEnum prefix = ((BaseParamWithPrefix<?>) param).getPrefix();
 						RestSearchParameterTypeEnum paramType = theParamDef.getParamType();
 						if (!supportedPrefix(prefix, paramType)) {
 							return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, String.format("The prefix %s is not supported for param type %s", prefix, paramType));
@@ -268,6 +247,7 @@ public class InMemoryResourceMatcher {
 		return InMemoryMatchResult.successfulMatch();
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private boolean supportedPrefix(ParamPrefixEnum theParam, RestSearchParameterTypeEnum theParamType) {
 		if (theParam == null || theParamType == null) {
 			return true;

@@ -42,17 +42,10 @@ public class InlineResourceLinkResolver implements IResourceLinkResolver {
 		 * really clear if it's useful or not.
 		 */
 
-		if (true) throw new UnsupportedOperationException();
-
 		ResourceTable target;
 		target = new ResourceTable();
 		target.setResourceType(theTypeString);
-		if (theNextId.isIdPartValidLong()) {
-			return new ResourceLookup(theTypeString, theNextId.getIdPartAsLong(), null);
-		} else {
-			return new ResourceLookup(theTypeString, null, null);
-		}
-
+		return new ResourceLookup(theTypeString, null, null);
 	}
 
 	@Override

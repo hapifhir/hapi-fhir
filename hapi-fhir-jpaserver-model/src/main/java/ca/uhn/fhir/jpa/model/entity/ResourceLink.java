@@ -216,10 +216,6 @@ public class ResourceLink extends BaseResourceIndex {
 		return b.toString();
 	}
 
-	public void setTargetResourceForUnitTest(ResourceTable theTarget) {
-		myTargetResource = theTarget;
-	}
-
 	public static ResourceLink forAbsoluteReference(String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {
 		ResourceLink retVal = new ResourceLink();
 		retVal.setSourcePath(theSourcePath);
