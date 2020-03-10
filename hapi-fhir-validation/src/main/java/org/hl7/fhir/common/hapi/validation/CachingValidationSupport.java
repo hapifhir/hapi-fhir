@@ -93,7 +93,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		assert result != null;
 
 		// FIXME: remove
-		ourLog.info("Done fetching from cache: {}", theKey);
+		ourLog.info("Done fetching from cache with {} items: {}", theCache.estimatedSize(), theKey);
 
 		return result.orElse(null);
 

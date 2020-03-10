@@ -42,11 +42,10 @@ public class JpaValidationSupportChainDstu3 extends ValidationSupportChain {
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 	@Autowired
 	private ITermReadSvcDstu3 myTerminologyService;
-	@Autowired
-	private FhirContext myFhirContext;
+	private final FhirContext myFhirContext;
 
-	public JpaValidationSupportChainDstu3() {
-		super();
+	public JpaValidationSupportChainDstu3(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
 	}
 
 	@Override

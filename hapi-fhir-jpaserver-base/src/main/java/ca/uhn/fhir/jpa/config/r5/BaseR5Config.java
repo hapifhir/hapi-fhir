@@ -118,7 +118,7 @@ public class BaseR5Config extends BaseConfigDstu3Plus {
 
 	@Bean(name = "myJpaValidationSupportR5", autowire = Autowire.BY_NAME)
 	public ca.uhn.fhir.jpa.dao.r5.IJpaValidationSupportR5 jpaValidationSupportR5() {
-		ca.uhn.fhir.jpa.dao.r5.JpaValidationSupportR5 retVal = new ca.uhn.fhir.jpa.dao.r5.JpaValidationSupportR5();
+		ca.uhn.fhir.jpa.dao.r5.JpaValidationSupportR5 retVal = new ca.uhn.fhir.jpa.dao.r5.JpaValidationSupportR5(fhirContextR5());
 		return retVal;
 	}
 

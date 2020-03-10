@@ -15,6 +15,7 @@ import org.hl7.fhir.common.hapi.validation.CachingValidationSupport;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.instance.hapi.validation.HapiToHl7OrgDstu2ValidatingSupportWrapper;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
@@ -82,7 +83,9 @@ public class BaseDstu2Config extends BaseConfig {
 	@Bean(name = "myInstanceValidatorDstu2")
 	@Lazy
 	public IInstanceValidatorModule instanceValidatorDstu2() {
-		FhirInstanceValidator retVal = new FhirInstanceValidator(new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(fhirContext()), jpaValidationSupportDstu2())));
+		ValidationSupportChain validationSupportChain = new ValidationSupportChain(new DefaultProfileValidationSupport(fhirContext()), jpaValidationSupportDstu2());
+		CachingValidationSupport cachingValidationSupport = new CachingValidationSupport(new HapiToHl7OrgDstu2ValidatingSupportWrapper(validationSupportChain));
+		FhirInstanceValidator retVal = new FhirInstanceValidator(cachingValidationSupport);
 		retVal.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
 		return retVal;
 	}

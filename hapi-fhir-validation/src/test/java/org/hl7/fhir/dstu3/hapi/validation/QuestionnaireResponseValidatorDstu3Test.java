@@ -1,6 +1,7 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
@@ -9,10 +10,8 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hamcrest.Matchers;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.StaticResourceTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
@@ -66,7 +65,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 	@Before
 	public void before() {
-		myValSupport = mock(IValidationSupport.class);
+		myValSupport = mock(IContextValidationSupport.class);
 
 		myVal = ourCtx.newValidator();
 		myVal.setValidateAgainstStandardSchema(false);

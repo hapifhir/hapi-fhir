@@ -105,17 +105,17 @@ public class BaseDstu3Config extends BaseConfigDstu3Plus {
 
 	@Bean
 	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
-		return new DefaultProfileValidationSupport(fhirContext());
+		return new DefaultProfileValidationSupport(fhirContextDstu3());
 	}
 
 	@Bean
 	public JpaValidationSupportChainDstu3 jpaValidationSupportChain() {
-		return new JpaValidationSupportChainDstu3();
+		return new JpaValidationSupportChainDstu3(fhirContextDstu3());
 	}
 
 	@Bean(name = "myJpaValidationSupportDstu3")
 	public ca.uhn.fhir.jpa.dao.dstu3.IJpaValidationSupportDstu3 jpaValidationSupportDstu3() {
-		return new ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3(theFhirContext);
+		return new ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3(fhirContextDstu3());
 	}
 
 	@Bean(name = "myResourceCountsCache")

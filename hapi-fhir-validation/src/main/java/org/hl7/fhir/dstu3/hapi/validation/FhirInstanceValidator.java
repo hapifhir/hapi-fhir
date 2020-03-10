@@ -7,7 +7,6 @@ import ca.uhn.fhir.validation.IValidationContext;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.ValidatorWrapper;
 import org.hl7.fhir.convertors.VersionConvertor_30_50;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.utils.IResourceValidator;
@@ -38,7 +37,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	/**
 	 * Constructor
 	 * <p>
-	 * Uses DefaultProfileValidationSupport for {@link IValidationSupport validation support}
+	 * Uses DefaultProfileValidationSupport for {@link IContextValidationSupport validation support}
 	 */
 	public FhirInstanceValidator(FhirContext theFhirContext) {
 		this(theFhirContext.getValidationSupport());
@@ -155,7 +154,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	}
 
 	/**
-	 * Returns the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
+	 * Returns the {@link IContextValidationSupport validation support} in use by this validator. Default is an instance of
 	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
 	 *
 	 * @return
@@ -165,7 +164,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	}
 
 	/**
-	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
+	 * Sets the {@link IContextValidationSupport validation support} in use by this validator. Default is an instance of
 	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
 	 */
 	public void setValidationSupport(IContextValidationSupport theValidationSupport) {

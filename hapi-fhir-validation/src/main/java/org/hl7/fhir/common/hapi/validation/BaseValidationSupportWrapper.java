@@ -9,14 +9,20 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import javax.annotation.Nonnull;
 import java.util.List;
 
+/**
+ * This class is a wrapper for an existing {@link @IContextValidationSupport} object, intended to be
+ * subclassed in order to layer functionality on top of the existing validation support object.
+ *
+ * @since 5.0.0
+ */
 public class BaseValidationSupportWrapper extends BaseValidationSupport {
 	private final IContextValidationSupport myWrap;
 
 	/**
 	 * Constructor
 	 *
-	 * @param theFhirContext
-	 * @param theWrap
+	 * @param theFhirContext The FhirContext object (must be initialized for the appropriate FHIR version)
+	 * @param theWrap The validation support object to wrap
 	 */
 	public BaseValidationSupportWrapper(FhirContext theFhirContext, IContextValidationSupport theWrap) {
 		super(theFhirContext);

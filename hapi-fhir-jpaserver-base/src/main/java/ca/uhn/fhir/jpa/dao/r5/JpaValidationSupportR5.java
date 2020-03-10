@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -35,8 +36,8 @@ public class JpaValidationSupportR5 extends BaseJpaValidationSupport implements 
 	/**
 	 * Constructor
 	 */
-	public JpaValidationSupportR5() {
-		super();
+	public JpaValidationSupportR5(FhirContext theFhirContext) {
+		super(theFhirContext);
 	}
 
 

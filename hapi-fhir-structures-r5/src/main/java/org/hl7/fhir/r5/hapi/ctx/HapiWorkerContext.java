@@ -208,7 +208,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 			return new ValidationResult(definition);
 		}
 
-		IValidationSupport.CodeValidationResult outcome;
+		IContextValidationSupport.CodeValidationResult outcome;
 		if (isNotBlank(theVs.getUrl())) {
 			outcome = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, theVs.getUrl());
 		} else {

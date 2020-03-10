@@ -81,7 +81,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 	@Override
 	public void start() {
 		super.start();
-		myValidationSupport = getApplicationContext().getBean(org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport.class,"myJpaValidationSupportChainDstu3" );
+		myValidationSupport = getApplicationContext().getBean(IContextValidationSupport.class,"myJpaValidationSupportChainDstu3" );
 	}
 
 	@Override

@@ -13,7 +13,6 @@ import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.fhir.util.VersionIndependentConcept;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r5.model.CodeableConcept;
@@ -56,7 +55,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSupport, ITermReadSvcR5 {
+public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IContextValidationSupport, ITermReadSvcR5 {
 
 	@Autowired
 	@Qualifier("myValueSetDaoR5")
@@ -212,7 +211,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 
 	@CoverageIgnore
 	@Override
-	public IValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public IContextValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		Optional<VersionIndependentConcept> codeOpt = Optional.empty();
 		boolean haveValidated = false;
 
@@ -231,12 +230,12 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 			VersionIndependentConcept code = codeOpt.get();
 			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
 			def.setCode(code.getCode());
-			IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult()
+			IContextValidationSupport.CodeValidationResult retVal = new IContextValidationSupport.CodeValidationResult()
 				.setCode(code.getCode());
 			return retVal;
 		}
 
-		return new IValidationSupport.CodeValidationResult()
+		return new IContextValidationSupport.CodeValidationResult()
 			.setSeverity(IssueSeverity.ERROR.toCode())
 			.setCode("Unknown code {" + theCodeSystem + "}" + theCode);
 	}

@@ -9,7 +9,6 @@ import org.hl7.fhir.common.hapi.validation.ValidatorWrapper;
 import org.hl7.fhir.dstu3.hapi.validation.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
-import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.model.Base;
 import org.hl7.fhir.r5.model.TypeDetails;
 import org.hl7.fhir.r5.model.ValueSet;
@@ -38,7 +37,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 	/**
 	 * Constructor
 	 * <p>
-	 * Uses DefaultProfileValidationSupport for {@link IValidationSupport validation support}
+	 * Uses DefaultProfileValidationSupport for {@link IContextValidationSupport validation support}
 	 */
 	public FhirInstanceValidator(FhirContext theContext) {
 		this(theContext.getValidationSupport());
@@ -124,7 +123,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 	}
 
 	/**
-	 * Returns the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
+	 * Returns the {@link IContextValidationSupport validation support} in use by this validator. Default is an instance of
 	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
 	 * @return
 	 */
@@ -133,7 +132,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 	}
 
 	/**
-	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
+	 * Sets the {@link IContextValidationSupport validation support} in use by this validator. Default is an instance of
 	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
 	 */
 	public void setValidationSupport(IContextValidationSupport theValidationSupport) {

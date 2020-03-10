@@ -16,11 +16,11 @@ public class HapiToHl7OrgDstu2ValidatingSupportWrapper extends BaseValidationSup
 	/**
 	 * Constructor
 	 */
-	public HapiToHl7OrgDstu2ValidatingSupportWrapper(FhirContext theHapiFhirContext, IContextValidationSupport theWrap) {
+	public HapiToHl7OrgDstu2ValidatingSupportWrapper(IContextValidationSupport theWrap) {
 		super(FhirContext.forDstu2Hl7Org(), theWrap);
 
-		Validate.isTrue(theHapiFhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU2);
-		myHapiCtx = theHapiFhirContext;
+		Validate.isTrue(theWrap.getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU2);
+		myHapiCtx = theWrap.getFhirContext();
 	}
 
 	@Override

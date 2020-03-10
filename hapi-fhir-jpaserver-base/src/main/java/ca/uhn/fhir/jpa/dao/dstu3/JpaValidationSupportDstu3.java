@@ -42,7 +42,7 @@ public class JpaValidationSupportDstu3 extends BaseJpaValidationSupport implemen
 	 * Constructor
 	 */
 	public JpaValidationSupportDstu3(FhirContext theFhirContext) {
-		super();
+		super(theFhirContext);
 		Validate.notNull(theFhirContext);
 		myFhirContext = theFhirContext;
 	}

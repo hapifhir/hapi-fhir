@@ -36,7 +36,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	/**
 	 * Constructor
 	 * <p>
-	 * Uses DefaultProfileValidationSupport for {@link IValidationSupport validation support}
+	 * Uses DefaultProfileValidationSupport for {@link IContextValidationSupport validation support}
 	 */
 	public FhirInstanceValidator(FhirContext theContext) {
 		this(theContext.getValidationSupport());
@@ -152,7 +152,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	}
 
 	/**
-	 * Returns the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
+	 * Returns the {@link IContextValidationSupport validation support} in use by this validator. Default is an instance of
 	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
 	 *
 	 * @return
@@ -162,10 +162,10 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	}
 
 	/**
-	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
+	 * Sets the {@link IContextValidationSupport validation support} in use by this validator. Default is an instance of
 	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
 	 */
-	public void setValidationSupport(IValidationSupport theValidationSupport) {
+	public void setValidationSupport(IContextValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 		myWrappedWorkerContext = null;
 	}

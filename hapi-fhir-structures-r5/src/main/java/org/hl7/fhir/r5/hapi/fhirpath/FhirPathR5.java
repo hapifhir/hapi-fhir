@@ -1,12 +1,12 @@
 package org.hl7.fhir.r5.hapi.fhirpath;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.FluentPathExecutionException;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.model.Base;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
 
@@ -18,10 +18,7 @@ public class FhirPathR5 implements IFluentPath {
   private FHIRPathEngine myEngine;
 
   public FhirPathR5(FhirContext theCtx) {
-    if (!(theCtx.getValidationSupport() instanceof IValidationSupport)) {
-      throw new IllegalStateException("Validation support module configured on context appears to be for the wrong FHIR version- Does not extend " + IValidationSupport.class.getName());
-    }
-    IValidationSupport validationSupport = (IValidationSupport) theCtx.getValidationSupport();
+	  IContextValidationSupport validationSupport = theCtx.getValidationSupport();
     myEngine = new FHIRPathEngine(new HapiWorkerContext(theCtx, validationSupport));
   }
 

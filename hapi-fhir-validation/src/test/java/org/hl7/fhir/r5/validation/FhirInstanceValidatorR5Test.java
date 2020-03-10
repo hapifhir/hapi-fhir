@@ -2,6 +2,7 @@ package org.hl7.fhir.r5.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.TestUtil;
@@ -12,11 +13,9 @@ import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.CachingValidationSupport;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.StaticResourceTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
@@ -110,7 +109,7 @@ public class FhirInstanceValidatorR5Test {
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
 
-		myMockSupport = mock(IValidationSupport.class);
+		myMockSupport = mock(IContextValidationSupport.class);
 		when(myMockSupport.getFhirContext()).thenReturn(ourCtx);
 		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(myMockSupport, myDefaultValidationSupport, new StaticResourceTerminologyServerValidationSupport(ourCtx)));
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);

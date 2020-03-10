@@ -14,7 +14,6 @@ import org.hl7.fhir.common.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.StaticResourceTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
@@ -105,7 +104,7 @@ public class FhirInstanceValidatorDstu3Test {
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
 
-		IValidationSupport mockSupport = mock(IValidationSupport.class);
+		IContextValidationSupport mockSupport = mock(IContextValidationSupport.class);
 		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
 		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(mockSupport, myDefaultValidationSupport, new StaticResourceTerminologyServerValidationSupport(ourCtx)));
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);

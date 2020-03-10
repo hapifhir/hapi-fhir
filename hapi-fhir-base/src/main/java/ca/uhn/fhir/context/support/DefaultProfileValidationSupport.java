@@ -1,5 +1,6 @@
 package ca.uhn.fhir.context.support;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -61,6 +63,15 @@ public class DefaultProfileValidationSupport implements IContextValidationSuppor
 				terminologyResources.add("/org/hl7/fhir/instance/model/valueset/valuesets.xml");
 				terminologyResources.add("/org/hl7/fhir/instance/model/valueset/v2-tables.xml");
 				terminologyResources.add("/org/hl7/fhir/instance/model/valueset/v3-codesystems.xml");
+				Properties profileNameProperties = new Properties();
+				try {
+					profileNameProperties.load(DefaultProfileValidationSupport.class.getResourceAsStream("/org/hl7/fhir/instance/model/profile/profiles.properties"));
+					for (Object nextKey : profileNameProperties.keySet()) {
+						structureDefinitionResources.add("/org/hl7/fhir/instance/model/profile/" + nextKey);
+					}
+				} catch (IOException e) {
+					throw new ConfigurationException(e);
+				}
 				break;
 			case DSTU2_1:
 				terminologyResources.add("/org/hl7/fhir/dstu2016may/model/valueset/valuesets.xml");
@@ -168,7 +179,9 @@ public class DefaultProfileValidationSupport implements IContextValidationSuppor
 		} else if (StringUtils.countMatches(url, '/') == 1) {
 			url = URL_PREFIX_STRUCTURE_DEFINITION_BASE + url;
 		}
-		return provideStructureDefinitionMap().get(url);
+		Map<String, IBaseResource> structureDefinitionMap = provideStructureDefinitionMap();
+		IBaseResource retVal = structureDefinitionMap.get(url);
+		return retVal;
 	}
 
 	@Override
@@ -310,9 +323,13 @@ public class DefaultProfileValidationSupport implements IContextValidationSuppor
 	}
 
 	private List<IBaseResource> parseBundle(InputStreamReader theReader) {
-		Class<? extends IBaseResource> bundleType = getFhirContext().getResourceDefinition("Bundle").getImplementingClass();
-		IBaseBundle bundle = (IBaseBundle) getFhirContext().newXmlParser().parseResource(bundleType, theReader);
-		return BundleUtil.toListOfResources(getFhirContext(), bundle);
+		IBaseResource parsedObject = getFhirContext().newXmlParser().parseResource(theReader);
+		if (parsedObject instanceof IBaseBundle) {
+			IBaseBundle bundle = (IBaseBundle) parsedObject;
+			return BundleUtil.toListOfResources(getFhirContext(), bundle);
+		} else {
+			return Collections.singletonList(parsedObject);
+		}
 	}
 
 	static <T extends IBaseResource> List<T> toList(Map<String, IBaseResource> theMap) {

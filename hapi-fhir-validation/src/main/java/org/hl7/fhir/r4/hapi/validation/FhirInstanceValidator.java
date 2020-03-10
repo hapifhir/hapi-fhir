@@ -1,16 +1,15 @@
 package org.hl7.fhir.r4.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
 import org.apache.commons.lang3.Validate;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.ValidatorWrapper;
 import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.dstu3.hapi.validation.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
@@ -35,7 +34,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 	/**
 	 * Constructor
 	 * <p>
-	 * Uses {@link DefaultProfileValidationSupport} for {@link IValidationSupport validation support}
+	 * Uses {@link DefaultProfileValidationSupport} for {@link IContextValidationSupport validation support}
 	 */
 	public FhirInstanceValidator(FhirContext theContext) {
 		this(theContext.getValidationSupport());
@@ -122,7 +121,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 	}
 
 	/**
-	 * Returns the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
+	 * Returns the {@link IContextValidationSupport validation support} in use by this validator. Default is an instance of
 	 * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
 	 * @return
 	 */
@@ -131,7 +130,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 	}
 
 	/**
-	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
+	 * Sets the {@link IContextValidationSupport validation support} in use by this validator. Default is an instance of
 	 * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
 	 */
 	public void setValidationSupport(IContextValidationSupport theValidationSupport) {
