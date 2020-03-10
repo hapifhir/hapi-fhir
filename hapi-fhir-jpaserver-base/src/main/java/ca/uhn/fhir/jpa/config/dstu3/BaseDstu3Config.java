@@ -115,7 +115,7 @@ public class BaseDstu3Config extends BaseConfigDstu3Plus {
 
 	@Bean(name = "myJpaValidationSupportDstu3")
 	public ca.uhn.fhir.jpa.dao.dstu3.IJpaValidationSupportDstu3 jpaValidationSupportDstu3() {
-		return new ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3();
+		return new ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3(theFhirContext);
 	}
 
 	@Bean(name = "myResourceCountsCache")

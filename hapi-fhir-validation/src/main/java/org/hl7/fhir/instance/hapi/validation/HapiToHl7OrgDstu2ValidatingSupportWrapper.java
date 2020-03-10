@@ -69,7 +69,7 @@ public class HapiToHl7OrgDstu2ValidatingSupportWrapper extends BaseValidationSup
 		if (theInput == null) {
 			return null;
 		}
-		String encoded = getFhirContext().newJsonParser().encodeResourceToString(theInput);
+		String encoded = myHapiCtx.newJsonParser().encodeResourceToString(theInput);
 		return getFhirContext().newJsonParser().parseResource(encoded);
 	}
 }
