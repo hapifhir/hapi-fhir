@@ -180,14 +180,7 @@ public class IdHelperService {
 			Collection<String> nextIds = nextEntry.getValue();
 			if (isBlank(nextResourceType)) {
 
-				StorageProcessingMessage msg = new StorageProcessingMessage()
-					.setMessage("This search uses unqualified resource IDs (an ID without a resource type). This is less efficient than using a qualified type.");
-				ourLog.debug(msg.getMessage());
-				HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest)
-					.add(StorageProcessingMessage.class, msg);
-				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
+				warn2(theRequest);
 
 				List<Long> views = myForcedIdDao.findByForcedId(nextIds);
 				views.forEach(t -> retVal.add(new ResourcePersistentId(t)));
@@ -225,7 +218,6 @@ public class IdHelperService {
 
 		return retVal;
 	}
-
 
 	/**
 	 * Given a persistent ID, returns the associated resource ID
@@ -316,20 +308,12 @@ public class IdHelperService {
 			if (nextIds.size() > 0) {
 				Collection<Object[]> views;
 				if (isBlank(nextResourceType)) {
-
-					StorageProcessingMessage msg = new StorageProcessingMessage()
-						.setMessage("This search uses unqualified resource IDs (an ID without a resource type). This is less efficient than using a qualified type.");
-					HookParams params = new HookParams()
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest)
-						.add(StorageProcessingMessage.class, msg);
-					JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
-
-					views = myForcedIdDao.findAndResolveByTypeAndForcedId(nextIds);
+					warnAboutUnqualifiedForcedIdResolution(theRequest);
+					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextIds);
 
 				} else {
 
-					views = myForcedIdDao.findAndResolveByTypeAndForcedId(nextResourceType, nextIds);
+					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds);
 
 				}
 
@@ -351,6 +335,17 @@ public class IdHelperService {
 		}
 
 		return retVal;
+	}
+
+	private void warnAboutUnqualifiedForcedIdResolution(RequestDetails theRequest) {
+		StorageProcessingMessage msg = new StorageProcessingMessage()
+			.setMessage("This search uses unqualified resource IDs (an ID without a resource type). This is less efficient than using a qualified type.");
+		ourLog.debug(msg.getMessage());
+		HookParams params = new HookParams()
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(StorageProcessingMessage.class, msg);
+		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 	}
 
 	public void clearCache() {

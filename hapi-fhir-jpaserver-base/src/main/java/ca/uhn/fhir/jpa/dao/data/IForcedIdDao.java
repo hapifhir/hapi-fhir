@@ -47,13 +47,17 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 	void deleteByPid(@Param("pid") Long theId);
 
 	/**
-	 * This method returns an object array, where the order matters. Be careful if you change this query in any way.
+	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
+	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */
 	@Query("SELECT f.myForcedId, f.myResourcePid FROM ForcedId f WHERE myResourceType = :resource_type AND myForcedId IN ( :forced_id )")
 	Collection<Object[]> findByTypeAndForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedId);
 
 	/**
-	 * This method returns an object array, where the order matters. Be careful if you change this query in any way.
+	 * Warning: No DB index exists for this particular query, so it may not perform well
+	 *
+	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
+	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */
 	@Query("" +
 		"SELECT " +
@@ -61,10 +65,11 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 		"FROM ForcedId f " +
 		"JOIN ResourceTable t ON t.myId = f.myResourcePid " +
 		"WHERE f.myForcedId IN ( :forced_id )")
-	Collection<Object[]> findAndResolveByTypeAndForcedId(@Param("forced_id") Collection<String> theForcedIds);
+	Collection<Object[]> findAndResolveByForcedIdWithNoType(@Param("forced_id") Collection<String> theForcedIds);
 
 	/**
-	 * This method returns an object array, where the order matters. Be careful if you change this query in any way.
+	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
+	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */
 	@Query("" +
 		"SELECT " +
@@ -72,5 +77,5 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 		"FROM ForcedId f " +
 		"JOIN ResourceTable t ON t.myId = f.myResourcePid " +
 		"WHERE f.myResourceType = :resource_type AND f.myForcedId IN ( :forced_id )")
-	Collection<Object[]> findAndResolveByTypeAndForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedIds);
+	Collection<Object[]> findAndResolveByForcedIdWithNoType(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedIds);
 }

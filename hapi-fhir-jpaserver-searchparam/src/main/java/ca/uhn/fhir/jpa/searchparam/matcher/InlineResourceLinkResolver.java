@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 public class InlineResourceLinkResolver implements IResourceLinkResolver {
 
 	@Override
-	public IResourceLookup findTargetResource(RuntimeSearchParam theNextSpDef, String theNextPathsUnsplit, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
+	public IResourceLookup findTargetResource(RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
 
 		/*
 		 * TODO: JA - This gets used during runtime in-memory matching for subscription. It's not

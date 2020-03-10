@@ -64,16 +64,16 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	private DaoRegistry myDaoRegistry;
 
 	@Override
-	public IResourceLookup findTargetResource(RuntimeSearchParam theNextSpDef, String theNextPathsUnsplit, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
-		IResourceLookup valueOf;
-		String idPart = theNextId.getIdPart();
+	public IResourceLookup findTargetResource(RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
+		IResourceLookup resolvedResource;
+		String idPart = theSourceResourceId.getIdPart();
 		try {
-			valueOf = myIdHelperService.resolveResourceIdentity(theTypeString, idPart, theRequest);
-			ourLog.trace("Translated {}/{} to resource PID {}", theType, idPart, valueOf);
+			resolvedResource = myIdHelperService.resolveResourceIdentity(theTypeString, idPart, theRequest);
+			ourLog.trace("Translated {}/{} to resource PID {}", theType, idPart, resolvedResource);
 		} catch (ResourceNotFoundException e) {
 
-			Optional<ResourceTable> pidOpt = createPlaceholderTargetIfConfiguredToDoSo(theType, theReference, idPart);
-			if (!pidOpt.isPresent()) {
+			Optional<ResourceTable> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(theType, theReference, idPart);
+			if (!createdTableOpt.isPresent()) {
 
 				if (myDaoConfig.isEnforceReferentialIntegrityOnWrite() == false) {
 					return null;
@@ -81,29 +81,29 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 
 				RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(theType);
 				String resName = missingResourceDef.getName();
-				throw new InvalidRequestException("Resource " + resName + "/" + idPart + " not found, specified in path: " + theNextPathsUnsplit);
+				throw new InvalidRequestException("Resource " + resName + "/" + idPart + " not found, specified in path: " + theSourcePath);
 
 			}
 
-			valueOf = pidOpt.get();
+			resolvedResource = createdTableOpt.get();
 		}
 
-		ourLog.trace("Resource PID {} is of type {}", valueOf, valueOf.getResourceType());
-		if (!theTypeString.equals(valueOf.getResourceType())) {
-			ourLog.error("Resource with PID {} was of type {} and wanted {}", valueOf.getResourceId(), theTypeString, valueOf.getResourceType());
-			throw new UnprocessableEntityException("Resource contains reference to unknown resource ID " + theNextId.getValue());
+		ourLog.trace("Resolved resource of type {} as PID: {}", resolvedResource.getResourceType(), resolvedResource.getResourceId());
+		if (!theTypeString.equals(resolvedResource.getResourceType())) {
+			ourLog.error("Resource with PID {} was of type {} and wanted {}", resolvedResource.getResourceId(), theTypeString, resolvedResource.getResourceType());
+			throw new UnprocessableEntityException("Resource contains reference to unknown resource ID " + theSourceResourceId.getValue());
 		}
 
-		if (valueOf.getDeleted() != null) {
-			String resName = valueOf.getResourceType();
-			throw new InvalidRequestException("Resource " + resName + "/" + idPart + " is deleted, specified in path: " + theNextPathsUnsplit);
+		if (resolvedResource.getDeleted() != null) {
+			String resName = resolvedResource.getResourceType();
+			throw new InvalidRequestException("Resource " + resName + "/" + idPart + " is deleted, specified in path: " + theSourcePath);
 		}
 
-		if (!theNextSpDef.hasTargets() && theNextSpDef.getTargets().contains(theTypeString)) {
+		if (!theSearchParam.hasTargets() && theSearchParam.getTargets().contains(theTypeString)) {
 			return null;
 		}
 
-		return valueOf;
+		return resolvedResource;
 	}
 
 	/**
