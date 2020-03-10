@@ -1,6 +1,8 @@
 package org.hl7.fhir.common.hapi.validation;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -32,7 +34,7 @@ public class ValidationSupportChain implements IContextValidationSupport {
 		this();
 		for (IContextValidationSupport next : theValidationSupportModules) {
 			if (next != null) {
-				myChain.add(next);
+				addValidationSupport(next);
 			}
 		}
 	}
@@ -76,6 +78,18 @@ public class ValidationSupportChain implements IContextValidationSupport {
 	}
 
 	public void addValidationSupport(IContextValidationSupport theValidationSupport) {
+		if (myChain.size() > 0) {
+			if (theValidationSupport.getFhirContext() == null) {
+				String message = "Can not add validation support: getFhirContext() returns null";
+				throw new ConfigurationException(message);
+			}
+			FhirVersionEnum newVersion = theValidationSupport.getFhirContext().getVersion().getVersion();
+			FhirVersionEnum existingVersion = myChain.get(0).getFhirContext().getVersion().getVersion();
+			if (!existingVersion.equals(newVersion)) {
+				String message = "Trying to add validation support of version " + newVersion + " to chain with " + myChain.size() + " entries of version " + existingVersion;
+				throw new ConfigurationException(message);
+			}
+		}
 		myChain.add(theValidationSupport);
 	}
 

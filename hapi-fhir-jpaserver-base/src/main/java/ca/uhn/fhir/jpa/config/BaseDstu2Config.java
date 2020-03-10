@@ -89,7 +89,7 @@ public class BaseDstu2Config extends BaseConfig {
 
 	@Bean(name = "myJpaValidationSupportDstu2", autowire = Autowire.BY_NAME)
 	public ca.uhn.fhir.jpa.dao.IJpaValidationSupportDstu2 jpaValidationSupportDstu2() {
-		ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2 retVal = new ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2();
+		ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2 retVal = new ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2(fhirContextDstu2());
 		return retVal;
 	}
 

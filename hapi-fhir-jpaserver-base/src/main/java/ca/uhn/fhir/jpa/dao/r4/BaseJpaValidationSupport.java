@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
@@ -41,8 +42,8 @@ public abstract class BaseJpaValidationSupport implements IContextValidationSupp
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseJpaValidationSupport.class);
 
-	@Autowired
-	private FhirContext myR4Ctx;
+	private final FhirContext myFhirContext;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	private IFhirResourceDao<?> myStructureDefinitionDao;
@@ -50,6 +51,15 @@ public abstract class BaseJpaValidationSupport implements IContextValidationSupp
 	private IFhirResourceDao<?> myQuestionnaireDao;
 	private IFhirResourceDao<?> myCodeSystemDao;
 	private IFhirResourceDao<?> myImplementationGuideDao;
+
+	/**
+	 * Constructor
+	 */
+	public BaseJpaValidationSupport(FhirContext theFhirContext) {
+		super();
+		Validate.notNull(theFhirContext);
+		myFhirContext = theFhirContext;
+	}
 
 	@Override
 	@SuppressWarnings({"unchecked", "unused"})
@@ -60,7 +70,7 @@ public abstract class BaseJpaValidationSupport implements IContextValidationSupp
 			localReference = true;
 		}
 
-		String resourceName = myR4Ctx.getResourceDefinition(theClass).getName();
+		String resourceName = myFhirContext.getResourceDefinition(theClass).getName();
 		IBundleProvider search;
 		if ("ValueSet".equals(resourceName)) {
 			if (localReference) {
@@ -84,7 +94,7 @@ public abstract class BaseJpaValidationSupport implements IContextValidationSupp
 			// Don't allow the core FHIR definitions to be overwritten
 			if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
 				String typeName = theUri.substring("http://hl7.org/fhir/StructureDefinition/".length());
-				if (myR4Ctx.getElementDefinition(typeName) != null) {
+				if (myFhirContext.getElementDefinition(typeName) != null) {
 					return null;
 				}
 			}
@@ -129,7 +139,7 @@ public abstract class BaseJpaValidationSupport implements IContextValidationSupp
 
 	@Override
 	public FhirContext getFhirContext() {
-		return myR4Ctx;
+		return myFhirContext;
 	}
 
 	@PostConstruct

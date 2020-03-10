@@ -4,9 +4,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
+import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,37 +44,39 @@ public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaValidationSupportDstu2.class);
 
 	@Autowired
-	@Qualifier("myFhirContextDstu2Hl7Org")
-	private FhirContext myRiCtx;
-
-	@Autowired
 	@Qualifier("myStructureDefinitionDaoDstu2")
-	private IFhirResourceDao<ca.uhn.fhir.model.dstu2.resource.StructureDefinition> myStructureDefinitionDao;
+	private IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
 
 	@Autowired
 	@Qualifier("myQuestionnaireDaoDstu2")
-	private IFhirResourceDao<ca.uhn.fhir.model.dstu2.resource.Questionnaire> myQuestionnaireDao;
+	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
 
 	@Autowired
 	@Qualifier("myValueSetDaoDstu2")
-	private IFhirResourceDao<ca.uhn.fhir.model.dstu2.resource.ValueSet> myValueSetDao;
+	private IFhirResourceDao<ValueSet> myValueSetDao;
 
-	@Autowired
-	@Qualifier("myFhirContextDstu2")
-	private FhirContext myDstu2Ctx;
+	private final FhirContext myDstu2Ctx;
+
+	/**
+	 * Constructor
+	 */
+	public JpaValidationSupportDstu2(FhirContext theDstu2Ctx) {
+		Validate.notNull(theDstu2Ctx);
+		myDstu2Ctx = theDstu2Ctx;
+	}
 
 	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
-		String resourceName = myRiCtx.getResourceDefinition(theClass).getName();
+		String resourceName = myDstu2Ctx.getResourceDefinition(theClass).getName();
 		IBundleProvider search;
 		IdType uriAsId = new IdType(theUri);
 		if ("ValueSet".equals(resourceName)) {
 			SearchParameterMap params = new SearchParameterMap();
-			params.add(ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_URL, new UriParam(theUri));
+			params.add(ValueSet.SP_URL, new UriParam(theUri));
 			params.setLoadSynchronousUpTo(10);
 			search = myValueSetDao.search(params);
 		} else if ("StructureDefinition".equals(resourceName)) {
-			search = myStructureDefinitionDao.search(new SearchParameterMap().setLoadSynchronous(true).add(ca.uhn.fhir.model.dstu2.resource.StructureDefinition.SP_URL, new UriParam(theUri)));
+			search = myStructureDefinitionDao.search(new SearchParameterMap().setLoadSynchronous(true).add(StructureDefinition.SP_URL, new UriParam(theUri)));
 		} else if ("Questionnaire".equals(resourceName)) {
 			search = myQuestionnaireDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Questionnaire.SP_RES_ID, new TokenParam(null, theUri)));
 		} else {
@@ -81,7 +86,7 @@ public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 		if (search.size() == 0) {
 			if ("ValueSet".equals(resourceName)) {
 				SearchParameterMap params = new SearchParameterMap();
-				params.add(ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_RES_ID, new TokenParam(null, uriAsId.toUnqualifiedVersionless().getValue()));
+				params.add(ValueSet.SP_RES_ID, new TokenParam(null, uriAsId.toUnqualifiedVersionless().getValue()));
 				params.setLoadSynchronousUpTo(10);
 				search = myValueSetDao.search(params);
 				if (search.size() == 0) {
@@ -96,15 +101,7 @@ public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 			ourLog.warn("Found multiple {} instances with URL search value of: {}", resourceName, theUri);
 		}
 
-		IBaseResource res = search.getResources(0, 1).get(0);
-
-		/*
-		 * Validator wants RI structures and not HAPI ones, so convert
-		 *
-		 * TODO: we really need a more efficient way of converting.. Or maybe this will just go away when we move to RI structures
-		 */
-		String encoded = myDstu2Ctx.newJsonParser().encodeResourceToString(res);
-		return myRiCtx.newJsonParser().parseResource(theClass, encoded);
+		return (T) search.getResources(0, 1).get(0);
 	}
 
 	@Override
@@ -115,7 +112,7 @@ public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 
 	@Override
 	public FhirContext getFhirContext() {
-		return myRiCtx;
+		return myDstu2Ctx;
 	}
 
 }
