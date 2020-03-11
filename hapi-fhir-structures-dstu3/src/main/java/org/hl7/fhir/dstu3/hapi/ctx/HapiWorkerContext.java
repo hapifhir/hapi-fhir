@@ -303,7 +303,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   @Override
   public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
     ValidationOptions options = new ValidationOptions();
-    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(options), theSystem, theCode, theDisplay, null);
+    IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(options), theSystem, theCode, theDisplay, null);
     if (result == null) {
       return null;
     }
@@ -352,7 +352,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       return new ValidationResult(definition);
     }
 
-    IValidationSupport.CodeValidationResult outcome;
+    IContextValidationSupport.CodeValidationResult outcome;
     ValidationOptions options = new ValidationOptions();
     if (isNotBlank(theVs.getUrl())) {
       outcome = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(options), theSystem, theCode, theDisplay, theVs.getUrl());

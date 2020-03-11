@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
@@ -17,13 +17,11 @@ import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
-import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -58,10 +56,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IContextValidationSupport, ITermReadSvcR5 {
 
 	@Autowired
-	@Qualifier("myValueSetDaoR5")
-	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
-	@Autowired
-	private IContextValidationSupport myValidationSupport;
+	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
 
@@ -99,7 +94,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IContextValida
 	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
 		// TODO: DM 2019-09-10 - This is problematic because an incorrect URL that matches ValueSet.id will not be found in the terminology tables but will yield a ValueSet here. Depending on the ValueSet, the expansion may time-out.
-		ValueSet valueSetR5 = myValidationSupport.fetchResource(ValueSet.class, theValueSet);
+		ValueSet valueSetR5 = (ValueSet) fetchValueSet(theValueSet);
 		if (valueSetR5 == null) {
 			super.throwInvalidValueSet(theValueSet);
 		}
@@ -127,28 +122,6 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IContextValida
 		super.expandValueSet(valueSetToExpand, theValueSetCodeAccumulator);
 	}
 
-	@Override
-	public List<IBaseResource> fetchAllConformanceResources() {
-		return null;
-	}
-
-
-	@CoverageIgnore
-	@Override
-	public ValueSet fetchValueSet(String theSystem) {
-		return null;
-	}
-
-	@Override
-	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
-		return null;
-	}
-
-	@CoverageIgnore
-	@Override
-	public StructureDefinition fetchStructureDefinition(String theUrl) {
-		return null;
-	}
 
 	private void findCodesAbove(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
 		List<ConceptDefinitionComponent> conceptList = theSystem.getConcept();
@@ -160,7 +133,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IContextValida
 	@Override
 	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = (CodeSystem) myValidationSupport.fetchCodeSystem(theSystem);
+		CodeSystem system = (CodeSystem) fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
 		}
@@ -185,7 +158,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IContextValida
 	@Override
 	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = (CodeSystem) myValidationSupport.fetchCodeSystem(theSystem);
+		CodeSystem system = (CodeSystem) fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}
@@ -194,19 +167,14 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IContextValida
 
 	@Override
 	public org.hl7.fhir.r4.model.CodeSystem getCodeSystemFromContext(String theSystem) {
-		CodeSystem codeSystemR5 = (CodeSystem) myValidationSupport.fetchCodeSystem(theSystem);
+		CodeSystem codeSystemR5 = (CodeSystem) fetchCodeSystem(theSystem);
 		return org.hl7.fhir.convertors.conv40_50.CodeSystem40_50.convertCodeSystem(codeSystemR5);
 	}
 
 	@Override
 	protected org.hl7.fhir.r4.model.ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
-		ValueSet valueSetR5 = myValueSetResourceDao.toResource(ValueSet.class, theResourceTable, null, false);
+		ValueSet valueSetR5 = myDaoRegistry.getResourceDao("ValueSet").toResource(ValueSet.class, theResourceTable, null, false);
 		return org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetR5);
-	}
-
-	@Override
-	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
-		return supportsSystem(theSystem);
 	}
 
 	@CoverageIgnore
@@ -216,7 +184,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IContextValida
 		boolean haveValidated = false;
 
 		if (isNotBlank(theValueSetUrl)) {
-			codeOpt = super.validateCodeInValueSet(theOptions, theValueSetUrl, theCodeSystem, theCode);
+			codeOpt = super.validateCodeInValueSet(theRootValidationSupport, theOptions, theValueSetUrl, theCodeSystem, theCode);
 			haveValidated = true;
 		}
 

@@ -48,7 +48,7 @@ public class SearchParamDstu2Config extends BaseSearchParamConfig {
 	}
 
 	@Primary
-	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainDstu2")
+	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChain")
 	public IContextValidationSupport validationSupportChainDstu2() {
 		return new DefaultProfileValidationSupport(fhirContextDstu2());
 	}

@@ -27,7 +27,6 @@ import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -117,7 +116,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	@Qualifier("myOrganizationDaoR4")
 	private IFhirResourceDao<Organization> myOrganizationDao;
 	@Autowired
-	@Qualifier("myJpaValidationSupportChainR4")
+	@Qualifier("myJpaValidationSupportChain")
 	private IContextValidationSupport myValidationSupport;
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;

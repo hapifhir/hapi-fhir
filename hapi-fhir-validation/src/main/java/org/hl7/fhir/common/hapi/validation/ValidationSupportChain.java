@@ -40,6 +40,13 @@ public class ValidationSupportChain implements IContextValidationSupport {
 	}
 
 	@Override
+	public void flushCaches() {
+		for (IContextValidationSupport next : myChain) {
+			next.flushCaches();
+		}
+	}
+
+	@Override
 	public CodeValidationResult validateCodeInValueSet(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		for (IContextValidationSupport next : myChain) {
 			CodeValidationResult retVal = next.validateCodeInValueSet(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, theValueSet);
@@ -74,17 +81,22 @@ public class ValidationSupportChain implements IContextValidationSupport {
 
 	@Override
 	public FhirContext getFhirContext() {
+		if (myChain.size() == 0){
+			return null;
+		}
 		return myChain.get(0).getFhirContext();
 	}
 
 	public void addValidationSupport(IContextValidationSupport theValidationSupport) {
-		if (myChain.size() > 0) {
-			if (theValidationSupport.getFhirContext() == null) {
-				String message = "Can not add validation support: getFhirContext() returns null";
-				throw new ConfigurationException(message);
-			}
+		if (theValidationSupport.getFhirContext() == null) {
+			String message = "Can not add validation support: getFhirContext() returns null";
+			throw new ConfigurationException(message);
+		}
+
+		FhirContext existingFhirContext = getFhirContext();
+		if (existingFhirContext != null) {
 			FhirVersionEnum newVersion = theValidationSupport.getFhirContext().getVersion().getVersion();
-			FhirVersionEnum existingVersion = myChain.get(0).getFhirContext().getVersion().getVersion();
+			FhirVersionEnum existingVersion = existingFhirContext.getVersion().getVersion();
 			if (!existingVersion.equals(newVersion)) {
 				String message = "Trying to add validation support of version " + newVersion + " to chain with " + myChain.size() + " entries of version " + existingVersion;
 				throw new ConfigurationException(message);

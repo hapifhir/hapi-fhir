@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
@@ -243,6 +244,10 @@ public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 
 	@Override
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri) {
+
+		if (isBlank(uri)) {
+			return null;
+		}
 
 		ResourceKey key = new ResourceKey(class_.getSimpleName(), uri);
 		@SuppressWarnings("unchecked")

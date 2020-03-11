@@ -211,6 +211,15 @@ public interface IContextValidationSupport {
 	 */
 	FhirContext getFhirContext();
 
+	// FIXME: rename to invalidateCaches()
+	/**
+	 * This method clears any temporary caches within the validation support. It is mainly intended for unit tests,
+	 * but could be used in non-test scenarios as well.
+	 */
+	default void flushCaches() {
+		// nothing
+	}
+
 
 	class ConceptDesignation {
 		private String myLanguage;

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
@@ -11,7 +12,6 @@ import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -56,26 +56,25 @@ import static org.junit.Assert.fail;
 
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
-	protected static JpaValidationSupportChainR4 myValidationSupport;
+	protected static IContextValidationSupport myValidationSupport;
 	protected static CloseableHttpClient ourHttpClient;
 	protected static int ourPort;
 	protected static RestfulServer ourRestServer;
 	protected static String ourServerBase;
 	protected static SearchParamRegistryImpl ourSearchParamRegistry;
-	private static DatabaseBackedPagingProvider ourPagingProvider;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	protected static Server ourServer;
+	private static DatabaseBackedPagingProvider ourPagingProvider;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	private static SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor;
-	protected static Server ourServer;
 	protected IGenericClient ourClient;
-	ResourceCountCache myResourceCountsCache;
-	private TerminologyUploaderProvider myTerminologyUploaderProvider;
-	private boolean ourRestHookSubscriptionInterceptorRequested;
-
 	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
+	ResourceCountCache myResourceCountsCache;
+	private TerminologyUploaderProvider myTerminologyUploaderProvider;
+	private boolean ourRestHookSubscriptionInterceptorRequested;
 
 	public BaseResourceProviderR4Test() {
 		super();
@@ -157,11 +156,11 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 			server.setHandler(proxyHandler);
 			JettyUtil.startServer(server);
-            ourPort = JettyUtil.getPortForStartedServer(server);
-            ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
+			ourPort = JettyUtil.getPortForStartedServer(server);
+			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
-			myValidationSupport = wac.getBean(JpaValidationSupportChainR4.class);
+			myValidationSupport = wac.getBean(IContextValidationSupport.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryImpl.class);
 			ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
@@ -225,7 +224,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		ourHttpClient.close();
 		ourServer = null;
 		ourHttpClient = null;
-		myValidationSupport.flush();
+		myValidationSupport.flushCaches();
 		myValidationSupport = null;
 		ourWebApplicationContext.close();
 		ourWebApplicationContext = null;

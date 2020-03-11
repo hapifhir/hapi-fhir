@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
@@ -82,10 +81,8 @@ import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.quartz.JobExecutionContext;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -119,7 +116,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationContextAware {
+public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseTermReadSvcImpl.class);
 	private static boolean ourLastResultsFromTranslationCache; // For testing.
@@ -159,7 +156,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 	private Cache<TranslationQuery, List<TermConceptMapGroupElementTarget>> myTranslationCache;
 	private Cache<TranslationQuery, List<TermConceptMapGroupElement>> myTranslationWithReverseCache;
 	private int myFetchSize = DEFAULT_FETCH_SIZE;
-	private ApplicationContext myApplicationContext;
 	private TransactionTemplate myTxTemplate;
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
@@ -175,7 +171,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 	private ITermDeferredStorageSvc myDeferredStorageSvc;
 	@Autowired(required = false)
 	private ITermCodeSystemStorageSvc myConceptStorageSvc;
-	private IContextValidationSupport myValidationSupport;
+	@Autowired
+	private ApplicationContext myApplicationContext;
+
+	@Override
+	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
+		return supportsSystem(theSystem);
+	}
 
 	private void addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, AtomicInteger theCodeCounter) {
 		String codeSystem = theConcept.getCodeSystemVersion().getCodeSystem().getCodeSystemUri();
@@ -1294,16 +1296,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		return myCodeSystemDao.findByCodeSystemUri(theSystem);
 	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
-		myApplicationContext = theApplicationContext;
-	}
-
 	@PostConstruct
 	public void start() {
-		if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-			myValidationSupport = myApplicationContext.getBean(IContextValidationSupport.class);
-		}
 		RuleBasedTransactionAttribute rules = new RuleBasedTransactionAttribute();
 		rules.getRollbackRules().add(new NoRollbackRuleAttribute(ExpansionTooCostlyException.class));
 		myTxTemplate = new TransactionTemplate(myTransactionManager, rules);
@@ -1856,8 +1850,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		throw new ResourceNotFoundException("Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSet));
 	}
 
-	Optional<VersionIndependentConcept> validateCodeInValueSet(ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode) {
-		IBaseResource valueSet = myValidationSupport.fetchValueSet(theValueSetUrl);
+	Optional<VersionIndependentConcept> validateCodeInValueSet(IContextValidationSupport theValidationSupport, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode) {
+		IBaseResource valueSet = theValidationSupport.fetchValueSet(theValueSetUrl);
 
 		// If we don't have a PID, this came from some source other than the JPA
 		// database, so we don't need to check if it's pre-expanded or not
@@ -1880,6 +1874,25 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 			.stream()
 			.filter(t -> (theValidationOptions.isInferSystem() || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
 			.findFirst();
+	}
+
+	@Override
+	public IBaseResource fetchCodeSystem(String theSystem) {
+		// FIXME: this is kinda inefficient
+		IContextValidationSupport jpaValidationSupport = myApplicationContext.getBean("myJpaValidationSupport", IContextValidationSupport.class);
+		return jpaValidationSupport.fetchCodeSystem(theSystem);
+	}
+
+	@Override
+	public IBaseResource fetchValueSet(String theValueSetUrl) {
+		// FIXME: this is kinda inefficient
+		IContextValidationSupport jpaValidationSupport = myApplicationContext.getBean( "myJpaValidationSupport", IContextValidationSupport.class);
+		return jpaValidationSupport.fetchValueSet(theValueSetUrl);
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myContext;
 	}
 
 	public static class Job implements HapiJob {

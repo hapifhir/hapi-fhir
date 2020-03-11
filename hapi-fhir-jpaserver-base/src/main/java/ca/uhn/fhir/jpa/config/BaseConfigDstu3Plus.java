@@ -20,15 +20,22 @@ package ca.uhn.fhir.jpa.config;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.jpa.dao.r4.BaseJpaValidationSupport;
 import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.CachingValidationSupport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
 public abstract class BaseConfigDstu3Plus extends BaseConfig {
@@ -51,4 +58,28 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	@Bean
 	public abstract ITermVersionAdapterSvc terminologyVersionAdapterSvc();
 
+	@Bean(name="myDefaultProfileValidationSupport")
+	public IContextValidationSupport defaultProfileValidationSupport() {
+		return new DefaultProfileValidationSupport(fhirContext());
+	}
+
+	@Bean
+	public IContextValidationSupport jpaValidationSupportChain() {
+		return new JpaValidationSupportChain(fhirContext());
+	}
+
+	@Bean(name = "myJpaValidationSupport")
+	public IContextValidationSupport jpaValidationSupport() {
+		return new BaseJpaValidationSupport(fhirContext());
+	}
+
+	// FIXME: rename from dstu3
+	@Primary
+	@Bean(name = "myJpaValidationSupportChain")
+	public IContextValidationSupport validationSupportChainDstu3() {
+		return new CachingValidationSupport(jpaValidationSupportChain());
+	}
+
+	@Bean
+	public abstract ITermReadSvc terminologyService();
 }

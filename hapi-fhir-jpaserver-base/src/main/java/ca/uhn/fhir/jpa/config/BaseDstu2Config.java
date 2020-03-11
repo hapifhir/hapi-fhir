@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.r4.BaseJpaValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
 import ca.uhn.fhir.jpa.term.TermReadSvcDstu2;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -83,16 +85,18 @@ public class BaseDstu2Config extends BaseConfig {
 	@Bean(name = "myInstanceValidatorDstu2")
 	@Lazy
 	public IInstanceValidatorModule instanceValidatorDstu2() {
-		ValidationSupportChain validationSupportChain = new ValidationSupportChain(new DefaultProfileValidationSupport(fhirContext()), jpaValidationSupportDstu2());
+		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(fhirContext());
+		ValidationSupportChain validationSupportChain = new ValidationSupportChain(defaultProfileValidationSupport, jpaValidationSupportDstu2());
 		CachingValidationSupport cachingValidationSupport = new CachingValidationSupport(new HapiToHl7OrgDstu2ValidatingSupportWrapper(validationSupportChain));
 		FhirInstanceValidator retVal = new FhirInstanceValidator(cachingValidationSupport);
 		retVal.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
 		return retVal;
 	}
 
+	@Primary
 	@Bean(name = "myJpaValidationSupportDstu2", autowire = Autowire.BY_NAME)
-	public ca.uhn.fhir.jpa.dao.IJpaValidationSupportDstu2 jpaValidationSupportDstu2() {
-		ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2 retVal = new ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2(fhirContextDstu2());
+	public IContextValidationSupport jpaValidationSupportDstu2() {
+		BaseJpaValidationSupport retVal = new BaseJpaValidationSupport(fhirContextDstu2());
 		return retVal;
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term.api;
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -52,7 +53,7 @@ import java.util.Set;
  * been moved yet)
  * </p>
  */
-public interface ITermReadSvc {
+public interface ITermReadSvc extends IContextValidationSupport {
 
 	ValueSet expandValueSetInMemory(ValueSet theValueSetToExpand, VersionIndependentConcept theWantConceptOrNull);
 

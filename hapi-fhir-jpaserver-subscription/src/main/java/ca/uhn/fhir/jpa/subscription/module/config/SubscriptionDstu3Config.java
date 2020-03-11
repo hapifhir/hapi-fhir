@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Primary;
 @Import({SearchParamDstu3Config.class})
 public class SubscriptionDstu3Config extends BaseSubscriptionConfig {
 	@Primary
-	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainDstu3")
+	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChain")
 	public IContextValidationSupport validationSupportChainDstu3() {
 		return new DefaultProfileValidationSupport(FhirContext.forDstu3());
 	}

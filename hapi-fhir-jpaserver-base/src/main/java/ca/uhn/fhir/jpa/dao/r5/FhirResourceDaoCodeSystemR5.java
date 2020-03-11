@@ -36,7 +36,6 @@ import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -56,15 +55,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoCodeSystemR5.class);
-
-	@Autowired
-	private ITermCodeSystemDao myCsDao;
-	@Autowired
-	private ValidationSupportChain myValidationSupport;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTerminologyCodeSystemStorageSvc;
 	@Autowired
 	protected IdHelperService myIdHelperService;
+	@Autowired
+	private ITermCodeSystemDao myCsDao;
+	@Autowired
+	private IContextValidationSupport myValidationSupport;
 	@Autowired
 	private FhirContext myFhirContext;
 

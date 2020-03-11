@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.dao.r4;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -31,14 +31,24 @@ import ca.uhn.fhir.rest.param.UriParam;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.ImplementationGuide;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 
-public abstract class BaseJpaValidationSupport implements IContextValidationSupport {
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+// FIXME: rename this
+@Transactional(value = Transactional.TxType.REQUIRED)
+public class BaseJpaValidationSupport implements IContextValidationSupport {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseJpaValidationSupport.class);
 
@@ -46,11 +56,11 @@ public abstract class BaseJpaValidationSupport implements IContextValidationSupp
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-	private IFhirResourceDao<?> myStructureDefinitionDao;
-	private IFhirResourceDao<?> myValueSetDao;
-	private IFhirResourceDao<?> myQuestionnaireDao;
-	private IFhirResourceDao<?> myCodeSystemDao;
-	private IFhirResourceDao<?> myImplementationGuideDao;
+	private Class<? extends IBaseResource> myCodeSystemType;
+	private Class<? extends IBaseResource> myStructureDefinitionType;
+	private Class<? extends IBaseResource> myValueSetType;
+	private Class<? extends IBaseResource> myQuestionnaireType;
+	private Class<? extends IBaseResource> myImplementationGuideType;
 
 	/**
 	 * Constructor
@@ -61,9 +71,30 @@ public abstract class BaseJpaValidationSupport implements IContextValidationSupp
 		myFhirContext = theFhirContext;
 	}
 
+
+	@Override
+	public IBaseResource fetchCodeSystem(String theSystem) {
+		return fetchResource(myCodeSystemType, theSystem);
+	}
+
+	@Override
+	public IBaseResource fetchValueSet(String theSystem) {
+		return fetchResource(myValueSetType, theSystem);
+	}
+
+	@Override
+	public IBaseResource fetchStructureDefinition(String theUrl) {
+		return fetchResource(myStructureDefinitionType, theUrl);
+	}
+
+
 	@Override
 	@SuppressWarnings({"unchecked", "unused"})
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
+		if (isBlank(theUri)) {
+			return null;
+		}
+
 		IdType id = new IdType(theUri);
 		boolean localReference = false;
 		if (id.hasBaseUrl() == false && id.hasIdPart() == true) {
@@ -77,18 +108,18 @@ public abstract class BaseJpaValidationSupport implements IContextValidationSupp
 				SearchParameterMap params = new SearchParameterMap();
 				params.setLoadSynchronousUpTo(1);
 				params.add(IAnyResource.SP_RES_ID, new StringParam(theUri));
-				search = myValueSetDao.search(params);
+				search = myDaoRegistry.getResourceDao("ValueSet").search(params);
 				if (search.size() == 0) {
 					params = new SearchParameterMap();
 					params.setLoadSynchronousUpTo(1);
 					params.add(ValueSet.SP_URL, new UriParam(theUri));
-					search = myValueSetDao.search(params);
+					search = myDaoRegistry.getResourceDao("ValueSet").search(params);
 				}
 			} else {
 				SearchParameterMap params = new SearchParameterMap();
 				params.setLoadSynchronousUpTo(1);
 				params.add(ValueSet.SP_URL, new UriParam(theUri));
-				search = myValueSetDao.search(params);
+				search = myDaoRegistry.getResourceDao("ValueSet").search(params);
 			}
 		} else if ("StructureDefinition".equals(resourceName)) {
 			// Don't allow the core FHIR definitions to be overwritten
@@ -101,7 +132,7 @@ public abstract class BaseJpaValidationSupport implements IContextValidationSupp
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(1);
 			params.add(StructureDefinition.SP_URL, new UriParam(theUri));
-			search = myStructureDefinitionDao.search(params);
+			search = myDaoRegistry.getResourceDao("StructureDefinition").search(params);
 		} else if ("Questionnaire".equals(resourceName)) {
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(1);
@@ -110,17 +141,17 @@ public abstract class BaseJpaValidationSupport implements IContextValidationSupp
 			} else {
 				params.add(Questionnaire.SP_URL, new UriParam(id.getValue()));
 			}
-			search = myQuestionnaireDao.search(params);
+			search = myDaoRegistry.getResourceDao("Questionnaire").search(params);
 		} else if ("CodeSystem".equals(resourceName)) {
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(1);
 			params.add(CodeSystem.SP_URL, new UriParam(theUri));
-			search = myCodeSystemDao.search(params);
+			search = myDaoRegistry.getResourceDao(resourceName).search(params);
 		} else if ("ImplementationGuide".equals(resourceName)) {
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(1);
 			params.add(ImplementationGuide.SP_URL, new UriParam(theUri));
-			search = myImplementationGuideDao.search(params);
+			search = myDaoRegistry.getResourceDao("ImplementationGuide").search(params);
 		} else {
 			throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
 		}
@@ -144,11 +175,16 @@ public abstract class BaseJpaValidationSupport implements IContextValidationSupp
 
 	@PostConstruct
 	public void start() {
-		myStructureDefinitionDao = myDaoRegistry.getResourceDao("StructureDefinition");
-		myValueSetDao = myDaoRegistry.getResourceDao("ValueSet");
-		myQuestionnaireDao = myDaoRegistry.getResourceDao("Questionnaire");
-		myCodeSystemDao = myDaoRegistry.getResourceDao("CodeSystem");
-		myImplementationGuideDao = myDaoRegistry.getResourceDao("ImplementationGuide");
+		myStructureDefinitionType = myFhirContext.getResourceDefinition("StructureDefinition").getImplementingClass();
+		myValueSetType = myFhirContext.getResourceDefinition("ValueSet").getImplementingClass();
+		myQuestionnaireType = myFhirContext.getResourceDefinition("Questionnaire").getImplementingClass();
+		myImplementationGuideType = myFhirContext.getResourceDefinition("ImplementationGuide").getImplementingClass();
+
+		if (myFhirContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
+			myCodeSystemType = myFhirContext.getResourceDefinition("CodeSystem").getImplementingClass();
+		} else {
+			myCodeSystemType = myFhirContext.getResourceDefinition("ValueSet").getImplementingClass();
+		}
 	}
 
 

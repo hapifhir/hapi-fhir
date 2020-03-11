@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
@@ -50,7 +49,6 @@ import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.common.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
@@ -87,7 +85,7 @@ import static org.mockito.Mockito.mock;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
 public abstract class BaseJpaR4Test extends BaseJpaTest {
-	private static JpaValidationSupportChainR4 ourJpaValidationSupportChainR4;
+	private static IContextValidationSupport ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
 	@Autowired
@@ -329,7 +327,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
-	@Qualifier("myJpaValidationSupportChainR4")
+	@Qualifier("myJpaValidationSupportChain")
 	protected IContextValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
@@ -350,7 +348,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected SubscriptionRegistry mySubscriptionRegistry;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
-	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
+	private IContextValidationSupport myJpaValidationSupportChainR4;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	private List<Object> mySystemInterceptors;
 	@Autowired
@@ -511,7 +509,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@AfterClass
 	public static void afterClassClearContextBaseJpaR4Test() {
 		ourValueSetDao.purgeCaches();
-		ourJpaValidationSupportChainR4.flush();
+		ourJpaValidationSupportChainR4.flushCaches();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 

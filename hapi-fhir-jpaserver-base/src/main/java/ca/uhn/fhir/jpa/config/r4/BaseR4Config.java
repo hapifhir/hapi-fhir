@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.config.BaseConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
@@ -18,11 +17,8 @@ import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.common.hapi.validation.CachingValidationSupport;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -92,7 +88,7 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 	@Bean(name = GRAPHQL_PROVIDER_NAME)
 	@Lazy
 	public GraphQLProvider graphQLProvider() {
-		return new GraphQLProvider(fhirContextR4(), validationSupportChainR4(), graphqlStorageServices());
+		return new GraphQLProvider(fhirContextR4(), validationSupportChainDstu3(), graphqlStorageServices());
 	}
 
 	@Bean(name = "myInstanceValidatorR4")
@@ -101,24 +97,8 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 		FhirInstanceValidator val = new FhirInstanceValidator(fhirContext());
 		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Warning;
 		val.setBestPracticeWarningLevel(level);
-		val.setValidationSupport(validationSupportChainR4());
+		val.setValidationSupport(validationSupportChainDstu3());
 		return val;
-	}
-
-	@Bean
-	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
-		return new DefaultProfileValidationSupport(fhirContext());
-	}
-
-	@Bean
-	public JpaValidationSupportChainR4 jpaValidationSupportChain() {
-		return new JpaValidationSupportChainR4();
-	}
-
-	@Bean(name = "myJpaValidationSupportR4", autowire = Autowire.BY_NAME)
-	public ca.uhn.fhir.jpa.dao.r4.IJpaValidationSupportR4 jpaValidationSupportR4() {
-		ca.uhn.fhir.jpa.dao.r4.JpaValidationSupportR4 retVal = new ca.uhn.fhir.jpa.dao.r4.JpaValidationSupportR4(fhirContextR4());
-		return retVal;
 	}
 
 	@Bean(name = "myResourceCountsCache")
@@ -158,15 +138,10 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 		return new TermLoaderSvcImpl();
 	}
 
+	@Override
 	@Bean(autowire = Autowire.BY_TYPE)
 	public ITermReadSvcR4 terminologyService() {
 		return new TermReadSvcR4();
-	}
-
-	@Primary
-	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainR4")
-	public IContextValidationSupport validationSupportChainR4() {
-		return new CachingValidationSupport(jpaValidationSupportChain());
 	}
 
 }

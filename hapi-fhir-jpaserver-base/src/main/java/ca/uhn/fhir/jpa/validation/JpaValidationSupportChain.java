@@ -21,77 +21,54 @@ package ca.uhn.fhir.jpa.validation;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import org.hl7.fhir.common.hapi.validation.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.SnapshotGeneratingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.StaticResourceTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.StructureDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-public class JpaValidationSupportChainR4 extends ValidationSupportChain {
+public class JpaValidationSupportChain extends ValidationSupportChain {
+
+	private final FhirContext myFhirContext;
 
 	@Autowired
-	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
+	@Qualifier("myJpaValidationSupport")
+	public IContextValidationSupport myJpaValidationSupport;
 
+	@Qualifier("myDefaultProfileValidationSupport")
 	@Autowired
-	private FhirContext myFhirContext;
+	private IContextValidationSupport myDefaultProfileValidationSupport;
+	@Autowired
+	private ITermReadSvc myTerminologyService;
 
-	@Autowired
-	@Qualifier("myJpaValidationSupportR4")
-	public ca.uhn.fhir.jpa.dao.r4.IJpaValidationSupportR4 myJpaValidationSupportR4;
-	
-	@Autowired
-	private ITermReadSvcR4 myTerminologyService;
+	public JpaValidationSupportChain(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
 
 	@Override
 	public FhirContext getFhirContext() {
 		return myFhirContext;
 	}
 
-	public JpaValidationSupportChainR4() {
-		super();
-	}
-	
+	@PreDestroy
 	public void flush() {
-		myDefaultProfileValidationSupport.flush();
+		flushCaches();
 	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
-		if (theClass.equals(StructureDefinition.class)) {
-			return (T) fetchStructureDefinition(theUri);
-		}
-		return super.fetchResource(theClass, theUri);
-	}
-
-	@Override
-	public StructureDefinition fetchStructureDefinition(String theUrl) {
-		StructureDefinition retVal = (StructureDefinition) super.fetchStructureDefinition(theUrl);
-		if (retVal != null && !retVal.hasSnapshot()) {
-			retVal = (StructureDefinition) generateSnapshot(this, retVal, theUrl, null, null);
-		}
-		return retVal;
-	}
-
 
 	@PostConstruct
 	public void postConstruct() {
+		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 		addValidationSupport(myDefaultProfileValidationSupport);
-		addValidationSupport(myJpaValidationSupportR4);
+		addValidationSupport(myJpaValidationSupport);
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
+		addValidationSupport(new StaticResourceTerminologyServerValidationSupport(myFhirContext));
 	}
-	
-	@PreDestroy
-	public void preDestroy() {
-		flush();
-	}
-	
-	
+
 }

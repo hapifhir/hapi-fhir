@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
@@ -28,7 +29,6 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR5;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
@@ -43,7 +43,6 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.ConceptMap.ConceptMapGroupComponent;
@@ -76,7 +75,7 @@ import static org.mockito.Mockito.mock;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR5Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest {
-	private static JpaValidationSupportChainR5 ourJpaValidationSupportChainR5;
+	private static IContextValidationSupport ourJpaValidationSupportChainR5;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
 	@Autowired
@@ -296,8 +295,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
-	@Qualifier("myJpaValidationSupportChainR5")
-	protected IValidationSupport myValidationSupport;
+	@Qualifier("myJpaValidationSupportChain")
+	protected IContextValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoR5")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
@@ -317,7 +316,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	protected SubscriptionRegistry mySubscriptionRegistry;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
-	private JpaValidationSupportChainR5 myJpaValidationSupportChainR5;
+	private IContextValidationSupport myJpaValidationSupportChain;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	private List<Object> mySystemInterceptors;
 	@Autowired
@@ -359,7 +358,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	@After()
 	public void afterGrabCaches() {
 		ourValueSetDao = myValueSetDao;
-		ourJpaValidationSupportChainR5 = myJpaValidationSupportChainR5;
+		ourJpaValidationSupportChainR5 = myJpaValidationSupportChain;
 	}
 
 	@Before
@@ -440,7 +439,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	@AfterClass
 	public static void afterClassClearContextBaseJpaR5Test() {
 		ourValueSetDao.purgeCaches();
-		ourJpaValidationSupportChainR5.flush();
+		ourJpaValidationSupportChainR5.flushCaches();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 

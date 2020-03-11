@@ -50,6 +50,7 @@ import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Collections;
 import java.util.Date;
@@ -63,8 +64,11 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 	@Autowired
 	private ITermReadSvc myHapiTerminologySvc;
 
+	// FIXME: do we need both below
+
 	@Autowired
-	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
+	@Qualifier("myDefaultProfileValidationSupport")
+	private IContextValidationSupport myDefaultProfileValidationSupport;
 
 	private IContextValidationSupport myValidationSupport;
 
@@ -74,7 +78,7 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 	@Override
 	public void start() {
 		super.start();
-		myValidationSupport = getApplicationContext().getBean(IContextValidationSupport.class,"myJpaValidationSupportChainR5" );
+		myValidationSupport = getApplicationContext().getBean(IContextValidationSupport.class,"myJpaValidationSupportChain" );
 	}
 
 	@Override

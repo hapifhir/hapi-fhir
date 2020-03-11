@@ -59,7 +59,7 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 	@Autowired
 	private ITermCodeSystemDao myCsDao;
 	@Autowired
-	private ValidationSupportChain myValidationSupport;
+	private IContextValidationSupport myValidationSupport;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTerminologyCodeSystemStorageSvc;
 	@Autowired

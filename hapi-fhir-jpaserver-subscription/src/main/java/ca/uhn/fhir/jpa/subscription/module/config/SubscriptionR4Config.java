@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Primary;
 public class SubscriptionR4Config extends BaseSubscriptionConfig {
 
 	@Primary
-	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainR4")
+	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChain")
 	public IContextValidationSupport validationSupportChainR4() {
 		return new DefaultProfileValidationSupport(FhirContext.forR4());
 	}

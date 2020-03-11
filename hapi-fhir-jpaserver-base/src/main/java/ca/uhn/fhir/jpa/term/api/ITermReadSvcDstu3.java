@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.term.api;
  * #L%
  */
 
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 
-public interface ITermReadSvcDstu3 extends ITermReadSvc, IValidationSupport {
+public interface ITermReadSvcDstu3 extends ITermReadSvc, IContextValidationSupport {
 	// nothing
 }

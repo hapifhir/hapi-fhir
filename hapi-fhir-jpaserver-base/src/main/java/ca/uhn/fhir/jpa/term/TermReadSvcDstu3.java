@@ -12,7 +12,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.fhir.util.VersionIndependentConcept;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -58,15 +57,8 @@ import static org.hl7.fhir.convertors.conv30_40.ValueSet30_40.convertValueSet;
  * #L%
  */
 
-public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidationSupport, ITermReadSvcDstu3 {
+public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IContextValidationSupport, ITermReadSvcDstu3 {
 
-	@Autowired
-	@Qualifier("myValueSetDaoDstu3")
-	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
-	@Autowired
-	private IContextValidationSupport myValidationSupport;
-	@Autowired
-	private ITermReadSvc myTerminologySvc;
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
 
@@ -164,7 +156,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
 		// TODO: DM 2019-09-10 - This is problematic because an incorrect URL that matches ValueSet.id will not be found in the terminology tables but will yield a ValueSet here. Depending on the ValueSet, the expansion may time-out.
-		ValueSet vs = myValidationSupport.fetchResource(ValueSet.class, theValueSet);
+		ValueSet vs = (ValueSet) fetchValueSet( theValueSet);
 		if (vs == null) {
 			super.throwInvalidValueSet(theValueSet);
 		}
@@ -180,28 +172,6 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 		return expandValueSetAndReturnVersionIndependentConcepts(valueSetToExpandR4, null);
 	}
 
-	@Override
-	public List<IBaseResource> fetchAllConformanceResources() {
-		return null;
-	}
-
-	@Override
-	public IBaseResource fetchResource(Class theClass, String theUri) {
-		return null;
-	}
-
-	@CoverageIgnore
-	@Override
-	public ValueSet fetchValueSet(String theSystem) {
-		return null;
-	}
-
-	@CoverageIgnore
-	@Override
-	public StructureDefinition fetchStructureDefinition(String theUrl) {
-		return null;
-	}
-
 	private void findCodesAbove(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
 		List<ConceptDefinitionComponent> conceptList = theSystem.getConcept();
 		for (ConceptDefinitionComponent next : conceptList) {
@@ -212,7 +182,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 	@Override
 	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = (CodeSystem) myValidationSupport.fetchCodeSystem(theSystem);
+		CodeSystem system = (CodeSystem) fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
 		}
@@ -237,7 +207,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 	@Override
 	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = (CodeSystem) myValidationSupport.fetchCodeSystem(theSystem);
+		CodeSystem system = (CodeSystem) fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}
@@ -246,7 +216,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 
 	@Override
 	public org.hl7.fhir.r4.model.CodeSystem getCodeSystemFromContext(String theSystem) {
-		CodeSystem codeSystem = (CodeSystem) myValidationSupport.fetchCodeSystem(theSystem);
+		CodeSystem codeSystem = (CodeSystem) fetchCodeSystem(theSystem);
 		try {
 			return convertCodeSystem(codeSystem);
 		} catch (FHIRException e) {
@@ -256,7 +226,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 
 	@Override
 	protected org.hl7.fhir.r4.model.ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
-		ValueSet valueSet = myValueSetResourceDao.toResource(ValueSet.class, theResourceTable, null, false);
+		ValueSet valueSet = myDaoRegistry.getResourceDao("ValueSet").toResource(ValueSet.class, theResourceTable, null, false);
 
 		org.hl7.fhir.r4.model.ValueSet valueSetR4;
 		try {
@@ -268,19 +238,14 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 		return valueSetR4;
 	}
 
-	@Override
-	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
-		return myTerminologySvc.supportsSystem(theSystem);
-	}
-
 	@CoverageIgnore
 	@Override
-	public IValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public IContextValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		Optional<VersionIndependentConcept> codeOpt = Optional.empty();
 		boolean haveValidated = false;
 
 		if (isNotBlank(theValueSetUrl)) {
-			codeOpt = super.validateCodeInValueSet(theOptions, theValueSetUrl, theCodeSystem, theCode);
+			codeOpt = super.validateCodeInValueSet(theRootValidationSupport, theOptions, theValueSetUrl, theCodeSystem, theCode);
 			haveValidated = true;
 		}
 
@@ -292,12 +257,12 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 
 		if (codeOpt != null && codeOpt.isPresent()) {
 			VersionIndependentConcept code = codeOpt.get();
-			IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult()
+			IContextValidationSupport.CodeValidationResult retVal = new IContextValidationSupport.CodeValidationResult()
 				.setCode(code.getCode());
 			return retVal;
 		}
 
-		return new IValidationSupport.CodeValidationResult()
+		return new IContextValidationSupport.CodeValidationResult()
 			.setSeverity(IssueSeverity.ERROR.toCode())
 			.setMessage("Unknown code {" + theCodeSystem + "}" + theCode);
 	}
