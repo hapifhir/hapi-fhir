@@ -60,7 +60,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 	@Nullable
 	Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
 
-		Predicate nextPredicate = createPredicate(myQueryRoot.getRoot(), theResourceName, theValues, theOperation, theRequest);
+		Predicate nextPredicate = createPredicate(myQueryRoot.getRoot(), theResourceName, theValues, theOperation);
 
 		if (nextPredicate != null) {
 			myQueryRoot.addPredicate(nextPredicate);
@@ -71,7 +71,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 	}
 
 	@Nullable
-	private Predicate createPredicate(Root<ResourceTable> theRoot, String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
+	private Predicate createPredicate(Root<ResourceTable> theRoot, String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation) {
 		Predicate nextPredicate = null;
 
 		Set<ResourcePersistentId> allOrPids = null;
@@ -89,7 +89,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 				if (isNotBlank(value)) {
 					haveValue = true;
 					try {
-						ResourcePersistentId pid = myIdHelperService.translateForcedIdToPid(theResourceName, valueAsId.getIdPart(), theRequest);
+						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(theResourceName, valueAsId.getIdPart());
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {
 						// This is not an error in a search, it just results in no matchesFhirResourceDaoR4InterceptorTest

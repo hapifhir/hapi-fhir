@@ -23,16 +23,17 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.DependsOn;
 
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
 import static org.apache.commons.lang3.StringUtils.compare;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class ResourceIndexedSearchParams {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceIndexedSearchParams.class);
@@ -217,7 +218,7 @@ public final class ResourceIndexedSearchParams {
 		return myPopulatedResourceLinkParameters;
 	}
 
-	public boolean matchParam(String theResourceName, String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
+	public boolean matchParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
 		if (theParamDef == null) {
 			return false;
 		}
@@ -242,7 +243,7 @@ public final class ResourceIndexedSearchParams {
 				resourceParams = myDateParams;
 				break;
 			case REFERENCE:
-				return matchResourceLinks(theResourceName, theParamName, theParam, theParamDef.getPath());
+				return matchResourceLinks(theModelConfig, theResourceName, theParamName, theParam, theParamDef.getPath());
 			case COMPOSITE:
 			case HAS:
 			case SPECIAL:
@@ -259,39 +260,56 @@ public final class ResourceIndexedSearchParams {
 		return resourceParams.stream().anyMatch(namedParamPredicate);
 	}
 
+	/**
+	 * @deprecated Replace with the method below
+	 */
 	// KHS This needs to be public as libraries outside of hapi call it directly
+	@Deprecated
 	public boolean matchResourceLinks(String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
+		return matchResourceLinks(new ModelConfig(), theResourceName, theParamName, theParam, theParamPath);
+	}
+
+	// KHS This needs to be public as libraries outside of hapi call it directly
+	public boolean matchResourceLinks(ModelConfig theModelConfig, String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
 		ReferenceParam reference = (ReferenceParam)theParam;
 
 		Predicate<ResourceLink> namedParamPredicate = resourceLink ->
-			resourceLinkMatches(theResourceName, resourceLink, theParamName, theParamPath)
-			 && resourceIdMatches(resourceLink, reference);
+			searchParameterPathMatches(theResourceName, resourceLink, theParamName, theParamPath)
+			 && resourceIdMatches(theModelConfig, resourceLink, reference);
 
 		return myLinks.stream().anyMatch(namedParamPredicate);
 	}
 
-	private boolean resourceIdMatches(ResourceLink theResourceLink, ReferenceParam theReference) {
-		ResourceTable target = theResourceLink.getTargetResource();
-		IdDt idDt = target.getIdDt();
-		if (idDt.isIdPartValidLong()) {
-			if (theReference.isIdPartValidLong()) {
-				return theReference.getIdPartAsLong().equals(idDt.getIdPartAsLong());
-			} else {
-				return false;
-			}
-		} else {
-			ForcedId forcedId = target.getForcedId();
-			if (forcedId != null) {
-				return forcedId.getForcedId().equals(theReference.getValue());
-			} else {
+	private boolean resourceIdMatches(ModelConfig theModelConfig, ResourceLink theResourceLink, ReferenceParam theReference) {
+		String baseUrl = theReference.getBaseUrl();
+		if (isNotBlank(baseUrl)) {
+			if (!theModelConfig.getTreatBaseUrlsAsLocal().contains(baseUrl)) {
 				return false;
 			}
 		}
+
+		String targetType = theResourceLink.getTargetResourceType();
+		String targetId = theResourceLink.getTargetResourceId();
+
+		assert isNotBlank(targetType);
+		assert isNotBlank(targetId);
+
+		if (theReference.hasResourceType()) {
+			if (!theReference.getResourceType().equals(targetType)) {
+				return false;
+			}
+		}
+
+		if (!targetId.equals(theReference.getIdPart())) {
+			return false;
+		}
+
+		return true;
 	}
 
-	private boolean resourceLinkMatches(String theResourceName, ResourceLink theResourceLink, String theParamName, String theParamPath) {
-		return theResourceLink.getTargetResource().getResourceType().equalsIgnoreCase(theParamName) ||
-			theResourceLink.getSourcePath().equalsIgnoreCase(theParamPath);
+	private boolean searchParameterPathMatches(String theResourceName, ResourceLink theResourceLink, String theParamName, String theParamPath) {
+		String sourcePath = theResourceLink.getSourcePath();
+		return sourcePath.equalsIgnoreCase(theParamPath);
 	}
 
 	@Override
