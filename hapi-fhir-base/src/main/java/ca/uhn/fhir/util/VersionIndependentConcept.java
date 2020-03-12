@@ -40,7 +40,6 @@ public class VersionIndependentConcept implements Comparable<VersionIndependentC
 	}
 
 	public VersionIndependentConcept(String theSystem, String theCode, String theDisplay) {
-		Validate.notBlank(theCode, "theCode must not be blank");
 		mySystem = theSystem;
 		myCode = theCode;
 		myDisplay = theDisplay;
