@@ -180,8 +180,6 @@ public class IdHelperService {
 			Collection<String> nextIds = nextEntry.getValue();
 			if (isBlank(nextResourceType)) {
 
-				warn2(theRequest);
-
 				List<Long> views = myForcedIdDao.findByForcedId(nextIds);
 				views.forEach(t -> retVal.add(new ResourcePersistentId(t)));
 
