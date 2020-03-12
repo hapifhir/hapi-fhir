@@ -591,8 +591,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					get.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 					getResp = ourHttpClient.execute(get);
 					try {
-						assertEquals(200, getResp.getStatusLine().getStatusCode());
 						String respBundleString = IOUtils.toString(getResp.getEntity().getContent(), Charsets.UTF_8);
+						assertEquals(respBundleString, 200, getResp.getStatusLine().getStatusCode());
 						respBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, respBundleString);
 						myTaskCount++;
 					} finally {

@@ -12,6 +12,7 @@ import com.google.gson.JsonObject;
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r5.conformance.ProfileUtilities;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Manager;
 import org.hl7.fhir.r5.model.StructureDefinition;
@@ -179,7 +180,7 @@ public class ValidatorWrapper {
 				i--;
 			}
 
-			if (message.endsWith("' could not be resolved, so has not been checked") && next.getLevel() == ValidationMessage.IssueSeverity.WARNING) {
+			if (message.endsWith("\" could not be resolved, so has not been checked") && next.getLevel() == ValidationMessage.IssueSeverity.WARNING) {
 				next.setLevel(ValidationMessage.IssueSeverity.ERROR);
 			}
 
@@ -190,7 +191,10 @@ public class ValidatorWrapper {
 
 	private void fetchAndAddProfile(IWorkerContext theWorkerContext, List<StructureDefinition> theProfileStructureDefinitions, String theUrl) throws org.hl7.fhir.exceptions.FHIRException {
 		try {
-			StructureDefinition structureDefinition = theWorkerContext.fetchResourceWithException(StructureDefinition.class, theUrl);
+
+			// NOTE: We expect the following call to generate a snapshot if needed
+			StructureDefinition structureDefinition = theWorkerContext.fetchRawProfile(theUrl);
+
 			theProfileStructureDefinitions.add(structureDefinition);
 		} catch (FHIRException e) {
 			ourLog.debug("Failed to load profile: {}", theUrl);

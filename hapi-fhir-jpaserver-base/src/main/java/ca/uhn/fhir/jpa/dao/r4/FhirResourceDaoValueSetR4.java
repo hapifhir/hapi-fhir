@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ElementUtil;
 import org.apache.commons.codec.binary.StringUtils;
@@ -91,35 +92,46 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 
 	private ValueSet doExpand(ValueSet theSource) {
 
-		/*
-		 * If all of the code systems are supported by the HAPI FHIR terminology service, let's
-		 * use that as it's more efficient.
-		 */
+		// FIXME: make the same change for other versions
+//		/*
+//		 * If all of the code systems are supported by the HAPI FHIR terminology service, let's
+//		 * use that as it's more efficient.
+//		 */
+//
+//		boolean allSystemsAreSuppportedByTerminologyService = true;
+//		for (ConceptSetComponent next : theSource.getCompose().getInclude()) {
+//			if (!isBlank(next.getSystem()) && !myTerminologySvc.supportsSystem(next.getSystem())) {
+//				allSystemsAreSuppportedByTerminologyService = false;
+//			}
+//		}
+//		for (ConceptSetComponent next : theSource.getCompose().getExclude()) {
+//			if (!isBlank(next.getSystem()) && !myTerminologySvc.supportsSystem(next.getSystem())) {
+//				allSystemsAreSuppportedByTerminologyService = false;
+//			}
+//		}
+//		if (allSystemsAreSuppportedByTerminologyService) {
+//			return myTerminologySvc.expandValueSetInMemory(theSource, null);
+//		}
 
-		boolean allSystemsAreSuppportedByTerminologyService = true;
-		for (ConceptSetComponent next : theSource.getCompose().getInclude()) {
-			if (!isBlank(next.getSystem()) && !myTerminologySvc.supportsSystem(next.getSystem())) {
-				allSystemsAreSuppportedByTerminologyService = false;
-			}
+		IContextValidationSupport.ValueSetExpansionOutcome retVal = myValidationSupport.expandValueSet(myValidationSupport, theSource);
+
+//
+//		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
+//
+//		ValueSetExpansionOutcome outcome = workerContext.expand(theSource, null);
+//
+//		ValueSet retVal = outcome.getValueset();
+//		retVal.setStatus(PublicationStatus.ACTIVE);
+
+		if (retVal != null && retVal.getValueSet() != null) {
+			return (ValueSet) retVal.getValueSet();
 		}
-		for (ConceptSetComponent next : theSource.getCompose().getExclude()) {
-			if (!isBlank(next.getSystem()) && !myTerminologySvc.supportsSystem(next.getSystem())) {
-				allSystemsAreSuppportedByTerminologyService = false;
-			}
-		}
-		if (allSystemsAreSuppportedByTerminologyService) {
-			return myTerminologySvc.expandValueSetInMemory(theSource, null);
+
+		if (retVal != null) {
+			throw new InternalErrorException("Unable to expand ValueSet: " + retVal.getError());
 		}
 
-		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
-
-		ValueSetExpansionOutcome outcome = workerContext.expand(theSource, null);
-
-		ValueSet retVal = outcome.getValueset();
-		retVal.setStatus(PublicationStatus.ACTIVE);
-
-		return retVal;
-
+		throw new InternalErrorException("Unable to expand ValueSet");
 	}
 
 	private ValueSet doExpand(ValueSet theSource, int theOffset, int theCount) {

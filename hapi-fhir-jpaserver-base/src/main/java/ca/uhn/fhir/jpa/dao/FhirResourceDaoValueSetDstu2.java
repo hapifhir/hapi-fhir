@@ -154,7 +154,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		}
 		ValueSet source;
 
-		org.hl7.fhir.dstu2.model.ValueSet defaultValueSet = myDefaultProfileValidationSupport.fetchResource(org.hl7.fhir.dstu2.model.ValueSet.class, theUri);
+		ValueSet defaultValueSet = myDefaultProfileValidationSupport.fetchResource(ValueSet.class, theUri);
 		if (defaultValueSet != null) {
 			source = getContext().newJsonParser().parseResource(ValueSet.class, myRiCtx.newJsonParser().encodeResourceToString(defaultValueSet));
 		} else {

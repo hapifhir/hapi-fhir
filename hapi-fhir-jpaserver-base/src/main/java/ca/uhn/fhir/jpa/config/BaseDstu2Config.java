@@ -5,7 +5,7 @@ import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.r4.BaseJpaValidationSupport;
+import ca.uhn.fhir.jpa.dao.r4.JpaPersistedResourceValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
 import ca.uhn.fhir.jpa.term.TermReadSvcDstu2;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -96,7 +96,7 @@ public class BaseDstu2Config extends BaseConfig {
 	@Primary
 	@Bean(name = "myJpaValidationSupportDstu2", autowire = Autowire.BY_NAME)
 	public IContextValidationSupport jpaValidationSupportDstu2() {
-		BaseJpaValidationSupport retVal = new BaseJpaValidationSupport(fhirContextDstu2());
+		JpaPersistedResourceValidationSupport retVal = new JpaPersistedResourceValidationSupport(fhirContextDstu2());
 		return retVal;
 	}
 

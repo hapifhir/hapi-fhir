@@ -213,6 +213,8 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 				throw new IllegalArgumentException("Can not handle version: " + myCtx.getVersion().getVersion());
 		}
 
+		String codeSystemName = null;
+		String codeSystemVersion = null;
 		if (system != null) {
 			switch (system.getStructureFhirVersionEnum()) {
 				case DSTU2_HL7ORG: {
@@ -220,15 +222,24 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 					break;
 				}
 				case DSTU3: {
-					caseSensitive = ((org.hl7.fhir.dstu3.model.CodeSystem) system).getCaseSensitive();
+					org.hl7.fhir.dstu3.model.CodeSystem systemDstu3 = (org.hl7.fhir.dstu3.model.CodeSystem) system;
+					caseSensitive = systemDstu3.getCaseSensitive();
+					codeSystemName = systemDstu3.getName();
+					codeSystemVersion = systemDstu3.getVersion();
 					break;
 				}
 				case R4: {
-					caseSensitive = ((org.hl7.fhir.r4.model.CodeSystem) system).getCaseSensitive();
+					org.hl7.fhir.r4.model.CodeSystem systemR4 = (org.hl7.fhir.r4.model.CodeSystem) system;
+					caseSensitive = systemR4.getCaseSensitive();
+					codeSystemName = systemR4.getName();
+					codeSystemVersion = systemR4.getVersion();
 					break;
 				}
 				case R5: {
-					caseSensitive = ((CodeSystem) system).getCaseSensitive();
+					CodeSystem systemR5 = (CodeSystem) system;
+					caseSensitive = systemR5.getCaseSensitive();
+					codeSystemName = systemR5.getName();
+					codeSystemVersion = systemR5.getVersion();
 					break;
 				}
 				case DSTU2:
@@ -249,7 +260,10 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 			if (codeMatches) {
 				if (theOptions.isInferSystem() || nextExpansionCode.getSystem().equals(theCodeSystem)) {
 					return new CodeValidationResult()
-						.setCode(theCode);
+						.setCode(theCode)
+						.setDisplay(nextExpansionCode.getDisplay())
+						.setCodeSystemName(codeSystemName)
+						.setCodeSystemVersion(codeSystemVersion);
 				}
 			}
 		}
@@ -375,7 +389,10 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 
 		org.hl7.fhir.r5.model.ValueSet retVal = new org.hl7.fhir.r5.model.ValueSet();
 		for (VersionIndependentConcept next : concepts) {
-			retVal.getExpansion().addContains().setSystem(next.getSystem()).setCode(next.getCode());
+			org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent contains = retVal.getExpansion().addContains();
+			contains.setSystem(next.getSystem());
+			contains.setCode(next.getCode());
+			contains.setDisplay(next.getDisplay());
 		}
 
 		return retVal;
@@ -413,7 +430,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 						throw new ExpansionCouldNotBeCompletedInternallyException();
 					}
 					for (org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent next : subExpansion.getExpansion().getContains()) {
-						nextCodeList.add(new VersionIndependentConcept(next.getSystem(), next.getCode()));
+						nextCodeList.add(new VersionIndependentConcept(next.getSystem(), next.getCode(), next.getDisplay()));
 					}
 				}
 			}
@@ -432,7 +449,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 		for (CodeSystem.ConceptDefinitionComponent next : theSource) {
 			if (isNotBlank(next.getCode())) {
 				if (theCodeFilter == null || theCodeFilter.contains(next.getCode())) {
-					theTarget.add(new VersionIndependentConcept(theSystem, next.getCode()));
+					theTarget.add(new VersionIndependentConcept(theSystem, next.getCode(), next.getDisplay()));
 				}
 			}
 			addCodes(theSystem, next.getConcept(), theTarget, theCodeFilter);
@@ -445,28 +462,28 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 
 	private static void flattenAndConvertCodesDstu2(List<org.hl7.fhir.dstu2.model.ValueSet.ValueSetExpansionContainsComponent> theInput, List<VersionIndependentConcept> theVersionIndependentConcepts) {
 		for (org.hl7.fhir.dstu2.model.ValueSet.ValueSetExpansionContainsComponent next : theInput) {
-			theVersionIndependentConcepts.add(new VersionIndependentConcept(next.getSystem(), next.getCode()));
+			theVersionIndependentConcepts.add(new VersionIndependentConcept(next.getSystem(), next.getCode(), next.getDisplay()));
 			flattenAndConvertCodesDstu2(next.getContains(), theVersionIndependentConcepts);
 		}
 	}
 
 	private static void flattenAndConvertCodesDstu3(List<org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent> theInput, List<VersionIndependentConcept> theVersionIndependentConcepts) {
 		for (org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent next : theInput) {
-			theVersionIndependentConcepts.add(new VersionIndependentConcept(next.getSystem(), next.getCode()));
+			theVersionIndependentConcepts.add(new VersionIndependentConcept(next.getSystem(), next.getCode(), next.getDisplay()));
 			flattenAndConvertCodesDstu3(next.getContains(), theVersionIndependentConcepts);
 		}
 	}
 
 	private static void flattenAndConvertCodesR4(List<org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent> theInput, List<VersionIndependentConcept> theVersionIndependentConcepts) {
 		for (org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent next : theInput) {
-			theVersionIndependentConcepts.add(new VersionIndependentConcept(next.getSystem(), next.getCode()));
+			theVersionIndependentConcepts.add(new VersionIndependentConcept(next.getSystem(), next.getCode(), next.getDisplay()));
 			flattenAndConvertCodesR4(next.getContains(), theVersionIndependentConcepts);
 		}
 	}
 
 	private static void flattenAndConvertCodesR5(List<org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent> theInput, List<VersionIndependentConcept> theVersionIndependentConcepts) {
 		for (org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent next : theInput) {
-			theVersionIndependentConcepts.add(new VersionIndependentConcept(next.getSystem(), next.getCode()));
+			theVersionIndependentConcepts.add(new VersionIndependentConcept(next.getSystem(), next.getCode(), next.getDisplay()));
 			flattenAndConvertCodesR5(next.getContains(), theVersionIndependentConcepts);
 		}
 	}

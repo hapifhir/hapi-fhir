@@ -20,6 +20,7 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -28,18 +29,29 @@ public class VersionIndependentConcept implements Comparable<VersionIndependentC
 
 	private final String mySystem;
 	private final String myCode;
+	private final String myDisplay;
 	private int myHashCode;
 
 	/**
 	 * Constructor
 	 */
 	public VersionIndependentConcept(String theSystem, String theCode) {
+		this(theSystem, theCode, null);
+	}
+
+	public VersionIndependentConcept(String theSystem, String theCode, String theDisplay) {
+		Validate.notBlank(theCode, "theCode must not be blank");
 		mySystem = theSystem;
 		myCode = theCode;
+		myDisplay = theDisplay;
 		myHashCode = new HashCodeBuilder(17, 37)
 			.append(mySystem)
 			.append(myCode)
 			.toHashCode();
+	}
+
+	public String getDisplay() {
+		return myDisplay;
 	}
 
 	public String getSystem() {

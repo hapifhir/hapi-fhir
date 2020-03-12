@@ -1,19 +1,23 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.time.DateUtils;
 import org.fhir.ucum.UcumService;
+import org.hl7.fhir.common.hapi.validation.ProfileKnowledgeWorkerR5;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.conformance.ProfileUtilities;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.formats.IParser;
 import org.hl7.fhir.r5.formats.ParserType;
@@ -42,17 +46,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
-	public static final IVersionTypeConverter IDENTITY_VERSION_TYPE_CONVERTER = new IVersionTypeConverter() {
-		@Override
-		public Resource toCanonical(IBaseResource theNonCanonical) {
-			return (Resource) theNonCanonical;
-		}
-
-		@Override
-		public IBaseResource fromCanonical(Resource theCanonical) {
-			return theCanonical;
-		}
-	};
+	public static final IVersionTypeConverter IDENTITY_VERSION_TYPE_CONVERTER = new VersionTypeConverterR5();
+	private static FhirContext ourR5Context = FhirContext.forR5();
 	private final IContextValidationSupport myValidationSupport;
 	private final IVersionTypeConverter myModelConverter;
 	private volatile List<StructureDefinition> myAllStructures;
@@ -86,11 +81,17 @@ public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 					return null;
 				}
 
-				try {
-					return myModelConverter.toCanonical(fetched);
-				} catch (FHIRException e) {
-					throw new InternalErrorException(e);
+
+				Resource canonical = myModelConverter.toCanonical(fetched);
+
+				if (canonical instanceof StructureDefinition) {
+					if (((StructureDefinition) canonical).getSnapshot().isEmpty()) {
+						fetched = myValidationSupport.generateSnapshot(myValidationSupport, fetched, "", null, "");
+						canonical = myModelConverter.toCanonical(fetched);
+					}
 				}
+
+				return canonical;
 			});
 	}
 
@@ -110,8 +111,19 @@ public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 	}
 
 	@Override
-	public void generateSnapshot(StructureDefinition p) throws FHIRException {
-		// nothing yet
+	public void generateSnapshot(StructureDefinition input) throws FHIRException {
+		if (input.hasSnapshot()) {
+			return;
+		}
+
+		org.hl7.fhir.r5.conformance.ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new ProfileKnowledgeWorkerR5(ourR5Context);
+		ArrayList<ValidationMessage> messages = new ArrayList<>();
+		org.hl7.fhir.r5.model.StructureDefinition base = (org.hl7.fhir.r5.model.StructureDefinition) fetchResource(StructureDefinition.class, input.getBaseDefinition());
+		if (base == null) {
+			throw new PreconditionFailedException("Unknown base definition: " + input.getBaseDefinition());
+		}
+		new org.hl7.fhir.r5.conformance.ProfileUtilities(this, messages, profileKnowledgeProvider).generateSnapshot(base, input, "", null, "");
+
 	}
 
 	@Override
@@ -327,7 +339,13 @@ public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 
 	@Override
 	public StructureDefinition fetchRawProfile(String url) {
-		return fetchResource(StructureDefinition.class, url);
+		StructureDefinition retVal = fetchResource(StructureDefinition.class, url);
+
+		if (retVal != null && retVal.getSnapshot().isEmpty()) {
+			generateSnapshot(retVal);
+		}
+
+		return retVal;
 	}
 
 	@Override
@@ -547,6 +565,18 @@ public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 		@Override
 		public int hashCode() {
 			return myHashCode;
+		}
+	}
+
+	private static class VersionTypeConverterR5 implements IVersionTypeConverter {
+		@Override
+		public Resource toCanonical(IBaseResource theNonCanonical) {
+			return (Resource) theNonCanonical;
+		}
+
+		@Override
+		public IBaseResource fromCanonical(Resource theCanonical) {
+			return theCanonical;
 		}
 	}
 

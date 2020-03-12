@@ -367,16 +367,18 @@ public interface IContextValidationSupport {
 			return myCodeSystemName;
 		}
 
-		public void setCodeSystemName(String theCodeSystemName) {
+		public CodeValidationResult setCodeSystemName(String theCodeSystemName) {
 			myCodeSystemName = theCodeSystemName;
+			return this;
 		}
 
 		public String getCodeSystemVersion() {
 			return myCodeSystemVersion;
 		}
 
-		public void setCodeSystemVersion(String theCodeSystemVersion) {
+		public CodeValidationResult setCodeSystemVersion(String theCodeSystemVersion) {
 			myCodeSystemVersion = theCodeSystemVersion;
+			return this;
 		}
 
 		public String getMessage() {
@@ -420,6 +422,11 @@ public interface IContextValidationSupport {
 				retVal.setCodeSystemVersion(getCodeSystemVersion());
 			}
 			return retVal;
+		}
+
+		public CodeValidationResult setDisplay(String theDisplay) {
+			myDisplay = theDisplay;
+			return this;
 		}
 	}
 

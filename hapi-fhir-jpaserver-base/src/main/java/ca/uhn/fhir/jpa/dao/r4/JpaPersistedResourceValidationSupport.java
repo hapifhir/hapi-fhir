@@ -46,11 +46,15 @@ import javax.transaction.Transactional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-// FIXME: rename this
+/**
+ * This class is a {@link IContextValidationSupport Validation support} module that loads
+ * validation resources (StructureDefinition, ValueSet, CodeSystem, etc.) from the resources
+ * persisted in the JPA server.
+ */
 @Transactional(value = Transactional.TxType.REQUIRED)
-public class BaseJpaValidationSupport implements IContextValidationSupport {
+public class JpaPersistedResourceValidationSupport implements IContextValidationSupport {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseJpaValidationSupport.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaPersistedResourceValidationSupport.class);
 
 	private final FhirContext myFhirContext;
 
@@ -65,7 +69,7 @@ public class BaseJpaValidationSupport implements IContextValidationSupport {
 	/**
 	 * Constructor
 	 */
-	public BaseJpaValidationSupport(FhirContext theFhirContext) {
+	public JpaPersistedResourceValidationSupport(FhirContext theFhirContext) {
 		super();
 		Validate.notNull(theFhirContext);
 		myFhirContext = theFhirContext;
@@ -136,7 +140,7 @@ public class BaseJpaValidationSupport implements IContextValidationSupport {
 		} else if ("Questionnaire".equals(resourceName)) {
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(1);
-			if (localReference) {
+			if (localReference || myFhirContext.getVersion().getVersion().isEquivalentTo(FhirVersionEnum.DSTU2)) {
 				params.add(IAnyResource.SP_RES_ID, new StringParam(id.getIdPart()));
 			} else {
 				params.add(Questionnaire.SP_URL, new UriParam(id.getValue()));

@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.fhir.util.VersionIndependentConcept;
+import org.hl7.fhir.convertors.conv40_50.CodeSystem40_50;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -26,9 +27,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -60,46 +60,12 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IContextValida
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
 
-	private void addAllChildren(String theSystemString, ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
-		if (isNotBlank(theCode.getCode())) {
-			theListToPopulate.add(new VersionIndependentConcept(theSystemString, theCode.getCode()));
-		}
-		for (ConceptDefinitionComponent nextChild : theCode.getConcept()) {
-			addAllChildren(theSystemString, nextChild, theListToPopulate);
-		}
-	}
-
-	private boolean addTreeIfItContainsCode(String theSystemString, ConceptDefinitionComponent theNext, String theCode, List<VersionIndependentConcept> theListToPopulate) {
-		boolean foundCodeInChild = false;
-		for (ConceptDefinitionComponent nextChild : theNext.getConcept()) {
-			foundCodeInChild |= addTreeIfItContainsCode(theSystemString, nextChild, theCode, theListToPopulate);
-		}
-
-		if (theCode.equals(theNext.getCode()) || foundCodeInChild) {
-			theListToPopulate.add(new VersionIndependentConcept(theSystemString, theNext.getCode()));
-			return true;
-		}
-
-		return false;
-	}
-
 	@Override
 	@Transactional(dontRollbackOn = {ExpansionTooCostlyException.class})
 	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, IBaseResource theValueSetToExpand) {
 		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
 		org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetToExpand), null);
 		return new ValueSetExpansionOutcome(org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(expandedR4));
-	}
-
-	@Override
-	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
-		// TODO: DM 2019-09-10 - This is problematic because an incorrect URL that matches ValueSet.id will not be found in the terminology tables but will yield a ValueSet here. Depending on the ValueSet, the expansion may time-out.
-		ValueSet valueSetR5 = (ValueSet) fetchValueSet(theValueSet);
-		if (valueSetR5 == null) {
-			super.throwInvalidValueSet(theValueSet);
-		}
-
-		return expandValueSetAndReturnVersionIndependentConcepts(org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetR5), null);
 	}
 
 	@Override
@@ -122,62 +88,12 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IContextValida
 		super.expandValueSet(valueSetToExpand, theValueSetCodeAccumulator);
 	}
 
-
-	private void findCodesAbove(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
-		List<ConceptDefinitionComponent> conceptList = theSystem.getConcept();
-		for (ConceptDefinitionComponent next : conceptList) {
-			addTreeIfItContainsCode(theSystemString, next, theCode, theListToPopulate);
-		}
-	}
-
-	@Override
-	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = (CodeSystem) fetchCodeSystem(theSystem);
-		if (system != null) {
-			findCodesAbove(system, theSystem, theCode, retVal);
-		}
-		return retVal;
-	}
-
-	private void findCodesBelow(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
-		List<ConceptDefinitionComponent> conceptList = theSystem.getConcept();
-		findCodesBelow(theSystemString, theCode, theListToPopulate, conceptList);
-	}
-
-	private void findCodesBelow(String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate, List<ConceptDefinitionComponent> conceptList) {
-		for (ConceptDefinitionComponent next : conceptList) {
-			if (theCode.equals(next.getCode())) {
-				addAllChildren(theSystemString, next, theListToPopulate);
-			} else {
-				findCodesBelow(theSystemString, theCode, theListToPopulate, next.getConcept());
-			}
-		}
-	}
-
-	@Override
-	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = (CodeSystem) fetchCodeSystem(theSystem);
-		if (system != null) {
-			findCodesBelow(system, theSystem, theCode, retVal);
-		}
-		return retVal;
-	}
-
-	@Override
-	public org.hl7.fhir.r4.model.CodeSystem getCodeSystemFromContext(String theSystem) {
-		CodeSystem codeSystemR5 = (CodeSystem) fetchCodeSystem(theSystem);
-		return org.hl7.fhir.convertors.conv40_50.CodeSystem40_50.convertCodeSystem(codeSystemR5);
-	}
-
 	@Override
 	protected org.hl7.fhir.r4.model.ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
 		ValueSet valueSetR5 = myDaoRegistry.getResourceDao("ValueSet").toResource(ValueSet.class, theResourceTable, null, false);
 		return org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetR5);
 	}
 
-	@CoverageIgnore
 	@Override
 	public IContextValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		Optional<VersionIndependentConcept> codeOpt = Optional.empty();
@@ -245,6 +161,11 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IContextValida
 	@Override
 	protected org.hl7.fhir.r4.model.ValueSet toCanonicalValueSet(IBaseResource theValueSet) throws org.hl7.fhir.exceptions.FHIRException {
 		return org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet((ValueSet) theValueSet);
+	}
+
+	@Override
+	protected org.hl7.fhir.r4.model.CodeSystem toCanonicalCodeSystem(IBaseResource theCodeSystem) {
+		return CodeSystem40_50.convertCodeSystem((CodeSystem) theCodeSystem);
 	}
 
 	@Override

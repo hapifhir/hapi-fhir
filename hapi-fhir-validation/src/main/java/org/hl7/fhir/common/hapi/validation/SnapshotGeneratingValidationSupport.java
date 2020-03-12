@@ -10,8 +10,6 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.ElementDefinition;
-import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 import java.util.ArrayList;
@@ -70,7 +68,7 @@ public class SnapshotGeneratingValidationSupport implements IContextValidationSu
 			case R5: {
 				org.hl7.fhir.r5.model.StructureDefinition input = (org.hl7.fhir.r5.model.StructureDefinition) theInput;
 				org.hl7.fhir.r5.context.IWorkerContext context = new org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext(myCtx, theValidationSupport);
-				org.hl7.fhir.r5.conformance.ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new MyProfileKnowledgeWorkerR5();
+				org.hl7.fhir.r5.conformance.ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new ProfileKnowledgeWorkerR5(myCtx);
 				ArrayList<ValidationMessage> messages = new ArrayList<>();
 				org.hl7.fhir.r5.model.StructureDefinition base = (org.hl7.fhir.r5.model.StructureDefinition) theValidationSupport.fetchStructureDefinition(input.getBaseDefinition());
 				if (base == null) {
@@ -135,58 +133,6 @@ public class SnapshotGeneratingValidationSupport implements IContextValidationSu
 
 		@Override
 		public String getLinkForProfile(org.hl7.fhir.r4.model.StructureDefinition profile, String url) {
-			return null;
-		}
-
-		@Override
-		public boolean prependLinks() {
-			return false;
-		}
-
-		@Override
-		public String getLinkForUrl(String corePath, String url) {
-			throw new UnsupportedOperationException();
-		}
-
-	}
-
-	private class MyProfileKnowledgeWorkerR5 implements org.hl7.fhir.r5.conformance.ProfileUtilities.ProfileKnowledgeProvider {
-		@Override
-		public boolean isDatatype(String typeSimple) {
-			BaseRuntimeElementDefinition<?> def = myCtx.getElementDefinition(typeSimple);
-			Validate.notNull(typeSimple);
-			return (def instanceof RuntimePrimitiveDatatypeDefinition) || (def instanceof RuntimeCompositeDatatypeDefinition);
-		}
-
-		@Override
-		public boolean isResource(String typeSimple) {
-			BaseRuntimeElementDefinition<?> def = myCtx.getElementDefinition(typeSimple);
-			Validate.notNull(typeSimple);
-			return def instanceof RuntimeResourceDefinition;
-		}
-
-		@Override
-		public boolean hasLinkFor(String typeSimple) {
-			return false;
-		}
-
-		@Override
-		public String getLinkFor(String corePath, String typeSimple) {
-			return null;
-		}
-
-		@Override
-		public BindingResolution resolveBinding(StructureDefinition theStructureDefinition, ElementDefinition.ElementDefinitionBindingComponent theElementDefinitionBindingComponent, String theS) throws FHIRException {
-			return null;
-		}
-
-		@Override
-		public BindingResolution resolveBinding(StructureDefinition theStructureDefinition, String theS, String theS1) throws FHIRException {
-			return null;
-		}
-
-		@Override
-		public String getLinkForProfile(StructureDefinition theStructureDefinition, String theS) {
 			return null;
 		}
 

@@ -144,7 +144,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 		Validate.notNull(csv);
 
-		CodeSystem codeSystem = myTerminologySvc.getCodeSystemFromContext(theSystem);
+		CodeSystem codeSystem = myTerminologySvc.fetchCanonicalCodeSystemFromCompleteContext(theSystem);
 		if (codeSystem.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 			throw new InvalidRequestException("CodeSystem with url[" + Constants.codeSystemWithDefaultDescription(theSystem) + "] can not apply a delta - wrong content mode: " + codeSystem.getContent());
 		}

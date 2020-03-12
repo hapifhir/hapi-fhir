@@ -46,6 +46,7 @@ import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.StopWatch;
@@ -317,6 +318,18 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
+	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
+		// TODO: DM 2019-09-10 - This is problematic because an incorrect URL that matches ValueSet.id will not be found in the terminology tables but will yield a ValueSet here. Depending on the ValueSet, the expansion may time-out.
+
+		ValueSet valueSet = fetchCanonicalValueSetFromCompleteContext(theValueSet);
+		if (valueSet == null) {
+			throwInvalidValueSet(theValueSet);
+		}
+
+		return expandValueSetAndReturnVersionIndependentConcepts(valueSet, null);
+	}
+
+	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public ValueSet expandValueSet(ValueSet theValueSetToExpand, int theOffset, int theCount) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSetToExpand, "ValueSet to expand can not be null");
@@ -532,8 +545,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
 		for (org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent nextContains : expandedR4.getContains()) {
-			retVal.add(
-				new VersionIndependentConcept(nextContains.getSystem(), nextContains.getCode()));
+			retVal.add(new VersionIndependentConcept(nextContains.getSystem(), nextContains.getCode()));
 		}
 		return retVal;
 	}
@@ -678,7 +690,14 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			} else {
 				// No CodeSystem matching the URL found in the database.
 
-				CodeSystem codeSystemFromContext = getCodeSystemFromContext(system);
+				CodeSystem codeSystemFromContext = fetchCanonicalCodeSystemFromCompleteContext(system);
+				if (codeSystemFromContext == null) {
+					String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionRefersToUnknownCs", system);
+					throw new PreconditionFailedException(msg);
+//					ourLog.warn(msg);
+//					theValueSetCodeAccumulator.addMessage(msg);
+//					return false;
+				}
 
 				if (!theIncludeOrExclude.getConcept().isEmpty()) {
 					for (ValueSet.ConceptReferenceComponent next : theIncludeOrExclude.getConcept()) {
@@ -692,24 +711,18 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 										String display = code.getDisplay();
 										addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, nextCode, display);
 									}
-								} else {
-
-									// This code just plain doesn't exist in any known codesystem, but the valueset
-									// explicitly includes it. We'll trust the valueset in this case. This happens for
-									// codesytems such a USPS. There is probably a better way to handle this...
-									addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, nextCode, null);
+//								} else {
+//
+//									// This code just plain doesn't exist in any known codesystem, but the valueset
+//									// explicitly includes it. We'll trust the valueset in this case. This happens for
+//									// codesytems such a USPS. There is probably a better way to handle this...
+//									addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, nextCode, null);
+//
 								}
 							}
 						}
 					}
 				} else {
-					if (codeSystemFromContext == null) {
-						String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionRefersToUnknownCs", system);
-						ourLog.warn(msg);
-						theValueSetCodeAccumulator.addMessage(msg);
-						return false;
-					}
-
 					List<CodeSystem.ConceptDefinitionComponent> concept = codeSystemFromContext.getConcept();
 					addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, system, concept, theAdd, theWantConceptOrNull);
 				}
@@ -1850,6 +1863,17 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		throw new ResourceNotFoundException("Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSet));
 	}
 
+	@Override
+	public CodeValidationResult validateCodeInValueSet(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+
+		IPrimitiveType<?> urlPrimitive = myContext.newTerser().getSingleValueOrNull(theValueSet, "url", IPrimitiveType.class);
+		String url = urlPrimitive.getValueAsString();
+		if (isNotBlank(url)) {
+			return validateCode(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, url);
+		}
+		return null;
+	}
+
 	Optional<VersionIndependentConcept> validateCodeInValueSet(IContextValidationSupport theValidationSupport, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode) {
 		IBaseResource valueSet = theValidationSupport.fetchValueSet(theValueSetUrl);
 
@@ -1884,15 +1908,103 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
+	public CodeSystem fetchCanonicalCodeSystemFromCompleteContext(String theSystem) {
+		// FIXME: this is kinda inefficient
+		IContextValidationSupport jpaValidationSupport = myApplicationContext.getBean(IContextValidationSupport.class);
+		IBaseResource codeSystem = jpaValidationSupport.fetchCodeSystem(theSystem);
+		if (codeSystem != null) {
+			codeSystem = toCanonicalCodeSystem(codeSystem);
+		}
+		return (CodeSystem) codeSystem;
+	}
+
+	public ValueSet fetchCanonicalValueSetFromCompleteContext(String theSystem) {
+		// FIXME: this is kinda inefficient
+		IContextValidationSupport jpaValidationSupport = myApplicationContext.getBean(IContextValidationSupport.class);
+		IBaseResource valueSet = jpaValidationSupport.fetchValueSet(theSystem);
+		if (valueSet != null) {
+			valueSet = toCanonicalValueSet(valueSet);
+		}
+		return (ValueSet) valueSet;
+	}
+
+	protected abstract CodeSystem toCanonicalCodeSystem(IBaseResource theCodeSystem);
+
+	@Override
 	public IBaseResource fetchValueSet(String theValueSetUrl) {
 		// FIXME: this is kinda inefficient
-		IContextValidationSupport jpaValidationSupport = myApplicationContext.getBean( "myJpaValidationSupport", IContextValidationSupport.class);
+		IContextValidationSupport jpaValidationSupport = myApplicationContext.getBean("myJpaValidationSupport", IContextValidationSupport.class);
 		return jpaValidationSupport.fetchValueSet(theValueSetUrl);
 	}
 
 	@Override
 	public FhirContext getFhirContext() {
 		return myContext;
+	}
+
+	private void findCodesAbove(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
+		List<CodeSystem.ConceptDefinitionComponent> conceptList = theSystem.getConcept();
+		for (CodeSystem.ConceptDefinitionComponent next : conceptList) {
+			addTreeIfItContainsCode(theSystemString, next, theCode, theListToPopulate);
+		}
+	}
+
+	@Override
+	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
+		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
+		CodeSystem system = (CodeSystem) fetchCanonicalCodeSystemFromCompleteContext(theSystem);
+		if (system != null) {
+			findCodesAbove(system, theSystem, theCode, retVal);
+		}
+		return retVal;
+	}
+
+	private void findCodesBelow(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
+		List<CodeSystem.ConceptDefinitionComponent> conceptList = theSystem.getConcept();
+		findCodesBelow(theSystemString, theCode, theListToPopulate, conceptList);
+	}
+
+	private void findCodesBelow(String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate, List<CodeSystem.ConceptDefinitionComponent> conceptList) {
+		for (CodeSystem.ConceptDefinitionComponent next : conceptList) {
+			if (theCode.equals(next.getCode())) {
+				addAllChildren(theSystemString, next, theListToPopulate);
+			} else {
+				findCodesBelow(theSystemString, theCode, theListToPopulate, next.getConcept());
+			}
+		}
+	}
+
+	@Override
+	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
+		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
+		CodeSystem system = (CodeSystem) fetchCanonicalCodeSystemFromCompleteContext(theSystem);
+		if (system != null) {
+			findCodesBelow(system, theSystem, theCode, retVal);
+		}
+		return retVal;
+	}
+
+	private void addAllChildren(String theSystemString, CodeSystem.ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
+		if (isNotBlank(theCode.getCode())) {
+			theListToPopulate.add(new VersionIndependentConcept(theSystemString, theCode.getCode()));
+		}
+		for (CodeSystem.ConceptDefinitionComponent nextChild : theCode.getConcept()) {
+			addAllChildren(theSystemString, nextChild, theListToPopulate);
+		}
+	}
+
+	private boolean addTreeIfItContainsCode(String theSystemString, CodeSystem.ConceptDefinitionComponent theNext, String theCode, List<VersionIndependentConcept> theListToPopulate) {
+		boolean foundCodeInChild = false;
+		for (CodeSystem.ConceptDefinitionComponent nextChild : theNext.getConcept()) {
+			foundCodeInChild |= addTreeIfItContainsCode(theSystemString, nextChild, theCode, theListToPopulate);
+		}
+
+		if (theCode.equals(theNext.getCode()) || foundCodeInChild) {
+			theListToPopulate.add(new VersionIndependentConcept(theSystemString, theNext.getCode()));
+			return true;
+		}
+
+		return false;
 	}
 
 	public static class Job implements HapiJob {

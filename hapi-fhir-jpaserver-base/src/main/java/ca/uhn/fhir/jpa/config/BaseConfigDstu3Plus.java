@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
-import ca.uhn.fhir.jpa.dao.r4.BaseJpaValidationSupport;
+import ca.uhn.fhir.jpa.dao.r4.JpaPersistedResourceValidationSupport;
 import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
@@ -70,7 +70,7 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 
 	@Bean(name = "myJpaValidationSupport")
 	public IContextValidationSupport jpaValidationSupport() {
-		return new BaseJpaValidationSupport(fhirContext());
+		return new JpaPersistedResourceValidationSupport(fhirContext());
 	}
 
 	// FIXME: rename from dstu3

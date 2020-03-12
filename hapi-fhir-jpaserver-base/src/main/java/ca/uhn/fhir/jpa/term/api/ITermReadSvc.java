@@ -89,7 +89,7 @@ public interface ITermReadSvc extends IContextValidationSupport {
 
 	List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode);
 
-	CodeSystem getCodeSystemFromContext(String theSystem);
+	CodeSystem fetchCanonicalCodeSystemFromCompleteContext(String theSystem);
 
 	void deleteConceptMapAndChildren(ResourceTable theResourceTable);
 

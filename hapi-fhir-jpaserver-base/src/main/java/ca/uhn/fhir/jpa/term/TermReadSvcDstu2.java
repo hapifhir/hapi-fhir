@@ -65,17 +65,17 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	}
 
 	@Override
-	public CodeSystem getCodeSystemFromContext(String theSystem) {
-		return null;
-	}
-
-	@Override
 	protected ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	protected ValueSet toCanonicalValueSet(IBaseResource theValueSet) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	protected CodeSystem toCanonicalCodeSystem(IBaseResource theCodeSystem) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -91,11 +91,6 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 
 	@Override
 	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
 		throw new UnsupportedOperationException();
 	}
 

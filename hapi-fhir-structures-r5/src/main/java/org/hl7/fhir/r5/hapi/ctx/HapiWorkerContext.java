@@ -238,7 +238,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public void generateSnapshot(StructureDefinition p) throws FHIRException {
-
+		myValidationSupport.generateSnapshot(myValidationSupport, p, "", "", "");
 	}
 
 	@Override
