@@ -28,6 +28,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class QuestionnaireValidatorDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(QuestionnaireValidatorDstu3Test.class);
@@ -39,6 +40,7 @@ public class QuestionnaireValidatorDstu3Test {
 	@Before
 	public void before() {
 		IContextValidationSupport myValSupport = mock(IContextValidationSupport.class);
+		when(myValSupport.getFhirContext()).thenReturn(ourCtx);
 
 		myVal = ourCtx.newValidator();
 		myVal.setValidateAgainstStandardSchema(false);

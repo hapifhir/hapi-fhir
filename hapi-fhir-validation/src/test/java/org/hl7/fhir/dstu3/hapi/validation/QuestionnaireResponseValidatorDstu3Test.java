@@ -66,6 +66,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	@Before
 	public void before() {
 		myValSupport = mock(IContextValidationSupport.class);
+		when(myValSupport.getFhirContext()).thenReturn(ourCtx);
 
 		myVal = ourCtx.newValidator();
 		myVal.setValidateAgainstStandardSchema(false);

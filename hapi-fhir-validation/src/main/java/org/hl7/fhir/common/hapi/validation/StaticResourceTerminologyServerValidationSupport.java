@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -83,8 +82,9 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 	private org.hl7.fhir.r5.model.ValueSet expandValueSetToCanonical(IContextValidationSupport theRootValidationSupport, IBaseResource theValueSetToExpand) {
 		org.hl7.fhir.r5.model.ValueSet expansionR5;
 		switch (myCtx.getVersion().getVersion()) {
+			case DSTU2:
 			case DSTU2_HL7ORG: {
-				expansionR5 = expandValueSetDstu2(theRootValidationSupport, (ValueSet) theValueSetToExpand);
+				expansionR5 = expandValueSetDstu2Hl7Org(theRootValidationSupport, (ValueSet) theValueSetToExpand);
 				break;
 			}
 			case DSTU3: {
@@ -99,7 +99,6 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 				expansionR5 = expandValueSetR5(theRootValidationSupport, (org.hl7.fhir.r5.model.ValueSet) theValueSetToExpand);
 				break;
 			}
-			case DSTU2:
 			case DSTU2_1:
 			default:
 				throw new IllegalArgumentException("Can not handle version: " + myCtx.getVersion().getVersion());
@@ -113,7 +112,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 
 	@Override
 	public CodeValidationResult validateCodeInValueSet(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-		org.hl7.fhir.r5.model.ValueSet expansion = expandValueSetToCanonical(theRootValidationSupport, theValueSet);
+	org.hl7.fhir.r5.model.ValueSet expansion = expandValueSetToCanonical(theRootValidationSupport, theValueSet);
 		if (expansion == null) {
 			return null;
 		}
@@ -282,11 +281,11 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu2(IContextValidationSupport theRootValidationSupport, ValueSet theInput) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu2Hl7Org(IContextValidationSupport theRootValidationSupport, ValueSet theInput) {
 		Function<String, CodeSystem> codeSystemLoader = t -> {
 			org.hl7.fhir.dstu2.model.ValueSet codeSystem = (org.hl7.fhir.dstu2.model.ValueSet) theRootValidationSupport.fetchCodeSystem(t);
 			CodeSystem retVal = new CodeSystem();
-			addCodes(codeSystem.getCodeSystem().getConcept(), retVal.getConcept());
+			addCodesDstu2Hl7Org(codeSystem.getCodeSystem().getConcept(), retVal.getConcept());
 			return retVal;
 		};
 		Function<String, org.hl7.fhir.r5.model.ValueSet> valueSetLoader = t -> {
@@ -328,11 +327,11 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 	}
 
 
-	private void addCodes(List<ValueSet.ConceptDefinitionComponent> theSourceList, List<CodeSystem.ConceptDefinitionComponent> theTargetList) {
+	private void addCodesDstu2Hl7Org(List<ValueSet.ConceptDefinitionComponent> theSourceList, List<CodeSystem.ConceptDefinitionComponent> theTargetList) {
 		for (ValueSet.ConceptDefinitionComponent nextSource : theSourceList) {
 			CodeSystem.ConceptDefinitionComponent targetConcept = new CodeSystem.ConceptDefinitionComponent().setCode(nextSource.getCode()).setDisplay(nextSource.getDisplay());
 			theTargetList.add(targetConcept);
-			addCodes(nextSource.getConcept(), targetConcept.getConcept());
+			addCodesDstu2Hl7Org(nextSource.getConcept(), targetConcept.getConcept());
 		}
 	}
 

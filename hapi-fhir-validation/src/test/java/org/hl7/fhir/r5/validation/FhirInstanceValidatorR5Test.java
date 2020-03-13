@@ -260,7 +260,7 @@ public class FhirInstanceValidatorR5Test {
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("@value cannot be empty", all.get(0).getMessage());
+		assertEquals("ele-1: All FHIR elements must have a @value or children [hasValue() or (children().count() > id.count())]", all.get(0).getMessage());
 	}
 
 	/**
@@ -619,8 +619,8 @@ public class FhirInstanceValidatorR5Test {
 		List<SingleValidationMessage> messages = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(output.toString(), 3, messages.size());
 		assertThat(messages.get(0).getMessage(), containsString("Element must have some content"));
-		assertThat(messages.get(1).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
-		assertThat(messages.get(2).getMessage(), containsString("All FHIR elements must have a @value or children [hasValue() or (children().count() > id.count())]"));
+		assertThat(messages.get(1).getMessage(), containsString("ele-1: All FHIR elements must have a @value or children [hasValue() or (children().count() > id.count())]"));
+		assertThat(messages.get(2).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
 	}
 
 	@Test

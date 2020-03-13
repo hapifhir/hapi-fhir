@@ -121,6 +121,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myVal.setValidateAgainstStandardSchematron(false);
 
 		IContextValidationSupport mockSupport = mock(IContextValidationSupport.class);
+		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
+
 		ValidationSupportChain chain = new ValidationSupportChain(myDefaultValidationSupport, mockSupport, new StaticResourceTerminologyServerValidationSupport(ourCtx));
 		myValidationSupport = new CachingValidationSupport(chain);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
@@ -290,7 +292,6 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	/**
 	 * See #1740
 	 */
-	@Ignore
 	@Test
 	public void testValidateScalarInRepeatableField() {
 		String operationDefinition = "{\n" +
@@ -311,7 +312,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult result = val.validateWithResult(operationDefinition);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("Primitive types must have a value that is not empty", all.get(0).getMessage());
+		assertEquals("This property must be an Array, not a a primitive property", all.get(0).getMessage());
 	}
 
 	/**
@@ -1073,7 +1074,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
 		assertEquals(1, errors.size());
-		assertEquals("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked", errors.get(0).getMessage());
+		assertEquals("Profile reference \"http://foo/structuredefinition/myprofile\" could not be resolved, so has not been checked", errors.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
 	}
 

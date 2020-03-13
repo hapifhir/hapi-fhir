@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class QuestionnaireValidatorR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(QuestionnaireValidatorR4Test.class);
@@ -40,6 +41,7 @@ public class QuestionnaireValidatorR4Test {
 	@Before
 	public void before() {
 		IContextValidationSupport myValSupport = mock(IContextValidationSupport.class);
+		when(myValSupport.getFhirContext()).thenReturn(ourCtx);
 
 		myVal = ourCtx.newValidator();
 		myVal.setValidateAgainstStandardSchema(false);

@@ -58,7 +58,8 @@ public class QuestionnaireResponseValidatorR5Test {
 	@Before
 	public void before() {
 		myValSupport = mock(IContextValidationSupport.class);
-		// new DefaultProfileValidationSupport();
+		when(myValSupport.getFhirContext()).thenReturn(ourCtx);
+
 		myWorkerCtx = new HapiWorkerContext(ourCtx, myValSupport);
 
 		myVal = ourCtx.newValidator();

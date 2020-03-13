@@ -261,7 +261,17 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			VersionSpecificWorkerContextWrapper.IVersionTypeConverter converter = new VersionSpecificWorkerContextWrapper.IVersionTypeConverter() {
 				@Override
 				public Resource toCanonical(IBaseResource theNonCanonical) {
-					return VersionConvertor_10_50.convertResource((org.hl7.fhir.dstu2.model.Resource)theNonCanonical);
+					Resource retVal = VersionConvertor_10_50.convertResource((org.hl7.fhir.dstu2.model.Resource) theNonCanonical);
+					if (theNonCanonical instanceof org.hl7.fhir.dstu2.model.ValueSet) {
+						org.hl7.fhir.dstu2.model.ValueSet valueSet = (ValueSet) theNonCanonical;
+						if (valueSet.hasCodeSystem() && valueSet.getCodeSystem().hasSystem()) {
+							if (!valueSet.hasCompose()) {
+								org.hl7.fhir.r5.model.ValueSet valueSetR5 = (org.hl7.fhir.r5.model.ValueSet) retVal;
+								valueSetR5.getCompose().addInclude().setSystem(valueSet.getCodeSystem().getSystem());
+							}
+						}
+					}
+					return retVal;
 				}
 
 				@Override

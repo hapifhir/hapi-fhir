@@ -185,8 +185,9 @@ public class DefaultProfileValidationSupport implements IContextValidationSuppor
 	}
 
 	@Override
-	public IBaseResource fetchValueSet(String uri) {
-		return fetchCodeSystemOrValueSet(uri, false);
+	public IBaseResource fetchValueSet(String theUrl) {
+		IBaseResource retVal = fetchCodeSystemOrValueSet(theUrl, false);
+		return retVal;
 	}
 
 	public void flush() {

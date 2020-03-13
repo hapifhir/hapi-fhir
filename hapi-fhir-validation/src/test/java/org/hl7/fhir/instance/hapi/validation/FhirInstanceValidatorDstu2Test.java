@@ -1,6 +1,7 @@
 package org.hl7.fhir.instance.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -15,6 +16,8 @@ import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.StaticResourceTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu2.model.DateType;
 import org.hl7.fhir.dstu2.model.Observation;
 import org.hl7.fhir.dstu2.model.Observation.ObservationStatus;
@@ -22,6 +25,7 @@ import org.hl7.fhir.dstu2.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.dstu2.model.StringType;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -34,8 +38,15 @@ public class FhirInstanceValidatorDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu2Test.class);
 	private static FhirContext ourCtxDstu2 = FhirContext.forDstu2();
-	private static FhirInstanceValidator ourValidator = new FhirInstanceValidator(new DefaultProfileValidationSupport(ourCtxDstu2));
+	private static FhirInstanceValidator ourValidator;
 	private static FhirContext ourCtxHl7OrgDstu2 = FhirContext.forDstu2Hl7Org();
+
+	@BeforeClass
+	public static void beforeClass() {
+		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(ourCtxDstu2);
+		IContextValidationSupport validationSupport = new ValidationSupportChain(defaultProfileValidationSupport, new StaticResourceTerminologyServerValidationSupport(ourCtxDstu2));
+		ourValidator = new FhirInstanceValidator(validationSupport);
+	}
 
 	/**
 	 * See #872

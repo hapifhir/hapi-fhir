@@ -42,9 +42,10 @@ public class CustomResourceGenerationTest extends BaseTest {
 		String outcome = myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(outcome);
 
-		assertEquals(2, result.getMessages().size());
+		assertEquals(3, result.getMessages().size());
 		assertEquals("Error parsing JSON: the primitive value must be a boolean", result.getMessages().get(0).getMessage());
-		assertEquals("Unrecognised property '@id1'", result.getMessages().get(1).getMessage());
+		assertEquals("This property must be an Array, not a a primitive property", result.getMessages().get(1).getMessage());
+		assertEquals("Unrecognised property '@id1'", result.getMessages().get(2).getMessage());
 
 	}
 
