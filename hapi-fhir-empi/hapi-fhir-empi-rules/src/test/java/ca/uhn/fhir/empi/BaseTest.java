@@ -4,13 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.rules.EmpiMatchFieldJson;
 import ca.uhn.fhir.empi.rules.EmpiRulesJson;
 import ca.uhn.fhir.empi.rules.metric.DistanceMetricEnum;
-import ca.uhn.fhir.empi.rules.metric.EmpiResourceFieldComparator;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 
 public abstract class BaseTest {
 	protected static final FhirContext ourFhirContext = FhirContext.forR4();
-	public static final double NAME_SIMILARITY = 0.8165;
+	public static final double EXPECTED_WEIGHT = 0.83;
+	public static final double NAME_THRESHOLD = 0.8;
 	public static final double NAME_DELTA = 0.0001;
 
 	protected Patient myPatient1;
@@ -20,9 +20,10 @@ public abstract class BaseTest {
 
 	@Before
 	public void before() {
-		myGivenNameMatchField = new EmpiMatchFieldJson("Patient", "name.given", DistanceMetricEnum.COSINE);
+		myGivenNameMatchField = new EmpiMatchFieldJson("Patient", "name.given", DistanceMetricEnum.COSINE, NAME_THRESHOLD);
 		myEmpiRules = new EmpiRulesJson();
 		myEmpiRules.addMatchField(myGivenNameMatchField);
+		myEmpiRules.putWeight(1L, EXPECTED_WEIGHT);
 		initializePatients();
 	}
 

@@ -4,12 +4,10 @@ import ca.uhn.fhir.empi.BaseTest;
 import ca.uhn.fhir.empi.rules.EmpiMatchFieldJson;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.fail;
+import static junit.framework.TestCase.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 
@@ -27,13 +25,13 @@ public class EmpiResourceFieldComparatorTest extends BaseTest {
 		Encounter encounter = new Encounter();
 		encounter.setId("Encounter/1");
 		try {
-			myComparator.compare(encounter, myPatient2);
+			myComparator.match(encounter, myPatient2);
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("Expecting resource type Patient got resource type Encounter", e.getMessage());
 		}
 		try {
-			myComparator.compare(myPatient1, encounter);
+			myComparator.match(myPatient1, encounter);
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("Expecting resource type Patient got resource type Encounter", e.getMessage());
@@ -43,9 +41,9 @@ public class EmpiResourceFieldComparatorTest extends BaseTest {
 	@Test
 	public void testBadPath() {
 		try {
-			EmpiMatchFieldJson matchField = new EmpiMatchFieldJson("Patient", "foo", DistanceMetricEnum.COSINE);
+			EmpiMatchFieldJson matchField = new EmpiMatchFieldJson("Patient", "foo", DistanceMetricEnum.COSINE, NAME_THRESHOLD);
 			EmpiResourceFieldComparator comparator = new EmpiResourceFieldComparator(ourFhirContext, matchField);
-			comparator.compare(myPatient1, myPatient2);
+			comparator.match(myPatient1, myPatient2);
 			fail();
 		} catch (DataFormatException e) {
 			assertThat( e.getMessage(), startsWith("Unknown child name 'foo' in element Patient"));
@@ -53,7 +51,7 @@ public class EmpiResourceFieldComparatorTest extends BaseTest {
 	}
 
 	@Test
-	public void testCompare() {
-		assertEquals(NAME_SIMILARITY, myComparator.compare(myPatient1, myPatient2), NAME_DELTA);
+	public void testMatch() {
+		assertTrue(myComparator.match(myPatient1, myPatient2));
 	}
 }

@@ -4,7 +4,7 @@ import ca.uhn.fhir.empi.BaseTest;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class EmpiResourceComparatorTest extends BaseTest {
 	private EmpiResourceComparator myEmpiResourceComparator;
@@ -17,7 +17,7 @@ public class EmpiResourceComparatorTest extends BaseTest {
 	@Test
 	public void testCompare() {
 		double result = myEmpiResourceComparator.compare(myPatient1, myPatient2);
-		assertEquals(NAME_SIMILARITY, result, NAME_DELTA);
+		assertEquals(EXPECTED_WEIGHT, result, NAME_DELTA);
 	}
 
 }

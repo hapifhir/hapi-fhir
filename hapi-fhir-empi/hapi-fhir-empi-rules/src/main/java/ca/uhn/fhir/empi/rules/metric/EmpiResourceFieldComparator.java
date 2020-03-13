@@ -1,9 +1,8 @@
 package ca.uhn.fhir.empi.rules.metric;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.empi.IEmpiComparator;
 import ca.uhn.fhir.empi.rules.EmpiMatchFieldJson;
+import ca.uhn.fhir.empi.rules.IEmpiMatcher;
 import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -11,7 +10,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
 
-public class EmpiResourceFieldComparator implements IEmpiComparator<IBaseResource> {
+public class EmpiResourceFieldComparator implements IEmpiMatcher<IBaseResource> {
 	private final FhirContext myFhirContext;
 	private final EmpiMatchFieldJson myEmpiMatchFieldJson;
 	private final String myResourceType;
@@ -24,27 +23,29 @@ public class EmpiResourceFieldComparator implements IEmpiComparator<IBaseResourc
 		myResourcePath = theEmpiMatchFieldJson.getResourcePath();
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
-	public double compare(IBaseResource theLeftResource, IBaseResource theRightResource) {
+	public boolean match(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		validate(theLeftResource);
 		validate(theRightResource);
 
 		FhirTerser terser = myFhirContext.newTerser();
 		List<IPrimitiveType> leftValues = terser.getValues(theLeftResource, myResourcePath, IPrimitiveType.class);
 		List<IPrimitiveType> rightValues = terser.getValues(theRightResource, myResourcePath, IPrimitiveType.class);
-		return compare(leftValues, rightValues);
+		return match(leftValues, rightValues);
 	}
 
-	private double compare(List<IPrimitiveType> theLeftValues, List<IPrimitiveType> theRightValues) {
-		double max = 0.0;
+	@SuppressWarnings("rawtypes")
+	private boolean match(List<IPrimitiveType> theLeftValues, List<IPrimitiveType> theRightValues) {
+	boolean retval = false;
 		for (IPrimitiveType leftValue : theLeftValues) {
 			String leftString = leftValue.getValueAsString();
 			for (IPrimitiveType rightValue : theRightValues) {
 				String rightString = rightValue.getValueAsString();
-				max = Math.max(max, myEmpiMatchFieldJson.compare(leftString, rightString));
+				retval |= myEmpiMatchFieldJson.match(leftString, rightString);
 			}
 		}
-		return max;
+		return retval;
 	}
 
 	private void validate(IBaseResource theResource) {

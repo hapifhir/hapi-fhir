@@ -2,12 +2,10 @@ package ca.uhn.fhir.empi.rules;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class EmpiRulesJson implements IModelJson, Iterable<EmpiMatchFieldJson> {
@@ -15,6 +13,8 @@ public class EmpiRulesJson implements IModelJson, Iterable<EmpiMatchFieldJson> {
 	String myTest = "test";
 	@JsonProperty("matchFields")
 	List<EmpiMatchFieldJson> myMatchFieldJsonList = new ArrayList<>();
+	@JsonProperty("vectorWeights")
+	Map<Long, Double> myVectorWeights = new HashMap<>();
 
 	public void addMatchField(EmpiMatchFieldJson theMatchRuleName) {
 		myMatchFieldJsonList.add(theMatchRuleName);
@@ -42,5 +42,14 @@ public class EmpiRulesJson implements IModelJson, Iterable<EmpiMatchFieldJson> {
 	@Override
 	public Spliterator<EmpiMatchFieldJson> spliterator() {
 		return myMatchFieldJsonList.spliterator();
+	}
+
+	public double getWeight(Long theMatchVector) {
+		Double result = myVectorWeights.get(theMatchVector);
+		return MoreObjects.firstNonNull(result, 0.0);
+	}
+
+	public void putWeight(Long theMatchVector, double theWeight) {
+		myVectorWeights.put(theMatchVector, theWeight);
 	}
 }

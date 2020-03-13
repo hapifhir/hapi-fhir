@@ -21,10 +21,19 @@ public class EmpiResourceComparator implements IEmpiComparator<IBaseResource> {
 
 	@Override
 	public double compare(IBaseResource theLeftResource, IBaseResource theRightResource) {
-		double total = 0.0;
-		for (EmpiResourceFieldComparator fieldComparator : myFieldComparators) {
-			total += fieldComparator.compare(theLeftResource, theRightResource);
+		long matchVector = getMatchVector(theLeftResource, theRightResource);
+		return myEmpiRulesJson.getWeight(matchVector);
+	}
+
+	// FIXME KHS test
+	private long getMatchVector(IBaseResource theLeftResource, IBaseResource theRightResource) {
+		long retval = 0;
+		for (int i = 0; i < myFieldComparators.size(); ++i) {
+			EmpiResourceFieldComparator fieldComparator = myFieldComparators.get(i);
+			if (fieldComparator.match(theLeftResource, theRightResource)) {
+				retval |= (1 << i);
+			}
 		}
-		return total;
+		return retval;
 	}
 }

@@ -1,24 +1,26 @@
 package ca.uhn.fhir.empi.rules;
 
-import ca.uhn.fhir.empi.IEmpiComparator;
 import ca.uhn.fhir.empi.rules.metric.DistanceMetricEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class EmpiMatchFieldJson implements IModelJson, IEmpiComparator<String> {
+public class EmpiMatchFieldJson implements IModelJson, IEmpiMatcher<String> {
 	@JsonProperty("resourceType")
 	String myResourceType;
 	@JsonProperty("resourcePath")
 	String myResourcePath;
 	@JsonProperty("metric")
 	DistanceMetricEnum myMetric;
+	@JsonProperty("matchThreshold")
+	double myMatchThreshold;
 
 	public EmpiMatchFieldJson() {}
 
-	public EmpiMatchFieldJson(String theResourceType, String theResourcePath, DistanceMetricEnum theMetric) {
+	public EmpiMatchFieldJson(String theResourceType, String theResourcePath, DistanceMetricEnum theMetric, double theMatchThreshold) {
 		myResourceType = theResourceType;
 		myResourcePath = theResourcePath;
 		myMetric = theMetric;
+		myMatchThreshold = theMatchThreshold;
 	}
 
 	public DistanceMetricEnum getMetric() {
@@ -48,8 +50,17 @@ public class EmpiMatchFieldJson implements IModelJson, IEmpiComparator<String> {
 		return this;
 	}
 
+	public double getMatchThreshold() {
+		return myMatchThreshold;
+	}
+
+	public EmpiMatchFieldJson setMatchThreshold(double theMatchThreshold) {
+		myMatchThreshold = theMatchThreshold;
+		return this;
+	}
+
 	@Override
-	public double compare(String theLeftString, String theRightString) {
-		return myMetric.compare(theLeftString, theRightString);
+	public boolean match(String theLeftString, String theRightString) {
+		return myMetric.compare(theLeftString, theRightString) >= myMatchThreshold;
 	}
 }

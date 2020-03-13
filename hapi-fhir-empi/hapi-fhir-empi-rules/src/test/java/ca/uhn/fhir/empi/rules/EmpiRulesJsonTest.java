@@ -17,8 +17,8 @@ public class EmpiRulesJsonTest extends BaseTest {
 	@Test
 	public void testSerDeser() throws IOException {
 		EmpiRulesJson rules = new EmpiRulesJson();
-		rules.addMatchField(new EmpiMatchFieldJson("Patient", "name.given", DistanceMetricEnum.COSINE));
-		rules.addMatchField(new EmpiMatchFieldJson("Patient", "name.last", DistanceMetricEnum.JARO_WINKLER));
+		rules.addMatchField(new EmpiMatchFieldJson("Patient", "name.given", DistanceMetricEnum.COSINE, NAME_THRESHOLD));
+		rules.addMatchField(new EmpiMatchFieldJson("Patient", "name.last", DistanceMetricEnum.JARO_WINKLER, NAME_THRESHOLD));
 
 		String json = JsonUtil.serialize(rules);
 		ourLog.info(json);
