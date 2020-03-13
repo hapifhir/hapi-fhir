@@ -1,7 +1,6 @@
 package ca.uhn.fhir.empi.rules;
 
 import ca.uhn.fhir.empi.BaseTest;
-import ca.uhn.fhir.empi.rules.metric.DistanceMetricEnum;
 import ca.uhn.fhir.jpa.util.JsonUtil;
 import org.junit.Test;
 import org.slf4j.Logger;

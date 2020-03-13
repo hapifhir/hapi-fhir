@@ -1,6 +1,5 @@
 package ca.uhn.fhir.empi.rules;
 
-import ca.uhn.fhir.empi.rules.metric.DistanceMetricEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -75,6 +74,6 @@ public class EmpiFieldMatchJson implements IModelJson, IEmpiMatcher<String> {
 
 	@Override
 	public boolean match(String theLeftString, String theRightString) {
-		return myMetric.compare(theLeftString, theRightString) >= myMatchThreshold;
+		return myMetric.similarity(theLeftString, theRightString) >= myMatchThreshold;
 	}
 }

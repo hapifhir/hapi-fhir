@@ -1,6 +1,7 @@
 package ca.uhn.fhir.empi.rules;
 
 import ca.uhn.fhir.empi.BaseTest;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,4 +29,15 @@ public class EmpiResourceComparatorTest extends BaseTest {
 		assertEquals(EXPECTED_BOTH_NAMES_WEIGHT, result, NAME_DELTA);
 	}
 
+	@Test
+	public void testMatchResult() {
+		assertEquals(EmpiMatchResultEnum.POSSIBLE_MATCH, myEmpiResourceComparator.getMatchResult(myPatient1, myPatient2));
+		myPatient1.addName().setFamily("Smith");
+		myPatient2.addName().setFamily("Smith");
+		assertEquals(EmpiMatchResultEnum.MATCH, myEmpiResourceComparator.getMatchResult(myPatient1, myPatient2));
+		Patient patient3 = new Patient();
+		patient3.setId("Patient/3");
+		patient3.addName().addGiven("Henry");
+		assertEquals(EmpiMatchResultEnum.NO_MATCH, myEmpiResourceComparator.getMatchResult(myPatient1, patient3));
+	}
 }

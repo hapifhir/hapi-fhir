@@ -1,14 +1,12 @@
 package ca.uhn.fhir.empi.rules;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.IEmpiComparator;
-import ca.uhn.fhir.empi.rules.metric.EmpiResourceFieldComparator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EmpiResourceComparator implements IEmpiComparator<IBaseResource> {
+public class EmpiResourceComparator {
 	private final EmpiRulesJson myEmpiRulesJson;
 	private final List<EmpiResourceFieldComparator> myFieldComparators = new ArrayList<>();
 
@@ -19,8 +17,12 @@ public class EmpiResourceComparator implements IEmpiComparator<IBaseResource> {
 		}
 	}
 
-	@Override
-	public double compare(IBaseResource theLeftResource, IBaseResource theRightResource) {
+	public EmpiMatchResultEnum getMatchResult(IBaseResource theLeftResource, IBaseResource theRightResource) {
+		double weight = compare(theLeftResource, theRightResource);
+		return myEmpiRulesJson.getMatchResult(weight);
+	}
+
+	double compare(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		long matchVector = getMatchVector(theLeftResource, theRightResource);
 		return myEmpiRulesJson.getWeight(matchVector);
 	}

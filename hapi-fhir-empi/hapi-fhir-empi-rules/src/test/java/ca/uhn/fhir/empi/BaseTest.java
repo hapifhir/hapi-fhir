@@ -1,15 +1,17 @@
 package ca.uhn.fhir.empi;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.rules.DistanceMetricEnum;
 import ca.uhn.fhir.empi.rules.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.EmpiRulesJson;
-import ca.uhn.fhir.empi.rules.metric.DistanceMetricEnum;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 
 public abstract class BaseTest {
 	protected static final FhirContext ourFhirContext = FhirContext.forR4();
-	public static final double EXPECTED_FIRST_NAME_WEIGHT = 0.23;
+	public static final double NO_MATCH_THRESHOLD = 0.60;
+	public static final double MATCH_THRESHOLD = 0.80;
+	public static final double EXPECTED_FIRST_NAME_WEIGHT = 0.63;
 	public static final double EXPECTED_BOTH_NAMES_WEIGHT = 0.83;
 
 	public static final double NAME_THRESHOLD = 0.8;
@@ -31,6 +33,8 @@ public abstract class BaseTest {
 		myGivenNameMatchField = new EmpiFieldMatchJson(PATIENT_GIVEN, "Patient", "name.given", DistanceMetricEnum.COSINE, NAME_THRESHOLD);
 		myLastNameMatchField = new EmpiFieldMatchJson(PATIENT_LAST, "Patient", "name.family", DistanceMetricEnum.JARO_WINKLER, NAME_THRESHOLD);
 		myRules = new EmpiRulesJson();
+		myRules.setMatchThreshold(MATCH_THRESHOLD);
+		myRules.setNoMatchThreshold(NO_MATCH_THRESHOLD);
 		myRules.addMatchField(myGivenNameMatchField);
 		myRules.addMatchField(myLastNameMatchField);
 

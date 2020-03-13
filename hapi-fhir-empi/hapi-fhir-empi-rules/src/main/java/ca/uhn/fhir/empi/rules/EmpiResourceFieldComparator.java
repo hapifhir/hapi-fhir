@@ -1,8 +1,6 @@
-package ca.uhn.fhir.empi.rules.metric;
+package ca.uhn.fhir.empi.rules;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.rules.EmpiFieldMatchJson;
-import ca.uhn.fhir.empi.rules.IEmpiMatcher;
 import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;

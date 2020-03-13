@@ -1,7 +1,6 @@
-package ca.uhn.fhir.empi.rules.metric;
+package ca.uhn.fhir.empi.rules;
 
 import ca.uhn.fhir.empi.BaseTest;
-import ca.uhn.fhir.empi.rules.EmpiFieldMatchJson;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.r4.model.Encounter;
 import org.junit.Before;
