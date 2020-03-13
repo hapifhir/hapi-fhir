@@ -850,10 +850,9 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 			ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
 
-            for (IQueryParameterOr<IQueryParameterType> next : parsedParam.getValuesAsQueryTokens()) {
-                orValues.addAll(next.getValuesAsQueryTokens());
-            }
-
+			for (IQueryParameterOr<IQueryParameterType> next : parsedParam.getValuesAsQueryTokens()) {
+				orValues.addAll(next.getValuesAsQueryTokens());
+			}
 			//Handle internal chain inside the has.
 			if (parameterName.contains(".")) {
 				String chainedPartOfParameter = getChainedPart(parameterName);
@@ -874,6 +873,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			myQueryRoot.addPredicate(andPredicate);
 		}
 	}
+
 	private String getChainedPart(String parameter) {
 		return parameter.substring(parameter.indexOf(".") + 1);
 	}
