@@ -15,9 +15,17 @@ public class EmpiResourceComparatorTest extends BaseTest {
 	}
 
 	@Test
-	public void testCompare() {
+	public void testCompareFirstNameMatch() {
 		double result = myEmpiResourceComparator.compare(myPatient1, myPatient2);
 		assertEquals(EXPECTED_FIRST_NAME_WEIGHT, result, NAME_DELTA);
+	}
+
+	@Test
+	public void testCompareBothNamesMatch() {
+		myPatient1.addName().setFamily("Smith");
+		myPatient2.addName().setFamily("Smith");
+		double result = myEmpiResourceComparator.compare(myPatient1, myPatient2);
+		assertEquals(EXPECTED_BOTH_NAMES_WEIGHT, result, NAME_DELTA);
 	}
 
 }
