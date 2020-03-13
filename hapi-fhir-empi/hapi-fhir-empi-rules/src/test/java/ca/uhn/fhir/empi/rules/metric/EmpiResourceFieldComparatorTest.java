@@ -14,26 +14,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 
 public class EmpiResourceFieldComparatorTest extends BaseTest {
-	private Patient myPatient1;
-	private Patient myPatient2;
-	private EmpiMatchFieldJson myGivenNameMatchField;
-	private EmpiResourceFieldComparator myComparator;
+	protected EmpiResourceFieldComparator myComparator;
 
 	@Before
 	public void before() {
-		myGivenNameMatchField = new EmpiMatchFieldJson("Patient", "name.given", DistanceMetricEnum.COSINE);
+		super.before();
 		myComparator = new EmpiResourceFieldComparator(ourFhirContext, myGivenNameMatchField);
-
-		initializePatients();
-	}
-
-	private void initializePatients() {
-		myPatient1 = new Patient();
-		myPatient1.addName().addGiven("John");
-		myPatient1.setId("Patient/1");
-		myPatient2 = new Patient();
-		myPatient2.addName().addGiven("Johny");
-		myPatient2.setId("Patient/2");
 	}
 
 	@Test
@@ -68,6 +54,6 @@ public class EmpiResourceFieldComparatorTest extends BaseTest {
 
 	@Test
 	public void testCompare() {
-		assertEquals(0.8165, myComparator.compare(myPatient1, myPatient2), 0.0001);
+		assertEquals(NAME_SIMILARITY, myComparator.compare(myPatient1, myPatient2), NAME_DELTA);
 	}
 }

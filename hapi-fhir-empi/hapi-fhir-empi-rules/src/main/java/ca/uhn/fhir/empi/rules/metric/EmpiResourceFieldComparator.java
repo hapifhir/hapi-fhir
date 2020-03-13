@@ -2,6 +2,7 @@ package ca.uhn.fhir.empi.rules.metric;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.empi.IEmpiComparator;
 import ca.uhn.fhir.empi.rules.EmpiMatchFieldJson;
 import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.Validate;
@@ -10,7 +11,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
 
-public class EmpiResourceFieldComparator {
+public class EmpiResourceFieldComparator implements IEmpiComparator<IBaseResource> {
 	private final FhirContext myFhirContext;
 	private final EmpiMatchFieldJson myEmpiMatchFieldJson;
 	private final String myResourceType;
@@ -23,6 +24,7 @@ public class EmpiResourceFieldComparator {
 		myResourcePath = theEmpiMatchFieldJson.getResourcePath();
 	}
 
+	@Override
 	public double compare(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		validate(theLeftResource);
 		validate(theRightResource);

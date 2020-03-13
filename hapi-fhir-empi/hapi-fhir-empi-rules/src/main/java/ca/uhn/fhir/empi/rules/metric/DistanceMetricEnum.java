@@ -1,8 +1,9 @@
 package ca.uhn.fhir.empi.rules.metric;
 
+import ca.uhn.fhir.empi.IEmpiComparator;
 import info.debatty.java.stringsimilarity.*;
 
-public enum DistanceMetricEnum {
+public enum DistanceMetricEnum implements IEmpiComparator<String> {
 	JARO_WINKLER("Jaro Winkler", new HapiStringMetric(new JaroWinkler())),
 	COSINE("Cosine", new HapiStringMetric(new Cosine())),
 	JACCARD("Jaccard", new HapiStringMetric(new Jaccard())),
@@ -26,6 +27,7 @@ public enum DistanceMetricEnum {
 		return myHapiStringMetric;
 	}
 
+	@Override
 	public double compare(String theLeftString, String theRightString) {
 		return myHapiStringMetric.compare(theLeftString, theRightString);
 	}
