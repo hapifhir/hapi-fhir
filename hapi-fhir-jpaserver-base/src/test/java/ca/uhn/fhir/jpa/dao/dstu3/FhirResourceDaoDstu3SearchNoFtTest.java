@@ -48,6 +48,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -350,6 +351,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	@Test
 	public void testHasParameterChained() {
 		IIdType pid0;
+		IIdType oid0;
 		{
 			Device device = new Device();
 			device.addIdentifier().setSystem("urn:system").setValue("DEVICEID");
@@ -364,35 +366,16 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			obs.setDevice(new Reference(devId));
 			obs.setSubject(new Reference(pid0));
 			obs.setCode(new CodeableConcept(new Coding("sys", "val", "disp")));
-			myObservationDao.create(obs, mySrd).getId();
+			oid0 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		SearchParameterMap standardStringQuery = new SearchParameterMap();
+		SearchParameterMap hasWithChainParamQuery = new SearchParameterMap();
 
-		standardStringQuery.setLoadSynchronous(true);
-		//params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
-		standardStringQuery.add("gender", new TokenParam("male"));
-		//This is the tested query:
+		hasWithChainParamQuery.setLoadSynchronous(true);
+		hasWithChainParamQuery.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
 		// Patient?_has:Observation:subject:device.identifier=urn:system|DEVICEID
-		//assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(standardStringQuery)), contains(pid0.getValue()));
-
-		SearchParameterMap chainQuery = new SearchParameterMap();
-		chainQuery.setLoadSynchronous(true);
-		chainQuery.add(Observation.SP_DEVICE, new ReferenceParam("device", "urn:system|FOO").setChain("identifier"));
 		myCaptureQueriesListener.clear();
-		IBundleProvider chainSearch = myObservationDao.search(chainQuery);
-		List<SqlQuery> selectqueriesForCurrentThread = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-		assertThat(chainQuery.size(), is(equalTo(1)));
-
-		SearchParameterMap hasQuery = new SearchParameterMap();
-		hasQuery.setLoadSynchronous(true);
-		hasQuery.add("_has", new HasParam("Observation", "subject", "code", "sys|val"));
-		//hasQuery.add(Observation.SP_DEVICE, new ReferenceParam("device", "urn:system|FOO").setChain("identifier"));
-		myCaptureQueriesListener.clear();
-		IBundleProvider hasSearch = myPatientDao.search(hasQuery);
-		selectqueriesForCurrentThread = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-		assertThat(hasQuery.size(), is(equalTo(1)));
-
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(hasWithChainParamQuery)), contains(pid0.getValue()));
 	}
 
 	@Test

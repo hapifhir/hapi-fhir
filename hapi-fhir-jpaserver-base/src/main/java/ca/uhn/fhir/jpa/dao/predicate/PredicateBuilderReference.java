@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -302,18 +303,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			}
 
 			boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
-			//I'm pretty sure this chunk of code can actually cause ambiguous behaviour. Consider the query:
-			// Observation?subject.name=Graham.
-			// Once in this chunk of code, It could be either Patient or Practitioner, as both have returned their runtime search params.
-			// according to docs here : https://www.hl7.org/fhir/search.html#chaining , the server SHOULD reject these queries,
-			// but does not. From the docs:
-
-			// Advanced Search Note: Where a chained parameter searches a resource reference that may
-			// have more than one type of resource as its target, the parameter chain may end up referring to
-			// search parameters with the same name on more than one kind of resource at once. Servers SHOULD reject
-			// a search where the logical id refers to more than one matching resource across different types.
-			// For example, the client has to specify the type explicitly using the syntax in the second example above.
-			// @jagnew your thoughts?
+			//TODO LOG PERF TRACE ISSUE ON AMBIGUOUS REFERENCE TARGETS
 			RuntimeSearchParam param = null;
 			if (!isMeta) {
 				param = mySearchParamRegistry.getSearchParamByName(typeDef, chain);
@@ -418,7 +408,6 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myResourceType"), theSubResourceName));
 		myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myDeleted")));
 
-		//How is it possible for us to do a chain query if we _havent_ found a chain match? @jagnew
 		if (theFoundChainMatch) {
 			searchForIdsWithAndOr(theSubResourceName, theChain, andOrParams, theRequest);
 			subQ.where(myQueryRoot.getPredicateArray());
@@ -831,19 +820,34 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 			ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
 
-			for (IQueryParameterOr<IQueryParameterType> next : parsedParam.getValuesAsQueryTokens()) {
-				orValues.addAll(next.getValuesAsQueryTokens());
+            for (IQueryParameterOr<IQueryParameterType> next : parsedParam.getValuesAsQueryTokens()) {
+                orValues.addAll(next.getValuesAsQueryTokens());
+            }
+
+			//Handle internal chain inside the has.
+			if (parameterName.contains(".")) {
+				String chainedPartOfParameter = getChainedPart(parameterName);
+				orValues.stream()
+					.filter(qp -> qp instanceof ReferenceParam)
+					.map(qp -> (ReferenceParam)qp)
+					.forEach(rp -> rp.setChain(getChainedPart(chainedPartOfParameter)));
 			}
 
-			Subquery<Long> subQ = myPredicateBuilder.createLinkSubquery(parameterName, targetResourceType, orValues, theRequest);
-
+			Subquery<Long> subQ = myPredicateBuilder.createLinkSubquery(paramName, targetResourceType, orValues, theRequest);
 			Join<ResourceTable, ResourceLink> join = myQueryRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
+			//Predicate predicate = addPredicateReferenceWithChain("Device", paramName, orValues, join, Collections.emptyList(), refere, theRequest);
+
 			Predicate pathPredicate = myPredicateBuilder.createResourceLinkPathPredicate(targetResourceType, paramReference, join);
 			Predicate sourceTypePredicate = myCriteriaBuilder.equal(join.get("myTargetResourceType"), theResourceType);
 			Predicate sourcePidPredicate = join.get("mySourceResourcePid").in(subQ);
 			Predicate andPredicate = myCriteriaBuilder.and(pathPredicate, sourcePidPredicate, sourceTypePredicate);
+			//Predicate andPredicate = myCriteriaBuilder.and(pathPredicate, predicate, sourceTypePredicate);
 			myQueryRoot.addPredicate(andPredicate);
 		}
+	}
+	private String getChainedPart(String parameter) {
+		//replace with indexof(.) stuff.
+		return parameter.replaceAll("^.+?\\.(.+)$", "$1");
 	}
 
 	private void addPredicateComposite(String theResourceName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd) {
