@@ -85,7 +85,7 @@ public class ResourceLink extends BaseResourceIndex {
 
 	public String getTargetResourceId() {
 		if (myTargetResourceId == null && myTargetResource != null) {
-			myTargetResourceId = myTargetResource.getIdDt().getIdPart();
+			myTargetResourceId = getTargetResource().getIdDt().getIdPart();
 		}
 		return myTargetResourceId;
 	}
@@ -214,6 +214,10 @@ public class ResourceLink extends BaseResourceIndex {
 
 		b.append("]");
 		return b.toString();
+	}
+
+	public ResourceTable getTargetResource() {
+		return myTargetResource;
 	}
 
 	public static ResourceLink forAbsoluteReference(String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {
