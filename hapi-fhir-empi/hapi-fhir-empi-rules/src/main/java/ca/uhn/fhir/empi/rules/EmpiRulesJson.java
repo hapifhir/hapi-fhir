@@ -39,8 +39,9 @@ public class EmpiRulesJson implements IModelJson, Iterable<EmpiFieldMatchJson> {
 	}
 
 	public void putWeight(String theFieldMatchNames, double theWeight) {
-		initVectorWeightMapIfRequired();
 		myWeightMap.put(theFieldMatchNames, theWeight);
+
+		initVectorWeightMapIfRequired();
 		myVectorWeightMap.put(theFieldMatchNames, theWeight);
 	}
 
