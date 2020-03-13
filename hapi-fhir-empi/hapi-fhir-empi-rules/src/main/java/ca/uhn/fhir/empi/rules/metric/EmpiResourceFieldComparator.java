@@ -1,7 +1,7 @@
 package ca.uhn.fhir.empi.rules.metric;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.rules.EmpiMatchFieldJson;
+import ca.uhn.fhir.empi.rules.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.IEmpiMatcher;
 import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.Validate;
@@ -12,15 +12,15 @@ import java.util.List;
 
 public class EmpiResourceFieldComparator implements IEmpiMatcher<IBaseResource> {
 	private final FhirContext myFhirContext;
-	private final EmpiMatchFieldJson myEmpiMatchFieldJson;
+	private final EmpiFieldMatchJson myEmpiFieldMatchJson;
 	private final String myResourceType;
 	private final String myResourcePath;
 
-	public EmpiResourceFieldComparator(FhirContext theFhirContext, EmpiMatchFieldJson theEmpiMatchFieldJson) {
+	public EmpiResourceFieldComparator(FhirContext theFhirContext, EmpiFieldMatchJson theEmpiFieldMatchJson) {
 		myFhirContext = theFhirContext;
-		myEmpiMatchFieldJson = theEmpiMatchFieldJson;
-		myResourceType = theEmpiMatchFieldJson.getResourceType();
-		myResourcePath = theEmpiMatchFieldJson.getResourcePath();
+		myEmpiFieldMatchJson = theEmpiFieldMatchJson;
+		myResourceType = theEmpiFieldMatchJson.getResourceType();
+		myResourcePath = theEmpiFieldMatchJson.getResourcePath();
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -42,7 +42,7 @@ public class EmpiResourceFieldComparator implements IEmpiMatcher<IBaseResource> 
 			String leftString = leftValue.getValueAsString();
 			for (IPrimitiveType rightValue : theRightValues) {
 				String rightString = rightValue.getValueAsString();
-				retval |= myEmpiMatchFieldJson.match(leftString, rightString);
+				retval |= myEmpiFieldMatchJson.match(leftString, rightString);
 			}
 		}
 		return retval;

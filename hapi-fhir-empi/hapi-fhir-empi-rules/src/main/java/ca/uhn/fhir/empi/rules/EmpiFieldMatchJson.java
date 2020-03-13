@@ -4,7 +4,11 @@ import ca.uhn.fhir.empi.rules.metric.DistanceMetricEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class EmpiMatchFieldJson implements IModelJson, IEmpiMatcher<String> {
+import javax.annotation.Nonnull;
+
+public class EmpiFieldMatchJson implements IModelJson, IEmpiMatcher<String> {
+	@JsonProperty("name")
+	String myName;
 	@JsonProperty("resourceType")
 	String myResourceType;
 	@JsonProperty("resourcePath")
@@ -14,9 +18,10 @@ public class EmpiMatchFieldJson implements IModelJson, IEmpiMatcher<String> {
 	@JsonProperty("matchThreshold")
 	double myMatchThreshold;
 
-	public EmpiMatchFieldJson() {}
+	public EmpiFieldMatchJson() {}
 
-	public EmpiMatchFieldJson(String theResourceType, String theResourcePath, DistanceMetricEnum theMetric, double theMatchThreshold) {
+	public EmpiFieldMatchJson(@Nonnull String theName, String theResourceType, String theResourcePath, DistanceMetricEnum theMetric, double theMatchThreshold) {
+		myName = theName;
 		myResourceType = theResourceType;
 		myResourcePath = theResourcePath;
 		myMetric = theMetric;
@@ -27,7 +32,7 @@ public class EmpiMatchFieldJson implements IModelJson, IEmpiMatcher<String> {
 		return myMetric;
 	}
 
-	public EmpiMatchFieldJson setMetric(DistanceMetricEnum theMetric) {
+	public EmpiFieldMatchJson setMetric(DistanceMetricEnum theMetric) {
 		myMetric = theMetric;
 		return this;
 	}
@@ -36,7 +41,7 @@ public class EmpiMatchFieldJson implements IModelJson, IEmpiMatcher<String> {
 		return myResourceType;
 	}
 
-	public EmpiMatchFieldJson setResourceType(String theResourceType) {
+	public EmpiFieldMatchJson setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
 		return this;
 	}
@@ -45,7 +50,7 @@ public class EmpiMatchFieldJson implements IModelJson, IEmpiMatcher<String> {
 		return myResourcePath;
 	}
 
-	public EmpiMatchFieldJson setResourcePath(String theResourcePath) {
+	public EmpiFieldMatchJson setResourcePath(String theResourcePath) {
 		myResourcePath = theResourcePath;
 		return this;
 	}
@@ -54,8 +59,17 @@ public class EmpiMatchFieldJson implements IModelJson, IEmpiMatcher<String> {
 		return myMatchThreshold;
 	}
 
-	public EmpiMatchFieldJson setMatchThreshold(double theMatchThreshold) {
+	public EmpiFieldMatchJson setMatchThreshold(double theMatchThreshold) {
 		myMatchThreshold = theMatchThreshold;
+		return this;
+	}
+
+	public String getName() {
+		return myName;
+	}
+
+	public EmpiFieldMatchJson setName(@Nonnull String theName) {
+		myName = theName;
 		return this;
 	}
 

@@ -14,7 +14,7 @@ public class EmpiResourceComparator implements IEmpiComparator<IBaseResource> {
 
 	public EmpiResourceComparator(FhirContext theFhirContext, EmpiRulesJson theEmpiRulesJson) {
 		myEmpiRulesJson = theEmpiRulesJson;
-		for (EmpiMatchFieldJson matchFieldJson : myEmpiRulesJson) {
+		for (EmpiFieldMatchJson matchFieldJson : myEmpiRulesJson) {
 			myFieldComparators.add(new EmpiResourceFieldComparator(theFhirContext, matchFieldJson));
 		}
 	}

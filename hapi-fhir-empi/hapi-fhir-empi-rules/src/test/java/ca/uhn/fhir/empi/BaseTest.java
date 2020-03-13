@@ -1,29 +1,32 @@
 package ca.uhn.fhir.empi;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.rules.EmpiMatchFieldJson;
+import ca.uhn.fhir.empi.rules.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.EmpiRulesJson;
 import ca.uhn.fhir.empi.rules.metric.DistanceMetricEnum;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
+
+import java.util.Set;
 
 public abstract class BaseTest {
 	protected static final FhirContext ourFhirContext = FhirContext.forR4();
 	public static final double EXPECTED_WEIGHT = 0.83;
 	public static final double NAME_THRESHOLD = 0.8;
 	public static final double NAME_DELTA = 0.0001;
+	public static final String PATIENT_GIVEN = "patient-given";
 
 	protected Patient myPatient1;
 	protected Patient myPatient2;
-	protected EmpiMatchFieldJson myGivenNameMatchField;
+	protected EmpiFieldMatchJson myGivenNameMatchField;
 	protected EmpiRulesJson myEmpiRules;
 
 	@Before
 	public void before() {
-		myGivenNameMatchField = new EmpiMatchFieldJson("Patient", "name.given", DistanceMetricEnum.COSINE, NAME_THRESHOLD);
+		myGivenNameMatchField = new EmpiFieldMatchJson(PATIENT_GIVEN, "Patient", "name.given", DistanceMetricEnum.COSINE, NAME_THRESHOLD);
 		myEmpiRules = new EmpiRulesJson();
 		myEmpiRules.addMatchField(myGivenNameMatchField);
-		myEmpiRules.putWeight(1L, EXPECTED_WEIGHT);
+		myEmpiRules.putWeight(Set.of(PATIENT_GIVEN), EXPECTED_WEIGHT);
 		initializePatients();
 	}
 

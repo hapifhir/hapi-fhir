@@ -1,7 +1,7 @@
 package ca.uhn.fhir.empi.rules.metric;
 
 import ca.uhn.fhir.empi.BaseTest;
-import ca.uhn.fhir.empi.rules.EmpiMatchFieldJson;
+import ca.uhn.fhir.empi.rules.EmpiFieldMatchJson;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.r4.model.Encounter;
 import org.junit.Before;
@@ -41,7 +41,7 @@ public class EmpiResourceFieldComparatorTest extends BaseTest {
 	@Test
 	public void testBadPath() {
 		try {
-			EmpiMatchFieldJson matchField = new EmpiMatchFieldJson("Patient", "foo", DistanceMetricEnum.COSINE, NAME_THRESHOLD);
+			EmpiFieldMatchJson matchField = new EmpiFieldMatchJson("patient-foo", "Patient", "foo", DistanceMetricEnum.COSINE, NAME_THRESHOLD);
 			EmpiResourceFieldComparator comparator = new EmpiResourceFieldComparator(ourFhirContext, matchField);
 			comparator.match(myPatient1, myPatient2);
 			fail();
