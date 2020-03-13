@@ -14,7 +14,7 @@ public class EmpiRulesJson implements IModelJson, Iterable<EmpiFieldMatchJson> {
 	@JsonProperty("weightMap")
 	Map<String, Double> myWeightMap = new HashMap<>();
 
-	transient Map<Long, Double> myVectorWeights = new HashMap<>();
+	transient VectorWeightMap myVectorWeightMap;
 
 	public void addMatchField(EmpiFieldMatchJson theMatchRuleName) {
 		myMatchFieldJsonList.add(theMatchRuleName);
@@ -28,16 +28,35 @@ public class EmpiRulesJson implements IModelJson, Iterable<EmpiFieldMatchJson> {
 		return myMatchFieldJsonList.get(theIndex);
 	}
 
+	public double getWeight(String theFieldMatchNames) {
+		return myWeightMap.get(theFieldMatchNames);
+	}
+
 	public double getWeight(Long theMatchVector) {
-		Double result = myVectorWeights.get(theMatchVector);
+		initVectorWeightMapIfRequired();
+		Double result = myVectorWeightMap.get(theMatchVector);
 		return MoreObjects.firstNonNull(result, 0.0);
 	}
 
 	public void putWeight(String theFieldMatchNames, double theWeight) {
+		initVectorWeightMapIfRequired();
 		myWeightMap.put(theFieldMatchNames, theWeight);
+		myVectorWeightMap.put(theFieldMatchNames, theWeight);
+	}
 
-		long vector = MatchFieldVectorHelper.getVector(this, theFieldMatchNames);
-		myVectorWeights.put(vector, theWeight);
+	public Map<String, Double> getWeightMap() {
+		return Collections.unmodifiableMap(myWeightMap);
+	}
+
+	public VectorWeightMap getVectorWeightMap() {
+		initVectorWeightMapIfRequired();
+		return myVectorWeightMap;
+	}
+
+	private void initVectorWeightMapIfRequired() {
+		if (myVectorWeightMap == null) {
+			myVectorWeightMap = new VectorWeightMap(this);
+		}
 	}
 
 	@NotNull

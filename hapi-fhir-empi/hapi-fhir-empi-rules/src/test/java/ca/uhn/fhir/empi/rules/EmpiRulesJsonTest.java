@@ -18,6 +18,7 @@ public class EmpiRulesJsonTest extends BaseTest {
 	public static final String PATIENT_LAST = "patient-last";
 	public static final double EXPECTED_WEIGHT = 0.23;
 	private EmpiRulesJson myRules;
+	private String myAllFields;
 
 	@Before
 	public void before() {
@@ -26,8 +27,8 @@ public class EmpiRulesJsonTest extends BaseTest {
 		myRules = new EmpiRulesJson();
 		myRules.addMatchField(new EmpiFieldMatchJson(PATIENT_GIVEN, "Patient", "name.given", DistanceMetricEnum.COSINE, NAME_THRESHOLD));
 		myRules.addMatchField(new EmpiFieldMatchJson(PATIENT_LAST, "Patient", "name.last", DistanceMetricEnum.JARO_WINKLER, NAME_THRESHOLD));
-		String allFields = String.join(",", PATIENT_GIVEN, PATIENT_LAST);
-		myRules.putWeight(allFields, EXPECTED_WEIGHT);
+		myAllFields = String.join(",", PATIENT_GIVEN, PATIENT_LAST);
+		myRules.putWeight(myAllFields, EXPECTED_WEIGHT);
 	}
 
 	@Test
@@ -36,6 +37,7 @@ public class EmpiRulesJsonTest extends BaseTest {
 		ourLog.info(json);
 		EmpiRulesJson rulesDeser = JsonUtil.deserialize(json, EmpiRulesJson.class);
 		assertEquals(2, rulesDeser.size());
+		assertEquals(EXPECTED_WEIGHT, rulesDeser.getWeight(myAllFields));
 		EmpiFieldMatchJson second = rulesDeser.get(1);
 		assertEquals("name.last", second.getResourcePath());
 		assertEquals(DistanceMetricEnum.JARO_WINKLER, second.getMetric());
@@ -48,14 +50,15 @@ public class EmpiRulesJsonTest extends BaseTest {
 
 	@Test
 	public void getVector() {
-		assertEquals(1, MatchFieldVectorHelper.getVector(myRules, PATIENT_GIVEN));
-		assertEquals(2, MatchFieldVectorHelper.getVector(myRules, PATIENT_LAST));
-		assertEquals(3, MatchFieldVectorHelper.getVector(myRules, String.join(",", PATIENT_GIVEN, PATIENT_LAST)));
-		assertEquals(3, MatchFieldVectorHelper.getVector(myRules, String.join(", ", PATIENT_GIVEN, PATIENT_LAST)));
-		assertEquals(3, MatchFieldVectorHelper.getVector(myRules, String.join(",  ", PATIENT_GIVEN, PATIENT_LAST)));
-		assertEquals(3, MatchFieldVectorHelper.getVector(myRules, String.join(", \n ", PATIENT_GIVEN, PATIENT_LAST)));
+		VectorWeightMap vectorWeightMap = myRules.getVectorWeightMap();
+		assertEquals(1, vectorWeightMap.getVector(PATIENT_GIVEN));
+		assertEquals(2, vectorWeightMap.getVector(PATIENT_LAST));
+		assertEquals(3, vectorWeightMap.getVector(String.join(",", PATIENT_GIVEN, PATIENT_LAST)));
+		assertEquals(3, vectorWeightMap.getVector(String.join(", ", PATIENT_GIVEN, PATIENT_LAST)));
+		assertEquals(3, vectorWeightMap.getVector(String.join(",  ", PATIENT_GIVEN, PATIENT_LAST)));
+		assertEquals(3, vectorWeightMap.getVector(String.join(", \n ", PATIENT_GIVEN, PATIENT_LAST)));
 		try {
-			MatchFieldVectorHelper.getVector(myRules, "bad");
+			vectorWeightMap.getVector("bad");
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("There is no matchField with name bad", e.getMessage());
