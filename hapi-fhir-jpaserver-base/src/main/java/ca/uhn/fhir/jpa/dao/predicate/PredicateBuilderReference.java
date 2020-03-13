@@ -21,14 +21,19 @@ package ca.uhn.fhir.jpa.dao.predicate;
  */
 
 import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -41,6 +46,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -71,6 +77,8 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	MatchUrlService myMatchUrlService;
 	@Autowired
 	DaoRegistry myDaoRegistry;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	private final PredicateBuilder myPredicateBuilder;
 
@@ -275,7 +283,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		boolean foundChainMatch = false;
-
+		List<Class<? extends IBaseResource>> candidateTargetTypes = new ArrayList<>();
 		for (Class<? extends IBaseResource> nextType : resourceTypes) {
 
 			String chain = theReferenceParam.getChain();
@@ -303,7 +311,6 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			}
 
 			boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
-			//TODO LOG PERF TRACE ISSUE ON AMBIGUOUS REFERENCE TARGETS
 			RuntimeSearchParam param = null;
 			if (!isMeta) {
 				param = mySearchParamRegistry.getSearchParamByName(typeDef, chain);
@@ -325,21 +332,44 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				orValues.add(chainValue);
 			}
 
+
 			Subquery<Long> subQ = createLinkSubquery(foundChainMatch, chain, subResourceName, orValues, theRequest);
 
 			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theJoin);
 			Predicate pidPredicate = theJoin.get("myTargetResourcePid").in(subQ);
 			Predicate andPredicate = myCriteriaBuilder.and(pathPredicate, pidPredicate);
 			theCodePredicates.add(andPredicate);
+			candidateTargetTypes.add(nextType);
 		}
 
 		if (!foundChainMatch) {
 			throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
 		}
 
+		if (candidateTargetTypes.size() > 1) {
+			warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, candidateTargetTypes);
+		}
+
 		Predicate predicate = myCriteriaBuilder.or(toArray(theCodePredicates));
 		myQueryRoot.addPredicate(predicate);
 		return predicate;
+	}
+
+	private void warnAboutPerformanceOnUnqualifiedResources(String theParamName, RequestDetails theRequest, List<Class<? extends IBaseResource>> theCandidateTargetTypes) {
+		String message = new StringBuilder()
+			.append("This search uses an unqualified resource(a parameter in a chain without a resource type). ")
+			.append("This is less efficient than using a qualified type. ")
+			.append("[" + theParamName + "] resolves to ["+ theCandidateTargetTypes.stream().map(Class::getSimpleName).collect(Collectors.joining(",")) +"].")
+			.append("If you know what you're looking for, try qualifying it like this: ")
+			.append(theCandidateTargetTypes.stream().map(cls -> "[" +cls.getSimpleName() +":"+theParamName+"]").collect(Collectors.joining(" or ")))
+			.toString();
+		StorageProcessingMessage msg = new StorageProcessingMessage()
+			.setMessage(message);
+		HookParams params = new HookParams()
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(StorageProcessingMessage.class, msg);
+		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 	}
 
 	Predicate createResourceLinkPathPredicate(String theResourceName, String theParamName, From<?, ? extends ResourceLink> from) {
@@ -835,7 +865,6 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 			Subquery<Long> subQ = myPredicateBuilder.createLinkSubquery(paramName, targetResourceType, orValues, theRequest);
 			Join<ResourceTable, ResourceLink> join = myQueryRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
-			//Predicate predicate = addPredicateReferenceWithChain("Device", paramName, orValues, join, Collections.emptyList(), refere, theRequest);
 
 			Predicate pathPredicate = myPredicateBuilder.createResourceLinkPathPredicate(targetResourceType, paramReference, join);
 			Predicate sourceTypePredicate = myCriteriaBuilder.equal(join.get("myTargetResourceType"), theResourceType);
@@ -846,8 +875,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 	}
 	private String getChainedPart(String parameter) {
-		//replace with indexof(.) stuff.
-		return parameter.replaceAll("^.+?\\.(.+)$", "$1");
+		return parameter.substring(parameter.indexOf(".") + 1);
 	}
 
 	private void addPredicateComposite(String theResourceName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd) {

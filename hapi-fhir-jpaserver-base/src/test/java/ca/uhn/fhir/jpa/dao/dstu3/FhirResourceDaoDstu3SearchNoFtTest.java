@@ -376,6 +376,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		// Patient?_has:Observation:subject:device.identifier=urn:system|DEVICEID
 		myCaptureQueriesListener.clear();
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(hasWithChainParamQuery)), contains(pid0.getValue()));
+		ourLog.warn(myCaptureQueriesListener.getSelectQueriesForCurrentThread().stream().map(q -> q.getSql(true, true)).collect(Collectors.joining("******")));
 	}
 
 	@Test
