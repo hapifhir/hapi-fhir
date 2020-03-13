@@ -23,10 +23,9 @@ package ca.uhn.fhir.jpa.subscription.module;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.BaseResourceMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.IResourceMessage;
+import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -37,9 +36,7 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class ResourceModifiedMessage extends BaseResourceMessage implements IResourceMessage {
+public class ResourceModifiedMessage extends BaseResourceMessage implements IResourceMessage, IModelJson {
 
 	@JsonProperty("resourceId")
 	private String myId;
