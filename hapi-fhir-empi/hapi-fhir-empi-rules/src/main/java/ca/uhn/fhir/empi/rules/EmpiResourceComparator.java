@@ -25,7 +25,6 @@ public class EmpiResourceComparator implements IEmpiComparator<IBaseResource> {
 		return myEmpiRulesJson.getWeight(matchVector);
 	}
 
-	// FIXME KHS test
 	private long getMatchVector(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		long retval = 0;
 		for (int i = 0; i < myFieldComparators.size(); ++i) {

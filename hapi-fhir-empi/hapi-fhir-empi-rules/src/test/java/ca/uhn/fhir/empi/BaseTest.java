@@ -7,8 +7,6 @@ import ca.uhn.fhir.empi.rules.metric.DistanceMetricEnum;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 
-import java.util.Set;
-
 public abstract class BaseTest {
 	protected static final FhirContext ourFhirContext = FhirContext.forR4();
 	public static final double EXPECTED_WEIGHT = 0.83;
@@ -26,7 +24,7 @@ public abstract class BaseTest {
 		myGivenNameMatchField = new EmpiFieldMatchJson(PATIENT_GIVEN, "Patient", "name.given", DistanceMetricEnum.COSINE, NAME_THRESHOLD);
 		myEmpiRules = new EmpiRulesJson();
 		myEmpiRules.addMatchField(myGivenNameMatchField);
-		myEmpiRules.putWeight(Set.of(PATIENT_GIVEN), EXPECTED_WEIGHT);
+		myEmpiRules.putWeight(PATIENT_GIVEN, EXPECTED_WEIGHT);
 		initializePatients();
 	}
 
