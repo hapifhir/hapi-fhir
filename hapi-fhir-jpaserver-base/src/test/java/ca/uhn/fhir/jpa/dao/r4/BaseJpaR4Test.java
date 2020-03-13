@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -352,6 +353,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
+	@Autowired
+	private IdHelperService myIdHelperService;
 
 	@After()
 	public void afterCleanupDao() {
@@ -380,6 +383,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl termDeferredStorageSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
 		termDeferredStorageSvc.clearDeferred();
+
+		myIdHelperService.clearCache();
 	}
 
 	@After()
