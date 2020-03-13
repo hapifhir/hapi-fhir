@@ -11,13 +11,13 @@ public class EmpiResourceComparatorTest extends BaseTest {
 	@Before
 	public void before() {
 		super.before();
-		myEmpiResourceComparator = new EmpiResourceComparator(ourFhirContext, myEmpiRules);
+		myEmpiResourceComparator = new EmpiResourceComparator(ourFhirContext, myRules);
 	}
 
 	@Test
 	public void testCompare() {
 		double result = myEmpiResourceComparator.compare(myPatient1, myPatient2);
-		assertEquals(EXPECTED_WEIGHT, result, NAME_DELTA);
+		assertEquals(EXPECTED_FIRST_NAME_WEIGHT, result, NAME_DELTA);
 	}
 
 }
