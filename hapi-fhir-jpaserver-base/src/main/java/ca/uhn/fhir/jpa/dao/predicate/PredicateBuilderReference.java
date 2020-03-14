@@ -869,7 +869,6 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			Predicate sourceTypePredicate = myCriteriaBuilder.equal(join.get("myTargetResourceType"), theResourceType);
 			Predicate sourcePidPredicate = join.get("mySourceResourcePid").in(subQ);
 			Predicate andPredicate = myCriteriaBuilder.and(pathPredicate, sourcePidPredicate, sourceTypePredicate);
-			//Predicate andPredicate = myCriteriaBuilder.and(pathPredicate, predicate, sourceTypePredicate);
 			myQueryRoot.addPredicate(andPredicate);
 		}
 	}

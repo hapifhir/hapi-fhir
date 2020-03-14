@@ -180,8 +180,8 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	/**
-	 * A search is a candidate for Composite Unique SP if unique indexes are enabled, we are not in
-	 * @return
+	 * A search is a candidate for Composite Unique SP if unique indexes are enabled, there is no EverythingMode, and the
+	 * parameters all have no modifiers.
 	 */
 	private boolean isCompositeUniqueSpCandidate() {
 		return myDaoConfig.isUniqueIndexesEnabled() &&
@@ -272,7 +272,6 @@ public class SearchBuilder implements ISearchBuilder {
 					myAlsoIncludePids = new ArrayList<>(1);
 				}
 				myAlsoIncludePids.add(pid);
-				//Won't this fail on non-long IDs? Or does IdHelperService massage this?
 				myQueryRoot.addPredicate(myCriteriaBuilder.equal(join.get("myTargetResourcePid").as(Long.class), pid.getIdAsLong()));
 			} else {
 				Predicate targetTypePredicate = myCriteriaBuilder.equal(join.get("myTargetResourceType").as(String.class), myResourceName);
