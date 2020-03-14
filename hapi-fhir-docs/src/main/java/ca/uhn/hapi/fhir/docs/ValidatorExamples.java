@@ -22,6 +22,7 @@ package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -35,11 +36,9 @@ import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Observation;
@@ -242,8 +241,8 @@ public class ValidatorExamples {
       FhirValidator validator = ctx.newValidator();
       FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
       validator.registerValidatorModule(instanceValidator);
-      
-      IValidationSupport valSupport = new IValidationSupport() {
+
+		IContextValidationSupport valSupport = new IContextValidationSupport() {
 
 			@Override
 			public List<IBaseResource> fetchAllConformanceResources() {

@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -120,6 +121,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseTermReadSvcImpl.class);
+	private static final ValueSetExpansionOptions DEFAULT_EXPANSION_OPTIONS = new ValueSetExpansionOptions();
 	private static boolean ourLastResultsFromTranslationCache; // For testing.
 	private static boolean ourLastResultsFromTranslationWithReverseCache; // For testing.
 	@Autowired
@@ -297,7 +299,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public ValueSet expandValueSetInMemory(ValueSet theValueSetToExpand, VersionIndependentConcept theWantConceptOrNull) {
+	public ValueSet expandValueSetInMemory(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, VersionIndependentConcept theWantConceptOrNull) {
 
 		int maxCapacity = myDaoConfig.getMaximumExpansionSize();
 		ValueSetExpansionComponentWithConceptAccumulator expansionComponent = new ValueSetExpansionComponentWithConceptAccumulator(myContext, maxCapacity);
@@ -306,7 +308,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		AtomicInteger codeCounter = new AtomicInteger(0);
 
-		expandValueSet(theValueSetToExpand, expansionComponent, codeCounter, theWantConceptOrNull);
+		expandValueSet(theExpansionOptions, theValueSetToExpand, expansionComponent, codeCounter, theWantConceptOrNull);
 
 		expansionComponent.setTotal(codeCounter.get());
 
@@ -318,7 +320,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
-	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
+	public List<VersionIndependentConcept> expandValueSet(ValueSetExpansionOptions theExpansionOptions, String theValueSet) {
 		// TODO: DM 2019-09-10 - This is problematic because an incorrect URL that matches ValueSet.id will not be found in the terminology tables but will yield a ValueSet here. Depending on the ValueSet, the expansion may time-out.
 
 		ValueSet valueSet = fetchCanonicalValueSetFromCompleteContext(theValueSet);
@@ -326,12 +328,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			throwInvalidValueSet(theValueSet);
 		}
 
-		return expandValueSetAndReturnVersionIndependentConcepts(valueSet, null);
+		return expandValueSetAndReturnVersionIndependentConcepts(theExpansionOptions, valueSet, null);
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public ValueSet expandValueSet(ValueSet theValueSetToExpand, int theOffset, int theCount) {
+	public ValueSet expandValueSet(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, int theOffset, int theCount) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSetToExpand, "ValueSet to expand can not be null");
 
 		Optional<TermValueSet> optionalTermValueSet;
@@ -346,7 +348,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		if (!optionalTermValueSet.isPresent()) {
 			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory expansion without parameters. {}", getValueSetInfo(theValueSetToExpand));
-			return expandValueSetInMemory(theValueSetToExpand, null); // In-memory expansion.
+			return expandValueSetInMemory(theExpansionOptions, theValueSetToExpand, null); // In-memory expansion.
 		}
 
 		TermValueSet termValueSet = optionalTermValueSet.get();
@@ -354,7 +356,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		if (termValueSet.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
 			ourLog.warn("{} is present in terminology tables but not ready for persistence-backed invocation of operation $expand. Will perform in-memory expansion without parameters. Current status: {} | {}",
 				getValueSetInfo(theValueSetToExpand), termValueSet.getExpansionStatus().name(), termValueSet.getExpansionStatus().getDescription());
-			return expandValueSetInMemory(theValueSetToExpand, null); // In-memory expansion.
+			return expandValueSetInMemory(theExpansionOptions, theValueSetToExpand, null); // In-memory expansion.
 		}
 
 		ValueSet.ValueSetExpansionComponent expansionComponent = new ValueSet.ValueSetExpansionComponent();
@@ -449,12 +451,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void expandValueSet(ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
-		expandValueSet(theValueSetToExpand, theValueSetCodeAccumulator, new AtomicInteger(0), null);
+	public void expandValueSet(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
+		expandValueSet(theExpansionOptions, theValueSetToExpand, theValueSetCodeAccumulator, new AtomicInteger(0), null);
 	}
 
 	@SuppressWarnings("ConstantConditions")
-	private void expandValueSet(ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator, AtomicInteger theCodeCounter, VersionIndependentConcept theWantConceptOrNull) {
+	private void expandValueSet(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator, AtomicInteger theCodeCounter, VersionIndependentConcept theWantConceptOrNull) {
 		Set<String> addedCodes = new HashSet<>();
 
 		StopWatch sw = new StopWatch();
@@ -468,7 +470,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				int queryIndex = i;
 				Boolean shouldContinue = myTxTemplate.execute(t -> {
 					boolean add = true;
-					return expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, include, add, theCodeCounter, queryIndex, theWantConceptOrNull);
+					return expandValueSetHandleIncludeOrExclude(theExpansionOptions, theValueSetCodeAccumulator, addedCodes, include, add, theCodeCounter, queryIndex, theWantConceptOrNull);
 				});
 				if (!shouldContinue) {
 					break;
@@ -489,7 +491,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				int queryIndex = i;
 				Boolean shouldContinue = myTxTemplate.execute(t -> {
 					boolean add = false;
-					return expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, exclude, add, theCodeCounter, queryIndex, null);
+					return expandValueSetHandleIncludeOrExclude(theExpansionOptions, theValueSetCodeAccumulator, addedCodes, exclude, add, theCodeCounter, queryIndex, null);
 				});
 				if (!shouldContinue) {
 					break;
@@ -540,12 +542,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return sb.toString();
 	}
 
-	protected List<VersionIndependentConcept> expandValueSetAndReturnVersionIndependentConcepts(org.hl7.fhir.r4.model.ValueSet theValueSetToExpandR4, VersionIndependentConcept theWantConceptOrNull) {
-		org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandedR4 = expandValueSetInMemory(theValueSetToExpandR4, theWantConceptOrNull).getExpansion();
+	protected List<VersionIndependentConcept> expandValueSetAndReturnVersionIndependentConcepts(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpandR4, VersionIndependentConcept theWantConceptOrNull) {
+		org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandedR4 = expandValueSetInMemory(theExpansionOptions, theValueSetToExpandR4, theWantConceptOrNull).getExpansion();
 
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
 		for (org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent nextContains : expandedR4.getContains()) {
-			retVal.add(new VersionIndependentConcept(nextContains.getSystem(), nextContains.getCode()));
+			retVal.add(new VersionIndependentConcept(nextContains.getSystem(), nextContains.getCode(), nextContains.getDisplay()));
 		}
 		return retVal;
 	}
@@ -553,7 +555,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	/**
 	 * @return Returns true if there are potentially more results to process.
 	 */
-	private Boolean expandValueSetHandleIncludeOrExclude(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex, VersionIndependentConcept theWantConceptOrNull) {
+	private Boolean expandValueSetHandleIncludeOrExclude(@Nullable ValueSetExpansionOptions theExpansionOptions, IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex, VersionIndependentConcept theWantConceptOrNull) {
 
 		String system = theIncludeOrExclude.getSystem();
 		boolean hasSystem = isNotBlank(system);
@@ -693,10 +695,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				CodeSystem codeSystemFromContext = fetchCanonicalCodeSystemFromCompleteContext(system);
 				if (codeSystemFromContext == null) {
 					String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionRefersToUnknownCs", system);
-					throw new PreconditionFailedException(msg);
-//					ourLog.warn(msg);
-//					theValueSetCodeAccumulator.addMessage(msg);
-//					return false;
+					if (provideExpansionOptions(theExpansionOptions).isFailOnMissingCodeSystem()) {
+						throw new PreconditionFailedException(msg);
+					} else {
+						ourLog.warn(msg);
+						theValueSetCodeAccumulator.addMessage(msg);
+						return false;
+					}
 				}
 
 				if (!theIncludeOrExclude.getConcept().isEmpty()) {
@@ -734,7 +739,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			for (CanonicalType nextValueSet : theIncludeOrExclude.getValueSet()) {
 				ourLog.debug("Starting {} expansion around ValueSet: {}", (theAdd ? "inclusion" : "exclusion"), nextValueSet.getValueAsString());
 
-				List<VersionIndependentConcept> expanded = expandValueSet(nextValueSet.getValueAsString());
+				List<VersionIndependentConcept> expanded = expandValueSet(theExpansionOptions, nextValueSet.getValueAsString());
 				Map<String, TermCodeSystem> uriToCodeSystem = new HashMap<>();
 
 				for (VersionIndependentConcept nextConcept : expanded) {
@@ -756,7 +761,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 							// This will happen if we're expanding against a built-in (part of FHIR) ValueSet that
 							// isn't actually in the database anywhere
 							Collection<TermConceptDesignation> emptyCollection = Collections.emptyList();
-							addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, emptyCollection, theAdd, theCodeCounter, nextConcept.getSystem(), nextConcept.getCode(), null);
+							addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, emptyCollection, theAdd, theCodeCounter, nextConcept.getSystem(), nextConcept.getCode(), nextConcept.getDisplay());
 						}
 					}
 					if (isNoneBlank(nextConcept.getSystem(), nextConcept.getCode()) && !theAdd && theAddedCodes.remove(nextConcept.getSystem() + "|" + nextConcept.getCode())) {
@@ -773,6 +778,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 
+	}
+
+	private @Nonnull
+	ValueSetExpansionOptions provideExpansionOptions(@Nullable ValueSetExpansionOptions theExpansionOptions) {
+		if (theExpansionOptions != null) {
+			return theExpansionOptions;
+		} else {
+			return DEFAULT_EXPANSION_OPTIONS;
+		}
 	}
 
 	private void addOrRemoveCode(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, boolean theAdd, String theSystem, String theCode, String theDisplay) {
@@ -1489,7 +1503,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					TermValueSet refreshedValueSetToExpand = myValueSetDao.findById(valueSetToExpand.getId()).get();
 					return getValueSetFromResourceTable(refreshedValueSetToExpand.getResource());
 				});
-				expandValueSet(valueSet, new ValueSetConceptAccumulator(valueSetToExpand, myValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao));
+				expandValueSet(null, valueSet, new ValueSetConceptAccumulator(valueSetToExpand, myValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao));
 
 				// We are done with this ValueSet.
 				txTemplate.execute(t -> {
@@ -1893,7 +1907,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		ValueSet canonicalValueSet = toCanonicalValueSet(valueSet);
 		VersionIndependentConcept wantConcept = new VersionIndependentConcept(theCodeSystem, theCode);
-		List<VersionIndependentConcept> expansionOutcome = expandValueSetAndReturnVersionIndependentConcepts(canonicalValueSet, wantConcept);
+		ValueSetExpansionOptions expansionOptions = new ValueSetExpansionOptions()
+			.setFailOnMissingCodeSystem(false);
+
+		List<VersionIndependentConcept> expansionOutcome = expandValueSetAndReturnVersionIndependentConcepts(expansionOptions, canonicalValueSet, wantConcept);
 		return expansionOutcome
 			.stream()
 			.filter(t -> (theValidationOptions.isInferSystem() || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))

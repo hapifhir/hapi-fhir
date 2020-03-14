@@ -25,13 +25,12 @@ import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.hl7.fhir.dstu2.model.ConceptMap;
 import org.hl7.fhir.dstu2.model.StructureDefinition;
 import org.hl7.fhir.dstu2.model.ValueSet;
-import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Map;
 
-public class IgPackValidationSupportDstu2 implements IValidationSupport {
+public class IgPackValidationSupportDstu2 implements IContextValidationSupport {
 	private final Map<IIdType, IBaseResource> myIgResources;
 	private FhirContext myCtx;
 

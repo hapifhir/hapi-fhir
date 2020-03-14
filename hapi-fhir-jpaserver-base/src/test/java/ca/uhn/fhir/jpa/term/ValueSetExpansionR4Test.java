@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -69,7 +70,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myCaptureQueriesListener.clear();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
 		assertEquals(24, expandedValueSet.getExpansion().getContains().size());
 
 		runInTransaction(()->{
@@ -82,7 +83,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			assertEquals(0, myTermValueSetConceptDao.count());
 		});
 
-		expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
+		expandedValueSet = myTermSvc.expandValueSet(null, valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
 		assertEquals(24, expandedValueSet.getExpansion().getContains().size());
 	}
 
@@ -103,7 +104,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myCaptureQueriesListener.clear();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -185,7 +186,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myCaptureQueriesListener.clear();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, 0, 100);
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet, 0, 100);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(3, expandedValueSet.getExpansion().getContains().size());
@@ -204,7 +205,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
@@ -260,7 +261,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertEquals("Systolic blood pressure 8 hour minimum", containsComponent.getDisplay());
 		assertFalse(containsComponent.hasDesignation());
 
-		expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
+		expandedValueSet = myTermSvc.expandValueSet(null, valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
@@ -331,7 +332,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
@@ -406,7 +407,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), 23);
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), 23);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
@@ -475,7 +476,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), 23);
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), 23);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
@@ -544,7 +545,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), 0);
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), 0);
 		String expanded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet);
 		ourLog.info("Expanded ValueSet:\n" + expanded);
 
@@ -573,7 +574,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), 0);
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), 0);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
@@ -601,7 +602,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, 1, myDaoConfig.getPreExpandValueSetsDefaultCount());
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet, 1, myDaoConfig.getPreExpandValueSetsDefaultCount());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
@@ -662,7 +663,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, 1, myDaoConfig.getPreExpandValueSetsDefaultCount());
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet, 1, myDaoConfig.getPreExpandValueSetsDefaultCount());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
@@ -723,7 +724,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, 1, 22);
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet, 1, 22);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
@@ -769,7 +770,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet vs = new ValueSet();
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem("http://unknown-system");
-		ValueSet outcome = myTermSvc.expandValueSetInMemory(vs, null);
+		ValueSet outcome = myTermSvc.expandValueSetInMemory(new ValueSetExpansionOptions().setFailOnMissingCodeSystem(false), vs, null);
 		assertEquals(0, outcome.getExpansion().getContains().size());
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
@@ -793,7 +794,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, 1, 22);
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet, 1, 22);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
@@ -852,7 +853,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(CS_URL);
 		try {
-			myTermSvc.expandValueSetInMemory(vs, null);
+			myTermSvc.expandValueSetInMemory(null, vs, null);
 			fail();
 		} catch (InternalErrorException e) {
 			assertEquals("Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!", e.getMessage());
@@ -863,7 +864,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
 		include.setSystem(CS_URL);
-		ValueSet outcome = myTermSvc.expandValueSetInMemory(vs, null);
+		ValueSet outcome = myTermSvc.expandValueSetInMemory(null, vs, null);
 		assertEquals(109, outcome.getExpansion().getContains().size());
 
 	}
@@ -878,7 +879,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(CS_URL);
 
-		myTermSvc.expandValueSet(vs, myValueSetCodeAccumulator);
+		myTermSvc.expandValueSet(null, vs, myValueSetCodeAccumulator);
 		verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection());
 	}
 

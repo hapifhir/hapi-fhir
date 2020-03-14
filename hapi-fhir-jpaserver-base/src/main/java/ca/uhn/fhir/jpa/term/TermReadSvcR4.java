@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
@@ -13,21 +13,17 @@ import ca.uhn.fhir.util.VersionIndependentConcept;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -58,27 +54,27 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	private PlatformTransactionManager myTransactionManager;
 
 	@Override
-	public IBaseResource expandValueSet(IBaseResource theInput) {
+	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theInput) {
 		ValueSet valueSetToExpand = (ValueSet) theInput;
-		return super.expandValueSetInMemory(valueSetToExpand, null);
+		return super.expandValueSetInMemory(theExpansionOptions, valueSetToExpand, null);
 	}
 
 	@Override
-	public IBaseResource expandValueSet(IBaseResource theInput, int theOffset, int theCount) {
+	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theInput, int theOffset, int theCount) {
 		ValueSet valueSetToExpand = (ValueSet) theInput;
-		return super.expandValueSet(valueSetToExpand, theOffset, theCount);
+		return super.expandValueSet(theExpansionOptions, valueSetToExpand, theOffset, theCount);
 	}
 
 	@Override
-	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
+	public void expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
-		super.expandValueSet(valueSetToExpand, theValueSetCodeAccumulator);
+		super.expandValueSet(theExpansionOptions, valueSetToExpand, theValueSetCodeAccumulator);
 	}
 
 	@Transactional(dontRollbackOn = {ExpansionTooCostlyException.class})
 	@Override
-	public IContextValidationSupport.ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, IBaseResource theValueSetToExpand)  {
-		ValueSet expanded = super.expandValueSetInMemory((ValueSet) theValueSetToExpand, null);
+	public IContextValidationSupport.ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand)  {
+		ValueSet expanded = super.expandValueSetInMemory(theExpansionOptions, (ValueSet) theValueSetToExpand, null);
 		return new IContextValidationSupport.ValueSetExpansionOutcome(expanded);
 	}
 

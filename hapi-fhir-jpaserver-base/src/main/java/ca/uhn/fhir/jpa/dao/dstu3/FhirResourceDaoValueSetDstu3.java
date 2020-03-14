@@ -117,7 +117,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 			}
 		}
 		if (allSystemsAreSuppportedByTerminologyService) {
-			return (ValueSet) myTerminologySvc.expandValueSet(theSource);
+			return (ValueSet) myTerminologySvc.expandValueSet(null, theSource);
 		}
 
 		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
@@ -149,7 +149,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 			}
 		}
 		if (allSystemsAreSuppportedByTerminologyService) {
-			return (ValueSet) myTerminologySvc.expandValueSet(theSource, theOffset, theCount);
+			return (ValueSet) myTerminologySvc.expandValueSet(null, theSource, theOffset, theCount);
 		}
 
 		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);

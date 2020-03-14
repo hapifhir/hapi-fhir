@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term.api;
 
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
@@ -19,6 +20,7 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -55,25 +57,25 @@ import java.util.Set;
  */
 public interface ITermReadSvc extends IContextValidationSupport {
 
-	ValueSet expandValueSetInMemory(ValueSet theValueSetToExpand, VersionIndependentConcept theWantConceptOrNull);
+	ValueSet expandValueSetInMemory(@Nullable ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, VersionIndependentConcept theWantConceptOrNull);
 
-	ValueSet expandValueSet(ValueSet theValueSetToExpand, int theOffset, int theCount);
+	ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, int theOffset, int theCount);
 
-	void expandValueSet(ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
-
-	/**
-	 * Version independent
-	 */
-	IBaseResource expandValueSet(IBaseResource theValueSetToExpand);
+	void expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 
 	/**
 	 * Version independent
 	 */
-	IBaseResource expandValueSet(IBaseResource theValueSetToExpand, int theOffset, int theCount);
+	IBaseResource expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand);
 
-	void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
+	/**
+	 * Version independent
+	 */
+	IBaseResource expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, int theOffset, int theCount);
 
-	List<VersionIndependentConcept> expandValueSet(String theValueSet);
+	void expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
+
+	List<VersionIndependentConcept> expandValueSet(ValueSetExpansionOptions theExpansionOptions, String theValueSet);
 
 	Optional<TermConcept> findCode(String theCodeSystem, String theCode);
 

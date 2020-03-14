@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -106,10 +107,10 @@ public class ValidationSupportChain implements IContextValidationSupport {
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
 		for (IContextValidationSupport next : myChain) {
 			// TODO: test if code system is supported?
-			ValueSetExpansionOutcome expanded = next.expandValueSet(theRootValidationSupport, theValueSetToExpand);
+			ValueSetExpansionOutcome expanded = next.expandValueSet(theRootValidationSupport, null, theValueSetToExpand);
 			if (expanded != null) {
 				return expanded;
 			}

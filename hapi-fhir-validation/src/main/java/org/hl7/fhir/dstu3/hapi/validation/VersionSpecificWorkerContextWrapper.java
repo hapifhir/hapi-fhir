@@ -17,7 +17,6 @@ import org.hl7.fhir.common.hapi.validation.ProfileKnowledgeWorkerR5;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.conformance.ProfileUtilities;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.formats.IParser;
 import org.hl7.fhir.r5.formats.ParserType;
@@ -204,7 +203,7 @@ public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
-		IContextValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(myValidationSupport, convertedSource);
+		IContextValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(myValidationSupport, null, convertedSource);
 
 		org.hl7.fhir.r5.model.ValueSet convertedResult = null;
 		if (expanded.getValueSet() != null) {

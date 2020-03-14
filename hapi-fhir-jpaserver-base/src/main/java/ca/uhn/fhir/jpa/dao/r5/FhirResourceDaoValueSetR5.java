@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
@@ -112,7 +111,7 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 			}
 		}
 		if (allSystemsAreSuppportedByTerminologyService) {
-			return (ValueSet) myTerminologySvc.expandValueSet(theSource);
+			return (ValueSet) myTerminologySvc.expandValueSet(null, theSource);
 		}
 
 		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
@@ -151,7 +150,7 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 			}
 		}
 		if (allSystemsAreSuppportedByTerminologyService) {
-			return (ValueSet) myTerminologySvc.expandValueSet(theSource, theOffset, theCount);
+			return (ValueSet) myTerminologySvc.expandValueSet(null, theSource, theOffset, theCount);
 		}
 
 		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);

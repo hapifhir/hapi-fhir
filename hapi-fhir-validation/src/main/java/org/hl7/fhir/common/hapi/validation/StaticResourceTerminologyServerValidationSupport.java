@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.util.VersionIndependentConcept;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.convertors.conv10_50.ValueSet10_50;
@@ -45,7 +46,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
 
 		org.hl7.fhir.r5.model.ValueSet expansionR5 = expandValueSetToCanonical(theRootValidationSupport, theValueSetToExpand);
 		if (expansionR5 == null) {
@@ -157,7 +158,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 			}
 		}
 
-		ValueSetExpansionOutcome valueSetExpansionOutcome = expandValueSet(theRootValidationSupport, vs);
+		ValueSetExpansionOutcome valueSetExpansionOutcome = expandValueSet(theRootValidationSupport, null, vs);
 		if (valueSetExpansionOutcome == null) {
 			return null;
 		}

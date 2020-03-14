@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -58,10 +59,11 @@ public interface IContextValidationSupport {
 	 *
 	 * @param theRootValidationSupport The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                 other method in the support chain.
+	 * @param theExpansionOptions
 	 * @param theValueSetToExpand      The valueset that should be expanded
 	 * @return The expansion, or null
 	 */
-	default ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, IBaseResource theValueSetToExpand) {
+	default ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 		return null;
 	}
 

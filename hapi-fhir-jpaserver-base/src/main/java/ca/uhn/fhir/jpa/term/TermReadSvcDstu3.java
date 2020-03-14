@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
@@ -25,7 +26,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -67,11 +67,11 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IContextVal
 
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
 		try {
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
 			valueSetToExpandR4 = toCanonicalValueSet(theValueSetToExpand);
-			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(valueSetToExpandR4, null);
+			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(theExpansionOptions, valueSetToExpandR4, null);
 			return new ValueSetExpansionOutcome(expandedR4, null);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
@@ -79,13 +79,13 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IContextVal
 	}
 
 	@Override
-	public IBaseResource expandValueSet(IBaseResource theInput) {
+	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theInput) {
 		ValueSet valueSetToExpand = (ValueSet) theInput;
 
 		try {
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
 			valueSetToExpandR4 = toCanonicalValueSet(valueSetToExpand);
-			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(valueSetToExpandR4, null);
+			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(theExpansionOptions, valueSetToExpandR4, null);
 			return convertValueSet(expandedR4);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
@@ -105,13 +105,13 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IContextVal
 	}
 
 	@Override
-	public IBaseResource expandValueSet(IBaseResource theInput, int theOffset, int theCount) {
+	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theInput, int theOffset, int theCount) {
 		ValueSet valueSetToExpand = (ValueSet) theInput;
 
 		try {
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
 			valueSetToExpandR4 = toCanonicalValueSet(valueSetToExpand);
-			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(valueSetToExpandR4, theOffset, theCount);
+			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(theExpansionOptions, valueSetToExpandR4, theOffset, theCount);
 			return convertValueSet(expandedR4);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
@@ -119,13 +119,13 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IContextVal
 	}
 
 	@Override
-	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
+	public void expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
 
 		try {
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
 			valueSetToExpandR4 = toCanonicalValueSet(valueSetToExpand);
-			super.expandValueSet(valueSetToExpandR4, theValueSetCodeAccumulator);
+			super.expandValueSet(theExpansionOptions, valueSetToExpandR4, theValueSetCodeAccumulator);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}

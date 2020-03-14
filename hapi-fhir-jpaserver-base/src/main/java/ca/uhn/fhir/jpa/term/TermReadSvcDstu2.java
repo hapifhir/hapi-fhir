@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.VersionIndependentConcept;
@@ -80,17 +81,17 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	}
 
 	@Override
-	public IBaseResource expandValueSet(IBaseResource theValueSetToExpand) {
+	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IBaseResource expandValueSet(IBaseResource theValueSetToExpand, int theOffset, int theCount) {
+	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, int theOffset, int theCount) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
+	public void expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		throw new UnsupportedOperationException();
 	}
 

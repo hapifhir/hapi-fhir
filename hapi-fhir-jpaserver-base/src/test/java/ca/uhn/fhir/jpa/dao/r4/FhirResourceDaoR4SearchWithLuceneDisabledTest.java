@@ -309,10 +309,10 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	 */
 	@Test
 	public void testExpandValueSetContainingSystemIncludeWithNoCodes() throws IOException {
-		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/dstu3/iar/CodeSystem-iar-citizenship-status.xml");
+		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/r4/iar/CodeSystem-iar-citizenship-status.xml");
 		myCodeSystemDao.create(cs);
 
-		ValueSet vs = loadResourceFromClasspath(ValueSet.class, "/dstu3/iar/ValueSet-iar-citizenship-status.xml");
+		ValueSet vs = loadResourceFromClasspath(ValueSet.class, "/r4/iar/ValueSet-iar-citizenship-status.xml");
 		myValueSetDao.create(vs);
 
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);

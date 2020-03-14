@@ -113,7 +113,7 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 //			return myTerminologySvc.expandValueSetInMemory(theSource, null);
 //		}
 
-		IContextValidationSupport.ValueSetExpansionOutcome retVal = myValidationSupport.expandValueSet(myValidationSupport, theSource);
+		IContextValidationSupport.ValueSetExpansionOutcome retVal = myValidationSupport.expandValueSet(myValidationSupport, null , theSource);
 
 //
 //		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
@@ -147,7 +147,7 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 			}
 		}
 		if (allSystemsAreSuppportedByTerminologyService) {
-			return myTerminologySvc.expandValueSet(theSource, theOffset, theCount);
+			return myTerminologySvc.expandValueSet(null, theSource, theOffset, theCount);
 		}
 
 		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
