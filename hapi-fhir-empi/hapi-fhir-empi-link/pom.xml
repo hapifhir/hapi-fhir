@@ -3,22 +3,21 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
 	<parent>
+		<artifactId>hapi-fhir-empi</artifactId>
 		<groupId>ca.uhn.hapi.fhir</groupId>
-		<artifactId>hapi-deployable-pom</artifactId>
 		<version>4.3.0-SNAPSHOT</version>
-		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>hapi-fhir-empi</artifactId>
-	<packaging>pom</packaging>
+	<artifactId>hapi-fhir-empi-link</artifactId>
+	<packaging>jar</packaging>
 
-	<name>HAPI FHIR - Enterprise Master Patient Index</name>
-
-	<modules>
-		<module>hapi-fhir-empi-rules</module>
-		<module>hapi-fhir-empi-link</module>
-	</modules>
-
+	<dependencies>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-empi-rules</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 </project>
