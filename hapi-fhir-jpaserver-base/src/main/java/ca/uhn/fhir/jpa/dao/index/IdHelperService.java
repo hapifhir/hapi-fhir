@@ -272,15 +272,10 @@ public class IdHelperService {
 				.map(t -> t.getIdPartAsLong())
 				.collect(Collectors.toList());
 			if (!pids.isEmpty()) {
-
-				Collection<Object[]> lookups = myResourceTableDao.findLookupFieldsByResourcePid(pids);
-				for (Object[] next : lookups) {
-					String resourceType = (String) next[0];
-					Long resourcePid = (Long) next[1];
-					Date deletedAt = (Date) next[2];
-					retVal.add(new ResourceLookup(resourceType, resourcePid, deletedAt));
-				}
-
+				myResourceTableDao.findLookupFieldsByResourcePid(pids)
+					.stream()
+					.map(lookup -> new ResourceLookup((String)lookup[0], (Long)lookup[1], (Date)lookup[2]))
+					.forEach(retVal::add);
 			}
 		}
 
