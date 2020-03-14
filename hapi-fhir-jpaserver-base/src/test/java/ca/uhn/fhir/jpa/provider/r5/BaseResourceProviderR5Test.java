@@ -226,7 +226,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 		ourHttpClient.close();
 		ourServer = null;
 		ourHttpClient = null;
-		myValidationSupport.flushCaches();
+		myValidationSupport.invalidateCaches();
 		myValidationSupport = null;
 		ourWebApplicationContext.close();
 		ourWebApplicationContext = null;

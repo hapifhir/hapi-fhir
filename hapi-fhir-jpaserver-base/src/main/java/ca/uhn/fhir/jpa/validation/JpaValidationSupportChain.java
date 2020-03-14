@@ -58,7 +58,7 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 
 	@PreDestroy
 	public void flush() {
-		flushCaches();
+		invalidateCaches();
 	}
 
 	@PostConstruct

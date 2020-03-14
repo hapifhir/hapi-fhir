@@ -196,7 +196,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 		ourHttpClient.close();
 		ourServer = null;
 		ourHttpClient = null;
-		myValidationSupport.flushCaches();
+		myValidationSupport.invalidateCaches();
 		myValidationSupport = null;
 		ourWebApplicationContext.close();
 		ourWebApplicationContext = null;

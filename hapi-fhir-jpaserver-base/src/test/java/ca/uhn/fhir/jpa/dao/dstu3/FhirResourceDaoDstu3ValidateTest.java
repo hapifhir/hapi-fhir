@@ -76,7 +76,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(results.getOperationOutcome()));
 
 		ourLog.info("Clearing cache");
-		myValidationSupport.flushCaches();
+		myValidationSupport.invalidateCaches();
 		myFhirInstanceValidator.flushCaches();
 
 		try {

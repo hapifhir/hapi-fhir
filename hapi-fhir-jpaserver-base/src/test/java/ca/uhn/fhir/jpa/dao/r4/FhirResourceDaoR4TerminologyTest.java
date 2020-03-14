@@ -55,7 +55,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	@Before
 	public void before() {
 		myDaoConfig.setMaximumExpansionSize(5000);
-		myCachingValidationSupport.flushCaches();
+		myCachingValidationSupport.invalidateCaches();
 	}
 
 	private CodeSystem createExternalCs() {

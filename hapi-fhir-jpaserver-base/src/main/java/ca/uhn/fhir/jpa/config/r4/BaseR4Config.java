@@ -88,7 +88,7 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 	@Bean(name = GRAPHQL_PROVIDER_NAME)
 	@Lazy
 	public GraphQLProvider graphQLProvider() {
-		return new GraphQLProvider(fhirContextR4(), validationSupportChainDstu3(), graphqlStorageServices());
+		return new GraphQLProvider(fhirContextR4(), validationSupportChain(), graphqlStorageServices());
 	}
 
 	@Bean(name = "myInstanceValidatorR4")
@@ -97,7 +97,7 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 		FhirInstanceValidator val = new FhirInstanceValidator(fhirContext());
 		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Warning;
 		val.setBestPracticeWarningLevel(level);
-		val.setValidationSupport(validationSupportChainDstu3());
+		val.setValidationSupport(validationSupportChain());
 		return val;
 	}
 

@@ -22,7 +22,12 @@ package ca.uhn.fhir.rest.api;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
@@ -355,17 +360,7 @@ public class Constants {
 		CORS_ALLWED_METHODS = Collections.unmodifiableSet(corsAllowedMethods);
 	}
 
-	// FIXME: remove
-	public static final String CODESYSTEM_VALIDATE_NOT_NEEDED_ = UUID.randomUUID().toString();
-
-	// FIXME: remove
-	public static boolean codeSystemNotNeeded_(String theCodeSystem) {
-		return Constants.CODESYSTEM_VALIDATE_NOT_NEEDED_.equals(theCodeSystem);
-	}
-
-
-	// FIXME: should we handle "guess" and null nicely?
 	public static String codeSystemWithDefaultDescription(String theSystem) {
-			return defaultIfBlank(theSystem, "(none)");
+		return defaultIfBlank(theSystem, "(none)");
 	}
 }

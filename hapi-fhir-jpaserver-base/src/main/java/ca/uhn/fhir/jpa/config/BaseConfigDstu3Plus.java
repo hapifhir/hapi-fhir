@@ -73,10 +73,9 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 		return new JpaPersistedResourceValidationSupport(fhirContext());
 	}
 
-	// FIXME: rename from dstu3
 	@Primary
 	@Bean(name = "myJpaValidationSupportChain")
-	public IContextValidationSupport validationSupportChainDstu3() {
+	public IContextValidationSupport validationSupportChain() {
 		return new CachingValidationSupport(jpaValidationSupportChain());
 	}
 

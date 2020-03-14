@@ -73,7 +73,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	@Before
 	public void before() {
 		myDaoConfig.setMaximumExpansionSize(5000);
-		myCachingValidationSupport.flushCaches();
+		myCachingValidationSupport.invalidateCaches();
 	}
 
 	private CodeSystem createExternalCs() {

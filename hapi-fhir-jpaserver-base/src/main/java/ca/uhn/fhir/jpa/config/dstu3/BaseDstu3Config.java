@@ -77,7 +77,7 @@ public class BaseDstu3Config extends BaseConfigDstu3Plus {
 	@Bean(name = GRAPHQL_PROVIDER_NAME)
 	@Lazy
 	public GraphQLProvider graphQLProvider() {
-		return new GraphQLProvider(fhirContextDstu3(), validationSupportChainDstu3(), graphqlStorageServices());
+		return new GraphQLProvider(fhirContextDstu3(), validationSupportChain(), graphqlStorageServices());
 	}
 
 	@Bean
@@ -95,7 +95,7 @@ public class BaseDstu3Config extends BaseConfigDstu3Plus {
 	public IInstanceValidatorModule instanceValidatorDstu3() {
 		FhirInstanceValidator val = new FhirInstanceValidator(fhirContext());
 		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
-		val.setValidationSupport(validationSupportChainDstu3());
+		val.setValidationSupport(validationSupportChain());
 		return val;
 	}
 

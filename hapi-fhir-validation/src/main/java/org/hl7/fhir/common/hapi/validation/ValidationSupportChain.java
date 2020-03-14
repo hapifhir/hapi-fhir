@@ -41,9 +41,9 @@ public class ValidationSupportChain implements IContextValidationSupport {
 	}
 
 	@Override
-	public void flushCaches() {
+	public void invalidateCaches() {
 		for (IContextValidationSupport next : myChain) {
-			next.flushCaches();
+			next.invalidateCaches();
 		}
 	}
 

@@ -509,7 +509,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@AfterClass
 	public static void afterClassClearContextBaseJpaR4Test() {
 		ourValueSetDao.purgeCaches();
-		ourJpaValidationSupportChainR4.flushCaches();
+		ourJpaValidationSupportChainR4.invalidateCaches();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 

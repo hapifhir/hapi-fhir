@@ -100,7 +100,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	}
 
 	@Override
-	public void flushCaches() {
+	public void invalidateCaches() {
 		myCache.invalidateAll();
 	}
 }
