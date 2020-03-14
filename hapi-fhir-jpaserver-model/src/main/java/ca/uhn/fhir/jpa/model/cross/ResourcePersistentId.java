@@ -25,6 +25,7 @@ import ca.uhn.fhir.util.ObjectUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class is an abstraction for however primary keys are stored in the underlying storage engine. This might be
@@ -35,6 +36,7 @@ public class ResourcePersistentId {
 	private Object myId;
 
 	public ResourcePersistentId(Object theId) {
+		assert !(theId instanceof Optional);
 		myId = theId;
 	}
 
