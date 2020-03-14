@@ -184,6 +184,11 @@ public class DaoConfig {
 	private boolean myPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets;
 
 	/**
+	 * @since 5.0.0
+	 */
+	private boolean myDeleteEnabled = true;
+
+	/**
 	 * Constructor
 	 */
 	public DaoConfig() {
@@ -1907,7 +1912,33 @@ public class DaoConfig {
 		setPreExpandValueSetsDefaultCount(Math.min(getPreExpandValueSetsDefaultCount(), getPreExpandValueSetsMaxCount()));
 	}
 
-	public enum StoreMetaSourceInformationEnum {
+	/**
+	 * This setting should be disabled (set to <code>false</code>) on servers that are not allowing
+	 * deletes. Default is <code>true</code>. If deletes are disabled, some checks for resource
+	 * deletion can be skipped, which improves performance. This is particularly helpful when large
+	 * amounts of data containing client-assigned IDs are being loaded, but it can also improve
+	 * search performance.
+	 *
+	 * @since 5.0.0
+	 */
+	public void setDeleteEnabled(boolean theDeleteEnabled) {
+		myDeleteEnabled = theDeleteEnabled;
+	}
+
+	/**
+	 * This setting should be disabled (set to <code>false</code>) on servers that are not allowing
+	 * deletes. Default is <code>true</code>. If deletes are disabled, some checks for resource
+	 * deletion can be skipped, which improves performance. This is particularly helpful when large
+	 * amounts of data containing client-assigned IDs are being loaded, but it can also improve
+	 * search performance.
+	 *
+	 * @since 5.0.0
+	 */
+	public boolean isDeleteEnabled() {
+		return myDeleteEnabled;
+	}
+
+    public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
 		SOURCE_URI(true, false),
 		REQUEST_ID(false, true),
