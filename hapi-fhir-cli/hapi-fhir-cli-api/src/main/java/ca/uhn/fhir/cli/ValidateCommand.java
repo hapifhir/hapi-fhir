@@ -21,6 +21,8 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.igpacks.parser.IgPackParserDstu2;
 import ca.uhn.fhir.igpacks.parser.IgPackParserDstu3;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -37,9 +39,8 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.fusesource.jansi.Ansi.Color;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.StaticResourceTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -157,12 +158,12 @@ public class ValidateCommand extends BaseCommand {
 			switch (ctx.getVersion().getVersion()) {
 				case DSTU2: {
 					ValidationSupportChain validationSupport = new ValidationSupportChain(
-						new DefaultProfileValidationSupport(ctx));
+						new DefaultProfileValidationSupport(ctx), new StaticResourceTerminologyServerValidationSupport(ctx));
 					if (igPack != null) {
 						FhirContext hl7orgCtx = FhirContext.forDstu2Hl7Org();
 						hl7orgCtx.setParserErrorHandler(new LenientErrorHandler(false));
 						IgPackParserDstu2 parser = new IgPackParserDstu2(hl7orgCtx);
-						org.hl7.fhir.instance.hapi.validation.IValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
+						IContextValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
 						validationSupport.addValidationSupport(igValidationSupport);
 					}
 
@@ -178,10 +179,10 @@ public class ValidateCommand extends BaseCommand {
 				case DSTU3: {
 					FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 					val.registerValidatorModule(instanceValidator);
-					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport(ctx));
+					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), new StaticResourceTerminologyServerValidationSupport(ctx));
 					if (igPack != null) {
 						IgPackParserDstu3 parser = new IgPackParserDstu3(getFhirContext());
-						IValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
+						IContextValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
 						validationSupport.addValidationSupport(igValidationSupport);
 					}
 

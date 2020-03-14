@@ -6,8 +6,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.fail;
 
-public class ValidateTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateTest.class);
+public class ValidateCommandTest {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateCommandTest.class);
 
 	@Before
 	public void before() {
@@ -16,7 +16,7 @@ public class ValidateTest {
 	
 	@Test
 	public void testValidateLocalProfile() {
-		String resourcePath = ValidateTest.class.getResource("/patient-uslab-example1.xml").getFile();
+		String resourcePath = ValidateCommandTest.class.getResource("/patient-uslab-example1.xml").getFile();
 		ourLog.info(resourcePath);
 		
 		App.main(new String[] {
@@ -29,7 +29,7 @@ public class ValidateTest {
 	@Test
 	@Ignore
 	public void testValidateUsingIgPackSucceedingDstu2() {
-		String resourcePath = ValidateTest.class.getResource("/argo-dstu2-observation-good.json").getFile();
+		String resourcePath = ValidateCommandTest.class.getResource("/argo-dstu2-observation-good.json").getFile();
 		ourLog.info(resourcePath);
 
 		App.main(new String[] {
@@ -42,7 +42,7 @@ public class ValidateTest {
 
 	@Test
 	public void testValidateUsingIgPackFailingDstu2() {
-		String resourcePath = ValidateTest.class.getResource("/argo-dstu2-observation-bad.json").getFile();
+		String resourcePath = ValidateCommandTest.class.getResource("/argo-dstu2-observation-bad.json").getFile();
 		ourLog.info(resourcePath);
 
 		try {

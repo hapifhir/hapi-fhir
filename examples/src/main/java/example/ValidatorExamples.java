@@ -2,6 +2,7 @@ package example;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -15,9 +16,7 @@ import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.Observation;
@@ -224,7 +223,7 @@ public class ValidatorExamples {
       FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
       validator.registerValidatorModule(instanceValidator);
       
-      IValidationSupport valSupport = new IValidationSupport() {
+      IContextValidationSupport valSupport = new IContextValidationSupport() {
 
 			@Override
 			public List<IBaseResource> fetchAllConformanceResources() {

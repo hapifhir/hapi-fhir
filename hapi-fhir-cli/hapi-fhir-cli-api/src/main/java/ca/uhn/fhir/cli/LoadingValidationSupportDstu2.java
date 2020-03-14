@@ -25,10 +25,9 @@ import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public class LoadingValidationSupportDstu2 implements IValidationSupport {
+public class LoadingValidationSupportDstu2 implements IContextValidationSupport {
 
 	private FhirContext myCtx = FhirContext.forDstu2Hl7Org();
 

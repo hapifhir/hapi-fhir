@@ -21,13 +21,13 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public class LoadingValidationSupportDstu3 implements IValidationSupport {
+public class LoadingValidationSupportDstu3 implements IContextValidationSupport {
 
 	private FhirContext myCtx = FhirContext.forDstu3();
 

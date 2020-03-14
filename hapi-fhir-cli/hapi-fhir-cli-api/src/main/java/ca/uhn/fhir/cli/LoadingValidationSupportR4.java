@@ -21,12 +21,13 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public class LoadingValidationSupportR4 implements org.hl7.fhir.r4.hapi.ctx.IValidationSupport {
+public class LoadingValidationSupportR4 implements IContextValidationSupport {
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoadingValidationSupportR4.class);
 	private FhirContext myCtx = FhirContext.forR4();

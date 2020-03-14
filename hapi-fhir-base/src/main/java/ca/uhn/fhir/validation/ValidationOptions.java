@@ -29,7 +29,7 @@ import java.util.Set;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 // FIXME: is this needed? it has the same name as another class
-public class ValidationOptions {
+public class Validatgit aionOptions {
 
 	private static ValidationOptions ourEmpty;
 	private Set<String> myProfiles;
