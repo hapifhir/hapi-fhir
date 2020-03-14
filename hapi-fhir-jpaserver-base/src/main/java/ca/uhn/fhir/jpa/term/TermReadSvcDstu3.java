@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -52,7 +52,7 @@ import static org.hl7.fhir.convertors.conv30_40.ValueSet30_40.convertValueSet;
  * #L%
  */
 
-public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IContextValidationSupport, ITermReadSvcDstu3 {
+public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidationSupport, ITermReadSvcDstu3 {
 
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
@@ -67,12 +67,12 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IContextVal
 
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(IValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
 		try {
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
 			valueSetToExpandR4 = toCanonicalValueSet(theValueSetToExpand);
-			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(theExpansionOptions, valueSetToExpandR4, null);
-			return new ValueSetExpansionOutcome(expandedR4, null);
+			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(theExpansionOptions, valueSetToExpandR4);
+			return new ValueSetExpansionOutcome(convertValueSet(expandedR4), null);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
@@ -85,7 +85,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IContextVal
 		try {
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
 			valueSetToExpandR4 = toCanonicalValueSet(valueSetToExpand);
-			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(theExpansionOptions, valueSetToExpandR4, null);
+			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(theExpansionOptions, valueSetToExpandR4);
 			return convertValueSet(expandedR4);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
@@ -102,20 +102,6 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IContextVal
 	@Override
 	protected org.hl7.fhir.r4.model.CodeSystem toCanonicalCodeSystem(IBaseResource theCodeSystem) {
 		return CodeSystem30_40.convertCodeSystem((CodeSystem)theCodeSystem);
-	}
-
-	@Override
-	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theInput, int theOffset, int theCount) {
-		ValueSet valueSetToExpand = (ValueSet) theInput;
-
-		try {
-			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
-			valueSetToExpandR4 = toCanonicalValueSet(valueSetToExpand);
-			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(theExpansionOptions, valueSetToExpandR4, theOffset, theCount);
-			return convertValueSet(expandedR4);
-		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
-		}
 	}
 
 	@Override
@@ -147,7 +133,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IContextVal
 
 	@CoverageIgnore
 	@Override
-	public IContextValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public IValidationSupport.CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		Optional<VersionIndependentConcept> codeOpt = Optional.empty();
 		boolean haveValidated = false;
 
@@ -164,18 +150,18 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IContextVal
 
 		if (codeOpt != null && codeOpt.isPresent()) {
 			VersionIndependentConcept code = codeOpt.get();
-			IContextValidationSupport.CodeValidationResult retVal = new IContextValidationSupport.CodeValidationResult()
+			IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult()
 				.setCode(code.getCode());
 			return retVal;
 		}
 
-		return new IContextValidationSupport.CodeValidationResult()
+		return new IValidationSupport.CodeValidationResult()
 			.setSeverity(IssueSeverity.ERROR.toCode())
 			.setMessage("Unknown code {" + theCodeSystem + "}" + theCode);
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
 		return super.lookupCode(theSystem, theCode);
 	}
 

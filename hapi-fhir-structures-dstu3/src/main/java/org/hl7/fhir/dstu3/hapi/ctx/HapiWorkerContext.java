@@ -2,10 +2,8 @@ package org.hl7.fhir.dstu3.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -19,12 +17,9 @@ import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
-import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderFactory;
-import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.dstu3.utils.INarrativeGenerator;
 import org.hl7.fhir.dstu3.utils.IResourceValidator;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.slf4j.Logger;
@@ -40,15 +35,14 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-// FIXME: can we remove the ValueSetExpander and ValueSetExpanderFactory interfaces?
-public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
+public final class HapiWorkerContext implements IWorkerContext {
   private static final Logger ourLog = LoggerFactory.getLogger(HapiWorkerContext.class);
   private final FhirContext myCtx;
   private final Cache<String, Resource> myFetchedResourceCache;
-  private IContextValidationSupport myValidationSupport;
+  private IValidationSupport myValidationSupport;
   private ExpansionProfile myExpansionProfile;
 
-  public HapiWorkerContext(FhirContext theCtx, IContextValidationSupport theValidationSupport) {
+  public HapiWorkerContext(FhirContext theCtx, IValidationSupport theValidationSupport) {
     Validate.notNull(theCtx, "theCtx must not be null");
     Validate.notNull(theValidationSupport, "theValidationSupport must not be null");
     myCtx = theCtx;
@@ -73,34 +67,10 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValueSetExpansionOutcome expand(ValueSet theSource, ExpansionProfile theProfile) {
-    ValueSetExpansionOutcome vso;
-    try {
-      vso = getExpander().expand(theSource, theProfile);
-    } catch (InvalidRequestException e) {
-      throw e;
-    } catch (TerminologyServiceException e) {
-      throw new InvalidRequestException(e.getMessage(), e);
-    } catch (Exception e) {
-      throw new InternalErrorException(e);
-    }
-    if (vso.getError() != null) {
-      throw new InvalidRequestException(vso.getError());
-    } else {
-      return vso;
-    }
-  }
-
-  @Override
-  public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHierarchical) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc, boolean theHierarchical) {
     ValueSet input = new ValueSet();
     input.getCompose().addInclude(theInc);
-    IContextValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(myValidationSupport, null, input);
+    IValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(myValidationSupport, null, input);
     ValueSet outputValueSet = (ValueSet) output.getValueSet();
     if (outputValueSet != null) {
       return outputValueSet.getExpansion();
@@ -130,9 +100,6 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       return null;
     } else {
       try {
-        // FIXME: remove
-        ourLog.info("Fetching {} resource: {}", theClass.getSimpleName(), theUri);
-
         //noinspection unchecked
         return (T) myFetchedResourceCache.get(theUri, t -> {
           T resource = myValidationSupport.fetchResource(theClass, theUri);
@@ -162,15 +129,13 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public String getAbbreviation(String theName) {
+  public ValueSetExpander.ValueSetExpansionOutcome expandVS(ValueSet source, boolean cacheOk, boolean heiarchical) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public ValueSetExpander getExpander() {
-    ValueSetExpanderSimple retVal = new ValueSetExpanderSimple(this, this);
-    retVal.setMaxExpansionSize(Integer.MAX_VALUE);
-    return retVal;
+  public String getAbbreviation(String theName) {
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -303,7 +268,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   @Override
   public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
     ValidationOptions options = new ValidationOptions();
-    IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(options), theSystem, theCode, theDisplay, null);
+    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(options), theSystem, theCode, theDisplay, null);
     if (result == null) {
       return null;
     }
@@ -352,7 +317,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       return new ValidationResult(definition);
     }
 
-    IContextValidationSupport.CodeValidationResult outcome;
+    IValidationSupport.CodeValidationResult outcome;
     ValidationOptions options = new ValidationOptions();
     if (isNotBlank(theVs.getUrl())) {
       outcome = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(options), theSystem, theCode, theDisplay, theVs.getUrl());

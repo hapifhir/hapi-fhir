@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.searchparam;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
@@ -40,8 +40,8 @@ public class IndexStressTest {
 		p.addAddress().addLine("A").addLine("B").addLine("C");
 
 		FhirContext ctx = FhirContext.forDstu3();
-		IContextValidationSupport mockValidationSupport = mock(IContextValidationSupport.class);
-		IContextValidationSupport validationSupport = new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), mockValidationSupport));
+		IValidationSupport mockValidationSupport = mock(IValidationSupport.class);
+		IValidationSupport validationSupport = new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), mockValidationSupport));
 		ISearchParamRegistry searchParamRegistry = mock(ISearchParamRegistry.class);
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ctx, validationSupport, searchParamRegistry);
 		extractor.start();

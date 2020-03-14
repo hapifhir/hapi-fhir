@@ -1,7 +1,7 @@
 package org.hl7.fhir.instance.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -44,7 +44,7 @@ public class FhirInstanceValidatorDstu2Test {
 	@BeforeClass
 	public static void beforeClass() {
 		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(ourCtxDstu2);
-		IContextValidationSupport validationSupport = new ValidationSupportChain(defaultProfileValidationSupport, new StaticResourceTerminologyServerValidationSupport(ourCtxDstu2));
+		IValidationSupport validationSupport = new ValidationSupportChain(defaultProfileValidationSupport, new StaticResourceTerminologyServerValidationSupport(ourCtxDstu2));
 		ourValidator = new FhirInstanceValidator(validationSupport);
 	}
 

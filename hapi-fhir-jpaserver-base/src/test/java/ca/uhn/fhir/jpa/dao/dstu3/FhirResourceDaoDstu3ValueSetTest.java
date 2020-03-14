@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
@@ -39,7 +39,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 
 	private IIdType myExtensionalVsId;
 	@Autowired
-	private IContextValidationSupport myValidationSupport;
+	private IValidationSupport myValidationSupport;
 
 	@Before
 	@Transactional
@@ -247,9 +247,9 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		IPrimitiveType<String> display = null;
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
-		StringType vsIdentifier = new StringType("http://hl7.org/fhir/ValueSet/v2-0487");
-		StringType code = new StringType("BRN");
-		StringType system = new StringType("http://hl7.org/fhir/v2/0487");
+		StringType vsIdentifier = new StringType("http://hl7.org/fhir/ValueSet/administrative-gender");
+		StringType code = new StringType("male");
+		StringType system = new StringType("http://hl7.org/fhir/administrative-gender");
 		ValidateCodeResult result = myValueSetDao.validateCode(vsIdentifier, null, code, system, display, coding, codeableConcept, mySrd);
 
 		ourLog.info(result.getMessage());

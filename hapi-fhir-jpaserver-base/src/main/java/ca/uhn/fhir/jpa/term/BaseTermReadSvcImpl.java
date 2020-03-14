@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IDao;
@@ -176,9 +176,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private ITermCodeSystemStorageSvc myConceptStorageSvc;
 	@Autowired
 	private ApplicationContext myApplicationContext;
+	private volatile IValidationSupport myJpaValidationSupport;
+	private volatile IValidationSupport myValidationSupport;
 
 	@Override
-	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
+	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
 		return supportsSystem(theSystem);
 	}
 
@@ -297,9 +299,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		deleteValueSet(theResourceTable);
 	}
 
-	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
-	public ValueSet expandValueSetInMemory(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, VersionIndependentConcept theWantConceptOrNull) {
+	private ValueSet expandValueSetInMemory(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, VersionIndependentConcept theWantConceptOrNull) {
 
 		int maxCapacity = myDaoConfig.getMaximumExpansionSize();
 		ValueSetExpansionComponentWithConceptAccumulator expansionComponent = new ValueSetExpansionComponentWithConceptAccumulator(myContext, maxCapacity);
@@ -333,21 +333,18 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public ValueSet expandValueSet(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, int theOffset, int theCount) {
+	public ValueSet expandValueSet(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSetToExpand, "ValueSet to expand can not be null");
 
 		Optional<TermValueSet> optionalTermValueSet;
-		if (theValueSetToExpand.hasId()) {
-			ResourcePersistentId valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSetToExpand.getIdElement());
-			optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong());
-		} else if (theValueSetToExpand.hasUrl()) {
+		if (theValueSetToExpand.hasUrl()) {
 			optionalTermValueSet = myValueSetDao.findByUrl(theValueSetToExpand.getUrl());
 		} else {
-			throw new UnprocessableEntityException("ValueSet to be expanded must provide either ValueSet.id or ValueSet.url");
+			optionalTermValueSet = Optional.empty();
 		}
 
 		if (!optionalTermValueSet.isPresent()) {
-			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory expansion without parameters. {}", getValueSetInfo(theValueSetToExpand));
+			ourLog.debug("ValueSet is not present in terminology tables. Will perform in-memory expansion without parameters. {}", getValueSetInfo(theValueSetToExpand));
 			return expandValueSetInMemory(theExpansionOptions, theValueSetToExpand, null); // In-memory expansion.
 		}
 
@@ -363,7 +360,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		expansionComponent.setIdentifier(UUID.randomUUID().toString());
 		expansionComponent.setTimestamp(new Date());
 
-		populateExpansionComponent(expansionComponent, termValueSet, theOffset, theCount);
+		ValueSetExpansionOptions expansionOptions = provideExpansionOptions(theExpansionOptions);
+		int offset = expansionOptions.getOffset();
+		int count = expansionOptions.getCount();
+		populateExpansionComponent(expansionComponent, termValueSet, offset, count);
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -1612,14 +1612,14 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	protected abstract ValueSet toCanonicalValueSet(IBaseResource theValueSet);
 
-	protected IContextValidationSupport.LookupCodeResult lookupCode(String theSystem, String theCode) {
+	protected IValidationSupport.LookupCodeResult lookupCode(String theSystem, String theCode) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		return txTemplate.execute(t -> {
 			Optional<TermConcept> codeOpt = findCode(theSystem, theCode);
 			if (codeOpt.isPresent()) {
 				TermConcept code = codeOpt.get();
 
-				IContextValidationSupport.LookupCodeResult result = new IContextValidationSupport.LookupCodeResult();
+				IValidationSupport.LookupCodeResult result = new IValidationSupport.LookupCodeResult();
 				result.setCodeSystemDisplayName(code.getCodeSystemVersion().getCodeSystemDisplayName());
 				result.setCodeSystemVersion(code.getCodeSystemVersion().getCodeSystemVersionId());
 				result.setSearchedForSystem(theSystem);
@@ -1628,7 +1628,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				result.setCodeDisplay(code.getDisplay());
 
 				for (TermConceptDesignation next : code.getDesignations()) {
-					IContextValidationSupport.ConceptDesignation designation = new IContextValidationSupport.ConceptDesignation();
+					IValidationSupport.ConceptDesignation designation = new IValidationSupport.ConceptDesignation();
 					designation.setLanguage(next.getLanguage());
 					designation.setUseSystem(next.getUseSystem());
 					designation.setUseCode(next.getUseCode());
@@ -1639,10 +1639,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 				for (TermConceptProperty next : code.getProperties()) {
 					if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
-						IContextValidationSupport.CodingConceptProperty property = new IContextValidationSupport.CodingConceptProperty(next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay());
+						IValidationSupport.CodingConceptProperty property = new IValidationSupport.CodingConceptProperty(next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay());
 						result.getProperties().add(property);
 					} else if (next.getType() == TermConceptPropertyTypeEnum.STRING) {
-						IContextValidationSupport.StringConceptProperty property = new IContextValidationSupport.StringConceptProperty(next.getKey(), next.getValue());
+						IValidationSupport.StringConceptProperty property = new IValidationSupport.StringConceptProperty(next.getKey(), next.getValue());
 						result.getProperties().add(property);
 					} else {
 						throw new InternalErrorException("Unknown type: " + next.getType());
@@ -1878,7 +1878,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
-	public CodeValidationResult validateCodeInValueSet(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	public CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 
 		IPrimitiveType<?> urlPrimitive = myContext.newTerser().getSingleValueOrNull(theValueSet, "url", IPrimitiveType.class);
 		String url = urlPrimitive.getValueAsString();
@@ -1888,7 +1888,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return null;
 	}
 
-	Optional<VersionIndependentConcept> validateCodeInValueSet(IContextValidationSupport theValidationSupport, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode) {
+	Optional<VersionIndependentConcept> validateCodeInValueSet(IValidationSupport theValidationSupport, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode) {
 		IBaseResource valueSet = theValidationSupport.fetchValueSet(theValueSetUrl);
 
 		// If we don't have a PID, this came from some source other than the JPA
@@ -1919,26 +1919,43 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
-		// FIXME: this is kinda inefficient
-		IContextValidationSupport jpaValidationSupport = myApplicationContext.getBean("myJpaValidationSupport", IContextValidationSupport.class);
+		IValidationSupport jpaValidationSupport = provideJpaValidationSupport();
 		return jpaValidationSupport.fetchCodeSystem(theSystem);
 	}
 
 	@Override
 	public CodeSystem fetchCanonicalCodeSystemFromCompleteContext(String theSystem) {
-		// FIXME: this is kinda inefficient
-		IContextValidationSupport jpaValidationSupport = myApplicationContext.getBean(IContextValidationSupport.class);
-		IBaseResource codeSystem = jpaValidationSupport.fetchCodeSystem(theSystem);
+		IValidationSupport validationSupport = provideValidationSupport();
+		IBaseResource codeSystem = validationSupport.fetchCodeSystem(theSystem);
 		if (codeSystem != null) {
 			codeSystem = toCanonicalCodeSystem(codeSystem);
 		}
 		return (CodeSystem) codeSystem;
 	}
 
+	@Nonnull
+	private IValidationSupport provideJpaValidationSupport() {
+		IValidationSupport jpaValidationSupport = myJpaValidationSupport;
+		if (jpaValidationSupport == null) {
+			jpaValidationSupport = myApplicationContext.getBean("myJpaValidationSupport", IValidationSupport.class);
+			myJpaValidationSupport = jpaValidationSupport;
+		}
+		return jpaValidationSupport;
+	}
+
+	@Nonnull
+	private IValidationSupport provideValidationSupport() {
+		IValidationSupport validationSupport = myValidationSupport;
+		if (validationSupport == null) {
+			validationSupport = myApplicationContext.getBean(IValidationSupport.class);
+			myValidationSupport = validationSupport;
+		}
+		return validationSupport;
+	}
+
 	public ValueSet fetchCanonicalValueSetFromCompleteContext(String theSystem) {
-		// FIXME: this is kinda inefficient
-		IContextValidationSupport jpaValidationSupport = myApplicationContext.getBean(IContextValidationSupport.class);
-		IBaseResource valueSet = jpaValidationSupport.fetchValueSet(theSystem);
+		IValidationSupport validationSupport = provideValidationSupport();
+		IBaseResource valueSet = validationSupport.fetchValueSet(theSystem);
 		if (valueSet != null) {
 			valueSet = toCanonicalValueSet(valueSet);
 		}
@@ -1949,9 +1966,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	public IBaseResource fetchValueSet(String theValueSetUrl) {
-		// FIXME: this is kinda inefficient
-		IContextValidationSupport jpaValidationSupport = myApplicationContext.getBean("myJpaValidationSupport", IContextValidationSupport.class);
-		return jpaValidationSupport.fetchValueSet(theValueSetUrl);
+		return provideJpaValidationSupport().fetchValueSet(theValueSetUrl);
 	}
 
 	@Override

@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription.module.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamR4Config;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -34,7 +34,7 @@ public class SubscriptionR4Config extends BaseSubscriptionConfig {
 
 	@Primary
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChain")
-	public IContextValidationSupport validationSupportChainR4() {
+	public IValidationSupport validationSupportChainR4() {
 		return new DefaultProfileValidationSupport(FhirContext.forR4());
 	}
 }

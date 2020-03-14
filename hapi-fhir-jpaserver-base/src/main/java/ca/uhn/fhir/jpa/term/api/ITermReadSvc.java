@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.term.api;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -55,11 +55,9 @@ import java.util.Set;
  * been moved yet)
  * </p>
  */
-public interface ITermReadSvc extends IContextValidationSupport {
+public interface ITermReadSvc extends IValidationSupport {
 
-	ValueSet expandValueSetInMemory(@Nullable ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, VersionIndependentConcept theWantConceptOrNull);
-
-	ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, int theOffset, int theCount);
+	ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand);
 
 	void expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 
@@ -67,11 +65,6 @@ public interface ITermReadSvc extends IContextValidationSupport {
 	 * Version independent
 	 */
 	IBaseResource expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand);
-
-	/**
-	 * Version independent
-	 */
-	IBaseResource expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, int theOffset, int theCount);
 
 	void expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 

@@ -2,7 +2,7 @@ package ca.uhn.fhir.igpack.parser;
 
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.igpacks.parser.IgPackParserDstu3;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.junit.Test;
@@ -21,7 +21,7 @@ public class IgPackParserDstu3Test {
 		FhirContext ctx = FhirContext.forDstu3();
 		IgPackParserDstu3 igParser = new IgPackParserDstu3(ctx);
 
-		IContextValidationSupport result = igParser.parseIg(IgPackParserDstu3Test.class.getResourceAsStream("/us-core-stu3-validator.pack"), "US-Core STU3");
+		IValidationSupport result = igParser.parseIg(IgPackParserDstu3Test.class.getResourceAsStream("/us-core-stu3-validator.pack"), "US-Core STU3");
 
 		assertNotNull(result.fetchResource(ValueSet.class, "http://hl7.org/fhir/us/core/ValueSet/simple-language"));
 		assertEquals(50, result.fetchAllConformanceResources().size());

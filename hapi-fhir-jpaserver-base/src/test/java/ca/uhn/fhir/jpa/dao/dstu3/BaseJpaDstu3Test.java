@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.*;
@@ -65,7 +65,7 @@ import static org.junit.Assert.fail;
 @ContextConfiguration(classes = {TestDstu3Config.class})
 public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
-	private static IContextValidationSupport ourJpaValidationSupportChainDstu3;
+	private static IValidationSupport ourJpaValidationSupportChainDstu3;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
 	@Autowired
@@ -256,7 +256,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
 	@Qualifier("myJpaValidationSupportChain")
-	protected IContextValidationSupport myValidationSupport;
+	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoDstu3")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
@@ -265,7 +265,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
 	@Autowired
-	private IContextValidationSupport myJpaValidationSupportChainDstu3;
+	private IValidationSupport myJpaValidationSupportChainDstu3;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired

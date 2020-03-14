@@ -1,7 +1,7 @@
 package org.hl7.fhir.r5.hapi.fhirpath;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.fluentpath.FluentPathExecutionException;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -18,7 +18,7 @@ public class FhirPathR5 implements IFluentPath {
   private FHIRPathEngine myEngine;
 
   public FhirPathR5(FhirContext theCtx) {
-	  IContextValidationSupport validationSupport = theCtx.getValidationSupport();
+	  IValidationSupport validationSupport = theCtx.getValidationSupport();
     myEngine = new FHIRPathEngine(new HapiWorkerContext(theCtx, validationSupport));
   }
 

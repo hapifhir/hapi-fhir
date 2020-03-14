@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -95,7 +95,7 @@ public class BaseDstu2Config extends BaseConfig {
 
 	@Primary
 	@Bean(name = "myJpaValidationSupportDstu2", autowire = Autowire.BY_NAME)
-	public IContextValidationSupport jpaValidationSupportDstu2() {
+	public IValidationSupport jpaValidationSupportDstu2() {
 		JpaPersistedResourceValidationSupport retVal = new JpaPersistedResourceValidationSupport(fhirContextDstu2());
 		return retVal;
 	}

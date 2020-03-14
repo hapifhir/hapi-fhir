@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription.module.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamDstu3Config;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Primary;
 public class SubscriptionDstu3Config extends BaseSubscriptionConfig {
 	@Primary
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChain")
-	public IContextValidationSupport validationSupportChainDstu3() {
+	public IValidationSupport validationSupportChainDstu3() {
 		return new DefaultProfileValidationSupport(FhirContext.forDstu3());
 	}
 }

@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -64,7 +64,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 
 	@Autowired
-	private IContextValidationSupport myJpaValidationSupport;
+	private IValidationSupport myJpaValidationSupport;
 
 	@Autowired
 	@Qualifier("myFhirContextDstu2Hl7Org")
@@ -207,13 +207,13 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		return source;
 	}
 
-	private IContextValidationSupport.LookupCodeResult lookup(List<ExpansionContains> theContains, String theSystem, String theCode) {
+	private IValidationSupport.LookupCodeResult lookup(List<ExpansionContains> theContains, String theSystem, String theCode) {
 		for (ExpansionContains nextCode : theContains) {
 
 			String system = nextCode.getSystem();
 			String code = nextCode.getCode();
 			if (theSystem.equals(system) && theCode.equals(code)) {
-				IContextValidationSupport.LookupCodeResult retVal = new IContextValidationSupport.LookupCodeResult();
+				IValidationSupport.LookupCodeResult retVal = new IValidationSupport.LookupCodeResult();
 				retVal.setSearchedForCode(code);
 				retVal.setSearchedForSystem(system);
 				retVal.setFound(true);
@@ -232,7 +232,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	}
 
 	@Override
-	public IContextValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, RequestDetails theRequest) {
+	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, RequestDetails theRequest) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
@@ -258,13 +258,13 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		for (IIdType nextId : valueSetIds) {
 			ValueSet expansion = expand(nextId, null, theRequest);
 			List<ExpansionContains> contains = expansion.getExpansion().getContains();
-			IContextValidationSupport.LookupCodeResult result = lookup(contains, system, code);
+			IValidationSupport.LookupCodeResult result = lookup(contains, system, code);
 			if (result != null) {
 				return result;
 			}
 		}
 
-		IContextValidationSupport.LookupCodeResult retVal = new IContextValidationSupport.LookupCodeResult();
+		IValidationSupport.LookupCodeResult retVal = new IValidationSupport.LookupCodeResult();
 		retVal.setFound(false);
 		retVal.setSearchedForCode(code);
 		retVal.setSearchedForSystem(system);

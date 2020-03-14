@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
@@ -62,7 +62,7 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 	@Autowired
 	private ITermCodeSystemDao myCsDao;
 	@Autowired
-	private IContextValidationSupport myValidationSupport;
+	private IValidationSupport myValidationSupport;
 	@Autowired
 	private FhirContext myFhirContext;
 
@@ -80,7 +80,7 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 
 	@Nonnull
 	@Override
-	public IContextValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
+	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
@@ -107,7 +107,7 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 		if (myValidationSupport.isCodeSystemSupported(myValidationSupport, system)) {
 
 			ourLog.info("Code system {} is supported", system);
-			IContextValidationSupport.LookupCodeResult retVal = myValidationSupport.lookupCode(myValidationSupport, system, code);
+			IValidationSupport.LookupCodeResult retVal = myValidationSupport.lookupCode(myValidationSupport, system, code);
 			if (retVal != null) {
 				return retVal;
 			}
@@ -115,7 +115,7 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 		}
 
 		// We didn't find it..
-		return IContextValidationSupport.LookupCodeResult.notFound(system, code);
+		return IValidationSupport.LookupCodeResult.notFound(system, code);
 
 	}
 

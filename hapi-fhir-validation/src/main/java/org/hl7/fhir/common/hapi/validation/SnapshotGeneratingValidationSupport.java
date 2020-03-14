@@ -5,7 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -24,7 +24,7 @@ import java.util.ArrayList;
  *    <li>R5</li>
  * </ul>
  */
-public class SnapshotGeneratingValidationSupport implements IContextValidationSupport {
+public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 	private final FhirContext myCtx;
 
 	/**
@@ -37,7 +37,7 @@ public class SnapshotGeneratingValidationSupport implements IContextValidationSu
 
 
 	@Override
-	public IBaseResource generateSnapshot(IContextValidationSupport theValidationSupport, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
+	public IBaseResource generateSnapshot(IValidationSupport theValidationSupport, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
 
 		assert theInput.getStructureFhirVersionEnum() == myCtx.getVersion().getVersion();
 		switch (theInput.getStructureFhirVersionEnum()) {

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
@@ -52,7 +52,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IContextValidationSupport, ITermReadSvcR5 {
+public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSupport, ITermReadSvcR5 {
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -61,23 +61,16 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IContextValida
 
 	@Override
 	@Transactional(dontRollbackOn = {ExpansionTooCostlyException.class})
-	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(IValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
 		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
-		org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(theExpansionOptions, org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetToExpand), null);
+		org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(theExpansionOptions, org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetToExpand));
 		return new ValueSetExpansionOutcome(org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(expandedR4));
 	}
 
 	@Override
 	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theInput) {
 		org.hl7.fhir.r4.model.ValueSet valueSetToExpand = toCanonicalValueSet(theInput);
-		org.hl7.fhir.r4.model.ValueSet valueSetR4 = super.expandValueSetInMemory(theExpansionOptions, valueSetToExpand, null);
-		return org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetR4);
-	}
-
-	@Override
-	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theInput, int theOffset, int theCount) {
-		org.hl7.fhir.r4.model.ValueSet valueSetToExpand = toCanonicalValueSet(theInput);
-		org.hl7.fhir.r4.model.ValueSet valueSetR4 = super.expandValueSet(theExpansionOptions, valueSetToExpand, theOffset, theCount);
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = super.expandValueSet(theExpansionOptions, valueSetToExpand);
 		return org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetR4);
 	}
 
@@ -94,7 +87,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IContextValida
 	}
 
 	@Override
-	public IContextValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public IValidationSupport.CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		Optional<VersionIndependentConcept> codeOpt = Optional.empty();
 		boolean haveValidated = false;
 
@@ -113,18 +106,18 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IContextValida
 			VersionIndependentConcept code = codeOpt.get();
 			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
 			def.setCode(code.getCode());
-			IContextValidationSupport.CodeValidationResult retVal = new IContextValidationSupport.CodeValidationResult()
+			IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult()
 				.setCode(code.getCode());
 			return retVal;
 		}
 
-		return new IContextValidationSupport.CodeValidationResult()
+		return new IValidationSupport.CodeValidationResult()
 			.setSeverity(IssueSeverity.ERROR.toCode())
 			.setCode("Unknown code {" + theCodeSystem + "}" + theCode);
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
 		return super.lookupCode(theSystem, theCode);
 	}
 

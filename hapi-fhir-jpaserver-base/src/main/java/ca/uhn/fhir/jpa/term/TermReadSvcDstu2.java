@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -40,7 +40,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 
 	@Autowired
-	private IContextValidationSupport myValidationSupport;
+	private IValidationSupport myValidationSupport;
 
 	private void addAllChildren(String theSystemString, org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
 		if (isNotBlank(theCode.getCode())) {
@@ -82,11 +82,6 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 
 	@Override
 	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, int theOffset, int theCount) {
 		throw new UnsupportedOperationException();
 	}
 

@@ -2,10 +2,8 @@ package org.hl7.fhir.dstu2016may.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2016may.formats.IParser;
 import org.hl7.fhir.dstu2016may.formats.ParserType;
@@ -15,10 +13,7 @@ import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpander;
 import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
-import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpanderFactory;
-import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.dstu2016may.utils.INarrativeGenerator;
 import org.hl7.fhir.dstu2016may.utils.IWorkerContext;
 
@@ -34,12 +29,12 @@ import java.util.Set;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public final class HapiWorkerContext implements IWorkerContext, ValueSetExpanderFactory {
+public final class HapiWorkerContext implements IWorkerContext {
 	private final FhirContext myCtx;
 	private Map<String, Resource> myFetchedResourceCache = new HashMap<>();
-	private IContextValidationSupport myValidationSupport;
+	private IValidationSupport myValidationSupport;
 
-	public HapiWorkerContext(FhirContext theCtx, IContextValidationSupport theValidationSupport) {
+	public HapiWorkerContext(FhirContext theCtx, IValidationSupport theValidationSupport) {
 		Validate.notNull(theCtx, "theCtx must not be null");
 		Validate.notNull(theValidationSupport, "theValidationSupport must not be null");
 		myCtx = theCtx;
@@ -176,7 +171,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, new ConceptValidationOptions(), theSystem, theCode, theDisplay, null);
+		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, new ConceptValidationOptions(), theSystem, theCode, theDisplay, null);
 		if (result == null) {
 			return null;
 		}
@@ -266,25 +261,8 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	}
 
 	@Override
-	public ValueSetExpander getExpander() {
-		return new ValueSetExpanderSimple(this, this);
-	}
-
-	@Override
 	public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk) {
-		ValueSetExpansionOutcome vso;
-		try {
-			vso = getExpander().expand(theSource);
-		} catch (InvalidRequestException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new InternalErrorException(e);
-		}
-		if (vso.getError() != null) {
-			throw new InvalidRequestException(vso.getError());
-		} else {
-			return vso;
-		}
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

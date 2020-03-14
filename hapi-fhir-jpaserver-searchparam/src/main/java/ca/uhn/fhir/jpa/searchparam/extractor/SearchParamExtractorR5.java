@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
@@ -67,12 +67,12 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 	public void start() {
 		super.start();
 		if (myFhirPathEngine == null) {
-			IContextValidationSupport support = myApplicationContext.getBean(IContextValidationSupport.class);
+			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
 			initFhirPath(support);
 		}
 	}
 
-	public void initFhirPath(IContextValidationSupport theSupport) {
+	public void initFhirPath(IValidationSupport theSupport) {
 		IWorkerContext worker = new HapiWorkerContext(getContext(), theSupport);
 		myFhirPathEngine = new FHIRPathEngine(worker);
 		myFhirPathEngine.setHostServices(new SearchParamExtractorR5HostServices());

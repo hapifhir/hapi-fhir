@@ -2,7 +2,7 @@ package org.hl7.fhir.common.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CommonCodeSystemsTerminologyService implements IContextValidationSupport {
+public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	private static final String USPS_CODESYSTEM_URL = "https://www.usps.com/";
 	private static Map<String, String> USPS_CODES = new HashMap<>();
 
@@ -90,7 +90,7 @@ public class CommonCodeSystemsTerminologyService implements IContextValidationSu
 	}
 
 	@Override
-	public CodeValidationResult validateCodeInValueSet(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	public CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		String url = getValueSetUrl(theValueSet);
 
 		if ("http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state".equals(url)) {

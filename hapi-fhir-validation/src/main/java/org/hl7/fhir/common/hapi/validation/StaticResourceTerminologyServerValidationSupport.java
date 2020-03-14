@@ -3,7 +3,7 @@ package org.hl7.fhir.common.hapi.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.util.VersionIndependentConcept;
 import org.apache.commons.lang3.Validate;
@@ -31,8 +31,13 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-// FIXME: add javadoc
-public class StaticResourceTerminologyServerValidationSupport implements IContextValidationSupport {
+/**
+ * This class is a basic in-memory terminology service, designed to expand ValueSets and validate codes
+ * completely in-memory. It is suitable for runtime validation purposes where no dedicated terminology
+ * service exists (either an internal one such as the HAPI FHIR JPA terminology service, or an
+ * external term service API)
+ */
+public class StaticResourceTerminologyServerValidationSupport implements IValidationSupport {
 	private final FhirContext myCtx;
 
 	public StaticResourceTerminologyServerValidationSupport(FhirContext theCtx) {
@@ -46,7 +51,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(IValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
 
 		org.hl7.fhir.r5.model.ValueSet expansionR5 = expandValueSetToCanonical(theRootValidationSupport, theValueSetToExpand);
 		if (expansionR5 == null) {
@@ -80,7 +85,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 		return new ValueSetExpansionOutcome(expansion, null);
 	}
 
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetToCanonical(IContextValidationSupport theRootValidationSupport, IBaseResource theValueSetToExpand) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetToCanonical(IValidationSupport theRootValidationSupport, IBaseResource theValueSetToExpand) {
 		org.hl7.fhir.r5.model.ValueSet expansionR5;
 		switch (myCtx.getVersion().getVersion()) {
 			case DSTU2:
@@ -112,7 +117,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 	}
 
 	@Override
-	public CodeValidationResult validateCodeInValueSet(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	public CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 	org.hl7.fhir.r5.model.ValueSet expansion = expandValueSetToCanonical(theRootValidationSupport, theValueSet);
 		if (expansion == null) {
 			return null;
@@ -122,7 +127,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 
 
 	@Override
-	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		IBaseResource vs;
 		if (isNotBlank(theValueSetUrl)) {
 			vs = theRootValidationSupport.fetchValueSet(theValueSetUrl);
@@ -169,7 +174,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 
 	}
 
-	private CodeValidationResult validateCodeInExpandedValueSet(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, IBaseResource theExpansion) {
+	private CodeValidationResult validateCodeInExpandedValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, IBaseResource theExpansion) {
 		assert theExpansion != null;
 
 		boolean caseSensitive = true;
@@ -277,12 +282,12 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
 		return validateCode(theRootValidationSupport, new ConceptValidationOptions(), theSystem, theCode, null, null).asLookupCodeResult(theSystem, theCode);
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu2Hl7Org(IContextValidationSupport theRootValidationSupport, ValueSet theInput) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu2Hl7Org(IValidationSupport theRootValidationSupport, ValueSet theInput) {
 		Function<String, CodeSystem> codeSystemLoader = t -> {
 			org.hl7.fhir.dstu2.model.ValueSet codeSystem = (org.hl7.fhir.dstu2.model.ValueSet) theRootValidationSupport.fetchCodeSystem(t);
 			CodeSystem retVal = new CodeSystem();
@@ -301,7 +306,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 
 
 	@Override
-	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
+	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
 		if (isBlank(theSystem)) {
 			return false;
 		}
@@ -323,7 +328,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 	}
 
 	@Override
-	public boolean isValueSetSupported(IContextValidationSupport theRootValidationSupport, String theValueSetUrl) {
+	public boolean isValueSetSupported(IValidationSupport theRootValidationSupport, String theValueSetUrl) {
 		return isNotBlank(theValueSetUrl) && theRootValidationSupport.fetchValueSet(theValueSetUrl) != null;
 	}
 
@@ -337,7 +342,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu3(IContextValidationSupport theRootValidationSupport, org.hl7.fhir.dstu3.model.ValueSet theInput) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu3(IValidationSupport theRootValidationSupport, org.hl7.fhir.dstu3.model.ValueSet theInput) {
 		Function<String, org.hl7.fhir.r5.model.CodeSystem> codeSystemLoader = t -> {
 			org.hl7.fhir.dstu3.model.CodeSystem codeSystem = (org.hl7.fhir.dstu3.model.CodeSystem) theRootValidationSupport.fetchCodeSystem(t);
 			return CodeSystem30_50.convertCodeSystem(codeSystem);
@@ -353,7 +358,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetR4(IContextValidationSupport theRootValidationSupport, org.hl7.fhir.r4.model.ValueSet theInput) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetR4(IValidationSupport theRootValidationSupport, org.hl7.fhir.r4.model.ValueSet theInput) {
 		Function<String, org.hl7.fhir.r5.model.CodeSystem> codeSystemLoader = t -> {
 			org.hl7.fhir.r4.model.CodeSystem codeSystem = (org.hl7.fhir.r4.model.CodeSystem) theRootValidationSupport.fetchCodeSystem(t);
 			return CodeSystem40_50.convertCodeSystem(codeSystem);
@@ -369,7 +374,7 @@ public class StaticResourceTerminologyServerValidationSupport implements IContex
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetR5(IContextValidationSupport theRootValidationSupport, org.hl7.fhir.r5.model.ValueSet theInput) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetR5(IValidationSupport theRootValidationSupport, org.hl7.fhir.r5.model.ValueSet theInput) {
 		Function<String, org.hl7.fhir.r5.model.CodeSystem> codeSystemLoader = t -> (org.hl7.fhir.r5.model.CodeSystem) theRootValidationSupport.fetchCodeSystem(t);
 		Function<String, org.hl7.fhir.r5.model.ValueSet> valueSetLoader = t -> (org.hl7.fhir.r5.model.ValueSet) theRootValidationSupport.fetchValueSet(t);
 

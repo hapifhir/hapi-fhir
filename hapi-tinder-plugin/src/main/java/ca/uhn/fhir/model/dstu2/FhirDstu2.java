@@ -27,7 +27,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.*;

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
@@ -56,7 +56,7 @@ import static org.junit.Assert.fail;
 
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
-	protected static IContextValidationSupport myValidationSupport;
+	protected static IValidationSupport myValidationSupport;
 	protected static CloseableHttpClient ourHttpClient;
 	protected static int ourPort;
 	protected static RestfulServer ourRestServer;
@@ -160,7 +160,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
-			myValidationSupport = wac.getBean(IContextValidationSupport.class);
+			myValidationSupport = wac.getBean(IValidationSupport.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryImpl.class);
 			ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);

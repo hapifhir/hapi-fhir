@@ -23,20 +23,20 @@ package ca.uhn.fhir.igpacks.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Map;
 
-public class IgPackParserDstu3 extends BaseIgPackParser<IContextValidationSupport> {
+public class IgPackParserDstu3 extends BaseIgPackParser<IValidationSupport> {
 
 	public IgPackParserDstu3(FhirContext theCtx) {
 		super(theCtx);
 	}
 
 	@Override
-	protected IContextValidationSupport createValidationSupport(Map<IIdType, IBaseResource> theIgResources) {
+	protected IValidationSupport createValidationSupport(Map<IIdType, IBaseResource> theIgResources) {
 		return new IgPackValidationSupportDstu3(getCtx(), theIgResources);
 	}
 

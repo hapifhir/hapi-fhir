@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.config;
  */
 
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.r4.JpaPersistedResourceValidationSupport;
 import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
@@ -59,23 +59,23 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	public abstract ITermVersionAdapterSvc terminologyVersionAdapterSvc();
 
 	@Bean(name="myDefaultProfileValidationSupport")
-	public IContextValidationSupport defaultProfileValidationSupport() {
+	public IValidationSupport defaultProfileValidationSupport() {
 		return new DefaultProfileValidationSupport(fhirContext());
 	}
 
 	@Bean
-	public IContextValidationSupport jpaValidationSupportChain() {
+	public IValidationSupport jpaValidationSupportChain() {
 		return new JpaValidationSupportChain(fhirContext());
 	}
 
 	@Bean(name = "myJpaValidationSupport")
-	public IContextValidationSupport jpaValidationSupport() {
+	public IValidationSupport jpaValidationSupport() {
 		return new JpaPersistedResourceValidationSupport(fhirContext());
 	}
 
 	@Primary
 	@Bean(name = "myJpaValidationSupportChain")
-	public IContextValidationSupport validationSupportChain() {
+	public IValidationSupport validationSupportChain() {
 		return new CachingValidationSupport(jpaValidationSupportChain());
 	}
 

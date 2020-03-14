@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -56,13 +56,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	@Override
 	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theInput) {
 		ValueSet valueSetToExpand = (ValueSet) theInput;
-		return super.expandValueSetInMemory(theExpansionOptions, valueSetToExpand, null);
-	}
-
-	@Override
-	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theInput, int theOffset, int theCount) {
-		ValueSet valueSetToExpand = (ValueSet) theInput;
-		return super.expandValueSet(theExpansionOptions, valueSetToExpand, theOffset, theCount);
+		return super.expandValueSet(theExpansionOptions, valueSetToExpand);
 	}
 
 	@Override
@@ -73,9 +67,9 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 
 	@Transactional(dontRollbackOn = {ExpansionTooCostlyException.class})
 	@Override
-	public IContextValidationSupport.ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand)  {
-		ValueSet expanded = super.expandValueSetInMemory(theExpansionOptions, (ValueSet) theValueSetToExpand, null);
-		return new IContextValidationSupport.ValueSetExpansionOutcome(expanded);
+	public IValidationSupport.ValueSetExpansionOutcome expandValueSet(IValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand)  {
+		ValueSet expanded = super.expandValueSet(theExpansionOptions, (ValueSet) theValueSetToExpand);
+		return new IValidationSupport.ValueSetExpansionOutcome(expanded);
 	}
 
 	@Override
@@ -84,7 +78,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	}
 
 	@Override
-	public boolean isValueSetSupported(IContextValidationSupport theRootValidationSupport, String theValueSetUrl) {
+	public boolean isValueSetSupported(IValidationSupport theRootValidationSupport, String theValueSetUrl) {
 		return fetchValueSet(theValueSetUrl) != null;
 	}
 
@@ -106,7 +100,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 
 	@CoverageIgnore
 	@Override
-	public IContextValidationSupport.CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public IValidationSupport.CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		Optional<VersionIndependentConcept> codeOpt = Optional.empty();
 		boolean haveValidated = false;
 
@@ -123,18 +117,18 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 
 		if (codeOpt != null && codeOpt.isPresent()) {
 			VersionIndependentConcept code = codeOpt.get();
-				IContextValidationSupport.CodeValidationResult retVal = new IContextValidationSupport.CodeValidationResult()
+				IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult()
 					.setCode(code.getCode()); // AAAAAAAAAAA format
 				return retVal;
 			}
 
-			return new IContextValidationSupport.CodeValidationResult()
+			return new IValidationSupport.CodeValidationResult()
 		.setSeverity(IssueSeverity.ERROR.toCode())
 		.setMessage("Unknown code {" + theCodeSystem + "}" + theCode);
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
 		return super.lookupCode(theSystem, theCode);
 	}
 

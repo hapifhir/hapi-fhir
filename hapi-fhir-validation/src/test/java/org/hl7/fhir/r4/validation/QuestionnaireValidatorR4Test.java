@@ -2,7 +2,7 @@ package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -40,7 +40,7 @@ public class QuestionnaireValidatorR4Test {
 
 	@Before
 	public void before() {
-		IContextValidationSupport myValSupport = mock(IContextValidationSupport.class);
+		IValidationSupport myValSupport = mock(IValidationSupport.class);
 		when(myValSupport.getFhirContext()).thenReturn(ourCtx);
 
 		myVal = ourCtx.newValidator();

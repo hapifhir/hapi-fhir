@@ -50,7 +50,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * and calling code is expected to be able to handle this.
  * </p>
  */
-public interface IContextValidationSupport {
+public interface IValidationSupport {
 	String URL_PREFIX_VALUE_SET = "http://hl7.org/fhir/ValueSet/";
 
 
@@ -63,7 +63,7 @@ public interface IContextValidationSupport {
 	 * @param theValueSetToExpand      The valueset that should be expanded
 	 * @return The expansion, or null
 	 */
-	default ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
+	default ValueSetExpansionOutcome expandValueSet(IValidationSupport theRootValidationSupport, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 		return null;
 	}
 
@@ -135,7 +135,7 @@ public interface IContextValidationSupport {
 	 * @return Returns <code>true</code> if codes in the given code system can be
 	 * validated
 	 */
-	default boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
+	default boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
 		return false;
 	}
 
@@ -158,7 +158,7 @@ public interface IContextValidationSupport {
 	 * @param theDisplay               The display name, if it should also be validated
 	 * @return Returns a validation result object
 	 */
-	default CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	default CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 
@@ -173,7 +173,7 @@ public interface IContextValidationSupport {
 	 * @param theValueSet   The ValueSet to validate against. Must not be null, and must be a ValueSet resource.
 	 * @return Returns a validation result object, or <code>null</code> if this validation support module can not handle this kind of request
 	 */
-	default CodeValidationResult validateCodeInValueSet(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	default CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		return null;
 	}
 
@@ -184,7 +184,7 @@ public interface IContextValidationSupport {
 	 * @param theSystem                The CodeSystem URL
 	 * @param theCode                  The code
 	 */
-	default LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, String theSystem, String theCode) {
+	default LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
 		return null;
 	}
 
@@ -194,7 +194,7 @@ public interface IContextValidationSupport {
 	 *
 	 * @param theValueSetUrl The URL
 	 */
-	default boolean isValueSetSupported(IContextValidationSupport theRootValidationSupport, String theValueSetUrl) {
+	default boolean isValueSetSupported(IValidationSupport theRootValidationSupport, String theValueSetUrl) {
 		return false;
 	}
 
@@ -204,7 +204,7 @@ public interface IContextValidationSupport {
 	 * @param theRootValidationSupport The root validation support object is passed in, in order to allow this operation to perform other lookups as required
 	 * @return Returns null if this module does not know how to handle this request
 	 */
-	default IBaseResource generateSnapshot(IContextValidationSupport theRootValidationSupport, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
+	default IBaseResource generateSnapshot(IValidationSupport theRootValidationSupport, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
 		return null;
 	}
 
@@ -464,7 +464,7 @@ public interface IContextValidationSupport {
 		private boolean myFound;
 		private String mySearchedForCode;
 		private String mySearchedForSystem;
-		private List<IContextValidationSupport.BaseConceptProperty> myProperties;
+		private List<IValidationSupport.BaseConceptProperty> myProperties;
 		private List<ConceptDesignation> myDesignations;
 
 		/**
@@ -481,7 +481,7 @@ public interface IContextValidationSupport {
 			return myProperties;
 		}
 
-		public void setProperties(List<IContextValidationSupport.BaseConceptProperty> theProperties) {
+		public void setProperties(List<IValidationSupport.BaseConceptProperty> theProperties) {
 			myProperties = theProperties;
 		}
 
@@ -580,7 +580,7 @@ public interface IContextValidationSupport {
 						.collect(Collectors.toSet());
 				}
 
-				for (IContextValidationSupport.BaseConceptProperty next : myProperties) {
+				for (IValidationSupport.BaseConceptProperty next : myProperties) {
 
 					if (!properties.isEmpty()) {
 						if (!properties.contains(next.getPropertyName())) {
@@ -591,11 +591,11 @@ public interface IContextValidationSupport {
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "property");
 					ParametersUtil.addPartCode(theContext, property, "code", next.getPropertyName());
 
-					if (next instanceof IContextValidationSupport.StringConceptProperty) {
-						IContextValidationSupport.StringConceptProperty prop = (IContextValidationSupport.StringConceptProperty) next;
+					if (next instanceof IValidationSupport.StringConceptProperty) {
+						IValidationSupport.StringConceptProperty prop = (IValidationSupport.StringConceptProperty) next;
 						ParametersUtil.addPartString(theContext, property, "value", prop.getValue());
-					} else if (next instanceof IContextValidationSupport.CodingConceptProperty) {
-						IContextValidationSupport.CodingConceptProperty prop = (IContextValidationSupport.CodingConceptProperty) next;
+					} else if (next instanceof IValidationSupport.CodingConceptProperty) {
+						IValidationSupport.CodingConceptProperty prop = (IValidationSupport.CodingConceptProperty) next;
 						ParametersUtil.addPartCoding(theContext, property, "value", prop.getCodeSystem(), prop.getCode(), prop.getDisplay());
 					} else {
 						throw new IllegalStateException("Don't know how to handle " + next.getClass());

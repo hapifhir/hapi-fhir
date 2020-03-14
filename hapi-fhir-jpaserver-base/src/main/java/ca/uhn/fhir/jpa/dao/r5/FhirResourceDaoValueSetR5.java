@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
@@ -35,18 +36,15 @@ import org.apache.commons.codec.binary.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetFilterComponent;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.hl7.fhir.r5.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -55,6 +53,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoValueSetR4.validateHaveExpansionOrThrowInternalErrorException;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -63,13 +62,11 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 	@Autowired
 	private ITermReadSvc myHapiTerminologySvc;
 
-	// FIXME: do we need both below
-
 	@Autowired
 	@Qualifier("myDefaultProfileValidationSupport")
-	private IContextValidationSupport myDefaultProfileValidationSupport;
+	private IValidationSupport myDefaultProfileValidationSupport;
 
-	private IContextValidationSupport myValidationSupport;
+	private IValidationSupport myValidationSupport;
 
 	@Autowired
 	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
@@ -77,7 +74,7 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 	@Override
 	public void start() {
 		super.start();
-		myValidationSupport = getApplicationContext().getBean(IContextValidationSupport.class,"myJpaValidationSupportChain" );
+		myValidationSupport = getApplicationContext().getBean(IValidationSupport.class,"myJpaValidationSupportChain" );
 	}
 
 	@Override
@@ -93,74 +90,19 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 	}
 
 	private ValueSet doExpand(ValueSet theSource) {
+		IValidationSupport.ValueSetExpansionOutcome retVal = myValidationSupport.expandValueSet(myValidationSupport, null, theSource);
+		validateHaveExpansionOrThrowInternalErrorException(retVal);
+		return (ValueSet) retVal.getValueSet();
 
-		/*
-		 * If all of the code systems are supported by the HAPI FHIR terminology service, let's
-		 * use that as it's more efficient.
-		 */
-
-		boolean allSystemsAreSuppportedByTerminologyService = true;
-		for (ConceptSetComponent next : theSource.getCompose().getInclude()) {
-			if (!isBlank(next.getSystem()) && !myTerminologySvc.supportsSystem(next.getSystem())) {
-				allSystemsAreSuppportedByTerminologyService = false;
-			}
-		}
-		for (ConceptSetComponent next : theSource.getCompose().getExclude()) {
-			if (!isBlank(next.getSystem()) && !myTerminologySvc.supportsSystem(next.getSystem())) {
-				allSystemsAreSuppportedByTerminologyService = false;
-			}
-		}
-		if (allSystemsAreSuppportedByTerminologyService) {
-			return (ValueSet) myTerminologySvc.expandValueSet(null, theSource);
-		}
-
-		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
-
-		ValueSetExpansionOutcome outcome = workerContext.expand(theSource, null);
-
-		ValueSet retVal = outcome.getValueset();
-		retVal.setStatus(PublicationStatus.ACTIVE);
-
-		return retVal;
-
-		// ValueSetExpansionComponent expansion = outcome.getValueset().getExpansion();
-		//
-		// ValueSet retVal = new ValueSet();
-		// retVal.getMeta().setLastUpdated(new Date());
-		// retVal.setExpansion(expansion);
-		// return retVal;
 	}
 
 	private ValueSet doExpand(ValueSet theSource, int theOffset, int theCount) {
-
-		/*
-		 * If all of the code systems are supported by the HAPI FHIR terminology service, let's
-		 * use that as it's more efficient.
-		 */
-
-		boolean allSystemsAreSuppportedByTerminologyService = true;
-		for (ConceptSetComponent next : theSource.getCompose().getInclude()) {
-			if (!isBlank(next.getSystem()) && !myTerminologySvc.supportsSystem(next.getSystem())) {
-				allSystemsAreSuppportedByTerminologyService = false;
-			}
-		}
-		for (ConceptSetComponent next : theSource.getCompose().getExclude()) {
-			if (!isBlank(next.getSystem()) && !myTerminologySvc.supportsSystem(next.getSystem())) {
-				allSystemsAreSuppportedByTerminologyService = false;
-			}
-		}
-		if (allSystemsAreSuppportedByTerminologyService) {
-			return (ValueSet) myTerminologySvc.expandValueSet(null, theSource, theOffset, theCount);
-		}
-
-		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
-
-		ValueSetExpansionOutcome outcome = workerContext.expand(theSource, null);
-
-		ValueSet retVal = outcome.getValueset();
-		retVal.setStatus(PublicationStatus.ACTIVE);
-
-		return retVal;
+		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
+			.setOffset(theOffset)
+			.setCount(theCount);
+		IValidationSupport.ValueSetExpansionOutcome retVal = myValidationSupport.expandValueSet(myValidationSupport, options, theSource);
+		validateHaveExpansionOrThrowInternalErrorException(retVal);
+		return (ValueSet) retVal.getValueSet();
 	}
 
 	@Override
@@ -339,7 +281,7 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 			}
 			// String code = theCode.getValue();
 			// String system = toStringOrNull(theSystem);
-			IContextValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(theCode, theSystem, null, null);
+			IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(theCode, theSystem, null, null);
 			if (result.isFound()) {
 				ValidateCodeResult retVal = new ValidateCodeResult(true, "Found code", result.getCodeDisplay());
 				return retVal;

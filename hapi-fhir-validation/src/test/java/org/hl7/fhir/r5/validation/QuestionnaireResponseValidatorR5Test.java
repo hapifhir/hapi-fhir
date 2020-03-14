@@ -2,7 +2,7 @@ package org.hl7.fhir.r5.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -52,12 +52,12 @@ public class QuestionnaireResponseValidatorR5Test {
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
-	private IContextValidationSupport myValSupport;
+	private IValidationSupport myValSupport;
 	private HapiWorkerContext myWorkerCtx;
 
 	@Before
 	public void before() {
-		myValSupport = mock(IContextValidationSupport.class);
+		myValSupport = mock(IValidationSupport.class);
 		when(myValSupport.getFhirContext()).thenReturn(ourCtx);
 
 		myWorkerCtx = new HapiWorkerContext(ourCtx, myValSupport);
@@ -98,9 +98,9 @@ public class QuestionnaireResponseValidatorR5Test {
 		when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 
 		when(myValSupport.validateCode(any(), any(), any(), any(), any(), nullable(String.class)))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult().setSeverity("error").setMessage("Unknown code"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity("error").setMessage("Unknown code"));
 		when(myValSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), nullable(ValueSet.class)))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode("code0"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 
 		int itemCnt = 16;
 		QuestionnaireItemType[] questionnaireItemTypes = new QuestionnaireItemType[itemCnt];
@@ -201,13 +201,13 @@ public class QuestionnaireResponseValidatorR5Test {
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode("code0"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(ValueSet.class)))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode("code0"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(ValueSet.class)))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -358,7 +358,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		when(myValSupport.fetchResource(eq(ValueSet.class), eq(valueSetRef)))
 			.thenReturn(options);
 		when(myValSupport.validateCode(any(), any(), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode(codeValue));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(codeValue));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String qXml = xmlParser.encodeResourceToString(q);
@@ -414,7 +414,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		when(myValSupport.fetchResource(eq(ValueSet.class), eq(valueSetRef)))
 			.thenReturn(options);
 		when(myValSupport.validateCode(any(), any(), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode(codeValue));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(codeValue));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String qXml = xmlParser.encodeResourceToString(q);
@@ -534,9 +534,9 @@ public class QuestionnaireResponseValidatorR5Test {
 		when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult().setCode("code0"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
-			.thenReturn(new IContextValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
 
 		QuestionnaireResponse qa;
 		ValidationResult errors;
@@ -677,7 +677,7 @@ public class QuestionnaireResponseValidatorR5Test {
 
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire()))).thenReturn(questionnaire);
 		when(myValSupport.fetchResource(eq(ValueSet.class), eq(ID_VS_SCHOOLTYPE))).thenReturn(iccSchoolTypeVs);
-		when(myValSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any(ValueSet.class))).thenReturn(new IContextValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
+		when(myValSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any(ValueSet.class))).thenReturn(new IValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());

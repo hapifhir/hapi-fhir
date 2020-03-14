@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
@@ -520,7 +521,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.saveDeferred();
 
-		IContextValidationSupport.LookupCodeResult lookupResults = myCodeSystemDao.lookupCode(new StringType("childAA"), new StringType(URL_MY_CODE_SYSTEM),null, mySrd);
+		IValidationSupport.LookupCodeResult lookupResults = myCodeSystemDao.lookupCode(new StringType("childAA"), new StringType(URL_MY_CODE_SYSTEM),null, mySrd);
 		assertEquals(true, lookupResults.isFound());
 
 		ValueSet vs = new ValueSet();
@@ -561,8 +562,8 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		try {
 			myValueSetDao.expand(vs, null);
 			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("unable to find code system http://example.com/my_code_systemAA", e.getMessage());
+		} catch (PreconditionFailedException e) {
+			assertEquals("Unknown CodeSystem URI \"http://example.com/my_code_systemAA\" referenced from ValueSet", e.getMessage());
 		}
 	}
 	
@@ -710,7 +711,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 		StringType code = new StringType("ParentA");
 		StringType system = new StringType("http://snomed.info/sct");
-		IContextValidationSupport.LookupCodeResult outcome = myCodeSystemDao.lookupCode(code, system, null, mySrd);
+		IValidationSupport.LookupCodeResult outcome = myCodeSystemDao.lookupCode(code, system, null, mySrd);
 		assertEquals(true, outcome.isFound());
 	}
 

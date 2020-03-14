@@ -21,7 +21,7 @@ package ca.uhn.fhir.igpacks.parser;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import org.hl7.fhir.dstu2.model.ConceptMap;
 import org.hl7.fhir.dstu2.model.StructureDefinition;
 import org.hl7.fhir.dstu2.model.ValueSet;
@@ -30,7 +30,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Map;
 
-public class IgPackValidationSupportDstu2 implements IContextValidationSupport {
+public class IgPackValidationSupportDstu2 implements IValidationSupport {
 	private final Map<IIdType, IBaseResource> myIgResources;
 	private FhirContext myCtx;
 
@@ -75,7 +75,7 @@ public class IgPackValidationSupportDstu2 implements IContextValidationSupport {
 
 
 	@Override
-	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
+	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
 		return false;
 	}
 

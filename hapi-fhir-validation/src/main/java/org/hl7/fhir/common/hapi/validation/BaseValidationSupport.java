@@ -1,10 +1,10 @@
 package org.hl7.fhir.common.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import org.apache.commons.lang3.Validate;
 
-public abstract class BaseValidationSupport implements IContextValidationSupport {
+public abstract class BaseValidationSupport implements IValidationSupport {
 	protected final FhirContext myCtx;
 
 	/**

@@ -57,6 +57,7 @@ import static org.junit.Assert.fail;
 	"max_db_connections=10"
 })
 @DirtiesContext
+@Ignore
 public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 	static {

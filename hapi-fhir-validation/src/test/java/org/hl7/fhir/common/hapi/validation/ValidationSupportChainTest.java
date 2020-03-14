@@ -3,7 +3,7 @@ package org.hl7.fhir.common.hapi.validation;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -27,7 +27,7 @@ public class ValidationSupportChainTest {
 
 	@Test
 	public void testMissingContext() {
-		IContextValidationSupport ctx = mock(IContextValidationSupport.class);
+		IValidationSupport ctx = mock(IValidationSupport.class);
 		try {
 			new ValidationSupportChain(ctx);
 		} catch (ConfigurationException e) {

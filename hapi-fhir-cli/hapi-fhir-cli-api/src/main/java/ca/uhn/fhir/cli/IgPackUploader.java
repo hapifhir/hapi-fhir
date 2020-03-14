@@ -21,7 +21,7 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.igpacks.parser.IgPackParserDstu3;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.apache.commons.cli.CommandLine;
@@ -90,7 +90,7 @@ public class IgPackUploader extends BaseCommand {
 			switch (ctx.getVersion().getVersion()) {
 				case DSTU3:
 					IgPackParserDstu3 packParser = new IgPackParserDstu3(ctx);
-					IContextValidationSupport ig = null;
+					IValidationSupport ig = null;
 					try {
 						ig = packParser.parseIg(new FileInputStream(nextFile), nextFile.getName());
 					} catch (FileNotFoundException e) {

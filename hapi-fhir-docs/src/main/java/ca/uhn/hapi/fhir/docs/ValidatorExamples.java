@@ -23,7 +23,7 @@ package ca.uhn.hapi.fhir.docs;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -242,7 +242,7 @@ public class ValidatorExamples {
       FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
       validator.registerValidatorModule(instanceValidator);
 
-		IContextValidationSupport valSupport = new IContextValidationSupport() {
+		IValidationSupport valSupport = new IValidationSupport() {
 
 			@Override
 			public List<IBaseResource> fetchAllConformanceResources() {
@@ -269,19 +269,19 @@ public class ValidatorExamples {
 			}
 
 			@Override
-			public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
+			public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return false;
 			}
 
 			@Override
-			public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+			public CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}
 
 			@Override
-			public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, String theSystem, String theCode) {
+			public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}

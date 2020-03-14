@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -47,12 +47,12 @@ import javax.transaction.Transactional;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
- * This class is a {@link IContextValidationSupport Validation support} module that loads
+ * This class is a {@link IValidationSupport Validation support} module that loads
  * validation resources (StructureDefinition, ValueSet, CodeSystem, etc.) from the resources
  * persisted in the JPA server.
  */
 @Transactional(value = Transactional.TxType.REQUIRED)
-public class JpaPersistedResourceValidationSupport implements IContextValidationSupport {
+public class JpaPersistedResourceValidationSupport implements IValidationSupport {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPersistedResourceValidationSupport.class);
 

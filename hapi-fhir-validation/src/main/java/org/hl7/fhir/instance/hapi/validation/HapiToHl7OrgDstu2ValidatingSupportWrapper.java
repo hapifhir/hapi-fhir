@@ -2,7 +2,7 @@ package org.hl7.fhir.instance.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.BaseValidationSupportWrapper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -10,13 +10,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class HapiToHl7OrgDstu2ValidatingSupportWrapper extends BaseValidationSupportWrapper implements ca.uhn.fhir.context.support.IContextValidationSupport {
+public class HapiToHl7OrgDstu2ValidatingSupportWrapper extends BaseValidationSupportWrapper implements IValidationSupport {
 	private final FhirContext myHapiCtx;
 
 	/**
 	 * Constructor
 	 */
-	public HapiToHl7OrgDstu2ValidatingSupportWrapper(IContextValidationSupport theWrap) {
+	public HapiToHl7OrgDstu2ValidatingSupportWrapper(IValidationSupport theWrap) {
 		super(FhirContext.forDstu2Hl7Org(), theWrap);
 
 		Validate.isTrue(theWrap.getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU2);

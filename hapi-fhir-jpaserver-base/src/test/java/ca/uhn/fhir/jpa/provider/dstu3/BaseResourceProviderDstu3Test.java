@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
@@ -51,7 +51,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
-	protected static IContextValidationSupport myValidationSupport;
+	protected static IValidationSupport myValidationSupport;
 	protected static IGenericClient ourClient;
 	protected static CloseableHttpClient ourHttpClient;
 	protected static int ourPort;
@@ -151,7 +151,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
-			myValidationSupport = wac.getBean(IContextValidationSupport.class);
+			myValidationSupport = wac.getBean(IValidationSupport.class);
 			ourSearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryImpl.class);
 			ourSubscriptionTriggeringProvider = wac.getBean(SubscriptionTriggeringProvider.class);

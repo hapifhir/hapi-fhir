@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
@@ -85,7 +85,7 @@ import static org.mockito.Mockito.mock;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
 public abstract class BaseJpaR4Test extends BaseJpaTest {
-	private static IContextValidationSupport ourJpaValidationSupportChainR4;
+	private static IValidationSupport ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
 	@Autowired
@@ -328,7 +328,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
 	@Qualifier("myJpaValidationSupportChain")
-	protected IContextValidationSupport myValidationSupport;
+	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
@@ -348,7 +348,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected SubscriptionRegistry mySubscriptionRegistry;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
-	private IContextValidationSupport myJpaValidationSupportChainR4;
+	private IValidationSupport myJpaValidationSupportChainR4;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	private List<Object> mySystemInterceptors;
 	@Autowired

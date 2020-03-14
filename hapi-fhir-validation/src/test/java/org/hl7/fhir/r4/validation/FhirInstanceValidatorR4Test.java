@@ -3,7 +3,7 @@ package org.hl7.fhir.r4.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
@@ -121,7 +121,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
 
-		IContextValidationSupport mockSupport = mock(IContextValidationSupport.class);
+		IValidationSupport mockSupport = mock(IValidationSupport.class);
 		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
 
 		ValidationSupportChain chain = new ValidationSupportChain(myDefaultValidationSupport, mockSupport, new StaticResourceTerminologyServerValidationSupport(ourCtx));
@@ -171,19 +171,19 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				return retVal;
 			}
 		});
-		when(mockSupport.validateCode(any(), any(), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IContextValidationSupport.CodeValidationResult>() {
+		when(mockSupport.validateCode(any(), any(), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IValidationSupport.CodeValidationResult>() {
 			@Override
-			public IContextValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
+			public IValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
 				ConceptValidationOptions options = theInvocation.getArgument(1, ConceptValidationOptions.class);
 				String system = theInvocation.getArgument(2, String.class);
 				String code = theInvocation.getArgument(3, String.class);
 				String display = theInvocation.getArgument(4, String.class);
 				String valueSetUrl = theInvocation.getArgument(5, String.class);
-				IContextValidationSupport.CodeValidationResult retVal;
+				IValidationSupport.CodeValidationResult retVal;
 				if (myValidConcepts.contains(system + "___" + code)) {
-					retVal = new IContextValidationSupport.CodeValidationResult().setCode(code);
+					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IContextValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.WARNING.toCode()).setMessage("Unknown code: " + system + " / " + code);
+					return new IValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.WARNING.toCode()).setMessage("Unknown code: " + system + " / " + code);
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(myDefaultValidationSupport, options, system, code, display, valueSetUrl);
 				}

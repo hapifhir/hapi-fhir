@@ -22,7 +22,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.igpacks.parser.IgPackParserDstu2;
 import ca.uhn.fhir.igpacks.parser.IgPackParserDstu3;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -163,7 +163,7 @@ public class ValidateCommand extends BaseCommand {
 						FhirContext hl7orgCtx = FhirContext.forDstu2Hl7Org();
 						hl7orgCtx.setParserErrorHandler(new LenientErrorHandler(false));
 						IgPackParserDstu2 parser = new IgPackParserDstu2(hl7orgCtx);
-						IContextValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
+						IValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
 						validationSupport.addValidationSupport(igValidationSupport);
 					}
 
@@ -182,7 +182,7 @@ public class ValidateCommand extends BaseCommand {
 					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), new StaticResourceTerminologyServerValidationSupport(ctx));
 					if (igPack != null) {
 						IgPackParserDstu3 parser = new IgPackParserDstu3(getFhirContext());
-						IContextValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
+						IValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
 						validationSupport.addValidationSupport(igValidationSupport);
 					}
 

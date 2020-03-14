@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
@@ -187,7 +187,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
@@ -224,7 +224,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
@@ -1775,7 +1775,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	public void testValidateCode() {
 		createCodeSystem();
 
-		IContextValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(myValidationSupport, new ConceptValidationOptions(), CS_URL, "ParentWithNoChildrenA", null, null);
+		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(myValidationSupport, new ConceptValidationOptions(), CS_URL, "ParentWithNoChildrenA", null, null);
 		assertEquals(true, validation.isOk());
 
 		validation = myTermSvc.validateCode(myValidationSupport, new ConceptValidationOptions(), CS_URL, "ZZZZZZZ", null, null);

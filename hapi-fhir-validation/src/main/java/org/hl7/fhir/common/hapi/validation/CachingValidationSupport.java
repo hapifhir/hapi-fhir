@@ -1,7 +1,7 @@
 package org.hl7.fhir.common.hapi.validation;
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -17,7 +17,7 @@ import java.util.function.Function;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 @SuppressWarnings("unchecked")
-public class CachingValidationSupport extends BaseValidationSupportWrapper implements IContextValidationSupport {
+public class CachingValidationSupport extends BaseValidationSupportWrapper implements IValidationSupport {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CachingValidationSupport.class);
 	private final Cache<String, Object> myCache;
@@ -25,7 +25,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	private final Cache<String, Object> myLookupCodeCache;
 
 
-	public CachingValidationSupport(IContextValidationSupport theWrap) {
+	public CachingValidationSupport(IValidationSupport theWrap) {
 		super(theWrap.getFhirContext(), theWrap);
 		myValidateCodeCache = Caffeine
 			.newBuilder()
@@ -63,7 +63,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
+	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
 		String key = "isCodeSystemSupported " + theSystem;
 		Boolean retVal = loadFromCache(myCache, key, t -> super.isCodeSystemSupported(theRootValidationSupport, theSystem));
 		assert retVal != null;
@@ -71,13 +71,13 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	}
 
 	@Override
-	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		String key = "validateCode " + theCodeSystem + " " + theCode + " " + defaultIfBlank(theValueSetUrl, "NO_VS");
 		return loadFromCache(myValidateCodeCache, key, t -> super.validateCode(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl));
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
 		String key = "lookupCode " + theSystem + " " + theCode;
 		return loadFromCache(myLookupCodeCache, key, t -> super.lookupCode(theRootValidationSupport, theSystem, theCode));
 	}
@@ -85,15 +85,11 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	@SuppressWarnings("OptionalAssignedToNull")
 	@Nullable
 	private <T> T loadFromCache(Cache theCache, String theKey, Function<String, T> theLoader) {
-		// FIXME: remove
-		ourLog.info("Fetching from cache: {}", theKey);
+		ourLog.trace("Fetching from cache: {}", theKey);
 
 		Function<String, Optional<T>> loaderWrapper = key -> Optional.ofNullable(theLoader.apply(theKey));
 		Optional<T> result = (Optional<T>) theCache.get(theKey, loaderWrapper);
 		assert result != null;
-
-		// FIXME: remove
-		ourLog.info("Done fetching from cache with {} items: {}", theCache.estimatedSize(), theKey);
 
 		return result.orElse(null);
 

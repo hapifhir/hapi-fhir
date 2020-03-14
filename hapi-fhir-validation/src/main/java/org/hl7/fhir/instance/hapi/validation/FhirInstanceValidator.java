@@ -3,7 +3,7 @@ package org.hl7.fhir.instance.hapi.validation;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.XmlUtil;
@@ -54,7 +54,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private boolean myAnyExtensionsAllowed = true;
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
 	private StructureDefinition myStructureDefintion;
-	private final IContextValidationSupport myValidationSupport;
+	private final IValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
 	private boolean assumeValidRestReferences;
 	private volatile VersionSpecificWorkerContextWrapper myWrappedWorkerContext;
@@ -72,7 +72,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	 *
 	 * @param theValidationSupport The validation support
 	 */
-	public FhirInstanceValidator(IContextValidationSupport theValidationSupport) {
+	public FhirInstanceValidator(IValidationSupport theValidationSupport) {
 		if (theValidationSupport.getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU2) {
 			myValidationSupport = new HapiToHl7OrgDstu2ValidatingSupportWrapper(theValidationSupport);
 		} else {
@@ -204,19 +204,9 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	 *
 	 * @return
 	 */
-	public IContextValidationSupport getValidationSupport() {
+	public IValidationSupport getValidationSupport() {
 		return myValidationSupport;
 	}
-
-// FIXME: remove
-//	/**
-//	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
-//	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
-//	 */
-//	public void setValidationSupport(IContextValidationSupport theValidationSupport) {
-//		myValidationSupport = theValidationSupport;
-//		myWrappedWorkerContext = null;
-//	}
 
 	/**
 	 * If set to {@literal true} (default is true) extensions which are not known to the

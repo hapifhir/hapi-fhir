@@ -2,7 +2,7 @@ package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.model.api.IElement;
@@ -103,7 +103,7 @@ public class FhirContext {
 	private Collection<Class<? extends IBaseResource>> myResourceTypesToScan;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
-	private IContextValidationSupport myValidationSupport;
+	private IValidationSupport myValidationSupport;
 	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
 
 	/**
@@ -562,20 +562,20 @@ public class FhirContext {
 
 	/**
 	 * Returns the validation support module configured for this context, creating a default
-	 * implementation if no module has been passed in via the {@link #setValidationSupport(IContextValidationSupport)}
+	 * implementation if no module has been passed in via the {@link #setValidationSupport(IValidationSupport)}
 	 * method
 	 *
-	 * @see #setValidationSupport(IContextValidationSupport)
+	 * @see #setValidationSupport(IValidationSupport)
 	 */
-	public IContextValidationSupport getValidationSupport() {
-		IContextValidationSupport retVal = myValidationSupport;
+	public IValidationSupport getValidationSupport() {
+		IValidationSupport retVal = myValidationSupport;
 		if (retVal == null) {
 			retVal = new DefaultProfileValidationSupport(this);
 
 			String name = "org.hl7.fhir.common.hapi.validation.StaticResourceTerminologyServerValidationSupport";
 			if (ReflectionUtil.typeExists(name)) {
-				IContextValidationSupport staticResourceValidationSupport = ReflectionUtil.newInstanceOrReturnNull(name, IContextValidationSupport.class, new Class<?>[]{FhirContext.class}, new Object[]{this});
-				retVal = ReflectionUtil.newInstanceOrReturnNull("org.hl7.fhir.common.hapi.validation.ValidationSupportChain", IContextValidationSupport.class, new Class<?>[]{IContextValidationSupport[].class}, new Object[]{new IContextValidationSupport[]{
+				IValidationSupport staticResourceValidationSupport = ReflectionUtil.newInstanceOrReturnNull(name, IValidationSupport.class, new Class<?>[]{FhirContext.class}, new Object[]{this});
+				retVal = ReflectionUtil.newInstanceOrReturnNull("org.hl7.fhir.common.hapi.validation.ValidationSupportChain", IValidationSupport.class, new Class<?>[]{IValidationSupport[].class}, new Object[]{new IValidationSupport[]{
 					retVal, staticResourceValidationSupport
 				}});
 				assert retVal != null : "Failed to instantiate " + "org.hl7.fhir.common.hapi.validation.ValidationSupportChain";
@@ -592,7 +592,7 @@ public class FhirContext {
 	 * is used to supply underlying infrastructure such as conformance resources (StructureDefinition, ValueSet, etc)
 	 * as well as to provide terminology services to modules such as the validator and FluentPath executor
 	 */
-	public void setValidationSupport(IContextValidationSupport theValidationSupport) {
+	public void setValidationSupport(IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 	}
 
@@ -619,10 +619,10 @@ public class FhirContext {
 	/**
 	 * Creates a new FluentPath engine which can be used to exvaluate
 	 * path expressions over FHIR resources. Note that this engine will use the
-	 * {@link IContextValidationSupport context validation support} module which is
+	 * {@link IValidationSupport context validation support} module which is
 	 * configured on the context at the time this method is called.
 	 * <p>
-	 * In other words, call {@link #setValidationSupport(IContextValidationSupport)} before
+	 * In other words, call {@link #setValidationSupport(IValidationSupport)} before
 	 * calling {@link #newFluentPath()}
 	 * </p>
 	 * <p>

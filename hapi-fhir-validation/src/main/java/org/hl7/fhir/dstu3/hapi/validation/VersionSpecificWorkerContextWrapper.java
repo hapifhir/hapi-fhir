@@ -3,7 +3,7 @@ package org.hl7.fhir.dstu3.hapi.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -47,13 +47,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 	public static final IVersionTypeConverter IDENTITY_VERSION_TYPE_CONVERTER = new VersionTypeConverterR5();
 	private static FhirContext ourR5Context = FhirContext.forR5();
-	private final IContextValidationSupport myValidationSupport;
+	private final IValidationSupport myValidationSupport;
 	private final IVersionTypeConverter myModelConverter;
 	private volatile List<StructureDefinition> myAllStructures;
 	private LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
 	private org.hl7.fhir.r5.model.Parameters myExpansionProfile;
 
-	public VersionSpecificWorkerContextWrapper(IContextValidationSupport theValidationSupport, IVersionTypeConverter theModelConverter) {
+	public VersionSpecificWorkerContextWrapper(IValidationSupport theValidationSupport, IVersionTypeConverter theModelConverter) {
 		myValidationSupport = theValidationSupport;
 		myModelConverter = theModelConverter;
 
@@ -171,7 +171,7 @@ public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 	}
 
 	@Nonnull
-	private ValidationResult convertValidationResult(@Nullable IContextValidationSupport.CodeValidationResult theResult) {
+	private ValidationResult convertValidationResult(@Nullable IValidationSupport.CodeValidationResult theResult) {
 		ValidationResult retVal = null;
 		if (theResult != null) {
 			String code = theResult.getCode();
@@ -203,7 +203,7 @@ public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
-		IContextValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(myValidationSupport, null, convertedSource);
+		IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(myValidationSupport, null, convertedSource);
 
 		org.hl7.fhir.r5.model.ValueSet convertedResult = null;
 		if (expanded.getValueSet() != null) {
@@ -429,7 +429,7 @@ public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 
 	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, String system, String code, String display) {
-		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(theOptions), system, code, display, null);
+		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(theOptions), system, code, display, null);
 		return convertValidationResult(result);
 	}
 
@@ -445,7 +445,7 @@ public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 			throw new InternalErrorException(e);
 		}
 
-		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(myValidationSupport, convertConceptValidationOptions(theOptions), theSystem, theCode, display, convertedVs);
+		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(myValidationSupport, convertConceptValidationOptions(theOptions), theSystem, theCode, display, convertedVs);
 		return convertValidationResult(result);
 	}
 
@@ -481,7 +481,7 @@ public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 			throw new InternalErrorException(e);
 		}
 
-		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(myValidationSupport, convertConceptValidationOptions(theOptions).setInferSystem(true), null, code, null, convertedVs);
+		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(myValidationSupport, convertConceptValidationOptions(theOptions).setInferSystem(true), null, code, null, convertedVs);
 		return convertValidationResult(result);
 	}
 
@@ -497,7 +497,7 @@ public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 			throw new InternalErrorException(e);
 		}
 
-		IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(myValidationSupport, convertConceptValidationOptions(theOptions), code.getSystem(), code.getCode(), code.getDisplay(), convertedVs);
+		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(myValidationSupport, convertConceptValidationOptions(theOptions), code.getSystem(), code.getCode(), code.getDisplay(), convertedVs);
 		return convertValidationResult(result);
 	}
 

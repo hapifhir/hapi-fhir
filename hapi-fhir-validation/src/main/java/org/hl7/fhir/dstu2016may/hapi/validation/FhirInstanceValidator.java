@@ -1,7 +1,7 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.Validate;
@@ -26,7 +26,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	private boolean myAnyExtensionsAllowed = true;
 	private IResourceValidator.BestPracticeWarningLevel myBestPracticeWarningLevel;
 	private StructureDefinition myStructureDefintion;
-	private IContextValidationSupport myValidationSupport;
+	private IValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
 	private volatile VersionSpecificWorkerContextWrapper myWrappedWorkerContext;
 
@@ -36,7 +36,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	/**
 	 * Constructor
 	 * <p>
-	 * Uses DefaultProfileValidationSupport for {@link IContextValidationSupport validation support}
+	 * Uses DefaultProfileValidationSupport for {@link IValidationSupport validation support}
 	 */
 	public FhirInstanceValidator(FhirContext theContext) {
 		this(theContext.getValidationSupport());
@@ -47,7 +47,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 *
 	 * @param theValidationSupport The validation support
 	 */
-	public FhirInstanceValidator(IContextValidationSupport theValidationSupport) {
+	public FhirInstanceValidator(IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 	}
 
@@ -152,20 +152,20 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	}
 
 	/**
-	 * Returns the {@link IContextValidationSupport validation support} in use by this validator. Default is an instance of
+	 * Returns the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
 	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
 	 *
 	 * @return
 	 */
-	public IContextValidationSupport getValidationSupport() {
+	public IValidationSupport getValidationSupport() {
 		return myValidationSupport;
 	}
 
 	/**
-	 * Sets the {@link IContextValidationSupport validation support} in use by this validator. Default is an instance of
+	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
 	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
 	 */
-	public void setValidationSupport(IContextValidationSupport theValidationSupport) {
+	public void setValidationSupport(IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 		myWrappedWorkerContext = null;
 	}

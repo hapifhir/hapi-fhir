@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.validation;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import org.hl7.fhir.common.hapi.validation.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.SnapshotGeneratingValidationSupport;
@@ -39,11 +39,11 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 
 	@Autowired
 	@Qualifier("myJpaValidationSupport")
-	public IContextValidationSupport myJpaValidationSupport;
+	public IValidationSupport myJpaValidationSupport;
 
 	@Qualifier("myDefaultProfileValidationSupport")
 	@Autowired
-	private IContextValidationSupport myDefaultProfileValidationSupport;
+	private IValidationSupport myDefaultProfileValidationSupport;
 	@Autowired
 	private ITermReadSvc myTerminologyService;
 

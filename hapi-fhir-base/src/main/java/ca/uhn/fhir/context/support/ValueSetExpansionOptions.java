@@ -1,13 +1,55 @@
 package ca.uhn.fhir.context.support;
 
+import org.apache.commons.lang3.Validate;
+
 /**
  * Options for ValueSet expansion
  *
- * @see IContextValidationSupport
+ * @see IValidationSupport
  */
 public class ValueSetExpansionOptions {
 
 	private boolean myFailOnMissingCodeSystem = true;
+	private int myCount = 1000;
+	private int myOffset = 0;
+
+	/**
+	 * The number of codes to return.
+	 * <p>
+	 * Default is 1000
+	 * </p>
+	 */
+	public int getCount() {
+		return myCount;
+	}
+
+	/**
+	 * The number of codes to return.
+	 * <p>
+	 * Default is 1000
+	 * </p>
+	 */
+	public ValueSetExpansionOptions setCount(int theCount) {
+		Validate.isTrue(theCount >= 0, "theCount must be >= 0");
+		myCount = theCount;
+		return this;
+	}
+
+	/**
+	 * The code index to start at (i.e the individual code index, not the page number)
+	 */
+	public int getOffset() {
+		return myOffset;
+	}
+
+	/**
+	 * The code index to start at (i.e the individual code index, not the page number)
+	 */
+	public ValueSetExpansionOptions setOffset(int theOffset) {
+		Validate.isTrue(theOffset >= 0, "theOffset must be >= 0");
+		myOffset = theOffset;
+		return this;
+	}
 
 	/**
 	 * Should the expansion fail if a codesystem is referenced by the valueset, but

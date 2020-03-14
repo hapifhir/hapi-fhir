@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -59,7 +58,7 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 	@Autowired
 	private ITermCodeSystemDao myCsDao;
 	@Autowired
-	private IContextValidationSupport myValidationSupport;
+	private IValidationSupport myValidationSupport;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTerminologyCodeSystemStorageSvc;
 	@Autowired
@@ -79,7 +78,7 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 
 	@Nonnull
 	@Override
-	public IContextValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
+	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
@@ -106,7 +105,7 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 		if (myValidationSupport.isCodeSystemSupported(myValidationSupport, system)) {
 
 			ourLog.info("Code system {} is supported", system);
-			IContextValidationSupport.LookupCodeResult retVal = myValidationSupport.lookupCode(myValidationSupport, system, code);
+			IValidationSupport.LookupCodeResult retVal = myValidationSupport.lookupCode(myValidationSupport, system, code);
 			if (retVal != null) {
 				return retVal;
 			}
@@ -114,7 +113,7 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 		}
 
 		// We didn't find it..
-		return IContextValidationSupport.LookupCodeResult.notFound(system, code);
+		return IValidationSupport.LookupCodeResult.notFound(system, code);
 
 	}
 

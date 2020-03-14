@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestR4WithLuceneDisabledConfig;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
@@ -117,7 +117,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	private IFhirResourceDao<Organization> myOrganizationDao;
 	@Autowired
 	@Qualifier("myJpaValidationSupportChain")
-	private IContextValidationSupport myValidationSupport;
+	private IValidationSupport myValidationSupport;
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 	@Autowired

@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -17,9 +17,9 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class ValidationSupportChain implements IContextValidationSupport {
+public class ValidationSupportChain implements IValidationSupport {
 
-	private List<IContextValidationSupport> myChain;
+	private List<IValidationSupport> myChain;
 
 	/**
 	 * Constructor
@@ -31,9 +31,9 @@ public class ValidationSupportChain implements IContextValidationSupport {
 	/**
 	 * Constructor
 	 */
-	public ValidationSupportChain(IContextValidationSupport... theValidationSupportModules) {
+	public ValidationSupportChain(IValidationSupport... theValidationSupportModules) {
 		this();
-		for (IContextValidationSupport next : theValidationSupportModules) {
+		for (IValidationSupport next : theValidationSupportModules) {
 			if (next != null) {
 				addValidationSupport(next);
 			}
@@ -42,14 +42,14 @@ public class ValidationSupportChain implements IContextValidationSupport {
 
 	@Override
 	public void invalidateCaches() {
-		for (IContextValidationSupport next : myChain) {
+		for (IValidationSupport next : myChain) {
 			next.invalidateCaches();
 		}
 	}
 
 	@Override
-	public CodeValidationResult validateCodeInValueSet(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-		for (IContextValidationSupport next : myChain) {
+	public CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+		for (IValidationSupport next : myChain) {
 			CodeValidationResult retVal = next.validateCodeInValueSet(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, theValueSet);
 			if (retVal != null) {
 				return retVal;
@@ -59,8 +59,8 @@ public class ValidationSupportChain implements IContextValidationSupport {
 	}
 
 	@Override
-	public boolean isValueSetSupported(IContextValidationSupport theRootValidationSupport, String theValueSetUrl) {
-		for (IContextValidationSupport next : myChain) {
+	public boolean isValueSetSupported(IValidationSupport theRootValidationSupport, String theValueSetUrl) {
+		for (IValidationSupport next : myChain) {
 			boolean retVal = next.isValueSetSupported(theRootValidationSupport, theValueSetUrl);
 			if (retVal) {
 				return true;
@@ -70,8 +70,8 @@ public class ValidationSupportChain implements IContextValidationSupport {
 	}
 
 	@Override
-	public IBaseResource generateSnapshot(IContextValidationSupport theRootValidationSupport, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
-		for (IContextValidationSupport next : myChain) {
+	public IBaseResource generateSnapshot(IValidationSupport theRootValidationSupport, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
+		for (IValidationSupport next : myChain) {
 			IBaseResource retVal = next.generateSnapshot(theRootValidationSupport, theInput, theUrl, theWebUrl, theProfileName);
 			if (retVal != null) {
 				return retVal;
@@ -88,7 +88,7 @@ public class ValidationSupportChain implements IContextValidationSupport {
 		return myChain.get(0).getFhirContext();
 	}
 
-	public void addValidationSupport(IContextValidationSupport theValidationSupport) {
+	public void addValidationSupport(IValidationSupport theValidationSupport) {
 		if (theValidationSupport.getFhirContext() == null) {
 			String message = "Can not add validation support: getFhirContext() returns null";
 			throw new ConfigurationException(message);
@@ -107,8 +107,8 @@ public class ValidationSupportChain implements IContextValidationSupport {
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(IContextValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
-		for (IContextValidationSupport next : myChain) {
+	public ValueSetExpansionOutcome expandValueSet(IValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
+		for (IValidationSupport next : myChain) {
 			// TODO: test if code system is supported?
 			ValueSetExpansionOutcome expanded = next.expandValueSet(theRootValidationSupport, null, theValueSetToExpand);
 			if (expanded != null) {
@@ -121,7 +121,7 @@ public class ValidationSupportChain implements IContextValidationSupport {
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources() {
 		List<IBaseResource> retVal = new ArrayList<>();
-		for (IContextValidationSupport next : myChain) {
+		for (IValidationSupport next : myChain) {
 			List<IBaseResource> candidates = next.fetchAllConformanceResources();
 			if (candidates != null) {
 				retVal.addAll(candidates);
@@ -134,7 +134,7 @@ public class ValidationSupportChain implements IContextValidationSupport {
 	public List<IBaseResource> fetchAllStructureDefinitions() {
 		ArrayList<IBaseResource> retVal = new ArrayList<>();
 		Set<String> urls = new HashSet<>();
-		for (IContextValidationSupport nextSupport : myChain) {
+		for (IValidationSupport nextSupport : myChain) {
 			List<IBaseResource> allStructureDefinitions = nextSupport.fetchAllStructureDefinitions();
 			if (allStructureDefinitions != null) {
 				for (IBaseResource next : allStructureDefinitions) {
@@ -151,7 +151,7 @@ public class ValidationSupportChain implements IContextValidationSupport {
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
-		for (IContextValidationSupport next : myChain) {
+		for (IValidationSupport next : myChain) {
 			IBaseResource retVal = next.fetchCodeSystem(theSystem);
 			if (retVal != null) {
 				return retVal;
@@ -162,7 +162,7 @@ public class ValidationSupportChain implements IContextValidationSupport {
 
 	@Override
 	public IBaseResource fetchValueSet(String theUrl) {
-		for (IContextValidationSupport next : myChain) {
+		for (IValidationSupport next : myChain) {
 			IBaseResource retVal = next.fetchValueSet(theUrl);
 			if (retVal != null) {
 				return retVal;
@@ -174,7 +174,7 @@ public class ValidationSupportChain implements IContextValidationSupport {
 
 	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
-		for (IContextValidationSupport next : myChain) {
+		for (IValidationSupport next : myChain) {
 			T retVal = next.fetchResource(theClass, theUri);
 			if (retVal != null) {
 				return retVal;
@@ -185,7 +185,7 @@ public class ValidationSupportChain implements IContextValidationSupport {
 
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
-		for (IContextValidationSupport next : myChain) {
+		for (IValidationSupport next : myChain) {
 			IBaseResource retVal = next.fetchStructureDefinition(theUrl);
 			if (retVal != null) {
 				return retVal;
@@ -195,8 +195,8 @@ public class ValidationSupportChain implements IContextValidationSupport {
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
-		for (IContextValidationSupport next : myChain) {
+	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
+		for (IValidationSupport next : myChain) {
 			if (next.isCodeSystemSupported(theRootValidationSupport, theSystem)) {
 				return true;
 			}
@@ -205,8 +205,8 @@ public class ValidationSupportChain implements IContextValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(IContextValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
-		for (IContextValidationSupport next : myChain) {
+	public CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+		for (IValidationSupport next : myChain) {
 			if (theOptions.isInferSystem() || (theCodeSystem != null && next.isCodeSystemSupported(theRootValidationSupport, theCodeSystem))) {
 				CodeValidationResult retVal = next.validateCode(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 				if (retVal != null) {
@@ -218,8 +218,8 @@ public class ValidationSupportChain implements IContextValidationSupport {
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IContextValidationSupport theRootValidationSupport, String theSystem, String theCode) {
-		for (IContextValidationSupport next : myChain) {
+	public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
+		for (IValidationSupport next : myChain) {
 			if (next.isCodeSystemSupported(theRootValidationSupport, theSystem)) {
 				return next.lookupCode(theRootValidationSupport, theSystem, theCode);
 			}

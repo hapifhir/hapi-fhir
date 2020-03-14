@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
@@ -62,7 +62,7 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	@Autowired
 	private ITermCodeSystemDao myCsDao;
 	@Autowired
-	private IContextValidationSupport myValidationSupport;
+	private IValidationSupport myValidationSupport;
 	@Autowired
 	private FhirContext myFhirContext;
 
@@ -83,7 +83,7 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 
 	@Nonnull
 	@Override
-	public IContextValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
+	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
@@ -109,14 +109,14 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 
 		if (myValidationSupport.isCodeSystemSupported(myValidationSupport, system)) {
 			ourLog.debug("Code system {} is supported", system);
-			IContextValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(myValidationSupport, system, code);
+			IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(myValidationSupport, system, code);
 			if (result != null) {
 				return result;
 			}
 		}
 
 		// We didn't find it..
-		return IContextValidationSupport.LookupCodeResult.notFound(system, code);
+		return IValidationSupport.LookupCodeResult.notFound(system, code);
 	}
 
 	@Override

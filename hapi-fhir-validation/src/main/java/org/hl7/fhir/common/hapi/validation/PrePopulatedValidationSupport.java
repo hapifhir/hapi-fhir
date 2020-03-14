@@ -2,7 +2,7 @@ package org.hl7.fhir.common.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -20,10 +20,10 @@ import java.util.Optional;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * This class is an implementation of {@link IContextValidationSupport} which may be pre-populated
+ * This class is an implementation of {@link IValidationSupport} which may be pre-populated
  * with a collection of validation resources to be used by the validator.
  */
-public class PrePopulatedValidationSupport extends BaseStaticResourceValidationSupport implements IContextValidationSupport {
+public class PrePopulatedValidationSupport extends BaseStaticResourceValidationSupport implements IValidationSupport {
 
 	private final FhirContext myFhirContext;
 	private final Map<String, IBaseResource> myCodeSystems;
@@ -178,12 +178,12 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(IContextValidationSupport theRootValidationSupport, String theSystem) {
+	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
 		return myCodeSystems.containsKey(theSystem);
 	}
 
 	@Override
-	public boolean isValueSetSupported(IContextValidationSupport theRootValidationSupport, String theValueSetUrl) {
+	public boolean isValueSetSupported(IValidationSupport theRootValidationSupport, String theValueSetUrl) {
 		return myValueSets.containsKey(theValueSetUrl);
 	}
 
