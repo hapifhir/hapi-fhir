@@ -594,6 +594,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		// Should see 1 subscription notification
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
+		waitForSize(1, ourContentTypes);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
