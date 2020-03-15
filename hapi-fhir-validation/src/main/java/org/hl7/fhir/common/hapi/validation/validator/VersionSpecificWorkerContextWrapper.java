@@ -1,4 +1,4 @@
-package org.hl7.fhir.dstu3.hapi.validation;
+package org.hl7.fhir.common.hapi.validation.validator;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -13,7 +13,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.time.DateUtils;
 import org.fhir.ucum.UcumService;
-import org.hl7.fhir.common.hapi.validation.ProfileKnowledgeWorkerR5;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -44,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class VersionSpecificWorkerContextWrapper implements IWorkerContext {
+class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 	public static final IVersionTypeConverter IDENTITY_VERSION_TYPE_CONVERTER = new VersionTypeConverterR5();
 	private static FhirContext ourR5Context = FhirContext.forR5();
 	private final IValidationSupport myValidationSupport;

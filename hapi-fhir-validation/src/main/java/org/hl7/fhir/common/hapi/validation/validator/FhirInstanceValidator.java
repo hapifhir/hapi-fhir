@@ -1,22 +1,27 @@
-package org.hl7.fhir.dstu3.hapi.validation;
+package org.hl7.fhir.common.hapi.validation.validator;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.common.hapi.validation.ValidatorWrapper;
+import org.hl7.fhir.convertors.VersionConvertor_10_50;
+import org.hl7.fhir.convertors.VersionConvertor_14_50;
 import org.hl7.fhir.convertors.VersionConvertor_30_50;
+import org.hl7.fhir.convertors.VersionConvertor_40_50;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.Base;
 import org.hl7.fhir.r5.model.Resource;
+import org.hl7.fhir.r5.model.TypeDetails;
+import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -28,19 +33,19 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
 	private IValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
-	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
 	private volatile VersionSpecificWorkerContextWrapper myWrappedWorkerContext;
 	private boolean errorForUnknownProfiles;
-	private List<String> myExtensionDomains = Collections.emptyList();
 	private boolean assumeValidRestReferences;
+	private List<String> myExtensionDomains = Collections.emptyList();
+	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
 
 	/**
 	 * Constructor
 	 * <p>
-	 * Uses DefaultProfileValidationSupport for {@link IValidationSupport validation support}
+	 * Uses {@link DefaultProfileValidationSupport} for {@link IValidationSupport validation support}
 	 */
-	public FhirInstanceValidator(FhirContext theFhirContext) {
-		this(theFhirContext.getValidationSupport());
+	public FhirInstanceValidator(FhirContext theContext) {
+		this(theContext.getValidationSupport());
 	}
 
 	/**
@@ -90,37 +95,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		return this;
 	}
 
-	private String determineResourceName(Document theDocument) {
-		NodeList list = theDocument.getChildNodes();
-		for (int i = 0; i < list.getLength(); i++) {
-			if (list.item(i) instanceof Element) {
-				return list.item(i).getLocalName();
-			}
-		}
-		return theDocument.getDocumentElement().getLocalName();
-	}
-
-	private ArrayList<String> determineIfProfilesSpecified(Document theDocument) {
-		ArrayList<String> profileNames = new ArrayList<String>();
-		NodeList list = theDocument.getChildNodes().item(0).getChildNodes();
-		for (int i = 0; i < list.getLength(); i++) {
-			if (list.item(i).getNodeName().compareToIgnoreCase("meta") == 0) {
-				NodeList metaList = list.item(i).getChildNodes();
-				for (int j = 0; j < metaList.getLength(); j++) {
-					if (metaList.item(j).getNodeName().compareToIgnoreCase("profile") == 0) {
-						profileNames.add(metaList.item(j).getAttributes().item(0).getNodeValue());
-					}
-				}
-				break;
-			}
-		}
-		return profileNames;
-	}
-
-	public void flushCaches() {
-		myWrappedWorkerContext = null;
-	}
-
 	/**
 	 * Returns the "best practice" warning level (default is {@link BestPracticeWarningLevel#Hint}).
 	 * <p>
@@ -156,7 +130,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	/**
 	 * Returns the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
 	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
-	 *
 	 * @return
 	 */
 	public IValidationSupport getValidationSupport() {
@@ -212,7 +185,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		noTerminologyChecks = theNoTerminologyChecks;
 	}
 
-	private List<String> getExtensionDomains() {
+	public List<String> getExtensionDomains() {
 		return myExtensionDomains;
 	}
 
@@ -220,17 +193,89 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	protected List<ValidationMessage> validate(IValidationContext<?> theValidationCtx) {
 		VersionSpecificWorkerContextWrapper wrappedWorkerContext = myWrappedWorkerContext;
 		if (wrappedWorkerContext == null) {
-			VersionSpecificWorkerContextWrapper.IVersionTypeConverter converter = new VersionSpecificWorkerContextWrapper.IVersionTypeConverter() {
-				@Override
-				public Resource toCanonical(IBaseResource theNonCanonical) {
-					return VersionConvertor_30_50.convertResource((org.hl7.fhir.dstu3.model.Resource) theNonCanonical, true);
+			VersionSpecificWorkerContextWrapper.IVersionTypeConverter converter;
+
+			switch (myValidationSupport.getFhirContext().getVersion().getVersion()) {
+				case DSTU2:
+				case DSTU2_HL7ORG: {
+					converter = new VersionSpecificWorkerContextWrapper.IVersionTypeConverter() {
+						@Override
+						public Resource toCanonical(IBaseResource theNonCanonical) {
+							Resource retVal = VersionConvertor_10_50.convertResource((org.hl7.fhir.dstu2.model.Resource) theNonCanonical);
+							if (theNonCanonical instanceof org.hl7.fhir.dstu2.model.ValueSet) {
+								org.hl7.fhir.dstu2.model.ValueSet valueSet = (org.hl7.fhir.dstu2.model.ValueSet) theNonCanonical;
+								if (valueSet.hasCodeSystem() && valueSet.getCodeSystem().hasSystem()) {
+									if (!valueSet.hasCompose()) {
+										org.hl7.fhir.r5.model.ValueSet valueSetR5 = (org.hl7.fhir.r5.model.ValueSet) retVal;
+										valueSetR5.getCompose().addInclude().setSystem(valueSet.getCodeSystem().getSystem());
+									}
+								}
+							}
+							return retVal;
+						}
+
+						@Override
+						public IBaseResource fromCanonical(Resource theCanonical) {
+							return VersionConvertor_10_50.convertResource(theCanonical);
+						}
+					};
+					break;
 				}
 
-				@Override
-				public IBaseResource fromCanonical(Resource theCanonical) {
-					return VersionConvertor_30_50.convertResource(theCanonical, true);
+				case DSTU2_1: {
+					converter = new VersionSpecificWorkerContextWrapper.IVersionTypeConverter() {
+						@Override
+						public org.hl7.fhir.r5.model.Resource toCanonical(IBaseResource theNonCanonical) {
+							return VersionConvertor_14_50.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theNonCanonical);
+						}
+
+						@Override
+						public IBaseResource fromCanonical(org.hl7.fhir.r5.model.Resource theCanonical) {
+							return VersionConvertor_14_50.convertResource(theCanonical);
+						}
+					};
+					break;
 				}
-			};
+
+				case DSTU3: {
+					converter = new VersionSpecificWorkerContextWrapper.IVersionTypeConverter() {
+						@Override
+						public Resource toCanonical(IBaseResource theNonCanonical) {
+							return VersionConvertor_30_50.convertResource((org.hl7.fhir.dstu3.model.Resource) theNonCanonical, true);
+						}
+
+						@Override
+						public IBaseResource fromCanonical(Resource theCanonical) {
+							return VersionConvertor_30_50.convertResource(theCanonical, true);
+						}
+					};
+					break;
+				}
+
+				case R4: {
+					converter = new VersionSpecificWorkerContextWrapper.IVersionTypeConverter() {
+						@Override
+						public org.hl7.fhir.r5.model.Resource toCanonical(IBaseResource theNonCanonical) {
+							return VersionConvertor_40_50.convertResource((org.hl7.fhir.r4.model.Resource)theNonCanonical);
+						}
+
+						@Override
+						public IBaseResource fromCanonical(org.hl7.fhir.r5.model.Resource theCanonical) {
+							return VersionConvertor_40_50.convertResource(theCanonical);
+						}
+					};
+					break;
+				}
+
+				case R5: {
+					converter = VersionSpecificWorkerContextWrapper.IDENTITY_VERSION_TYPE_CONVERTER;
+					break;
+				}
+
+				default:
+					throw new IllegalStateException();
+			}
+
 			wrappedWorkerContext = new VersionSpecificWorkerContextWrapper(myValidationSupport, converter);
 		}
 		myWrappedWorkerContext = wrappedWorkerContext;
@@ -244,7 +289,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			.setValidatorResourceFetcher(getValidatorResourceFetcher())
 			.setAssumeValidRestReferences(isAssumeValidRestReferences())
 			.validate(wrappedWorkerContext, theValidationCtx);
-
 	}
 
 	public IResourceValidator.IValidatorResourceFetcher getValidatorResourceFetcher() {
@@ -261,6 +305,54 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	public void setAssumeValidRestReferences(boolean assumeValidRestReferences) {
 		this.assumeValidRestReferences = assumeValidRestReferences;
+	}
+
+
+	public static class NullEvaluationContext implements FHIRPathEngine.IEvaluationContext {
+		@Override
+		public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
+			return null;
+		}
+
+		@Override
+		public TypeDetails resolveConstantType(Object appContext, String name) throws PathEngineException {
+			return null;
+		}
+
+		@Override
+		public boolean log(String argument, List<Base> focus) {
+			return false;
+		}
+
+		@Override
+		public FunctionDetails resolveFunction(String functionName) {
+			return null;
+		}
+
+		@Override
+		public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters) throws PathEngineException {
+			return null;
+		}
+
+		@Override
+		public List<Base> executeFunction(Object appContext, String functionName, List<List<Base>> parameters) {
+			return null;
+		}
+
+		@Override
+		public Base resolveReference(Object appContext, String url, Base refContext) throws FHIRException {
+			return null;
+		}
+
+		@Override
+		public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
+			return false;
+		}
+
+		@Override
+		public ValueSet resolveValueSet(Object appContext, String url) {
+			return null;
+		}
 	}
 
 

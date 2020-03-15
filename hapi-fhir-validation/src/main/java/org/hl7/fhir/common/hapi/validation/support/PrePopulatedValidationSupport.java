@@ -1,4 +1,4 @@
-package org.hl7.fhir.common.hapi.validation;
+package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;

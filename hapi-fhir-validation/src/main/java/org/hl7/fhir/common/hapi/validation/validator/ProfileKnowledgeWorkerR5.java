@@ -1,4 +1,4 @@
-package org.hl7.fhir.common.hapi.validation;
+package org.hl7.fhir.common.hapi.validation.validator;
 
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;

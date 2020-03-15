@@ -23,10 +23,10 @@ package ca.uhn.fhir.jpa.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import org.hl7.fhir.common.hapi.validation.CommonCodeSystemsTerminologyService;
-import org.hl7.fhir.common.hapi.validation.SnapshotGeneratingValidationSupport;
-import org.hl7.fhir.common.hapi.validation.StaticResourceTerminologyServerValidationSupport;
-import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.StaticResourceTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 

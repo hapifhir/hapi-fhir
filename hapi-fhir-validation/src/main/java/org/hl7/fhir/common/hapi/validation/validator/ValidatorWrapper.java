@@ -1,4 +1,4 @@
-package org.hl7.fhir.common.hapi.validation;
+package org.hl7.fhir.common.hapi.validation.validator;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -12,7 +12,6 @@ import com.google.gson.JsonObject;
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r5.conformance.ProfileUtilities;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Manager;
 import org.hl7.fhir.r5.model.StructureDefinition;
@@ -31,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class ValidatorWrapper {
+class ValidatorWrapper {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidatorWrapper.class);
 	private IResourceValidator.BestPracticeWarningLevel myBestPracticeWarningLevel;
@@ -91,7 +90,7 @@ public class ValidatorWrapper {
 
 	public List<ValidationMessage> validate(IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
 		InstanceValidator v;
-		FHIRPathEngine.IEvaluationContext evaluationCtx = new org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator.NullEvaluationContext();
+		FHIRPathEngine.IEvaluationContext evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
 		try {
 			v = new InstanceValidator(theWorkerContext, evaluationCtx);
 		} catch (Exception e) {

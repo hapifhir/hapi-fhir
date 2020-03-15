@@ -6,7 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.springframework.web.cors.CorsConfiguration;
 
 import ca.uhn.fhir.rest.server.RestfulServer;

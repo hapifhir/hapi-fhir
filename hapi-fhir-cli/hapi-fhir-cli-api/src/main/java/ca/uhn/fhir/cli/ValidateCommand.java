@@ -39,9 +39,9 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.fusesource.jansi.Ansi.Color;
-import org.hl7.fhir.common.hapi.validation.StaticResourceTerminologyServerValidationSupport;
-import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.support.StaticResourceTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.File;
@@ -170,8 +170,8 @@ public class ValidateCommand extends BaseCommand {
 					if (theCommandLine.hasOption("r")) {
 						validationSupport.addValidationSupport(new LoadingValidationSupportDstu2());
 					}
-					org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator instanceValidator;
-					instanceValidator = new org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator(validationSupport);
+					FhirInstanceValidator instanceValidator;
+					instanceValidator = new FhirInstanceValidator(validationSupport);
 					val.registerValidatorModule(instanceValidator);
 
 					break;

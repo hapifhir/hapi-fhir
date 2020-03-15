@@ -51,9 +51,9 @@ definitions provided either by HL7 or by the user.
     multiple versions, and you should use the version of the class the is appropriate
     for the version of FHIR you are looking to validate. For example, the
     examples and links below are using the
-    <code>org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator</code> class to
+    <code>org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator</code> class to
     validate FHIR R4 resources, but you would want to use the class
-    <code>org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator</code>
+    <code>org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator</code>
     if you need to validate DSTU3 content.
 </div>
 

@@ -18,6 +18,7 @@ import org.hl7.fhir.dstu2016may.model.OperationOutcome;
 import org.hl7.fhir.dstu2016may.model.Patient;
 import org.hl7.fhir.dstu2016may.model.Reference;
 import org.hl7.fhir.dstu2016may.model.StringType;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;

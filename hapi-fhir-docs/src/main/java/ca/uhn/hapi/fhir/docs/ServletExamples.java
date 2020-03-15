@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.*;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
-import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.springframework.web.cors.CorsConfiguration;
 
 import javax.servlet.ServletException;

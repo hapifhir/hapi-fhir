@@ -1,4 +1,4 @@
-package org.hl7.fhir.common.hapi.validation;
+package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;

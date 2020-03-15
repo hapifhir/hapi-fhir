@@ -1,6 +1,7 @@
-package org.hl7.fhir.instance.hapi.validation;
+package org.hl7.fhir.dstu2.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
@@ -15,15 +16,15 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import org.hl7.fhir.common.hapi.validation.StaticResourceTerminologyServerValidationSupport;
-import org.hl7.fhir.common.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.support.StaticResourceTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.dstu2.model.DateType;
 import org.hl7.fhir.dstu2.model.Observation;
 import org.hl7.fhir.dstu2.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.dstu2.model.StringType;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -31,8 +32,12 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class FhirInstanceValidatorDstu2Test {
 

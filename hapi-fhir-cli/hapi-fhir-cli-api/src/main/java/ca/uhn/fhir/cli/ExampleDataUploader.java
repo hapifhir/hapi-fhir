@@ -45,7 +45,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
@@ -245,7 +245,7 @@ public class ExampleDataUploader extends BaseCommand {
 		bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
 
 		FhirValidator val = ctx.newValidator();
-		val.registerValidatorModule(new org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator(new DefaultProfileValidationSupport(ctx)));
+		val.registerValidatorModule(new FhirInstanceValidator(new DefaultProfileValidationSupport(ctx)));
 
 		ZipInputStream zis = new ZipInputStream(FileUtils.openInputStream(inputFile));
 		byte[] buffer = new byte[2048];
