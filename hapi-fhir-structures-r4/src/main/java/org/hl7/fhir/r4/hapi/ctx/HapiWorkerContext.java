@@ -191,26 +191,6 @@ public final class HapiWorkerContext implements IWorkerContext {
   @Override
   public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
 
-    /*
-     * The following valueset is a special case, since the BCP codesystem is very difficult to expand
-     */
-    if ("http://hl7.org/fhir/ValueSet/languages".equals(theVs.getUrl())) {
-      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-      definition.setCode(theSystem);
-      definition.setDisplay(theCode);
-      return new ValidationResult(definition);
-    }
-
-    /*
-     * The following valueset is a special case, since the mime types codesystem is very difficult to expand
-     */
-    if ("http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getUrl())) {
-      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-      definition.setCode(theSystem);
-      definition.setDisplay(theCode);
-      return new ValidationResult(definition);
-    }
-
     IValidationSupport.CodeValidationResult outcome;
     if (isNotBlank(theVs.getUrl())) {
       outcome = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, theVs.getUrl());

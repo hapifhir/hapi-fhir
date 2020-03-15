@@ -36,7 +36,9 @@ import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
@@ -58,27 +60,30 @@ public class ValidatorExamples {
 
    public void validationIntro() {
    // START SNIPPET: validationIntro
-      FhirContext ctx = FhirContext.forR4();
-      
-      // Ask the context for a validator
-      FhirValidator validator = ctx.newValidator();
-      
-      // Create a validator modules and register it
-      IValidatorModule module = new FhirInstanceValidator(ctx);
-      validator.registerValidatorModule(module);
+		FhirContext ctx = FhirContext.forR4();
 
-      // Pass a resource in to be validated. The resource can
-      // be an IBaseResource instance, or can be a raw String
-      // containing a serialized resource as text.
-      Patient resource = new Patient();
-      ValidationResult result = validator.validateWithResult(resource);
-      String resourceText = "<Patient.....>";
-      ValidationResult result2 = validator.validateWithResult(resourceText);
-      
-      // The result object now contains the validation results
-      for (SingleValidationMessage next : result.getMessages()) {
-         System.out.println(next.getLocationString() + " " + next.getMessage());
-      }
+		// Ask the context for a validator
+		FhirValidator validator = ctx.newValidator();
+
+		// Create a validation module and register it
+		IValidatorModule module = new FhirInstanceValidator(ctx);
+		validator.registerValidatorModule(module);
+
+		// Pass a resource instance as input to be validated
+		org.hl7.fhir.dstu3.model.Patient resource = new org.hl7.fhir.dstu3.model.Patient();
+		ValidationResult result = validator.validateWithResult(resource);
+
+		// The input can also be a raw string (this mechanism can
+		// potentially catch syntax issues that would have been missed
+		// otherwise, since the HAPI FHIR Parser is forgiving about
+		// its input.
+		String resourceText = "<Patient.....>";
+		ValidationResult result2 = validator.validateWithResult(resourceText);
+
+		// The result object now contains the validation results
+		for (SingleValidationMessage next : result.getMessages()) {
+			System.out.println(next.getLocationString() + " " + next.getMessage());
+		}
    // END SNIPPET: validationIntro
    }
    
@@ -316,33 +321,72 @@ public class ValidatorExamples {
    	// START SNIPPET: validateSupplyProfiles
 		FhirContext ctx = FhirContext.forR4();
 
-		// Create a PrePopulatedValidationSupport and load it with our custom structures
-		PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport(ctx);
+		// Create a chain that will hold our modules
+		ValidationSupportChain supportChain = new ValidationSupportChain();
 
+		// DefaultProfileValidationSupport supplies base FHIR definitions. This is generally required
+		// even if you are using custom profiles, since those profiles will derive from the base
+		// definitions.
+		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ctx);
+		supportChain.addValidationSupport(defaultSupport);
+
+		// Create a PrePopulatedValidationSupport which can be used to load custom definitions.
 		// In this example we're loading two things, but in a real scenario we might
 		// load many StructureDefinitions, ValueSets, CodeSystems, etc.
+		PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport(ctx);
 		prePopulatedSupport.addStructureDefinition(someStructureDefnition);
 		prePopulatedSupport.addValueSet(someValueSet);
+		supportChain.addValidationSupport(prePopulatedSupport);
 
-		// We'll still use DefaultProfileValidationSupport since derived profiles generally
-		// rely on built-in profiles also being available
-		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ctx);
-
-		// We'll create a chain that includes both the pre-populated and default. We put
-		// the pre-populated (custom) support module first so that it takes precedence
-		ValidationSupportChain supportChain = new ValidationSupportChain();
-		supportChain.addValidationSupport((IValidationSupport) prePopulatedSupport);
-		supportChain.addValidationSupport((IValidationSupport) defaultSupport);
+		// Wrap the chain in a cache to improve performance
+		CachingValidationSupport cache = new CachingValidationSupport(supportChain);
 
 		// Create a validator using the FhirInstanceValidator module. We can use this
 		// validator to perform validation
-		FhirInstanceValidator validatorModule = new FhirInstanceValidator(supportChain);
+		FhirInstanceValidator validatorModule = new FhirInstanceValidator(cache);
 		FhirValidator validator = ctx.newValidator().registerValidatorModule(validatorModule);
 		ValidationResult result = validator.validateWithResult(input);
 		// END SNIPPET: validateSupplyProfiles
 
 	}
-   
+
+
+	public void validateUsingRemoteTermServer() {
+
+		StructureDefinition someStructureDefnition = null;
+		ValueSet someValueSet = null;
+		String input = null;
+
+		// START SNIPPET: validateUsingRemoteTermSvr
+		FhirContext ctx = FhirContext.forR4();
+
+		// Create a chain that will hold our modules
+		ValidationSupportChain supportChain = new ValidationSupportChain();
+
+		// DefaultProfileValidationSupport supplies base FHIR definitions. This is generally required
+		// even if you are using custom profiles, since those profiles will derive from the base
+		// definitions.
+		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ctx);
+		supportChain.addValidationSupport(defaultSupport);
+
+		// Create a module that uses a remote terminology service
+		RemoteTerminologyServiceValidationSupport remoteTermSvc = new RemoteTerminologyServiceValidationSupport(ctx);
+		remoteTermSvc.setBaseUrl("http://hapi.fhir.org/baseR4");
+		supportChain.addValidationSupport(remoteTermSvc);
+
+		// Wrap the chain in a cache to improve performance
+		CachingValidationSupport cache = new CachingValidationSupport(supportChain);
+
+		// Create a validator using the FhirInstanceValidator module. We can use this
+		// validator to perform validation
+		FhirInstanceValidator validatorModule = new FhirInstanceValidator(cache);
+		FhirValidator validator = ctx.newValidator().registerValidatorModule(validatorModule);
+		ValidationResult result = validator.validateWithResult(input);
+		// END SNIPPET: validateUsingRemoteTermSvr
+
+	}
+
+
    @SuppressWarnings("unused")
    private static void validateFiles() throws Exception {
       // START SNIPPET: validateFiles

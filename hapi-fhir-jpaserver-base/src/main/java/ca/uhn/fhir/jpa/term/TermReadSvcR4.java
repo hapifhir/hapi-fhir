@@ -123,7 +123,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 			}
 
 			return new IValidationSupport.CodeValidationResult()
-		.setSeverity(IssueSeverity.ERROR.toCode())
+		.setSeverity(IssueSeverity.ERROR)
 		.setMessage("Unknown code {" + theCodeSystem + "}" + theCode);
 	}
 

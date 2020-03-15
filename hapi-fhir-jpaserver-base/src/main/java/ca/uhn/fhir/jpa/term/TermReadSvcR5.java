@@ -20,7 +20,6 @@ import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.utilities.TerminologyServiceOptions;
-import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -112,7 +111,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 		}
 
 		return new IValidationSupport.CodeValidationResult()
-			.setSeverity(IssueSeverity.ERROR.toCode())
+			.setSeverity(IssueSeverity.ERROR)
 			.setCode("Unknown code {" + theCodeSystem + "}" + theCode);
 	}
 

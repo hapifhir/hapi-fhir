@@ -450,27 +450,6 @@ class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 
 	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, String code, org.hl7.fhir.r5.model.ValueSet theValueSet) {
-		/*
-		 * The following valueset is a special case, since the BCP codesystem is very difficult to expand
-		 */
-		if ("http://hl7.org/fhir/ValueSet/languages".equals(theValueSet.getUrl())) {
-			org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent definition = new org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent();
-			definition.setCode(code);
-			definition.setDisplay(code);
-			return new ValidationResult(definition);
-		}
-
-		/*
-		 * The following valueset is a special case, since the mime types codesystem is very difficult to expand
-		 */
-		if ("http://hl7.org/fhir/ValueSet/mimetypes".equals(theValueSet.getUrl())) {
-			org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent definition = new org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent();
-			definition.setCode(code);
-			definition.setDisplay(code);
-
-			return new ValidationResult(definition);
-		}
-
 		IBaseResource convertedVs = null;
 		try {
 			if (theValueSet != null) {

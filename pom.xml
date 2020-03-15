@@ -2437,50 +2437,12 @@
 			</build>
 		</profile>
 		<profile>
-			<id>SITE</id>
-			<modules>
-				<module>hapi-fhir-base</module>
-				<module>hapi-fhir-structures-dstu2</module>
-				<module>hapi-fhir-structures-dstu3</module>
-				<module>hapi-fhir-structures-r4</module>
-				<module>hapi-fhir-structures-r5</module>
-				<module>hapi-fhir-client</module>
-				<module>hapi-fhir-server</module>
-				<module>hapi-fhir-jpaserver-model</module>
-				<module>hapi-fhir-jpaserver-searchparam</module>
-				<module>hapi-fhir-jpaserver-subscription</module>
-				<module>hapi-fhir-jpaserver-base</module>
-				<module>hapi-fhir-jaxrsserver-base</module>
-				<!-- <module>hapi-fhir-cobertura</module> -->
-				<module>examples</module>
-			</modules>
-			<reporting>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>findbugs-maven-plugin</artifactId>
-						<version>3.0.5</version>
-						<configuration>
-							<classFilesDirectory>./hapi-fhir-base/target/classes</classFilesDirectory>
-						</configuration>
-						<reportSets>
-							<reportSet>
-								<reports>
-									<report>findbugs</report>
-								</reports>
-							</reportSet>
-						</reportSets>
-					</plugin>
-				</plugins>
-			</reporting>
-		</profile>
-		<profile>
 			<id>ALLMODULES</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
-                <module>hapi-fhir-bom</module>
+            <module>hapi-fhir-bom</module>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-docs</module>
@@ -2518,7 +2480,6 @@
 				<module>hapi-fhir-android</module>
 				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
-				<module>examples</module>
 				<!--<module>osgi</module>-->
 				<!--<module>osgi/hapi-fhir-karaf-features</module>
 				<module>osgi/hapi-fhir-karaf-integration-tests</module>-->

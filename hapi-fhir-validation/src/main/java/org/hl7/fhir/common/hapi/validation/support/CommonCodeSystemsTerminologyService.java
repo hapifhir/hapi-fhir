@@ -8,75 +8,26 @@ import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This {@link IValidationSupport validation support module} can be used to validate codes against common
+ * CodeSystems that are commonly used, but are not distriuted with the FHIR specification for various reasons
+ * (size, complexity, etc.).
+ * <p>
+ * See <a href="https://hapifhir.io/hapi-fhir/docs/validation/validation_support_modules.html#CommonCodeSystemsTerminologyService">CommonCodeSystemsTerminologyService</a> in the HAPI FHIR documentation
+ * for details about what is and isn't covered by this class.
+ * </p>
+ */
 public class CommonCodeSystemsTerminologyService implements IValidationSupport {
+	public static final String LANGUAGES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/languages";
+	public static final String MIMETYPES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/mimetypes";
 	private static final String USPS_CODESYSTEM_URL = "https://www.usps.com/";
-	private static Map<String, String> USPS_CODES = new HashMap<>();
+	private static final String USPS_VALUESET_URL = "http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state";
+	private static Map<String, String> USPS_CODES = Collections.unmodifiableMap(buildUspsCodes());
 
-	static {
-		USPS_CODES.put("AK", "Alaska");
-		USPS_CODES.put("AL", "Alabama");
-		USPS_CODES.put("AR", "Arkansas");
-		USPS_CODES.put("AS", "American Samoa");
-		USPS_CODES.put("AZ", "Arizona");
-		USPS_CODES.put("CA", "California");
-		USPS_CODES.put("CO", "Colorado");
-		USPS_CODES.put("CT", "Connecticut");
-		USPS_CODES.put("DC", "District of Columbia");
-		USPS_CODES.put("DE", "Delaware");
-		USPS_CODES.put("FL", "Florida");
-		USPS_CODES.put("FM", "Federated States of Micronesia");
-		USPS_CODES.put("GA", "Georgia");
-		USPS_CODES.put("GU", "Guam");
-		USPS_CODES.put("HI", "Hawaii");
-		USPS_CODES.put("IA", "Iowa");
-		USPS_CODES.put("ID", "Idaho");
-		USPS_CODES.put("IL", "Illinois");
-		USPS_CODES.put("IN", "Indiana");
-		USPS_CODES.put("KS", "Kansas");
-		USPS_CODES.put("KY", "Kentucky");
-		USPS_CODES.put("LA", "Louisiana");
-		USPS_CODES.put("MA", "Massachusetts");
-		USPS_CODES.put("MD", "Maryland");
-		USPS_CODES.put("ME", "Maine");
-		USPS_CODES.put("MH", "Marshall Islands");
-		USPS_CODES.put("MI", "Michigan");
-		USPS_CODES.put("MN", "Minnesota");
-		USPS_CODES.put("MO", "Missouri");
-		USPS_CODES.put("MP", "Northern Mariana Islands");
-		USPS_CODES.put("MS", "Mississippi");
-		USPS_CODES.put("MT", "Montana");
-		USPS_CODES.put("NC", "North Carolina");
-		USPS_CODES.put("ND", "North Dakota");
-		USPS_CODES.put("NE", "Nebraska");
-		USPS_CODES.put("NH", "New Hampshire");
-		USPS_CODES.put("NJ", "New Jersey");
-		USPS_CODES.put("NM", "New Mexico");
-		USPS_CODES.put("NV", "Nevada");
-		USPS_CODES.put("NY", "New York");
-		USPS_CODES.put("OH", "Ohio");
-		USPS_CODES.put("OK", "Oklahoma");
-		USPS_CODES.put("OR", "Oregon");
-		USPS_CODES.put("PA", "Pennsylvania");
-		USPS_CODES.put("PR", "Puerto Rico");
-		USPS_CODES.put("PW", "Palau");
-		USPS_CODES.put("RI", "Rhode Island");
-		USPS_CODES.put("SC", "South Carolina");
-		USPS_CODES.put("SD", "South Dakota");
-		USPS_CODES.put("TN", "Tennessee");
-		USPS_CODES.put("TX", "Texas");
-		USPS_CODES.put("UM", "U.S. Minor Outlying Islands");
-		USPS_CODES.put("UT", "Utah");
-		USPS_CODES.put("VA", "Virginia");
-		USPS_CODES.put("VI", "Virgin Islands of the U.S.");
-		USPS_CODES.put("VT", "Vermont");
-		USPS_CODES.put("WA", "Washington");
-		USPS_CODES.put("WI", "Wisconsin");
-		USPS_CODES.put("WV", "West Virginia");
-		USPS_CODES.put("WY", "Wyoming");
-	}
 
 	private final FhirContext myFhirContext;
 
@@ -93,15 +44,39 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	public CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		String url = getValueSetUrl(theValueSet);
 
-		if ("http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state".equals(url)) {
+		/* **************************************************************************************
+		 * NOTE: Update validation_support_modules.html if any of the support in this module
+		 * changes in any way!
+		 * **************************************************************************************/
+
+		boolean handled = false;
+		if (USPS_VALUESET_URL.equals(url)) {
+			handled = true;
 			String display = USPS_CODES.get(theCode);
 			if (display != null) {
 				if (USPS_CODESYSTEM_URL.equals(theCodeSystem) || theOptions.isInferSystem()) {
 					return new CodeValidationResult()
-						.setCode(theCode);
+						.setCode(theCode)
+						.setDisplay(display);
 				}
 			}
+		}
 
+		// This is a pretty naive implementation - Will be enhanced in future
+		if (LANGUAGES_VALUESET_URL.equals(url)) {
+			return new CodeValidationResult()
+				.setCode(theCode)
+				.setDisplay(theDisplay);
+		}
+
+		// This is a pretty naive implementation - Will be enhanced in future
+		if (MIMETYPES_VALUESET_URL.equals(url)) {
+			return new CodeValidationResult()
+				.setCode(theCode)
+				.setDisplay(theDisplay);
+		}
+
+		if (handled) {
 			return new CodeValidationResult()
 				.setSeverity(IssueSeverity.ERROR)
 				.setMessage("Code \"" + theCode + "\" is not in system: " + USPS_CODESYSTEM_URL);
@@ -117,7 +92,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				url = ((ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSet).getUrl();
 				break;
 			}
-			case DSTU2_HL7ORG:{
+			case DSTU2_HL7ORG: {
 				url = ((ValueSet) theValueSet).getUrl();
 				break;
 			}
@@ -143,5 +118,70 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	@Override
 	public FhirContext getFhirContext() {
 		return myFhirContext;
+	}
+
+	private static HashMap<String, String> buildUspsCodes() {
+		HashMap<String, String> uspsCodes = new HashMap<>();
+		uspsCodes.put("AK", "Alaska");
+		uspsCodes.put("AL", "Alabama");
+		uspsCodes.put("AR", "Arkansas");
+		uspsCodes.put("AS", "American Samoa");
+		uspsCodes.put("AZ", "Arizona");
+		uspsCodes.put("CA", "California");
+		uspsCodes.put("CO", "Colorado");
+		uspsCodes.put("CT", "Connecticut");
+		uspsCodes.put("DC", "District of Columbia");
+		uspsCodes.put("DE", "Delaware");
+		uspsCodes.put("FL", "Florida");
+		uspsCodes.put("FM", "Federated States of Micronesia");
+		uspsCodes.put("GA", "Georgia");
+		uspsCodes.put("GU", "Guam");
+		uspsCodes.put("HI", "Hawaii");
+		uspsCodes.put("IA", "Iowa");
+		uspsCodes.put("ID", "Idaho");
+		uspsCodes.put("IL", "Illinois");
+		uspsCodes.put("IN", "Indiana");
+		uspsCodes.put("KS", "Kansas");
+		uspsCodes.put("KY", "Kentucky");
+		uspsCodes.put("LA", "Louisiana");
+		uspsCodes.put("MA", "Massachusetts");
+		uspsCodes.put("MD", "Maryland");
+		uspsCodes.put("ME", "Maine");
+		uspsCodes.put("MH", "Marshall Islands");
+		uspsCodes.put("MI", "Michigan");
+		uspsCodes.put("MN", "Minnesota");
+		uspsCodes.put("MO", "Missouri");
+		uspsCodes.put("MP", "Northern Mariana Islands");
+		uspsCodes.put("MS", "Mississippi");
+		uspsCodes.put("MT", "Montana");
+		uspsCodes.put("NC", "North Carolina");
+		uspsCodes.put("ND", "North Dakota");
+		uspsCodes.put("NE", "Nebraska");
+		uspsCodes.put("NH", "New Hampshire");
+		uspsCodes.put("NJ", "New Jersey");
+		uspsCodes.put("NM", "New Mexico");
+		uspsCodes.put("NV", "Nevada");
+		uspsCodes.put("NY", "New York");
+		uspsCodes.put("OH", "Ohio");
+		uspsCodes.put("OK", "Oklahoma");
+		uspsCodes.put("OR", "Oregon");
+		uspsCodes.put("PA", "Pennsylvania");
+		uspsCodes.put("PR", "Puerto Rico");
+		uspsCodes.put("PW", "Palau");
+		uspsCodes.put("RI", "Rhode Island");
+		uspsCodes.put("SC", "South Carolina");
+		uspsCodes.put("SD", "South Dakota");
+		uspsCodes.put("TN", "Tennessee");
+		uspsCodes.put("TX", "Texas");
+		uspsCodes.put("UM", "U.S. Minor Outlying Islands");
+		uspsCodes.put("UT", "Utah");
+		uspsCodes.put("VA", "Virginia");
+		uspsCodes.put("VI", "Virgin Islands of the U.S.");
+		uspsCodes.put("VT", "Vermont");
+		uspsCodes.put("WA", "Washington");
+		uspsCodes.put("WI", "Wisconsin");
+		uspsCodes.put("WV", "West Virginia");
+		uspsCodes.put("WY", "Wyoming");
+		return uspsCodes;
 	}
 }

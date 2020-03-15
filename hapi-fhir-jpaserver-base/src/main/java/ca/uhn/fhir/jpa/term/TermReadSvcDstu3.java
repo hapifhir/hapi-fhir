@@ -156,7 +156,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 		}
 
 		return new IValidationSupport.CodeValidationResult()
-			.setSeverity(IssueSeverity.ERROR.toCode())
+			.setSeverity(IssueSeverity.ERROR)
 			.setMessage("Unknown code {" + theCodeSystem + "}" + theCode);
 	}
 
