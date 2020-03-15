@@ -11,15 +11,14 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseStatus;
-import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -98,7 +97,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 
 		when(myValSupport.validateCode(any(), any(), any(), any(), any(), nullable(String.class)))
-			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity("error").setMessage("Unknown code"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code"));
 		when(myValSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), nullable(ValueSet.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 
@@ -203,11 +202,11 @@ public class QuestionnaireResponseValidatorR5Test {
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
-			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code"));
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(ValueSet.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(ValueSet.class)))
-			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -536,7 +535,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
-			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code"));
 
 		QuestionnaireResponse qa;
 		ValidationResult errors;

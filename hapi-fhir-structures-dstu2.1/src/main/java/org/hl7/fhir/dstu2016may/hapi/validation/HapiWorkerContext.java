@@ -177,7 +177,7 @@ public final class HapiWorkerContext implements IWorkerContext {
 		}
 		OperationOutcome.IssueSeverity severity = null;
 		if (result.getSeverity() != null) {
-			severity = OperationOutcome.IssueSeverity.fromCode(result.getSeverity());
+			severity = OperationOutcome.IssueSeverity.fromCode(result.getSeverityCode());
 		}
 		ConceptDefinitionComponent definition = result.getCode() != null ? new ConceptDefinitionComponent().setCode(result.getCode()) : null;
 		return new ValidationResult(severity, result.getMessage(), definition);

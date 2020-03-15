@@ -331,8 +331,8 @@ public class ValidatorExamples {
 		// We'll create a chain that includes both the pre-populated and default. We put
 		// the pre-populated (custom) support module first so that it takes precedence
 		ValidationSupportChain supportChain = new ValidationSupportChain();
-		supportChain.addValidationSupport(prePopulatedSupport);
-		supportChain.addValidationSupport(defaultSupport);
+		supportChain.addValidationSupport((IValidationSupport) prePopulatedSupport);
+		supportChain.addValidationSupport((IValidationSupport) defaultSupport);
 
 		// Create a validator using the FhirInstanceValidator module. We can use this
 		// validator to perform validation

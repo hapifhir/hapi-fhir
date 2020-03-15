@@ -277,7 +277,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 		String message = "Unknown code '" + (isNotBlank(theCodeSystem) ? theCodeSystem + "#" : "") + theCode + "'";
 		return new CodeValidationResult()
-			.setSeverity(severity.toCode())
+			.setSeverityCode(severity.toCode())
 			.setMessage(message);
 	}
 

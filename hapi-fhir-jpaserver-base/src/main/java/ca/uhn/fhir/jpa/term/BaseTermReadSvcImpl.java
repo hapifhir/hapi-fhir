@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IDao;
@@ -37,7 +38,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -710,20 +710,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 						if (theWantConceptOrNull == null || theWantConceptOrNull.getCode().equals(nextCode)) {
 							if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
 
-								if (codeSystemFromContext != null) {
-									CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
-									if (code != null) {
-										String display = code.getDisplay();
-										addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, nextCode, display);
-									}
-//								} else {
-//
-//									// This code just plain doesn't exist in any known codesystem, but the valueset
-//									// explicitly includes it. We'll trust the valueset in this case. This happens for
-//									// codesytems such a USPS. There is probably a better way to handle this...
-//									addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, nextCode, null);
-//
+								CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
+								if (code != null) {
+									String display = code.getDisplay();
+									addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, nextCode, display);
 								}
+
 							}
 						}
 					}

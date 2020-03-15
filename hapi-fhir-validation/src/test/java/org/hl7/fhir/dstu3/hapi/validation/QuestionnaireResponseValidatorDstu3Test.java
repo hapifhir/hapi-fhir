@@ -204,7 +204,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(ValueSet.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(ValueSet.class)))
-			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -226,7 +226,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
-			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity("warning").setMessage("Unknown code: http://codesystems.com/system / code1"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverityCode("warning").setMessage("Unknown code: http://codesystems.com/system / code1"));
 
 
 		QuestionnaireResponse qa;
@@ -1004,7 +1004,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
-			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);

@@ -187,7 +187,7 @@ public class FhirInstanceValidatorDstu3Test {
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.WARNING.toCode()).setMessage("Unknown code: " + system + " / " + code);
+					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.WARNING.toCode()).setMessage("Unknown code: " + system + " / " + code);
 				} else if (myCodeSystems.containsKey(system)) {
 					CodeSystem cs = myCodeSystems.get(system);
 					Optional<ConceptDefinitionComponent> found = cs.getConcept().stream().filter(t -> t.getCode().equals(code)).findFirst();

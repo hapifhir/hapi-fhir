@@ -183,7 +183,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverity(ValidationMessage.IssueSeverity.WARNING.toCode()).setMessage("Unknown code: " + system + " / " + code);
+					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.WARNING.toCode()).setMessage("Unknown code: " + system + " / " + code);
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(myDefaultValidationSupport, options, system, code, display, valueSetUrl);
 				}
