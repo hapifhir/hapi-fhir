@@ -356,10 +356,29 @@ public interface IValidationSupport {
 		}
 	}
 
+	enum IssueSeverity {
+		/**
+		 * The issue caused the action to fail, and no further checking could be performed.
+		 */
+		FATAL,
+		/**
+		 * The issue is sufficiently important to cause the action to fail.
+		 */
+		ERROR,
+		/**
+		 * The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired.
+		 */
+		WARNING,
+		/**
+		 * The issue has no relation to the degree of success of the action.
+		 */
+		INFORMATION
+	}
+
 	class CodeValidationResult {
 		private String myCode;
 		private String myMessage;
-		private String mySeverity;
+		private IssueSeverity mySeverity;
 		private String myCodeSystemName;
 		private String myCodeSystemVersion;
 		private List<BaseConceptProperty> myProperties;
@@ -422,11 +441,11 @@ public interface IValidationSupport {
 			myProperties = theProperties;
 		}
 
-		public String getSeverity() {
+		public IssueSeverity getSeverity() {
 			return mySeverity;
 		}
 
-		public CodeValidationResult setSeverity(String theSeverity) {
+		public CodeValidationResult setSeverity(IssueSeverity theSeverity) {
 			mySeverity = theSeverity;
 			return this;
 		}
@@ -446,6 +465,26 @@ public interface IValidationSupport {
 				retVal.setCodeSystemVersion(getCodeSystemVersion());
 			}
 			return retVal;
+		}
+
+		/**
+		 * Convenience method that returns {@link #getSeverity()} as an IssueSeverity code string
+		 */
+		public String getSeverityCode() {
+			String retVal = null;
+			if (getSeverity() != null) {
+				retVal = getSeverity().name().toLowerCase();
+			}
+			return retVal;
+		}
+
+		/**
+		 * Sets an issue severity as a string code. Value must be the name of
+		 * one of the enum values in {@link IssueSeverity}. Value is case-insensitive.
+		 */
+		public CodeValidationResult setSeverityCode(@Nonnull String theIssueSeverity) {
+			setSeverity(IssueSeverity.valueOf(theIssueSeverity.toUpperCase()));
+			return this;
 		}
 	}
 

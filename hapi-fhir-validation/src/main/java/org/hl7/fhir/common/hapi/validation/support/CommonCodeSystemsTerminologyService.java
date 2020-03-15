@@ -103,7 +103,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			}
 
 			return new CodeValidationResult()
-				.setSeverity("error")
+				.setSeverity(IssueSeverity.ERROR)
 				.setMessage("Code \"" + theCode + "\" is not in system: " + USPS_CODESYSTEM_URL);
 		}
 

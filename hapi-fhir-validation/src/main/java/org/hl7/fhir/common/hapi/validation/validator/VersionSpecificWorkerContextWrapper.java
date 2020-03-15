@@ -175,7 +175,7 @@ class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 		if (theResult != null) {
 			String code = theResult.getCode();
 			String display = theResult.getDisplay();
-			String issueSeverity = theResult.getSeverity();
+			String issueSeverity = theResult.getSeverityCode();
 			String message = theResult.getMessage();
 			if (isNotBlank(code)) {
 				retVal = new ValidationResult(new org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent()

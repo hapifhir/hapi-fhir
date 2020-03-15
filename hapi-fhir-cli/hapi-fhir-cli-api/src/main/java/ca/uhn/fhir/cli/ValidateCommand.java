@@ -168,7 +168,7 @@ public class ValidateCommand extends BaseCommand {
 					}
 
 					if (theCommandLine.hasOption("r")) {
-						validationSupport.addValidationSupport(new LoadingValidationSupportDstu2());
+						validationSupport.addValidationSupport((IValidationSupport) new LoadingValidationSupportDstu2());
 					}
 					FhirInstanceValidator instanceValidator;
 					instanceValidator = new FhirInstanceValidator(validationSupport);
@@ -187,7 +187,7 @@ public class ValidateCommand extends BaseCommand {
 					}
 
 					if (theCommandLine.hasOption("r")) {
-						validationSupport.addValidationSupport(new LoadingValidationSupportDstu3());
+						validationSupport.addValidationSupport((IValidationSupport) new LoadingValidationSupportDstu3());
 					}
 					instanceValidator.setValidationSupport(validationSupport);
 					break;

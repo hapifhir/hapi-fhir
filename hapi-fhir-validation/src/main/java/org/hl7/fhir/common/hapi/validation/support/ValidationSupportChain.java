@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -82,13 +83,37 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@Override
 	public FhirContext getFhirContext() {
-		if (myChain.size() == 0){
+		if (myChain.size() == 0) {
 			return null;
 		}
 		return myChain.get(0).getFhirContext();
 	}
 
+	/**
+	 * Add a validation support module to the chain.
+	 * <p>
+	 * Note that this method is not thread-safe. All validation support modules should be added prior to use.
+	 * </p>
+	 *
+	 * @param theValidationSupport The validation support. Must not be null, and must have a {@link #getFhirContext() FhirContext} that is configured for the same FHIR version as other entries in the chain.
+	 */
 	public void addValidationSupport(IValidationSupport theValidationSupport) {
+		int index = myChain.size();
+		addValidationSupport(index, theValidationSupport);
+	}
+
+	/**
+	 * Add a validation support module to the chain at the given index.
+	 * <p>
+	 * Note that this method is not thread-safe. All validation support modules should be added prior to use.
+	 * </p>
+	 *
+	 * @param theIndex             The index to add to
+	 * @param theValidationSupport The validation support. Must not be null, and must have a {@link #getFhirContext() FhirContext} that is configured for the same FHIR version as other entries in the chain.
+	 */
+	public void addValidationSupport(int theIndex, IValidationSupport theValidationSupport) {
+		Validate.notNull(theValidationSupport, "theValidationSupport must not be null");
+
 		if (theValidationSupport.getFhirContext() == null) {
 			String message = "Can not add validation support: getFhirContext() returns null";
 			throw new ConfigurationException(message);
@@ -103,7 +128,8 @@ public class ValidationSupportChain implements IValidationSupport {
 				throw new ConfigurationException(message);
 			}
 		}
-		myChain.add(theValidationSupport);
+
+		myChain.add(theIndex, theValidationSupport);
 	}
 
 	@Override
