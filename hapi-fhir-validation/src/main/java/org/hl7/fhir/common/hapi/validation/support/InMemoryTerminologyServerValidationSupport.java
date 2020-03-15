@@ -37,10 +37,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * service exists (either an internal one such as the HAPI FHIR JPA terminology service, or an
  * external term service API)
  */
-public class StaticResourceTerminologyServerValidationSupport implements IValidationSupport {
+public class InMemoryTerminologyServerValidationSupport implements IValidationSupport {
 	private final FhirContext myCtx;
 
-	public StaticResourceTerminologyServerValidationSupport(FhirContext theCtx) {
+	public InMemoryTerminologyServerValidationSupport(FhirContext theCtx) {
 		Validate.notNull(theCtx, "theCtx must not be null");
 		myCtx = theCtx;
 	}

@@ -14,7 +14,7 @@ import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.StaticResourceTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
@@ -112,7 +112,7 @@ public class FhirInstanceValidatorR5Test {
 
 		myMockSupport = mock(IValidationSupport.class);
 		when(myMockSupport.getFhirContext()).thenReturn(ourCtx);
-		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(myMockSupport, myDefaultValidationSupport, new StaticResourceTerminologyServerValidationSupport(ourCtx)));
+		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(myMockSupport, myDefaultValidationSupport, new InMemoryTerminologyServerValidationSupport(ourCtx)));
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);

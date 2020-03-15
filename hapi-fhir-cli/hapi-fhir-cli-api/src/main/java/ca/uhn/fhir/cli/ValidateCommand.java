@@ -40,7 +40,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.fusesource.jansi.Ansi.Color;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.common.hapi.validation.support.StaticResourceTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -158,7 +158,7 @@ public class ValidateCommand extends BaseCommand {
 			switch (ctx.getVersion().getVersion()) {
 				case DSTU2: {
 					ValidationSupportChain validationSupport = new ValidationSupportChain(
-						new DefaultProfileValidationSupport(ctx), new StaticResourceTerminologyServerValidationSupport(ctx));
+						new DefaultProfileValidationSupport(ctx), new InMemoryTerminologyServerValidationSupport(ctx));
 					if (igPack != null) {
 						FhirContext hl7orgCtx = FhirContext.forDstu2Hl7Org();
 						hl7orgCtx.setParserErrorHandler(new LenientErrorHandler(false));
@@ -179,7 +179,7 @@ public class ValidateCommand extends BaseCommand {
 				case DSTU3: {
 					FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 					val.registerValidatorModule(instanceValidator);
-					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), new StaticResourceTerminologyServerValidationSupport(ctx));
+					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), new InMemoryTerminologyServerValidationSupport(ctx));
 					if (igPack != null) {
 						IgPackParserDstu3 parser = new IgPackParserDstu3(getFhirContext());
 						IValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);

@@ -25,7 +25,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.StaticResourceTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -68,7 +68,7 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		addValidationSupport(myJpaValidationSupport);
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
-		addValidationSupport(new StaticResourceTerminologyServerValidationSupport(myFhirContext));
+		addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
 	}
 
 }

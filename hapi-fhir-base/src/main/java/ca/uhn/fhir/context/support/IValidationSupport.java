@@ -44,11 +44,30 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * various functions that can be provided by validation and terminology
  * services.
  * <p>
+ * This interface is invoked directly by internal parts of the HAPI FHIR API, including the
+ * Validator and the FHIRPath evaluator. It is used to supply artifacts required for validation
+ * (e.g. StructureDefinition resources, ValueSet resources, etc.) and also to provide
+ * terminology functions such as code validation, ValueSet expansion, etc.
+ * </p>
+ * <p>
  * Implementations are not required to implement all of the functions
  * in this interface; in fact it is expected that most won't. Any
  * methods which are not implemented may simply return <code>null</code>
- * and calling code is expected to be able to handle this.
+ * and calling code is expected to be able to handle this. Generally, a
+ * series of implementations of this interface will be joined together using
+ * the
+ * <a href="https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/ValidationSupportChain2.html">ValidationSupportChain</a>
+ * class.
  * </p>
+ * <p>
+ * See <a href="https://hapifhir.io/hapi-fhir/docs/validation/validation_support_modules.html">Validation Support Modules</a>
+ * for information on how to assemble and configure implementations of this interface. See also
+ * the <code>org.hl7.fhir.common.hapi.validation.support</code>
+ * <a href="https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/package-summary.html">package summary</a>
+ * in the <code>hapi-fhir-validation</code> module for many implementations of this interface.
+ * </p>
+ *
+ * @since 5.0.0
  */
 public interface IValidationSupport {
 	String URL_PREFIX_VALUE_SET = "http://hl7.org/fhir/ValueSet/";
@@ -129,7 +148,6 @@ public interface IValidationSupport {
 	/**
 	 * Returns <code>true</code> if codes in the given code system can be expanded
 	 * or validated
-	 *
 	 *
 	 * @param theSystem The URI for the code system, e.g. <code>"http://loinc.org"</code>
 	 * @return Returns <code>true</code> if codes in the given code system can be
@@ -355,6 +373,11 @@ public interface IValidationSupport {
 			return myDisplay;
 		}
 
+		public CodeValidationResult setDisplay(String theDisplay) {
+			myDisplay = theDisplay;
+			return this;
+		}
+
 		public String getCode() {
 			return myCode;
 		}
@@ -423,11 +446,6 @@ public interface IValidationSupport {
 				retVal.setCodeSystemVersion(getCodeSystemVersion());
 			}
 			return retVal;
-		}
-
-		public CodeValidationResult setDisplay(String theDisplay) {
-			myDisplay = theDisplay;
-			return this;
 		}
 	}
 

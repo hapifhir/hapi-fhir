@@ -16,7 +16,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.common.hapi.validation.support.StaticResourceTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.dstu2.model.DateType;
 import org.hl7.fhir.dstu2.model.Observation;
@@ -49,7 +49,7 @@ public class FhirInstanceValidatorDstu2Test {
 	@BeforeClass
 	public static void beforeClass() {
 		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(ourCtxDstu2);
-		IValidationSupport validationSupport = new ValidationSupportChain(defaultProfileValidationSupport, new StaticResourceTerminologyServerValidationSupport(ourCtxDstu2));
+		IValidationSupport validationSupport = new ValidationSupportChain(defaultProfileValidationSupport, new InMemoryTerminologyServerValidationSupport(ourCtxDstu2));
 		ourValidator = new FhirInstanceValidator(validationSupport);
 	}
 

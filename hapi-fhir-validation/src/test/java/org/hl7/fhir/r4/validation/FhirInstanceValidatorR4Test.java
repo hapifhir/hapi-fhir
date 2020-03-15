@@ -17,7 +17,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.StaticResourceTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -124,7 +124,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		IValidationSupport mockSupport = mock(IValidationSupport.class);
 		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
 
-		ValidationSupportChain chain = new ValidationSupportChain(myDefaultValidationSupport, mockSupport, new StaticResourceTerminologyServerValidationSupport(ourCtx));
+		ValidationSupportChain chain = new ValidationSupportChain(myDefaultValidationSupport, mockSupport, new InMemoryTerminologyServerValidationSupport(ourCtx));
 		myValidationSupport = new CachingValidationSupport(chain);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
@@ -671,7 +671,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	public void testValidateProfileWithExtension() throws IOException, FHIRException {
 		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport(ourCtx);
 		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ourCtx);
-		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport, new StaticResourceTerminologyServerValidationSupport(ourCtx)));
+		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport, new InMemoryTerminologyServerValidationSupport(ourCtx)));
 
 		// Prepopulate SDs
 		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/r4/myconsent-profile.xml"));

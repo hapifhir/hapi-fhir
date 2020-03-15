@@ -7,7 +7,7 @@ import com.google.common.base.Charsets;
 import org.apache.commons.lang.Validate;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.StaticResourceTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.context.IWorkerContext;
@@ -47,7 +47,7 @@ public class HapiWorkerContextTest extends BaseTest {
 		ValidationSupportChain validationSupportChain = new ValidationSupportChain(
 			new DefaultProfileValidationSupport(myCtx),
 			prePopulatedValidationSupport,
-			new StaticResourceTerminologyServerValidationSupport(myCtx)
+			new InMemoryTerminologyServerValidationSupport(myCtx)
 		);
 		HapiWorkerContext workerCtx = new HapiWorkerContext(myCtx, validationSupportChain);
 

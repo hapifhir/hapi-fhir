@@ -5,7 +5,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.StaticResourceTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
@@ -134,7 +134,7 @@ public class ParserWithValidationDstu3Test {
 	}
 
 	private IValidationSupport getValidationSupport() {
-		return new ValidationSupportChain(new DefaultProfileValidationSupport(ourCtx), new StaticResourceTerminologyServerValidationSupport(ourCtx));
+		return new ValidationSupportChain(new DefaultProfileValidationSupport(ourCtx), new InMemoryTerminologyServerValidationSupport(ourCtx));
 	}
 
 	@Test

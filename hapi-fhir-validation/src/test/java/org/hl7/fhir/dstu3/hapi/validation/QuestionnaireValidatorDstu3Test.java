@@ -8,7 +8,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.common.hapi.validation.support.StaticResourceTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -47,7 +47,7 @@ public class QuestionnaireValidatorDstu3Test {
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
 
-		ValidationSupportChain validationSupport = new ValidationSupportChain(myDefaultValidationSupport, myValSupport, new StaticResourceTerminologyServerValidationSupport(ourCtx));
+		ValidationSupportChain validationSupport = new ValidationSupportChain(myDefaultValidationSupport, myValSupport, new InMemoryTerminologyServerValidationSupport(ourCtx));
 		myInstanceVal = new FhirInstanceValidator(validationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
