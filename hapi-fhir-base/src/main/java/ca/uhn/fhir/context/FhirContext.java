@@ -572,13 +572,21 @@ public class FhirContext {
 		if (retVal == null) {
 			retVal = new DefaultProfileValidationSupport(this);
 
-			String name = "org.hl7.fhir.common.hapi.validation.StaticResourceTerminologyServerValidationSupport";
-			if (ReflectionUtil.typeExists(name)) {
-				IValidationSupport staticResourceValidationSupport = ReflectionUtil.newInstanceOrReturnNull(name, IValidationSupport.class, new Class<?>[]{FhirContext.class}, new Object[]{this});
-				retVal = ReflectionUtil.newInstanceOrReturnNull("org.hl7.fhir.common.hapi.validation.ValidationSupportChain", IValidationSupport.class, new Class<?>[]{IValidationSupport[].class}, new Object[]{new IValidationSupport[]{
-					retVal, staticResourceValidationSupport
+			/*
+			 * If hapi-fhir-validation is on the classpath, we can create a much more robust
+			 * validation chain using the classes found in that package
+			 */
+			String inMemoryTermSvcType = "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport";
+			String commonCodeSystemsSupportType = "org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService";
+			if (ReflectionUtil.typeExists(inMemoryTermSvcType)) {
+				IValidationSupport inMemoryTermSvc = ReflectionUtil.newInstanceOrReturnNull(inMemoryTermSvcType, IValidationSupport.class, new Class<?>[]{FhirContext.class}, new Object[]{this});
+				IValidationSupport commonCodeSystemsSupport = ReflectionUtil.newInstanceOrReturnNull(commonCodeSystemsSupportType, IValidationSupport.class, new Class<?>[]{FhirContext.class}, new Object[]{this});
+				retVal = ReflectionUtil.newInstanceOrReturnNull("org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain", IValidationSupport.class, new Class<?>[]{IValidationSupport[].class}, new Object[]{new IValidationSupport[]{
+					retVal,
+					inMemoryTermSvc,
+					commonCodeSystemsSupport
 				}});
-				assert retVal != null : "Failed to instantiate " + "org.hl7.fhir.common.hapi.validation.ValidationSupportChain";
+				assert retVal != null : "Failed to instantiate " + "org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain";
 			}
 
 

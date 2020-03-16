@@ -49,17 +49,6 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-		for (IValidationSupport next : myChain) {
-			CodeValidationResult retVal = next.validateCodeInValueSet(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, theValueSet);
-			if (retVal != null) {
-				return retVal;
-			}
-		}
-		return null;
-	}
-
-	@Override
 	public boolean isValueSetSupported(IValidationSupport theRootValidationSupport, String theValueSetUrl) {
 		for (IValidationSupport next : myChain) {
 			boolean retVal = next.isValueSetSupported(theRootValidationSupport, theValueSetUrl);
@@ -240,7 +229,18 @@ public class ValidationSupportChain implements IValidationSupport {
 				}
 			}
 		}
-		return null; // myChain.get(0).validateCode(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+		return null;
+	}
+
+	@Override
+	public CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+		for (IValidationSupport next : myChain) {
+			CodeValidationResult retVal = next.validateCodeInValueSet(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, theValueSet);
+			if (retVal != null) {
+				return retVal;
+			}
+		}
+		return null;
 	}
 
 	@Override

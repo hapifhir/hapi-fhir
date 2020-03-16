@@ -12,6 +12,7 @@ import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
@@ -108,7 +109,11 @@ public class FhirInstanceValidatorDstu3Test {
 
 		IValidationSupport mockSupport = mock(IValidationSupport.class);
 		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
-		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(mockSupport, myDefaultValidationSupport, new InMemoryTerminologyServerValidationSupport(ourCtx)));
+		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(
+			mockSupport,
+			myDefaultValidationSupport,
+			new InMemoryTerminologyServerValidationSupport(ourCtx),
+			new CommonCodeSystemsTerminologyService(ourCtx)));
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
@@ -304,7 +309,7 @@ public class FhirInstanceValidatorDstu3Test {
 		procedure.setPerformed(period);
 
 		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
 		ValidationResult result = val.validateWithResult(procedure);
 

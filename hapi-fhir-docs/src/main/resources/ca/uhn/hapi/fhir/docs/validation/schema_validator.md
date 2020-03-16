@@ -6,7 +6,7 @@ The two sets of files are included with HAPI, and it uses them to perform valida
 
 <div class="helpWarningCalloutBox">
 <i class='fa fa-exclamation-triangle helpWarningCalloutBoxExclamation'></i>
-The Schema/Schematron validators were recommended early in the development of FHIR itself, as the official FHIR validation toolchain was still maturing. At this time, the FHIR [Profile Validator](./profile_validator.html) is very mature, and gives far more helpful error messages than the Schema/Schematron validator is able to. For this reason, the Schema/Schematron validators are not available for validating R5+ content and may be deprecated in the future for other versions of FHIR as well.
+The Schema/Schematron validators were recommended early in the development of FHIR itself, as the official FHIR validation toolchain was still maturing. At this time, the FHIR [Instance Validator](./instance_validator.html) is very mature, and gives far more helpful error messages than the Schema/Schematron validator is able to. For this reason, the Schema/Schematron validators are not available for validating R5+ content and may be deprecated in the future for other versions of FHIR as well.
 </div>
 
 # Preparation

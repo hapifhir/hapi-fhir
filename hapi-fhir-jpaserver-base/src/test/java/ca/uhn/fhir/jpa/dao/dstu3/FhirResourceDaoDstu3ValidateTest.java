@@ -77,6 +77,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 		ourLog.info("Clearing cache");
 		myValidationSupport.invalidateCaches();
+		myFhirInstanceValidator.invalidateCaches();
 
 		try {
 			myQuestionnaireResponseDao.validate(qr, null, null, null, null, null, null);

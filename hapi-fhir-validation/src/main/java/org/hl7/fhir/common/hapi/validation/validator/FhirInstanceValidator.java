@@ -1,6 +1,7 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
@@ -38,6 +39,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private boolean assumeValidRestReferences;
 	private List<String> myExtensionDomains = Collections.emptyList();
 	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
+	private volatile FhirContext myDstu2Context;
+	private volatile FhirContext myHl7OrgDstu2Context;
 
 	/**
 	 * Constructor
@@ -54,7 +57,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	 * @param theValidationSupport The validation support
 	 */
 	public FhirInstanceValidator(IValidationSupport theValidationSupport) {
-		myValidationSupport = theValidationSupport;
+		if (theValidationSupport.getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU2) {
+			myValidationSupport = new HapiToHl7OrgDstu2ValidatingSupportWrapper(theValidationSupport);
+		} else {
+			myValidationSupport = theValidationSupport;
+		}
 	}
 
 	/**
@@ -130,6 +137,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	/**
 	 * Returns the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
 	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
+	 *
 	 * @return
 	 */
 	public IValidationSupport getValidationSupport() {
@@ -201,9 +209,10 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 					converter = new VersionSpecificWorkerContextWrapper.IVersionTypeConverter() {
 						@Override
 						public Resource toCanonical(IBaseResource theNonCanonical) {
-							Resource retVal = VersionConvertor_10_50.convertResource((org.hl7.fhir.dstu2.model.Resource) theNonCanonical);
-							if (theNonCanonical instanceof org.hl7.fhir.dstu2.model.ValueSet) {
-								org.hl7.fhir.dstu2.model.ValueSet valueSet = (org.hl7.fhir.dstu2.model.ValueSet) theNonCanonical;
+							IBaseResource nonCanonical = theNonCanonical;
+							Resource retVal = VersionConvertor_10_50.convertResource((org.hl7.fhir.dstu2.model.Resource) nonCanonical);
+							if (nonCanonical instanceof org.hl7.fhir.dstu2.model.ValueSet) {
+								org.hl7.fhir.dstu2.model.ValueSet valueSet = (org.hl7.fhir.dstu2.model.ValueSet) nonCanonical;
 								if (valueSet.hasCodeSystem() && valueSet.getCodeSystem().hasSystem()) {
 									if (!valueSet.hasCompose()) {
 										org.hl7.fhir.r5.model.ValueSet valueSetR5 = (org.hl7.fhir.r5.model.ValueSet) retVal;
@@ -216,7 +225,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 						@Override
 						public IBaseResource fromCanonical(Resource theCanonical) {
-							return VersionConvertor_10_50.convertResource(theCanonical);
+							IBaseResource canonical = VersionConvertor_10_50.convertResource(theCanonical);
+							return canonical;
 						}
 					};
 					break;
@@ -256,7 +266,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 					converter = new VersionSpecificWorkerContextWrapper.IVersionTypeConverter() {
 						@Override
 						public org.hl7.fhir.r5.model.Resource toCanonical(IBaseResource theNonCanonical) {
-							return VersionConvertor_40_50.convertResource((org.hl7.fhir.r4.model.Resource)theNonCanonical);
+							return VersionConvertor_40_50.convertResource((org.hl7.fhir.r4.model.Resource) theNonCanonical);
 						}
 
 						@Override
@@ -291,6 +301,24 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			.validate(wrappedWorkerContext, theValidationCtx);
 	}
 
+	private FhirContext getDstu2Context() {
+		FhirContext dstu2Context = myDstu2Context;
+		if (dstu2Context == null) {
+			dstu2Context = FhirContext.forDstu2();
+			myDstu2Context = dstu2Context;
+		}
+		return dstu2Context;
+	}
+
+	private FhirContext getHl7OrgDstu2Context() {
+		FhirContext hl7OrgDstu2Context = myHl7OrgDstu2Context;
+		if (hl7OrgDstu2Context == null) {
+			hl7OrgDstu2Context = FhirContext.forDstu2Hl7Org();
+			myHl7OrgDstu2Context = hl7OrgDstu2Context;
+		}
+		return hl7OrgDstu2Context;
+	}
+
 	public IResourceValidator.IValidatorResourceFetcher getValidatorResourceFetcher() {
 		return validatorResourceFetcher;
 	}
@@ -305,6 +333,15 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	public void setAssumeValidRestReferences(boolean assumeValidRestReferences) {
 		this.assumeValidRestReferences = assumeValidRestReferences;
+	}
+
+	/**
+	 * Clear any cached data held by the validator or any of its internal stores. This is mostly intended
+	 * for unit tests, but could be used for production uses too.
+	 */
+	public void invalidateCaches() {
+		myValidationSupport.invalidateCaches();
+		myWrappedWorkerContext.invalidateCaches();
 	}
 
 

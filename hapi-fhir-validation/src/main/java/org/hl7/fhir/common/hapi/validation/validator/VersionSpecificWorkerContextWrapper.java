@@ -491,6 +491,10 @@ class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null);
 	}
 
+	public void invalidateCaches() {
+		myFetchResourceCache.invalidateAll();
+	}
+
 	public interface IVersionTypeConverter {
 
 		org.hl7.fhir.r5.model.Resource toCanonical(IBaseResource theNonCanonical);

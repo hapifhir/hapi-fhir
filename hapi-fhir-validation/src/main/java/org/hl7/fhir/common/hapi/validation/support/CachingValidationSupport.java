@@ -97,6 +97,8 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 
 	@Override
 	public void invalidateCaches() {
+		myLookupCodeCache.invalidateAll();
 		myCache.invalidateAll();
+		myValidateCodeCache.invalidateAll();
 	}
 }

@@ -5,7 +5,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.r4.JpaPersistedResourceValidationSupport;
+import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
 import ca.uhn.fhir.jpa.term.TermReadSvcDstu2;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -15,6 +15,8 @@ import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.validator.HapiToHl7OrgDstu2ValidatingSupportWrapper;
@@ -86,7 +88,10 @@ public class BaseDstu2Config extends BaseConfig {
 	@Lazy
 	public IInstanceValidatorModule instanceValidatorDstu2() {
 		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(fhirContext());
-		ValidationSupportChain validationSupportChain = new ValidationSupportChain(defaultProfileValidationSupport, jpaValidationSupportDstu2());
+		InMemoryTerminologyServerValidationSupport inMemoryTerminologyServer = new InMemoryTerminologyServerValidationSupport(fhirContextDstu2());
+		IValidationSupport jpaValidationSupport = jpaValidationSupportDstu2();
+		CommonCodeSystemsTerminologyService commonCodeSystemsTermSvc = new CommonCodeSystemsTerminologyService(fhirContext());
+		ValidationSupportChain validationSupportChain = new ValidationSupportChain(defaultProfileValidationSupport, jpaValidationSupport, inMemoryTerminologyServer, commonCodeSystemsTermSvc);
 		CachingValidationSupport cachingValidationSupport = new CachingValidationSupport(new HapiToHl7OrgDstu2ValidatingSupportWrapper(validationSupportChain));
 		FhirInstanceValidator retVal = new FhirInstanceValidator(cachingValidationSupport);
 		retVal.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);

@@ -49,7 +49,7 @@ definitions provided either by HL7 or by the user.
 
 # Running the Validator
 
-To execute the validator, you simply create an instance of [FhirInstanceValidator](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/r4/hapi/validation/FhirInstanceValidator.html) and register it to new validator, as shown in the example below.
+To execute the validator, you simply create an instance of [FhirInstanceValidator](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/validator/FhirInstanceValidator.html) and register it to new validator, as shown in the example below.
 
 Note that the example below uses the official FHIR StructureDefintions and ValueSets
 to validate the resource. It will not work unless you include the
