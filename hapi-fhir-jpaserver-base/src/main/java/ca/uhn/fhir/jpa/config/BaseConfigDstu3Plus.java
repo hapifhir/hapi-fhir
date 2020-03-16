@@ -62,7 +62,7 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	@Bean
 	public abstract ITermVersionAdapterSvc terminologyVersionAdapterSvc();
 
-	@Bean(name="myDefaultProfileValidationSupport")
+	@Bean(name = "myDefaultProfileValidationSupport")
 	public IValidationSupport defaultProfileValidationSupport() {
 		return new DefaultProfileValidationSupport(fhirContext());
 	}
@@ -78,7 +78,7 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	}
 
 	@Primary
-	@Bean(name = "myJpaValidationSupportChain")
+	@Bean(name = JPA_VALIDATION_SUPPORT_CHAIN)
 	public IValidationSupport validationSupportChain() {
 		return new CachingValidationSupport(jpaValidationSupportChain());
 	}

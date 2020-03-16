@@ -10,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -24,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class RemoteTerminologyServiceValidationSupport extends BaseValidationSupport implements IValidationSupport {
 
 	private String myBaseUrl;
+	private List<Object> myClientInterceptors = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -40,7 +42,11 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	private IGenericClient provideClient() {
-		return myCtx.newRestfulGenericClient(myBaseUrl);
+		IGenericClient retVal = myCtx.newRestfulGenericClient(myBaseUrl);
+		for (Object next : myClientInterceptors) {
+			retVal.registerInterceptor(next);
+		}
+		return retVal;
 	}
 
 	@Override
@@ -116,4 +122,19 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		Validate.notBlank(theBaseUrl, "theBaseUrl must be provided");
 		myBaseUrl = theBaseUrl;
 	}
+
+	/**
+	 * Adds an interceptor that will be registered to all clients.
+	 * <p>
+	 * Note that this method is not thread-safe and should only be called prior to this module
+	 * being used.
+	 * </p>
+	 *
+	 * @param theClientInterceptor The interceptor (must not be null)
+	 */
+	public void addClientInterceptor(@Nonnull Object theClientInterceptor) {
+		Validate.notNull(theClientInterceptor, "theClientInterceptor must not be null");
+		myClientInterceptors.add(theClientInterceptor);
+	}
+
 }

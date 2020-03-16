@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
@@ -14,7 +15,6 @@ import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -87,15 +87,20 @@ public class BaseDstu2Config extends BaseConfig {
 	@Bean(name = "myInstanceValidator")
 	@Lazy
 	public IInstanceValidatorModule instanceValidator() {
-		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(fhirContext());
-		InMemoryTerminologyServerValidationSupport inMemoryTerminologyServer = new InMemoryTerminologyServerValidationSupport(fhirContextDstu2());
-		IValidationSupport jpaValidationSupport = jpaValidationSupportDstu2();
-		CommonCodeSystemsTerminologyService commonCodeSystemsTermSvc = new CommonCodeSystemsTerminologyService(fhirContext());
-		ValidationSupportChain validationSupportChain = new ValidationSupportChain(defaultProfileValidationSupport, jpaValidationSupport, inMemoryTerminologyServer, commonCodeSystemsTermSvc);
+		ValidationSupportChain validationSupportChain = validationSupportChain();
 		CachingValidationSupport cachingValidationSupport = new CachingValidationSupport(new HapiToHl7OrgDstu2ValidatingSupportWrapper(validationSupportChain));
 		FhirInstanceValidator retVal = new FhirInstanceValidator(cachingValidationSupport);
 		retVal.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
 		return retVal;
+	}
+
+	@Bean(name = JPA_VALIDATION_SUPPORT_CHAIN)
+	public ValidationSupportChain validationSupportChain() {
+		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(fhirContext());
+		InMemoryTerminologyServerValidationSupport inMemoryTerminologyServer = new InMemoryTerminologyServerValidationSupport(fhirContextDstu2());
+		IValidationSupport jpaValidationSupport = jpaValidationSupportDstu2();
+		CommonCodeSystemsTerminologyService commonCodeSystemsTermSvc = new CommonCodeSystemsTerminologyService(fhirContext());
+		return new ValidationSupportChain(defaultProfileValidationSupport, jpaValidationSupport, inMemoryTerminologyServer, commonCodeSystemsTermSvc);
 	}
 
 	@Primary
