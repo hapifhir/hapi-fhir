@@ -219,11 +219,6 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	}
 
 	private Map<String, IBaseResource> provideStructureDefinitionMap() {
-		if (getFhirContext().getVersion().getVersion() != getFhirContext().getVersion().getVersion()) {
-			assert getFhirContext().getVersion().getVersion() == getFhirContext().getVersion().getVersion() : "Support created for " + getFhirContext().getVersion().getVersion() + " but requested version: " + getFhirContext().getVersion().getVersion();
-		}
-		assert getFhirContext().getVersion().getVersion() == getFhirContext().getVersion().getVersion() : "Support created for " + getFhirContext().getVersion().getVersion() + " but requested version: " + getFhirContext().getVersion().getVersion();
-
 		Map<String, IBaseResource> structureDefinitions = myStructureDefinitions;
 		if (structureDefinitions == null) {
 			structureDefinitions = new HashMap<>();
