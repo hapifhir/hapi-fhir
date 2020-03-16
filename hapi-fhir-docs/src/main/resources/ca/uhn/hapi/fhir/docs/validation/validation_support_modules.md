@@ -10,45 +10,45 @@ However, if you have needs beyond simply validating against the core FHIR specif
 
 There are a several implementations of the [IValidationSupport](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/support/IValidationSupport.html) interface built into HAPI FHIR that can be used, typically in a chain.
 
-## ValidationSupportChain
+# ValidationSupportChain
 
-[(JavaDoc)](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/ValidationSupportChain.html) [(Source)](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/ValidationSupportChain.java)
+[JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/ValidationSupportChain.html) / [Source](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/ValidationSupportChain.java)
 
 This module can be used to combine multiple implementations together so that for every request, each support class instance in the chain is tried in sequence. Note that nearly all methods in the [IValidationSupport](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/support/IValidationSupport.html) interface are permitted to return `null` if they are not able to service a particular method call. So for example, if a call to the [`validateCode`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/support/IValidationSupport.html#validateCode(ca.uhn.fhir.context.support.IValidationSupport,ca.uhn.fhir.context.support.ConceptValidationOptions,java.lang.String,java.lang.String,java.lang.String,java.lang.String)) method is made, the validator will try each module in the chain until one of them returns a non-null response.
 
-## DefaultProfileValidationSupport
+# DefaultProfileValidationSupport
 
-[(JavaDoc)](/hapi-fhir/apidocs/hapi-fhir-base/undefined/ca/uhn/fhir/context/support/DefaultProfileValidationSupport.html) [(Source)](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-base/src/main/java/ca/uhn/fhir/context/support/DefaultProfileValidationSupport.java)
+[JavaDoc](/hapi-fhir/apidocs/hapi-fhir-base/undefined/ca/uhn/fhir/context/support/DefaultProfileValidationSupport.html) / [Source](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-base/src/main/java/ca/uhn/fhir/context/support/DefaultProfileValidationSupport.java)
 
 This module supplies the built-in FHIR core structure definitions, including both FHIR resource definitions (StructureDefinition resources) and FHIR built-in vocabulary (ValueSet and CodeSystem resources).
 
-## InMemoryTerminologyServerValidationSupport
+# InMemoryTerminologyServerValidationSupport
 
-[(JavaDoc)](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/InMemoryTerminologyServerValidationSupport.html) [(Source)](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/InMemoryTerminologyServerValidationSupport.java)
+[JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/InMemoryTerminologyServerValidationSupport.html) / [Source](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/InMemoryTerminologyServerValidationSupport.java)
 
 This module acts as a simple terminology service that can validate codes against ValueSet and CodeSystem resources purely in-memory (i.e. with no database). This is sufficient in many basic cases, although it is not able to validate CodeSystems with external content (i.e CodeSystems where the `CodeSystem.content` field is `external`, such as the LOINC and SNOMED CT CodeSystems).
 
-## PrePopulatedValidationSupport
+# PrePopulatedValidationSupport
 
-[(JavaDoc)](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/PrePopulatedValidationSupport.html) [(Source)](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/PrePopulatedValidationSupport.java)
+[JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/PrePopulatedValidationSupport.html) / [Source](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/PrePopulatedValidationSupport.java)
 
 This module contains a series of HashMaps that store loaded conformance resources in memory. Typically this is initialized at startup in order to add custom conformance resources into the chain.
 
-## CachingValidationSupport
+# CachingValidationSupport
 
-[(JavaDoc)](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/CachingValidationSupport.html) [(Source)](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/CachingValidationSupport.java)
+[JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/CachingValidationSupport.html) / [Source](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/CachingValidationSupport.java)
 
 This module caches results of calls to a wrapped service implementation for a period of time. This class can be a significant help in terms of performance if you are loading conformance resources or performing terminology operations from a database or disk, but it also has value even for purely in-memory validation since validating codes against a ValueSet can require the expansion of that ValueSet.
 
-## SnapshotGeneratingValidationSupport
+# SnapshotGeneratingValidationSupport
 
-[(JavaDoc)](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/SnapshotGeneratingValidationSupport.html) [(Source)](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/SnapshotGeneratingValidationSupport.java)
+[JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/SnapshotGeneratingValidationSupport.html) / [Source](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/SnapshotGeneratingValidationSupport.java)
 
 This module generates StructureDefinition snapshots as needed. This should be added to your chain if you are working wiith differential StructureDefinitions that do not include the snapshot view.
 
-## CommonCodeSystemsTerminologyService
+# CommonCodeSystemsTerminologyService
 
-[(JavaDoc)](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/CommonCodeSystemsTerminologyService.html) [(Source)](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/CommonCodeSystemsTerminologyService.java)
+[JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/CommonCodeSystemsTerminologyService.html) / [Source](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/CommonCodeSystemsTerminologyService.java)
 
 This module validates codes in CodeSystems that are not distributed with the FHIR specification because they are difficult to distribute but are commonly used in FHIR resources.
 
@@ -101,9 +101,9 @@ The following table lists vocabulary that is validated by this module:
     </tbody>
 </table>
 
-## RemoteTerminologyServiceValidationSupport
+# RemoteTerminologyServiceValidationSupport
 
-[(JavaDoc)](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/RemoteTerminologyServiceValidationSupport.html) [(Source)](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/RemoteTerminologyServiceValidationSupport.java)
+[JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/RemoteTerminologyServiceValidationSupport.html) / [Source](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/RemoteTerminologyServiceValidationSupport.java)
 
 This module validates codes using a remote FHIR-based terminology server.
 

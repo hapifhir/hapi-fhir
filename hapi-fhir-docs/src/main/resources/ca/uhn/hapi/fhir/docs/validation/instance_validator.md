@@ -31,7 +31,7 @@ Conformance Resources:
 <div class="doc_info_bubble">
     <b>Note on HAPI FHIR 5.0.0+:</b> Many of the classes described here have changed in HAPI FHIR 5.0.0 and
     existing users of HAPI FHIR may need to migrate existing validation code in order to successfully use the validator
-    in HAPI FHIR 5.0.0 and beyond. See [Migrating to 5.x](#migrating-to-5x) for information.
+    in HAPI FHIR 5.0.0 and beyond. See <a href="#migrating-to-5x">Migrating to 5.x</a> for information.
 </div>
 
 HAPI has very complete support for validation against FHIR conformance resources.
@@ -49,7 +49,7 @@ definitions provided either by HL7 or by the user.
 
 # Running the Validator
 
-To execute the validator, you simply create an instance of [FhirInstanceValidator](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/validator/FhirInstanceValidator.html) and register it to new validator, as shown in the example below.
+To execute the validator, you create a [validation support chain](./validation_support_modules.html) and pass this to an instance of [FhirInstanceValidator](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/validator/FhirInstanceValidator.html). The FhirInstanceValidator is then used as a module for the HAPI FHIR validation framework.
 
 Note that the example below uses the official FHIR StructureDefintions and ValueSets
 to validate the resource. It will not work unless you include the

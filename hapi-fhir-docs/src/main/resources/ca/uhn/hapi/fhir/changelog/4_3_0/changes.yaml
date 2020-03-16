@@ -1,0 +1,19 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+    (dependent HAPI modules listed in brackets):
+    <ul>
+    <li>Hibernate ORM (JPA): 5.4.6 -&gt; 5.4.12</li>
+    <li>Hibernate Search (JPA): 5.11.3 -&gt; 5.11.5</li>
+    </ul>"
+- item:
+    issue: "1583"
+    type: "fix"
+    title: "**Breaking Change**:
+    The HAPI FHIR Validation infrastructure has changed significantly under the hood. Existing users of the
+    validator may need to change package declarations (as FhirInstanceValidator and several other related classes
+    have been moved) and potentially add new modules to their Validation Support Chain. See
+    [Migrating to HAPI FHIR 5.x](/hapi-fhir/docs/validation/instance_validator.html#migrating-to-hapi-fhir-5x)
+    for details on how to account for this change in your code.
+    "

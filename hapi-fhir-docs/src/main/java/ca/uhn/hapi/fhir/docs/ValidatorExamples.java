@@ -37,6 +37,8 @@ import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -70,7 +72,8 @@ public class ValidatorExamples {
 		validator.registerValidatorModule(module);
 
 		// Pass a resource instance as input to be validated
-		org.hl7.fhir.dstu3.model.Patient resource = new org.hl7.fhir.dstu3.model.Patient();
+		Patient resource = new Patient();
+		resource.addName().setFamily("Simpson").addGiven("Homer");
 		ValidationResult result = validator.validateWithResult(resource);
 
 		// The input can also be a raw string (this mechanism can
@@ -192,9 +195,16 @@ public class ValidatorExamples {
       // START SNIPPET: instanceValidator
       FhirContext ctx = FhirContext.forR4();
 
+      // Create a validation support chain
+		ValidationSupportChain validationSupportChain = new ValidationSupportChain(
+			new DefaultProfileValidationSupport(ctx),
+			new InMemoryTerminologyServerValidationSupport(ctx),
+			new CommonCodeSystemsTerminologyService(ctx)
+		);
+
       // Create a FhirInstanceValidator and register it to a validator
       FhirValidator validator = ctx.newValidator();
-      FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
+      FhirInstanceValidator instanceValidator = new FhirInstanceValidator(validationSupportChain);
       validator.registerValidatorModule(instanceValidator);
       
       /*

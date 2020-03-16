@@ -645,9 +645,9 @@
 		<jsr305_version>3.0.2</jsr305_version>
 		<flyway_version>6.1.0</flyway_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
-		<hibernate_version>5.4.6.Final</hibernate_version>
+		<hibernate_version>5.4.12.Final</hibernate_version>
 		<!-- Update lucene version when you update hibernate-search version -->
-		<hibernate_search_version>5.11.3.Final</hibernate_search_version>
+		<hibernate_search_version>5.11.5.Final</hibernate_search_version>
 		<lucene_version>5.5.5</lucene_version>
 		<hibernate_validator_version>5.4.2.Final</hibernate_validator_version>
 		<httpcore_version>4.4.11</httpcore_version>
