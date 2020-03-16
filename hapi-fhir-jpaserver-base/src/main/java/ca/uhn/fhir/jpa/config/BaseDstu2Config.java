@@ -84,9 +84,9 @@ public class BaseDstu2Config extends BaseConfig {
 		return ourFhirContextDstu2Hl7Org;
 	}
 
-	@Bean(name = "myInstanceValidatorDstu2")
+	@Bean(name = "myInstanceValidator")
 	@Lazy
-	public IInstanceValidatorModule instanceValidatorDstu2() {
+	public IInstanceValidatorModule instanceValidator() {
 		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(fhirContext());
 		InMemoryTerminologyServerValidationSupport inMemoryTerminologyServer = new InMemoryTerminologyServerValidationSupport(fhirContextDstu2());
 		IValidationSupport jpaValidationSupport = jpaValidationSupportDstu2();

@@ -32,9 +32,13 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
+import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
@@ -78,6 +82,16 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	public IValidationSupport validationSupportChain() {
 		return new CachingValidationSupport(jpaValidationSupportChain());
 	}
+
+	@Bean(name = "myInstanceValidator")
+	@Lazy
+	public IInstanceValidatorModule instanceValidator() {
+		FhirInstanceValidator val = new FhirInstanceValidator(fhirContext());
+		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
+		val.setValidationSupport(validationSupportChain());
+		return val;
+	}
+
 
 	@Bean
 	public abstract ITermReadSvc terminologyService();

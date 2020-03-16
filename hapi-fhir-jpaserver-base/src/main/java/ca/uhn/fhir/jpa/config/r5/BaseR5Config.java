@@ -92,16 +92,6 @@ public class BaseR5Config extends BaseConfigDstu3Plus {
 		return new GraphQLProvider(fhirContextR5(), validationSupportChain(), graphqlStorageServices());
 	}
 
-	@Bean(name = "myInstanceValidatorR5")
-	@Lazy
-	public IInstanceValidatorModule instanceValidatorR5() {
-		FhirInstanceValidator val = new FhirInstanceValidator(fhirContext());
-		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Warning;
-		val.setBestPracticeWarningLevel(level);
-		val.setValidationSupport(validationSupportChain());
-		return val;
-	}
-
 	@Bean(name = "myResourceCountsCache")
 	public ResourceCountCache resourceCountsCache() {
 		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoR5().getResourceCounts());

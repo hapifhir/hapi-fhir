@@ -90,15 +90,6 @@ public class BaseDstu3Config extends BaseConfigDstu3Plus {
 		return new TransactionProcessor();
 	}
 
-	@Bean(name = "myInstanceValidatorDstu3")
-	@Lazy
-	public IInstanceValidatorModule instanceValidatorDstu3() {
-		FhirInstanceValidator val = new FhirInstanceValidator(fhirContext());
-		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
-		val.setValidationSupport(validationSupportChain());
-		return val;
-	}
-
 	@Bean(name = "myResourceCountsCache")
 	public ResourceCountCache resourceCountsCache() {
 		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoDstu3().getResourceCounts());
