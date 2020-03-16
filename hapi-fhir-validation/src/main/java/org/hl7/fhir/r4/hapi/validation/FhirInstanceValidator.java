@@ -55,6 +55,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
 	private boolean assumeValidRestReferences;
 	private boolean errorForUnknownProfiles;
+	private boolean allowExamples = false;
 	private List<String> extensionDomains = Collections.emptyList();
 
 	/**
@@ -221,6 +222,7 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 			.setNoTerminologyChecks(isNoTerminologyChecks())
 			.setValidatorResourceFetcher(getValidatorResourceFetcher())
 			.setAssumeValidRestReferences(isAssumeValidRestReferences())
+            .setAllowExamples(isAllowExamples())
 			.validate(wrappedWorkerContext, theValidationCtx);
 	}
 
@@ -245,8 +247,15 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 		this.assumeValidRestReferences = assumeValidRestReferences;
 	}
 
+    public boolean isAllowExamples() {
+        return allowExamples;
+    }
 
-	private static class WorkerContextWrapper implements IWorkerContext {
+    public void setAllowExamples(boolean allowExamples) {
+        this.allowExamples = allowExamples;
+    }
+
+    private static class WorkerContextWrapper implements IWorkerContext {
 		private final HapiWorkerContext myWrap;
 		private volatile List<org.hl7.fhir.r5.model.StructureDefinition> myAllStructures;
 		private LoadingCache<ResourceKey, org.hl7.fhir.r5.model.Resource> myFetchResourceCache;

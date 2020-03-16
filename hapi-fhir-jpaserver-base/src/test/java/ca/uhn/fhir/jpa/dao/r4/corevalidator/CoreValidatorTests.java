@@ -4,15 +4,28 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4ValidateTest;
+import ca.uhn.fhir.jpa.dao.r4.corevalidator.gson.TestEntry;
+import ca.uhn.fhir.jpa.dao.r4.corevalidator.gson.TestResult;
 import ca.uhn.fhir.jpa.dao.r4.corevalidator.utils.ConvertorHelper;
 import ca.uhn.fhir.jpa.dao.r4.corevalidator.utils.CoreValidatorTestUtils;
 import ca.uhn.fhir.jpa.dao.r4.corevalidator.utils.ParsingUtils;
 import ca.uhn.fhir.jpa.dao.r4.jupiter.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import com.google.gson.*;
+import org.hl7.fhir.exceptions.DefinitionException;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r5.conformance.ProfileUtilities;
+import org.hl7.fhir.r5.model.Resource;
+import org.hl7.fhir.r5.model.StructureDefinition;
+import org.hl7.fhir.r5.test.utils.TestingUtilities;
+import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -32,7 +45,16 @@ public class CoreValidatorTests extends BaseJpaR4Test {
     @Autowired
     protected DaoRegistry daoRegistry;
 
+    @Autowired
+    protected FhirInstanceValidator validator;
+
     protected FhirContext myCtx = FhirContext.forR4();
+
+    @BeforeEach
+    public void beforeEach() {
+        validator.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Ignore);
+        validator.setAnyExtensionsAllowed(true);
+    }
 
     /**
      * This is the method data source for the testing data for used in the {@link CoreValidatorTests#runCoreValidationTests(String, TestEntry)}
@@ -91,35 +113,49 @@ public class CoreValidatorTests extends BaseJpaR4Test {
     @MethodSource("data")
     public void runCoreValidationTests(String testFile, TestEntry testEntry) throws IOException {
 
+        //if (!testFile.equals("allergy.json")) Assertions.fail();
+
+        validator.setAssumeValidRestReferences(testEntry.getProfile().getAssumeValidRestReferences());
+        validator.setAllowExamples(testEntry.getAllowExamples());
+
         myDaoConfig.setAllowExternalReferences(true);
 
-        String temp = testFile;
-        TestEntry te = testEntry;
-
         if (testEntry.getUsesTest()) {
-            String resourceName = null;
             String resourceAsString = loadResource(TEST_FILES_BASE_PATH + testFile);
             Assertions.assertNotNull(resourceAsString, "Could not load resource string from file <" + testFile + ">");
-            OperationOutcome operationOutcome = null;
+            validator.setValidatorResourceFetcher(new TestResourceFetcher(testEntry));
+
+//            if (testEntry.getProfiles() != null) {
+//                for (String filename : testEntry.getProfiles()) {
+//                    String contents = TestingUtilities.loadTestResource("validator", filename);
+//                    StructureDefinition sd = loadProfile(filename, contents, v, messages);
+//                    vali.getContext().cacheResource(sd);
+//                }
+//            }
 
             String profileFilename = CoreValidatorTestUtils.getProfileFilename(testEntry);
             String testProfile = profileFilename == null ? null : loadResource(TEST_FILES_BASE_PATH + CoreValidatorTestUtils.getProfileFilename(testEntry));
-
-            try {
-                resourceName = extractResourceName(testFile, resourceAsString);
-            } catch (Exception e) {
-                operationOutcome = new OperationOutcome();
-                operationOutcome.addIssue().setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(e.getMessage());
+            if (testProfile != null) {
+                validate(testFile, testEntry.getProfile().getTestResult(), resourceAsString, testProfile, ConvertorHelper.shouldTest(testEntry));
             }
+            validate(testFile, testEntry.getTestResult(), resourceAsString, null, ConvertorHelper.shouldTest(testEntry));
+        }
+    }
 
-            if (resourceName != null) {
-                IFhirResourceDao<? extends IBaseResource> resourceDao = daoRegistry.getResourceDaoOrNull(resourceName);
-                operationOutcome = CoreValidatorTestUtils.validate(myCtx, testProfile, resourceName, resourceAsString, resourceDao);
-            }
+    protected void validate(String testFile, TestResult testResult, String resourceAsString, String testProfile, boolean shouldTest) {
+        String resourceName = null;
+        OperationOutcome operationOutcome = new OperationOutcome();
 
-            if (ConvertorHelper.shouldTest(testEntry)) {
-                CoreValidatorTestUtils.testOutputs(testEntry.getTestResult(), operationOutcome);
-            }
+        try {
+            resourceName = extractResourceName(testFile, resourceAsString);
+            IFhirResourceDao<? extends IBaseResource> resourceDao = daoRegistry.getResourceDaoOrNull(resourceName);
+            operationOutcome = CoreValidatorTestUtils.validate(myCtx, testProfile, resourceName, resourceAsString, resourceDao);
+        } catch (Exception e) {
+            operationOutcome.addIssue().setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(e.getMessage());
+        }
+
+        if (shouldTest) {
+            CoreValidatorTestUtils.testOutputs(testResult, operationOutcome);
         }
     }
 
@@ -140,6 +176,23 @@ public class CoreValidatorTests extends BaseJpaR4Test {
         return resourceName;
     }
 
-
+    public StructureDefinition loadProfile(String filename, String contents, String v, List<ValidationMessage> messages)  throws IOException, FHIRException {
+        StructureDefinition sd = (StructureDefinition) loadResource(filename, contents, v);
+        ProfileUtilities pu = new ProfileUtilities(TestingUtilities.context(), messages, null);
+        if (!sd.hasSnapshot()) {
+            StructureDefinition base = TestingUtilities.context().fetchResource(StructureDefinition.class, sd.getBaseDefinition());
+            pu.generateSnapshot(base, sd, sd.getUrl(), null, sd.getTitle());
+        }
+        for (Resource r: sd.getContained()) {
+            if (r instanceof StructureDefinition) {
+                StructureDefinition childSd = (StructureDefinition)r;
+                if (!childSd.hasSnapshot()) {
+                    StructureDefinition base = TestingUtilities.context().fetchResource(StructureDefinition.class, childSd.getBaseDefinition());
+                    pu.generateSnapshot(base, childSd, childSd.getUrl(), null, childSd.getTitle());
+                }
+            }
+        }
+        return sd;
+    }
 
 }

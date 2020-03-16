@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4.corevalidator.utils;
 
-import ca.uhn.fhir.jpa.dao.r4.corevalidator.TestEntry;
+import ca.uhn.fhir.jpa.dao.r4.corevalidator.gson.TestEntry;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.codesystems.FHIRVersion;
 

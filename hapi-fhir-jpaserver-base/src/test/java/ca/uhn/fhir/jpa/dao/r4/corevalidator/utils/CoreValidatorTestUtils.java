@@ -2,12 +2,11 @@ package ca.uhn.fhir.jpa.dao.r4.corevalidator.utils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.r4.corevalidator.TestEntry;
-import ca.uhn.fhir.jpa.dao.r4.corevalidator.TestResult;
+import ca.uhn.fhir.jpa.dao.r4.corevalidator.gson.TestEntry;
+import ca.uhn.fhir.jpa.dao.r4.corevalidator.gson.TestResult;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.jupiter.api.Assertions;
@@ -15,7 +14,6 @@ import org.junit.jupiter.api.Assertions;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CoreValidatorTestUtils {
 
@@ -66,10 +64,14 @@ public class CoreValidatorTestUtils {
 
         int finalErrorCount = errorCount;
         int finalWarningCount = warningCount;
-        Assertions.assertAll("Error counts and warnings should match test results from manifest.xml file...",
-                () -> Assertions.assertEquals(result.getErrorCount(), finalErrorCount),
-                () -> Assertions.assertEquals(result.getWarningCount(), finalWarningCount)
-        );
+        if (result.getWarningCount() == TestResult.NO_WARNING) {
+            Assertions.assertAll("Error counts should match test results from manifest.xml file...",
+                    () -> Assertions.assertEquals(result.getErrorCount(), finalErrorCount));
+        } else {
+            Assertions.assertAll("Error counts and warnings should match test results from manifest.xml file...",
+                    () -> Assertions.assertEquals(result.getErrorCount(), finalErrorCount),
+                    () -> Assertions.assertEquals(result.getWarningCount(), finalWarningCount));
+        }
     }
 
     private static String prettyPrint(OperationOutcome oo) {

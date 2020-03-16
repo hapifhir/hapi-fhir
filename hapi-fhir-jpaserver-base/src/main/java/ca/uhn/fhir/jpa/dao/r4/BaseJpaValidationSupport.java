@@ -103,13 +103,18 @@ public abstract class BaseJpaValidationSupport {
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(1);
 			params.add(CodeSystem.SP_URL, new UriParam(theUri));
-			search = myCodeSystemDao.search(params);
+			search = myCodeSystemDao.search(params); //FIXME Copy lines 102-106 and add the case for search param,
 		} else if ("ImplementationGuide".equals(resourceName)) {
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(1);
 			params.add(ImplementationGuide.SP_URL, new UriParam(theUri));
 			search = myImplementationGuideDao.search(params);
-		} else {
+        } else if ("SearchParameter".equals(resourceName)) {
+            SearchParameterMap params = new SearchParameterMap();
+            params.setLoadSynchronousUpTo(1);
+            params.add(CodeSystem.SP_URL, new UriParam(theUri));
+            search = myCodeSystemDao.search(params);
+        } else {
 			throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
 		}
 

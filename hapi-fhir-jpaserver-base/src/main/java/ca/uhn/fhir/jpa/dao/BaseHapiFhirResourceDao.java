@@ -1329,7 +1329,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} else {
 			throw new PreconditionFailedException("Validation failed", result.toOperationOutcome());
 		}
-
 	}
 
 	/**

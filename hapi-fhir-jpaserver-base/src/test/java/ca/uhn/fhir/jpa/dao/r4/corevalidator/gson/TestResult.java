@@ -1,7 +1,8 @@
-package ca.uhn.fhir.jpa.dao.r4.corevalidator;
+package ca.uhn.fhir.jpa.dao.r4.corevalidator.gson;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import net.sf.saxon.value.IntegerRange;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,12 +10,14 @@ import java.util.stream.Collectors;
 
 public class TestResult {
 
+    public static final int NO_WARNING = Integer.MIN_VALUE;
+
     @SerializedName("errorCount")
     @Expose
     private Integer errorCount = 0;
     @SerializedName("warningCount")
     @Expose
-    private Integer warningCount = 0;
+    private Integer warningCount = NO_WARNING;
     @SerializedName("output")
     @Expose
     private List<String> output = new ArrayList<>();
@@ -50,7 +53,7 @@ public class TestResult {
     public String toString() {
         return "TestResult {" +
                 "\nerrorCount=" + errorCount +
-                "\nwarningCount=" + warningCount +
+                (warningCount == NO_WARNING ? "" : "\nwarningCount=" + warningCount) +
                 "\noutput=\n" + output.stream().collect(Collectors.joining("\n")) +
                 "\n}";
     }

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r4.corevalidator;
+package ca.uhn.fhir.jpa.dao.r4.corevalidator.gson;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -19,6 +19,9 @@ public class TestEntry {
     @SerializedName("profile")
     @Expose
     private Profile profile = new Profile();
+    @SerializedName("profiles")
+    @Expose
+    private List<String> profiles = null;
     @SerializedName("java")
     @Expose
     private TestResult testResult;
@@ -31,6 +34,12 @@ public class TestEntry {
     @SerializedName("use-test")
     @Expose
     private Boolean usesTest = true;
+    @SerializedName("validate")
+    @Expose
+    private String validate = null;
+    @SerializedName("examples")
+    @Expose
+    private Boolean allowExamples = false;
 
     public String getVersion() {
         return version;
@@ -66,6 +75,14 @@ public class TestEntry {
         this.profile = profile;
     }
 
+    public List<String> getProfiles() {
+        return profiles;
+    }
+
+    public void setProfiles(List<String> profiles) {
+        this.profiles = profiles;
+    }
+
     public TestResult getTestResult() {
         return testResult;
     }
@@ -96,6 +113,24 @@ public class TestEntry {
 
     public TestEntry setUsesTest(Boolean usesTest) {
         this.usesTest = usesTest;
+        return this;
+    }
+
+    public String getValidate() {
+        return validate;
+    }
+
+    public TestEntry setValidate(String validate) {
+        this.validate = validate;
+        return this;
+    }
+
+    public Boolean getAllowExamples() {
+        return allowExamples;
+    }
+
+    public TestEntry setAllowExamples(Boolean allowExamples) {
+        this.allowExamples = allowExamples;
         return this;
     }
 }

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r4.corevalidator;
+package ca.uhn.fhir.jpa.dao.r4.corevalidator.gson;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -19,6 +19,9 @@ public class Profile {
     @SerializedName("java")
     @Expose
     private TestResult testResult;
+    @SerializedName("assumeValidRestReferences")
+    @Expose
+    private Boolean assumeValidRestReferences = false;
 
     public String getErrorCount() {
         return errorCount;
@@ -53,6 +56,15 @@ public class Profile {
 
     public Profile setTestResult(TestResult testResult) {
         this.testResult = testResult;
+        return this;
+    }
+
+    public Boolean getAssumeValidRestReferences() {
+        return assumeValidRestReferences;
+    }
+
+    public Profile setAssumeValidRestReferences(Boolean assumeValidRestReferences) {
+        this.assumeValidRestReferences = assumeValidRestReferences;
         return this;
     }
 }

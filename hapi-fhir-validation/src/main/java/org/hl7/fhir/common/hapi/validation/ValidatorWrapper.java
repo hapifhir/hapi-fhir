@@ -38,6 +38,7 @@ public class ValidatorWrapper {
 	private boolean myErrorForUnknownProfiles;
 	private boolean myNoTerminologyChecks;
 	private boolean myAssumeValidRestReferences;
+	private boolean myAllowExamples = false;
 	private Collection<? extends String> myExtensionDomains;
 	private IResourceValidator.IValidatorResourceFetcher myValidatorResourceFetcher;
 
@@ -88,7 +89,16 @@ public class ValidatorWrapper {
 		return this;
 	}
 
-	public List<ValidationMessage> validate(IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
+    public boolean isMyAllowExamples() {
+        return myAllowExamples;
+    }
+
+    public ValidatorWrapper setAllowExamples(boolean myAllowExamples) {
+        this.myAllowExamples = myAllowExamples;
+        return this;
+    }
+
+    public List<ValidationMessage> validate(IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
 		InstanceValidator v;
 		FHIRPathEngine.IEvaluationContext evaluationCtx = new org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator.NullEvaluationContext();
 		try {
@@ -105,6 +115,7 @@ public class ValidatorWrapper {
 		v.setErrorForUnknownProfiles(myErrorForUnknownProfiles);
 		v.getExtensionDomains().addAll(myExtensionDomains);
 		v.setFetcher(myValidatorResourceFetcher);
+		v.setAllowExamples(myAllowExamples);
 		v.setAllowXsiLocation(true);
 
 		List<ValidationMessage> messages = new ArrayList<>();
