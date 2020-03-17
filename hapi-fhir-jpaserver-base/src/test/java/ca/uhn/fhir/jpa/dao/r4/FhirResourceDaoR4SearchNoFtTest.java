@@ -1065,9 +1065,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		params = new SearchParameterMap();
 		params.add("_id", new StringParam(id1));
-		myCaptureQueriesListener.clear();
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		params = new SearchParameterMap();
 		params.add("_id", new StringParam("9999999999999999"));
