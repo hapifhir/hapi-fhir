@@ -98,11 +98,11 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 		}
 
 		Join<ResourceTable, ResourceIndexedSearchParamToken> join = createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);
-		Collection<Predicate> singleCode = createPredicateToken(tokens, theResourceName, theParamName, myBuilder, join, operation);
+		Collection<Predicate> singleCode = createPredicateToken(tokens, theResourceName, theParamName, myCriteriaBuilder, join, operation);
 		assert singleCode != null;
 		codePredicates.addAll(singleCode);
 
-		Predicate spPredicate = myBuilder.or(toArray(codePredicates));
+		Predicate spPredicate = myCriteriaBuilder.or(toArray(codePredicates));
 		myQueryRoot.addPredicate(spPredicate);
 		return spPredicate;
 	}
@@ -345,8 +345,8 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 
 	private <T> Expression<Boolean> toEqualOrIsNullPredicate(Path<T> theExpression, T theCode) {
 		if (theCode == null) {
-			return myBuilder.isNull(theExpression);
+			return myCriteriaBuilder.isNull(theExpression);
 		}
-		return myBuilder.equal(theExpression, theCode);
+		return myCriteriaBuilder.equal(theExpression, theCode);
 	}
 }

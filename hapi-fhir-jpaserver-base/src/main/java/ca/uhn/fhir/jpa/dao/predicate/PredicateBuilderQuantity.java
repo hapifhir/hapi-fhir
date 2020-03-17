@@ -66,13 +66,13 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 			Predicate singleCode = createPredicateQuantity(nextOr,
 				theResourceName,
 				theParamName,
-				myBuilder,
+                    myCriteriaBuilder,
 				join,
 				operation);
 			codePredicates.add(singleCode);
 		}
 
-		Predicate retVal = myBuilder.or(toArray(codePredicates));
+		Predicate retVal = myCriteriaBuilder.or(toArray(codePredicates));
 		myQueryRoot.addPredicate(retVal);
 		return retVal;
 	}
@@ -171,13 +171,13 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 		Predicate hashPredicate;
 		if (!isBlank(systemValue) && !isBlank(unitsValue)) {
 			long hash = ResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(theResourceName, theParamName, systemValue, unitsValue);
-			hashPredicate = myBuilder.equal(theFrom.get("myHashIdentitySystemAndUnits"), hash);
+			hashPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentitySystemAndUnits"), hash);
 		} else if (!isBlank(unitsValue)) {
 			long hash = ResourceIndexedSearchParamQuantity.calculateHashUnits(theResourceName, theParamName, unitsValue);
-			hashPredicate = myBuilder.equal(theFrom.get("myHashIdentityAndUnits"), hash);
+			hashPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentityAndUnits"), hash);
 		} else {
 			long hash = BaseResourceIndexedSearchParam.calculateHashIdentity(theResourceName, theParamName);
-			hashPredicate = myBuilder.equal(theFrom.get("myHashIdentity"), hash);
+			hashPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentity"), hash);
 		}
 
 		cmpValue = defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);

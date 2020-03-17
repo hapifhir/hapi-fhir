@@ -110,7 +110,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 		if (allOrPids != null && allOrPids.isEmpty()) {
 
 			// This will never match
-			nextPredicate = myBuilder.equal(theRoot.get("myId").as(Long.class), -1);
+			nextPredicate = myCriteriaBuilder.equal(theRoot.get("myId").as(Long.class), -1);
 
 		} else if (allOrPids != null) {
 
@@ -121,11 +121,11 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 				default:
 				case eq:
 					codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)));
-					nextPredicate = myBuilder.and(toArray(codePredicates));
+					nextPredicate = myCriteriaBuilder.and(toArray(codePredicates));
 					break;
 				case ne:
 					codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)).not());
-					nextPredicate = myBuilder.and(toArray(codePredicates));
+					nextPredicate = myCriteriaBuilder.and(toArray(codePredicates));
 					break;
 			}
 

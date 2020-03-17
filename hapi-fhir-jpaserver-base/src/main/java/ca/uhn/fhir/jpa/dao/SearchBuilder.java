@@ -157,7 +157,7 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private PredicateBuilderFactory myPredicateBuilderFactory;
 	private List<ResourcePersistentId> myAlsoIncludePids;
-	private CriteriaBuilder myBuilder;
+	private CriteriaBuilder myCriteriaBuilder;
 	private IDao myCallingDao;
 	private SearchParameterMap myParams;
 	private String mySearchUuid;
@@ -195,15 +195,8 @@ public class SearchBuilder implements ISearchBuilder {
 			Dstu3DistanceHelper.setNearDistance(myResourceType, theParams);
 		}
 
-		/*
-		 * Check if there is a unique key associated with the set
-		 * of parameters passed in
-		 */
-		boolean couldBeEligibleForCompositeUniqueSpProcessing =
-			myDaoConfig.isUniqueIndexesEnabled() &&
-				myParams.getEverythingMode() == null &&
-				myParams.isAllParametersHaveNoModifier();
-		if (couldBeEligibleForCompositeUniqueSpProcessing) {
+		// Attempt to lookup via composite unique key.
+		if (isCompositeUniqueSpCandidate()) {
 			attemptCompositeUniqueSpProcessing(theParams, theRequest);
 		}
 
@@ -213,7 +206,16 @@ public class SearchBuilder implements ISearchBuilder {
 			List<List<IQueryParameterType>> andOrParams = nextParamEntry.getValue();
 			searchForIdsWithAndOr(myResourceName, nextParamName, andOrParams, theRequest);
 		}
+	}
 
+	/**
+	 * A search is a candidate for Composite Unique SP if unique indexes are enabled, there is no EverythingMode, and the
+	 * parameters all have no modifiers.
+	 */
+	private boolean isCompositeUniqueSpCandidate() {
+		return myDaoConfig.isUniqueIndexesEnabled() &&
+			myParams.getEverythingMode() == null &&
+			myParams.isAllParametersHaveNoModifier();
 	}
 
 	@Override
@@ -243,10 +245,10 @@ public class SearchBuilder implements ISearchBuilder {
 		return new QueryIterator(theSearchRuntimeDetails, theRequest);
 	}
 
-	private void init(SearchParameterMap theParams, String theTheSearchUuid) {
+	private void init(SearchParameterMap theParams, String theSearchUuid) {
 		myParams = theParams;
-		myBuilder = myEntityManager.getCriteriaBuilder();
-		mySearchUuid = theTheSearchUuid;
+		myCriteriaBuilder = myEntityManager.getCriteriaBuilder();
+		mySearchUuid = theSearchUuid;
 		myPredicateBuilder = new PredicateBuilder(this, myPredicateBuilderFactory);
 	}
 
@@ -261,50 +263,49 @@ public class SearchBuilder implements ISearchBuilder {
 		if (sort != null) {
 			assert !theCount;
 
-			outerQuery = myBuilder.createQuery(Long.class);
+			outerQuery = myCriteriaBuilder.createQuery(Long.class);
 			myQueryRoot.push(outerQuery);
 			if (theCount) {
-				outerQuery.multiselect(myBuilder.countDistinct(myQueryRoot.getRoot()));
+				outerQuery.multiselect(myCriteriaBuilder.countDistinct(myQueryRoot.getRoot()));
 			} else {
 				outerQuery.multiselect(myQueryRoot.get("myId").as(Long.class));
 			}
 
 			List<Order> orders = Lists.newArrayList();
 
-			createSort(myBuilder, myQueryRoot, sort, orders);
+			createSort(myCriteriaBuilder, myQueryRoot, sort, orders);
 			if (orders.size() > 0) {
 				outerQuery.orderBy(orders);
 			}
 
 		} else {
 
-			outerQuery = myBuilder.createQuery(Long.class);
+			outerQuery = myCriteriaBuilder.createQuery(Long.class);
 			myQueryRoot.push(outerQuery);
 			if (theCount) {
-				outerQuery.multiselect(myBuilder.countDistinct(myQueryRoot.getRoot()));
+				outerQuery.multiselect(myCriteriaBuilder.countDistinct(myQueryRoot.getRoot()));
 			} else {
 				outerQuery.multiselect(myQueryRoot.get("myId").as(Long.class));
 				// KHS This distinct call is causing performance issues in large installations
 //				outerQuery.distinct(true);
 			}
-
 		}
 
 		if (myParams.getEverythingMode() != null) {
 			Join<ResourceTable, ResourceLink> join = myQueryRoot.join("myResourceLinks", JoinType.LEFT);
 
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
-				StringParam idParm = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-				ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(myResourceName, idParm.getValue());
+				StringParam idParam = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
+				ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(myResourceName, idParam.getValue());
 				if (myAlsoIncludePids == null) {
 					myAlsoIncludePids = new ArrayList<>(1);
 				}
 				myAlsoIncludePids.add(pid);
-				myQueryRoot.addPredicate(myBuilder.equal(join.get("myTargetResourcePid").as(Long.class), pid.getIdAsLong()));
+				myQueryRoot.addPredicate(myCriteriaBuilder.equal(join.get("myTargetResourcePid").as(Long.class), pid.getIdAsLong()));
 			} else {
-				Predicate targetTypePredicate = myBuilder.equal(join.get("myTargetResourceType").as(String.class), myResourceName);
-				Predicate sourceTypePredicate = myBuilder.equal(myQueryRoot.get("myResourceType").as(String.class), myResourceName);
-				myQueryRoot.addPredicate(myBuilder.or(sourceTypePredicate, targetTypePredicate));
+				Predicate targetTypePredicate = myCriteriaBuilder.equal(join.get("myTargetResourceType").as(String.class), myResourceName);
+				Predicate sourceTypePredicate = myCriteriaBuilder.equal(myQueryRoot.get("myResourceType").as(String.class), myResourceName);
+				myQueryRoot.addPredicate(myCriteriaBuilder.or(sourceTypePredicate, targetTypePredicate));
 			}
 
 		} else {
@@ -348,17 +349,17 @@ public class SearchBuilder implements ISearchBuilder {
 		boolean haveNoIndexSearchParams = myParams.size() == 0 || myParams.keySet().stream().allMatch(t -> t.startsWith("_"));
 		if (haveNoIndexSearchParams) {
 			if (myParams.getEverythingMode() == null) {
-				myQueryRoot.addPredicate(myBuilder.equal(myQueryRoot.get("myResourceType"), myResourceName));
+				myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myResourceType"), myResourceName));
 			}
-			myQueryRoot.addPredicate(myBuilder.isNull(myQueryRoot.get("myDeleted")));
+			myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myDeleted")));
 		}
 
 		// Last updated
 		DateRangeParam lu = myParams.getLastUpdated();
-		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(lu, myBuilder, myQueryRoot.getRoot());
+		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(lu, myCriteriaBuilder, myQueryRoot.getRoot());
 		myQueryRoot.addPredicates(lastUpdatedPredicates);
 
-		myQueryRoot.where(myBuilder.and(myQueryRoot.getPredicateArray()));
+		myQueryRoot.where(myCriteriaBuilder.and(myQueryRoot.getPredicateArray()));
 
 		/*
 		 * Now perform the search
@@ -880,7 +881,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private void addPredicateCompositeStringUnique(@Nonnull SearchParameterMap theParams, String theIndexedString) {
 		myQueryRoot.setHasIndexJoins(true);
 		Join<ResourceTable, ResourceIndexedCompositeStringUnique> join = myQueryRoot.join("myParamsCompositeStringUnique", JoinType.LEFT);
-		Predicate predicate = myBuilder.equal(join.get("myIndexString"), theIndexedString);
+		Predicate predicate = myCriteriaBuilder.equal(join.get("myIndexString"), theIndexedString);
 		myQueryRoot.addPredicate(predicate);
 
 		// Remove any empty parameters remaining after this
@@ -907,7 +908,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	public CriteriaBuilder getBuilder() {
-		return myBuilder;
+		return myCriteriaBuilder;
 	}
 
 	public QueryRoot getQueryRoot() {
@@ -984,7 +985,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private final SearchRuntimeDetails mySearchRuntimeDetails;
 		private final RequestDetails myRequest;
 		private final boolean myHaveRawSqlHooks;
-		private final boolean myHavePerftraceFoundIdHook;
+		private final boolean myHavePerfTraceFoundIdHook;
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
 		private ResourcePersistentId myNext;
@@ -1005,7 +1006,7 @@ public class SearchBuilder implements ISearchBuilder {
 				myStillNeedToFetchIncludes = true;
 			}
 
-			myHavePerftraceFoundIdHook = JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, myInterceptorBroadcaster, myRequest);
+			myHavePerfTraceFoundIdHook = JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, myInterceptorBroadcaster, myRequest);
 			myHaveRawSqlHooks = JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, myRequest);
 
 		}
@@ -1047,7 +1048,7 @@ public class SearchBuilder implements ISearchBuilder {
 					if (myNext == null) {
 						while (myResultsIterator.hasNext()) {
 							Long nextLong = myResultsIterator.next();
-							if (myHavePerftraceFoundIdHook) {
+							if (myHavePerfTraceFoundIdHook) {
 								HookParams params = new HookParams()
 									.add(Integer.class, System.identityHashCode(this))
 									.add(Object.class, nextLong);

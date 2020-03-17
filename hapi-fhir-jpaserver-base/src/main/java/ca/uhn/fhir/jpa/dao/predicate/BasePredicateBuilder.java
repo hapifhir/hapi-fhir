@@ -52,7 +52,7 @@ abstract class BasePredicateBuilder {
 
 	boolean myDontUseHashesForSearch;
 	final IDao myCallingDao;
-	final CriteriaBuilder myBuilder;
+	final CriteriaBuilder myCriteriaBuilder;
 	final QueryRoot myQueryRoot;
 	final Class<? extends IBaseResource> myResourceType;
 	final String myResourceName;
@@ -60,7 +60,7 @@ abstract class BasePredicateBuilder {
 
 	BasePredicateBuilder(SearchBuilder theSearchBuilder) {
 		myCallingDao = theSearchBuilder.getCallingDao();
-		myBuilder = theSearchBuilder.getBuilder();
+		myCriteriaBuilder = theSearchBuilder.getBuilder();
 		myQueryRoot = theSearchBuilder.getQueryRoot();
 		myResourceType = theSearchBuilder.getResourceType();
 		myResourceName = theSearchBuilder.getResourceName();
@@ -122,27 +122,27 @@ abstract class BasePredicateBuilder {
 
 		Expression<Long> hashPresence = paramPresentJoin.get("myHashPresence").as(Long.class);
 		Long hash = SearchParamPresent.calculateHashPresence(theResourceName, theParamName, !theMissing);
-		myQueryRoot.addPredicate(myBuilder.equal(hashPresence, hash));
+		myQueryRoot.addPredicate(myCriteriaBuilder.equal(hashPresence, hash));
 	}
 
 	void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing, Join<ResourceTable, ? extends BaseResourceIndexedSearchParam> theJoin) {
 
-		myQueryRoot.addPredicate(myBuilder.equal(theJoin.get("myResourceType"), theResourceName));
-		myQueryRoot.addPredicate(myBuilder.equal(theJoin.get("myParamName"), theParamName));
-		myQueryRoot.addPredicate(myBuilder.equal(theJoin.get("myMissing"), theMissing));
+		myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myResourceType"), theResourceName));
+		myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myParamName"), theParamName));
+		myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myMissing"), theMissing));
 	}
 
 	Predicate combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, Predicate thePredicate) {
 		if (myDontUseHashesForSearch) {
-			Predicate resourceTypePredicate = myBuilder.equal(theFrom.get("myResourceType"), theResourceName);
-			Predicate paramNamePredicate = myBuilder.equal(theFrom.get("myParamName"), theParamName);
-			Predicate outerPredicate = myBuilder.and(resourceTypePredicate, paramNamePredicate, thePredicate);
+			Predicate resourceTypePredicate = myCriteriaBuilder.equal(theFrom.get("myResourceType"), theResourceName);
+			Predicate paramNamePredicate = myCriteriaBuilder.equal(theFrom.get("myParamName"), theParamName);
+			Predicate outerPredicate = myCriteriaBuilder.and(resourceTypePredicate, paramNamePredicate, thePredicate);
 			return outerPredicate;
 		}
 
 		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(theResourceName, theParamName);
-		Predicate hashIdentityPredicate = myBuilder.equal(theFrom.get("myHashIdentity"), hashIdentity);
-		return myBuilder.and(hashIdentityPredicate, thePredicate);
+		Predicate hashIdentityPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentity"), hashIdentity);
+		return myCriteriaBuilder.and(hashIdentityPredicate, thePredicate);
 	}
 
 	Predicate createPredicateNumeric(String theResourceName,
