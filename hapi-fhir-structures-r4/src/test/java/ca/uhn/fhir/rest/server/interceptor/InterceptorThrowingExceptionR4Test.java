@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -21,7 +22,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -30,11 +35,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class InterceptorThrowingExceptionR4Test {
 
@@ -57,7 +63,7 @@ public class InterceptorThrowingExceptionR4Test {
 	}
 
 	@After
-	public void after(){
+	public void after() {
 		ourServlet.getInterceptorService().unregisterAllInterceptors();
 	}
 
@@ -84,26 +90,26 @@ public class InterceptorThrowingExceptionR4Test {
 
 	@Test
 	public void testFailureInProcessingCompletedNormally() throws Exception {
-		final List<Integer> hit = new ArrayList<>();
+		final List<Integer> hit = Collections.synchronizedList(new ArrayList<>());
 		ourServlet.getInterceptorService().registerInterceptor(new InterceptorAdapter() {
 			@Override
 			public void processingCompletedNormally(ServletRequestDetails theRequestDetails) {
 				hit.add(1);
-				throw new NullPointerException();
+				throw new NullPointerException("Hit 1");
 			}
 		});
 		ourServlet.getInterceptorService().registerInterceptor(new InterceptorAdapter() {
 			@Override
 			public void processingCompletedNormally(ServletRequestDetails theRequestDetails) {
 				hit.add(2);
-				throw new NullPointerException();
+				throw new NullPointerException("Hit 2");
 			}
 		});
 		ourServlet.getInterceptorService().registerInterceptor(new InterceptorAdapter() {
 			@Override
 			public void processingCompletedNormally(ServletRequestDetails theRequestDetails) {
 				hit.add(3);
-				throw new NullPointerException();
+				throw new NullPointerException("Hit 3");
 			}
 		});
 
@@ -119,6 +125,9 @@ public class InterceptorThrowingExceptionR4Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(response, containsString("FAM"));
 		assertTrue(ourHitMethod);
+
+		await().until(() -> hit.size() == 3);
+
 		ourLog.info("Hit: {}", hit);
 		assertThat("Hits: " + hit.toString(), hit, contains(1, 2, 3));
 
@@ -165,7 +174,7 @@ public class InterceptorThrowingExceptionR4Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

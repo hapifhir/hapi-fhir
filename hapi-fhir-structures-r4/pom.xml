@@ -175,6 +175,11 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- Dependencies for Schematron -->
 		<dependency>
@@ -215,9 +220,8 @@
 
 		<!-- UNIT TEST DEPENDENCIES -->
 		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>apache-jena-libs</artifactId>
-			<type>pom</type>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

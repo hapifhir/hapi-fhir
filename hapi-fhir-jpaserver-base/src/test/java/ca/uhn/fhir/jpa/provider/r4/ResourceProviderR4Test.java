@@ -5368,7 +5368,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testValidateJsonWithDuplicateKey() throws IOException {
 
-		String inputStr = "{\"resourceType\":\"Patient\", \"name\":[{\"text\":foo\"}], name:[{\"text\":\"foo\"}] }";
+		String inputStr = "{\"resourceType\":\"Patient\", \"name\":[{\"text\":\"foo\"}], \"name\":[{\"text\":\"foo\"}] }";
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_JSON_NEW, "UTF-8")));
 
@@ -5378,7 +5378,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(resp);
 			assertEquals(412, response.getStatusLine().getStatusCode());
 
-			assertThat(resp, stringContainsInOrder("Error parsing JSON source: Syntax error in json reading special word false at Line 1"));
+			assertThat(resp, stringContainsInOrder("Duplicated property name: name"));
 		} finally {
 			response.getEntity().getContent().close();
 			response.close();
