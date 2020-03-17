@@ -46,6 +46,15 @@
 			<artifactId>jsr305</artifactId>
 		</dependency>
 
+		<!--
+		Note: As of HAPI FHIR 5.0.0 we now use Jackson for JSON parsing, but the
+		validator still uses GSON so it is a dependency here
+		-->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+
 		<!-- 
 		Optional dependencies from RI codebase
 		-->
