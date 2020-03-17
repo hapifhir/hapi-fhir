@@ -35,7 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class DropIndexTask extends BaseTableTask<DropIndexTask> {
+public class DropIndexTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropIndexTask.class);
 	private String myIndexName;

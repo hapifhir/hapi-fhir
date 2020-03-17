@@ -27,7 +27,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,7 +162,6 @@ public class SearchCoordinatorSvcImplTest {
 
 	}
 
-	// TODO INTERMITTENT this test fails intermittently
 	@Test
 	public void testAsyncSearchLargeResultSetBigCountSameCoordinator() {
 		List<ResourcePersistentId> allResults = new ArrayList<>();
@@ -187,6 +188,8 @@ public class SearchCoordinatorSvcImplTest {
 			myCurrentSearch = search;
 			return search;
 		});
+
+		// Do all the stubbing before starting any work, since we want to avoid threading issues
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
