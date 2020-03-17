@@ -95,7 +95,6 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 			assertEquals(30, mySearchResultDao.count());
 		});
 
-		myCaptureQueriesListener.clear();
 		myDataaseCacheSvc.pollForStaleSearchesAndDeleteThem();
 		runInTransaction(()->{
 			// We should delete up to 10, but 3 don't get deleted since they have too many results to delete in one pass
@@ -105,7 +104,6 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 			assertEquals(15, mySearchResultDao.count());
 		});
 
-		myCaptureQueriesListener.clear();
 		myDataaseCacheSvc.pollForStaleSearchesAndDeleteThem();
 		runInTransaction(()->{
 			// Once again we attempt to delete 10, but the first 3 don't get deleted and still remain
@@ -115,7 +113,6 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 			assertEquals(0, mySearchResultDao.count());
 		});
 
-		myCaptureQueriesListener.clear();
 		myDataaseCacheSvc.pollForStaleSearchesAndDeleteThem();
 		runInTransaction(()->{
 			assertEquals(0, mySearchDao.count());
