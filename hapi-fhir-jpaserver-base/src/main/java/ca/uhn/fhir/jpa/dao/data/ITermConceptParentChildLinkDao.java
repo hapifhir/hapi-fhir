@@ -1,9 +1,10 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.dao.IHapiJpaRepository;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -29,7 +30,7 @@ import java.util.Collection;
  * #L%
  */
 
-public interface ITermConceptParentChildLinkDao extends JpaRepository<TermConceptParentChildLink, Long> {
+public interface ITermConceptParentChildLinkDao extends IHapiJpaRepository<TermConceptParentChildLink> {
 
 	@Query("SELECT COUNT(t) FROM TermConceptParentChildLink t WHERE t.myCodeSystem.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
@@ -39,4 +40,14 @@ public interface ITermConceptParentChildLinkDao extends JpaRepository<TermConcep
 
 	@Query("SELECT t.myPid FROM TermConceptParentChildLink t WHERE t.myCodeSystem.myId = :cs_pid")
 	Slice<Long> findIdsByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
+
+	@Modifying
+	@Query("DELETE FROM TermConceptParentChildLink t WHERE t.myChildPid = :pid OR t.myParentPid = :pid")
+	void deleteByConceptPid(@Param("pid") Long theId);
+
+	@Override
+	@Modifying
+	@Query("DELETE FROM TermConceptParentChildLink t WHERE t.myPid = :pid")
+	void deleteByPid(@Param("pid") Long theId);
+
 }

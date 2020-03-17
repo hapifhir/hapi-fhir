@@ -31,7 +31,6 @@ import org.hl7.fhir.r4.hapi.rest.server.R4BundleFactory;
 import org.hl7.fhir.r4.model.*;
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -45,11 +44,6 @@ public class FhirR4 implements IFhirVersion {
 	@Override
 	public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
 		return new FluentPathR4(theFhirContext);
-	}
-
-	@Override
-	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
-		return ReflectionUtil.newInstanceOfFhirProfileValidationSupport("org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport");
 	}
 
 	@Override

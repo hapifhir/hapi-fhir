@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -47,6 +48,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -77,7 +79,6 @@ import org.apache.commons.lang3.Validate;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
-import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -189,8 +190,9 @@ public class SearchBuilder implements ISearchBuilder {
 		// Remove any empty parameters
 		theParams.clean();
 
-		if (myResourceType == Location.class) {
-			theParams.setLocationDistance();
+		// For DSTU3, pull out near-distance first so when it comes time to evaluate near, we already know the distance
+		if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
+			Dstu3DistanceHelper.setNearDistance(myResourceType, theParams);
 		}
 
 		/*
@@ -293,7 +295,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 				StringParam idParm = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-				ResourcePersistentId pid = myIdHelperService.translateForcedIdToPid(myResourceName, idParm.getValue(), theRequest);
+				ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(myResourceName, idParm.getValue());
 				if (myAlsoIncludePids == null) {
 					myAlsoIncludePids = new ArrayList<>(1);
 				}
@@ -343,7 +345,8 @@ public class SearchBuilder implements ISearchBuilder {
 		 * If we have any joins to index tables, we get this behaviour already guaranteed so we don't
 		 * need an explicit predicate for it.
 		 */
-		if (!myQueryRoot.hasIndexJoins()) {
+		boolean haveNoIndexSearchParams = myParams.size() == 0 || myParams.keySet().stream().allMatch(t -> t.startsWith("_"));
+		if (haveNoIndexSearchParams) {
 			if (myParams.getEverythingMode() == null) {
 				myQueryRoot.addPredicate(myBuilder.equal(myQueryRoot.get("myResourceType"), myResourceName));
 			}
@@ -504,6 +507,9 @@ public class SearchBuilder implements ISearchBuilder {
 
 		ResourcePersistentId resourceId;
 		for (ResourceSearchView next : resourceSearchViewList) {
+			if (next.getDeleted() != null) {
+				continue;
+			}
 
 			Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(next.getResourceType()).getImplementingClass();
 

@@ -3,18 +3,11 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
-import ca.uhn.fhir.jpa.util.CoordCalculatorTest;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -40,11 +33,7 @@ import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -55,30 +44,11 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
@@ -621,6 +591,41 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testHasLimitsByType() {
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		Encounter encounter = new Encounter();
+		encounter.setStatus(Encounter.EncounterStatus.ARRIVED);
+		IIdType encounterId = myEncounterDao.create(encounter).getId().toUnqualifiedVersionless();
+
+		Device device = new Device();
+		device.setManufacturer("Acme");
+		IIdType deviceId = myDeviceDao.create(device).getId().toUnqualifiedVersionless();
+
+		Provenance provenance = new Provenance();
+		provenance.addTarget().setReferenceElement(patientId);
+		provenance.addTarget().setReferenceElement(encounterId);
+		provenance.addAgent().setWho(new Reference(deviceId));
+		myProvenanceDao.create(provenance);
+
+		String criteria = "_has:Provenance:target:agent=" + deviceId.getValue();
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Encounter.class));
+
+		map.setLoadSynchronous(true);
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myEncounterDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids, containsInAnyOrder(encounterId.getValue()));
+
+	}
+
+	@Test
 	public void testHasParameter() {
 		IIdType pid0;
 		{
@@ -1070,6 +1075,65 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.add("_id", new StringParam(id2));
 		assertEquals(0, toList(myPatientDao.search(params)).size());
 
+	}
+
+	@Test
+	public void testSearchByIdParam_QueryIsMinimal() {
+		// With only an _id parameter
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			params.add("_id", new StringParam("DiagnosticReport/123"));
+			myCaptureQueriesListener.clear();
+			myDiagnosticReportDao.search(params).size();
+			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+			assertEquals(1, selectQueries.size());
+
+			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
+			ourLog.debug("SQL Query:\n{}", sqlQuery);
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_id in"));
+			assertEquals(0, StringUtils.countMatches(sqlQuery, "join"));
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_type='diagnosticreport'"));
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_deleted_at is null"));
+		}
+		// With an _id parameter and a standard search param
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			params.add("_id", new StringParam("DiagnosticReport/123"));
+			params.add("code", new TokenParam("foo", "bar"));
+			myCaptureQueriesListener.clear();
+			myDiagnosticReportDao.search(params).size();
+			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+			assertEquals(1, selectQueries.size());
+
+			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
+			ourLog.info("SQL Query:\n{}", sqlQuery);
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_id in"));
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "join"));
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "hash_sys_and_value"));
+			assertEquals(0, StringUtils.countMatches(sqlQuery, "diagnosticreport"));
+			assertEquals(0, StringUtils.countMatches(sqlQuery, "res_deleted_at"));
+		}
+	}
+
+	@Test
+	public void testSearchByIdParamAndOtherSearchParam_QueryIsMinimal() {
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add("_id", new StringParam("DiagnosticReport/123"));
+		params.add("_id", new StringParam("DiagnosticReport/123"));
+		myCaptureQueriesListener.clear();
+		myDiagnosticReportDao.search(params).size();
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		assertEquals(1, selectQueries.size());
+
+		String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
+		ourLog.info("SQL Query:\n{}", sqlQuery);
+		assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_id in"));
+		assertEquals(0, StringUtils.countMatches(sqlQuery, "join"));
+		assertEquals(1, StringUtils.countMatches(sqlQuery,"resourceta0_.res_type='diagnosticreport'"));
+		assertEquals(1, StringUtils.countMatches(sqlQuery,"resourceta0_.res_deleted_at is null"));
 	}
 
 	@Test
@@ -4262,120 +4326,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		IBundleProvider outcome = myCommunicationRequestDao.search(params);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), contains(crId));
-	}
-
-	@Test
-	public void testNearSearchDistanceNoDistance() {
-		Location loc = new Location();
-		double latitude = CoordCalculatorTest.LATITUDE_CHIN;
-		double longitude = CoordCalculatorTest.LATITUDE_CHIN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
-		loc.setPosition(position);
-		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
-
-		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-			"Location?" +
-				Location.SP_NEAR + "=" + latitude + "|" + longitude,
-			myFhirCtx.getResourceDefinition("Location"));
-
-		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-		assertThat(ids, contains(locId));
-	}
-
-	@Test
-	public void testNearSearchDistanceZero() {
-		Location loc = new Location();
-		double latitude = CoordCalculatorTest.LATITUDE_CHIN;
-		double longitude = CoordCalculatorTest.LATITUDE_CHIN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
-		loc.setPosition(position);
-		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
-		{
-			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + latitude + "|" + longitude + "|0",
-				myFhirCtx.getResourceDefinition("Location"));
-
-			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-			assertThat(ids, contains(locId));
-		}
-		{
-			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + latitude + "|" + longitude + "|0.0",
-				myFhirCtx.getResourceDefinition("Location"));
-
-			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-			assertThat(ids, contains(locId));
-		}
-	}
-
-	@Test
-	public void testNearSearchApproximate() {
-		Location loc = new Location();
-		double latitude = CoordCalculatorTest.LATITUDE_UHN;
-		double longitude = CoordCalculatorTest.LONGITUDE_UHN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
-		loc.setPosition(position);
-		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
-
-		{ // In the box
-			double bigEnoughDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN * 2;
-			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + "|"
-					+ CoordCalculatorTest.LONGITUDE_CHIN + "|" +
-					bigEnoughDistance, myFhirCtx.getResourceDefinition("Location"));
-
-			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-			assertThat(ids, contains(locId));
-		}
-		{ // Outside the box
-			double tooSmallDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN / 2;
-
-			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + "|"
-					+ CoordCalculatorTest.LONGITUDE_CHIN + "|" +
-					tooSmallDistance, myFhirCtx.getResourceDefinition("Location"));
-
-			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-			assertThat(ids.size(), is(0));
-		}
-
-	}
-
-	@Test
-	public void testNearSearchApproximateNearAntiMeridian() {
-		Location loc = new Location();
-		double latitude = CoordCalculatorTest.LATITUDE_TAVEUNI;
-		double longitude = CoordCalculatorTest.LONGITIDE_TAVEUNI;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
-		loc.setPosition(position);
-		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
-
-		{ // We match even when the box crosses the anti-meridian
-			double bigEnoughDistance = CoordCalculatorTest.DISTANCE_TAVEUNI;
-			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_TAVEUNI + "|"
-					+ CoordCalculatorTest.LONGITIDE_TAVEUNI + "|" +
-					bigEnoughDistance, myFhirCtx.getResourceDefinition("Location"));
-
-			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-			assertThat(ids, contains(locId));
-		}
-		{ // We don't match outside a box that crosses the anti-meridian
-			double tooSmallDistance = CoordCalculatorTest.DISTANCE_TAVEUNI;
-			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + "|"
-					+ CoordCalculatorTest.LONGITUDE_CHIN + "|" +
-					tooSmallDistance, myFhirCtx.getResourceDefinition("Location"));
-
-			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-			assertThat(ids.size(), is(0));
-		}
 	}
 
 	@Test

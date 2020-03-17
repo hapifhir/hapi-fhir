@@ -8,9 +8,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /*
  * #%L
@@ -63,4 +65,6 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
 	@Query("DELETE FROM ResourceTable t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
 
+	@Query("SELECT t.myResourceType, t.myId, t.myDeleted FROM ResourceTable t WHERE t.myId IN (:pid)")
+	Collection<Object[]> findLookupFieldsByResourcePid(@Param("pid") List<Long> thePids);
 }

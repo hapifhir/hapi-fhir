@@ -44,8 +44,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
@@ -54,9 +54,18 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -152,7 +161,7 @@ public class ExampleDataUploader extends BaseCommand {
 		bundle.setType(BundleType.TRANSACTION);
 
 		FhirValidator val = ctx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator(new DefaultProfileValidationSupport()));
+		val.registerValidatorModule(new FhirInstanceValidator(new DefaultProfileValidationSupport(ctx)));
 
 		ZipInputStream zis = new ZipInputStream(FileUtils.openInputStream(inputFile));
 		byte[] buffer = new byte[2048];
@@ -236,7 +245,7 @@ public class ExampleDataUploader extends BaseCommand {
 		bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
 
 		FhirValidator val = ctx.newValidator();
-		val.registerValidatorModule(new org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator(new org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport()));
+		val.registerValidatorModule(new FhirInstanceValidator(new DefaultProfileValidationSupport(ctx)));
 
 		ZipInputStream zis = new ZipInputStream(FileUtils.openInputStream(inputFile));
 		byte[] buffer = new byte[2048];
@@ -615,7 +624,6 @@ public class ExampleDataUploader extends BaseCommand {
 		}
 
 		String specUrl;
-
 		switch (ctx.getVersion().getVersion()) {
 			case DSTU2:
 				specUrl = "http://hl7.org/fhir/dstu2/examples-json.zip";

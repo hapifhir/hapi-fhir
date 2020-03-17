@@ -57,6 +57,10 @@ public abstract class BaseIgPackParser<T> {
 		myCtx = theCtx;
 	}
 
+	public FhirContext getCtx() {
+		return myCtx;
+	}
+
 	protected abstract T createValidationSupport(Map<IIdType, IBaseResource> theIgResources);
 
 	private IBaseResource findResource(Map<String, IBaseResource> theCandidateResources, IIdType theId) {

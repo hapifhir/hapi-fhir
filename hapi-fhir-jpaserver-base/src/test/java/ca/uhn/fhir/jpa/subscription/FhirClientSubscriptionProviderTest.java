@@ -56,6 +56,7 @@ public class FhirClientSubscriptionProviderTest extends BaseSubscriptionsR4Test 
 
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
+		waitForSize(1, ourContentTypes);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 }

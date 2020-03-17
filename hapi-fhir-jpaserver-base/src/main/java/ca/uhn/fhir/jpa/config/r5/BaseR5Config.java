@@ -17,13 +17,9 @@ import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR5;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r5.hapi.validation.CachingValidationSupport;
-import org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -93,33 +89,7 @@ public class BaseR5Config extends BaseConfigDstu3Plus {
 	@Bean(name = GRAPHQL_PROVIDER_NAME)
 	@Lazy
 	public GraphQLProvider graphQLProvider() {
-		return new GraphQLProvider(fhirContextR5(), validationSupportChainR5(), graphqlStorageServices());
-	}
-
-	@Bean(name = "myInstanceValidatorR5")
-	@Lazy
-	public IInstanceValidatorModule instanceValidatorR5() {
-		FhirInstanceValidator val = new FhirInstanceValidator();
-		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Warning;
-		val.setBestPracticeWarningLevel(level);
-		val.setValidationSupport(validationSupportChainR5());
-		return val;
-	}
-
-	@Bean
-	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
-		return new DefaultProfileValidationSupport();
-	}
-
-	@Bean
-	public JpaValidationSupportChainR5 jpaValidationSupportChain() {
-		return new JpaValidationSupportChainR5();
-	}
-
-	@Bean(name = "myJpaValidationSupportR5", autowire = Autowire.BY_NAME)
-	public ca.uhn.fhir.jpa.dao.r5.IJpaValidationSupportR5 jpaValidationSupportR5() {
-		ca.uhn.fhir.jpa.dao.r5.JpaValidationSupportR5 retVal = new ca.uhn.fhir.jpa.dao.r5.JpaValidationSupportR5();
-		return retVal;
+		return new GraphQLProvider(fhirContextR5(), validationSupportChain(), graphqlStorageServices());
 	}
 
 	@Bean(name = "myResourceCountsCache")
@@ -159,15 +129,10 @@ public class BaseR5Config extends BaseConfigDstu3Plus {
 		return new TermLoaderSvcImpl();
 	}
 
+	@Override
 	@Bean(autowire = Autowire.BY_TYPE)
 	public ITermReadSvcR5 terminologyService() {
 		return new TermReadSvcR5();
-	}
-
-	@Primary
-	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainR5")
-	public IValidationSupport validationSupportChainR5() {
-		return new CachingValidationSupport(jpaValidationSupportChain());
 	}
 
 }

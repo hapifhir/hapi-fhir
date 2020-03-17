@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -47,16 +46,6 @@ public class FhirDstu3 implements IFhirVersion {
   @Override
   public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
     return new FluentPathDstu3(theFhirContext);
-  }
-
-  @Override
-  public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
-    String className = "org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport";
-    try {
-      return (IContextValidationSupport<?, ?, ?, ?, ?, ?>) Class.forName(className).newInstance();
-    } catch (Exception theE) {
-      throw new ConfigurationException(className + " is not on classpath. Make sure that hapi-fhir-validation-VERSION.jar is available.");
-    }
   }
 
   @Override

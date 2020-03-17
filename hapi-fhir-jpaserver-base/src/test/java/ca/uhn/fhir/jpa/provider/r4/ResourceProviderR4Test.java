@@ -15,6 +15,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -41,7 +42,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.*;
 import org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent;
@@ -52,6 +53,7 @@ import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
@@ -2259,6 +2261,28 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 		}
 	}
+
+
+	@Test
+	public void testValidateResourceContainingProfileDeclarationDoesntResolve() throws IOException {
+		Observation input = new Observation();
+		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+		input.getMeta().addProfile("http://foo/structuredefinition/myprofile");
+
+		input.getCode().setText("Hello");
+		input.setStatus(ObservationStatus.FINAL);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Observation/$validate?_pretty=true");
+		post.setEntity(new ResourceEntity(myFhirCtx, input));
+
+		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
+			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info(respString);
+			assertEquals(412, resp.getStatusLine().getStatusCode());
+			assertThat(respString, containsString("Profile reference \\\"http://foo/structuredefinition/myprofile\\\" could not be resolved, so has not been checked"));
+		}
+	}
+
 
 	@SuppressWarnings("unused")
 	@Test

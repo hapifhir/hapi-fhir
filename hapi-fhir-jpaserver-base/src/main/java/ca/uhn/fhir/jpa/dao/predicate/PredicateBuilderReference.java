@@ -149,7 +149,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		List<Predicate> codePredicates = new ArrayList<>();
 
 		// Resources by ID
-		List<ResourcePersistentId> targetPids = myIdHelperService.translateForcedIdToPids(targetIds, theRequest);
+		List<ResourcePersistentId> targetPids = myIdHelperService.resolveResourcePersistentIds(targetIds, theRequest);
 		if (!targetPids.isEmpty()) {
 			ourLog.debug("Searching for resource link with target PIDs: {}", targetPids);
 			Predicate pathPredicate;
@@ -430,7 +430,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				break;
 
 			case Constants.PARAM_HAS:
-				addPredicateHas(theAndOrParams, theRequest);
+				addPredicateHas(theResourceName, theAndOrParams, theRequest);
 				break;
 
 			case Constants.PARAM_TAG:
@@ -666,6 +666,10 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				qp = new ReferenceParam();
 				break;
 			case SPECIAL:
+				if ("Location.position".equals(theParam.getPath())) {
+					qp = new SpecialParam();
+					break;
+				}
 			case URI:
 			case HAS:
 			default:
@@ -756,7 +760,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		return retVal;
 	}
 
-	private void addPredicateHas(List<List<IQueryParameterType>> theHasParameters, RequestDetails theRequest) {
+	private void addPredicateHas(String theResourceType, List<List<IQueryParameterType>> theHasParameters, RequestDetails theRequest) {
 
 		for (List<? extends IQueryParameterType> nextOrList : theHasParameters) {
 
@@ -811,8 +815,9 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 			Join<ResourceTable, ResourceLink> join = myQueryRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
 			Predicate pathPredicate = myPredicateBuilder.createResourceLinkPathPredicate(targetResourceType, paramReference, join);
-			Predicate pidPredicate = join.get("mySourceResourcePid").in(subQ);
-			Predicate andPredicate = myBuilder.and(pathPredicate, pidPredicate);
+			Predicate sourceTypePredicate = myBuilder.equal(join.get("myTargetResourceType"), theResourceType);
+			Predicate sourcePidPredicate = join.get("mySourceResourcePid").in(subQ);
+			Predicate andPredicate = myBuilder.and(pathPredicate, sourcePidPredicate, sourceTypePredicate);
 			myQueryRoot.addPredicate(andPredicate);
 		}
 	}

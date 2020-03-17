@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -53,7 +53,7 @@ public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderD
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
-			IContextValidationSupport.LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
+			IValidationSupport.LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
 			result.throwNotFoundIfAppropriate();
 			return (Parameters) result.toParameters(theRequestDetails.getFhirContext(), theProperties);
 		} catch (FHIRException e) {

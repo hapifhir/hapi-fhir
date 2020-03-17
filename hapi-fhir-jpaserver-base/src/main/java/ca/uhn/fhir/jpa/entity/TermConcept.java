@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
-import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
+import ca.uhn.fhir.util.VersionIndependentConcept;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -65,7 +65,7 @@ public class TermConcept implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CONCEPT_UPDATED", nullable = true)
 	private Date myUpdated;
-	@ManyToOne()
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
 	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
@@ -79,11 +79,11 @@ public class TermConcept implements Serializable {
 		@Field(name = "myDisplayPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
 	})
 	private String myDisplay;
-	@OneToMany(mappedBy = "myConcept", orphanRemoval = false)
+	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
 	@Field(name = "PROPmyProperties", analyzer = @Analyzer(definition = "termConceptPropertyAnalyzer"))
 	@FieldBridge(impl = TermConceptPropertyFieldBridge.class)
 	private Collection<TermConceptProperty> myProperties;
-	@OneToMany(mappedBy = "myConcept", orphanRemoval = false)
+	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
 	private Collection<TermConceptDesignation> myDesignations;
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_PID", sequenceName = "SEQ_CONCEPT_PID")
@@ -388,15 +388,15 @@ public class TermConcept implements Serializable {
 		return b.build();
 	}
 
-	public List<IContextValidationSupport.BaseConceptProperty> toValidationProperties() {
-		List<IContextValidationSupport.BaseConceptProperty> retVal = new ArrayList<>();
+	public List<IValidationSupport.BaseConceptProperty> toValidationProperties() {
+		List<IValidationSupport.BaseConceptProperty> retVal = new ArrayList<>();
 		for (TermConceptProperty next : getProperties()) {
 			switch (next.getType()) {
 				case STRING:
-					retVal.add(new IContextValidationSupport.StringConceptProperty(next.getKey(), next.getValue()));
+					retVal.add(new IValidationSupport.StringConceptProperty(next.getKey(), next.getValue()));
 					break;
 				case CODING:
-					retVal.add(new IContextValidationSupport.CodingConceptProperty(next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay()));
+					retVal.add(new IValidationSupport.CodingConceptProperty(next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay()));
 					break;
 				default:
 					throw new IllegalStateException("Don't know how to handle " + next.getType());

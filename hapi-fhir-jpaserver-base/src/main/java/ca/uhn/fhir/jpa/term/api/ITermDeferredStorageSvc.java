@@ -50,4 +50,9 @@ public interface ITermDeferredStorageSvc {
 	void addConceptMapsToStorageQueue(List<ConceptMap> theConceptMaps);
 
 	void addValueSetsToStorageQueue(List<ValueSet> theValueSets);
+
+	/**
+	 * This is mostly here for unit tests - Saves any and all deferred concepts and links
+	 */
+	void saveAllDeferred();
 }

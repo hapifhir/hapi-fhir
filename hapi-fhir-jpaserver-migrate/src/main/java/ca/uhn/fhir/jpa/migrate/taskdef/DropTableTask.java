@@ -29,7 +29,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
-public class DropTableTask extends BaseTableTask<DropTableTask> {
+public class DropTableTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropTableTask.class);
 

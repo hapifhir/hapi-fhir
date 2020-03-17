@@ -102,7 +102,7 @@ public class DaoConfig {
 	/**
 	 * update setter javadoc if default changes
 	 */
-	private int myDeferIndexingForCodesystemsOfSize = 2000;
+	private int myDeferIndexingForCodesystemsOfSize = 100;
 	private boolean myDeleteStaleSearches = true;
 	private boolean myEnforceReferentialIntegrityOnDelete = true;
 	private boolean myUniqueIndexesEnabled = true;
@@ -182,6 +182,11 @@ public class DaoConfig {
 	 * @since 4.2.0
 	 */
 	private boolean myPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets;
+
+	/**
+	 * @since 5.0.0
+	 */
+	private boolean myDeleteEnabled = true;
 
 	/**
 	 * Constructor
@@ -392,7 +397,7 @@ public class DaoConfig {
 	 * the code system will be indexed later in an incremental process in order to
 	 * avoid overwhelming Lucene with a huge number of codes in a single operation.
 	 * <p>
-	 * Defaults to 2000
+	 * Defaults to 100
 	 * </p>
 	 */
 	public int getDeferIndexingForCodesystemsOfSize() {
@@ -404,7 +409,7 @@ public class DaoConfig {
 	 * the code system will be indexed later in an incremental process in order to
 	 * avoid overwhelming Lucene with a huge number of codes in a single operation.
 	 * <p>
-	 * Defaults to 2000
+	 * Defaults to 100
 	 * </p>
 	 */
 	public void setDeferIndexingForCodesystemsOfSize(int theDeferIndexingForCodesystemsOfSize) {
@@ -1907,7 +1912,33 @@ public class DaoConfig {
 		setPreExpandValueSetsDefaultCount(Math.min(getPreExpandValueSetsDefaultCount(), getPreExpandValueSetsMaxCount()));
 	}
 
-	public enum StoreMetaSourceInformationEnum {
+	/**
+	 * This setting should be disabled (set to <code>false</code>) on servers that are not allowing
+	 * deletes. Default is <code>true</code>. If deletes are disabled, some checks for resource
+	 * deletion can be skipped, which improves performance. This is particularly helpful when large
+	 * amounts of data containing client-assigned IDs are being loaded, but it can also improve
+	 * search performance.
+	 *
+	 * @since 5.0.0
+	 */
+	public void setDeleteEnabled(boolean theDeleteEnabled) {
+		myDeleteEnabled = theDeleteEnabled;
+	}
+
+	/**
+	 * This setting should be disabled (set to <code>false</code>) on servers that are not allowing
+	 * deletes. Default is <code>true</code>. If deletes are disabled, some checks for resource
+	 * deletion can be skipped, which improves performance. This is particularly helpful when large
+	 * amounts of data containing client-assigned IDs are being loaded, but it can also improve
+	 * search performance.
+	 *
+	 * @since 5.0.0
+	 */
+	public boolean isDeleteEnabled() {
+		return myDeleteEnabled;
+	}
+
+    public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
 		SOURCE_URI(true, false),
 		REQUEST_ID(false, true),
