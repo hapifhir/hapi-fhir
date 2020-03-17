@@ -520,11 +520,6 @@ public class JsonLikeParserTest {
 			return jsonLikeObject;
 		}
 
-		@Override
-		public JsonLikeArray getRootArray() throws DataFormatException {
-			throw new DataFormatException("JSON document must be an object not an array for native Java Map structures");
-		}
-
 		private class JsonMapObject extends JsonLikeObject {
 			private Map<String,Object> nativeObject;
 			private Map<String,JsonLikeValue> jsonLikeMap = new LinkedHashMap<>();

@@ -130,17 +130,6 @@ public class JacksonStructure implements JsonLikeStructure {
 		throw new DataFormatException("Content must be a valid JSON Object. It must start with '{'.");
 	}
 
-	@Override
-	public JsonLikeArray getRootArray() throws DataFormatException {
-		if (rootType == ROOT_TYPE.ARRAY) {
-			if (null == jsonLikeRoot) {
-				jsonLikeRoot = nativeRoot;
-			}
-			return new JacksonJsonArray((ArrayNode) nativeRoot);
-		}
-		throw new DataFormatException("Content must be a valid JSON Array. It must start with '['.");
-	}
-
 	private enum ROOT_TYPE {OBJECT, ARRAY}
 
 	private static class JacksonJsonObject extends JsonLikeObject {
