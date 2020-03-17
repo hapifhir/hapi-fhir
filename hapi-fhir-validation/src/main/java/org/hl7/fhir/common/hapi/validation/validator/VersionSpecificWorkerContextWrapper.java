@@ -28,6 +28,7 @@ import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.INarrativeGenerator;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.TranslationServices;
+import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 
@@ -43,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-class VersionSpecificWorkerContextWrapper implements IWorkerContext {
+class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext {
 	public static final IVersionTypeConverter IDENTITY_VERSION_TYPE_CONVERTER = new VersionTypeConverterR5();
 	private static FhirContext ourR5Context = FhirContext.forR5();
 	private final IValidationSupport myValidationSupport;
@@ -91,6 +92,8 @@ class VersionSpecificWorkerContextWrapper implements IWorkerContext {
 
 				return canonical;
 			});
+
+		setValidationMessageLanguage(getLocale());
 	}
 
 	@Override

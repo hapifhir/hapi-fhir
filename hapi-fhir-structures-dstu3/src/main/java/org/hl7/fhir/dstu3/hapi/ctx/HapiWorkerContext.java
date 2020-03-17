@@ -20,6 +20,7 @@ import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
 import org.hl7.fhir.dstu3.utils.INarrativeGenerator;
 import org.hl7.fhir.dstu3.utils.IResourceValidator;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.slf4j.Logger;
@@ -30,12 +31,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public final class HapiWorkerContext implements IWorkerContext {
+public final class HapiWorkerContext extends I18nBase implements IWorkerContext {
   private static final Logger ourLog = LoggerFactory.getLogger(HapiWorkerContext.class);
   private final FhirContext myCtx;
   private final Cache<String, Resource> myFetchedResourceCache;
@@ -53,6 +55,9 @@ public final class HapiWorkerContext implements IWorkerContext {
       timeoutMillis = Long.parseLong(System.getProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS));
     }
     myFetchedResourceCache = Caffeine.newBuilder().expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS).build();
+
+    // Set a default locale
+    setValidationMessageLanguage(getLocale());
   }
 
   @Override

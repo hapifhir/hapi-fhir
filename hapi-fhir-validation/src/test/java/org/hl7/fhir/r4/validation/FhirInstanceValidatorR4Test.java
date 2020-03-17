@@ -933,29 +933,6 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertEquals(output.toString(), 0, res.size());
 	}
 
-	@Test
-	public void testValidateRawXmlWithMissingRootNamespace() {
-		String input = ""
-			+ "<Patient>"
-			+ "    <text>"
-			+ "        <status value=\"generated\"/>"
-			+ "        <div xmlns=\"http://www.w3.org/1999/xhtml\">Some narrative</div>"
-			+ "    </text>"
-			+ "    <name>"
-			+ "        <use value=\"official\"/>"
-			+ "        <family value=\"Doe\"/>"
-			+ "        <given value=\"John\"/>"
-			+ "    </name>"
-			+ "    <gender value=\"male\"/>"
-			+ "    <birthDate value=\"1974-12-25\"/>"
-			+ "</Patient>";
-
-		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.toString(), 1, output.getMessages().size());
-		assertEquals("This 'Patient' cannot be parsed as a FHIR object (no namespace)", output.getMessages().get(0).getMessage());
-		ourLog.info(output.getMessages().get(0).getLocationString());
-	}
-
 	/**
 	 * A reference with only an identifier should be valid
 	 */

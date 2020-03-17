@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.hl7.fhir.utilities.TranslationServices;
+import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 
@@ -30,12 +31,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public final class HapiWorkerContext implements IWorkerContext {
+public final class HapiWorkerContext extends I18nBase implements IWorkerContext {
   private final FhirContext myCtx;
   private final Cache<String, Resource> myFetchedResourceCache;
   private IValidationSupport myValidationSupport;
@@ -54,6 +56,9 @@ public final class HapiWorkerContext implements IWorkerContext {
     }
 
     myFetchedResourceCache = Caffeine.newBuilder().expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS).build();
+
+    // Set a default locale
+    setValidationMessageLanguage(getLocale());
   }
 
   @Override

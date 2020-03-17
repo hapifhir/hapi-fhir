@@ -40,6 +40,8 @@ public class QuestionnaireValidatorDstu3Test {
 
 	@Before
 	public void before() {
+
+
 		IValidationSupport myValSupport = mock(IValidationSupport.class);
 		when(myValSupport.getFhirContext()).thenReturn(ourCtx);
 

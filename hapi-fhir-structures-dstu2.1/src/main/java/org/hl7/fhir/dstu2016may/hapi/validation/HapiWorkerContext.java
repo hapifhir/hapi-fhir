@@ -16,6 +16,7 @@ import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionContainsComponen
 import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.dstu2016may.utils.INarrativeGenerator;
 import org.hl7.fhir.dstu2016may.utils.IWorkerContext;
+import org.hl7.fhir.utilities.i18n.I18nBase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,13 +24,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public final class HapiWorkerContext implements IWorkerContext {
+public final class HapiWorkerContext extends I18nBase implements IWorkerContext {
 	private final FhirContext myCtx;
 	private Map<String, Resource> myFetchedResourceCache = new HashMap<>();
 	private IValidationSupport myValidationSupport;
@@ -39,6 +41,8 @@ public final class HapiWorkerContext implements IWorkerContext {
 		Validate.notNull(theValidationSupport, "theValidationSupport must not be null");
 		myCtx = theCtx;
 		myValidationSupport = theValidationSupport;
+
+		setValidationMessageLanguage(getLocale());
 	}
 
 	@Override
