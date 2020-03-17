@@ -61,6 +61,14 @@ public class Builder {
 		return this;
 	}
 
+	@SuppressWarnings("unused")
+	public Builder initializeSchema(String theVersion, String theSchemaName, ISchemaInitializationProvider theSchemaInitializationProvider) {
+		InitializeSchemaTask task = new InitializeSchemaTask(myRelease, theVersion, theSchemaInitializationProvider);
+		task.setDescription("Initialize " + theSchemaName + " schema");
+		mySink.addTask(task);
+		return this;
+	}
+
 	public Builder executeRawSql(String theVersion, DriverTypeEnum theDriver, @Language("SQL") String theSql) {
 		mySink.addTask(new ExecuteRawSqlTask(myRelease, theVersion).addSql(theDriver, theSql));
 		return this;
