@@ -1120,11 +1120,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchByIdParamAndOtherSearchParam_QueryIsMinimal() {
 		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
 		params.add("_id", new StringParam("DiagnosticReport/123"));
 		params.add("_id", new StringParam("DiagnosticReport/123"));
 		myCaptureQueriesListener.clear();
 		myDiagnosticReportDao.search(params).size();
-		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		assertEquals(1, selectQueries.size());
 
 		String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
