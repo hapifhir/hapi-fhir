@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.springframework.context.annotation.Bean;
@@ -67,8 +68,8 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 		return new DefaultProfileValidationSupport(fhirContext());
 	}
 
-	@Bean
-	public IValidationSupport jpaValidationSupportChain() {
+	@Bean(name = JPA_VALIDATION_SUPPORT_CHAIN)
+	public ValidationSupportChain jpaValidationSupportChain() {
 		return new JpaValidationSupportChain(fhirContext());
 	}
 
@@ -78,7 +79,7 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	}
 
 	@Primary
-	@Bean(name = JPA_VALIDATION_SUPPORT_CHAIN)
+	@Bean()
 	public IValidationSupport validationSupportChain() {
 		return new CachingValidationSupport(jpaValidationSupportChain());
 	}

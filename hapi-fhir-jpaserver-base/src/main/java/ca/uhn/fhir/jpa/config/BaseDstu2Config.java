@@ -104,7 +104,7 @@ public class BaseDstu2Config extends BaseConfig {
 	}
 
 	@Primary
-	@Bean(name = "myJpaValidationSupportDstu2", autowire = Autowire.BY_NAME)
+	@Bean
 	public IValidationSupport jpaValidationSupportDstu2() {
 		JpaPersistedResourceValidationSupport retVal = new JpaPersistedResourceValidationSupport(fhirContextDstu2());
 		return retVal;
