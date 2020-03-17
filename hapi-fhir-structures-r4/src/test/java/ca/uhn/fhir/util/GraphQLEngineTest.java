@@ -2,11 +2,18 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.utils.GraphQLEngine;
-import org.hl7.fhir.utilities.graphql.*;
+import org.hl7.fhir.utilities.graphql.EGraphEngine;
+import org.hl7.fhir.utilities.graphql.EGraphQLException;
+import org.hl7.fhir.utilities.graphql.GraphQLResponse;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.hl7.fhir.utilities.graphql.Parser;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -122,7 +129,7 @@ public class GraphQLEngineTest {
 	@BeforeClass
 	public static void beforeClass() {
 		ourCtx = FhirContext.forR4();
-		ourWorkerCtx = new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport());
+		ourWorkerCtx = new HapiWorkerContext(ourCtx, ourCtx.getValidationSupport());
 	}
 
 }

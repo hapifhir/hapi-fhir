@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.*;
@@ -24,7 +25,6 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
@@ -35,7 +35,6 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -66,7 +65,7 @@ import static org.junit.Assert.fail;
 @ContextConfiguration(classes = {TestDstu3Config.class})
 public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
-	private static JpaValidationSupportChainDstu3 ourJpaValidationSupportChainDstu3;
+	private static IValidationSupport ourJpaValidationSupportChainDstu3;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
 	@Autowired
@@ -256,7 +255,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
-	@Qualifier("myJpaValidationSupportChainDstu3")
+	@Qualifier("myJpaValidationSupportChain")
 	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoDstu3")
@@ -266,7 +265,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
 	@Autowired
-	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
+	private IValidationSupport myJpaValidationSupportChainDstu3;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
@@ -360,7 +359,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@AfterClass
 	public static void afterClassClearContextBaseJpaDstu3Test() {
 		ourValueSetDao.purgeCaches();
-		ourJpaValidationSupportChainDstu3.flush();
+		ourJpaValidationSupportChainDstu3.invalidateCaches();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 

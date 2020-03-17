@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
@@ -158,7 +158,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IContextValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
+		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
 		Parameters parameters = (Parameters) result.toParameters(myFhirCtx, null);
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
@@ -188,7 +188,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IContextValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("17788-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
+		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("17788-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
 		Parameters parameters = (Parameters) result.toParameters(myFhirCtx, null);
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
@@ -206,7 +206,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IContextValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
+		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
 		List<? extends IPrimitiveType<String>> properties = Lists.newArrayList(new CodeType("SCALE_TYP"));
 		Parameters parameters = (Parameters) result.toParameters(myFhirCtx, properties);
 
