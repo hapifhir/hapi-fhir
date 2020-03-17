@@ -26,7 +26,6 @@ import java.util.Date;
 import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 
@@ -40,8 +39,6 @@ import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 public interface IFhirVersion {
 
 	IFluentPath createFluentPathExecutor(FhirContext theFhirContext);
-
-	IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport();
 
 	IBaseResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
 

@@ -121,12 +121,10 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 				default:
 				case eq:
 					codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)));
-					codePredicates.add(myCriteriaBuilder.equal(myQueryRoot.get("myResourceType"), theResourceName));
 					nextPredicate = myCriteriaBuilder.and(toArray(codePredicates));
 					break;
 				case ne:
 					codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)).not());
-					codePredicates.add(myCriteriaBuilder.equal(myQueryRoot.get("myResourceType"), theResourceName));
 					nextPredicate = myCriteriaBuilder.and(toArray(codePredicates));
 					break;
 			}

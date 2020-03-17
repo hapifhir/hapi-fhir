@@ -24,7 +24,7 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 	}
 
 	@Test
-	public void testCreateUnknownReferenceFail() throws Exception {
+	public void testCreateUnknownReferenceFail() {
 
 		Patient p = new Patient();
 		p.setManagingOrganization(new Reference("Organization/AAA"));

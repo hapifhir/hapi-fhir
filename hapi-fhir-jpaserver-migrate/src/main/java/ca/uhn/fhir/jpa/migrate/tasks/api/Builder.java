@@ -61,13 +61,6 @@ public class Builder {
 		return this;
 	}
 
-	public Builder initializeSchema(String theVersion, String theSchemaName, ISchemaInitializationProvider theSchemaInitializationProvider) {
-		InitializeSchemaTask task = new InitializeSchemaTask(myRelease, theVersion, theSchemaInitializationProvider);
-		task.setDescription("Initialize " + theSchemaName + " schema");
-		mySink.addTask(task);
-		return this;
-	}
-
 	public Builder executeRawSql(String theVersion, DriverTypeEnum theDriver, @Language("SQL") String theSql) {
 		mySink.addTask(new ExecuteRawSqlTask(myRelease, theVersion).addSql(theDriver, theSql));
 		return this;
@@ -217,7 +210,7 @@ public class Builder {
 
 		@Override
 		public void addTask(BaseTask theTask) {
-			((BaseTableTask<?>) theTask).setTableName(myTableName);
+			((BaseTableTask) theTask).setTableName(myTableName);
 			mySink.addTask(theTask);
 		}
 
@@ -457,9 +450,9 @@ public class Builder {
 
 	public static class BuilderCompleteTask {
 
-		private final BaseTask<?> myTask;
+		private final BaseTask myTask;
 
-		public BuilderCompleteTask(BaseTask<?> theTask) {
+		public BuilderCompleteTask(BaseTask theTask) {
 			myTask = theTask;
 		}
 

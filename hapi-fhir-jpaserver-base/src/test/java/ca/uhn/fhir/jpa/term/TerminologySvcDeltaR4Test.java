@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -369,7 +369,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		assertEquals("http://foo", outcome.getUrl());
 		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, outcome.getContent());
 
-		IContextValidationSupport.LookupCodeResult lookup = myTermSvc.lookupCode(myFhirCtx, "http://foo", "CBC");
+		IValidationSupport.LookupCodeResult lookup = myTermSvc.lookupCode(myValidationSupport, "http://foo", "CBC");
 		assertEquals("Complete Blood Count", lookup.getCodeDisplay());
 	}
 
@@ -427,7 +427,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA0", myTermSvc.lookupCode(myFhirCtx, "http://foo", "codea").getCodeDisplay());
+		assertEquals("CODEA0", myTermSvc.lookupCode(myValidationSupport, "http://foo", "codea").getCodeDisplay());
 
 		// Add codes again with different display
 		delta = new CustomTerminologySet();
@@ -435,12 +435,12 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("codeb", "CODEB1");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA1", myTermSvc.lookupCode(myFhirCtx, "http://foo", "codea").getCodeDisplay());
+		assertEquals("CODEA1", myTermSvc.lookupCode(myValidationSupport, "http://foo", "codea").getCodeDisplay());
 
 		// Add codes again with no changes
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA1", myTermSvc.lookupCode(myFhirCtx, "http://foo", "codea").getCodeDisplay());
+		assertEquals("CODEA1", myTermSvc.lookupCode(myValidationSupport, "http://foo", "codea").getCodeDisplay());
 	}
 
 	@Test
@@ -477,7 +477,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			.setCode("useless_sct_code")
 			.setValue(new Coding("http://snomed.info", "1234567", "Choked on large meal (finding)"));
 
-		IContextValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(myFhirCtx, "http://foo/cs", "lunch");
+		IValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(myValidationSupport, "http://foo/cs", "lunch");
 		assertEquals(true, result.isFound());
 		assertEquals("lunch", result.getSearchedForCode());
 		assertEquals("http://foo/cs", result.getSearchedForSystem());

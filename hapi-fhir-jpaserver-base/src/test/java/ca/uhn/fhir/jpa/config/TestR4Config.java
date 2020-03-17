@@ -163,7 +163,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		requestValidator.setFailOnSeverity(ResultSeverityEnum.ERROR);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidatorR4());
+		requestValidator.addValidatorModule(instanceValidator());
 
 		return requestValidator;
 	}

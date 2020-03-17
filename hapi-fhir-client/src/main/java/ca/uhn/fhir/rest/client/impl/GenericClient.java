@@ -816,6 +816,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
+		public IHistoryUntyped onType(String theResourceType) {
+			myType = myContext.getResourceDefinition(theResourceType).getImplementingClass();
+			return this;
+		}
+
+		@Override
 		public IHistoryTyped since(Date theCutoff) {
 			if (theCutoff != null) {
 				mySince = new InstantDt(theCutoff);
@@ -1220,6 +1226,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IOperationUnnamed onType(Class<? extends IBaseResource> theResourceType) {
 			myType = theResourceType;
+			return this;
+		}
+
+		@Override
+		public IOperationUnnamed onType(String theResourceType) {
+			myType = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 			return this;
 		}
 
