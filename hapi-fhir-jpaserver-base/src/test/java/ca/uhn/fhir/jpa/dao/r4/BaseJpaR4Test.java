@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -64,7 +65,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
@@ -163,12 +163,18 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myConditionDaoR4")
 	protected IFhirResourceDao<Condition> myConditionDao;
 	@Autowired
+	@Qualifier("myEpisodeOfCareDaoR4")
+	protected IFhirResourceDao<EpisodeOfCare> myEpisodeOfCareDao;
+	@Autowired
 	protected DaoConfig myDaoConfig;
 	@Autowired
 	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoR4")
 	protected IFhirResourceDao<Device> myDeviceDao;
+	@Autowired
+	@Qualifier("myProvenanceDaoR4")
+	protected IFhirResourceDao<Provenance> myProvenanceDao;
 	@Autowired
 	@Qualifier("myDiagnosticReportDaoR4")
 	protected IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
@@ -200,6 +206,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myLocationDaoR4")
 	protected IFhirResourceDao<Location> myLocationDao;
+	@Autowired
+	@Qualifier("myPractitionerRoleDaoR4")
+	protected IFhirResourceDao<PractitionerRole> myPractitionerRoleDao;
 	@Autowired
 	@Qualifier("myMediaDaoR4")
 	protected IFhirResourceDao<Media> myMediaDao;
@@ -344,6 +353,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
+	@Autowired
+	private IdHelperService myIdHelperService;
 
 	@After()
 	public void afterCleanupDao() {
@@ -372,6 +383,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl termDeferredStorageSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
 		termDeferredStorageSvc.clearDeferred();
+
+		myIdHelperService.clearCache();
 	}
 
 	@After()
@@ -409,7 +422,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	}
 
 	@Before
-	@Transactional()
 	public void beforePurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}

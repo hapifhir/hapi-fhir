@@ -156,10 +156,9 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		Validate.notNull(theJobDefinition.getJobClass());
 		Validate.notBlank(theJobDefinition.getId());
 
-		JobKey jobKey;
-
-		jobKey = new JobKey(theJobDefinition.getId(), theJobDefinition.getGroup());
-
+		JobKey jobKey = new JobKey(theJobDefinition.getId(), theJobDefinition.getGroup());
+		TriggerKey triggerKey = new TriggerKey(theJobDefinition.getId(), theJobDefinition.getGroup());
+		
 		JobDetailImpl jobDetail = new NonConcurrentJobDetailImpl();
 		jobDetail.setJobClass(theJobDefinition.getJobClass());
 		jobDetail.setKey(jobKey);
@@ -172,6 +171,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 		Trigger trigger = TriggerBuilder.newTrigger()
 			.forJob(jobDetail)
+			.withIdentity(triggerKey)
 			.startNow()
 			.withSchedule(schedule)
 			.build();

@@ -99,7 +99,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		myValueSetDao.create(vs);
 
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 //		Questionnaire q = loadResourceFromClasspath(Questionnaire.class,"/dstu3/iar/Questionnaire-iar-test.xml" );
 //		myQuestionnaireDao.create(q);
@@ -326,11 +326,11 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 			myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
-			ourLog.info(ooString);
-			assertThat(ooString, containsString("StructureDefinition reference \\\"" + profileUri + "\\\" could not be resolved"));
+			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			ourLog.info(outputString);
+			assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' could not be resolved, so has not been checked"));
 		}
-
 	}
 
 	@Test

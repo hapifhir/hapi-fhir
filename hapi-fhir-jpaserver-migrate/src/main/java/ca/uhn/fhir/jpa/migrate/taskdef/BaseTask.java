@@ -108,7 +108,9 @@ public abstract class BaseTask {
 				JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 				try {
 					int changesCount = jdbcTemplate.update(theSql, theArguments);
-					logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
+					if (!"true".equals(System.getProperty("unit_test_mode"))) {
+						logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
+					}
 					return changesCount;
 				} catch (DataAccessException e) {
 					if (myFailureAllowed) {

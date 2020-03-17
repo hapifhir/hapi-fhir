@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -35,6 +34,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -489,7 +489,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		assertEquals(2, results.size());
 
 		List<IIdType> actual = toUnqualifiedVersionlessIds(
-			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam((ParamPrefixEnum) null, 123, "http://foo", "UNIT"))));
+			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 123, "http://foo", "UNIT"))));
 		assertThat(actual, contains(id));
 	}
 
@@ -1586,7 +1586,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		dr01.setSubject(new Reference(patientId01));
 		IIdType drId01 = myDiagnosticReportDao.create(dr01, mySrd).getId();
 
-		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", new Object[]{patientId01, patientId02, obsId01, obsId02, drId01});
+		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", patientId01, patientId02, obsId01, obsId02, drId01);
 
 		List<Observation> result = toList(myObservationDao
 			.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "urn:system|testSearchResourceLinkWithChain01"))));
@@ -1691,7 +1691,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		Date after = new Date();
 		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
 
-		ourLog.info("P1[{}] L1[{}] Obs1[{}] Obs2[{}]", new Object[]{patientId01, locId01, obsId01, obsId02});
+		ourLog.info("P1[{}] L1[{}] Obs1[{}] Obs2[{}]", patientId01, locId01, obsId01, obsId02);
 
 		List<IIdType> result;
 		SearchParameterMap params;
@@ -1754,7 +1754,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		dr01.setSubject(new Reference(patientId01));
 		IIdType drId01 = myDiagnosticReportDao.create(dr01, mySrd).getId();
 
-		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", new Object[]{patientId01, patientId02, obsId01, obsId02, drId01});
+		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", patientId01, patientId02, obsId01, obsId02, drId01);
 
 		List<Observation> result = toList(
 			myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam("testSearchResourceLinkWithTextLogicalId01"))));
@@ -2845,7 +2845,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		ourLog.info("Initial size: " + value.size());
 		for (IBaseResource next : value.getResources(0, value.size())) {
 			ourLog.info("Deleting: {}", next.getIdElement());
-			myDeviceDao.delete((IIdType) next.getIdElement(), mySrd);
+			myDeviceDao.delete(next.getIdElement(), mySrd);
 		}
 
 		value = myDeviceDao.search(new SearchParameterMap());
@@ -2864,7 +2864,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	public void testSearchWithRevIncludes() {
 		final String methodName = "testSearchWithRevIncludes";
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionMgr);
-		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		IIdType pid = txTemplate.execute(new TransactionCallback<IIdType>() {
 
 			@Override
@@ -2882,7 +2882,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		});
 
 		SearchParameterMap map = new SearchParameterMap();
-		map.add(Patient.SP_RES_ID, new StringParam(pid.getIdPart()));
+		map.add(IAnyResource.SP_RES_ID, new StringParam(pid.getIdPart()));
 		map.addRevInclude(Condition.INCLUDE_PATIENT);
 		IBundleProvider results = myPatientDao.search(map);
 		List<IBaseResource> foundResources = results.getResources(0, results.size());

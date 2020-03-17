@@ -76,24 +76,6 @@ public class ElementUtil {
 		return true;
 	}
 
-	/*
-	public static <T> void validateAllElementsAreOfTypeOrThrowClassCastExceptionForModelSetter(List<T> theList, Class<T> theType) {
-		if (theList == null) {
-			return;
-		}
-		for (T next : theList) {
-			if (next != null && theType.isAssignableFrom(next.getClass()) == false) {
-				StringBuilder b = new StringBuilder();
-				b.append("Failed to set invalid value, found element in list of type ");
-				b.append(next.getClass().getSimpleName());
-				b.append(" but expected ");
-				b.append(theType.getName());
-				throw new ClassCastException(b.toString());
-			}
-		}
-	}
-	*/
-	
 	public static boolean isEmpty(List<? extends IBase> theElements) {
 		if (theElements == null) {
 			return true;
@@ -141,8 +123,7 @@ public class ElementUtil {
 
 	//@SuppressWarnings("unchecked")
 	private static <T extends IElement> void addElement(ArrayList<T> retVal, IElement next, Class<T> theType) {
-		//FIXME There seems to be an error on theType == null => if (theType != null|| theType.isAssignableFrom
-		if (theType == null|| theType.isAssignableFrom(next.getClass())) {
+		if (theType != null && theType.isAssignableFrom(next.getClass())) {
 			retVal.add(theType.cast(next));
 		}
 		if (next instanceof ICompositeElement) {

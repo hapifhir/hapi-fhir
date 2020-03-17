@@ -1796,11 +1796,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					if (rootSs == null) {
 						rootSs = nextSortSpec;
 					} else {
-						// FIXME lastSs is null never set
-						// TODO unused assignment
 						lastSs.setChain(nextSortSpec);
 					}
-					// TODO unused assignment
 					lastSs = nextSortSpec;
 				}
 				if (rootSs != null) {

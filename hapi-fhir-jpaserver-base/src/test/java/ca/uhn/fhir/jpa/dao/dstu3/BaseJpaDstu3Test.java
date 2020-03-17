@@ -35,7 +35,6 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -60,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
 import static org.junit.Assert.fail;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -147,6 +147,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myLocationDaoDstu3")
 	protected IFhirResourceDao<Location> myLocationDao;
+	@Autowired
+	@Qualifier("myPractitionerRoleDaoDstu3")
+	protected IFhirResourceDao<PractitionerRole> myPractitionerRoleDao;
 	@Autowired
 	@Qualifier("myMediaDaoDstu3")
 	protected IFhirResourceDao<Media> myMediaDao;
@@ -386,7 +389,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	 */
 	public static ConceptMap createConceptMap() {
 		try {
-			return VersionConvertor_30_40.convertConceptMap(BaseJpaR4Test.createConceptMap());
+			return convertConceptMap(BaseJpaR4Test.createConceptMap());
 		} catch (FHIRException fe) {
 			throw new InternalErrorException(fe);
 		}

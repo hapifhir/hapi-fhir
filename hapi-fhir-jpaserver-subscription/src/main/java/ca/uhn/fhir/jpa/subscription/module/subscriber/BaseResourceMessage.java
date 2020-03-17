@@ -20,8 +20,7 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  * #L%
  */
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.Validate;
 
@@ -30,9 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @SuppressWarnings("WeakerAccess")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public abstract class BaseResourceMessage implements IResourceMessage {
+public abstract class BaseResourceMessage implements IResourceMessage, IModelJson {
 
 	@JsonProperty("attributes")
 	private Map<String, String> myAttributes;

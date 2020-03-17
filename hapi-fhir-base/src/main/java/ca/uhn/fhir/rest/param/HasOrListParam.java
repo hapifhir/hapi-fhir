@@ -23,7 +23,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
  */
 
 
-public class HasOrListParam  extends BaseOrListParam<HasOrListParam, HasParam> {
+public class HasOrListParam extends BaseOrListParam<HasOrListParam, HasParam> {
 
 	@CoverageIgnore
 	@Override

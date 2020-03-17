@@ -21,12 +21,12 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class FhirResourceDaoStructureDefinitionDstu2 extends BaseHapiFhirResourceDao<StructureDefinition> implements IFhirResourceDaoStructureDefinition<StructureDefinition> {
 	@Override
 	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theName) {
-		// FIXME: implement
-		return null;
+		throw new InvalidRequestException("Snapshot generation not supported for DSTU2");
 	}
 
 }

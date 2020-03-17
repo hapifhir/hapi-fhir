@@ -79,20 +79,6 @@ public interface ISearchCacheSvc {
 	Collection<Search> findCandidatesForReuse(String theResourceType, String theQueryString, int theQueryStringHash, Date theCreatedAfter);
 
 	/**
-	 * Mark a search as having been "last used" at the given time. This method may (and probably should) be implemented
-	 * to work asynchronously in order to avoid hammering the database if the search gets reused many times.
-	 *
-	 * @param theSearch The search
-	 * @param theDate   The "last returned" timestamp
-	 */
-	void updateSearchLastReturned(Search theSearch, Date theDate);
-
-	/**
-	 * This is mostly public for unit tests
-	 */
-	void flushLastUpdated();
-
-	/**
 	 * This method will be called periodically to delete stale searches. Implementations are not required to do anything
 	 * if they have some other mechanism for expiring stale results other than manually looking for them
 	 * and deleting them.

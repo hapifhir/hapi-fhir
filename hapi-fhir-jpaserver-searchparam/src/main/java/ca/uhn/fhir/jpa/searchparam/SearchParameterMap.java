@@ -59,6 +59,7 @@ public class SearchParameterMap implements Serializable {
 	private SortSpec mySort;
 	private SummaryEnum mySummaryMode;
 	private SearchTotalModeEnum mySearchTotalMode;
+	private QuantityParam myNearDistanceParam;
 
 	/**
 	 * Constructor
@@ -495,6 +496,14 @@ public class SearchParameterMap implements Serializable {
 		}
 	}
 
+	public void setNearDistanceParam(QuantityParam theQuantityParam) {
+		myNearDistanceParam = theQuantityParam;
+	}
+
+	public QuantityParam getNearDistanceParam() {
+		return myNearDistanceParam;
+	}
+
 	public enum EverythingModeEnum {
 		/*
 		 * Don't reorder! We rely on the ordinals
@@ -636,5 +645,9 @@ public class SearchParameterMap implements Serializable {
 
 	public List<List<IQueryParameterType>> remove(String theName) {
 		return mySearchParameterMap.remove(theName);
+	}
+
+	public int size() {
+		return mySearchParameterMap.size();
 	}
 }

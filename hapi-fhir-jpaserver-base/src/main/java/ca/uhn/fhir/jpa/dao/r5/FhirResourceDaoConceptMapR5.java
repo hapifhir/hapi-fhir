@@ -166,7 +166,7 @@ public class FhirResourceDaoConceptMapR5 extends BaseHapiFhirResourceDao<Concept
 
 			if (retVal.getDeleted() == null) {
 				ConceptMap conceptMap = (ConceptMap) theResource;
-				myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, org.hl7.fhir.convertors.conv40_50.ConceptMap.convertConceptMap(conceptMap));
+				myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, org.hl7.fhir.convertors.conv40_50.ConceptMap40_50.convertConceptMap(conceptMap));
 			} else {
 				myHapiTerminologySvc.deleteConceptMapAndChildren(retVal);
 			}

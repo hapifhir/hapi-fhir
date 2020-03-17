@@ -199,7 +199,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 				nextSystem = nextComposeConceptSet.getSystem();
 			}
 
-			if (StringUtils.equals(nextSystem, nextComposeConceptSet.getSystem())) {
+			if (Constants.codeSystemNotNeeded(theSystem) || StringUtils.equals(nextSystem, nextComposeConceptSet.getSystem())) {
 				for (ConceptReferenceComponent nextComposeCode : nextComposeConceptSet.getConcept()) {
 					ConceptDefinitionComponent conceptDef = new ConceptDefinitionComponent();
 					conceptDef.setCode(nextComposeCode.getCode());
@@ -211,7 +211,13 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 				}
 
 				if (nextComposeConceptSet.getConcept().isEmpty()){
-					ValidationResult result = validateCode(nextSystem, theCode, null);
+
+					String validateSystem = nextSystem;
+					if (Constants.codeSystemNotNeeded(nextSystem)) {
+						validateSystem = nextComposeConceptSet.getSystem();
+					}
+
+					ValidationResult result = validateCode(validateSystem, theCode, null);
 					if (result.isOk()){
 						return result;
 					}

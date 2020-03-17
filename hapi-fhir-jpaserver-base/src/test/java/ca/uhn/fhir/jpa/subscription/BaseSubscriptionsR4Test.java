@@ -193,8 +193,8 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		@Update
 		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourLog.info("Received Listener Update");
-			ourUpdatedObservations.add(theObservation);
 			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourUpdatedObservations.add(theObservation);
 			extractHeaders(theRequest);
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}

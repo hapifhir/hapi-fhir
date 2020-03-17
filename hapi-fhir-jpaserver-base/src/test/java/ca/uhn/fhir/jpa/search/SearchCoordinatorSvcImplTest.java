@@ -62,7 +62,7 @@ public class SearchCoordinatorSvcImplTest {
 	private EntityManager myEntityManager;
 	private int myExpectedNumberOfSearchBuildersCreated = 2;
 	@Mock
-	private ISearchBuilder mySearchBuilder;
+	private SearchBuilder mySearchBuilder;
 	@Mock
 	private ISearchCacheSvc mySearchCacheSvc;
 	@Mock
@@ -75,11 +75,14 @@ public class SearchCoordinatorSvcImplTest {
 	private DaoRegistry myDaoRegistry;
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Mock
+	private SearchBuilderFactory mySearchBuilderFactory;
 
 	@After
 	public void after() {
 		System.clearProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK);
-		verify(myCallingDao, atMost(myExpectedNumberOfSearchBuildersCreated)).newSearchBuilder();
+
+		verify(mySearchBuilderFactory, atMost(myExpectedNumberOfSearchBuildersCreated)).newSearchBuilder(any(), any(), any());
 	}
 
 	@Before
@@ -95,11 +98,12 @@ public class SearchCoordinatorSvcImplTest {
 		mySvc.setSearchCacheServicesForUnitTest(mySearchCacheSvc, mySearchResultCacheSvc);
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 		mySvc.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
+		mySvc.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 
 		DaoConfig daoConfig = new DaoConfig();
 		mySvc.setDaoConfigForUnitTest(daoConfig);
 
-		when(myCallingDao.newSearchBuilder()).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
 
 		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
 
@@ -158,7 +162,6 @@ public class SearchCoordinatorSvcImplTest {
 
 	}
 
-	// TODO INTERMITTENT this test fails intermittently
 	@Test
 	public void testAsyncSearchLargeResultSetBigCountSameCoordinator() {
 		List<ResourcePersistentId> allResults = new ArrayList<>();
@@ -180,33 +183,11 @@ public class SearchCoordinatorSvcImplTest {
 		when(mySearchBuilder.createQuery(any(), any(), any())).thenReturn(iter);
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		when(mySearchResultCacheSvc.fetchResultPids(any(), anyInt(), anyInt())).thenAnswer(t -> {
-			List<ResourcePersistentId> returnedValues = iter.getReturnedValues();
-			int offset = t.getArgument(1, Integer.class);
-			int end = t.getArgument(2, Integer.class);
-			end = Math.min(end, returnedValues.size());
-			offset = Math.min(offset, returnedValues.size());
-			ourLog.info("findWithSearchUuid {} - {} out of {} values", offset, end, returnedValues.size());
-			return returnedValues.subList(offset, end);
-		});
-
-		when(mySearchResultCacheSvc.fetchAllResultPids(any())).thenReturn(allResults);
-
-		when(mySearchCacheSvc.tryToMarkSearchAsInProgress(any())).thenAnswer(t->{
-			Search search = t.getArgument(0, Search.class);
-			assertEquals(SearchStatusEnum.PASSCMPLET, search.getStatus());
-			search.setStatus(SearchStatusEnum.LOADING);
-			return Optional.of(search);
-		});
-
 		when(mySearchCacheSvc.save(any())).thenAnswer(t -> {
 			Search search = t.getArgument(0, Search.class);
 			myCurrentSearch = search;
 			return search;
 		});
-		when(mySearchCacheSvc.fetchByUuid(any())).thenAnswer(t -> Optional.ofNullable(myCurrentSearch));
-		IFhirResourceDao dao = myCallingDao;
-		when(myDaoRegistry.getResourceDao(any(String.class))).thenReturn(dao);
 
 		// Do all the stubbing before starting any work, since we want to avoid threading issues
 
@@ -214,9 +195,7 @@ public class SearchCoordinatorSvcImplTest {
 		assertNotNull(result.getUuid());
 		assertEquals(null, result.size());
 
-		List<IBaseResource> resources;
-
-		resources = result.getResources(0, 100000);
+		List<IBaseResource> resources = result.getResources(0, 100000);
 		assertEquals(790, resources.size());
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("799", resources.get(789).getIdElement().getValueAsString());
@@ -383,7 +362,7 @@ public class SearchCoordinatorSvcImplTest {
 		 * Now call from a new bundle provider. This simulates a separate HTTP
 		 * client request coming in.
 		 */
-		provider = new PersistedJpaBundleProvider(null, result.getUuid(), myCallingDao);
+		provider = new PersistedJpaBundleProvider(null, result.getUuid(), myCallingDao, mySearchBuilderFactory);
 		resources = provider.getResources(10, 20);
 		assertEquals(10, resources.size());
 		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
@@ -461,13 +440,13 @@ public class SearchCoordinatorSvcImplTest {
 		 * Now call from a new bundle provider. This simulates a separate HTTP
 		 * client request coming in.
 		 */
-		provider = new PersistedJpaBundleProvider(null, uuid, myCallingDao);
+		provider = new PersistedJpaBundleProvider(null, uuid, myCallingDao, mySearchBuilderFactory);
 		resources = provider.getResources(10, 20);
 		assertEquals(10, resources.size());
 		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("29", resources.get(9).getIdElement().getValueAsString());
 
-		provider = new PersistedJpaBundleProvider(null, uuid, myCallingDao);
+		provider = new PersistedJpaBundleProvider(null, uuid, myCallingDao, mySearchBuilderFactory);
 		resources = provider.getResources(20, 40);
 		assertEquals(20, resources.size());
 		assertEquals("30", resources.get(0).getIdElement().getValueAsString());
@@ -605,6 +584,11 @@ public class SearchCoordinatorSvcImplTest {
 		}
 
 		@Override
+		public int getNonSkippedCount() {
+			return myCount;
+		}
+
+		@Override
 		public void close() {
 			// nothing
 		}
@@ -613,6 +597,7 @@ public class SearchCoordinatorSvcImplTest {
 	public static class ResultIterator extends BaseIterator<ResourcePersistentId> implements IResultIterator {
 
 		private final Iterator<ResourcePersistentId> myWrap;
+		private int myCount;
 
 		ResultIterator(Iterator<ResourcePersistentId> theWrap) {
 			myWrap = theWrap;
@@ -625,12 +610,18 @@ public class SearchCoordinatorSvcImplTest {
 
 		@Override
 		public ResourcePersistentId next() {
+			myCount++;
 			return myWrap.next();
 		}
 
 		@Override
 		public int getSkippedCount() {
 			return 0;
+		}
+
+		@Override
+		public int getNonSkippedCount() {
+			return myCount;
 		}
 
 		@Override
@@ -697,6 +688,11 @@ public class SearchCoordinatorSvcImplTest {
 			} else {
 				return myResultIteratorWrap.getSkippedCount();
 			}
+		}
+
+		@Override
+		public int getNonSkippedCount() {
+			return 0;
 		}
 
 		@Override

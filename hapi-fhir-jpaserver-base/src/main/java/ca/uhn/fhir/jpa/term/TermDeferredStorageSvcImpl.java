@@ -99,6 +99,13 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	@Override
+	public void saveAllDeferred() {
+		while (!isStorageQueueEmpty()) {
+			saveDeferred();
+		}
+	}
+
+	@Override
 	public void setProcessDeferred(boolean theProcessDeferred) {
 		myProcessDeferred = theProcessDeferred;
 	}
@@ -264,7 +271,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		// Register scheduled job to save deferred concepts
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
-		jobDefinition.setId(this.getClass().getName());
+		jobDefinition.setId(Job.class.getName());
 		jobDefinition.setJobClass(Job.class);
 		mySchedulerService.scheduleLocalJob(5000, jobDefinition);
 	}

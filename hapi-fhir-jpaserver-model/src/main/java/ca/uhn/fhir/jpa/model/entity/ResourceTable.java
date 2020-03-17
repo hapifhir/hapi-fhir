@@ -21,18 +21,29 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.IndexNonDeletedInterceptor;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
-import org.hibernate.search.annotations.*;
+import org.hibernate.search.annotations.Analyze;
+import org.hibernate.search.annotations.Analyzer;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Fields;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.Store;
 
-import javax.persistence.Index;
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -46,17 +57,11 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
 	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
 })
-public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource {
+public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource, IResourceLookup {
 	public static final int RESTYPE_LEN = 40;
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final int MAX_PROFILE_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
-
-//	@Transient
-//	private transient byte[] myResource;
-//
-//	@Transient
-//	private transient ResourceEncodingEnum myEncoding;
 
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
@@ -199,25 +204,35 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinksAsTarget;
+
 	@Column(name = "RES_TYPE", length = RESTYPE_LEN, nullable = false)
 	@Field
 	@OptimisticLock(excluded = true)
 	private String myResourceType;
+
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
 	private Collection<SearchParamPresent> mySearchParamPresents;
+
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
 	private Set<ResourceTag> myTags;
+
 	@Transient
 	private transient boolean myUnchangedInCurrentOperation;
+
 	@Version
 	@Column(name = "RES_VER")
 	private long myVersion;
+
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
 	private Collection<ResourceHistoryProvenanceEntity> myProvenance;
+
 	@Transient
 	private transient ResourceHistoryTable myCurrentVersionEntity;
+
+	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false, mappedBy = "myResource")
+	private ForcedId myForcedId;
 
 	@Override
 	public ResourceTag addTag(TagDefinition theTag) {
@@ -549,7 +564,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		retVal.setUpdated(getUpdated());
 		retVal.setFhirVersion(getFhirVersion());
 		retVal.setDeleted(getDeleted());
-		retVal.setForcedId(getForcedId());
+		retVal.setResourceTable(this);
 
 		retVal.getTags().clear();
 
@@ -606,4 +621,28 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	public ResourcePersistentId getPersistentId() {
 		return new ResourcePersistentId(getId());
 	}
+
+	@Override
+	public ForcedId getForcedId() {
+		return myForcedId;
+	}
+
+	@Override
+	public void setForcedId(ForcedId theForcedId) {
+		myForcedId = theForcedId;
+	}
+
+	@Override
+	public IdDt getIdDt() {
+		if (getForcedId() == null) {
+			Long id = this.getResourceId();
+			return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else {
+			// Avoid a join query if possible
+			String forcedId = getTransientForcedId() != null ? getTransientForcedId() : getForcedId().getForcedId();
+			return new IdDt(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		}
+	}
+
+
 }

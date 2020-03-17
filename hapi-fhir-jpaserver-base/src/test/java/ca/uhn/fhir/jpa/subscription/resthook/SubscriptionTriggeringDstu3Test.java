@@ -17,7 +17,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
-import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -39,14 +38,14 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -56,10 +55,6 @@ import static org.junit.Assert.fail;
  * Test the rest-hook subscriptions
  */
 @SuppressWarnings("Duplicates")
-@TestPropertySource(properties = {
-	UnregisterScheduledProcessor.SCHEDULING_DISABLED + "=false"
-})
-@DirtiesContext
 public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionTriggeringDstu3Test.class);
@@ -194,6 +189,9 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
 
 		waitForQueueToDrain();
+
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(2, ourUpdatedObservations);
 
@@ -248,6 +246,13 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
 
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		waitForSize(33, ourUpdatedObservations);
+
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
 		waitForSize(51, ourUpdatedObservations);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(0, ourCreatedPatients);
@@ -257,8 +262,6 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 	@Test
 	public void testTriggerUsingOrSeparatedList_MultipleStrings() throws Exception {
-		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(13, 22, 100));
-
 		String payload = "application/fhir+json";
 		IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
 
@@ -284,8 +287,18 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
 
-		waitForSize(0, ourCreatedPatients);
-		waitForSize(3, ourUpdatedPatients);
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		assertEquals(0, mySubscriptionTriggeringSvc.getActiveJobCount());
+
+		assertEquals(0, ourCreatedPatients.size());
+		await().until(() -> ourUpdatedPatients.size() == 3);
 
 	}
 
@@ -315,6 +328,8 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.execute();
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+
+		mySubscriptionTriggeringSvc.runDeliveryPass();
 
 		waitForSize(0, ourCreatedPatients);
 		waitForSize(3, ourUpdatedPatients);
@@ -366,6 +381,9 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.execute();
 		responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
 
 		waitForSize(10, ourUpdatedObservations);
 		waitForSize(0, ourCreatedObservations);
@@ -421,6 +439,8 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
 
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+
 		waitForSize(20, ourUpdatedObservations);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(0, ourCreatedPatients);
@@ -458,6 +478,8 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
 
 		waitForQueueToDrain();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 
