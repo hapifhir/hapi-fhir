@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -44,24 +45,27 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	private static final FhirObjectPrinter ourFhirObjectToStringMapper = new FhirObjectPrinter();
 
 	private final String name;
-
+	private final AtomicLong myLastInvoke = new AtomicLong();
 	private final AtomicReference<CountDownLatch> myCountdownLatch = new AtomicReference<>();
 	private final AtomicReference<List<String>> myFailures = new AtomicReference<>();
 	private final AtomicReference<List<HookParams>> myCalledWith = new AtomicReference<>();
-	private int myDefaultTimeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
 	private final Pointcut myPointcut;
+	private int myDefaultTimeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
 	private int myInitialCount;
 	private boolean myExactMatch;
-
-
 	public PointcutLatch(Pointcut thePointcut) {
 		this.name = thePointcut.name();
 		myPointcut = thePointcut;
 	}
 
+
 	public PointcutLatch(String theName) {
 		this.name = theName;
 		myPointcut = null;
+	}
+
+	public long getLastInvoke() {
+		return myLastInvoke.get();
 	}
 
 	public PointcutLatch setDefaultTimeoutSeconds(int theDefaultTimeoutSeconds) {
@@ -166,6 +170,8 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	@Override
 	public void invoke(Pointcut thePointcut, HookParams theArgs) {
+		myLastInvoke.set(System.currentTimeMillis());
+		
 		CountDownLatch latch = myCountdownLatch.get();
 		if (myExactMatch) {
 			if (latch == null) {
@@ -189,6 +195,21 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		this.invoke(myPointcut, new HookParams(arg));
 	}
 
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("name", name)
+			.append("myCountdownLatch", myCountdownLatch)
+//			.append("myFailures", myFailures)
+//			.append("myCalledWith", myCalledWith)
+			.append("myInitialCount", myInitialCount)
+			.toString();
+	}
+
+	public Object getLatchInvocationParameter() {
+		return getLatchInvocationParameter(myCalledWith.get());
+	}
+
 	private class PointcutLatchException extends IllegalStateException {
 		private static final long serialVersionUID = 1372636272233536829L;
 
@@ -203,21 +224,6 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	private static String hookParamsToString(HookParams hookParams) {
 		return hookParams.values().stream().map(ourFhirObjectToStringMapper).collect(Collectors.joining(", "));
-	}
-
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-			.append("name", name)
-			.append("myCountdownLatch", myCountdownLatch)
-//			.append("myFailures", myFailures)
-//			.append("myCalledWith", myCalledWith)
-			.append("myInitialCount", myInitialCount)
-			.toString();
-	}
-
-	public Object getLatchInvocationParameter() {
-		return getLatchInvocationParameter(myCalledWith.get());
 	}
 
 	public static Object getLatchInvocationParameter(List<HookParams> theHookParams) {
