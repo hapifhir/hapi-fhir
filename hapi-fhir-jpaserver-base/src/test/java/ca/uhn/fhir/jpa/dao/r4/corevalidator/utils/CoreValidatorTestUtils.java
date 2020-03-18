@@ -74,6 +74,14 @@ public class CoreValidatorTestUtils {
         }
     }
 
+    public static OperationOutcome mergeOperationOutcomes(OperationOutcome oo1, OperationOutcome oo2) {
+		 List<OperationOutcome.OperationOutcomeIssueComponent> issues = oo2.getIssue() == null ? new ArrayList<>() : oo2.getIssue();
+		 for (OperationOutcome.OperationOutcomeIssueComponent o : issues) {
+		 	oo1.addIssue(o);
+		 }
+		 return oo1;
+	 }
+
     private static String prettyPrint(OperationOutcome oo) {
         HashMap<OperationOutcome.IssueSeverity, ArrayList<String>> issuesMap = new HashMap<>();
 

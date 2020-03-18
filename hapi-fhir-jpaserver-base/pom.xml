@@ -302,7 +302,7 @@
         <dependency>
             <groupId>org.hl7.fhir.testcases</groupId>
             <artifactId>fhir-test-cases</artifactId>
-            <version>1.0.42-SNAPSHOT</version>
+            <version>1.0.49-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 		<dependency>
