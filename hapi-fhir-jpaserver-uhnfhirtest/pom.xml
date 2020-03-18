@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>4.2.0</version>
+		<version>4.2.0-bbl</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -157,7 +157,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-converter</artifactId>
-			<version>4.2.0</version>
+			<version>4.2.0-bbl</version>
 		</dependency>
 
 	</dependencies>

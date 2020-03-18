@@ -1032,8 +1032,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		assertEquals(1, errors.size());
-		assertEquals("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked", errors.get(0).getMessage());
+		assertEquals(2, errors.size());
+		assertEquals("Unable to locate profile http://foo/structuredefinition/myprofile", errors.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
 	}
 

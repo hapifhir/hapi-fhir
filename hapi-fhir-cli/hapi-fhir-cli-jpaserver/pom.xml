@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>4.2.0</version>
+		<version>4.2.0-bbl</version>
 		<relativePath>../../hapi-deployable-pom</relativePath>
 	</parent>
 
