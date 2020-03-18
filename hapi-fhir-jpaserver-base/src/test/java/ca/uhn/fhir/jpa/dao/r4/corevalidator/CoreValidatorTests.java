@@ -19,9 +19,17 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.hl7.fhir.exceptions.DefinitionException;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r5.elementmodel.Element;
+import org.hl7.fhir.r5.elementmodel.Manager;
+import org.hl7.fhir.r5.elementmodel.ObjectConverter;
+import org.hl7.fhir.r5.model.Patient;
+import org.hl7.fhir.r5.test.utils.TestingUtilities;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,12 +45,12 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class CoreValidatorTests extends BaseJpaR4Test {
+public class CoreValidatorTests extends BaseJpaR4Test { // implements IResourceValidator.IValidatorResourceFetcher {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ValidateTest.class);
 	private static final String TEST_FILES_BASE_PATH = "/org/hl7/fhir/testcases/validator/";
 	private static final String TEST_MANIFEST_PATH = TEST_FILES_BASE_PATH + "manifest.json";
-	private static TestEntry value;
+	private static TestEntry currentTestEntry;
 
 	private static Set<String> classtypes = new HashSet<>();
 
@@ -72,12 +80,12 @@ public class CoreValidatorTests extends BaseJpaR4Test {
 
 		Gson gson = new Gson();
 		String contents = loadStringFromResourceFile(TEST_MANIFEST_PATH);
-
+		TestEntry temp;
 		Map<String, TestEntry> examples = new HashMap<>();
 		JsonObject manifest = (JsonObject) new JsonParser().parse(contents);
 		for (Map.Entry<String, JsonElement> e : manifest.getAsJsonObject("test-cases").entrySet()) {
-			value = gson.fromJson(e.getValue().toString(), TestEntry.class);
-			examples.put(e.getKey(), value);
+			temp = gson.fromJson(e.getValue().toString(), TestEntry.class);
+			examples.put(e.getKey(), temp);
 		}
 
 		List<String> names = new ArrayList<>(examples.size());
@@ -86,12 +94,12 @@ public class CoreValidatorTests extends BaseJpaR4Test {
 
 		List<Object[]> objects = new ArrayList<>(examples.size());
 		for (String id : names) {
-			//if (id.contains("type-ref-checked.xml")) {
-			//if (true) {
+			//if (id.contains("maritalstatus")) {
+			if (true) {
 			if (ConvertorHelper.shouldTest(examples.get(id))) {
 				objects.add(new Object[]{id, examples.get(id)});
 			}
-			//}
+			}
 		}
 		System.out.println();
 		return objects.stream();
@@ -123,11 +131,18 @@ public class CoreValidatorTests extends BaseJpaR4Test {
 	@MethodSource("data")
 	public void runCoreValidationTests(String testFile, TestEntry testEntry) throws IOException {
 
+		currentTestEntry = testEntry;
 		OperationOutcome mainOperationOutcome = new OperationOutcome();
 
 		myFhirCtx.setParserErrorHandler(new LenientErrorHandler());
+
 		validator.setAssumeValidRestReferences(testEntry.getProfile().getAssumeValidRestReferences());
-		validator.setAllowExamples(testEntry.getAllowExamples());
+		validator.setAllowExamples(true);
+		validator.setAnyExtensionsAllowed(false);
+		validator.setErrorForUnknownProfiles(true);
+
+
+		//validator.setCustomExtensionDomains("http://example.org/additional-information");
 
 		myDaoConfig.setAllowExternalReferences(true);
 
@@ -138,44 +153,37 @@ public class CoreValidatorTests extends BaseJpaR4Test {
 
 			if (testEntry.getProfiles() != null) {
 				for (String filename : testEntry.getProfiles()) {
-					String resource = loadResource(TEST_FILES_BASE_PATH + filename);
-					IParser parser = EncodingEnum.detectEncoding(resource).newParser(myFhirCtx);
-					IBaseResource resourceParsed = parser.parseResource(resource);
-					String resourceName;
-					if (resourceParsed.getIdElement().getResourceType() == null) {
-						resourceName = myFhirCtx.getResourceDefinition(resourceParsed).getImplementingClass().getName();
-						resourceName = resourceName.substring(resourceName.lastIndexOf('.') + 1);
-						resourceParsed.setId(new IdDt().setParts(null, resourceName, UUID.randomUUID().toString(), "1"));
-					}
-					IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
-					dao.update(resourceParsed);
+					updateDaosWithResource(TEST_FILES_BASE_PATH + filename);
 				}
+			}
+
+			if (testEntry.getQuestionnaireFileName() != null) {
+				updateDaosWithResource(TEST_FILES_BASE_PATH + testEntry.getQuestionnaireFileName());
 			}
 
 			if (testEntry.getProfile().getSource() != null) {
-				String resource = loadResource(TEST_FILES_BASE_PATH + testEntry.getProfile().getSource());
-				IParser parser = EncodingEnum.detectEncoding(resource).newParser(myFhirCtx);
-				IBaseResource resourceParsed = parser.parseResource(resource);
-				String resourceName = null;
-				if (resourceParsed.getIdElement().getResourceType() == null) {
-					resourceName = myFhirCtx.getResourceDefinition(resourceParsed).getImplementingClass().getName();
-					resourceName = resourceName.substring(resourceName.lastIndexOf('.') + 1);
-					resourceParsed.setId(new IdDt().setParts(null, resourceName, UUID.randomUUID().toString(), "1"));
-				}
-				IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
-				DaoMethodOutcome daoMethodOutcome = dao.update(resourceParsed);
-				mainOperationOutcome = (OperationOutcome) daoMethodOutcome.getOperationOutcome();
-				if (testEntry.getProfile().getTestResult() != null) {
-					testEntry.getTestResult().merge(testEntry.getProfile().getTestResult());
-				}
+				mainOperationOutcome = updateDaosWithResource(TEST_FILES_BASE_PATH + testEntry.getProfile().getSource());
 			}
 
 			OperationOutcome validationResult = validate(testFile, testEntry.getTestResult(), resourceAsString, null);
-
 			mainOperationOutcome = CoreValidatorTestUtils.mergeOperationOutcomes(validationResult, mainOperationOutcome);
 			CoreValidatorTestUtils.testOutputs(testEntry.getTestResult(), mainOperationOutcome);
-
 		}
+	}
+
+	private OperationOutcome updateDaosWithResource(String filepath) throws IOException {
+		String resource = loadResource(filepath);
+		IParser parser = EncodingEnum.detectEncoding(resource).newParser(myFhirCtx);
+		IBaseResource resourceParsed = parser.parseResource(resource);
+		String resourceName = null;
+		if (resourceParsed.getIdElement().getResourceType() == null) {
+			resourceName = myFhirCtx.getResourceDefinition(resourceParsed).getImplementingClass().getName();
+			resourceName = resourceName.substring(resourceName.lastIndexOf('.') + 1);
+			resourceParsed.setId(new IdDt().setParts(null, resourceName, UUID.randomUUID().toString(), "1"));
+		}
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
+		DaoMethodOutcome daoMethodOutcome = dao.update(resourceParsed);
+		return (OperationOutcome) daoMethodOutcome.getOperationOutcome();
 	}
 
 	protected OperationOutcome validate(String testFile, TestResult testResult, String resourceAsString, String testProfile) {
@@ -208,5 +216,39 @@ public class CoreValidatorTests extends BaseJpaR4Test {
 		}
 		return resourceName;
 	}
+//
+//	@Override
+//	public Element fetch(Object appContext, String url) throws FHIRFormatError, DefinitionException, IOException, FHIRException {
+//		Element res = null;
+//		if (url.equals("Patient/test")) {
+//			res = new ObjectConverter(TestingUtilities.context()).convert(new Patient());
+//		} else if (TestingUtilities.findTestResource("validator", url.replace("/", "-").toLowerCase()+".json")) {
+//			res = Manager.makeParser(TestingUtilities.context(), Manager.FhirFormat.JSON).parse(TestingUtilities.loadTestResourceStream("validator", url.replace("/", "-").toLowerCase()+".json"));
+//		} else if (TestingUtilities.findTestResource("validator", url.replace("/", "-").toLowerCase()+".xml")) {
+//			res = Manager.makeParser(TestingUtilities.context(), Manager.FhirFormat.XML).parse(TestingUtilities.loadTestResourceStream("validator", url.replace("/", "-").toLowerCase()+".xml"));
+//		}
+//		if (res == null && url.contains("/")) {
+//			String tail = url.substring(url.indexOf("/")+1);
+//			if (TestingUtilities.findTestResource("validator", tail.replace("/", "-").toLowerCase()+".json")) {
+//				res = Manager.makeParser(TestingUtilities.context(), Manager.FhirFormat.JSON).parse(TestingUtilities.loadTestResourceStream("validator", tail.replace("/", "-").toLowerCase()+".json"));
+//			} else if (TestingUtilities.findTestResource("validator", tail.replace("/", "-").toLowerCase()+".xml")) {
+//				res =  Manager.makeParser(TestingUtilities.context(), Manager.FhirFormat.XML).parse(TestingUtilities.loadTestResourceStream("validator", tail.replace("/", "-").toLowerCase()+".xml"));
+//			}
+//		}
+//		return res;
+//	}
+//
+//	@Override
+//	public IResourceValidator.ReferenceValidationPolicy validationPolicy(Object appContext, String path, String url) {
+//		if (currentTestEntry.getValidate() != null)
+//			return IResourceValidator.ReferenceValidationPolicy.valueOf(currentTestEntry.getValidate());
+//		else
+//			return IResourceValidator.ReferenceValidationPolicy.IGNORE;
+//	}
+//
+//	@Override
+//	public boolean resolveURL(Object appContext, String path, String url) throws IOException, FHIRException {
+//		return !url.contains("example.org");
+//	}
 
 }
