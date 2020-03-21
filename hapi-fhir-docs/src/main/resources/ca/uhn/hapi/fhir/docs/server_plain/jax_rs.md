@@ -2,10 +2,10 @@
 
 The HAPI FHIR Plain Server ([RestfulServer](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/RestfulServer.html)) is implemented as a standard JEE Servlet, meaning that it can be deployed in any compliant JEE web container. 
 
-For users who already have an existing JAX-RS infrastructure, and who would like to use that technology foor their FHIR stack as well, a module exists which implements the server using [JAX-RS technology](https://jax-rs-spec.java.net/nonav/2.0/apidocs/index.html). 
+For users who already have an existing JAX-RS infrastructure, and who would like to use that technology for their FHIR stack as well, a module exists which implements the server using [JAX-RS technology](https://jax-rs-spec.java.net/nonav/2.0/apidocs/index.html). 
 
 <div class="doc_info_bubble">
-    The JAX-RS module is a community-supported module that was not developed by the core HAPI FHIR team. Before decid the HAPI FHIR JAX-RS module, please be aware that it does not have as complete of support for the full FHIR REST specification as the Plain Server. If you need a feature that is missing, please consiider adding it and making a pull request! 
+    The JAX-RS module is a community-supported module that was not developed by the core HAPI FHIR team. Before deciding to use the HAPI FHIR JAX-RS module, please be aware that it does not have as complete of support for the full FHIR REST specification as the Plain Server. If you need a feature that is missing, please consider adding it and making a pull request! 
 </div>
 
 ## Features
@@ -27,7 +27,7 @@ An example server can be found in the Git repo [here](https://github.com/jamesag
 
 The set-up of a JAX-RS server goes beyond the scope of this documentation. The implementation of the server follows the same pattern as the standard server. It is required to put the correct [annotation](./rest_operations.html) on the methods in the [Resource Providers](./resource_providers.html) in order to be able to call them. 
 
-Implementing a JAX-RS Resource Provider requires some JAX-RS annotations. The [@Path](https://docs.oracle.com/javaee/6/api/javax/ws/rs/Path.html) annotation needs to define the resource path. The <code><a href="https://docs.oracle.com/javaee/6/api/javax/ws/rs/Produces.html">@Produces</a></code> annotation needs to declare the produced formats. The constructor needs to pass the class of the object explicitely in order to avoid  problems with proxy classes in a Java EE environment.
+Implementing a JAX-RS Resource Provider requires some JAX-RS annotations. The [@Path](https://docs.oracle.com/javaee/6/api/javax/ws/rs/Path.html) annotation needs to define the resource path. The <code><a href="https://docs.oracle.com/javaee/6/api/javax/ws/rs/Produces.html">@Produces</a></code> annotation needs to declare the produced formats. The constructor needs to pass the class of the object explicitly in order to avoid problems with proxy classes in a Java EE environment.
 
 It is necessary to extend the abstract class [AbstractJaxRsResourceProvide](/hapi-fhir/apidocs/hapi-fhir-jaxrsserver-base/ca/uhn/fhir/jaxrs/server/AbstractJaxRsResourceProvider.html).
 
