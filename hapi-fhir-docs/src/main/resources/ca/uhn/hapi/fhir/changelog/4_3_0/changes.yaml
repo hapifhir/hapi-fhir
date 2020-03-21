@@ -18,7 +18,7 @@
     for details on how to account for this change in your code.
     "
 - item:
-     issue: ""
+     issue: "1769"
      type: "change"
      title: "**Breaking Change**:
     The `IFluentPath` interface has been renamed to `IFhirPath`, and the `FhirContext#newFluentPath()` method
