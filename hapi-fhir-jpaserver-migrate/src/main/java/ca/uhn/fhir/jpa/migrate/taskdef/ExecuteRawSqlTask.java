@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ExecuteRawSqlTask extends BaseTask<ExecuteRawSqlTask> {
+public class ExecuteRawSqlTask extends BaseTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ExecuteRawSqlTask.class);
 	private Map<DriverTypeEnum, List<String>> myDriverToSqls = new HashMap<>();
@@ -80,22 +80,15 @@ public class ExecuteRawSqlTask extends BaseTask<ExecuteRawSqlTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (!(theO instanceof ExecuteRawSqlTask)) return false;
-
-		ExecuteRawSqlTask that = (ExecuteRawSqlTask) theO;
-
-		return new EqualsBuilder()
-			.append(myDriverNeutralSqls, that.myDriverNeutralSqls)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		ExecuteRawSqlTask otherObject = (ExecuteRawSqlTask) theOtherObject;
+		theBuilder.append(myDriverNeutralSqls, otherObject.myDriverNeutralSqls);
+		theBuilder.append(myDriverToSqls, otherObject.myDriverToSqls);
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myDriverNeutralSqls)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		theBuilder.append(myDriverNeutralSqls);
+		theBuilder.append(myDriverToSqls);
 	}
 }

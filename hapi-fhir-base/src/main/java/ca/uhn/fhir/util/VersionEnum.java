@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,9 @@ public enum VersionEnum {
 	V4_0_0,
 	V4_0_3,
 	V4_1_0,
-	V4_2_0;
+	V4_2_0,
+	V4_3_0, // 4.3.0 was renamed to 5.0.0 during the cycle
+	V5_0_0;
 
 	public static VersionEnum latestVersion() {
 		VersionEnum[] values = VersionEnum.values();

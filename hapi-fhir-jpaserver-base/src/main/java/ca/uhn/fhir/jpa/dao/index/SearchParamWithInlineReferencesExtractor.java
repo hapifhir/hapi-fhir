@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.index;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,9 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
@@ -61,6 +62,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -81,16 +83,15 @@ public class SearchParamWithInlineReferencesExtractor {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	SearchParamExtractorService mySearchParamExtractorService;
+	private SearchParamExtractorService mySearchParamExtractorService;
 	@Autowired
-	ResourceLinkExtractor myResourceLinkExtractor;
+	private ResourceLinkExtractor myResourceLinkExtractor;
 	@Autowired
-	DaoResourceLinkResolver myDaoResourceLinkResolver;
+	private DaoResourceLinkResolver myDaoResourceLinkResolver;
 	@Autowired
-	DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
+	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
-
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -187,7 +188,9 @@ public class SearchParamWithInlineReferencesExtractor {
 				if (linksForCompositePart != null) {
 					for (ResourceLink nextLink : linksForCompositePart) {
 						if (linksForCompositePartWantPaths.contains(nextLink.getSourcePath())) {
-							String value = nextLink.getTargetResource().getIdDt().toUnqualifiedVersionless().getValue();
+							assert isNotBlank(nextLink.getTargetResourceType());
+							assert isNotBlank(nextLink.getTargetResourceId());
+							String value = nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
 							if (isNotBlank(value)) {
 								value = UrlUtil.escapeUrlParam(value);
 								nextChoicesList.add(key + "=" + value);
@@ -246,18 +249,28 @@ public class SearchParamWithInlineReferencesExtractor {
 				}
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
 				Set<ResourcePersistentId> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theRequest);
+
+				ResourcePersistentId match;
 				if (matches.isEmpty()) {
-					String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
-					throw new ResourceNotFoundException(msg);
-				}
-				if (matches.size() > 1) {
+
+					Optional<ResourceTable> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null);
+					if (placeholderOpt.isPresent()) {
+						match = new ResourcePersistentId(placeholderOpt.get().getResourceId());
+					} else {
+						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
+						throw new ResourceNotFoundException(msg);
+					}
+
+				} else if (matches.size() > 1) {
 					String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlMultipleMatches", nextId.getValue());
 					throw new PreconditionFailedException(msg);
+				} else {
+					match = matches.iterator().next();
 				}
-				ResourcePersistentId next = matches.iterator().next();
-				String newId = myIdHelperService.translatePidIdToForcedId(resourceTypeString, next);
+
+				IIdType newId = myIdHelperService.translatePidIdToForcedId(myContext, resourceTypeString, match);
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
-				nextRef.setReference(newId);
+				nextRef.setReference(newId.getValue());
 			}
 		}
 	}

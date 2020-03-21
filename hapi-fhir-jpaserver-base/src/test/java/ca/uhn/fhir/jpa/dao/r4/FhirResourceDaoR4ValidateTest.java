@@ -20,7 +20,7 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -127,7 +127,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "Unknown code: http://terminology.hl7.org/CodeSystem/observation-category / FOO", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "Unknown code {http://terminology.hl7.org/CodeSystem/observation-category}FOO", oo.getIssueFirstRep().getDiagnostics());
 
 	}
 
@@ -146,6 +146,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
 		}
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		// Create a valueset
 		ValueSet vs = new ValueSet();
@@ -208,7 +210,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "Unknown code: http://terminology.hl7.org/CodeSystem/observation-category / FOO", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "Unknown code {http://terminology.hl7.org/CodeSystem/observation-category}FOO", oo.getIssueFirstRep().getDiagnostics());
 
 	}
 
@@ -399,12 +401,11 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
-			ourLog.info(ooString);
-			assertThat(ooString, containsString("StructureDefinition reference \\\"" + profileUri + "\\\" could not be resolved"));
+			org.hl7.fhir.r4.model.OperationOutcome oo = (org.hl7.fhir.r4.model.OperationOutcome) e.getOperationOutcome();
+			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			ourLog.info(outputString);
+			assertThat(outputString, containsString("Profile reference \\\"http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid\\\" could not be resolved, so has not been checked"));
 		}
-
-
 	}
 
 	@Test
@@ -617,6 +618,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		upload("/r4/uscore/ValueSet-omb-ethnicity-category.json");
 		upload("/r4/uscore/ValueSet-omb-race-category.json");
 		upload("/r4/uscore/ValueSet-us-core-usps-state.json");
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		{
 			String resource = loadResource("/r4/uscore/patient-resource-badcode.json");

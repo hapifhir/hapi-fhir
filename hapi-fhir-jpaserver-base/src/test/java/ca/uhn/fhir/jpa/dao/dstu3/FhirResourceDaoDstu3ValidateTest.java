@@ -10,8 +10,8 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.hapi.validation.CachingValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
@@ -76,8 +76,8 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(results.getOperationOutcome()));
 
 		ourLog.info("Clearing cache");
-		myValidationSupport.flushCaches();
-		myFhirInstanceValidator.flushCaches();
+		myValidationSupport.invalidateCaches();
+		myFhirInstanceValidator.invalidateCaches();
 
 		try {
 			myQuestionnaireResponseDao.validate(qr, null, null, null, null, null, null);
@@ -99,7 +99,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		myValueSetDao.create(vs);
 
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 //		Questionnaire q = loadResourceFromClasspath(Questionnaire.class,"/dstu3/iar/Questionnaire-iar-test.xml" );
 //		myQuestionnaireDao.create(q);
@@ -323,14 +323,16 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
 		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
 		try {
-			myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
+			// Expected to throw exception
+			MethodOutcome output = myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output.getOperationOutcome()));
 			fail();
 		} catch (PreconditionFailedException e) {
-			String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
-			ourLog.info(ooString);
-			assertThat(ooString, containsString("StructureDefinition reference \\\"" + profileUri + "\\\" could not be resolved"));
+			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			ourLog.info(outputString);
+			assertThat(outputString, containsString("Profile reference \\\"http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid\\\" could not be resolved, so has not been checked"));
 		}
-
 	}
 
 	@Test
@@ -474,11 +476,17 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		p.setActive(true);
 
 		String raw = myFhirCtx.newJsonParser().encodeResourceToString(p);
-		MethodOutcome outcome = myPatientDao.validate(p, null, raw, EncodingEnum.JSON, null, null, mySrd);
+		try {
+			MethodOutcome outcome = myPatientDao.validate(p, null, raw, EncodingEnum.JSON, null, null, mySrd);
 
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
-		ourLog.info("OO: {}", encoded);
-		assertThat(encoded, containsString("No issues detected"));
+			String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+			ourLog.info("OO: {}", encoded);
+			assertThat(encoded, containsString("No issues detected"));
+		} catch (PreconditionFailedException e) {
+			// not expected, but let's log the error
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			fail(e.toString());
+		}
 	}
 
 	@AfterClass

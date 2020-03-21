@@ -12,7 +12,7 @@ import java.util.List;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import java.util.List;
 public interface IResourceHistoryTagDao extends JpaRepository<ResourceHistoryTag, Long> {
 
 	@Modifying
-	@Query("DELETE FROM ResourceHistoryTag t WHERE t.myId IN :pids")
-	void deleteByPid(@Param("pids") List<Long> thePids);
+	@Query("DELETE FROM ResourceHistoryTag t WHERE t.myResourceHistoryPid = :historyPid")
+	void deleteByPid(@Param("historyPid") Long theResourceHistoryTablePid);
 
 }

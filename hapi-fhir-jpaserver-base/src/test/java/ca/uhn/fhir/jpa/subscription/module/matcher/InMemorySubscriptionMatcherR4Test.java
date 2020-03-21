@@ -3,11 +3,13 @@ package ca.uhn.fhir.jpa.subscription.module.matcher;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.util.CoordCalculatorTest;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.param.*;
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +42,9 @@ public class InMemorySubscriptionMatcherR4Test {
 	@Autowired
 	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 	@Autowired
-	FhirContext myContext;
+	FhirContext myFhirContext;
+	@Autowired
+	MatchUrlService myMatchUrlService;
 
 	private void assertMatched(Resource resource, SearchParameterMap params) {
 		InMemoryMatchResult result = match(resource, params);
@@ -61,7 +65,7 @@ public class InMemorySubscriptionMatcherR4Test {
 	}
 
 	private String getCriteria(Resource theResource, SearchParameterMap theParams) {
-		return theResource.getResourceType().name() + theParams.toNormalizedQueryString(myContext);
+		return theResource.getResourceType().name() + theParams.toNormalizedQueryString(myFhirContext);
 	}
 
 	private InMemoryMatchResult match(String criteria, Resource theResource) {
@@ -201,6 +205,22 @@ public class InMemorySubscriptionMatcherR4Test {
 		params = new SearchParameterMap();
 		params.add(IAnyResource.SP_RES_LANGUAGE, new StringParam("en_CA"));
 		assertUnsupported(patient, params);
+	}
+
+	@Test
+	public void testLocationPositionNotSupported() {
+		Location loc = new Location();
+		double latitude = CoordCalculatorTest.LATITUDE_UHN;
+		double longitude = CoordCalculatorTest.LONGITUDE_UHN;
+		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		loc.setPosition(position);
+		double bigEnoughDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN * 2;
+		SearchParameterMap params = myMatchUrlService.translateMatchUrl(
+			"Location?" +
+				Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + "|"
+				+ CoordCalculatorTest.LONGITUDE_CHIN + "|" +
+				bigEnoughDistance, myFhirContext.getResourceDefinition("Location"));
+		assertUnsupported(loc, params);
 	}
 
 	@Test
@@ -394,11 +414,11 @@ public class InMemorySubscriptionMatcherR4Test {
 		params = new SearchParameterMap();
 		params.add(Patient.SP_FAMILY, new StringParam("testSearchNameParam01Fam"));
 		try {
-			String criteria = params.toNormalizedQueryString(myContext);
+			String criteria = params.toNormalizedQueryString(myFhirContext);
 			CanonicalSubscription subscription = new CanonicalSubscription();
 			subscription.setCriteriaString(criteria);
 			subscription.setIdElement(new IdType("Subscription", 123L));
-			ResourceModifiedMessage msg = new ResourceModifiedMessage(myContext, patient, ResourceModifiedMessage.OperationTypeEnum.CREATE);
+			ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, patient, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 			msg.setSubscriptionId("123");
 			msg.setId(new IdType("Patient/ABC"));
 			InMemoryMatchResult result = myInMemorySubscriptionMatcher.match(subscription, msg);

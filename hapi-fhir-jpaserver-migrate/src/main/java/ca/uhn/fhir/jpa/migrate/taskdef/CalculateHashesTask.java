@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,20 +34,25 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask> {
+public class CalculateHashesTask extends BaseTableColumnTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CalculateHashesTask.class);
 	private int myBatchSize = 10000;
 	private Map<String, Function<MandatoryKeyMap<String, Object>, Long>> myCalculators = new HashMap<>();
 	private ThreadPoolExecutor myExecutor;
-
-	public void setBatchSize(int theBatchSize) {
-		myBatchSize = theBatchSize;
-	}
 
 	/**
 	 * Constructor
@@ -55,6 +60,16 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 	public CalculateHashesTask(VersionEnum theRelease, String theVersion) {
 		super(theRelease.toString(), theVersion);
 		setDescription("Calculate resource search parameter index hashes");
+	}
+
+	public void setBatchSize(int theBatchSize) {
+		myBatchSize = theBatchSize;
+	}
+
+	@Override
+	public CalculateHashesTask setColumnName(String theColumnName) {
+		super.setColumnName(theColumnName);
+		return this;
 	}
 
 	@Override
@@ -74,10 +89,10 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 		initializeExecutor();
 		try {
 
-			while(true) {
+			while (true) {
 				MyRowCallbackHandler rch = new MyRowCallbackHandler();
 				getTxTemplate().execute(t -> {
-					JdbcTemplate jdbcTemplate = newJdbcTemnplate();
+					JdbcTemplate jdbcTemplate = newJdbcTemplate();
 					jdbcTemplate.setMaxRows(100000);
 					String sql = "SELECT * FROM " + getTableName() + " WHERE " + getColumnName() + " IS NULL";
 					logInfo(ourLog, "Finding up to {} rows in {} that requires hashes", myBatchSize, getTableName());
@@ -184,7 +199,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 					arguments.add((Number) nextRow.get("SP_ID"));
 
 					// Apply update SQL
-					newJdbcTemnplate().update(sqlBuilder.toString(), arguments.toArray());
+					newJdbcTemplate().update(sqlBuilder.toString(), arguments.toArray());
 
 				}
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,17 +67,21 @@ public class SearchParamExtractorService {
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, uris);
 		theParams.myUriParams.addAll(uris);
 
-		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamCoords> coords = extractSearchParamCoords(theResource);
-		handleWarnings(theRequestDetails, myInterceptorBroadcaster, coords);
-		theParams.myCoordsParams.addAll(coords);
-
 		ourLog.trace("Storing date indexes: {}", theParams.myDateParams);
 
 		for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theResource)) {
 			if (next instanceof ResourceIndexedSearchParamToken) {
 				theParams.myTokenParams.add((ResourceIndexedSearchParamToken) next);
+			} else if (next instanceof ResourceIndexedSearchParamCoords) {
+				theParams.myCoordsParams.add((ResourceIndexedSearchParamCoords) next);
 			} else {
 				theParams.myStringParams.add((ResourceIndexedSearchParamString) next);
+			}
+		}
+
+		for (BaseResourceIndexedSearchParam next : extractSearchParamSpecial(theResource)) {
+			if (next instanceof ResourceIndexedSearchParamCoords) {
+				theParams.myCoordsParams.add((ResourceIndexedSearchParamCoords) next);
 			}
 		}
 
@@ -113,10 +117,6 @@ public class SearchParamExtractorService {
 		}
 	}
 
-	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamCoords(theResource);
-	}
-
 	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
 		return mySearchParamExtractor.extractSearchParamDates(theResource);
 	}
@@ -135,6 +135,10 @@ public class SearchParamExtractorService {
 
 	private ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
 		return mySearchParamExtractor.extractSearchParamTokens(theResource);
+	}
+
+	private ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamSpecial(theResource);
 	}
 
 	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {

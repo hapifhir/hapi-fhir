@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.sched;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,10 +156,9 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		Validate.notNull(theJobDefinition.getJobClass());
 		Validate.notBlank(theJobDefinition.getId());
 
-		JobKey jobKey;
-
-		jobKey = new JobKey(theJobDefinition.getId(), theJobDefinition.getGroup());
-
+		JobKey jobKey = new JobKey(theJobDefinition.getId(), theJobDefinition.getGroup());
+		TriggerKey triggerKey = new TriggerKey(theJobDefinition.getId(), theJobDefinition.getGroup());
+		
 		JobDetailImpl jobDetail = new NonConcurrentJobDetailImpl();
 		jobDetail.setJobClass(theJobDefinition.getJobClass());
 		jobDetail.setKey(jobKey);
@@ -172,6 +171,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 		Trigger trigger = TriggerBuilder.newTrigger()
 			.forJob(jobDetail)
+			.withIdentity(triggerKey)
 			.startNow()
 			.withSchedule(schedule)
 			.build();

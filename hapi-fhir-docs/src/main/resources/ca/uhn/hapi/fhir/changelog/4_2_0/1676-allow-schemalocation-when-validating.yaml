@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1676
+title: "When validating an XML resource, the validatin failed if the resource contained an
+   `xsi:schemaLocation` declaration. This has been corrected. Thanks to Brian Kaney for reporting!"

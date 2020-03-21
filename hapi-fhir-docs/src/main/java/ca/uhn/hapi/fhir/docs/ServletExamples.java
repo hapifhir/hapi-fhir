@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@ package ca.uhn.hapi.fhir.docs;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.*;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
-import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.springframework.web.cors.CorsConfiguration;
 
 import javax.servlet.ServletException;
@@ -65,15 +66,17 @@ public class ServletExamples {
    public class ValidatingServerWithLogging extends RestfulServer {
 
       @Override
-      protected void initialize() throws ServletException {
-         
+      protected void initialize() {
+			FhirContext ctx = FhirContext.forDstu3();
+			setFhirContext(ctx);
+
          // ... define your resource providers here ...
 
          // Create an interceptor to validate incoming requests
          RequestValidatingInterceptor requestInterceptor = new RequestValidatingInterceptor();
          
          // Register a validator module (you could also use SchemaBaseValidator and/or SchematronBaseValidator)
-         requestInterceptor.addValidatorModule(new FhirInstanceValidator());
+			requestInterceptor.addValidatorModule(new FhirInstanceValidator(ctx));
          
          requestInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
          requestInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
@@ -86,7 +89,7 @@ public class ServletExamples {
          // Create an interceptor to validate responses
          // This is configured in the same way as above
          ResponseValidatingInterceptor responseInterceptor = new ResponseValidatingInterceptor();
-         responseInterceptor.addValidatorModule(new FhirInstanceValidator());
+         responseInterceptor.addValidatorModule(new FhirInstanceValidator(ctx));
          responseInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
          responseInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
          responseInterceptor.setResponseHeaderValue("Validation on ${line}: ${message} ${severity}");

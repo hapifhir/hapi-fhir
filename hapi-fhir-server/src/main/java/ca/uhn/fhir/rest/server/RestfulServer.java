@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -360,17 +360,28 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		Class<?> supertype = clazz.getSuperclass();
 		while (!Object.class.equals(supertype)) {
 			count += findResourceMethods(theProvider, supertype);
+			count += findResourceMethodsOnInterfaces(theProvider, supertype.getInterfaces());
 			supertype = supertype.getSuperclass();
 		}
 
 		try {
 			count += findResourceMethods(theProvider, clazz);
+			count += findResourceMethodsOnInterfaces(theProvider, clazz.getInterfaces());
 		} catch (ConfigurationException e) {
 			throw new ConfigurationException("Failure scanning class " + clazz.getSimpleName() + ": " + e.getMessage(), e);
 		}
 		if (count == 0) {
 			throw new ConfigurationException("Did not find any annotated RESTful methods on provider class " + theProvider.getClass().getName());
 		}
+	}
+
+	private int findResourceMethodsOnInterfaces(Object theProvider, Class<?>[] interfaces) {
+		int count = 0;
+		for (Class<?> anInterface : interfaces) {
+			count += findResourceMethods(theProvider, anInterface);
+			count += findResourceMethodsOnInterfaces(theProvider, anInterface.getInterfaces());
+		}
+		return count;
 	}
 
 	private int findResourceMethods(Object theProvider, Class<?> clazz) throws ConfigurationException {
@@ -1604,11 +1615,20 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		Collection<String> resourceNames = new ArrayList<>();
 		while (!Object.class.equals(supertype)) {
 			removeResourceMethods(theProvider, supertype, resourceNames);
+			removeResourceMethodsOnInterfaces(theProvider, supertype.getInterfaces(), resourceNames);
 			supertype = supertype.getSuperclass();
 		}
 		removeResourceMethods(theProvider, clazz, resourceNames);
+		removeResourceMethodsOnInterfaces(theProvider, clazz.getInterfaces(), resourceNames);
 		for (String resourceName : resourceNames) {
 			myResourceNameToBinding.remove(resourceName);
+		}
+	}
+
+	private void removeResourceMethodsOnInterfaces(Object theProvider, Class<?>[] interfaces, Collection<String> resourceNames) {
+		for (Class<?> anInterface : interfaces) {
+			removeResourceMethods(theProvider, anInterface, resourceNames);
+			removeResourceMethodsOnInterfaces(theProvider, anInterface.getInterfaces(), resourceNames);
 		}
 	}
 

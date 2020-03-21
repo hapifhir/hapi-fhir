@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r5.BaseResourceProviderR5Test;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -21,9 +22,19 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r5.model.*;
-import org.hl7.fhir.r5.model.codesystems.SubscriptionChannelType;
-import org.junit.*;
+import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.Subscription;
+import org.hl7.fhir.r5.model.Topic;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -131,8 +142,8 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 		Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
 		channel.getType().addCoding()
-			.setSystem(SubscriptionChannelType.RESTHOOK.getSystem())
-			.setCode(SubscriptionChannelType.RESTHOOK.toCode());
+			.setSystem(CanonicalSubscriptionChannelType.RESTHOOK.getSystem())
+			.setCode(CanonicalSubscriptionChannelType.RESTHOOK.toCode());
 		channel.getPayload().setContentType(thePayload);
 		channel.setEndpoint(ourListenerServerBase);
 		return subscription;
@@ -158,7 +169,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		coding.setCode(code);
 		coding.setSystem(system);
 
-		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.setStatus(Enumerations.ObservationStatus.FINAL);
 
 		IIdType id = myObservationDao.create(observation).getId();
 		observation.setId(id);

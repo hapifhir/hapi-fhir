@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.cross;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.util.ObjectUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class is an abstraction for however primary keys are stored in the underlying storage engine. This might be
@@ -35,6 +36,7 @@ public class ResourcePersistentId {
 	private Object myId;
 
 	public ResourcePersistentId(Object theId) {
+		assert !(theId instanceof Optional);
 		myId = theId;
 	}
 

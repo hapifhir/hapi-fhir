@@ -1,0 +1,7 @@
+---
+type: add
+issue: 1736
+title: When performing large terminology concept additions via the delta addition service, concepts will
+  now be added via the deferred storage service, meaning that they will be added in small incremental batches
+  instead of as a part of one large transaction. This helps to avoid timeouts and memory issues when uploading
+  large collections of concepts.

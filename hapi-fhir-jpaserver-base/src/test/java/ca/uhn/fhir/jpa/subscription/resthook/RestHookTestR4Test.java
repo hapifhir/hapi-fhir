@@ -21,9 +21,16 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test the rest-hook subscriptions
@@ -869,7 +876,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		String criteriaGood = "Patient?gender=male";
 		Subscription subscription = newSubscription(criteriaGood, payload);
 		ourClient.create().resource(subscription).execute();
-		assertEquals(1, subscriptionCount());
+		await().until(() -> subscriptionCount() == 1);
 	}
 
 	/**
@@ -889,7 +896,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			assertEquals(Subscription.SubscriptionStatus.REQUESTED, subscription.getStatus());
 
 		} finally {
-			existingSupportedSubscriptionTypes.forEach(t-> myDaoConfig.addSupportedSubscriptionType(t));
+			existingSupportedSubscriptionTypes.forEach(t -> myDaoConfig.addSupportedSubscriptionType(t));
 		}
 	}
 

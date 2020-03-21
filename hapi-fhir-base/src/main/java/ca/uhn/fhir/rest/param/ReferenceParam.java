@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,6 +200,13 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		return myValue;
 	}
 
+	/**
+	 * Note that the parameter to this method <b>must</b> be a resource reference, e.g
+	 * <code>123</code> or <code>Patient/123</code> or <code>http://example.com/fhir/Patient/123</code>
+	 * or something like this. This is not appropriate for cases where a chain is being used and
+	 * the value is for a different type of parameter (e.g. a token). In that case, use one of the
+	 * setter constructors.
+	 */
 	public ReferenceParam setValue(String theValue) {
 		IdDt id = new IdDt(theValue);
 		String qualifier= null;

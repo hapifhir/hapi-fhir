@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 import java.util.Set;
 
-public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> {
+public class ModifyColumnTask extends BaseTableColumnTypeTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ModifyColumnTask.class);
 

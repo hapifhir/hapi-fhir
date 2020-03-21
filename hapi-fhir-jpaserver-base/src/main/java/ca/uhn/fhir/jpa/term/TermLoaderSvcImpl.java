@@ -49,7 +49,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -388,7 +388,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			}
 		}
 
-		// FIXME: DM 2019-09-13 - Manually add EXTERNAL_COPYRIGHT_NOTICE property until Regenstrief adds this to loinc.xml
+		// TODO: DM 2019-09-13 - Manually add EXTERNAL_COPYRIGHT_NOTICE property until Regenstrief adds this to loinc.xml
 		if (!propertyNamesToTypes.containsKey("EXTERNAL_COPYRIGHT_NOTICE")) {
 			String externalCopyRightNoticeCode = "EXTERNAL_COPYRIGHT_NOTICE";
 			CodeSystem.PropertyType externalCopyRightNoticeType = CodeSystem.PropertyType.STRING;

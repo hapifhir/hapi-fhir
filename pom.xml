@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>4.2.0-SNAPSHOT</version>
+	<version>5.0.0-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -587,6 +587,14 @@
 			<id>jiaola</id>
 			<name>Dazhi Jiao</name>
 		</developer>
+		<developer>
+			<id>dionmcm</id>
+		</developer>
+		<developer>
+			<id>ttntrifork</id>
+			<organization>Trifork</organization>
+			<name>Tue Toft Nørgård</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -598,7 +606,7 @@
 
 	<properties>
 
-		<fhir_core_version>4.1.7-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>4.2.9-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -637,9 +645,9 @@
 		<jsr305_version>3.0.2</jsr305_version>
 		<flyway_version>6.1.0</flyway_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
-		<hibernate_version>5.4.6.Final</hibernate_version>
+		<hibernate_version>5.4.12.Final</hibernate_version>
 		<!-- Update lucene version when you update hibernate-search version -->
-		<hibernate_search_version>5.11.3.Final</hibernate_search_version>
+		<hibernate_search_version>5.11.5.Final</hibernate_search_version>
 		<lucene_version>5.5.5</lucene_version>
 		<hibernate_validator_version>5.4.2.Final</hibernate_validator_version>
 		<httpcore_version>4.4.11</httpcore_version>
@@ -655,7 +663,7 @@
 		<servicemix_saxon_version>9.5.1-5_1</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<slf4j_version>1.7.28</slf4j_version>
-		<spring_version>5.2.1.RELEASE</spring_version>
+		<spring_version>5.2.3.RELEASE</spring_version>
 		<!-- FYI: Spring Data JPA 2.1.9 causes test failures due to unexpected cascading deletes -->
 		<spring_data_version>2.2.0.RELEASE</spring_data_version>
 		<spring_boot_version>2.2.0.RELEASE</spring_boot_version>
@@ -671,6 +679,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 
+		<elastic_apm_version>1.13.0</elastic_apm_version>
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
 	</properties>
@@ -1029,6 +1038,11 @@
 				<version>${httpcore_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>co.elastic.apm</groupId>
+				<artifactId>apm-agent-api</artifactId>
+				<version>${elastic_apm_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>apache-jena-libs</artifactId>
 				<version>3.12.0</version>
@@ -1313,12 +1327,12 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.2.8</version>
+				<version>42.2.9</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
-				<version>2.3.1</version>
+				<version>2.3.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -1899,12 +1913,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.1.0</version>
 					<dependencies>
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checkstyle</artifactId>
-							<version>8.18</version>
+							<version>8.29</version>
 						</dependency>
 					</dependencies>
 					<configuration>
@@ -2423,50 +2437,12 @@
 			</build>
 		</profile>
 		<profile>
-			<id>SITE</id>
-			<modules>
-				<module>hapi-fhir-base</module>
-				<module>hapi-fhir-structures-dstu2</module>
-				<module>hapi-fhir-structures-dstu3</module>
-				<module>hapi-fhir-structures-r4</module>
-				<module>hapi-fhir-structures-r5</module>
-				<module>hapi-fhir-client</module>
-				<module>hapi-fhir-server</module>
-				<module>hapi-fhir-jpaserver-model</module>
-				<module>hapi-fhir-jpaserver-searchparam</module>
-				<module>hapi-fhir-jpaserver-subscription</module>
-				<module>hapi-fhir-jpaserver-base</module>
-				<module>hapi-fhir-jaxrsserver-base</module>
-				<!-- <module>hapi-fhir-cobertura</module> -->
-				<module>examples</module>
-			</modules>
-			<reporting>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>findbugs-maven-plugin</artifactId>
-						<version>3.0.5</version>
-						<configuration>
-							<classFilesDirectory>./hapi-fhir-base/target/classes</classFilesDirectory>
-						</configuration>
-						<reportSets>
-							<reportSet>
-								<reports>
-									<report>findbugs</report>
-								</reports>
-							</reportSet>
-						</reportSets>
-					</plugin>
-				</plugins>
-			</reporting>
-		</profile>
-		<profile>
 			<id>ALLMODULES</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
-                <module>hapi-fhir-bom</module>
+            <module>hapi-fhir-bom</module>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-docs</module>
@@ -2504,7 +2480,6 @@
 				<module>hapi-fhir-android</module>
 				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
-				<module>examples</module>
 				<!--<module>osgi</module>-->
 				<!--<module>osgi/hapi-fhir-karaf-features</module>
 				<module>osgi/hapi-fhir-karaf-integration-tests</module>-->
@@ -2552,6 +2527,30 @@
 			<properties>
 				<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m -XX:TieredStopAtLevel=1 -XX:+UseParallelGC -Xverify:none  -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M</surefire_jvm_args>
 			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>validate</id>
+								<phase>generate-sources</phase>
+								<configuration>
+									<configLocation>src/checkstyle/checkstyle_config_nofixmes.xml</configLocation>
+									<encoding>UTF-8</encoding>
+									<consoleOutput>true</consoleOutput>
+									<failOnViolation>true</failOnViolation>
+									<failsOnError>false</failsOnError>
+								</configuration>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		<profile>
 			<id>NOPARALLEL</id>

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.impl;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -816,6 +816,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
+		public IHistoryUntyped onType(String theResourceType) {
+			myType = myContext.getResourceDefinition(theResourceType).getImplementingClass();
+			return this;
+		}
+
+		@Override
 		public IHistoryTyped since(Date theCutoff) {
 			if (theCutoff != null) {
 				mySince = new InstantDt(theCutoff);
@@ -1220,6 +1226,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IOperationUnnamed onType(Class<? extends IBaseResource> theResourceType) {
 			myType = theResourceType;
+			return this;
+		}
+
+		@Override
+		public IOperationUnnamed onType(String theResourceType) {
+			myType = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 			return this;
 		}
 
@@ -1796,11 +1808,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					if (rootSs == null) {
 						rootSs = nextSortSpec;
 					} else {
-						// FIXME lastSs is null never set
-						// TODO unused assignment
 						lastSs.setChain(nextSortSpec);
 					}
-					// TODO unused assignment
 					lastSs = nextSortSpec;
 				}
 				if (rootSs != null) {

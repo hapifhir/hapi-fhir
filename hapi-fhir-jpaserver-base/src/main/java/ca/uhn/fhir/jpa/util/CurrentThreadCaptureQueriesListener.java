@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.util;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,24 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 public class CurrentThreadCaptureQueriesListener extends BaseCaptureQueriesListener {
 
 	private static final ThreadLocal<Queue<SqlQuery>> ourQueues = new ThreadLocal<>();
+	private static final Logger ourLog = LoggerFactory.getLogger(CurrentThreadCaptureQueriesListener.class);
 
 	@Override
 	protected Queue<SqlQuery> provideQueryList() {
 		return ourQueues.get();
 	}
-
 
 	/**
 	 * Get the current queue of items and stop collecting
@@ -58,4 +64,27 @@ public class CurrentThreadCaptureQueriesListener extends BaseCaptureQueriesListe
 		ourQueues.set(new ArrayDeque<>());
 	}
 
+	/**
+	 * Log all captured SELECT queries
+	 *
+	 * @return Returns the number of queries captured
+	 */
+	public static int logQueriesForCurrentThreadAndStopCapturing(int... theIndexes) {
+		List<String> queries = getCurrentQueueAndStopCapturing()
+			.stream()
+			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
+			.collect(Collectors.toList());
+
+		if (theIndexes != null && theIndexes.length > 0) {
+			List<String> newList = new ArrayList<>();
+			for (int i = 0; i < theIndexes.length; i++) {
+				newList.add(queries.get(theIndexes[i]));
+			}
+			queries = newList;
+		}
+
+		ourLog.info("Select Queries:\n{}", String.join("\n", queries));
+
+		return queries.size();
+	}
 }

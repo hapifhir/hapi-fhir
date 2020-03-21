@@ -65,7 +65,7 @@ The RequestValidatingInterceptor looks at resources coming into the server (e.g.
 
 These interceptors can be configured to add headers to the response, fail the response (returning an HTTP 422 and throwing an exception in the process), or to add to the OperationOutcome returned by the server.
 
-See [Profile Validator](/docs/validation/profile_validator.html) for information on how validation works in HAPI FHIR.
+See [Instance Validator](/docs/validation/instance_validator.html) for information on how validation works in HAPI FHIR.
 
 The following example shows how to register this interceptor within a HAPI FHIR REST server.
 

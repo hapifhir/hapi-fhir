@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,7 @@ import java.io.Serializable;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
-@Table(name = "TRM_VALUESET_C_DESIGNATION", indexes = {
-	@Index(name = "IDX_VALUESET_C_DSGNTN_VAL", columnList = "VAL")
-})
+@Table(name = "TRM_VALUESET_C_DESIGNATION")
 @Entity()
 public class TermValueSetConceptDesignation implements Serializable {
 	private static final long serialVersionUID = 1L;

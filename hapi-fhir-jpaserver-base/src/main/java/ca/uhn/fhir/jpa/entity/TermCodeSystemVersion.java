@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class TermCodeSystemVersion implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
-	@OneToOne()
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_CODESYSVER_RES_ID"))
 	private ResourceTable myResource;
 
@@ -64,7 +64,7 @@ public class TermCodeSystemVersion implements Serializable {
 	 * This was added in HAPI FHIR 3.3.0 and is nullable just to avoid migration
 	 * issued. It should be made non-nullable at some point.
 	 */
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", nullable = true, foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
 	private TermCodeSystem myCodeSystem;
 
@@ -72,7 +72,7 @@ public class TermCodeSystemVersion implements Serializable {
 	private Long myCodeSystemPid;
 
 	@SuppressWarnings("unused")
-	@OneToOne(mappedBy = "myCurrentVersion", optional = true)
+	@OneToOne(mappedBy = "myCurrentVersion", optional = true, fetch = FetchType.LAZY)
 	private TermCodeSystem myCodeSystemHavingThisVersionAsCurrentVersionIfAny;
 
 	@Column(name = "CS_DISPLAY", nullable = true, updatable = false, length = MAX_VERSION_LENGTH)

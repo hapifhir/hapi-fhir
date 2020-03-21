@@ -1170,44 +1170,6 @@ public class JsonParserDstu2_1Test {
 		assertEquals("<Linkage xmlns=\"http://hl7.org/fhir\"><item><resource><display value=\"FOO\"/></resource></item></Linkage>", out);
 	}
 
-	// FIXME: this should pass
-	@Test
-	@Ignore
-	public void testNamespacePreservationEncode() throws Exception {
-		//@formatter:off
-		String input = "<Patient xmlns=\"http://hl7.org/fhir\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">" + 
-				"<text>" + 
-				"<xhtml:div>" + 
-				"<xhtml:img src=\"foo\"/>" + 
-				"@fhirabend" + 
-				"</xhtml:div>" + 
-				"</text>" + 
-				"</Patient>";
-		//@formatter:on
-		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, input);
-
-		String expected = "<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div>";
-		assertEquals(expected, parsed.getText().getDiv().getValueAsString());
-
-		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
-		ourLog.info(encoded);
-		assertThat(encoded, containsString("\"div\":\"" + expected.replace("\"", "\\\"") + "\""));
-	}
-
-	// TODO: this should pass
-	@Test
-	@Ignore
-	public void testNamespacePreservationParse() throws Exception {
-		String input = "{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\"><xhtml:img src=\\\"foo\\\"/>@fhirabend</xhtml:div>\"}}";
-		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, input);
-		XhtmlNode div = parsed.getText().getDiv();
-
-		assertEquals("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div>", div.getValueAsString());
-
-		String encoded = ourCtx.newXmlParser().encodeResourceToString(parsed);
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div></text></Patient>", encoded);
-	}
-
 	@Test
 	public void testOmitResourceId() {
 		Patient p = new Patient();
@@ -1556,13 +1518,13 @@ public class JsonParserDstu2_1Test {
 			ourCtx.newJsonParser().parseResource("FOO");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON content, error was: Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
+			assertEquals("Failed to parse JSON encoded FHIR content: Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
 		}
 		try {
 			ourCtx.newJsonParser().parseResource("[\"aaa\"]");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON content, error was: Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
+			assertEquals("Failed to parse JSON encoded FHIR content: Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
 		}
 
 		assertEquals(Bundle.class, ourCtx.newJsonParser().parseResource("  {\"resourceType\" : \"Bundle\"}").getClass());
@@ -1692,25 +1654,6 @@ public class JsonParserDstu2_1Test {
 
 	}
 
-
-	/**
-	 * See #484
-	 */
-	@Test
-	public void testParseNarrativeWithEmptyDiv() {
-		String input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div/>\"}}";
-		Basic basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
-		assertEquals(null, basic.getText().getDivAsString());
-
-		input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div></div>\"}}";
-		basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
-		assertEquals(null, basic.getText().getDivAsString());
-
-		input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div> </div>\"}}";
-		basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"> </div>", basic.getText().getDivAsString());
-
-	}
 
 	/**
 	 * See #163

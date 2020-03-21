@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -163,7 +162,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testFetchTotalAccurateForSlowLoading() throws InterruptedException {
+	public void testFetchTotalAccurateForSlowLoading() {
 		create200Patients();
 
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(25);
@@ -836,8 +835,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		// Because of the forced ID's bidirectional link HFJ_RESOURCE <-> HFJ_FORCED_ID
-		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		runInTransaction(() -> {
 			assertEquals(1, myResourceTableDao.count());
 			assertEquals(1, myResourceHistoryTableDao.count());

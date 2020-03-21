@@ -29,7 +29,6 @@ import org.hl7.fhir.dstu2.model.*;
 import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -44,11 +43,6 @@ public class FhirDstu2Hl7Org implements IFhirVersion {
   @Override
   public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
     throw new UnsupportedOperationException("FluentPath is not supported in DSTU2 contexts");
-  }
-
-  @Override
-  public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
-    throw new UnsupportedOperationException("Validation support is not supported in DSTU2 contexts");
   }
 
   @Override

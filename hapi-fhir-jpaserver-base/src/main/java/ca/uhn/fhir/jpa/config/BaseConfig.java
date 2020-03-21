@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.subscription.dbmatcher.CompositeInMemoryDaoSubscriptionMa
 import ca.uhn.fhir.jpa.subscription.dbmatcher.DaoSubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
@@ -54,7 +55,7 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,6 +82,7 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.subscription.module.standalone.*")})
 public abstract class BaseConfig {
 
+	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
 	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
 	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
@@ -204,8 +206,13 @@ public abstract class BaseConfig {
 	 * Create a @Primary @Bean if you need a different implementation
 	 */
 	@Bean
-	public ISubscribableChannelFactory linkedBlockingQueueSubscribableChannelFactory() {
+	public ISubscribableChannelFactory subscribableChannelFactory() {
 		return new LinkedBlockingQueueSubscribableChannelFactory();
+	}
+
+	@Bean
+	public SubscriptionChannelFactory subscriptionChannelFactory() {
+		return new SubscriptionChannelFactory();
 	}
 
 	@Bean
@@ -280,6 +287,4 @@ public abstract class BaseConfig {
 	private static HapiFhirHibernateJpaDialect hibernateJpaDialect(HapiLocalizer theLocalizer) {
 		return new HapiFhirHibernateJpaDialect(theLocalizer);
 	}
-
-
 }

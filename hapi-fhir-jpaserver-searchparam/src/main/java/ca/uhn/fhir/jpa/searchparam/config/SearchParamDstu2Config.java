@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.config;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.searchparam.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
-import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -48,8 +48,8 @@ public class SearchParamDstu2Config extends BaseSearchParamConfig {
 	}
 
 	@Primary
-	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainDstu2")
+	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChain")
 	public IValidationSupport validationSupportChainDstu2() {
-		return new DefaultProfileValidationSupport();
+		return new DefaultProfileValidationSupport(fhirContextDstu2());
 	}
 }

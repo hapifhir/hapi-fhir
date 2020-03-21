@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.QuoteMode;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -43,6 +42,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
 
 public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConceptMapCommand {
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
@@ -114,7 +114,7 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 
 	private void convertConceptMapToCsv(org.hl7.fhir.dstu3.model.ConceptMap theConceptMap) throws ExecutionException {
 		try {
-			convertConceptMapToCsv(VersionConvertor_30_40.convertConceptMap(theConceptMap));
+			convertConceptMapToCsv(convertConceptMap(theConceptMap));
 		} catch (FHIRException fe) {
 			throw new ExecutionException(fe);
 		}

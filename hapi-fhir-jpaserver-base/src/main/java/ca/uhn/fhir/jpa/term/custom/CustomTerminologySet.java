@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.custom;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,40 +28,38 @@ import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimaps;
 import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CustomTerminologySet {
 
 	private final int mySize;
-	private final ListMultimap<TermConcept, String> myUnanchoredChildConceptsToParentCodes;
 	private final List<TermConcept> myRootConcepts;
 
 	/**
 	 * Constructor for an empty object
 	 */
 	public CustomTerminologySet() {
-		this(0, ArrayListMultimap.create(), new ArrayList<>());
+		this(0, new ArrayList<>());
 	}
 
 	/**
 	 * Constructor
 	 */
-	private CustomTerminologySet(int theSize, ListMultimap<TermConcept, String> theUnanchoredChildConceptsToParentCodes, Collection<TermConcept> theRootConcepts) {
-		this(theSize, theUnanchoredChildConceptsToParentCodes, new ArrayList<>(theRootConcepts));
-	}
-
-	/**
-	 * Constructor
-	 */
-	private CustomTerminologySet(int theSize, ListMultimap<TermConcept, String> theUnanchoredChildConceptsToParentCodes, List<TermConcept> theRootConcepts) {
+	private CustomTerminologySet(int theSize, List<TermConcept> theRootConcepts) {
 		mySize = theSize;
-		myUnanchoredChildConceptsToParentCodes = theUnanchoredChildConceptsToParentCodes;
 		myRootConcepts = theRootConcepts;
 	}
 
@@ -79,10 +77,6 @@ public class CustomTerminologySet {
 		return retVal;
 	}
 
-
-	public ListMultimap<TermConcept, String> getUnanchoredChildConceptsToParentCodes() {
-		return Multimaps.unmodifiableListMultimap(myUnanchoredChildConceptsToParentCodes);
-	}
 
 	public int getSize() {
 		return mySize;
@@ -111,22 +105,9 @@ public class CustomTerminologySet {
 		return Collections.unmodifiableList(myRootConcepts);
 	}
 
-	public void addUnanchoredChildConcept(String theParentCode, String theCode, String theDisplay) {
-		Validate.notBlank(theParentCode);
-		Validate.notBlank(theCode);
-
-		TermConcept code = new TermConcept()
-			.setCode(theCode)
-			.setDisplay(theDisplay);
-		myUnanchoredChildConceptsToParentCodes.put(code, theParentCode);
-	}
-
 	public void validateNoCycleOrThrowInvalidRequest() {
 		Set<String> codes = new HashSet<>();
 		validateNoCycleOrThrowInvalidRequest(codes, getRootConcepts());
-		for (TermConcept next : myUnanchoredChildConceptsToParentCodes.keySet()) {
-			validateNoCycleOrThrowInvalidRequest(codes, next);
-		}
 	}
 
 	private void validateNoCycleOrThrowInvalidRequest(Set<String> theCodes, List<TermConcept> theRootConcepts) {
@@ -142,25 +123,30 @@ public class CustomTerminologySet {
 		validateNoCycleOrThrowInvalidRequest(theCodes, next.getChildCodes());
 	}
 
+	public Set<String> getRootConceptCodes() {
+		return getRootConcepts()
+			.stream()
+			.map(TermConcept::getCode)
+			.collect(Collectors.toSet());
+	}
 
 	@Nonnull
 	public static CustomTerminologySet load(LoadedFileDescriptors theDescriptors, boolean theFlat) {
 
 		final Map<String, TermConcept> code2concept = new LinkedHashMap<>();
-		ArrayListMultimap<TermConcept, String> unanchoredChildConceptsToParentCodes = ArrayListMultimap.create();
 
 		// Concepts
 		IRecordHandler conceptHandler = new ConceptHandler(code2concept);
 		TermLoaderSvcImpl.iterateOverZipFile(theDescriptors, TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE, conceptHandler, ',', QuoteMode.NON_NUMERIC, false);
 		if (theFlat) {
 
-			return new CustomTerminologySet(code2concept.size(), ArrayListMultimap.create(), code2concept.values());
+			return new CustomTerminologySet(code2concept.size(), new ArrayList<>(code2concept.values()));
 
 		} else {
 
 			// Hierarchy
 			if (theDescriptors.hasFile(TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE)) {
-				IRecordHandler hierarchyHandler = new HierarchyHandler(code2concept, unanchoredChildConceptsToParentCodes);
+				IRecordHandler hierarchyHandler = new HierarchyHandler(code2concept);
 				TermLoaderSvcImpl.iterateOverZipFile(theDescriptors, TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE, hierarchyHandler, ',', QuoteMode.NON_NUMERIC, false);
 			}
 
@@ -178,7 +164,7 @@ public class CustomTerminologySet {
 				}
 
 				// Sort children so they appear in the same order as they did in the concepts.csv file
-				nextConcept.getChildren().sort((o1,o2)->{
+				nextConcept.getChildren().sort((o1, o2) -> {
 					String code1 = o1.getChild().getCode();
 					String code2 = o2.getChild().getCode();
 					int order1 = codesInOrder.get(code1);
@@ -188,7 +174,7 @@ public class CustomTerminologySet {
 
 			}
 
-			return new CustomTerminologySet(code2concept.size(), unanchoredChildConceptsToParentCodes, rootConcepts);
+			return new CustomTerminologySet(code2concept.size(), rootConcepts);
 		}
 	}
 

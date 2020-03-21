@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,11 +56,29 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init360(); // 20180918 - 20181112
 		init400(); // 20190401 - 20190814
 		init410(); // 20190815 - 20191014
-		init420(); // 20191015 - present
+		init420(); // 20191015 - 20200217
+		init430(); // 20200218 - present
 	}
 
-	protected void init420() { // 20191015 - present
+	protected void init430() { // 20200218 - present
+		Builder version = forVersion(VersionEnum.V4_3_0);
+
+		// Eliminate circular dependency.
+		version.onTable("HFJ_RESOURCE").dropColumn("20200218.1", "FORCED_ID_PID");
+		version.onTable("HFJ_RES_VER").dropColumn("20200218.2", "FORCED_ID_PID");
+		version.onTable("HFJ_RES_VER").addForeignKey("20200218.3", "FK_RESOURCE_HISTORY_RESOURCE").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+		version.onTable("HFJ_RES_VER").modifyColumn("20200220.1", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+	}
+
+	protected void init420() { // 20191015 - 20200217
 		Builder version = forVersion(VersionEnum.V4_2_0);
+
+		// TermValueSetConceptDesignation
+		version.onTable("TRM_VALUESET_C_DESIGNATION").dropIndex("20200202.1", "IDX_VALUESET_C_DSGNTN_VAL").failureAllowed();
+		Builder.BuilderWithTableName searchTable = version.onTable("HFJ_SEARCH");
+		searchTable.dropIndex("20200203.1", "IDX_SEARCH_LASTRETURNED");
+		searchTable.dropColumn("20200203.2", "SEARCH_LAST_RETURNED");
+		searchTable.addIndex("20200203.3", "IDX_SEARCH_CREATED").unique(false).withColumns("CREATED");
 	}
 
 	protected void init410() { // 20190815 - 20191014
@@ -883,10 +901,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	}
 
-	private void init330() { // 20180114 - 20180329
+	protected void init330() { // 20180114 - 20180329
 		Builder version = forVersion(VersionEnum.V3_3_0);
 
-		version.initializeSchema("20180115.0", new SchemaInitializationProvider("/ca/uhn/hapi/fhir/jpa/docs/database", "HFJ_RESOURCE"));
+		version.initializeSchema("20180115.0", new SchemaInitializationProvider("HAPI FHIR", "/ca/uhn/hapi/fhir/jpa/docs/database", "HFJ_RESOURCE"));
 
 		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
 		version.startSectionWithMessage("Starting work on table: " + hfjResource.getTableName());

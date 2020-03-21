@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.module.channel;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,11 @@ import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.SubscribableChannel;
-import org.springframework.stereotype.Component;
 
-@Component
 public class SubscriptionChannelFactory {
 
-	private ISubscribableChannelFactory mySubscribableChannelFactory;
-
 	@Autowired
-	public SubscriptionChannelFactory(ISubscribableChannelFactory theSubscribableChannelFactory) {
-		mySubscribableChannelFactory = theSubscribableChannelFactory;
-	}
+	private ISubscribableChannelFactory mySubscribableChannelFactory;
 
 	public SubscribableChannel newDeliveryChannel(String theChannelName) {
 		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName, ResourceDeliveryMessage.class, mySubscribableChannelFactory.getDeliveryChannelConcurrentConsumers());

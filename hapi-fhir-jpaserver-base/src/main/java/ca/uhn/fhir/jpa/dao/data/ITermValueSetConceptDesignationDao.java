@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ package ca.uhn.fhir.jpa.dao.data;
  */
 
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -37,6 +35,4 @@ public interface ITermValueSetConceptDesignationDao extends JpaRepository<TermVa
 	@Modifying
 	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
 
-	@Query("SELECT vscd FROM TermValueSetConceptDesignation vscd WHERE vscd.myConcept.myId = :pid")
-	Slice<TermValueSetConceptDesignation> findByTermValueSetConceptId(Pageable thePage, @Param("pid") Long theValueSetConceptId);
 }

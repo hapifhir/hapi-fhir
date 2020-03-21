@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,23 +157,8 @@ public class SearchParameter extends BaseQueryParameter {
 	}
 
 	@Override
-	public boolean handlesMissing() {
-		return false;
-	}
-
-	@Override
 	public boolean isRequired() {
 		return myRequired;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ca.uhn.fhir.rest.param.IParameter#parse(java.util.List)
-	 */
-	@Override
-	public Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
-		return myParamBinder.parse(theContext, getName(), theString);
 	}
 
 	public void setChainlists(String[] theChainWhitelist) {

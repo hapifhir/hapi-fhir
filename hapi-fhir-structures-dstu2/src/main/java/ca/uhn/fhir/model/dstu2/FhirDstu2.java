@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.dstu2;
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.*;
@@ -47,11 +46,6 @@ public class FhirDstu2 implements IFhirVersion {
 		throw new UnsupportedOperationException("FluentPath is not supported in DSTU2 contexts");
 	}
 
-
-	@Override
-	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
-		throw new UnsupportedOperationException("Validation support is not supported in DSTU2 contexts");
-	}
 
 	@Override
 	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {

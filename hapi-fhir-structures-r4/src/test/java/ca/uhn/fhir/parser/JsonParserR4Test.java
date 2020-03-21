@@ -10,6 +10,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullWriter;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -52,6 +53,38 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(narrative);
 	}
 
+	@Test
+	public void testNamespacePrefixTrimmedFromNarrative() {
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">" +
+			"<text>" +
+			"<xhtml:div>" +
+			"<xhtml:img src=\"foo\"/>" +
+			"@fhirabend" +
+			"</xhtml:div>" +
+			"</text>" +
+			"</Patient>";
+		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, input);
+
+		String expected = "<div xmlns=\"http://www.w3.org/1999/xhtml\"><img src=\"foo\"/>@fhirabend</div>";
+		assertEquals(expected, parsed.getText().getDiv().getValueAsString());
+
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("\"div\":\"" + expected.replace("\"", "\\\"") + "\""));
+	}
+
+	@Test
+	public void testNamespacePrefixStrippedOnJsonParse() {
+		String input = "{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\"><xhtml:img src=\\\"foo\\\"/>@fhirabend</xhtml:div>\"}}";
+		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, input);
+		XhtmlNode div = parsed.getText().getDiv();
+
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><img src=\"foo\"/>@fhirabend</div>", div.getValueAsString());
+
+		String encoded = ourCtx.newXmlParser().encodeResourceToString(parsed);
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\"><img src=\"foo\"/>@fhirabend</div></text></Patient>", encoded);
+	}
+
 
 	@Test
 	public void testEncodeExtensionOnBinaryData() {
@@ -77,6 +110,19 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(output);
 
 		assertThat(output, containsString("\"Questionnaire/123/_history/456\""));
+	}
+
+	@Test
+	public void testPrettyPrint() {
+		ourCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths("QuestionnaireResponse.questionnaire");
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.getQuestionnaireElement().setValueAsString("Questionnaire/123/_history/456");
+
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(qr);
+		ourLog.info(output);
+
+		assertThat(output, containsString("\n  \"resourceType\""));
 	}
 
 	/**
@@ -202,6 +248,12 @@ public class JsonParserR4Test extends BaseTest {
 
 	}
 
+	@Test
+	public void testParseSingleQuotes() {
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, "{ 'resourceType': 'Bundle', 'id': '123' }");
+		assertEquals("123", bundle.getIdElement().getIdPart());
+	}
+
 
 	@Test
 	public void testEncodeBinary() {
@@ -212,6 +264,18 @@ public class JsonParserR4Test extends BaseTest {
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(false);
 		String output = parser.encodeResourceToString(b);
 		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"application/octet-stream\",\"data\":\"AAECAwQ=\"}", output);
+	}
+
+
+	@Test
+	public void testAlwaysUseUnixNewlines() {
+		Patient p = new Patient();
+		p.setId("1");
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		assertEquals("{\n" +
+			"  \"resourceType\": \"Patient\",\n" +
+			"  \"id\": \"1\"\n" +
+			"}", encoded);
 	}
 
 	@Test
@@ -533,11 +597,21 @@ public class JsonParserR4Test extends BaseTest {
 	 * 18:25:00.463 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:483] - Encoded 500 passes - 44ms / pass - 22.6 / second
 	 *
 	 * 2019-09-19 - Post #1489
-	 * 20:43:21.434 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:470] - Encoded 2300 passes - 29ms / pass - 33.5 / second
-	 * 20:43:24.228 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:470] - Encoded 2400 passes - 29ms / pass - 33.6 / second
-	 * 20:43:27.029 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:470] - Encoded 2500 passes - 29ms / pass - 33.7 / second
-	 * 20:43:29.825 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:470] - Encoded 2600 passes - 29ms / pass - 33.8 / second
-	 * 20:43:32.779 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:470] - Encoded 2700 passes - 29ms / pass - 33.8 / second
+	 * 15:20:30.134 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:574] - Encoded 800 passes - 28ms / pass - 34.5 / second
+	 * 15:20:32.986 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:574] - Encoded 900 passes - 28ms / pass - 34.6 / second
+	 * 15:20:35.865 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:574] - Encoded 1000 passes - 28ms / pass - 34.6 / second
+	 * 15:20:38.797 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:574] - Encoded 1100 passes - 28ms / pass - 34.6 / second
+	 * 15:20:41.708 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:574] - Encoded 1200 passes - 28ms / pass - 34.5 / second
+	 * 15:20:44.722 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:574] - Encoded 1300 passes - 29ms / pass - 34.4 / second
+	 * 15:20:47.716 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:574] - Encoded 1400 passes - 29ms / pass - 34.4 / second
+	 *
+	 * 2020-02-27 - Post #1673
+	 * 21:27:25.817 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:609] - Encoded 1100 passes - 28ms / pass - 35.5 / second
+	 * 21:27:28.598 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:609] - Encoded 1200 passes - 28ms / pass - 35.5 / second
+	 * 21:27:31.436 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:609] - Encoded 1300 passes - 28ms / pass - 35.5 / second
+	 * 21:27:34.246 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:609] - Encoded 1400 passes - 28ms / pass - 35.5 / second
+	 * 21:27:37.013 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:609] - Encoded 1500 passes - 28ms / pass - 35.6 / second
+	 * 21:27:39.874 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:609] - Encoded 1600 passes - 28ms / pass - 35.5 / second
 	 */
 	@Test
 	@Ignore
@@ -546,6 +620,14 @@ public class JsonParserR4Test extends BaseTest {
 		Bundle b = createBigBundle();
 
 		IParser parser = ourCtx.newJsonParser();
+
+		for (int i = 0; i < 500; i++) {
+			parser.encodeResourceToWriter(b, new NullWriter());
+			if (i % 100 == 0) {
+				ourLog.info("Warm-up Encoded {} passes", i);
+			}
+		}
+
 		StopWatch sw = new StopWatch();
 		for (int i = 0; ; i++) {
 			parser.encodeResourceToWriter(b, new NullWriter());
@@ -588,17 +670,39 @@ public class JsonParserR4Test extends BaseTest {
 
 	/**
 	 * 2019-09-19
-	 * 18:31:01.513 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:486] - Parsed 600 passes - 37ms / pass - 27.0 / second
-	 * 18:31:04.454 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:486] - Parsed 700 passes - 35ms / pass - 27.8 / second
-	 * 18:31:07.451 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:486] - Parsed 800 passes - 35ms / pass - 28.4 / second
-	 * 18:31:10.457 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:486] - Parsed 900 passes - 34ms / pass - 28.9 / second
+	 * 15:22:30.758 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:638] - Parsed 1700 passes - 12ms / pass - 79.3 / second
+	 * 15:22:31.968 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:638] - Parsed 1800 passes - 12ms / pass - 79.5 / second
+	 * 15:22:33.223 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:638] - Parsed 1900 passes - 12ms / pass - 79.5 / second
+	 * 15:22:34.459 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:638] - Parsed 2000 passes - 12ms / pass - 79.6 / second
+	 * 15:22:35.696 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:638] - Parsed 2100 passes - 12ms / pass - 79.7 / second
+	 * 15:22:36.983 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:638] - Parsed 2200 passes - 12ms / pass - 79.6 / second
+	 * 15:22:38.203 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:638] - Parsed 2300 passes - 12ms / pass - 79.7 / second
+	 * 15:22:39.456 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:638] - Parsed 2400 passes - 12ms / pass - 79.7 / second
+	 * 15:22:40.699 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:638] - Parsed 2500 passes - 12ms / pass - 79.7 / second
+	 * 15:22:42.135 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:638] - Parsed 2600 passes - 12ms / pass - 79.3 / second
+	 *
+	 * 2020-02-27 - Post #1673
+	 * 21:29:38.157 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:687] - Parsed 2200 passes - 11ms / pass - 83.4 / second
+	 * 21:29:39.374 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:687] - Parsed 2300 passes - 12ms / pass - 83.3 / second
+	 * 21:29:40.576 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:687] - Parsed 2400 passes - 12ms / pass - 83.3 / second
+	 * 21:29:41.778 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:687] - Parsed 2500 passes - 12ms / pass - 83.3 / second
+	 * 21:29:42.999 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:687] - Parsed 2600 passes - 12ms / pass - 83.3 / second
+	 * 
 	 */
 	@Test
 	@Ignore
-	public void testTimingsInput() throws IOException {
+	public void testTimingsInput() {
 		Bundle b = createBigBundle();
 		IParser parser = ourCtx.newJsonParser();
 		String input = parser.encodeResourceToString(b);
+
+		for (int i = 0; i < 500; i++) {
+			parser.parseResource(input);
+			if (i % 100 == 0) {
+				ourLog.info("Warm up parsed {} passes", i);
+			}
+		}
+
 
 		StopWatch sw = new StopWatch();
 		for (int i = 0; ; i++) {

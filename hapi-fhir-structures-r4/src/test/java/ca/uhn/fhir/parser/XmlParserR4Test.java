@@ -1,21 +1,26 @@
 package ca.uhn.fhir.parser;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 
+import ca.uhn.fhir.test.BaseTest;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Narrative;
+import org.hl7.fhir.r4.model.Observation;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class XmlParserR4Test {
+import java.io.IOException;
+
+public class XmlParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(XmlParserR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
 	
@@ -72,6 +77,18 @@ public class XmlParserR4Test {
 		assertEquals("urn:uuid:0.0.0.0", input.getEntry().get(0).getFullUrl());
 		assertEquals("MessageHeader/1.1.1.1", input.getEntry().get(0).getResource().getId());
 
+	}
+
+	/**
+	 * See #1658
+	 */
+	@Test
+	public void testNarrativeLangAttributePreserved() throws IOException {
+		Observation obs = loadResource(ourCtx, Observation.class, "/resource-with-lang-in-narrative.xml");
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(obs);
+		assertThat(encoded, containsString("xmlns=\"http://www.w3.org/1999/xhtml\""));
+		assertThat(encoded, containsString("lang=\"en-US\""));
+		ourLog.info(encoded);
 	}
 
 

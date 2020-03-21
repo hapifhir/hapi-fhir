@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,17 +25,12 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends BaseTableColumnTask<T> {
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseTableColumnTypeTask.class);
-
-
+public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 	private ColumnTypeEnum myColumnType;
 	private Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> myColumnTypeToDriverTypeToSqlType = new HashMap<>();
 	private Boolean myNullable;
@@ -116,6 +111,11 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		return myColumnType;
 	}
 
+	public BaseTableColumnTask setColumnType(ColumnTypeEnum theColumnType) {
+		myColumnType = theColumnType;
+		return this;
+	}
+
 	private void setColumnType(ColumnTypeEnum theColumnType, DriverTypeEnum theDriverType, String theColumnTypeSql) {
 		Map<DriverTypeEnum, String> columnSqlType = myColumnTypeToDriverTypeToSqlType.computeIfAbsent(theColumnType, k -> new HashMap<>());
 		if (columnSqlType.containsKey(theDriverType)) {
@@ -123,7 +123,6 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		}
 		columnSqlType.put(theDriverType, theColumnTypeSql);
 	}
-
 
 	@Override
 	public void validate() {
@@ -136,12 +135,6 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		} else {
 			Validate.isTrue(myColumnLength == null);
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public T setColumnType(ColumnTypeEnum theColumnType) {
-		myColumnType = theColumnType;
-		return (T) this;
 	}
 
 	protected String getSqlType() {
@@ -163,9 +156,9 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		return myNullable;
 	}
 
-	public T setNullable(boolean theNullable) {
+	public BaseTableColumnTask setNullable(boolean theNullable) {
 		myNullable = theNullable;
-		return (T) this;
+		return this;
 	}
 
 	protected String getSqlNotNull() {
@@ -176,11 +169,35 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		return myColumnLength;
 	}
 
-	public BaseTableColumnTypeTask<T> setColumnLength(long theColumnLength) {
+	public BaseTableColumnTypeTask setColumnLength(long theColumnLength) {
 		myColumnLength = theColumnLength;
 		return this;
 	}
 
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(getColumnTypeName(myColumnType));
+		theBuilder.append(myNullable);
+		theBuilder.append(myColumnLength);
+	}
+
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		BaseTableColumnTypeTask otherObject = (BaseTableColumnTypeTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(getColumnTypeName(myColumnType), getColumnTypeName(otherObject.myColumnType));
+		theBuilder.append(myNullable, otherObject.myNullable);
+		theBuilder.append(myColumnLength, otherObject.myColumnLength);
+	}
+
+	@Nullable
+	private Object getColumnTypeName(ColumnTypeEnum theColumnType) {
+		if (theColumnType == null) {
+			return null;
+		}
+		return myColumnType.name();
+	}
 
 	public enum ColumnTypeEnum {
 
@@ -191,42 +208,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		FLOAT,
 		INT,
 		BLOB,
-		CLOB
-		;
+		CLOB;
 
-	}
-
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (!(theO instanceof BaseTableColumnTypeTask)) return false;
-
-		BaseTableColumnTypeTask<?> that = (BaseTableColumnTypeTask<?>) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(getColumnTypeName(myColumnType), getColumnTypeName(that.myColumnType))
-			.append(myNullable, that.myNullable)
-			.append(myColumnLength, that.myColumnLength)
-			.isEquals();
-	}
-
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(getColumnTypeName(myColumnType))
-			.append(myNullable)
-			.append(myColumnLength)
-			.toHashCode();
-	}
-
-	@Nullable
-	private Object getColumnTypeName(ColumnTypeEnum theColumnType) {
-		if (theColumnType == null) {
-			return null;
-		}
-		return myColumnType.name();
 	}
 }

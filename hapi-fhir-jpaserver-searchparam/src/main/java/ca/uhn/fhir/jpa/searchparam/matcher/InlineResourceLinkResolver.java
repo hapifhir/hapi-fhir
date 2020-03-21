@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  */
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Service;
@@ -33,18 +35,17 @@ import org.springframework.stereotype.Service;
 public class InlineResourceLinkResolver implements IResourceLinkResolver {
 
 	@Override
-	public ResourceTable findTargetResource(RuntimeSearchParam theNextSpDef, String theNextPathsUnsplit, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, String theId, RequestDetails theRequest) {
+	public IResourceLookup findTargetResource(RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
+
+		/*
+		 * TODO: JA - This gets used during runtime in-memory matching for subscription. It's not
+		 * really clear if it's useful or not.
+		 */
+
 		ResourceTable target;
 		target = new ResourceTable();
 		target.setResourceType(theTypeString);
-		if (theNextId.isIdPartValidLong()) {
-			target.setId(theNextId.getIdPartAsLong());
-		} else {
-			ForcedId forcedId = new ForcedId();
-			forcedId.setForcedId(theId);
-			target.setForcedId(forcedId);
-		}
-		return target;
+		return new ResourceLookup(theTypeString, null, null);
 	}
 
 	@Override

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,9 @@ public class InMemoryMatchResult {
 	public static final String CHAIN = "Chained parameters are not supported";
 	public static final String PARAM = "Parameter not supported";
 	public static final String QUALIFIER = "Qualified parameter not supported";
+    public static final String LOCATION_NEAR = "Location.position near not supported";
 
-	private final boolean myMatch;
+    private final boolean myMatch;
 	private final boolean mySupported;
 	private final String myUnsupportedParameter;
 	private final String myUnsupportedReason;

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -14,72 +14,70 @@ import java.util.Set;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class ResourceIndexedSearchParamsTest {
 
 	public static final String STRING_ID = "StringId";
 	public static final String LONG_ID = "123";
 	private ResourceIndexedSearchParams myParams;
-	private ResourceTable myTarget;
+	private ResourceTable mySource;
+	private ModelConfig myModelConfig = new ModelConfig();
 
 	@Before
 	public void before() {
-		ResourceTable source = new ResourceTable();
-		source.setResourceType("Patient");
+		mySource = new ResourceTable();
+		mySource.setResourceType("Patient");
 
-		myTarget = new ResourceTable();
-		myTarget.setResourceType("Organization");
-
-		myParams = new ResourceIndexedSearchParams(source);
-		ResourceLink link = new ResourceLink("organization", source, myTarget, new Date());
-		myParams.getResourceLinks().add(link);
+		myParams = new ResourceIndexedSearchParams(mySource);
 	}
 
 	@Test
 	public void matchResourceLinksStringCompareToLong() {
-		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
-		myTarget.setId(123L);
+		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, LONG_ID, new Date());
+		myParams.getResourceLinks().add(link);
 
-		boolean result = myParams.matchResourceLinks("Patient", "organization", referenceParam, "organization");
+		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
+		boolean result = myParams.matchResourceLinks(myModelConfig, "Patient", "organization", referenceParam, "organization");
 		assertFalse(result);
 	}
 
 	@Test
 	public void matchResourceLinksStringCompareToString() {
-		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
-		ForcedId forcedid = new ForcedId();
-		forcedid.setForcedId(STRING_ID);
-		myTarget.setForcedId(forcedid);
+		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, STRING_ID, new Date());
+		myParams.getResourceLinks().add(link);
 
-		boolean result = myParams.matchResourceLinks("Patient", "organization", referenceParam, "organization");
+		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
+		boolean result = myParams.matchResourceLinks(myModelConfig, "Patient", "organization", referenceParam, "organization");
 		assertTrue(result);
 	}
 
 	@Test
 	public void matchResourceLinksLongCompareToString() {
-		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
-		ForcedId forcedid = new ForcedId();
-		forcedid.setForcedId(STRING_ID);
-		myTarget.setForcedId(forcedid);
+		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, STRING_ID, new Date());
+		myParams.getResourceLinks().add(link);
 
-		boolean result = myParams.matchResourceLinks("Patient", "organization", referenceParam, "organization");
+		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
+		boolean result = myParams.matchResourceLinks(myModelConfig, "Patient", "organization", referenceParam, "organization");
 		assertFalse(result);
 	}
 
 	@Test
 	public void matchResourceLinksLongCompareToLong() {
-		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
-		myTarget.setId(123L);
+		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, LONG_ID, new Date());
+		myParams.getResourceLinks().add(link);
 
-		boolean result = myParams.matchResourceLinks("Patient", "organization", referenceParam, "organization");
+		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
+		boolean result = myParams.matchResourceLinks(myModelConfig, "Patient", "organization", referenceParam, "organization");
 		assertTrue(result);
 	}
 
 	private ReferenceParam getReferenceParam(String theId) {
-		ReferenceParam retval = new ReferenceParam();
-		retval.setValue(theId);
-		return retval;
+		ReferenceParam retVal = new ReferenceParam();
+		retVal.setValue(theId);
+		return retVal;
 	}
 
 
@@ -93,14 +91,14 @@ public class ResourceIndexedSearchParamsTest {
 			Lists.newArrayList("name=SMITH", "name=JOHN")
 		);
 		values = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains("Patient", partsChoices);
-		assertThat(values.toString(), values, containsInAnyOrder("Patient?gender=male&name=JOHN","Patient?gender=male&name=SMITH"));
+		assertThat(values.toString(), values, containsInAnyOrder("Patient?gender=male&name=JOHN", "Patient?gender=male&name=SMITH"));
 
 		partsChoices = Lists.newArrayList(
 			Lists.newArrayList("gender=male", ""),
 			Lists.newArrayList("name=SMITH", "name=JOHN", "")
 		);
 		values = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains("Patient", partsChoices);
-		assertThat(values.toString(), values, containsInAnyOrder("Patient?gender=male&name=JOHN","Patient?gender=male&name=SMITH"));
+		assertThat(values.toString(), values, containsInAnyOrder("Patient?gender=male&name=JOHN", "Patient?gender=male&name=SMITH"));
 
 		partsChoices = Lists.newArrayList(
 		);
