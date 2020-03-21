@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.fluentpath.IFluentPath;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -120,7 +120,7 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 		if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 			return Collections.singletonList(theResource);
 		}
-		IFluentPath fhirPath = theFhirContext.newFluentPath();
+		IFhirPath fhirPath = theFhirContext.newFluentPath();
 		return fhirPath.evaluate(theResource, theContextPath, IBase.class);
 	}
 

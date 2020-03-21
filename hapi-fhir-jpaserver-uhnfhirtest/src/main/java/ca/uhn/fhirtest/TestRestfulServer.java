@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.BanUnsupportedHttpMethodsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.FhirPathFilterInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhirtest.config.TestDstu2Config;
 import ca.uhn.fhirtest.config.TestDstu3Config;
@@ -197,6 +198,11 @@ public class TestRestfulServer extends RestfulServer {
 		 */
 		CorsInterceptor corsInterceptor = new CorsInterceptor();
 		registerInterceptor(corsInterceptor);
+
+		/*
+		 * Enable FHIRPath evaluation
+		 */
+		registerInterceptor(new FhirPathFilterInterceptor());
 
 		/*
 		 * Enable version conversion
