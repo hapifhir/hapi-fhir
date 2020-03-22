@@ -1,4 +1,4 @@
-package ca.uhn.fhir.fluentpath;
+package ca.uhn.fhir.fhirpath;
 
 /*
  * #%L
@@ -25,7 +25,7 @@ import java.util.Optional;
 
 import org.hl7.fhir.instance.model.api.IBase;
 
-public interface IFluentPath {
+public interface IFhirPath {
 
 	/**
 	 * Apply the given FluentPath expression against the given input and return

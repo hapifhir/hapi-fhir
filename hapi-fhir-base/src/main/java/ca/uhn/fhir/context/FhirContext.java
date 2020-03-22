@@ -3,7 +3,7 @@ package ca.uhn.fhir.context;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.fluentpath.IFluentPath;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IFhirVersion;
@@ -625,12 +625,21 @@ public class FhirContext {
 	}
 
 	/**
-	 * Creates a new FluentPath engine which can be used to exvaluate
+	 * @since 2.2
+	 * @deprecated Deprecated in HAPI FHIR 5.0.0. Use {@link #newFhirPath()} instead.
+	 */
+	@Deprecated
+	public IFhirPath newFluentPath() {
+		return newFhirPath();
+	}
+
+	/**
+	 * Creates a new FhirPath engine which can be used to evaluate
 	 * path expressions over FHIR resources. Note that this engine will use the
 	 * {@link IValidationSupport context validation support} module which is
 	 * configured on the context at the time this method is called.
 	 * <p>
-	 * In other words, call {@link #setValidationSupport(IValidationSupport)} before
+	 * In other words, you may wish to call {@link #setValidationSupport(IValidationSupport)} before
 	 * calling {@link #newFluentPath()}
 	 * </p>
 	 * <p>
@@ -640,9 +649,9 @@ public class FhirContext {
 	 * {@link UnsupportedOperationException}
 	 * </p>
 	 *
-	 * @since 2.2
+	 * @since 5.0.0
 	 */
-	public IFluentPath newFluentPath() {
+	public IFhirPath newFhirPath() {
 		return myVersion.createFluentPathExecutor(this);
 	}
 

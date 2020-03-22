@@ -17,3 +17,11 @@
     [Migrating to HAPI FHIR 5.x](/hapi-fhir/docs/validation/instance_validator.html#migrating-to-hapi-fhir-5x)
     for details on how to account for this change in your code.
     "
+- item:
+     issue: "1769"
+     type: "change"
+     title: "**Breaking Change**:
+    The `IFluentPath` interface has been renamed to `IFhirPath`, and the `FhirContext#newFluentPath()` method
+    has been replaced with an equivalent `FhirContext.newFhirPath()`. The FhirPath expression language was initially
+    called FluentPath before being renamed, so this change brings HAPI FHIR inline with the correct naming.
+    "
