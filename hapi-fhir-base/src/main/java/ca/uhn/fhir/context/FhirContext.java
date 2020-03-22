@@ -652,7 +652,7 @@ public class FhirContext {
 	 * @since 5.0.0
 	 */
 	public IFhirPath newFhirPath() {
-		return myVersion.createFluentPathExecutor(this);
+		return myVersion.createFhirPathExecutor(this);
 	}
 
 	/**

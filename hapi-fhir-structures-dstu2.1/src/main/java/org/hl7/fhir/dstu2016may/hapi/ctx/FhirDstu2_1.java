@@ -41,7 +41,7 @@ public class FhirDstu2_1 implements IFhirVersion {
 	private String myId;
 
 	@Override
-	public IFhirPath createFluentPathExecutor(FhirContext theFhirContext) {
+	public IFhirPath createFhirPathExecutor(FhirContext theFhirContext) {
 		throw new UnsupportedOperationException("FluentPath is not supported in DSTU2 contexts");
 	}
 

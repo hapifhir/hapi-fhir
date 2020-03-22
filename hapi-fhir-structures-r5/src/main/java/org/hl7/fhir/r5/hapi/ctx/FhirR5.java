@@ -52,7 +52,7 @@ public class FhirR5 implements IFhirVersion {
 	private String myId;
 
 	@Override
-	public IFhirPath createFluentPathExecutor(FhirContext theFhirContext) {
+	public IFhirPath createFhirPathExecutor(FhirContext theFhirContext) {
 		return new FhirPathR5(theFhirContext);
 	}
 

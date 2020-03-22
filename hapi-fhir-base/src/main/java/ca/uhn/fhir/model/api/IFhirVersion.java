@@ -38,7 +38,7 @@ import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
  */
 public interface IFhirVersion {
 
-	IFhirPath createFluentPathExecutor(FhirContext theFhirContext);
+	IFhirPath createFhirPathExecutor(FhirContext theFhirContext);
 
 	IBaseResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
 
