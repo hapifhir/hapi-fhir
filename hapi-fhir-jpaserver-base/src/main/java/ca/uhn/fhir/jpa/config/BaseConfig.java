@@ -280,7 +280,8 @@ public abstract class BaseConfig {
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
 		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));
-		theFactory.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity");
+		// FIXME EMPI move empi out of here (requires refactoring code out of BaseJpaXXXTest into @Rule and @ClassRule classes
+		theFactory.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity", "ca.uhn.fhir.empi.jpalink.entity");
 		theFactory.setPersistenceProvider(new HibernatePersistenceProvider());
 	}
 

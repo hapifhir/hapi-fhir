@@ -1,7 +1,7 @@
 package ca.uhn.fhir.empi.rules;
 
 import ca.uhn.fhir.empi.BaseTest;
-import ca.uhn.fhir.jpa.util.JsonUtil;
+import ca.uhn.fhir.util.JsonUtil;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

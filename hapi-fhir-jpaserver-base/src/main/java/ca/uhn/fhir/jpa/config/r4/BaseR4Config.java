@@ -7,8 +7,10 @@ import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcR4;
@@ -17,10 +19,9 @@ import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Meta;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -110,14 +111,14 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 	}
 
 	@Bean(name = "mySystemDaoR4", autowire = Autowire.BY_NAME)
-	public IFhirSystemDao<org.hl7.fhir.r4.model.Bundle, org.hl7.fhir.r4.model.Meta> systemDaoR4() {
-		ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4 retVal = new ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4();
+	public IFhirSystemDao<Bundle, Meta> systemDaoR4() {
+		FhirSystemDaoR4 retVal = new FhirSystemDaoR4();
 		return retVal;
 	}
 
 	@Bean(name = "mySystemProviderR4")
-	public ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4 systemProviderR4() {
-		ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4 retVal = new ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4();
+	public JpaSystemProviderR4 systemProviderR4() {
+		JpaSystemProviderR4 retVal = new JpaSystemProviderR4();
 		retVal.setContext(fhirContextR4());
 		retVal.setDao(systemDaoR4());
 		return retVal;
@@ -133,5 +134,4 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 	public ITermReadSvcR4 terminologyService() {
 		return new TermReadSvcR4();
 	}
-
 }

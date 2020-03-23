@@ -3,8 +3,8 @@ package ca.uhn.fhir.empi.rules;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -92,7 +92,7 @@ public class EmpiRulesJson implements IModelJson, Iterable<EmpiFieldMatchJson> {
 		return this;
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public Iterator<EmpiFieldMatchJson> iterator() {
 		return myMatchFieldJsonList.iterator();

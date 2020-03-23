@@ -7,10 +7,6 @@
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
 	<version>5.0.0-SNAPSHOT</version>
-	<modules>
-		<module>hapi-fhir-empi</module>
-		<module>hapi-fhir-empi-rules</module>
-	</modules>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -2477,6 +2473,7 @@
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jpaserver-migrate</module>
+				<module>hapi-fhir-empi</module>
 				<module>restful-server-example</module>
 				<module>hapi-fhir-testpage-overlay</module>
 				<module>hapi-fhir-jpaserver-uhnfhirtest</module>
