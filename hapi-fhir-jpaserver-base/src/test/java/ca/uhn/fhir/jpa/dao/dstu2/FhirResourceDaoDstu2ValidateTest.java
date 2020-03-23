@@ -143,11 +143,15 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
 		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
-		MethodOutcome outcome = myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
-
-		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
-		ourLog.info(ooString);
-		assertThat(ooString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' could not be resolved, so has not been checked"));
+		ourLog.info(encoded);
+		try {
+			myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
+			fail();
+		} catch (PreconditionFailedException e) {
+			String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
+			ourLog.info(ooString);
+			assertThat(ooString, containsString("Profile reference \\\"http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid\\\" could not be resolved, so has not been checked"));
+		}
 
 	}
 

@@ -670,6 +670,40 @@ public class GenericClientR4Test {
 		assertEquals("http://example.com/fhir/_history?_at=ge2011&_at=le2018", capt.getAllValues().get(0).getURI().toASCIIString());
 	}
 
+
+	@Test
+	public void testHistoryOnTypeString() throws Exception {
+
+		final Bundle resp1 = new Bundle();
+		resp1.setTotal(0);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
+			@Override
+			public Header[] answer(InvocationOnMock theInvocation) {
+				return new Header[0];
+			}
+		});
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(t -> {
+			IParser p = ourCtx.newXmlParser();
+			return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), StandardCharsets.UTF_8);
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		Bundle outcome = client
+			.history()
+			.onType("Patient")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(0, outcome.getTotal());
+		assertEquals("http://example.com/fhir/Patient/_history", capt.getAllValues().get(0).getURI().toASCIIString());
+	}
+
 	@Test
 	public void testHttp499() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);

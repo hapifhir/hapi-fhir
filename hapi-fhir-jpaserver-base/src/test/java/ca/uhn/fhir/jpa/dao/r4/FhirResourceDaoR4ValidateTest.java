@@ -20,7 +20,7 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -127,7 +127,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "Unknown code[FOO] in system[http://terminology.hl7.org/CodeSystem/observation-category]", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "Unknown code {http://terminology.hl7.org/CodeSystem/observation-category}FOO", oo.getIssueFirstRep().getDiagnostics());
 
 	}
 
@@ -210,7 +210,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "Unknown code[FOO] in system[http://terminology.hl7.org/CodeSystem/observation-category]", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "Unknown code {http://terminology.hl7.org/CodeSystem/observation-category}FOO", oo.getIssueFirstRep().getDiagnostics());
 
 	}
 
@@ -404,7 +404,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			org.hl7.fhir.r4.model.OperationOutcome oo = (org.hl7.fhir.r4.model.OperationOutcome) e.getOperationOutcome();
 			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 			ourLog.info(outputString);
-			assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' could not be resolved, so has not been checked"));
+			assertThat(outputString, containsString("Profile reference \\\"http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid\\\" could not be resolved, so has not been checked"));
 		}
 	}
 

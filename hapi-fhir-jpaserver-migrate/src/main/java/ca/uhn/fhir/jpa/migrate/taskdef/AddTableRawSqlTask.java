@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
+public class AddTableRawSqlTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddTableRawSqlTask.class);
 	private Map<DriverTypeEnum, List<String>> myDriverToSqls = new HashMap<>();
@@ -91,7 +91,7 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<AddTableRawSqlTask> theOtherObject) {
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
 		super.generateEquals(theBuilder, theOtherObject);
 		AddTableRawSqlTask otherObject = (AddTableRawSqlTask) theOtherObject;
 		theBuilder.append(myDriverNeutralSqls, otherObject.myDriverNeutralSqls);

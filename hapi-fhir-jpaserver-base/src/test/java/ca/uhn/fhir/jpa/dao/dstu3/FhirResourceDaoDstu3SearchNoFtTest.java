@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -15,6 +16,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.method.SearchParameter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
@@ -47,6 +49,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -362,16 +365,16 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.setDevice(new Reference(devId));
 			obs.setSubject(new Reference(pid0));
-			myObservationDao.create(obs, mySrd).getId();
+			obs.setCode(new CodeableConcept(new Coding("sys", "val", "disp")));
+			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		SearchParameterMap params;
+		SearchParameterMap params = new SearchParameterMap();
 
-		// Not currently working
-//		params = new SearchParameterMap();
-//		params.setLoadSynchronous(true);
-//		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
-//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
+		// Target exists and is linked
+		params.setLoadSynchronous(true);
+		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
 
 		// No targets exist
 		params = new SearchParameterMap();

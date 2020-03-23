@@ -29,7 +29,8 @@ import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.util.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -97,11 +98,11 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 		}
 
 		Join<ResourceTable, ResourceIndexedSearchParamToken> join = createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);
-		Collection<Predicate> singleCode = createPredicateToken(tokens, theResourceName, theParamName, myBuilder, join, operation);
+		Collection<Predicate> singleCode = createPredicateToken(tokens, theResourceName, theParamName, myCriteriaBuilder, join, operation);
 		assert singleCode != null;
 		codePredicates.addAll(singleCode);
 
-		Predicate spPredicate = myBuilder.or(toArray(codePredicates));
+		Predicate spPredicate = myCriteriaBuilder.or(toArray(codePredicates));
 		myQueryRoot.addPredicate(spPredicate);
 		return spPredicate;
 	}
@@ -169,7 +170,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 			 */
 
 			if (modifier == TokenParamModifier.IN) {
-				codes.addAll(myTerminologySvc.expandValueSet(code));
+				codes.addAll(myTerminologySvc.expandValueSet(null, code));
 			} else if (modifier == TokenParamModifier.ABOVE) {
 				system = determineSystemIfMissing(theParamName, code, system);
 				validateHaveSystemAndCodeForToken(theParamName, code, system);
@@ -237,7 +238,9 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 				}
 				if (valueSetUris.size() == 1) {
 					String valueSet = valueSetUris.iterator().next();
-					List<VersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSet(valueSet);
+					ValueSetExpansionOptions options = new ValueSetExpansionOptions()
+						.setFailOnMissingCodeSystem(false);
+					List<VersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSet(options, valueSet);
 					for (VersionIndependentConcept nextCandidate : candidateCodes) {
 						if (nextCandidate.getCode().equals(code)) {
 							retVal = nextCandidate.getSystem();
@@ -342,8 +345,8 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 
 	private <T> Expression<Boolean> toEqualOrIsNullPredicate(Path<T> theExpression, T theCode) {
 		if (theCode == null) {
-			return myBuilder.isNull(theExpression);
+			return myCriteriaBuilder.isNull(theExpression);
 		}
-		return myBuilder.equal(theExpression, theCode);
+		return myCriteriaBuilder.equal(theExpression, theCode);
 	}
 }

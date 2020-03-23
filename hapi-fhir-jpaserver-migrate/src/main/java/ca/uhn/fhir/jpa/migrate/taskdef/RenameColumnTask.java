@@ -31,7 +31,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.sql.SQLException;
 import java.util.Set;
 
-public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
+public class RenameColumnTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(RenameColumnTask.class);
 	private String myOldName;

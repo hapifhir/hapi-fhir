@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ExecuteRawSqlTask extends BaseTask<ExecuteRawSqlTask> {
+public class ExecuteRawSqlTask extends BaseTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ExecuteRawSqlTask.class);
 	private Map<DriverTypeEnum, List<String>> myDriverToSqls = new HashMap<>();
@@ -80,7 +80,7 @@ public class ExecuteRawSqlTask extends BaseTask<ExecuteRawSqlTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<ExecuteRawSqlTask> theOtherObject) {
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
 		ExecuteRawSqlTask otherObject = (ExecuteRawSqlTask) theOtherObject;
 		theBuilder.append(myDriverNeutralSqls, otherObject.myDriverNeutralSqls);
 		theBuilder.append(myDriverToSqls, otherObject.myDriverToSqls);

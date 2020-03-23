@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -15,8 +16,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Consent;
@@ -114,6 +114,23 @@ public class SearchParamExtractorR4Test {
 		assertEquals(1, links.size());
 		assertEquals("Consent.source", links.iterator().next().getPath());
 		assertEquals("Consent/999", ((Reference) links.iterator().next().getRef()).getReference());
+	}
+
+
+	@Test
+	public void testExtractSearchParamTokenTest() {
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("sys").setValue("val");
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Patient", Patient.SP_IDENTIFIER);
+		assertNotNull(param);
+		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> params = extractor.extractSearchParamTokens(p, param);
+		assertEquals(1, params.size());
+		ResourceIndexedSearchParamToken paramValue = (ResourceIndexedSearchParamToken) params.iterator().next();
+		assertEquals("identifier", paramValue.getParamName());
+		assertEquals("sys", paramValue.getSystem());
+		assertEquals("val", paramValue.getValue());
 	}
 
 
@@ -227,7 +244,7 @@ public class SearchParamExtractorR4Test {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourValidationSupport = new DefaultProfileValidationSupport();
+		ourValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	}
 
 }

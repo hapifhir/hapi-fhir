@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>4.3.0-SNAPSHOT</version>
+	<version>5.0.0-SNAPSHOT</version>
 	<modules>
 		<module>hapi-fhir-empi</module>
 		<module>hapi-fhir-empi-rules</module>
@@ -610,7 +610,7 @@
 
 	<properties>
 
-		<fhir_core_version>4.2.1-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>4.2.9-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -649,9 +649,9 @@
 		<jsr305_version>3.0.2</jsr305_version>
 		<flyway_version>6.1.0</flyway_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
-		<hibernate_version>5.4.6.Final</hibernate_version>
+		<hibernate_version>5.4.12.Final</hibernate_version>
 		<!-- Update lucene version when you update hibernate-search version -->
-		<hibernate_search_version>5.11.3.Final</hibernate_search_version>
+		<hibernate_search_version>5.11.5.Final</hibernate_search_version>
 		<lucene_version>5.5.5</lucene_version>
 		<hibernate_validator_version>5.4.2.Final</hibernate_validator_version>
 		<httpcore_version>4.4.11</httpcore_version>
@@ -1336,7 +1336,7 @@
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
-				<version>2.3.1</version>
+				<version>2.3.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -2441,50 +2441,12 @@
 			</build>
 		</profile>
 		<profile>
-			<id>SITE</id>
-			<modules>
-				<module>hapi-fhir-base</module>
-				<module>hapi-fhir-structures-dstu2</module>
-				<module>hapi-fhir-structures-dstu3</module>
-				<module>hapi-fhir-structures-r4</module>
-				<module>hapi-fhir-structures-r5</module>
-				<module>hapi-fhir-client</module>
-				<module>hapi-fhir-server</module>
-				<module>hapi-fhir-jpaserver-model</module>
-				<module>hapi-fhir-jpaserver-searchparam</module>
-				<module>hapi-fhir-jpaserver-subscription</module>
-				<module>hapi-fhir-jpaserver-base</module>
-				<module>hapi-fhir-jaxrsserver-base</module>
-				<!-- <module>hapi-fhir-cobertura</module> -->
-				<module>examples</module>
-			</modules>
-			<reporting>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>findbugs-maven-plugin</artifactId>
-						<version>3.0.5</version>
-						<configuration>
-							<classFilesDirectory>./hapi-fhir-base/target/classes</classFilesDirectory>
-						</configuration>
-						<reportSets>
-							<reportSet>
-								<reports>
-									<report>findbugs</report>
-								</reports>
-							</reportSet>
-						</reportSets>
-					</plugin>
-				</plugins>
-			</reporting>
-		</profile>
-		<profile>
 			<id>ALLMODULES</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
-                <module>hapi-fhir-bom</module>
+            <module>hapi-fhir-bom</module>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-docs</module>
@@ -2522,7 +2484,6 @@
 				<module>hapi-fhir-android</module>
 				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
-				<module>examples</module>
 				<!--<module>osgi</module>-->
 				<!--<module>osgi/hapi-fhir-karaf-features</module>
 				<module>osgi/hapi-fhir-karaf-integration-tests</module>-->

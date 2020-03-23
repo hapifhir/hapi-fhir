@@ -82,6 +82,7 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.subscription.module.standalone.*")})
 public abstract class BaseConfig {
 
+	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
 	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
 	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";

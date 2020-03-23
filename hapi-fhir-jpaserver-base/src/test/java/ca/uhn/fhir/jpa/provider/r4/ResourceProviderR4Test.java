@@ -27,9 +27,6 @@ import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
-import ca.uhn.fhir.validation.SingleValidationMessage;
-import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -45,7 +42,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.*;
 import org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent;
@@ -2282,7 +2279,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(respString);
 			assertEquals(412, resp.getStatusLine().getStatusCode());
-			assertThat(respString, containsString("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked"));
+			assertThat(respString, containsString("Profile reference \\\"http://foo/structuredefinition/myprofile\\\" could not be resolved, so has not been checked"));
 		}
 	}
 
@@ -5371,7 +5368,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testValidateJsonWithDuplicateKey() throws IOException {
 
-		String inputStr = "{\"resourceType\":\"Patient\", \"name\":[{\"text\":foo\"}], name:[{\"text\":\"foo\"}] }";
+		String inputStr = "{\"resourceType\":\"Patient\", \"name\":[{\"text\":\"foo\"}], \"name\":[{\"text\":\"foo\"}] }";
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_JSON_NEW, "UTF-8")));
 
@@ -5381,7 +5378,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(resp);
 			assertEquals(412, response.getStatusLine().getStatusCode());
 
-			assertThat(resp, stringContainsInOrder("Error parsing JSON source: Syntax error in json reading special word false at Line 1"));
+			assertThat(resp, stringContainsInOrder("Duplicated property name: name"));
 		} finally {
 			response.getEntity().getContent().close();
 			response.close();

@@ -45,4 +45,10 @@ public class ReflectionUtilTest {
 			assertEquals("Failed to instantiate java.util.List", e.getMessage());
 		}
 	}
+
+	@Test
+	public void testTypeExists() {
+		assertFalse(ReflectionUtil.typeExists("ca.Foo"));
+		assertTrue(ReflectionUtil.typeExists(String.class.getName()));
+	}
 }

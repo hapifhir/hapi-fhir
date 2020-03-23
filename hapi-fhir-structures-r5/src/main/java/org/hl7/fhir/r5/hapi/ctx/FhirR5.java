@@ -24,17 +24,24 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
-import ca.uhn.fhir.fluentpath.IFluentPath;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.hapi.fhirpath.FhirPathR5;
 import org.hl7.fhir.r5.hapi.rest.server.R5BundleFactory;
-import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.Resource;
+import org.hl7.fhir.r5.model.StructureDefinition;
 
 import java.io.InputStream;
 import java.util.Date;
@@ -45,13 +52,8 @@ public class FhirR5 implements IFhirVersion {
 	private String myId;
 
 	@Override
-	public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
+	public IFhirPath createFhirPathExecutor(FhirContext theFhirContext) {
 		return new FhirPathR5(theFhirContext);
-	}
-
-	@Override
-	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
-		return ReflectionUtil.newInstanceOfFhirProfileValidationSupport("org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport");
 	}
 
 	@Override

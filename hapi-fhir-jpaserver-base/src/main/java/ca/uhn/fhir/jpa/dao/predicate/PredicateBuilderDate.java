@@ -85,13 +85,13 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 			Predicate p = createPredicateDate(params,
 				theResourceName,
 				theParamName,
-				myBuilder,
+				myCriteriaBuilder,
 				join,
 				operation);
 			codePredicates.add(p);
 		}
 
-		Predicate orPredicates = myBuilder.or(toArray(codePredicates));
+		Predicate orPredicates = myCriteriaBuilder.or(toArray(codePredicates));
 
 		if (newJoin) {
 			Predicate identityAndValuePredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicates);

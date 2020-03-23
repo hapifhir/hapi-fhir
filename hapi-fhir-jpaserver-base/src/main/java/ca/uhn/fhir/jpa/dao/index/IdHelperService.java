@@ -109,10 +109,8 @@ public class IdHelperService {
 	}
 
 	/**
-	 * Given a resource type and ID, looks up the resource and returns a {@link IResourceLookup}. This
-	 * object contains the internal PID for the resource and the resource deletion status, making it sufficient
-	 * for persisting resource links between resources without adding any further database calls after the
-	 * single one performed by this call.
+	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
+	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
 	 *
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
@@ -167,10 +165,10 @@ public class IdHelperService {
 		if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
 			theIds
 				.stream()
-				.filter(t -> isValidPid(t))
-				.map(t -> t.getIdPartAsLong())
-				.map(t -> new ResourcePersistentId(t))
-				.forEach(t -> retVal.add(t));
+				.filter(IdHelperService::isValidPid)
+				.map(IIdType::getIdPartAsLong)
+				.map(ResourcePersistentId::new)
+				.forEach(retVal::add);
 		}
 
 		ListMultimap<String, String> typeToIds = organizeIdsByResourceType(theIds);
@@ -274,15 +272,10 @@ public class IdHelperService {
 				.map(t -> t.getIdPartAsLong())
 				.collect(Collectors.toList());
 			if (!pids.isEmpty()) {
-
-				Collection<Object[]> lookups = myResourceTableDao.findLookupFieldsByResourcePid(pids);
-				for (Object[] next : lookups) {
-					String resourceType = (String) next[0];
-					Long resourcePid = (Long) next[1];
-					Date deletedAt = (Date) next[2];
-					retVal.add(new ResourceLookup(resourceType, resourcePid, deletedAt));
-				}
-
+				myResourceTableDao.findLookupFieldsByResourcePid(pids)
+					.stream()
+					.map(lookup -> new ResourceLookup((String)lookup[0], (Long)lookup[1], (Date)lookup[2]))
+					.forEach(retVal::add);
 			}
 		}
 

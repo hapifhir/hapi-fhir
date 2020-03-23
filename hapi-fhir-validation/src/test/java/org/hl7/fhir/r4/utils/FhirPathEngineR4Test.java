@@ -5,7 +5,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.utils.FhirPathEngineTest;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
@@ -164,7 +164,7 @@ public class FhirPathEngineR4Test {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourEngine = new FHIRPathEngine(new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport()));
+		ourEngine = new FHIRPathEngine(new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport(ourCtx)));
 	}
 
 }

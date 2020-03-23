@@ -1,4 +1,0 @@
-In this directory:
-
-* XCF files are opened in The GIMP
-* XML files are opened in draw.io

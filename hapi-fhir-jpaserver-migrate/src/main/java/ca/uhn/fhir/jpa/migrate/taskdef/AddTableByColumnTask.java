@@ -31,7 +31,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
+public class AddTableByColumnTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddTableByColumnTask.class);
 
@@ -110,7 +110,7 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<AddTableByColumnTask> theOtherObject) {
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
 		super.generateEquals(theBuilder, theOtherObject);
 		AddTableByColumnTask otherObject = (AddTableByColumnTask) theOtherObject;
 		theBuilder.append(myAddColumnTasks, otherObject.myAddColumnTasks);

@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -12,7 +12,12 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
@@ -37,15 +42,15 @@ public class SearchParamExtractorMegaTest {
 
 		ctx = FhirContext.forDstu3();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorDstu3(null, ctx, new DefaultProfileValidationSupport(), searchParamRegistry));
+		process(ctx, new SearchParamExtractorDstu3(null, ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry));
 
 		ctx = FhirContext.forR4();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorR4(null, ctx, new org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport(), searchParamRegistry));
+		process(ctx, new SearchParamExtractorR4(null, ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry));
 
 		ctx = FhirContext.forR5();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorR5(ctx, new org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport(), searchParamRegistry));
+		process(ctx, new SearchParamExtractorR5(ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry));
 	}
 
 	private void process(FhirContext theCtx, BaseSearchParamExtractor theExtractor) throws Exception {

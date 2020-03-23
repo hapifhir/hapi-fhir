@@ -134,8 +134,8 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 				subQ.select(subQfrom.get("myResourceId").as(Long.class));
 
 				myQueryRoot.addPredicate(
-					myBuilder.not(
-						myBuilder.in(
+					myCriteriaBuilder.not(
+						myCriteriaBuilder.in(
 							myQueryRoot.get("myId")
 						).value(subQ)
 					)
@@ -147,7 +147,7 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 
 				subQ.where(subQfrom.get("myTagId").as(Long.class).in(defJoin));
 
-				Predicate tagListPredicate = createPredicateTagList(defJoinFrom, myBuilder, tagType, tokens);
+				Predicate tagListPredicate = createPredicateTagList(defJoinFrom, myCriteriaBuilder, tagType, tokens);
 				defJoin.where(tagListPredicate);
 
 				continue;
@@ -156,7 +156,7 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 			Join<ResourceTable, ResourceTag> tagJoin = myQueryRoot.join("myTags", JoinType.LEFT);
 			From<ResourceTag, TagDefinition> defJoin = tagJoin.join("myTag");
 
-			Predicate tagListPredicate = createPredicateTagList(defJoin, myBuilder, tagType, tokens);
+			Predicate tagListPredicate = createPredicateTagList(defJoin, myCriteriaBuilder, tagType, tokens);
 			myQueryRoot.addPredicate(tagListPredicate);
 
 		}
