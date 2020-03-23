@@ -260,6 +260,7 @@ public class Constants {
 	 */
 	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
 	public static final String PARAM_FHIRPATH = "_fhirpath";
+	public static final String PARAM_TYPE = "_type";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

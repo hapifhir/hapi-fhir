@@ -20,14 +20,31 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
+import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.IDao;
+import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -47,22 +64,36 @@ import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.criteria.*;
-import java.util.*;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 @Component
 @Scope("prototype")
@@ -273,20 +304,43 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			}
 
 		} else {
+
 			try {
 				RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theReferenceParam.getResourceType());
 				resourceTypes = new ArrayList<>(1);
 				resourceTypes.add(resDef.getImplementingClass());
 			} catch (DataFormatException e) {
-				throw new InvalidRequestException("Invalid resource type: " + theReferenceParam.getResourceType());
+				throw newInvalidResourceTypeException(theReferenceParam.getResourceType());
 			}
+
+		}
+
+		// Handle chain on _type
+		String chain = theReferenceParam.getChain();
+		if (Constants.PARAM_TYPE.equals(chain)) {
+			String typeValue = theReferenceParam.getValue();
+
+			Class<? extends IBaseResource> wantedType;
+			try {
+				wantedType = myContext.getResourceDefinition(typeValue).getImplementingClass();
+			} catch (DataFormatException e) {
+				throw newInvalidResourceTypeException(typeValue);
+			}
+			if (!resourceTypes.contains(wantedType)) {
+				String searchParamName = theResourceName + ":" + theParamName;
+				String msg = myContext.getLocalizer().getMessage(PredicateBuilderReference.class, "invalidTargetTypeForChain", typeValue, searchParamName);
+				throw new InvalidRequestException(msg);
+			}
+
+			Predicate targetTypeParameter = myCriteriaBuilder.equal(theJoin.get("myTargetResourceType"), typeValue);
+			myQueryRoot.addPredicate(targetTypeParameter);
+			return targetTypeParameter;
 		}
 
 		boolean foundChainMatch = false;
 		List<Class<? extends IBaseResource>> candidateTargetTypes = new ArrayList<>();
 		for (Class<? extends IBaseResource> nextType : resourceTypes) {
 
-			String chain = theReferenceParam.getChain();
 			String remainingChain = null;
 			int chainDotIndex = chain.indexOf('.');
 			if (chainDotIndex != -1) {
@@ -353,6 +407,12 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		Predicate predicate = myCriteriaBuilder.or(toArray(theCodePredicates));
 		myQueryRoot.addPredicate(predicate);
 		return predicate;
+	}
+
+	@NotNull
+	private InvalidRequestException newInvalidResourceTypeException(String theResourceType) {
+		String msg = myContext.getLocalizer().getMessageSanitized(PredicateBuilderReference.class, "invalidResourceType", theResourceType);
+		throw new InvalidRequestException(msg);
 	}
 
 	private void warnAboutPerformanceOnUnqualifiedResources(String theParamName, RequestDetails theRequest, List<Class<? extends IBaseResource>> theCandidateTargetTypes) {
