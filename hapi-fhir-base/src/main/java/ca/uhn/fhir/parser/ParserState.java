@@ -1054,8 +1054,6 @@ class ParserState<T> {
 		private void stitchBundleCrossReferences() {
 			final boolean bundle = "Bundle".equals(myContext.getResourceDefinition(myInstance).getName());
 			if (bundle) {
-				//if (myGlobalReferences.stream().map(x -> x.))
-				//throw new DataFormatException("resourceType does not appear to be 'TagList', found: " + theLocalPart);
 
 				FhirTerser t = myContext.newTerser();
 
