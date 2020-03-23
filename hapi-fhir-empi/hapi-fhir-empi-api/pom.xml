@@ -12,4 +12,11 @@
 	<artifactId>hapi-fhir-empi-api</artifactId>
 	<packaging>jar</packaging>
 
+	<dependencies>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-base</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 </project>

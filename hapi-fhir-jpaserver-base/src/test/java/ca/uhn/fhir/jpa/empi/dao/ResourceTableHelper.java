@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 
+// FIXME KHS delete this if we don't need it
 public class ResourceTableHelper {
 	@Autowired
 	private IdHelperService myIdHelperService;

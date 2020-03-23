@@ -1,0 +1,22 @@
+{
+	"matchFields" : [ {
+		"name" : "patient-given",
+		"resourceType" : "Patient",
+		"resourcePath" : "name.given",
+		"metric" : "COSINE",
+		"matchThreshold" : 0.8
+	}, {
+		"name" : "patient-last",
+		"resourceType" : "Patient",
+		"resourcePath" : "name.family",
+		"metric" : "JARO_WINKLER",
+		"matchThreshold" : 0.8
+	} ],
+	"weightMap" : {
+		"patient-given" : 0.63,
+		"patient-given,patient-last" : 0.83
+	},
+	"noMatchThreshold" : 0.6,
+	"matchThreshold" : 0.8
+}
+
