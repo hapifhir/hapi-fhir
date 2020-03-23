@@ -90,9 +90,11 @@ public class XmlParserR4Test extends BaseTest {
 	public void testParseBundleWithMultipleNestedContainedResources() throws Exception {
 		URL url = Resources.getResource("bundle-with-two-patient-resources.xml");
 		String text = Resources.toString(url, Charsets.UTF_8);
-		Bundle input = ourCtx.newXmlParser().parseResource(Bundle.class, text);
-		assertEquals("12346", getPatientIdValue(input, 0));
-		assertEquals("12345", getPatientIdValue(input, 1));
+
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, text);
+		
+		assertEquals("12346", getPatientIdValue(bundle, 0));
+		assertEquals("12345", getPatientIdValue(bundle, 1));
 	}
 
 	private String getPatientIdValue(Bundle input, int entry) {

@@ -5,7 +5,10 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
+import com.google.common.io.Resources;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullWriter;
 import org.apache.commons.lang.StringUtils;
@@ -18,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -148,6 +152,23 @@ public class JsonParserR4Test extends BaseTest {
 		idx = encoded.indexOf("\"Medication\"", idx + 1);
 		assertEquals(-1, idx);
 
+	}
+
+	@Test
+	public void testParseBundleWithMultipleNestedContainedResources() throws Exception {
+		URL url = Resources.getResource("bundle-with-two-patient-resources.json");
+		String text = Resources.toString(url, Charsets.UTF_8);
+
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, text);
+
+		assertEquals("12346", getPatientIdValue(bundle, 0));
+		assertEquals("12345", getPatientIdValue(bundle, 1));
+	}
+
+	private String getPatientIdValue(Bundle input, int entry) {
+		final DocumentReference documentReference = (DocumentReference)input.getEntry().get(entry).getResource();
+		final Patient patient = (Patient) documentReference.getSubject().getResource();
+		return patient.getIdentifier().get(0).getValue();
 	}
 
 	/**
