@@ -31,13 +31,20 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-public abstract class SubscriptionDeliveryHandlerFactory {
+public class SubscriptionDeliveryHandlerFactory {
 	private IEmailSender myEmailSender;
 
 	@Lookup
-	protected abstract SubscriptionDeliveringEmailSubscriber getSubscriptionDeliveringEmailSubscriber(IEmailSender myEmailSender);
+	protected SubscriptionDeliveringEmailSubscriber getSubscriptionDeliveringEmailSubscriber(IEmailSender myEmailSender) {
+		// stub method since this is a @Lookup
+		throw new IllegalStateException();
+	}
+
 	@Lookup
-	protected abstract SubscriptionDeliveringRestHookSubscriber getSubscriptionDeliveringRestHookSubscriber();
+	protected SubscriptionDeliveringRestHookSubscriber getSubscriptionDeliveringRestHookSubscriber() {
+		// stub method since this is a @Lookup
+		throw new IllegalStateException();
+	}
 
 	public Optional<MessageHandler> createDeliveryHandler(CanonicalSubscriptionChannelType theChannelType) {
 		if (theChannelType == CanonicalSubscriptionChannelType.EMAIL) {
