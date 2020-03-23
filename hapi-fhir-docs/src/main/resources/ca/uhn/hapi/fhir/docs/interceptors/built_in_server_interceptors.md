@@ -52,7 +52,7 @@ The following example shows how to register the ExceptionHandlingInterceptor.
 
 # Response Customizing: Evaluate FHIRPath
 
-The FhirPathFilterInterceptor looks for a request URL parameter in the form `_fhirpath=(expression)` in all REST requests. If this parameter is found, the value is treated as a [FHIRPath](http://hl7.org/fhirpath/) expression. The response resource will be replaced with a [Parameters](hl7.org/fhir/parameters.html) resource containing the results of the given expression applied against the response resource.   
+The FhirPathFilterInterceptor looks for a request URL parameter in the form `_fhirpath=(expression)` in all REST requests. If this parameter is found, the value is treated as a [FHIRPath](http://hl7.org/fhirpath/) expression. The response resource will be replaced with a [Parameters](http://hl7.org/fhir/parameters.html) resource containing the results of the given expression applied against the response resource.   
 
 * [FhirPathFilterInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/FhirPathFilterInterceptor.html)
 * [FhirPathFilterInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/FhirPathFilterInterceptor.java)
