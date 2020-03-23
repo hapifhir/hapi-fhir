@@ -22,7 +22,14 @@ package ca.uhn.fhir.rest.api;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class Constants {
 
@@ -253,6 +260,8 @@ public class Constants {
 	 */
 	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
 	public static final String CODESYSTEM_VALIDATE_NOT_NEEDED = UUID.randomUUID().toString();
+	public static final String PARAM_FHIRPATH = "_fhirpath";
+	public static final String PARAM_TYPE = "_type";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

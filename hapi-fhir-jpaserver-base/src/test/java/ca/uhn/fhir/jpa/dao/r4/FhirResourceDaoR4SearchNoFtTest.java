@@ -295,6 +295,67 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertThat(ids, empty());
 	}
 
+	@Test
+	public void testChainOnType() {
+
+		Patient sub1 = new Patient();
+		sub1.setActive(true);
+		sub1.addIdentifier().setSystem("foo").setValue("bar");
+		String sub1Id = myPatientDao.create(sub1).getId().toUnqualifiedVersionless().getValue();
+
+		Group sub2 = new Group();
+		sub2.setActive(true);
+		sub2.addIdentifier().setSystem("foo").setValue("bar");
+		String sub2Id = myGroupDao.create(sub2).getId().toUnqualifiedVersionless().getValue();
+
+		Encounter enc1 = new Encounter();
+		enc1.getSubject().setReference(sub1Id);
+		String enc1Id = myEncounterDao.create(enc1).getId().toUnqualifiedVersionless().getValue();
+
+		Encounter enc2 = new Encounter();
+		enc2.getSubject().setReference(sub2Id);
+		String enc2Id = myEncounterDao.create(enc2).getId().toUnqualifiedVersionless().getValue();
+
+		List<String> ids;
+		SearchParameterMap map;
+		IBundleProvider results;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "Patient").setChain("_type"));
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids, hasItems(enc1Id));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "Group").setChain("_type"));
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids, hasItems(enc2Id));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "Organization").setChain("_type"));
+		try {
+			myEncounterDao.search(map);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Resource type \"Organization\" is not a valid target type for reference search parameter: Encounter:subject", e.getMessage());
+		}
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "HelpImABug").setChain("_type"));
+		try {
+			myEncounterDao.search(map);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid/unsupported resource type: \"HelpImABug\"", e.getMessage());
+		}
+
+	}
+
 	/**
 	 * See #441
 	 */
