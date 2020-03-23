@@ -85,6 +85,16 @@
 			<artifactId>Saxon-HE</artifactId>
 		</dependency>
 
+		<!--
+		Gson is needed for some utility classes in org.hl7.fhir.convertors, so
+		this is necessary for the JavaDocs to build
+		-->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<optional>true</optional>
+		</dependency>
+
 		<!-- Testing -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>

@@ -116,6 +116,11 @@
 			<version>1.4</version>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<optional>true</optional>
+		</dependency>
 
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
@@ -219,11 +224,6 @@
 		</dependency>
 
 		<!-- UNIT TEST DEPENDENCIES -->
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>
 			<artifactId>json-lib</artifactId>
