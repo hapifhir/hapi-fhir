@@ -950,6 +950,46 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
+	public void testSearchParameterWithContainedMedication() {
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("MedicationAdministration");
+		sp.setCode("my_search_param");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setTitle("Contained Medication in MedicationAdministration");
+		sp.setExpression("MedicationAdministration.medication.as(CodeableConcept)");
+		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		mySearchParameterDao.create(sp);
+
+		mySearchParamRegistry.forceRefresh();
+
+		Medication medication = new Medication();
+		medication.getCode().addCoding(new Coding()
+			.setSystem("urn:hssc:srhs:ads:medicationcode")
+			.setCode("01059")
+			.setDisplay("insulin regular (use for humuLIN R) sliding scale 0-28 Units"));
+
+		MedicationAdministration medicationAdministration = new MedicationAdministration();
+		medicationAdministration.addIdentifier()
+			.setSystem("urn:hssc:srhs:epc:medadminid")
+			.setValue("64552569-0-77");
+		medicationAdministration.setStatus(MedicationAdministration.MedicationAdministrationStatus.COMPLETED);
+		medicationAdministration.setMedication(new Reference());
+		medicationAdministration.getMedicationReference().setResource(medication);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(medicationAdministration));
+		IIdType medId = myMedicationAdministrationDao.create(medicationAdministration, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("my_search_param", new TokenParam(medication.getCode().getCodingFirstRep()));
+		IBundleProvider outcome = myMedicationAdministrationDao.search(params);
+		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
+		ourLog.info("IDS: " + ids);
+		assertThat(ids, contains(medId.getValue()));
+	}
+
+	@Test
 	public void testSearchWithCustomParam() {
 
 		SearchParameter fooSp = new SearchParameter();
