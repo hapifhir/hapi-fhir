@@ -20,7 +20,7 @@
 							<given value="Kees" />
 						</name>
 						<gender value="male" />
-						<birthDate value="1986-11-28" />
+						<birthDate value="1970-01-01" />
 					</Patient>
 				</contained>
 				<subject>
@@ -115,11 +115,11 @@
 						</identifier>
 						<name>
 							<use value="official" />
-							<family value="Bakker" />
-							<given value="Eddy" />
+							<family value="Baker" />
+							<given value="Rob" />
 						</name>
 						<gender value="male" />
-						<birthDate value="1986-11-28" />
+						<birthDate value="1970-01-01" />
 					</Patient>
 				</contained>
 				<subject>
