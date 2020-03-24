@@ -44,4 +44,17 @@ public final class PersonUtil {
 				throw new UnsupportedOperationException("Version not supported: " + theFhirContext.getVersion().getVersion());
 		}
 	}
+
+	public static void removeLink(FhirContext theFhirContext, IBaseResource thePerson, IIdType theResourceId) {
+		switch (theFhirContext.getVersion().getVersion()) {
+			case R4:
+				Person person = (Person) thePerson;
+				List<Person.PersonLinkComponent> links = person.getLink();
+				links.removeIf(component -> component.hasTarget() && component.getTarget().getReference().equals(theResourceId.getValue()));
+				break;
+			default:
+				// FIXME EMPI moar versions
+				throw new UnsupportedOperationException("Version not supported: " + theFhirContext.getVersion().getVersion());
+		}
+	}
 }

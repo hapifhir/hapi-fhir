@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.entity;
 
 import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
-import ca.uhn.fhir.empi.rules.EmpiMatchResultEnum;
+import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

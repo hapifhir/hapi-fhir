@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.empi.service;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.rules.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
+import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
@@ -51,17 +51,28 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
 	@Override
 	@Transactional
-	public void createLink(IBaseResource thePerson, IBaseResource theResource, EmpiLinkSourceEnum theLinkSource) {
+	public void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
 		IBaseResource person = myEmpiResourceDaoSvc.readPerson(thePerson.getIdElement());
 		IIdType resourceId = theResource.getIdElement().toUnqualifiedVersionless();
-		if (!PersonUtil.containsLinkTo(myFhirContext, person, resourceId)) {
-			PersonUtil.addLink(myFhirContext, thePerson, resourceId);
-			myEmpiResourceDaoSvc.updatePerson(thePerson);
-			addLinkEntity(thePerson, theResource, theLinkSource);
+
+		switch (theMatchResult) {
+			case MATCH:
+			case POSSIBLE_MATCH:
+				if (!PersonUtil.containsLinkTo(myFhirContext, person, resourceId)) {
+					PersonUtil.addLink(myFhirContext, thePerson, resourceId);
+					myEmpiResourceDaoSvc.updatePerson(thePerson);
+				}
+				break;
+			case NO_MATCH:
+				if (PersonUtil.containsLinkTo(myFhirContext, person, resourceId)) {
+					PersonUtil.removeLink(myFhirContext, thePerson, resourceId);
+					myEmpiResourceDaoSvc.updatePerson(thePerson);
+				}
 		}
+		updateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource);
 	}
 
-	private void addLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiLinkSourceEnum theLinkSource) {
+	private void updateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
 		Long personPid = ResourceTableHelper.getPidOrNull(thePerson);
 		Long resourcePid = ResourceTableHelper.getPidOrNull(theResource);
 
@@ -70,11 +81,11 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		empiLink.setResourcePid(resourcePid);
 		Example<EmpiLink> example = Example.of(empiLink);
 		List<EmpiLink> found = myEmpiLinkDao.findAll(example);
-		if (found.isEmpty()) {
-			empiLink.setLinkSource(theLinkSource);
-			empiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-			myEmpiLinkDao.save(empiLink);
+		if (!found.isEmpty()) {
+			empiLink = found.get(0);
 		}
+		empiLink.setLinkSource(theLinkSource);
+		empiLink.setMatchResult(theMatchResult);
+		myEmpiLinkDao.save(empiLink);
 	}
-
 }

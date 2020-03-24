@@ -21,6 +21,7 @@ package ca.uhn.fhir.empi.rules;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.ArrayList;

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.empi.rules;
 
 import ca.uhn.fhir.empi.BaseTest;
+import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;

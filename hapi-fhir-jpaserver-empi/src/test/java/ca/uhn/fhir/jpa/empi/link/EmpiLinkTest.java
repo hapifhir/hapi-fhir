@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.empi.link;
 
-import ca.uhn.fhir.empi.rules.EmpiMatchResultEnum;
+import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
@@ -27,12 +27,22 @@ public class EmpiLinkTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testCreateLink() {
+	public void testCreateRemoveLink() {
 		long initialLinkCount = myEmpiLinkDao.count();
 		assertEquals(0, myPerson.getLink().size());
-		myEmpiLinkSvc.createLink(myPerson, myPatient, EmpiLinkSourceEnum.AUTO);
-		assertEquals(1 + initialLinkCount, myEmpiLinkDao.count());
-		Person newPerson = myPersonDao.read(myPersonId);
-		assertEquals(1, newPerson.getLink().size());
+
+		{
+			myEmpiLinkSvc.updateLink(myPerson, myPatient, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO);
+			assertEquals(1 + initialLinkCount, myEmpiLinkDao.count());
+			Person newPerson = myPersonDao.read(myPersonId);
+			assertEquals(1, newPerson.getLink().size());
+		}
+
+		{
+			myEmpiLinkSvc.updateLink(myPerson, myPatient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL);
+			assertEquals(1 + initialLinkCount, myEmpiLinkDao.count());
+			Person newPerson = myPersonDao.read(myPersonId);
+			assertEquals(0, newPerson.getLink().size());
+		}
 	}
 }

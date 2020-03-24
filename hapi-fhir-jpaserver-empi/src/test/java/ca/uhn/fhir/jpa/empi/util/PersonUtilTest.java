@@ -23,12 +23,24 @@ public class PersonUtilTest {
 		Person person = new Person();
 		person.addLink().setTarget(new Reference(PATIENT_1));
 		person.addLink().setTarget(new Reference(PATIENT_2));
-		List<IIdType> links = PersonUtil.getLinks(ourFhirContext, person).collect(Collectors.toList());
-		assertEquals(2, links.size());
-		assertEquals(PATIENT_1, links.get(0).getValue());
-		assertEquals(PATIENT_2, links.get(1).getValue());
-		assertTrue(PersonUtil.containsLinkTo(ourFhirContext, person, new IdDt(PATIENT_1)));
-		assertTrue(PersonUtil.containsLinkTo(ourFhirContext, person, new IdDt(PATIENT_2)));
-		assertFalse(PersonUtil.containsLinkTo(ourFhirContext, person, new IdDt(PATIENT_BAD)));
+
+		{
+			List<IIdType> links = PersonUtil.getLinks(ourFhirContext, person).collect(Collectors.toList());
+			assertEquals(2, links.size());
+			assertEquals(PATIENT_1, links.get(0).getValue());
+			assertEquals(PATIENT_2, links.get(1).getValue());
+			assertTrue(PersonUtil.containsLinkTo(ourFhirContext, person, new IdDt(PATIENT_1)));
+			assertTrue(PersonUtil.containsLinkTo(ourFhirContext, person, new IdDt(PATIENT_2)));
+			assertFalse(PersonUtil.containsLinkTo(ourFhirContext, person, new IdDt(PATIENT_BAD)));
+		}
+
+		{
+			PersonUtil.removeLink(ourFhirContext, person, new IdDt(PATIENT_1));
+			List<IIdType> links = PersonUtil.getLinks(ourFhirContext, person).collect(Collectors.toList());
+			assertEquals(1, links.size());
+			assertEquals(PATIENT_2, links.get(0).getValue());
+
+		}
+
 	}
 }

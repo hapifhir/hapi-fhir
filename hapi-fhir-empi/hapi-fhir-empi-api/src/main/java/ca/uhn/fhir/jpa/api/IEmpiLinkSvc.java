@@ -23,5 +23,5 @@ package ca.uhn.fhir.jpa.api;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IEmpiLinkSvc {
-	void createLink(IBaseResource thePerson, IBaseResource theResource, EmpiLinkSourceEnum theLinkSource);
+	void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource);
 }
