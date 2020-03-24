@@ -64,7 +64,6 @@ import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -327,9 +326,8 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				throw newInvalidResourceTypeException(typeValue);
 			}
 			if (!resourceTypes.contains(wantedType)) {
-				String searchParamName = theResourceName + ":" + theParamName;
-				String msg = myContext.getLocalizer().getMessage(PredicateBuilderReference.class, "invalidTargetTypeForChain", typeValue, searchParamName);
-				throw new InvalidRequestException(msg);
+				InvalidRequestException invalidRequestException = newInvalidTargetTypeForChainException(theResourceName, theParamName, typeValue);
+				throw invalidRequestException;
 			}
 
 			Predicate targetTypeParameter = myCriteriaBuilder.equal(theJoin.get("myTargetResourceType"), typeValue);
@@ -407,12 +405,6 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		Predicate predicate = myCriteriaBuilder.or(toArray(theCodePredicates));
 		myQueryRoot.addPredicate(predicate);
 		return predicate;
-	}
-
-	@NotNull
-	private InvalidRequestException newInvalidResourceTypeException(String theResourceType) {
-		String msg = myContext.getLocalizer().getMessageSanitized(PredicateBuilderReference.class, "invalidResourceType", theResourceType);
-		throw new InvalidRequestException(msg);
 	}
 
 	private void warnAboutPerformanceOnUnqualifiedResources(String theParamName, RequestDetails theRequest, List<Class<? extends IBaseResource>> theCandidateTargetTypes) {
@@ -996,4 +988,18 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 		return retVal;
 	}
+
+	@NotNull
+	private InvalidRequestException newInvalidTargetTypeForChainException(String theResourceName, String theParamName, String theTypeValue) {
+		String searchParamName = theResourceName + ":" + theParamName;
+		String msg = myContext.getLocalizer().getMessage(PredicateBuilderReference.class, "invalidTargetTypeForChain", theTypeValue, searchParamName);
+		return new InvalidRequestException(msg);
+	}
+
+	@NotNull
+	private InvalidRequestException newInvalidResourceTypeException(String theResourceType) {
+		String msg = myContext.getLocalizer().getMessageSanitized(PredicateBuilderReference.class, "invalidResourceType", theResourceType);
+		throw new InvalidRequestException(msg);
+	}
+
 }

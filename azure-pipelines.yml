@@ -29,7 +29,7 @@ jobs:
         env:
           JAVA_HOME_11_X64: /usr/local/openjdk-11
         inputs:
-          goals: 'clean install'
+           goals: 'dependency:resolve clean install'
           # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
           options: '-P ALLMODULES,JACOCO,CI,ERRORPRONE -nsu -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
           # These are JVM options (and don't show up in the build logs)
