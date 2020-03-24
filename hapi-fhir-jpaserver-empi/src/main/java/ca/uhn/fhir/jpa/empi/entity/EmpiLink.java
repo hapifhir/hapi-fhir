@@ -30,7 +30,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "HFJ_EMPI_LINK", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_EMPI_PERSONID_RESID", columnNames = {"PERSON_PID", "RESOURCE_PID"}),
-	// FIXME KHS what happens when we find new patients we think should be in the same person--i.e. we want to request a merge, or if we match people in more than one eid
+	// FIXME EMPI what happens when we find new patients we think should be in the same person--i.e. we want to request a merge, or if we match people in more than one eid
 	// Fundamentally, matching might not be transitive.  If unsure send to manual sorting
 })
 public class EmpiLink {
