@@ -315,8 +315,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		// Handle chain on _type
-		String chain = theReferenceParam.getChain();
-		if (Constants.PARAM_TYPE.equals(chain)) {
+		if (Constants.PARAM_TYPE.equals(theReferenceParam.getChain())) {
 			String typeValue = theReferenceParam.getValue();
 
 			Class<? extends IBaseResource> wantedType;
@@ -326,8 +325,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				throw newInvalidResourceTypeException(typeValue);
 			}
 			if (!resourceTypes.contains(wantedType)) {
-				InvalidRequestException invalidRequestException = newInvalidTargetTypeForChainException(theResourceName, theParamName, typeValue);
-				throw invalidRequestException;
+				throw newInvalidTargetTypeForChainException(theResourceName, theParamName, typeValue);
 			}
 
 			Predicate targetTypeParameter = myBuilder.equal(theJoin.get("myTargetResourceType"), typeValue);
@@ -338,6 +336,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		boolean foundChainMatch = false;
 		List<Class<? extends IBaseResource>> candidateTargetTypes = new ArrayList<>();
 		for (Class<? extends IBaseResource> nextType : resourceTypes) {
+			String chain = theReferenceParam.getChain();
 
 			String remainingChain = null;
 			int chainDotIndex = chain.indexOf('.');
