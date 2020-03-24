@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
-@EnableJpaRepositories(basePackages = "ca.uhn.fhir.empi.jpalink.dao")
+@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpaserver.empi.dao")
 @ComponentScan(basePackages = "ca.uhn.fhir.jpaserver.empi.service")
 public class EmpiConfig {
 }
