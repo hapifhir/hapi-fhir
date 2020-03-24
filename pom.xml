@@ -595,6 +595,10 @@
 			<organization>Trifork</organization>
 			<name>Tue Toft Nørgård</name>
 		</developer>
+		<developer>
+			<id>augla</id>
+			<name>August Langhout</name>
+		</developer>
 	</developers>
 
 	<licenses>

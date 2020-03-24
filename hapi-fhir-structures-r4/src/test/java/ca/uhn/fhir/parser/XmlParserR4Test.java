@@ -7,18 +7,25 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 
 import ca.uhn.fhir.test.BaseTest;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 
 import java.io.IOException;
+import java.net.URL;
 
 public class XmlParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(XmlParserR4Test.class);
@@ -77,6 +84,23 @@ public class XmlParserR4Test extends BaseTest {
 		assertEquals("urn:uuid:0.0.0.0", input.getEntry().get(0).getFullUrl());
 		assertEquals("MessageHeader/1.1.1.1", input.getEntry().get(0).getResource().getId());
 
+	}
+
+	@Test
+	public void testParseBundleWithMultipleNestedContainedResources() throws Exception {
+		URL url = Resources.getResource("bundle-with-two-patient-resources.xml");
+		String text = Resources.toString(url, Charsets.UTF_8);
+
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, text);
+		
+		assertEquals("12346", getPatientIdValue(bundle, 0));
+		assertEquals("12345", getPatientIdValue(bundle, 1));
+	}
+
+	private String getPatientIdValue(Bundle input, int entry) {
+		final DocumentReference documentReference = (DocumentReference)input.getEntry().get(entry).getResource();
+		final Patient patient = (Patient) documentReference.getSubject().getResource();
+		return patient.getIdentifier().get(0).getValue();
 	}
 
 	/**
