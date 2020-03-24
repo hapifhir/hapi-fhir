@@ -1524,7 +1524,7 @@
 		<pluginRepository>
 			<id>maven2</id>
 			<name>Maven2</name>
-			<url>http://central.maven.org/maven2/</url>
+			<url>https://central.maven.org/maven2/</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
