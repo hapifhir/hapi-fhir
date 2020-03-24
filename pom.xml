@@ -1516,6 +1516,7 @@
 		</dependencies>
 	</dependencyManagement>
 
+	<!--
 	<pluginRepositories>
 		<pluginRepository>
 			<id>ossrh</id>
@@ -1528,12 +1529,13 @@
 		<pluginRepository>
 			<id>maven2</id>
 			<name>Maven2</name>
-			<url>http://central.maven.org/maven2/</url>
+			<url>https://central.maven.org/maven2/</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
+	-->
 
 	<build>
 		<pluginManagement>
