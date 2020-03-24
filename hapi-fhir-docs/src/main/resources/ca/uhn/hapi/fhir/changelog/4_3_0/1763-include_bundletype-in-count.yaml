@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1763
+title: In servers, when requesting _summary=count, the response Bundle.type value was filtered, leading
+  to an invalid response bundle. This has been corrected. Thanks to GitHub user @Legi429 for reporting!
