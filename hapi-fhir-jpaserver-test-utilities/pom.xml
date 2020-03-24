@@ -3,7 +3,6 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
@@ -11,14 +10,20 @@
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
-	<artifactId>hapi-fhir-empi</artifactId>
-	<packaging>pom</packaging>
+	<packaging>jar</packaging>
 
-	<name>HAPI FHIR - Enterprise Master Patient Index</name>
-
-	<modules>
-		<module>hapi-fhir-empi-api</module>
-		<module>hapi-fhir-empi-rules</module>
-	</modules>
-
+	<name>HAPI FHIR JPA Server Test Utilities</name>
+	<artifactId>hapi-fhir-jpaserver-test-utilities</artifactId>
+	<dependencies>
+	<dependency>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<artifactId>hapi-fhir-jpaserver-base</artifactId>
+		<version>${project.version}</version>
+	</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-test-utilities</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 </project>
