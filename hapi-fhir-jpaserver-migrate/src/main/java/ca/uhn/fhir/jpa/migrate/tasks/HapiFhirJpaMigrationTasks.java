@@ -68,6 +68,26 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RES_VER").dropColumn("20200218.2", "FORCED_ID_PID");
 		version.onTable("HFJ_RES_VER").addForeignKey("20200218.3", "FK_RESOURCE_HISTORY_RESOURCE").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 		version.onTable("HFJ_RES_VER").modifyColumn("20200220.1", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+
+		// HFJ_EMPI_LINK
+		version.addIdGenerator("20200324.1", "SEQ_EMPI_LINK_ID");
+		Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20200324.2", "HFJ_EMPI_LINK", "PID");
+		empiLink.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+
+		empiLink.addColumn("PERSON_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		empiLink
+			.addForeignKey("20200324.3", "FK_EMPI_LINK_PERSON")
+			.toColumn("PERSON_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
+
+		empiLink.addColumn("RESOURCE_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		empiLink
+			.addForeignKey("20200324.4", "FK_EMPI_LINK_RESOURCE")
+			.toColumn("RESOURCE_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
+
+		empiLink.addColumn("MATCH_RESULT").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		empiLink.addColumn("LINK_SOURCE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 	}
 
 	protected void init420() { // 20191015 - 20200217

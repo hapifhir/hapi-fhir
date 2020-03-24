@@ -94,6 +94,8 @@ public abstract class BaseConfig {
 
 	@Autowired
 	protected Environment myEnv;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	@Bean("myDaoRegistry")
 	public DaoRegistry daoRegistry() {
@@ -245,7 +247,7 @@ public abstract class BaseConfig {
 	 * Subclasses may override
 	 */
 	protected boolean isSupported(String theResourceType) {
-		return daoRegistry().getResourceDaoOrNull(theResourceType) != null;
+		return myDaoRegistry.getResourceDaoOrNull(theResourceType) != null;
 	}
 
 	@Bean
@@ -285,7 +287,7 @@ public abstract class BaseConfig {
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
 		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));
-		theFactory.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity");
+		theFactory.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity", "ca.uhn.fhir.jpa.empi.entity");
 		theFactory.setPersistenceProvider(new HibernatePersistenceProvider());
 	}
 

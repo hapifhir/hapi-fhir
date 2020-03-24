@@ -18,7 +18,7 @@ public class UhnFhirTestApp {
 	public static void main(String[] args) throws Exception {
 
 		int myPort = 8889;
-		String base = "http://localhost:" + myPort + "/baseDstu2";
+		String base = "http://localhost:" + myPort + "/baseR4";
 
 		//		new File("target/testdb").mkdirs();
 		System.setProperty("fhir.db.location", "./target/testdb");

@@ -36,7 +36,8 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
+public class DaoRegistry implements IDaoRegistry {
+	@Autowired
 	private ApplicationContext myAppCtx;
 
 	@Autowired
@@ -60,11 +61,6 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 		mySupportedResourceTypes = supportedResourceTypes;
 		myResourceNameToResourceDao = null;
 
-	}
-
-	@Override
-	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
-		myAppCtx = theApplicationContext;
 	}
 
 	public IFhirSystemDao getSystemDao() {
