@@ -1,0 +1,260 @@
+{
+	"resourceType": "Bundle",
+	"meta": {
+		"profile": [
+			"http://forcare.com/fhir/createCda"
+		]
+	},
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "DocumentReference",
+				"id": "doc1",
+				"contained": [
+					{
+						"resourceType": "Patient",
+						"id": "patient",
+						"identifier": [
+							{
+								"system": "urn:oid:1.3.6.1.4.1.21367.2005.3.7",
+								"value": "12346"
+							}
+						],
+						"name": [
+							{
+								"use": "official",
+								"family": "Beugels",
+								"given": [
+									"Kees"
+								]
+							}
+						],
+						"gender": "male",
+						"birthDate": "1970-01-01"
+					}
+				],
+				"status": "current",
+				"type": {
+					"coding": [
+						{
+							"system": "2.16.840.1.113883.6.1",
+							"code": "57016-8",
+							"display": "Privacy Policy Acknowledgment"
+						}
+					]
+				},
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "2.16.840.1.113883.6.1",
+								"code": "57016-8",
+								"display": "Privacy Policy Acknowledgment"
+							}
+						]
+					}
+				],
+				"subject": {
+					"reference": "#patient"
+				},
+				"date": "2016-05-04T08:18:03.203Z",
+				"author": [
+					{
+						"reference": "#patient"
+					}
+				],
+				"description": "Hospital Privacy Consent",
+				"securityLabel": [
+					{
+						"coding": [
+							{
+								"system": "2.16.840.1.113883.5.25",
+								"code": "N",
+								"display": "Normal"
+							}
+						]
+					}
+				],
+				"content": [
+					{
+						"attachment": {
+							"contentType": "text/xml",
+							"language": "en-US",
+							"url": "urn:uuid:d7d8ffca-e364-484b-bbf9-6a730854aea5"
+						},
+						"format": {
+							"system": "1.3.6.1.4.1.19376.1.2.3",
+							"code": "urn:ihe:iti:bppc-sd:2007",
+							"display": "Basic Patient Privacy Consent (scanned part)"
+						}
+					}
+				],
+				"context": {
+					"event": [
+						{
+							"coding": [
+								{
+									"system": "1.2.826.0.1.3680043.2.1611.2.10",
+									"code": "allowMedicalDoctorsFromHospitalAToSeeDocuments",
+									"display": "I allow Medical Doctors in Hospital A to access my medical record"
+								}
+							]
+						},
+						{
+							"coding": [
+								{
+									"system": "1.2.826.0.1.3680043.2.1611.2.10",
+									"code": "denyMedicalDoctorsFromHospitalBToSeeDocuments",
+									"display": "I deny Medical Doctors in Hospital B to access my medical record"
+								}
+							]
+						}
+					],
+					"period": {
+						"start": "2016-05-04T08:18:03.203Z",
+						"end": "2016-09-04T08:18:03.203Z"
+					},
+					"facilityType": {
+						"coding": [
+							{
+								"system": "2.16.840.1.113883.5.10588",
+								"code": "HOSP",
+								"display": "Hospital"
+							}
+						]
+					},
+					"practiceSetting": {
+						"coding": [
+							{
+								"system": "2.16.840.1.113883.2.1.6.8",
+								"code": "300",
+								"display": "General Medicine"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "DocumentReference",
+				"id": "doc2",
+				"contained": [
+					{
+						"resourceType": "Patient",
+						"id": "patient",
+						"identifier": [
+							{
+								"system": "urn:oid:1.3.6.1.4.1.21367.2005.3.7",
+								"value": "12345"
+							}
+						],
+						"name": [
+							{
+								"use": "official",
+								"family": "Baker",
+								"given": [
+									"Rob"
+								]
+							}
+						],
+						"gender": "male",
+						"birthDate": "1970-01-01"
+					}
+				],
+				"status": "current",
+				"type": {
+					"coding": [
+						{
+							"system": "2.16.840.1.113883.6.1",
+							"code": "57016-8",
+							"display": "Privacy Policy Acknowledgment"
+						}
+					]
+				},
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "2.16.840.1.113883.6.1",
+								"code": "57016-8",
+								"display": "Privacy Policy Acknowledgment"
+							}
+						]
+					}
+				],
+				"subject": {
+					"reference": "#patient"
+				},
+				"date": "2016-05-04T08:18:03.203Z",
+				"author": [
+					{
+						"reference": "#patient"
+					}
+				],
+				"description": "GPs Privacy Consent",
+				"securityLabel": [
+					{
+						"coding": [
+							{
+								"system": "2.16.840.1.113883.5.25",
+								"code": "N",
+								"display": "Normal"
+							}
+						]
+					}
+				],
+				"content": [
+					{
+						"attachment": {
+							"contentType": "text/xml",
+							"language": "en-US",
+							"url": "urn:uuid:d7d8ffca-e364-484b-bbf9-6a730854aea5"
+						},
+						"format": {
+							"system": "1.3.6.1.4.1.19376.1.2.3",
+							"code": "urn:ihe:iti:bppc-sd:2007",
+							"display": "Basic Patient Privacy Consent (scanned part)"
+						}
+					}
+				],
+				"context": {
+					"event": [
+						{
+							"coding": [
+								{
+									"system": "1.2.826.0.1.3680043.2.1611.2.10",
+									"code": "denyGeneralPractitionersFromHestiaToSeeDocuments",
+									"display": "I deny Medical Doctors in Hestia General Practitioners to access my medical record"
+								}
+							]
+						}
+					],
+					"period": {
+						"start": "2016-05-04T08:18:03.203Z",
+						"end": "2016-09-04T08:18:03.203Z"
+					},
+					"facilityType": {
+						"coding": [
+							{
+								"system": "2.16.840.1.113883.5.10588",
+								"code": "HOSP",
+								"display": "Hospital"
+							}
+						]
+					},
+					"practiceSetting": {
+						"coding": [
+							{
+								"system": "2.16.840.1.113883.2.1.6.8",
+								"code": "300",
+								"display": "General Medicine"
+							}
+						]
+					}
+				}
+			}
+		}
+	]
+}

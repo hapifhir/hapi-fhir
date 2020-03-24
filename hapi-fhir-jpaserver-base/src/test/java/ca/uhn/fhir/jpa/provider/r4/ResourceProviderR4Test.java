@@ -405,15 +405,15 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(idValues, contains(pid));
 
 		// Search param on extension
-		myCaptureQueriesListener.clear();
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient?extpatorg=" + orgId.getValue());
-		myCaptureQueriesListener.logSelectQueries();
 		assertThat(idValues, contains(pid));
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient?extpatorg.name=ORGANIZATION");
 		assertThat(idValues, contains(pid));
 
+		myCaptureQueriesListener.clear();
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient?extpatorg.extorgorg.name=PARENT");
+		myCaptureQueriesListener.logSelectQueries();
 		assertThat(idValues, contains(pid));
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient?extpatorg.extorgorg.extorgorg.name=GRANDPARENT");

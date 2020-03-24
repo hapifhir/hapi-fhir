@@ -1074,7 +1074,7 @@ class ParserState<T> {
 				 */
 				for (IBaseResource next : myGlobalResources) {
 					IIdType id = next.getIdElement();
-					if (id != null && id.isEmpty() == false) {
+					if (id != null && !id.isEmpty()) {
 						String resName = myContext.getResourceDefinition(next).getName();
 						IIdType idType = id.withResourceType(resName).toUnqualifiedVersionless();
 						idToResource.put(idType.getValueAsString(), next);
@@ -1082,10 +1082,11 @@ class ParserState<T> {
 				}
 
 				for (IBaseReference nextRef : myGlobalReferences) {
-					if (nextRef.isEmpty() == false && nextRef.getReferenceElement() != null) {
+					if (!nextRef.isEmpty() && nextRef.getReferenceElement() != null) {
 						IIdType unqualifiedVersionless = nextRef.getReferenceElement().toUnqualifiedVersionless();
 						IBaseResource target = idToResource.get(unqualifiedVersionless.getValueAsString());
-						if (target != null) {
+						// resource can already be filled with local contained resource by populateTarget()
+						if (target != null && nextRef.getResource() == null) {
 							nextRef.setResource(target);
 						}
 					}
