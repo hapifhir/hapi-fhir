@@ -43,18 +43,18 @@ public class EmpiLink {
 	@Column(name = "PID")
 	private Long myId;
 
-	@JoinColumn(name = "PERSON_PID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_EMPI_LINK_PERSON"))
-	@OneToOne(fetch = FetchType.LAZY)
+	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
+	@JoinColumn(name = "PERSON_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_EMPI_LINK_PERSON"), insertable=false, updatable=false, nullable=false)
 	private ResourceTable myPerson;
 
-	@Column(name = "PERSON_PID", nullable = false, updatable = false, insertable = false)
+	@Column(name = "PERSON_PID", updatable=false, nullable=false)
 	private Long myPersonPid;
 
-	@JoinColumn(name = "RESOURCE_PID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_EMPI_LINK_RESOURCE"))
-	@OneToOne(fetch = FetchType.LAZY)
+	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
+	@JoinColumn(name = "RESOURCE_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_EMPI_LINK_RESOURCE"), insertable=false, updatable=false, nullable=false)
 	private ResourceTable myResource;
 
-	@Column(name = "RESOURCE_PID", nullable = false, updatable = false, insertable = false)
+	@Column(name = "RESOURCE_PID", updatable=false, nullable=false)
 	private Long myResourcePid;
 
 	@Column(name = "MATCH_RESULT", nullable = false)

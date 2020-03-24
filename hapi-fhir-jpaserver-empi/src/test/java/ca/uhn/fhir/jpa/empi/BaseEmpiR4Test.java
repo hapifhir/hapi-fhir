@@ -35,8 +35,6 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected IFhirResourceDao<Person> myPersonDao;
 	@Autowired
 	protected IFhirResourceDao<Patient> myPatientDao;
-	@Autowired
-	private IResourceTableDao myResourceTableDao;
 
 	protected Person myPerson;
 	protected Patient myPatient;
@@ -45,8 +43,6 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected EmpiResourceComparator myEmpiResourceComparator;
 	protected Long myPersonPid;
 	protected Long myPatientPid;
-	protected ResourceTable myPersonEntity;
-	protected ResourceTable myPatientEntity;
 
 	@Before
 	public void before() throws IOException {
@@ -54,14 +50,13 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 			DaoMethodOutcome outcome = myPersonDao.create(new Person());
 			myPersonId = outcome.getId().toUnqualifiedVersionless();
 			myPersonPid = ResourceTableHelper.getPidOrNull(outcome.getResource());
-			myPersonEntity = myResourceTableDao.findById(myPersonPid).get();
 			myPerson = myPersonDao.read(myPersonId);
 		}
 		{
 			DaoMethodOutcome outcome = myPatientDao.create(new Patient());
 			myPatientId = outcome.getId().toUnqualifiedVersionless();
 			myPatientPid = ResourceTableHelper.getPidOrNull(outcome.getResource());
-			myPatientEntity = myResourceTableDao.findById(myPatientPid).get();
+			myPatient = myPatientDao.read(myPatientId);
 		}
 		myEmpiResourceComparator = buildEmpiResourceComparator();
 	}

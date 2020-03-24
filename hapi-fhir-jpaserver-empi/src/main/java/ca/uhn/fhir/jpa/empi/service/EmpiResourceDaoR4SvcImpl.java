@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.empi.service;
 
-import ca.uhn.fhir.jpa.api.IEmpiResourceDaoSvc;
+import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -32,5 +32,10 @@ public class EmpiResourceDaoR4SvcImpl implements IEmpiResourceDaoSvc {
 	@Override
 	public IBaseResource readPractitioner(IIdType theId) {
 		return myPractitionerDao.read(theId);
+	}
+
+	@Override
+	public DaoMethodOutcome updatePerson(IBaseResource thePerson) {
+		return myPersonDao.update((Person) thePerson);
 	}
 }

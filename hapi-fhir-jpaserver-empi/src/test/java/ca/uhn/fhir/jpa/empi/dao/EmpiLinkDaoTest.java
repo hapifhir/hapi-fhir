@@ -18,8 +18,9 @@ public class EmpiLinkDaoTest extends BaseEmpiR4Test {
 		EmpiLink empiLink = new EmpiLink();
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		empiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-		empiLink.setPerson(myPersonEntity);
-		empiLink.setResource(myPatientEntity);
+		// FIXME KHS get this to work with pids
+		empiLink.setPersonPid(myPersonPid);
+		empiLink.setResourcePid(myPatientPid);
 		myEmpiLinkDao.save(empiLink);
 	}
 }

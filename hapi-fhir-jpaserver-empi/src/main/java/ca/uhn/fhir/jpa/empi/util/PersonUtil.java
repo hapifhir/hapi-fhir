@@ -5,21 +5,40 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Person;
+import org.hl7.fhir.r4.model.Reference;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class PersonUtil {
 	private PersonUtil() {}
 
-	public static List<IIdType> getLinks(FhirContext theFhirContext, IBaseResource thePerson) {
+	public static Stream<IIdType> getLinks(FhirContext theFhirContext, IBaseResource thePerson) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person person = (Person)thePerson;
 				return person.getLink().stream()
 					.map(Person.PersonLinkComponent::getTarget)
 					.map(IBaseReference::getReferenceElement)
-					.collect(Collectors.toList());
+					.map(IIdType::toUnqualifiedVersionless);
+			default:
+				// FIXME EMPI moar versions
+				throw new UnsupportedOperationException("Version not supported: " + theFhirContext.getVersion().getVersion());
+		}
+	}
+
+    public static boolean containsLinkTo(FhirContext theFhirContext, IBaseResource thePerson, IIdType theResourceId) {
+		 Stream<IIdType> links = getLinks(theFhirContext, thePerson);
+		 return links.anyMatch(link -> link.getValue().equals(theResourceId.getValue()));
+    }
+
+	public static void addLink(FhirContext theFhirContext, IBaseResource thePerson, IIdType theResourceId) {
+		switch (theFhirContext.getVersion().getVersion()) {
+			case R4:
+				Person person = (Person) thePerson;
+				person.addLink().setTarget(new Reference(theResourceId));
+				break;
 			default:
 				// FIXME EMPI moar versions
 				throw new UnsupportedOperationException("Version not supported: " + theFhirContext.getVersion().getVersion());
