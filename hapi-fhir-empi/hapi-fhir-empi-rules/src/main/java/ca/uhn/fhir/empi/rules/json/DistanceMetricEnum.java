@@ -23,6 +23,10 @@ package ca.uhn.fhir.empi.rules.json;
 import info.debatty.java.stringsimilarity.*;
 import info.debatty.java.stringsimilarity.interfaces.NormalizedStringSimilarity;
 
+/**
+ * Enum for holding all the known distance metrics that we support in HAPI for
+ * calculating differences between strings (https://en.wikipedia.org/wiki/String_metric)
+ */
 public enum DistanceMetricEnum implements NormalizedStringSimilarity {
 	JARO_WINKLER("Jaro Winkler", new HapiStringSimilarity(new JaroWinkler())),
 	COSINE("Cosine", new HapiStringSimilarity(new Cosine())),

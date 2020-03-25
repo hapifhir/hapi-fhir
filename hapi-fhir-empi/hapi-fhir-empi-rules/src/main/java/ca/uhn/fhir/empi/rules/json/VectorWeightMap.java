@@ -23,6 +23,7 @@ package ca.uhn.fhir.empi.rules.json;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ public class VectorWeightMap {
 
 	VectorWeightMap(EmpiRulesJson theEmpiRulesJson) {
 		myEmpiRulesJson = theEmpiRulesJson;
+		//no reason to hold the entire empirulesjson here
 		initMap();
 	}
 

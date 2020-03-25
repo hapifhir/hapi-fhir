@@ -30,6 +30,10 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
 
+/**
+ * This class is responsible for performing matching between raw-typed values of a left record and a right record.
+ *
+ */
 public class EmpiResourceFieldComparator implements IEmpiMatcher<IBaseResource> {
 	private final FhirContext myFhirContext;
 	private final EmpiFieldMatchJson myEmpiFieldMatchJson;
