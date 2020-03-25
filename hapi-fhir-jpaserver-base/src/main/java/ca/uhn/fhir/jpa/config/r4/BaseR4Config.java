@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
@@ -133,5 +134,12 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 	public ITermReadSvcR4 terminologyService() {
 		return new TermReadSvcR4();
 	}
+
+	@Bean
+	public ObservationLastNIndexPersistSvc observationLastNIndexpersistSvc() {
+		return new ObservationLastNIndexPersistSvc();
+	}
+
+
 
 }
