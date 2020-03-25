@@ -1,4 +1,18 @@
 {
+	"searchParams" : [ {
+		"resourceType" : "Patient",
+		"searchParam" : "birthdate",
+		"searchParamMatchType" : "RESOURCE"
+	}, {
+		"resourceType" : "Patient",
+		"searchParam" : "identifier",
+		"searchParamMatchType" : "RESOURCE"
+	}, {
+		"resourceType" : "Patient",
+		"searchParam" : "active",
+		"searchParamMatchType" : "FIXED",
+		"fixedValue" : "true"
+	} ],
 	"matchFields" : [ {
 		"name" : "patient-given",
 		"resourceType" : "Patient",
@@ -19,4 +33,3 @@
 	"noMatchThreshold" : 0.6,
 	"matchThreshold" : 0.8
 }
-

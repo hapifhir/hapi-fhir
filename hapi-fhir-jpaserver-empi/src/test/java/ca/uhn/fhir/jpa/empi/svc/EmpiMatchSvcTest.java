@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
-import ca.uhn.fhir.jpa.api.IEmpiMatchSvc;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import org.hl7.fhir.r4.model.Patient;
@@ -9,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.Assert.assertEquals;
 
-public class EmpiMatchSvcImplTest extends BaseEmpiR4Test {
+public class EmpiMatchSvcTest extends BaseEmpiR4Test {
 	@Autowired
-	private IEmpiMatchSvc myEmpiMatchSvc;
+	private EmpiMatchSvc myEmpiMatchSvc;
 	@Autowired
 	IEmpiLinkDao myEmpiLinkDao;
 

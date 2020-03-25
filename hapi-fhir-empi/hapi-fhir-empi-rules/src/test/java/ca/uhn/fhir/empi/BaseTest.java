@@ -1,9 +1,7 @@
 package ca.uhn.fhir.empi;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.rules.DistanceMetricEnum;
-import ca.uhn.fhir.empi.rules.EmpiFieldMatchJson;
-import ca.uhn.fhir.empi.rules.EmpiRulesJson;
+import ca.uhn.fhir.empi.rules.json.*;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 
@@ -26,17 +24,48 @@ public abstract class BaseTest {
 	private EmpiFieldMatchJson myLastNameMatchField;
 	protected EmpiRulesJson myRules;
 	protected String myBothNameFields;
-
+	private EmpiSearchParamJson myPatientBirthdayBlocking;
+	private EmpiSearchParamJson myPatientIdentifierBlocking;
+	private EmpiSearchParamJson myPatientActiveBlocking;
 
 	@Before
 	public void before() {
-		myGivenNameMatchField = new EmpiFieldMatchJson(PATIENT_GIVEN, "Patient", "name.given", DistanceMetricEnum.COSINE, NAME_THRESHOLD);
-		myLastNameMatchField = new EmpiFieldMatchJson(PATIENT_LAST, "Patient", "name.family", DistanceMetricEnum.JARO_WINKLER, NAME_THRESHOLD);
+		myPatientBirthdayBlocking = new EmpiSearchParamJson()
+			.setResourceType("Patient")
+			.setSearchParam(Patient.SP_BIRTHDATE)
+			.setMatchType(SearchParamMatchTypeEnum.RESOURCE);
+		myPatientIdentifierBlocking = new EmpiSearchParamJson()
+			.setResourceType("Patient")
+			.setSearchParam(Patient.SP_IDENTIFIER)
+			.setMatchType(SearchParamMatchTypeEnum.RESOURCE);
+		myPatientActiveBlocking = new EmpiSearchParamJson()
+			.setResourceType("Patient")
+			.setSearchParam(Patient.SP_ACTIVE)
+			.setMatchType(SearchParamMatchTypeEnum.FIXED)
+		.setFixedValue("true");
+
+		myGivenNameMatchField = new EmpiFieldMatchJson()
+			.setName(PATIENT_GIVEN)
+			.setResourceType("Patient")
+			.setResourcePath("name.given")
+			.setMetric(DistanceMetricEnum.COSINE)
+			.setMatchThreshold(NAME_THRESHOLD);
+
+		myLastNameMatchField = new EmpiFieldMatchJson()
+			.setName(PATIENT_LAST)
+			.setResourceType("Patient")
+			.setResourcePath("name.family")
+			.setMetric(DistanceMetricEnum.JARO_WINKLER)
+			.setMatchThreshold(NAME_THRESHOLD);
+
 		myRules = new EmpiRulesJson();
-		myRules.setMatchThreshold(MATCH_THRESHOLD);
-		myRules.setNoMatchThreshold(NO_MATCH_THRESHOLD);
+		myRules.addSearchParam(myPatientBirthdayBlocking);
+		myRules.addSearchParam(myPatientIdentifierBlocking);
+		myRules.addSearchParam(myPatientActiveBlocking);
 		myRules.addMatchField(myGivenNameMatchField);
 		myRules.addMatchField(myLastNameMatchField);
+		myRules.setMatchThreshold(MATCH_THRESHOLD);
+		myRules.setNoMatchThreshold(NO_MATCH_THRESHOLD);
 
 		myBothNameFields = String.join(",", PATIENT_GIVEN, PATIENT_LAST);
 		myRules.putWeight(myBothNameFields, EXPECTED_BOTH_NAMES_WEIGHT);

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules;
+package ca.uhn.fhir.empi.rules.json;
 
 /*-
  * #%L
@@ -19,6 +19,8 @@ package ca.uhn.fhir.empi.rules;
  * limitations under the License.
  * #L%
  */
+
+import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules;
+package ca.uhn.fhir.empi.rules.json;
 
 /*-
  * #%L
@@ -25,11 +25,11 @@ import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 
-import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.function.Consumer;
 
-public class EmpiRulesJson implements IModelJson, Iterable<EmpiFieldMatchJson> {
+public class EmpiRulesJson implements IModelJson {
+	@JsonProperty("searchParams")
+	List<EmpiSearchParamJson> mySearchParams = new ArrayList<>();
 	@JsonProperty("matchFields")
 	List<EmpiFieldMatchJson> myMatchFieldJsonList = new ArrayList<>();
 	@JsonProperty("weightMap")
@@ -43,6 +43,10 @@ public class EmpiRulesJson implements IModelJson, Iterable<EmpiFieldMatchJson> {
 
 	public void addMatchField(EmpiFieldMatchJson theMatchRuleName) {
 		myMatchFieldJsonList.add(theMatchRuleName);
+	}
+
+	public void addSearchParam(EmpiSearchParamJson theSearchParam) {
+		mySearchParams.add(theSearchParam);
 	}
 
 	int size() {
@@ -67,7 +71,7 @@ public class EmpiRulesJson implements IModelJson, Iterable<EmpiFieldMatchJson> {
 		return myWeightMap.get(theFieldMatchNames);
 	}
 
-	double getWeight(Long theMatchVector) {
+	public double getWeight(Long theMatchVector) {
 		initVectorWeightMapIfRequired();
 		Double result = myVectorWeightMap.get(theMatchVector);
 		return MoreObjects.firstNonNull(result, 0.0);
@@ -113,19 +117,7 @@ public class EmpiRulesJson implements IModelJson, Iterable<EmpiFieldMatchJson> {
 		return this;
 	}
 
-	@Nonnull
-	@Override
-	public Iterator<EmpiFieldMatchJson> iterator() {
-		return myMatchFieldJsonList.iterator();
-	}
-
-	@Override
-	public void forEach(Consumer<? super EmpiFieldMatchJson> action) {
-		myMatchFieldJsonList.forEach(action);
-	}
-
-	@Override
-	public Spliterator<EmpiFieldMatchJson> spliterator() {
-		return myMatchFieldJsonList.spliterator();
+	public List<EmpiFieldMatchJson> getMatchFields() {
+		return Collections.unmodifiableList(myMatchFieldJsonList);
 	}
 }

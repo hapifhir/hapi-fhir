@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules;
+package ca.uhn.fhir.empi.rules.svc;
 
 /*-
  * #%L
@@ -21,23 +21,39 @@ package ca.uhn.fhir.empi.rules;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
+import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EmpiResourceComparator {
-	private final EmpiRulesJson myEmpiRulesJson;
+@Service
+public class EmpiResourceComparatorSvc {
+	private final FhirContext myFhirContext;
+	private final EmpiRulesSvc myEmpiRulesSvc;
+
+	private EmpiRulesJson myEmpiRulesJson;
 	private final List<EmpiResourceFieldComparator> myFieldComparators = new ArrayList<>();
 
-	public EmpiResourceComparator(FhirContext theFhirContext, EmpiRulesJson theEmpiRulesJson) {
-		myEmpiRulesJson = theEmpiRulesJson;
-		for (EmpiFieldMatchJson matchFieldJson : myEmpiRulesJson) {
-			myFieldComparators.add(new EmpiResourceFieldComparator(theFhirContext, matchFieldJson));
-		}
+	@Autowired
+	public EmpiResourceComparatorSvc(FhirContext theFhirContext, EmpiRulesSvc theEmpiRulesSvc) {
+		myFhirContext = theFhirContext;
+		myEmpiRulesSvc = theEmpiRulesSvc;
 	}
 
+	@PostConstruct
+	public void init() {
+		myEmpiRulesJson = myEmpiRulesSvc.getEmpiRules();
+		for (EmpiFieldMatchJson matchFieldJson : myEmpiRulesJson.getMatchFields()) {
+			myFieldComparators.add(new EmpiResourceFieldComparator(myFhirContext, matchFieldJson));
+		}
+
+	}
 	public EmpiMatchResultEnum getMatchResult(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		double weight = compare(theLeftResource, theRightResource);
 		return myEmpiRulesJson.getMatchResult(weight);

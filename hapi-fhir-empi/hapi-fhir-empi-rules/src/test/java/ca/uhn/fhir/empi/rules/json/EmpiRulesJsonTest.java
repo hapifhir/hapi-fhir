@@ -1,7 +1,8 @@
-package ca.uhn.fhir.empi.rules;
+package ca.uhn.fhir.empi.rules.json;
 
 import ca.uhn.fhir.empi.BaseTest;
 import ca.uhn.fhir.util.JsonUtil;
+import junit.framework.TestCase;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,7 @@ public class EmpiRulesJsonTest extends BaseTest {
 		assertEquals(EXPECTED_BOTH_NAMES_WEIGHT, rulesDeser.getWeight(myBothNameFields));
 		EmpiFieldMatchJson second = rulesDeser.get(1);
 		assertEquals("name.family", second.getResourcePath());
-		assertEquals(DistanceMetricEnum.JARO_WINKLER, second.getMetric());
+		TestCase.assertEquals(DistanceMetricEnum.JARO_WINKLER, second.getMetric());
 	}
 
 	@Test

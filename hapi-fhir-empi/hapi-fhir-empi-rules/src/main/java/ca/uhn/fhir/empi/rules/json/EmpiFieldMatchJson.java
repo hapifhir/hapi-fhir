@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules;
+package ca.uhn.fhir.empi.rules.json;
 
 /*-
  * #%L
@@ -36,16 +36,6 @@ public class EmpiFieldMatchJson implements IModelJson, IEmpiMatcher<String> {
 	DistanceMetricEnum myMetric;
 	@JsonProperty("matchThreshold")
 	double myMatchThreshold;
-
-	public EmpiFieldMatchJson() {}
-
-	public EmpiFieldMatchJson(@Nonnull String theName, String theResourceType, String theResourcePath, DistanceMetricEnum theMetric, double theMatchThreshold) {
-		myName = theName;
-		myResourceType = theResourceType;
-		myResourcePath = theResourcePath;
-		myMetric = theMetric;
-		myMatchThreshold = theMatchThreshold;
-	}
 
 	public DistanceMetricEnum getMetric() {
 		return myMetric;

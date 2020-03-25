@@ -1,6 +1,9 @@
-package ca.uhn.fhir.empi.rules;
+package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.empi.BaseTest;
+import ca.uhn.fhir.empi.rules.json.DistanceMetricEnum;
+import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
+import ca.uhn.fhir.empi.rules.svc.EmpiResourceFieldComparator;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.r4.model.Encounter;
 import org.junit.Before;
@@ -40,12 +43,17 @@ public class EmpiResourceFieldComparatorTest extends BaseTest {
 	@Test
 	public void testBadPath() {
 		try {
-			EmpiFieldMatchJson matchField = new EmpiFieldMatchJson("patient-foo", "Patient", "foo", DistanceMetricEnum.COSINE, NAME_THRESHOLD);
+			EmpiFieldMatchJson matchField = new EmpiFieldMatchJson()
+				.setName("patient-foo")
+				.setResourceType("Patient")
+				.setResourcePath("foo")
+				.setMetric(DistanceMetricEnum.COSINE)
+				.setMatchThreshold(NAME_THRESHOLD);
 			EmpiResourceFieldComparator comparator = new EmpiResourceFieldComparator(ourFhirContext, matchField);
 			comparator.match(myPatient1, myPatient2);
 			fail();
 		} catch (DataFormatException e) {
-			assertThat( e.getMessage(), startsWith("Unknown child name 'foo' in element Patient"));
+			assertThat(e.getMessage(), startsWith("Unknown child name 'foo' in element Patient"));
 		}
 	}
 

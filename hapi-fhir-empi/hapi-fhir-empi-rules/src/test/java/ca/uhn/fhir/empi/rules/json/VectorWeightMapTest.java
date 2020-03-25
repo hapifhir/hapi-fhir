@@ -1,6 +1,5 @@
-package ca.uhn.fhir.empi.rules;
+package ca.uhn.fhir.empi.rules.json;
 
-import ca.uhn.fhir.empi.rules.VectorWeightMap;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;

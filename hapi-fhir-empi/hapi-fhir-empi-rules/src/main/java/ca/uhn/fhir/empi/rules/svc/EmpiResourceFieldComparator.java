@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules;
+package ca.uhn.fhir.empi.rules.svc;
 
 /*-
  * #%L
@@ -21,6 +21,8 @@ package ca.uhn.fhir.empi.rules;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
+import ca.uhn.fhir.empi.rules.json.IEmpiMatcher;
 import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;

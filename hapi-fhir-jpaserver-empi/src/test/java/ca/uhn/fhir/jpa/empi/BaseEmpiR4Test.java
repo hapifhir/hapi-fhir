@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.empi;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.rules.EmpiResourceComparator;
+import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.empi.config.EmpiConfig;
@@ -23,13 +22,11 @@ import java.io.IOException;
 @ContextConfiguration(classes = {EmpiConfig.class, TestEmpiConfig.class})
 abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Autowired
-	FhirContext myFhirContext;
-	@Autowired
 	protected IFhirResourceDao<Person> myPersonDao;
 	@Autowired
 	protected IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
-	protected EmpiResourceComparator myEmpiResourceComparator;
+	protected EmpiResourceComparatorSvc myEmpiResourceComparatorSvc;
 
 	protected Person myPerson;
 	protected Patient myPatient;

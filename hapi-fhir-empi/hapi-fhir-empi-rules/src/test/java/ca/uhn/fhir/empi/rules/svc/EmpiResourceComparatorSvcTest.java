@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules;
+package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.empi.BaseTest;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
@@ -8,17 +8,19 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class EmpiResourceComparatorTest extends BaseTest {
-	private EmpiResourceComparator myEmpiResourceComparator;
+public class EmpiResourceComparatorSvcTest extends BaseTest {
+	private EmpiResourceComparatorSvc myEmpiResourceComparatorSvc;
+
 	@Before
 	public void before() {
 		super.before();
-		myEmpiResourceComparator = new EmpiResourceComparator(ourFhirContext, myRules);
+		myEmpiResourceComparatorSvc = new EmpiResourceComparatorSvc(ourFhirContext, new EmpiRulesSvc(myRules));
+		myEmpiResourceComparatorSvc.init();
 	}
 
 	@Test
 	public void testCompareFirstNameMatch() {
-		double result = myEmpiResourceComparator.compare(myPatient1, myPatient2);
+		double result = myEmpiResourceComparatorSvc.compare(myPatient1, myPatient2);
 		assertEquals(EXPECTED_FIRST_NAME_WEIGHT, result, NAME_DELTA);
 	}
 
@@ -26,19 +28,19 @@ public class EmpiResourceComparatorTest extends BaseTest {
 	public void testCompareBothNamesMatch() {
 		myPatient1.addName().setFamily("Smith");
 		myPatient2.addName().setFamily("Smith");
-		double result = myEmpiResourceComparator.compare(myPatient1, myPatient2);
+		double result = myEmpiResourceComparatorSvc.compare(myPatient1, myPatient2);
 		assertEquals(EXPECTED_BOTH_NAMES_WEIGHT, result, NAME_DELTA);
 	}
 
 	@Test
 	public void testMatchResult() {
-		assertEquals(EmpiMatchResultEnum.POSSIBLE_MATCH, myEmpiResourceComparator.getMatchResult(myPatient1, myPatient2));
+		assertEquals(EmpiMatchResultEnum.POSSIBLE_MATCH, myEmpiResourceComparatorSvc.getMatchResult(myPatient1, myPatient2));
 		myPatient1.addName().setFamily("Smith");
 		myPatient2.addName().setFamily("Smith");
-		assertEquals(EmpiMatchResultEnum.MATCH, myEmpiResourceComparator.getMatchResult(myPatient1, myPatient2));
+		assertEquals(EmpiMatchResultEnum.MATCH, myEmpiResourceComparatorSvc.getMatchResult(myPatient1, myPatient2));
 		Patient patient3 = new Patient();
 		patient3.setId("Patient/3");
 		patient3.addName().addGiven("Henry");
-		assertEquals(EmpiMatchResultEnum.NO_MATCH, myEmpiResourceComparator.getMatchResult(myPatient1, patient3));
+		assertEquals(EmpiMatchResultEnum.NO_MATCH, myEmpiResourceComparatorSvc.getMatchResult(myPatient1, patient3));
 	}
 }
