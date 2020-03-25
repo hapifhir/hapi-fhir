@@ -53,8 +53,10 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		IIdType resourceId = theResource.getIdElement().toUnqualifiedVersionless();
 
 		switch (theMatchResult) {
+			//GGG This should probably be configurable. i.e, what if I don't want possible matches to actually link.
 			case MATCH:
 			case POSSIBLE_MATCH:
+				//is the reason this isnt its own bean because you don't want to make util a bean?
 				if (!PersonUtil.containsLinkTo(myFhirContext, person, resourceId)) {
 					PersonUtil.addLink(myFhirContext, thePerson, resourceId);
 					myEmpiResourceDaoSvc.updatePerson(thePerson);
@@ -69,6 +71,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		updateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource);
 	}
 
+	// GGG this is technically an upsert
 	private void updateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
 		Long personPid = ResourceTableHelper.getPidOrNull(thePerson);
 		Long resourcePid = ResourceTableHelper.getPidOrNull(theResource);

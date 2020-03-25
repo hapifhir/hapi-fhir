@@ -34,5 +34,4 @@ public class EmpiMatchSvcTest extends BaseEmpiR4Test {
 		myEmpiMatchSvc.updatePatientLinks(patient1);
 		assertEquals(initialCount + 1, myEmpiLinkDao.count());
 	}
-
 }
