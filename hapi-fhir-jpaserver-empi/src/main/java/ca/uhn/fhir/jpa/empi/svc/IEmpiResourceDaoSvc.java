@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.empi.service;
+package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;

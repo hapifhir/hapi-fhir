@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.empi.service;
+package ca.uhn.fhir.jpa.empi.svc;
 
 /*-
  * #%L
@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.util.PersonUtil;
@@ -46,8 +45,6 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	IEmpiResourceDaoSvc myEmpiResourceDaoSvc;
 	@Autowired
 	IEmpiLinkDao myEmpiLinkDao;
-	@Autowired
-	IResourceTableDao myResourceTableDao;
 
 	@Override
 	@Transactional

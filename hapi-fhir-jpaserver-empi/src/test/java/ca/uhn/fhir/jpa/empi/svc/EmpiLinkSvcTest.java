@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.empi.link;
+package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.Assert.assertEquals;
 
-public class EmpiLinkTest extends BaseEmpiR4Test {
+public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	@Autowired
 	IEmpiLinkSvc myEmpiLinkSvc;
 	@Autowired
