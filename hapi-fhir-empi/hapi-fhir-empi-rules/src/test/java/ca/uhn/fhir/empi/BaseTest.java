@@ -26,7 +26,6 @@ public abstract class BaseTest {
 	protected String myBothNameFields;
 	private EmpiSearchParamJson myPatientBirthdayBlocking;
 	private EmpiSearchParamJson myPatientIdentifierBlocking;
-	private EmpiSearchParamJson myPatientActiveBlocking;
 
 	@Before
 	public void before() {
@@ -38,11 +37,6 @@ public abstract class BaseTest {
 			.setResourceType("Patient")
 			.setSearchParam(Patient.SP_IDENTIFIER)
 			.setMatchType(SearchParamMatchTypeEnum.RESOURCE);
-		myPatientActiveBlocking = new EmpiSearchParamJson()
-			.setResourceType("Patient")
-			.setSearchParam(Patient.SP_ACTIVE)
-			.setMatchType(SearchParamMatchTypeEnum.FIXED)
-		.setFixedValue("true");
 
 		myGivenNameMatchField = new EmpiFieldMatchJson()
 			.setName(PATIENT_GIVEN)
@@ -61,7 +55,6 @@ public abstract class BaseTest {
 		myRules = new EmpiRulesJson();
 		myRules.addSearchParam(myPatientBirthdayBlocking);
 		myRules.addSearchParam(myPatientIdentifierBlocking);
-		myRules.addSearchParam(myPatientActiveBlocking);
 		myRules.addMatchField(myGivenNameMatchField);
 		myRules.addMatchField(myLastNameMatchField);
 		myRules.setMatchThreshold(MATCH_THRESHOLD);

@@ -7,11 +7,6 @@
 		"resourceType" : "Patient",
 		"searchParam" : "identifier",
 		"searchParamMatchType" : "RESOURCE"
-	}, {
-		"resourceType" : "Patient",
-		"searchParam" : "active",
-		"searchParamMatchType" : "FIXED",
-		"fixedValue" : "true"
 	} ],
 	"matchFields" : [ {
 		"name" : "patient-given",
