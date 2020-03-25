@@ -28,26 +28,14 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected EmpiResourceComparatorSvc myEmpiResourceComparatorSvc;
 
-	protected Person myPerson;
-	protected Patient myPatient;
-	protected IIdType myPersonId;
-	protected IIdType myPatientId;
-	protected Long myPersonPid;
-	protected Long myPatientPid;
-
-	@Before
-	public void before() throws IOException {
-		{
-			DaoMethodOutcome outcome = myPersonDao.create(new Person());
-			myPersonId = outcome.getId().toUnqualifiedVersionless();
-			myPersonPid = ResourceTableHelper.getPidOrNull(outcome.getResource());
-			myPerson = myPersonDao.read(myPersonId);
-		}
-		{
-			DaoMethodOutcome outcome = myPatientDao.create(new Patient());
-			myPatientId = outcome.getId().toUnqualifiedVersionless();
-			myPatientPid = ResourceTableHelper.getPidOrNull(outcome.getResource());
-			myPatient = myPatientDao.read(myPatientId);
-		}
+	protected Person createPerson() {
+		DaoMethodOutcome outcome = myPersonDao.create(new Person());
+		return (Person) outcome.getResource();
 	}
+
+	protected Patient createPatient() {
+		DaoMethodOutcome outcome = myPatientDao.create(new Patient());
+		return (Patient) outcome.getResource();
+	}
+
 }

@@ -20,7 +20,7 @@ public class EmpiMatchSvcTest extends BaseEmpiR4Test {
 		myPatientDao.create(patient1);
 
 		long initialCount = myEmpiLinkDao.count();
-		myEmpiMatchSvc.updatePatientLinks(myPatient);
+		myEmpiMatchSvc.updatePatientLinks(patient1);
 		assertEquals(initialCount, myEmpiLinkDao.count());
 	}
 
@@ -31,7 +31,7 @@ public class EmpiMatchSvcTest extends BaseEmpiR4Test {
 		myPatientDao.create(patient1);
 
 		long initialCount = myEmpiLinkDao.count();
-		myEmpiMatchSvc.updatePatientLinks(myPatient);
+		myEmpiMatchSvc.updatePatientLinks(patient1);
 		assertEquals(initialCount + 1, myEmpiLinkDao.count());
 	}
 
