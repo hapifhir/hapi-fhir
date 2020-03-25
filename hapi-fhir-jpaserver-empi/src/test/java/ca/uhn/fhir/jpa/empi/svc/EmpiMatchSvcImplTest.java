@@ -16,7 +16,17 @@ public class EmpiMatchSvcImplTest extends BaseEmpiR4Test {
 	IEmpiLinkDao myEmpiLinkDao;
 
 	@Test
-	public void testAddPatient() {
+	public void testAddPatientNoMatchFields() {
+		Patient patient1 = new Patient();
+		myPatientDao.create(patient1);
+
+		long initialCount = myEmpiLinkDao.count();
+		myEmpiMatchSvc.updatePatientLinks(myPatient);
+		assertEquals(initialCount, myEmpiLinkDao.count());
+	}
+
+	@Test
+	public void testAddPatientWithMatchFields() {
 		Patient patient1 = new Patient();
 		patient1.addName().setFamily("Smith");
 		myPatientDao.create(patient1);
@@ -25,4 +35,5 @@ public class EmpiMatchSvcImplTest extends BaseEmpiR4Test {
 		myEmpiMatchSvc.updatePatientLinks(myPatient);
 		assertEquals(initialCount + 1, myEmpiLinkDao.count());
 	}
+
 }
