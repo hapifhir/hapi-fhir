@@ -956,7 +956,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		sp.setCode("my_search_param");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setTitle("Contained Medication in MedicationAdministration");
-		sp.setExpression("MedicationAdministration.medication.as(CodeableConcept)");
+		sp.setExpression("MedicationAdministration.medication.resolve().code.coding");
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
@@ -966,9 +966,9 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 
 		Medication medication = new Medication();
 		medication.getCode().addCoding(new Coding()
-			.setSystem("urn:hssc:srhs:ads:medicationcode")
-			.setCode("01059")
-			.setDisplay("insulin regular (use for humuLIN R) sliding scale 0-28 Units"));
+			.setSystem("medicationSystem")
+			.setCode("medicationCode")
+			.setDisplay("medicationDisplay"));
 
 		MedicationAdministration medicationAdministration = new MedicationAdministration();
 		medicationAdministration.addIdentifier()
@@ -978,8 +978,11 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		medicationAdministration.setMedication(new Reference());
 		medicationAdministration.getMedicationReference().setResource(medication);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(medicationAdministration));
-		IIdType medId = myMedicationAdministrationDao.create(medicationAdministration, mySrd).getId().toUnqualifiedVersionless();
+		String medAdmin = myFhirCtx.newJsonParser().encodeResourceToString(medicationAdministration);
+		MedicationAdministration medicationAdministrationResource = (MedicationAdministration) myFhirCtx.newJsonParser().parseResource(medAdmin);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(medicationAdministrationResource));
+		IIdType medId = myMedicationAdministrationDao.create(medicationAdministrationResource, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("my_search_param", new TokenParam(medication.getCode().getCodingFirstRep()));
