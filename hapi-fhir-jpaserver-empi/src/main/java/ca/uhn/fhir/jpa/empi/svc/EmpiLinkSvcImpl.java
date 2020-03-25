@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
@@ -53,10 +54,10 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		IIdType resourceId = theResource.getIdElement().toUnqualifiedVersionless();
 
 		switch (theMatchResult) {
-			//GGG This should probably be configurable. i.e, what if I don't want possible matches to actually link.
 			case MATCH:
+				// FIXME EMPI use assurance 2 for possible and assurance 4 for no match
 			case POSSIBLE_MATCH:
-				//is the reason this isnt its own bean because you don't want to make util a bean?
+				// FIXME EMPI change ot its own bean because you don't want to make util a bean?
 				if (!PersonUtil.containsLinkTo(myFhirContext, person, resourceId)) {
 					PersonUtil.addLink(myFhirContext, thePerson, resourceId);
 					myEmpiResourceDaoSvc.updatePerson(thePerson);
@@ -68,11 +69,10 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 					myEmpiResourceDaoSvc.updatePerson(thePerson);
 				}
 		}
-		updateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource);
+		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource);
 	}
 
-	// GGG this is technically an upsert
-	private void updateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
+	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
 		Long personPid = ResourceTableHelper.getPidOrNull(thePerson);
 		Long resourcePid = ResourceTableHelper.getPidOrNull(theResource);
 
@@ -80,9 +80,9 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		empiLink.setPersonPid(personPid);
 		empiLink.setResourcePid(resourcePid);
 		Example<EmpiLink> example = Example.of(empiLink);
-		List<EmpiLink> found = myEmpiLinkDao.findAll(example);
-		if (!found.isEmpty()) {
-			empiLink = found.get(0);
+		Optional<EmpiLink> found = myEmpiLinkDao.findOne(example);
+		if (found.isPresent()) {
+			empiLink = found.get();
 		}
 		empiLink.setLinkSource(theLinkSource);
 		empiLink.setMatchResult(theMatchResult);
