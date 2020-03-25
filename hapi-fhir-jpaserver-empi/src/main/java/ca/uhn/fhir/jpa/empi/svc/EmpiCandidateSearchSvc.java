@@ -12,6 +12,13 @@ public class EmpiCandidateSearchSvc {
 	@Autowired
 	EmpiRulesSvc myEmpiRulesSvc;
 
+	/**
+	 * Given a target resource, search for all resources that are considered an EMPI match based on locally defined
+	 * EMPI rules.
+	 *
+	 * @param theResource the target resource we are attempting to match.
+	 * @return the list of candidate resources which could be matches to theResource
+	 */
 	public List<IBaseResource> findCandidates(IBaseResource theResource) {
 		// FIXME EMPI implement
 		return null;
