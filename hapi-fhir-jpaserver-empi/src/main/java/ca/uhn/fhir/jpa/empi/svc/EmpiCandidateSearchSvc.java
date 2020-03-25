@@ -14,5 +14,6 @@ public class EmpiCandidateSearchSvc {
 
 	public List<IBaseResource> findCandidates(IBaseResource theResource) {
 		// FIXME EMPI implement
+		return null;
 	}
 }
