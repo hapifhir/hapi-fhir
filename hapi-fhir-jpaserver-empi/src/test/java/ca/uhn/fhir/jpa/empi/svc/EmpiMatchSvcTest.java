@@ -15,19 +15,8 @@ public class EmpiMatchSvcTest extends BaseEmpiR4Test {
 	IEmpiLinkDao myEmpiLinkDao;
 
 	@Test
-	public void testAddPatientNoMatchFields() {
+	public void testAddPatientLinksToNewPersonIfNoneFound() {
 		Patient patient = new Patient();
-		myPatientDao.create(patient);
-
-		long initialCount = myEmpiLinkDao.count();
-		myEmpiMatchSvc.updatePatientLinks(patient);
-		assertEquals(initialCount, myEmpiLinkDao.count());
-	}
-
-	@Test
-	public void testAddPatientWithMatchFields() {
-		Patient patient = new Patient();
-		patient.addName().setFamily("Smith");
 		myPatientDao.create(patient);
 
 		long initialCount = myEmpiLinkDao.count();
