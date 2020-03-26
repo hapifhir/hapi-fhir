@@ -28,7 +28,7 @@ public class EmpiMatchSvc {
 	@Autowired
 	private FhirContext myFhirContext;
 
-	public void updatePatientLinks(IBaseResource theResource) {
+	public void updateEmpiLinksForPatient(IBaseResource theResource) {
 		Collection<IBaseResource> candidates = myEmpiCandidateSearchSvc.findCandidates("Patient", theResource);
 
 		List<MatchedTargetCandidate> matchedCandidates = candidates.stream()

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.empi.svc;
+package ca.uhn.fhir.jpa.empi.interceptor;
 
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
@@ -8,19 +8,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.Assert.assertEquals;
 
-public class EmpiMatchSvcTest extends BaseEmpiR4Test {
-	@Autowired
-	private EmpiMatchSvc myEmpiMatchSvc;
+public class EmpiInterceptorTest extends BaseEmpiR4Test {
 	@Autowired
 	IEmpiLinkDao myEmpiLinkDao;
 
 	@Test
-	public void testAddPatientLinksToNewPersonIfNoneFound() {
+	public void testCreatePatient() {
 		Patient patient = new Patient();
-		myPatientDao.create(patient);
 
 		long initialCount = myEmpiLinkDao.count();
-		myEmpiMatchSvc.updateEmpiLinksForPatient(patient);
+		myPatientDao.create(patient);
 		assertEquals(initialCount + 1, myEmpiLinkDao.count());
 	}
+
 }

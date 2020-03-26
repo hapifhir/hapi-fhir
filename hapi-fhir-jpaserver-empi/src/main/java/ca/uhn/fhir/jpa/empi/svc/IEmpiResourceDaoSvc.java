@@ -12,4 +12,5 @@ public interface IEmpiResourceDaoSvc {
 	IBaseResource readPractitioner(IIdType theId);
 
 	DaoMethodOutcome updatePerson(IBaseResource thePerson);
+
 }
