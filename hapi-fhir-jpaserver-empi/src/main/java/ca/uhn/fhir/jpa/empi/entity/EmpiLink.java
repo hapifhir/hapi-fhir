@@ -29,7 +29,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "HFJ_EMPI_LINK", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_EMPI_PERSONID_RESID", columnNames = {"PERSON_PID", "RESOURCE_PID"}),
+	@UniqueConstraint(name = "IDX_EMPI_PERSON_TGT", columnNames = {"PERSON_PID", "TARGET_PID"}),
 	// FIXME EMPI what happens when we find new patients we think should be in the same person--i.e. we want to request a merge, or if we match people in more than one eid
 	// Fundamentally, matching might not be transitive.  If unsure send to manual sorting
 })
@@ -51,11 +51,11 @@ public class EmpiLink {
 	private Long myPersonPid;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(name = "RESOURCE_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_EMPI_LINK_RESOURCE"), insertable=false, updatable=false, nullable=false)
-	private ResourceTable myResource;
+	@JoinColumn(name = "TARGET_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_EMPI_LINK_TARGET"), insertable=false, updatable=false, nullable=false)
+	private ResourceTable myTarget;
 
-	@Column(name = "RESOURCE_PID", updatable=false, nullable=false)
-	private Long myResourcePid;
+	@Column(name = "TARGET_PID", updatable=false, nullable=false)
+	private Long myTargetPid;
 
 	@Column(name = "MATCH_RESULT", nullable = false)
 	@Enumerated(EnumType.ORDINAL)
@@ -95,22 +95,22 @@ public class EmpiLink {
 		return this;
 	}
 
-	public ResourceTable getResource() {
-		return myResource;
+	public ResourceTable getTarget() {
+		return myTarget;
 	}
 
-	public EmpiLink setResource(ResourceTable theResource) {
-		myResource = theResource;
-		myResourcePid = theResource.getId();
+	public EmpiLink setTarget(ResourceTable theTarget) {
+		myTarget = theTarget;
+		myTargetPid = theTarget.getId();
 		return this;
 	}
 
-	public Long getResourcePid() {
-		return myResourcePid;
+	public Long getTargetPid() {
+		return myTargetPid;
 	}
 
-	public EmpiLink setResourcePid(Long theResourcePid) {
-		myResourcePid = theResourcePid;
+	public EmpiLink setTargetPid(Long theTargetPid) {
+		myTargetPid = theTargetPid;
 		return this;
 	}
 

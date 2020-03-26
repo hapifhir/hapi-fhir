@@ -23,7 +23,7 @@ public class EmpiLinkDaoTest extends BaseEmpiR4Test {
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		empiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		empiLink.setPersonPid(ResourceTableHelper.getPidOrNull(person));
-		empiLink.setResourcePid(ResourceTableHelper.getPidOrNull(patient));
+		empiLink.setTargetPid(ResourceTableHelper.getPidOrNull(patient));
 		myEmpiLinkDao.save(empiLink);
 	}
 }

@@ -56,4 +56,17 @@ public final class PersonUtil {
 				throw new UnsupportedOperationException("Version not supported: " + theFhirContext.getVersion().getVersion());
 		}
 	}
+
+	public static IBaseResource createPersonFromPatient(FhirContext theFhirContext, IBaseResource thePatient) {
+		switch (theFhirContext.getVersion().getVersion()) {
+			case R4:
+				Person person = new Person();
+				//FIXME EMPI populate from data from theResource
+				return person;
+			default:
+				// FIXME EMPI moar versions
+				throw new UnsupportedOperationException("Version not supported: " + theFhirContext.getVersion().getVersion());
+		}
+
+	}
 }

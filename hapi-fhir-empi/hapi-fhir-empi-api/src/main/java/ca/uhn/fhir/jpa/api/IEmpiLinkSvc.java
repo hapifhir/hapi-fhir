@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.api;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
-import java.util.Map;
 
 public interface IEmpiLinkSvc {
 
@@ -47,5 +46,5 @@ public interface IEmpiLinkSvc {
 	 * @param theMatchedResults
 	 * @param theLinkSource
 	 */
-	void updateLinks(IBaseResource theIncomingResource, List<MatchedCandidate> theMatchedResults, EmpiLinkSourceEnum theLinkSource);
+	void updateLinks(IBaseResource theIncomingResource, List<MatchedTargetCandidate> theMatchedResults, EmpiLinkSourceEnum theLinkSource);
 }

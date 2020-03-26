@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
-import ca.uhn.fhir.jpa.api.MatchedCandidate;
+import ca.uhn.fhir.jpa.api.MatchedTargetCandidate;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.util.PersonUtil;
@@ -37,7 +37,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -52,7 +51,6 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	@Override
 	@Transactional
 	public void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
-		IBaseResource person = myEmpiResourceDaoSvc.readPerson(thePerson.getIdElement());
 		IIdType resourceId = theResource.getIdElement().toUnqualifiedVersionless();
 
 		switch (theMatchResult) {
@@ -60,13 +58,13 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 				// FIXME EMPI use assurance 2 for possible and assurance 4 for no match
 			case POSSIBLE_MATCH:
 				// FIXME EMPI change ot its own bean because you don't want to make util a bean?
-				if (!PersonUtil.containsLinkTo(myFhirContext, person, resourceId)) {
+				if (!PersonUtil.containsLinkTo(myFhirContext, thePerson, resourceId)) {
 					PersonUtil.addLink(myFhirContext, thePerson, resourceId);
 					myEmpiResourceDaoSvc.updatePerson(thePerson);
 				}
 				break;
 			case NO_MATCH:
-				if (PersonUtil.containsLinkTo(myFhirContext, person, resourceId)) {
+				if (PersonUtil.containsLinkTo(myFhirContext, thePerson, resourceId)) {
 					PersonUtil.removeLink(myFhirContext, thePerson, resourceId);
 					myEmpiResourceDaoSvc.updatePerson(thePerson);
 				}
@@ -75,7 +73,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	}
 
 	@Override
-	public void updateLinks(IBaseResource theIncomingResource, List<MatchedCandidate> theMatchedResults, EmpiLinkSourceEnum theLinkSource) {
+	public void updateLinks(IBaseResource theIncomingResource, List<MatchedTargetCandidate> theMatchedResults, EmpiLinkSourceEnum theLinkSource) {
 		//FIXME EMPI
 		//Given theIncomingResource, attempt to find a person. //QUESTION GGG: How do we determine a person match?
 		//If person is found, that is our person. If not, create a new person with information from theIncomingResource
@@ -90,7 +88,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
 		EmpiLink empiLink = new EmpiLink();
 		empiLink.setPersonPid(personPid);
-		empiLink.setResourcePid(resourcePid);
+		empiLink.setTargetPid(resourcePid);
 		Example<EmpiLink> example = Example.of(empiLink);
 		Optional<EmpiLink> found = myEmpiLinkDao.findOne(example);
 		if (found.isPresent()) {
