@@ -53,6 +53,8 @@ public interface ISearchParamExtractor {
 
 	String[] split(String theExpression);
 
+	List<String> extractParamValuesAsStrings(RuntimeSearchParam theActiveSearchParam, IBaseResource theResource);
+
 
 	class SearchParamSet<T> extends HashSet<T> {
 

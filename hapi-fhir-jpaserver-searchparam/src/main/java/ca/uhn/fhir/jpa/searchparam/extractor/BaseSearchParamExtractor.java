@@ -183,6 +183,36 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.REFERENCE);
 	}
 
+	@Override
+	public List<String> extractParamValuesAsStrings(RuntimeSearchParam theSearchParam, IBaseResource theResource) {
+		switch(theSearchParam.getParamType()) {
+			case DATE:
+				IExtractor<ResourceIndexedSearchParamDate> dateExtractor = createDateExtractor(theResource);
+				SearchParamSet<ResourceIndexedSearchParamDate> dateParams = new SearchParamSet<>();
+				extractSearchParam(theSearchParam, theResource, dateExtractor, dateParams);
+				return toStringList(dateParams);
+			case STRING:
+				IExtractor<ResourceIndexedSearchParamString> stringExtractor = createStringExtractor(theResource);
+				SearchParamSet<ResourceIndexedSearchParamString> stringParams = new SearchParamSet<>();
+				// FIXME KHS generic method
+				extractSearchParam(theSearchParam, theResource, stringExtractor, stringParams);
+				return toStringList(stringParams);
+			case TOKEN:
+				IExtractor<BaseResourceIndexedSearchParam> tokenExtractor = createTokenExtractor(theResource);
+				SearchParamSet<BaseResourceIndexedSearchParam> tokenParams = new SearchParamSet<>();
+				extractSearchParam(theSearchParam, theResource, tokenExtractor, tokenParams);
+				return toStringList(tokenParams);
+			default:
+				// FIXME EMPI add the rest
+				throw new UnsupportedOperationException("Type " + theSearchParam.getParamType() + " not supported for extraction");
+		}
+	}
+
+	private List<String> toStringList(SearchParamSet<? extends BaseResourceIndexedSearchParam> theParams) {
+		return theParams.stream()
+			.map(param -> param.toQueryParameterType().getValueAsQueryToken(myContext))
+			.collect(Collectors.toList());
+	}
 
 	@Override
 	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
@@ -262,7 +292,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
-		IExtractor<ResourceIndexedSearchParamDate> extractor = (params, searchParam, value, path) -> {
+		IExtractor<ResourceIndexedSearchParamDate> extractor = createDateExtractor(theResource);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.DATE);
+	}
+
+	private IExtractor<ResourceIndexedSearchParamDate> createDateExtractor(IBaseResource theResource) {
+		return (params, searchParam, value, path) -> {
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
 			switch (nextType) {
@@ -285,8 +320,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.DATE);
 	}
 
 	@Override
@@ -350,7 +383,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource) {
-		IExtractor<ResourceIndexedSearchParamString> extractor = (params, searchParam, value, path) -> {
+		IExtractor<ResourceIndexedSearchParamString> extractor = createStringExtractor(theResource);
+
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.STRING);
+	}
+
+	private IExtractor<ResourceIndexedSearchParamString> createStringExtractor(IBaseResource theResource) {
+		return (params, searchParam, value, path) -> {
 			String resourceType = toRootTypeName(theResource);
 
 			if (value instanceof IPrimitiveType) {
@@ -382,8 +421,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.STRING);
 	}
 
 	/**

@@ -11,17 +11,18 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.helper.ResourceTableHelper;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.util.FhirTerser;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -32,17 +33,15 @@ public class EmpiCandidateSearchSvc {
 	private static final Logger ourLog = getLogger(EmpiCandidateSearchSvc.class);
 
 	@Autowired
+	private FhirContext myFhirContext;
+	@Autowired
 	private EmpiRulesSvc myEmpiRulesSvc;
-
 	@Autowired
 	private MatchUrlService myMatchUrlService;
-
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
-
 	@Autowired
-	private FhirContext myFhirContext;
-
+	private SearchParamExtractorService mySearchParamExtractorService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -94,23 +93,7 @@ public class EmpiCandidateSearchSvc {
 	private List<String> getValueFromResourceForSearchParam(IBaseResource theResource, EmpiResourceSearchParamJson theFilterSearchParam) {
 		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(theFilterSearchParam.getResourceType(), theFilterSearchParam.getSearchParam());
 
-		//FIXME EMPI ask james how to grab unqualified path instead of this hack where we chop off the resource type.
-		int qualifierIndex = activeSearchParam.getPath().indexOf(".") + 1;
-		String parameterPath = activeSearchParam.getPath().substring(qualifierIndex);
-
-		FhirTerser fhirTerser = myFhirContext.newTerser();
-		return fhirTerser.getValues(theResource, parameterPath).stream()
-			.map(base -> convertBaseToString(activeSearchParam, base))
-			.collect(Collectors.toList());
-	}
-
-	private String convertBaseToString(RuntimeSearchParam theActiveSearchParam, IBase theBase) {
-		switch (theActiveSearchParam.getParamType()) {
-			case STRING:
-				return ((IPrimitiveType) theBase).getValueAsString();
-			case DATE:
-
-		}
+		return mySearchParamExtractorService.extractParamValuesAsStrings(activeSearchParam, theResource);
 	}
 
 	private String buildResourceMatchQuery(String theSearchParamName, List<String> theResourceValues) {
