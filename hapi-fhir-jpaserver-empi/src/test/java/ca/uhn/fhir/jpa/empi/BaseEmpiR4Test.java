@@ -6,6 +6,8 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.empi.config.EmpiConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.runner.RunWith;
@@ -14,6 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Nonnull;
+import java.util.Date;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {EmpiConfig.class, TestEmpiConfig.class})
@@ -56,10 +59,19 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected Patient buildPatientWithNameAndId(String theGivenName, String theId) {
+		return buildPatientWithNameIdAndBirthday(theGivenName, theId, null);
+	}
+
+	@Nonnull
+	protected Patient buildPatientWithNameIdAndBirthday(String theGivenName, String theId, Date theBirthday) {
 		Patient patient = new Patient();
 		patient.addName().addGiven(theGivenName);
 		patient.addName().setFamily("Doe");
 		patient.addIdentifier().setSystem(TEST_ID_SYSTEM).setValue(theId);
+		patient.setBirthDate(theBirthday);
+		DateType dateType = new DateType(theBirthday);
+		dateType.setPrecision(TemporalPrecisionEnum.DAY);
+		patient.setBirthDateElement(dateType);
 		return patient;
 	}
 }

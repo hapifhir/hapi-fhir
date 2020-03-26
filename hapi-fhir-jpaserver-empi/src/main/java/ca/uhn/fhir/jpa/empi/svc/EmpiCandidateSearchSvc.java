@@ -19,10 +19,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -61,7 +58,8 @@ public class EmpiCandidateSearchSvc {
 
 		List<EmpiFilterSearchParamJson> filterSearchParams = myEmpiRulesSvc.getEmpiRules().getFilterSearchParams();
 
-		List<String> criteria = buildFilterQuery(filterSearchParams, theResourceType);
+		List<String> filterCriteria = buildFilterQuery(filterSearchParams, theResourceType);
+
 		for (EmpiResourceSearchParamJson resourceSearchParam : myEmpiRulesSvc.getEmpiRules().getResourceSearchParams()) {
 
 			if (!resourceSearchParam.getResourceType().equals(theResourceType)) {
@@ -73,6 +71,7 @@ public class EmpiCandidateSearchSvc {
 				continue;
 			}
 
+			List<String> criteria = new ArrayList<>(filterCriteria);
 			criteria.add(buildResourceMatchQuery(resourceSearchParam.getSearchParam(), valuesFromResourceForSearchParam));
 
 			String resourceCriteria = theResourceType + "?" +  String.join("&", criteria);
@@ -101,10 +100,10 @@ public class EmpiCandidateSearchSvc {
 	}
 
 	private List<String> buildFilterQuery(List<EmpiFilterSearchParamJson> theFilterSearchParams, String theResourceType) {
-		return theFilterSearchParams.stream()
+		return Collections.unmodifiableList(theFilterSearchParams.stream()
 			.filter(spFilterJson -> spFilterJson.getResourceType().equals(theResourceType))
 			.map(this::convertToQueryString)
-			.collect(Collectors.toList());
+			.collect(Collectors.toList()));
 	}
 
 	private String convertToQueryString(EmpiFilterSearchParamJson theSpFilterJson) {
