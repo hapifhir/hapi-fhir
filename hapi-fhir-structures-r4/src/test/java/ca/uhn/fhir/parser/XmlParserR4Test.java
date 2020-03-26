@@ -9,6 +9,7 @@ import static org.junit.Assert.assertThat;
 import ca.uhn.fhir.test.BaseTest;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DocumentReference;
@@ -114,6 +115,44 @@ public class XmlParserR4Test extends BaseTest {
 		assertThat(encoded, containsString("lang=\"en-US\""));
 		ourLog.info(encoded);
 	}
+
+	/**
+	 * Ensure that a contained bundle doesn't cause a crash
+	 */
+	@Test
+	public void testEncodeContainedBundle() {
+		String auditEvent = "<AuditEvent xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <contained>\n" +
+			"      <Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"         <id value=\"REASONS\"/>\n" +
+			"         <entry>\n" +
+			"            <resource>\n" +
+			"               <Condition xmlns=\"http://hl7.org/fhir\">\n" +
+			"                  <id value=\"123\"/>\n" +
+			"               </Condition>\n" +
+			"            </resource>\n" +
+			"         </entry>\n" +
+			"      </Bundle>\n" +
+			"   </contained>\n" +
+			"   <contained>\n" +
+			"      <MeasureReport xmlns=\"http://hl7.org/fhir\">\n" +
+			"         <id value=\"MRPT5000602611RD\"/>\n" +
+			"         <evaluatedResource>\n" +
+			"            <reference value=\"#REASONS\"/>\n" +
+			"         </evaluatedResource>\n" +
+			"      </MeasureReport>\n" +
+			"   </contained>\n" +
+			"   <entity>\n" +
+			"      <what>\n" +
+			"         <reference value=\"#MRPT5000602611RD\"/>\n" +
+			"      </what>\n" +
+			"   </entity>\n" +
+			"</AuditEvent>";
+		AuditEvent ae = ourCtx.newXmlParser().parseResource(AuditEvent.class, auditEvent);
+		String auditEventAsString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(ae);
+		assertEquals(auditEvent, auditEventAsString);
+	}
+
 
 
 }
