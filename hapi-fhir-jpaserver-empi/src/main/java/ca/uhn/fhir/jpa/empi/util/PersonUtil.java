@@ -8,7 +8,6 @@ import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class PersonUtil {

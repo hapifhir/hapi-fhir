@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class EmpiCandidateSearchSvcTest extends BaseEmpiR4Test {
 	@Autowired

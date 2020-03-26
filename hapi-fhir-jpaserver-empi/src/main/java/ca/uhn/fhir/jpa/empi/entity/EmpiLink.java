@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.empi.entity;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.*;
