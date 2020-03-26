@@ -41,6 +41,8 @@ public class EmpiCandidateSearchSvc {
 	private SearchParamExtractorService mySearchParamExtractorService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private ResourceTableHelper myResourceTableHelper;
 
 	/**
 	 * Given a target resource, search for all resources that are considered an EMPI match based on locally defined
@@ -84,7 +86,7 @@ public class EmpiCandidateSearchSvc {
 			IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 			IBundleProvider search = resourceDao.search(searchParameterMap);
 			List<IBaseResource> resources = search.getResources(0, search.size());
-			resources.forEach(resource -> matchedPidsToResources.put(ResourceTableHelper.getPidOrNull(resource), resource));
+			resources.forEach(resource -> matchedPidsToResources.put(myResourceTableHelper.getPidOrNull(resource), resource));
 		}
 
 		return matchedPidsToResources.values();

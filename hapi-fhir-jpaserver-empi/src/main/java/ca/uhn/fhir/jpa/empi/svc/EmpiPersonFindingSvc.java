@@ -17,10 +17,12 @@ public class EmpiPersonFindingSvc {
 
 	@Autowired
 	IEmpiLinkDao myEmpiLinkDao;
+	@Autowired
+	ResourceTableHelper myResourceTableHelper;
 
 	public List<MatchedPersonCandidate> findPersonCandidates(IBaseResource theBaseResource) {
 	 // 1. First, check link table for any entries where this baseresource is the target of a person. If found, return.
-		EmpiLink empiLink = new EmpiLink().setTargetPid(ResourceTableHelper.getPidOrNull(theBaseResource));
+		EmpiLink empiLink = new EmpiLink().setTargetPid(myResourceTableHelper.getPidOrNull(theBaseResource));
 
 		Example<EmpiLink> example = Example.of(empiLink);
 		Optional<EmpiLink> oLink = myEmpiLinkDao.findOne(example);

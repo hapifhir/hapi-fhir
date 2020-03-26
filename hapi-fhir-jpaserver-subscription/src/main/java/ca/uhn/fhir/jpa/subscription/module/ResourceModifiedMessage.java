@@ -36,6 +36,7 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+// FIXME EMPI now that this is used outside of Subscriptions, we should move it
 public class ResourceModifiedMessage extends BaseResourceMessage implements IResourceMessage, IModelJson {
 
 	@JsonProperty("resourceId")

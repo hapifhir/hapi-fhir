@@ -5,49 +5,51 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
-import ca.uhn.fhir.jpa.empi.svc.EmpiMatchSvc;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import ca.uhn.fhir.jpa.interceptor.BaseResourceModifiedInterceptor;
+import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Interceptor
 @Service
-public class EmpiInterceptor {
+public class EmpiInterceptor extends BaseResourceModifiedInterceptor {
+	private static final Logger ourLog = LoggerFactory.getLogger(EmpiInterceptor.class);
+
+	private static final String EMPI_MATCHING_CHANNEL_NAME = "empi-matching";
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 	@Autowired
-	private EmpiMatchSvc myEmpiMatchSvc;
+	private ISubscribableChannelFactory mySubscribableChannelFactory;
+	@Autowired
+	private EmpiMatchingSubscriber myEmpiMatchingSubscriber;
 
-	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
-	public void resourceCreated(IBaseResource theResource) {
-		if (theResource instanceof IAnyResource) {
-			if ("Patient".equals(theResource.getIdElement().getResourceType())) {
-				myEmpiMatchSvc.updateEmpiLinksForPatient(theResource);
-			}
-			// FIXME KHS Practitioner
-		}
+	@Override
+	protected String getMatchingChannelName() {
+		return EMPI_MATCHING_CHANNEL_NAME;
 	}
 
-	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
-	public void resourceDeleted(IBaseResource theResource) {
-		// FIXME EMPI
+	@Override
+	protected MessageHandler getSubscriber() {
+		return myEmpiMatchingSubscriber;
 	}
 
-	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
-	public void resourceUpdated(IBaseResource theOldRootResource, IBaseResource theNewRootResource) {
-		// FIXME EMPI
-		if (theOldRootResource instanceof IAnyResource) {
-		}
-		if (theNewRootResource instanceof IAnyResource) {
-		}
+	@Override
+	protected SubscribableChannel createMatchingChannel() {
+		return mySubscribableChannelFactory.createSubscribableChannel(EMPI_MATCHING_CHANNEL_NAME, ResourceModifiedMessage.class, 1);
 	}
-
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING)
 	public void expungeAllLiveBundleRecords(AtomicInteger theCounter) {
+		// FIXME KHS
+		ourLog.info(">>> Expunging all EmpiLink records");
 		theCounter.addAndGet(myExpungeEverythingService.expungeEverythingByType(EmpiLink.class));
 	}
 

@@ -13,11 +13,13 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 	IEmpiLinkDao myEmpiLinkDao;
 
 	@Test
-	public void testCreatePatient() {
+	public void testCreatePatient() throws InterruptedException {
 		Patient patient = new Patient();
 
 		long initialCount = myEmpiLinkDao.count();
+		myAfterEmpiLatch.setExpectAtLeast(1);
 		myPatientDao.create(patient);
+		myAfterEmpiLatch.awaitExpected();
 		assertEquals(initialCount + 1, myEmpiLinkDao.count());
 	}
 

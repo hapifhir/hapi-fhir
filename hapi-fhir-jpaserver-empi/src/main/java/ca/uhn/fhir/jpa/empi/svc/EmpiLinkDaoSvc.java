@@ -6,6 +6,8 @@ import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.helper.ResourceTableHelper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
@@ -14,12 +16,16 @@ import java.util.Optional;
 
 @Service
 public class EmpiLinkDaoSvc {
+	private static final Logger ourLog = LoggerFactory.getLogger(EmpiLinkDaoSvc.class);
+
 	@Autowired
 	IEmpiLinkDao myEmpiLinkDao;
+	@Autowired
+	ResourceTableHelper myResourceTableHelper;
 
 	public void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
-		Long personPid = ResourceTableHelper.getPidOrNull(thePerson);
-		Long resourcePid = ResourceTableHelper.getPidOrNull(theResource);
+		Long personPid = myResourceTableHelper.getPidOrNull(thePerson);
+		Long resourcePid = myResourceTableHelper.getPidOrNull(theResource);
 
 		EmpiLink empiLink = new EmpiLink();
 		empiLink.setPersonPid(personPid);
@@ -31,6 +37,7 @@ public class EmpiLinkDaoSvc {
 		}
 		empiLink.setLinkSource(theLinkSource);
 		empiLink.setMatchResult(theMatchResult);
+		ourLog.debug("Creating EmpiLink from {} to {}", thePerson.getIdElement(), theResource.getIdElement());
 		myEmpiLinkDao.save(empiLink);
 	}
 }

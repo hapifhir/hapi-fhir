@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class EmpiLinkDaoTest extends BaseEmpiR4Test {
 	@Autowired
 	IEmpiLinkDao myEmpiLinkDao;
+	@Autowired
+	ResourceTableHelper myResourceTableHelper;
 
 	@Test
 	public void testSave() {
@@ -22,8 +24,8 @@ public class EmpiLinkDaoTest extends BaseEmpiR4Test {
 		EmpiLink empiLink = new EmpiLink();
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		empiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-		empiLink.setPersonPid(ResourceTableHelper.getPidOrNull(person));
-		empiLink.setTargetPid(ResourceTableHelper.getPidOrNull(patient));
+		empiLink.setPersonPid(myResourceTableHelper.getPidOrNull(person));
+		empiLink.setTargetPid(myResourceTableHelper.getPidOrNull(patient));
 		myEmpiLinkDao.save(empiLink);
 	}
 }

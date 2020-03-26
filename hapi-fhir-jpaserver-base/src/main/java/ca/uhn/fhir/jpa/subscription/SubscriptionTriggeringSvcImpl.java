@@ -66,13 +66,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider.RESOURCE_ID;
@@ -95,7 +89,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
-	private IResourceModifiedConsumer myResourceModifiedConsumer;
+	private SubscriptionMatcherInterceptor myResourceModifiedConsumer;
 	private int myMaxSubmitPerPass = DEFAULT_MAX_SUBMIT;
 	private ExecutorService myExecutorService;
 	@Autowired
