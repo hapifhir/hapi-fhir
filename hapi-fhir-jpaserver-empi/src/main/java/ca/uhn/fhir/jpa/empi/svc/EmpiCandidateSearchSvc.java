@@ -77,6 +77,7 @@ public class EmpiCandidateSearchSvc {
 
 			String resourceCriteria = theResourceType + "?" +  String.join("&", criteria);
 			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceType);
+
 			ourLog.info("About to execute URL query: {}", resourceCriteria);
 			SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(resourceCriteria, resourceDef);
 			//FIXME EMPI this will blow up under large scale i think.
@@ -92,7 +93,6 @@ public class EmpiCandidateSearchSvc {
 
 	private List<String> getValueFromResourceForSearchParam(IBaseResource theResource, EmpiResourceSearchParamJson theFilterSearchParam) {
 		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(theFilterSearchParam.getResourceType(), theFilterSearchParam.getSearchParam());
-
 		return mySearchParamExtractorService.extractParamValuesAsStrings(activeSearchParam, theResource);
 	}
 

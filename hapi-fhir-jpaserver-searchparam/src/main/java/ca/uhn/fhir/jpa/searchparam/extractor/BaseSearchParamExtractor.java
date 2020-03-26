@@ -204,9 +204,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private <T extends BaseResourceIndexedSearchParam> List<String> extractParamsAsQueryTokens(RuntimeSearchParam theSearchParam, IBaseResource theResource, IExtractor<T> theExtractor) {
-		SearchParamSet<T> dateParams = new SearchParamSet<>();
-		extractSearchParam(theSearchParam, theResource, theExtractor, dateParams);
-		return toStringList(dateParams);
+		SearchParamSet<T> params = new SearchParamSet<>();
+		extractSearchParam(theSearchParam, theResource, theExtractor, params);
+		return toStringList(params);
 	}
 
 	private <T extends BaseResourceIndexedSearchParam> List<String> toStringList(SearchParamSet<T> theParams) {
