@@ -898,7 +898,7 @@ public class RestfulServerUtils {
 		Writer writer = response.getResponseWriter(theStatusCode, theStatusMessage, contentType, charset, respondGzip);
 
 		// Interceptor call: SERVER_OUTGOING_WRITER_CREATED
-		if (theServer.getInterceptorService().hasHooks(Pointcut.SERVER_OUTGOING_WRITER_CREATED)) {
+		if (theServer.getInterceptorService() != null && theServer.getInterceptorService().hasHooks(Pointcut.SERVER_OUTGOING_WRITER_CREATED)) {
 			HookParams params = new HookParams()
 				.add(Writer.class, writer)
 				.add(RequestDetails.class, theRequestDetails)
