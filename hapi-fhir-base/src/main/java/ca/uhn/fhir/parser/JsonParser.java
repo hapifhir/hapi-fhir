@@ -317,19 +317,14 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 			case CONTAINED_RESOURCE_LIST:
 			case CONTAINED_RESOURCES: {
-				/*
-				 * Disabled per #103 ContainedDt value = (ContainedDt) theNextValue; for (IResource next :
-				 * value.getContainedResources()) { if (getContainedResources().getResourceId(next) != null) { continue; }
-				 * encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true,
-				 * fixContainedResourceId(next.getId().getValue())); }
-				 */
 				List<IBaseResource> containedResources = getContainedResources().getContainedResources();
 				if (containedResources.size() > 0) {
 					beginArray(theEventWriter, theChildName);
 
 					for (IBaseResource next : containedResources) {
 						IIdType resourceId = getContainedResources().getResourceId(next);
-						encodeResourceToJsonStreamWriter(theResDef, next, theEventWriter, null, true, fixContainedResourceId(resourceId.getValue()), theEncodeContext);
+						String value = resourceId.getValue();
+						encodeResourceToJsonStreamWriter(theResDef, next, theEventWriter, null, true, fixContainedResourceId(value), theEncodeContext);
 					}
 
 					theEventWriter.endArray();
@@ -359,7 +354,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				RuntimeResourceDefinition def = myContext.getResourceDefinition(resource);
 
 				theEncodeContext.pushPath(def.getName(), true);
-				encodeResourceToJsonStreamWriter(def, resource, theEventWriter, theChildName, false, theEncodeContext);
+				encodeResourceToJsonStreamWriter(def, resource, theEventWriter, theChildName, theContainedResource, theEncodeContext);
 				theEncodeContext.popPath();
 
 				break;
