@@ -1,7 +1,6 @@
 package ca.uhn.fhir.empi.rules.json;
 
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.param.TokenParamModifier;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**

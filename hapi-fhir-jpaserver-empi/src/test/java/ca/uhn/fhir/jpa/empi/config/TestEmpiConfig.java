@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.config;
 
-import ca.uhn.fhir.empi.rules.svc.EmpiRulesSvc;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
+import ca.uhn.fhir.empi.rules.svc.EmpiRulesSvc;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;

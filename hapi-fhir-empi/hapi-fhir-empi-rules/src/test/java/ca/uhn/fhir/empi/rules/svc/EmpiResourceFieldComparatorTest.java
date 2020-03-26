@@ -3,7 +3,6 @@ package ca.uhn.fhir.empi.rules.svc;
 import ca.uhn.fhir.empi.BaseTest;
 import ca.uhn.fhir.empi.rules.json.DistanceMetricEnum;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
-import ca.uhn.fhir.empi.rules.svc.EmpiResourceFieldComparator;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.r4.model.Encounter;
 import org.junit.Before;

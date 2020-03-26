@@ -20,10 +20,7 @@ package ca.uhn.fhir.empi.rules.json;
  * #L%
  */
 
-import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
-
 import javax.annotation.Nonnull;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 

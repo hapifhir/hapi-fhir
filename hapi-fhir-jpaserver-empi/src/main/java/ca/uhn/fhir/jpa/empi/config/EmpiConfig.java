@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.empi.config;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
