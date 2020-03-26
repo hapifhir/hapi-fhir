@@ -5,7 +5,7 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
-import ca.uhn.fhir.jpa.empi.svc.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.empi.svc.EmpiMatchSvc;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +19,15 @@ public class EmpiInterceptor {
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 	@Autowired
-	private EmpiLinkDaoSvc myEmpiLinkDaoSvc;
+	private EmpiMatchSvc myEmpiMatchSvc;
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
-	public void resourceCreated(IBaseResource theRootResource) {
-		// FIXME EMPI switch IBaseResource to IAnyResource in our parameters
-		if (theRootResource instanceof IAnyResource) {
-//			myLiveBundleReferenceUpdaterService.addReferencesForRootReference((IAnyResource) theRootResource);
+	public void resourceCreated(IBaseResource theResource) {
+		if (theResource instanceof IAnyResource) {
+			if ("Patient".equals(theResource.getIdElement().getResourceType())) {
+				myEmpiMatchSvc.updateEmpiLinksForPatient(theResource);
+			}
+			// FIXME KHS Practitioner
 		}
 	}
 
