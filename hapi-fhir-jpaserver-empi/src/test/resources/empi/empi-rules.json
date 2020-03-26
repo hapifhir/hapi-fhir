@@ -1,7 +1,7 @@
 {
 	"resourceSearchParams" : [ {
 		"resourceType" : "Patient",
-		"searchParam" : "given"
+		"searchParam" : "birthdate"
 	}, {
 		"resourceType" : "Patient",
 		"searchParam" : "identifier"

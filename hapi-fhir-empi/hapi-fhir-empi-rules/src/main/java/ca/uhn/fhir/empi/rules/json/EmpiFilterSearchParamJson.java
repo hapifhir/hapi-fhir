@@ -55,4 +55,8 @@ public class EmpiFilterSearchParamJson implements IModelJson {
 		myFixedValue = theFixedValue;
 		return this;
 	}
+
+    public String getTokenParamModifierAsString() {
+		return myTokenParamModifier == null ? "" : myTokenParamModifier.getValue();
+    }
 }

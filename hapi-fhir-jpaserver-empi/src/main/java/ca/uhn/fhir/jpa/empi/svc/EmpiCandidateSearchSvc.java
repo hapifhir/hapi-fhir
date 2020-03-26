@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.FhirTerser;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
@@ -98,9 +99,18 @@ public class EmpiCandidateSearchSvc {
 		String parameterPath = activeSearchParam.getPath().substring(qualifierIndex);
 
 		FhirTerser fhirTerser = myFhirContext.newTerser();
-		return fhirTerser.getValues(theResource, parameterPath, IPrimitiveType.class).stream()
-			.map(IPrimitiveType::getValueAsString)
+		return fhirTerser.getValues(theResource, parameterPath).stream()
+			.map(base -> convertBaseToString(activeSearchParam, base))
 			.collect(Collectors.toList());
+	}
+
+	private String convertBaseToString(RuntimeSearchParam theActiveSearchParam, IBase theBase) {
+		switch (theActiveSearchParam.getParamType()) {
+			case STRING:
+				return ((IPrimitiveType) theBase).getValueAsString();
+			case DATE:
+
+		}
 	}
 
 	private String buildResourceMatchQuery(String theSearchParamName, List<String> theResourceValues) {
@@ -115,7 +125,7 @@ public class EmpiCandidateSearchSvc {
 	}
 
 	private String convertToQueryString(EmpiFilterSearchParamJson theSpFilterJson) {
-		String tokenParamModifier = theSpFilterJson.getTokenParamModifier() == null ? "": theSpFilterJson.getTokenParamModifier().getValue();
-		return theSpFilterJson.getSearchParam() + tokenParamModifier + "=" + theSpFilterJson.getFixedValue();
+		String qualifier = theSpFilterJson.getTokenParamModifierAsString();
+		return theSpFilterJson.getSearchParam() + qualifier + "=" + theSpFilterJson.getFixedValue();
 	}
 }
