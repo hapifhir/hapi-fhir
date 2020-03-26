@@ -34,17 +34,14 @@ public class EmpiInterceptor {
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
 	public void resourceDeleted(IBaseResource theResource) {
 		// FIXME EMPI
-//		myLiveBundleReferenceUpdaterService.deleteWithAnyReferenceTo(theResource);
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
 	public void resourceUpdated(IBaseResource theOldRootResource, IBaseResource theNewRootResource) {
 		// FIXME EMPI
 		if (theOldRootResource instanceof IAnyResource) {
-//			myLiveBundleReferenceUpdaterService.deleteWithRootReferenceTo((IAnyResource) theOldRootResource);
 		}
 		if (theNewRootResource instanceof IAnyResource) {
-//			myLiveBundleReferenceUpdaterService.addReferencesForRootReference((IAnyResource) theNewRootResource);
 		}
 	}
 
@@ -57,6 +54,5 @@ public class EmpiInterceptor {
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE)
 	public void expungeAllLiveBundleRecords(AtomicInteger theCounter, IBaseResource theResource) {
 		// FIXME EMPI
-//		theCounter.addAndGet(myLiveBundleReferenceUpdaterService.deleteWithAnyReferenceTo(theResource).intValue());
 	}
 }
