@@ -37,6 +37,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -64,7 +65,7 @@ public class ExpungeEverythingService {
 		myTxTemplate = new TransactionTemplate(myPlatformTransactionManager);
 	}
 
-	void expungeEverything(RequestDetails theRequest) {
+	public void expungeEverything(@Nullable RequestDetails theRequest) {
 
 		final AtomicInteger counter = new AtomicInteger();
 

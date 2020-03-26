@@ -1,9 +1,13 @@
 package ca.uhn.fhir.jpa.test;
 
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.TestUtil;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
@@ -30,7 +34,15 @@ public abstract class BaseJpaTest {
 	}
 
 	@Autowired
+	protected ExpungeEverythingService myExpungeEverythingService;
+
+	@Autowired
 	PlatformTransactionManager myPlatformTransactionManager;
+
+	@After
+	public void after() {
+		myExpungeEverythingService.expungeEverything(null);
+	}
 
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(myPlatformTransactionManager);
