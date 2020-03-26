@@ -789,6 +789,40 @@ public class JsonParserR4Test extends BaseTest {
 		return b;
 	}
 
+	/**
+	 * Ensure that a contained bundle doesn't cause a crash
+	 */
+	@Test
+	public void testEncodeContainedBundle() {
+		String auditEvent = "{\n" +
+			"  \"resourceType\": \"AuditEvent\",\n" +
+			"  \"contained\": [ {\n" +
+			"    \"resourceType\": \"Bundle\",\n" +
+			"    \"id\": \"REASONS\",\n" +
+			"    \"entry\": [ {\n" +
+			"      \"resource\": {\n" +
+			"        \"resourceType\": \"Condition\",\n" +
+			"        \"id\": \"123\"\n" +
+			"      }\n" +
+			"    } ]\n" +
+			"  }, {\n" +
+			"    \"resourceType\": \"MeasureReport\",\n" +
+			"    \"id\": \"MRPT5000602611RD\",\n" +
+			"    \"evaluatedResource\": [ {\n" +
+			"      \"reference\": \"#REASONS\"\n" +
+			"    } ]\n" +
+			"  } ],\n" +
+			"  \"entity\": [ {\n" +
+			"    \"what\": {\n" +
+			"      \"reference\": \"#MRPT5000602611RD\"\n" +
+			"    }\n" +
+			"  } ]\n" +
+			"}";
+		AuditEvent ae = ourCtx.newJsonParser().parseResource(AuditEvent.class, auditEvent);
+		String auditEventAsString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ae);
+		assertEquals(auditEvent, auditEventAsString);
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {
