@@ -185,30 +185,31 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public List<String> extractParamValuesAsStrings(RuntimeSearchParam theSearchParam, IBaseResource theResource) {
+		IExtractor<? extends BaseResourceIndexedSearchParam> extractor;
 		switch(theSearchParam.getParamType()) {
 			case DATE:
-				IExtractor<ResourceIndexedSearchParamDate> dateExtractor = createDateExtractor(theResource);
-				SearchParamSet<ResourceIndexedSearchParamDate> dateParams = new SearchParamSet<>();
-				extractSearchParam(theSearchParam, theResource, dateExtractor, dateParams);
-				return toStringList(dateParams);
+				extractor = createDateExtractor(theResource);
+				break;
 			case STRING:
-				IExtractor<ResourceIndexedSearchParamString> stringExtractor = createStringExtractor(theResource);
-				SearchParamSet<ResourceIndexedSearchParamString> stringParams = new SearchParamSet<>();
-				// FIXME KHS generic method
-				extractSearchParam(theSearchParam, theResource, stringExtractor, stringParams);
-				return toStringList(stringParams);
+				extractor = createStringExtractor(theResource);
+				break;
 			case TOKEN:
-				IExtractor<BaseResourceIndexedSearchParam> tokenExtractor = createTokenExtractor(theResource);
-				SearchParamSet<BaseResourceIndexedSearchParam> tokenParams = new SearchParamSet<>();
-				extractSearchParam(theSearchParam, theResource, tokenExtractor, tokenParams);
-				return toStringList(tokenParams);
+				extractor = createTokenExtractor(theResource);
+				break;
 			default:
-				// FIXME EMPI add the rest
+				// FIXME EMPI add the rest of the types
 				throw new UnsupportedOperationException("Type " + theSearchParam.getParamType() + " not supported for extraction");
 		}
+		return extractParamsAsQueryTokens(theSearchParam, theResource, extractor);
 	}
 
-	private List<String> toStringList(SearchParamSet<? extends BaseResourceIndexedSearchParam> theParams) {
+	private <T extends BaseResourceIndexedSearchParam> List<String> extractParamsAsQueryTokens(RuntimeSearchParam theSearchParam, IBaseResource theResource, IExtractor<T> theExtractor) {
+		SearchParamSet<T> dateParams = new SearchParamSet<>();
+		extractSearchParam(theSearchParam, theResource, theExtractor, dateParams);
+		return toStringList(dateParams);
+	}
+
+	private <T extends BaseResourceIndexedSearchParam> List<String> toStringList(SearchParamSet<T> theParams) {
 		return theParams.stream()
 			.map(param -> param.toQueryParameterType().getValueAsQueryToken(myContext))
 			.collect(Collectors.toList());
