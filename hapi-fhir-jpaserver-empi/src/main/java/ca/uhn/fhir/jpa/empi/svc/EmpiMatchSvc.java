@@ -4,7 +4,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Collection;
 
 @Service
 public class EmpiMatchSvc {
@@ -12,7 +12,6 @@ public class EmpiMatchSvc {
 	EmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
 
 	public void updatePatientLinks(IBaseResource theResource) {
-		List<IBaseResource> candidates = myEmpiCandidateSearchSvc.findCandidates(theResource);
-		// FIXME EMPI implement
+		Collection<IBaseResource> candidates = myEmpiCandidateSearchSvc.findCandidates("Patient", theResource);
 	}
 }

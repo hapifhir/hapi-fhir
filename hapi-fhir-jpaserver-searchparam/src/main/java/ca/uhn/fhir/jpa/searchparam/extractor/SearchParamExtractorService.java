@@ -43,6 +43,7 @@ public class SearchParamExtractorService {
 
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
+
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 

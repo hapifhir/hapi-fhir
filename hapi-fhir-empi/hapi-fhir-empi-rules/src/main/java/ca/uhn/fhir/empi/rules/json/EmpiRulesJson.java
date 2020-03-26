@@ -28,8 +28,10 @@ import com.google.common.base.MoreObjects;
 import java.util.*;
 
 public class EmpiRulesJson implements IModelJson {
-	@JsonProperty("searchParams")
-	List<EmpiSearchParamJson> mySearchParams = new ArrayList<>();
+	@JsonProperty("resourceSearchParams")
+	List<EmpiResourceSearchParamJson> myResourceSearchParams = new ArrayList<>();
+	@JsonProperty("filterSearchParams")
+	List<EmpiFilterSearchParamJson> myFilterSearchParams = new ArrayList<>();
 	@JsonProperty("matchFields")
 	List<EmpiFieldMatchJson> myMatchFieldJsonList = new ArrayList<>();
 	@JsonProperty("weightMap")
@@ -45,8 +47,12 @@ public class EmpiRulesJson implements IModelJson {
 		myMatchFieldJsonList.add(theMatchRuleName);
 	}
 
-	public void addSearchParam(EmpiSearchParamJson theSearchParam) {
-		mySearchParams.add(theSearchParam);
+	public void addResourceSearchParam(EmpiResourceSearchParamJson theSearchParam) {
+		myResourceSearchParams.add(theSearchParam);
+	}
+
+	public void addFilterSearchParam(EmpiFilterSearchParamJson theSearchParam) {
+		myFilterSearchParams.add(theSearchParam);
 	}
 
 	int size() {
@@ -119,5 +125,13 @@ public class EmpiRulesJson implements IModelJson {
 
 	public List<EmpiFieldMatchJson> getMatchFields() {
 		return Collections.unmodifiableList(myMatchFieldJsonList);
+	}
+
+	public List<EmpiResourceSearchParamJson> getResourceSearchParams() {
+		return Collections.unmodifiableList(myResourceSearchParams);
+	}
+
+	public List<EmpiFilterSearchParamJson> getFilterSearchParams() {
+		return Collections.unmodifiableList(myFilterSearchParams);
 	}
 }

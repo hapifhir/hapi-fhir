@@ -1,12 +1,15 @@
 {
-	"searchParams" : [ {
+	"resourceSearchParams" : [ {
 		"resourceType" : "Patient",
-		"searchParam" : "birthdate",
-		"searchParamMatchType" : "RESOURCE"
+		"searchParam" : "given"
 	}, {
 		"resourceType" : "Patient",
-		"searchParam" : "identifier",
-		"searchParamMatchType" : "RESOURCE"
+		"searchParam" : "identifier"
+	} ],
+	"filterSearchParams" : [ {
+		"resourceType" : "Patient",
+		"searchParam" : "active",
+		"fixedValue" : "true"
 	} ],
 	"matchFields" : [ {
 		"name" : "patient-given",

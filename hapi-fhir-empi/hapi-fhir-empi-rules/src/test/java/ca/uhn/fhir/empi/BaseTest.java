@@ -24,19 +24,24 @@ public abstract class BaseTest {
 	private EmpiFieldMatchJson myLastNameMatchField;
 	protected EmpiRulesJson myRules;
 	protected String myBothNameFields;
-	private EmpiSearchParamJson myPatientBirthdayBlocking;
-	private EmpiSearchParamJson myPatientIdentifierBlocking;
+	private EmpiResourceSearchParamJson myPatientBirthdayBlocking;
+	private EmpiResourceSearchParamJson myPatientIdentifierBlocking;
+	private EmpiFilterSearchParamJson myActivePatientsBlockingFilter;
 
 	@Before
 	public void before() {
-		myPatientBirthdayBlocking = new EmpiSearchParamJson()
+
+		myActivePatientsBlockingFilter = new EmpiFilterSearchParamJson()
 			.setResourceType("Patient")
-			.setSearchParam(Patient.SP_BIRTHDATE)
-			.setMatchType(SearchParamMatchTypeEnum.RESOURCE);
-		myPatientIdentifierBlocking = new EmpiSearchParamJson()
+			.setSearchParam(Patient.SP_ACTIVE)
+			.setFixedValue("true");
+
+		myPatientBirthdayBlocking = new EmpiResourceSearchParamJson()
 			.setResourceType("Patient")
-			.setSearchParam(Patient.SP_IDENTIFIER)
-			.setMatchType(SearchParamMatchTypeEnum.RESOURCE);
+			.setSearchParam(Patient.SP_BIRTHDATE);
+		myPatientIdentifierBlocking = new EmpiResourceSearchParamJson()
+			.setResourceType("Patient")
+			.setSearchParam(Patient.SP_IDENTIFIER);
 
 		myGivenNameMatchField = new EmpiFieldMatchJson()
 			.setName(PATIENT_GIVEN)
@@ -53,8 +58,9 @@ public abstract class BaseTest {
 			.setMatchThreshold(NAME_THRESHOLD);
 
 		myRules = new EmpiRulesJson();
-		myRules.addSearchParam(myPatientBirthdayBlocking);
-		myRules.addSearchParam(myPatientIdentifierBlocking);
+		myRules.addResourceSearchParam(myPatientBirthdayBlocking);
+		myRules.addResourceSearchParam(myPatientIdentifierBlocking);
+		myRules.addFilterSearchParam(myActivePatientsBlockingFilter);
 		myRules.addMatchField(myGivenNameMatchField);
 		myRules.addMatchField(myLastNameMatchField);
 		myRules.setMatchThreshold(MATCH_THRESHOLD);

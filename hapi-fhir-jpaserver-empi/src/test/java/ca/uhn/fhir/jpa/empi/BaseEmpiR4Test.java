@@ -49,13 +49,17 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Nonnull
 	protected Person createPerson(Person thePerson) {
 		DaoMethodOutcome outcome = myPersonDao.create(thePerson);
-		return (Person) outcome.getResource();
+		Person person = (Person) outcome.getResource();
+		person.setId(outcome.getId());
+		return person;
 	}
 
 	@Nonnull
 	protected Patient createPatient(Patient thePatient) {
 		DaoMethodOutcome outcome = myPatientDao.create(thePatient);
-		return (Patient) outcome.getResource();
+		Patient patient = (Patient) outcome.getResource();
+		patient.setId(outcome.getId());
+		return patient;
 	}
 
 	@Nonnull

@@ -4,13 +4,16 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class EmpiSearchParamJson implements IModelJson {
+/**
+ * This SearchParamJson, unlike EmpiREsourceSearchParamJson, is responsible for doing inclusions during empi
+ * candidate searching. e.g. When doing candidate matching, only consider candidates that match all EmpiFilterSearchParams.
+ */
+//FIXME EMPI validate search param upon ingestion.
+public class EmpiFilterSearchParamJson implements IModelJson {
 	@JsonProperty("resourceType")
 	String myResourceType;
 	@JsonProperty("searchParam")
 	String mySearchParam;
-	@JsonProperty("searchParamMatchType")
-	SearchParamMatchTypeEnum myMatchType;
 	@JsonProperty("qualifier")
 	TokenParamModifier myTokenParamModifier;
 	@JsonProperty("fixedValue")
@@ -20,7 +23,7 @@ public class EmpiSearchParamJson implements IModelJson {
 		return myResourceType;
 	}
 
-	public EmpiSearchParamJson setResourceType(String theResourceType) {
+	public EmpiFilterSearchParamJson setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
 		return this;
 	}
@@ -29,25 +32,17 @@ public class EmpiSearchParamJson implements IModelJson {
 		return mySearchParam;
 	}
 
-	public EmpiSearchParamJson setSearchParam(String theSearchParam) {
+	public EmpiFilterSearchParamJson setSearchParam(String theSearchParam) {
 		mySearchParam = theSearchParam;
 		return this;
 	}
 
-	public SearchParamMatchTypeEnum getMatchType() {
-		return myMatchType;
-	}
-
-	public EmpiSearchParamJson setMatchType(SearchParamMatchTypeEnum theMatchType) {
-		myMatchType = theMatchType;
-		return this;
-	}
 
 	public TokenParamModifier getTokenParamModifier() {
 		return myTokenParamModifier;
 	}
 
-	public EmpiSearchParamJson setTokenParamModifier(TokenParamModifier theTokenParamModifier) {
+	public EmpiFilterSearchParamJson setTokenParamModifier(TokenParamModifier theTokenParamModifier) {
 		myTokenParamModifier = theTokenParamModifier;
 		return this;
 	}
@@ -56,7 +51,7 @@ public class EmpiSearchParamJson implements IModelJson {
 		return myFixedValue;
 	}
 
-	public EmpiSearchParamJson setFixedValue(String theFixedValue) {
+	public EmpiFilterSearchParamJson setFixedValue(String theFixedValue) {
 		myFixedValue = theFixedValue;
 		return this;
 	}
