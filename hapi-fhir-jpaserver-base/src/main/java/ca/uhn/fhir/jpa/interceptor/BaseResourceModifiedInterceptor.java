@@ -25,6 +25,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import javax.annotation.PreDestroy;
 
+// FIXME EMPI Now that this is used outside of Subscriptions, we should move it. Maybe to a `messaging` package? (see ResourceModifiedMessage)
 public abstract class BaseResourceModifiedInterceptor implements IResourceModifiedConsumer {
 	protected SubscribableChannel myMatchingChannel;
 
@@ -77,6 +78,7 @@ public abstract class BaseResourceModifiedInterceptor implements IResourceModifi
 
 	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType);
+		// FIXME EMPI move this down to subscription interceptor
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
 		HookParams params = new HookParams()
 			.add(ResourceModifiedMessage.class, msg);

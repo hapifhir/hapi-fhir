@@ -46,6 +46,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@After
 	public void after() {
 		//FIXME EMPI QUESTION I don't think the interceptor should be in charge of expunging everything in test, so I've just ripped it here for now to make the new Rule work nicely. Thoughts?
+		// KHS: Technically yes.  However I have often caught errors in the expunge interceptor only because it was a part of test cleanup.  E.g. when we add the second table with FKs into resource tables.
 		myEmpiLinkDao.deleteAll();
 		super.after();
 	}
