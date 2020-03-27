@@ -26,6 +26,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.empi.dao")
-@ComponentScan(basePackages = {"ca.uhn.fhir.jpa.empi.svc", "ca.uhn.fhir.empi.rules.svc", "ca.uhn.fhir.jpa.empi.interceptor"})
+@ComponentScan(basePackages = {
+	"ca.uhn.fhir.jpa.empi.svc",
+	"ca.uhn.fhir.empi.rules.svc",
+	"ca.uhn.fhir.jpa.empi.interceptor",
+	"ca.uhn.fhir.jpa.empi.util"
+})
 public class EmpiConfig {
 }
