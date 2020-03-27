@@ -62,10 +62,17 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 		}
 
 		Long taskColumnLength = getColumnLength();
-		if (taskColumnLength != null && isNoColumnShrink()) {
+		boolean isShrinkOnly = false;
+		if (taskColumnLength != null) {
 			long existingLength = existingType.getLength() != null ? existingType.getLength() : 0;
 			if (existingLength > taskColumnLength) {
-				taskColumnLength = existingLength;
+				if (isNoColumnShrink()) {
+					taskColumnLength = existingLength;
+				} else {
+					if (existingType.getColumnTypeEnum() == getColumnType()) {
+						isShrinkOnly = true;
+					}
+				}
 			}
 		}
 
@@ -129,6 +136,10 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 				throw new IllegalStateException("Dont know how to handle " + getDriverType());
 		}
 
+		if (!isFailureAllowed() && isShrinkOnly) {
+			setFailureAllowed(true);
+		}
+
 		logInfo(ourLog, "Updating column {} on table {} to type {}", getColumnName(), getTableName(), type);
 		if (sql != null) {
 			executeSql(getTableName(), sql);
@@ -139,4 +150,5 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 			executeSql(getTableName(), sqlNotNull);
 		}
 	}
+
 }
