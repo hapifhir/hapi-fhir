@@ -44,13 +44,13 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected IInterceptorService myInterceptorService;
 	@Autowired
-	private EmpiInterceptor myEmpiInterceptor;
+	protected EmpiInterceptor myEmpiInterceptor;
 	protected PointcutLatch myAfterEmpiLatch = new PointcutLatch(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED);
 
 	@Before
 	public void before() {
-		myEmpiInterceptor.start();
-		myInterceptorService.registerInterceptor(myEmpiInterceptor);
+		//myEmpiInterceptor.start();
+		//myInterceptorService.registerInterceptor(myEmpiInterceptor);
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, myAfterEmpiLatch);
 	}
 

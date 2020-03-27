@@ -115,7 +115,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<PathAndRef> extractResourceLinks(IBaseResource theResource) {
-		IExtractor<PathAndRef> extractor = (params, searchParam, value, path) -> {
+		IExtractor<PathAndRef> extractor = createReferenceExtractor();
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.REFERENCE);
+	}
+
+	private IExtractor<PathAndRef> createReferenceExtractor() {
+		return (params, searchParam, value, path) -> {
 			if (value instanceof IBaseResource) {
 				return;
 			}
@@ -179,13 +184,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.REFERENCE);
 	}
 
 	@Override
 	public List<String> extractParamValuesAsStrings(RuntimeSearchParam theSearchParam, IBaseResource theResource) {
-		IExtractor<? extends BaseResourceIndexedSearchParam> extractor;
+		IExtractor extractor;
 		switch(theSearchParam.getParamType()) {
 			case DATE:
 				extractor = createDateExtractor(theResource);
@@ -196,8 +199,24 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			case TOKEN:
 				extractor = createTokenExtractor(theResource);
 				break;
+			case NUMBER:
+				extractor = createNumberExtractor(theResource);
+				break;
+			case REFERENCE:
+				//FIXME EMPI unchecked generic here. Do we actually ever query EMPI on refs???
+				extractor = createReferenceExtractor();
+				break;
+			case QUANTITY:
+				extractor = createQuantityExtractor(theResource);
+				break;
+			case URI:
+				extractor = createUriExtractor(theResource);
+				break;
+			case SPECIAL:
+				extractor = createSpecialExtractor(theResource.getIdElement().getResourceType());
+				break;
+			case COMPOSITE:
 			default:
-				// FIXME EMPI add the rest of the types
 				throw new UnsupportedOperationException("Type " + theSearchParam.getParamType() + " not supported for extraction");
 		}
 		return extractParamsAsQueryTokens(theSearchParam, theResource, extractor);
@@ -252,16 +271,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource) {
-
 		String resourceTypeName = toRootTypeName(theResource);
+		IExtractor<BaseResourceIndexedSearchParam> extractor = createSpecialExtractor(resourceTypeName);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.SPECIAL);
+	}
 
-		IExtractor<BaseResourceIndexedSearchParam> extractor = (params, searchParam, value, path) -> {
+	private IExtractor<BaseResourceIndexedSearchParam> createSpecialExtractor(String theResourceTypeName) {
+		return (params, searchParam, value, path) -> {
 			if ("Location.position".equals(path)) {
-				addCoords_Position(resourceTypeName, params, searchParam, value);
+				addCoords_Position(theResourceTypeName, params, searchParam, value);
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.SPECIAL);
 	}
 
 
@@ -271,7 +291,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
-		IExtractor<ResourceIndexedSearchParamUri> extractor = (params, searchParam, value, path) -> {
+		IExtractor<ResourceIndexedSearchParamUri> extractor = createUriExtractor(theResource);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.URI);
+	}
+
+	private IExtractor<ResourceIndexedSearchParamUri> createUriExtractor(IBaseResource theResource) {
+		return (params, searchParam, value, path) -> {
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
 			switch (nextType) {
@@ -287,8 +312,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.URI);
 	}
 
 	@Override
@@ -325,8 +348,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource) {
+		IExtractor<ResourceIndexedSearchParamNumber> extractor = createNumberExtractor(theResource);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.NUMBER);
+	}
 
-		IExtractor<ResourceIndexedSearchParamNumber> extractor = (params, searchParam, value, path) -> {
+	private IExtractor<ResourceIndexedSearchParamNumber> createNumberExtractor(IBaseResource theResource) {
+		return (params, searchParam, value, path) -> {
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
 			switch (nextType) {
@@ -349,14 +376,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.NUMBER);
 	}
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
+		IExtractor<ResourceIndexedSearchParamQuantity> extractor = createQuantityExtractor(theResource);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY);
+	}
 
-		IExtractor<ResourceIndexedSearchParamQuantity> extractor = (params, searchParam, value, path) -> {
+	private IExtractor<ResourceIndexedSearchParamQuantity> createQuantityExtractor(IBaseResource theResource) {
+		return (params, searchParam, value, path) -> {
 			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
 				return;
 			}
@@ -378,8 +407,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY);
 	}
 
 	@Override
