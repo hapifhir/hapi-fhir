@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.Assert.assertEquals;
 
-public class EmpiMatchSvcTest extends BaseEmpiR4Test {
+public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Autowired
-	private EmpiMatchSvc myEmpiMatchSvc;
+	private EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired
 	IEmpiLinkDao myEmpiLinkDao;
 
@@ -20,7 +20,7 @@ public class EmpiMatchSvcTest extends BaseEmpiR4Test {
 		myPatientDao.create(patient);
 
 		long initialCount = myEmpiLinkDao.count();
-		myEmpiMatchSvc.updateEmpiLinksForPatient(patient);
+		myEmpiMatchLinkSvc.updateEmpiLinksForPatient(patient);
 		assertEquals(initialCount + 1, myEmpiLinkDao.count());
 	}
 }

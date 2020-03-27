@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.empi.svc.EmpiMatchSvc;
+import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 public class EmpiMatchingSubscriber implements MessageHandler {
 	private Logger ourLog = LoggerFactory.getLogger(EmpiMatchingSubscriber.class);
 	@Autowired
-	private EmpiMatchSvc myEmpiMatchSvc;
+	private EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
@@ -44,7 +44,7 @@ public class EmpiMatchingSubscriber implements MessageHandler {
 			switch (theMsg.getOperationType()) {
 				case CREATE:
 					if ("Patient".equals(theMsg.getId(myFhirContext).getResourceType())) {
-						myEmpiMatchSvc.updateEmpiLinksForPatient(theMsg.getNewPayload(myFhirContext));
+						myEmpiMatchLinkSvc.updateEmpiLinksForPatient(theMsg.getNewPayload(myFhirContext));
 					}
 					break;
 				case UPDATE:

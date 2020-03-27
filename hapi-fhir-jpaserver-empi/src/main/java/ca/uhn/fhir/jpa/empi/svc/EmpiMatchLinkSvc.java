@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class EmpiMatchSvc {
+public class EmpiMatchLinkSvc {
 	@Autowired
 	private EmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
 	@Autowired
