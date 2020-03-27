@@ -25,8 +25,3 @@
     has been replaced with an equivalent `FhirContext.newFhirPath()`. The FhirPath expression language was initially
     called FluentPath before being renamed, so this change brings HAPI FHIR inline with the correct naming.
     "
-- item:
-      type: change
-      title: "The JPA server now shared a single set of tags for all versions of a resource, bringing it in line with the
-        functional description in the FHIR specification. This means that it is no longer possible to modify the tags for
-        a specific version of a resource, and also causes significant performance improvements in some cases."

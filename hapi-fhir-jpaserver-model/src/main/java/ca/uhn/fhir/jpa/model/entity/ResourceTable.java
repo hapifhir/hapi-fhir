@@ -60,7 +60,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource, IResourceLookup {
 	public static final int RESTYPE_LEN = 40;
 	private static final int MAX_LANGUAGE_LENGTH = 20;
-	private static final int MAX_PROFILE_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -166,10 +165,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Column(name = "SP_URI_PRESENT")
 	@OptimisticLock(excluded = true)
 	private boolean myParamsUriPopulated;
-
-	@Column(name = "RES_PROFILE", length = MAX_PROFILE_LENGTH, nullable = true)
-	@OptimisticLock(excluded = true)
-	private String myProfile;
 
 	// Added in 3.0.0 - Should make this a primitive Boolean at some point
 	@OptimisticLock(excluded = true)
@@ -400,17 +395,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		}
 		getParamsUri().clear();
 		getParamsUri().addAll(theParamsUri);
-	}
-
-	public String getProfile() {
-		return myProfile;
-	}
-
-	public void setProfile(String theProfile) {
-		if (defaultString(theProfile).length() > MAX_PROFILE_LENGTH) {
-			throw new UnprocessableEntityException("Profile name exceeds maximum length of " + MAX_PROFILE_LENGTH + " chars: " + theProfile);
-		}
-		myProfile = theProfile;
 	}
 
 	@Override

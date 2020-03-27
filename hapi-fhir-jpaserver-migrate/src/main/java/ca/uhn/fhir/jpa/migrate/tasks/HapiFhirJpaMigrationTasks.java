@@ -57,10 +57,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init400(); // 20190401 - 20190814
 		init410(); // 20190815 - 20191014
 		init420(); // 20191015 - 20200217
-		init430(); // 20200218 - present
+		init500(); // 20200218 - present
 	}
 
-	protected void init430() { // 20200218 - present
+	protected void init500() { // 20200218 - present
 		Builder version = forVersion(VersionEnum.V4_3_0);
 
 		// Eliminate circular dependency.
@@ -68,6 +68,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RES_VER").dropColumn("20200218.2", "FORCED_ID_PID");
 		version.onTable("HFJ_RES_VER").addForeignKey("20200218.3", "FK_RESOURCE_HISTORY_RESOURCE").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 		version.onTable("HFJ_RES_VER").modifyColumn("20200220.1", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+
+		// Add mlutiitenancy
+		version.onTable("HFJ_RESOURCE").dropColumn("20200327.1", "RES_PROFILE");
 	}
 
 	protected void init420() { // 20191015 - 20200217

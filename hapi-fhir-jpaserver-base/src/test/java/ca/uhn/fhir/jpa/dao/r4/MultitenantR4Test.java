@@ -28,6 +28,7 @@ import org.junit.Test;
 import javax.servlet.ServletException;
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -36,16 +37,19 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 
 public class MultitenantR4Test extends BaseJpaR4SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MultitenantR4Test.class);
+	private MyInterceptor myTenantInterceptor;
 
 	@After
 	public void after() {
 		myDaoConfig.setMultiTenancyEnabled(new DaoConfig().isMultiTenancyEnabled());
 
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyInterceptor);
+		myInterceptor = null;
 	}
 
 	@Override
@@ -74,56 +78,84 @@ public class MultitenantR4Test extends BaseJpaR4SystemTest {
 	public void testCreateResourceWithTenant() {
 		createUniqueCompositeSp();
 
-		int expectId = 3;
-		LocalDate expectDate = LocalDate.of(2020, Month.JANUARY, 14);
-		myInterceptorRegistry.registerInterceptor(new MyInterceptor(new TenantId(expectId, expectDate)));
+		addTenant(3, LocalDate.of(2020, Month.JANUARY, 14));
+		addTenant(3, LocalDate.of(2020, Month.JANUARY, 14));
 
 		Organization org = new Organization();
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
 
 		Patient p = new Patient();
+		p.getMeta().addTag("http://system", "code", "diisplay");
 		p.addName().setFamily("FAM");
 		p.addIdentifier().setSystem("system").setValue("value");
 		p.setBirthDate(new Date());
 		p.getManagingOrganization().setReferenceElement(orgId);
-		Long patientId = myPatientDao.create(p).getId().getIdPartAsLong();
+		when(mySrd.getRequestId()).thenReturn("REQUEST_ID");
+		Long patientId = myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
 
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
 			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
-			assertEquals(expectId, resourceTable.getTenantId().getTenantId().intValue());
-			assertEquals(expectDate, resourceTable.getTenantId().getTenantDate());
+			assertEquals(3, resourceTable.getTenantId().getTenantId().intValue());
+			assertEquals(LocalDate.of(2020, Month.JANUARY, 14), resourceTable.getTenantId().getTenantDate());
+
+			resourceTable.getProfile()
 
 			// HFJ_RES_VER
 			ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(patientId, 1L);
-			assertEquals(expectId, version.getTenantId().getTenantId().intValue());
-			assertEquals(expectDate, version.getTenantId().getTenantDate());
+			assertEquals(3, version.getTenantId().getTenantId().intValue());
+			assertEquals(LocalDate.of(2020, Month.JANUARY, 14), version.getTenantId().getTenantDate());
 
 			// HFJ_SPIDX_STRING
 			List<ResourceIndexedSearchParamString> strings = myResourceIndexedSearchParamStringDao.findAllForResourceId(patientId);
 			ourLog.info("\n * {}", strings.stream().map(ResourceIndexedSearchParamString::toString).collect(Collectors.joining("\n * ")));
 			assertEquals(10, strings.size());
-			assertEquals(expectId, strings.get(0).getTenantId().getTenantId().intValue());
-			assertEquals(expectDate, strings.get(0).getTenantId().getTenantDate());
+			assertEquals(3, strings.get(0).getTenantId().getTenantId().intValue());
+			assertEquals(LocalDate.of(2020, Month.JANUARY, 14), strings.get(0).getTenantId().getTenantDate());
 
 			// HFJ_RES_LINK
 			List<ResourceLink> resourceLinks = myResourceLinkDao.findAllForResourceId(patientId);
 			assertEquals(1, resourceLinks.size());
-			assertEquals(expectId, resourceLinks.get(0).getTenantId().getTenantId().intValue());
-			assertEquals(expectDate, resourceLinks.get(0).getTenantId().getTenantDate());
+			assertEquals(3, resourceLinks.get(0).getTenantId().getTenantId().intValue());
+			assertEquals(LocalDate.of(2020, Month.JANUARY, 14), resourceLinks.get(0).getTenantId().getTenantDate());
 
 			// HFJ_RES_PARAM_PRESENT
 			List<SearchParamPresent> presents = mySearchParamPresentDao.findAllForResource(resourceTable);
 			assertEquals(3, presents.size());
-			assertEquals(expectId, presents.get(0).getTenantId().getTenantId().intValue());
-			assertEquals(expectDate, presents.get(0).getTenantId().getTenantDate());
+			assertEquals(3, presents.get(0).getTenantId().getTenantId().intValue());
+			assertEquals(LocalDate.of(2020, Month.JANUARY, 14), presents.get(0).getTenantId().getTenantDate());
 
 			// HFJ_IDX_CMP_STRING_UNIQ
 			List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAllForResourceId(patientId);
 			assertEquals(3, uniques.size());
-			assertEquals(expectId, uniques.get(0).getTenantId().getTenantId().intValue());
-			assertEquals(expectDate, uniques.get(0).getTenantId().getTenantDate());
+			assertEquals(3, uniques.get(0).getTenantId().getTenantId().intValue());
+			assertEquals(LocalDate.of(2020, Month.JANUARY, 14), uniques.get(0).getTenantId().getTenantDate());
+		});
+
+	}
+
+	@Test
+	public void testUpdateResourceWithTenant() {
+		createUniqueCompositeSp();
+
+		addTenant(3, LocalDate.of(2020, Month.JANUARY, 14));
+
+		Patient p = new Patient();
+		p.setActive(true);
+		Long patientId = myPatientDao.create(p).getId().getIdPartAsLong();
+
+		p = new Patient();
+		p.setId("Patient/" + patientId);
+		p.setActive(false);
+		myPatientDao.update(p);
+
+		runInTransaction(() -> {
+			// HFJ_RES_VER
+			ResourceHistoryTable resVer = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(patientId, 2);
+			assertEquals(tenantId, resVer.getTenantId().getTenantId().intValue());
+			assertEquals(tenantDate, resVer.getTenantId().getTenantDate());
+
 		});
 
 	}
@@ -154,19 +186,27 @@ public class MultitenantR4Test extends BaseJpaR4SystemTest {
 		mySearchParamRegistry.forceRefresh();
 	}
 
+	public void addTenant(int theTenantId, LocalDate theTenantDate) {
+		if (myTenantInterceptor == null) {
+			myTenantInterceptor = new MyInterceptor();
+			myInterceptorRegistry.registerInterceptor(myInterceptor);
+		}
+		myTenantInterceptor.addTenant(new TenantId(theTenantId, theTenantDate));
+	}
+
 	@Interceptor
 	public static class MyInterceptor {
 
-		private final List<TenantId> myTenantIds;
+		private final List<TenantId> myTenantIds = new ArrayList<>();
 
-		public MyInterceptor(TenantId theTenantId) {
+		public void addTenant(TenantId theTenantId) {
 			Validate.notNull(theTenantId);
-			myTenantIds = Collections.singletonList(theTenantId);
+			myTenantIds.add(theTenantId);
 		}
 
 		@Hook(Pointcut.STORAGE_TENANT_IDENTIFY_CREATE)
 		public TenantId tenantIdentifyCreate() {
-			TenantId retVal = myTenantIds.get(0);
+			TenantId retVal = myTenantIds.remove(0);
 			ourLog.info("Returning tenant ID: {}", retVal);
 			return retVal;
 		}

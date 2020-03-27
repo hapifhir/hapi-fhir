@@ -50,6 +50,7 @@ public class ResourceTag extends BaseTag {
 
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourceId;
+
 	@Embedded
 	private TenantId myTenantId;
 
