@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.empi.interceptor;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.IEmpiInterceptor;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.interceptor.BaseResourceModifiedInterceptor;
@@ -20,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Interceptor
 @Service
-public class EmpiInterceptor extends BaseResourceModifiedInterceptor {
+public class EmpiInterceptor extends BaseResourceModifiedInterceptor implements IEmpiInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiInterceptor.class);
 
 	private static final String EMPI_MATCHING_CHANNEL_NAME = "empi-matching";

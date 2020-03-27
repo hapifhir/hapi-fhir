@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.empi.util;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.IEmpiInterceptor;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.empi.interceptor.EmpiInterceptor;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
@@ -18,7 +18,7 @@ public class EmpiHelper extends ExternalResource {
 	private IInterceptorService myIInterceptorService;
 
 	@Autowired
-	private EmpiInterceptor myEmpiInterceptor;
+	private IEmpiInterceptor myEmpiInterceptor;
 	@Autowired
 	protected IFhirResourceDao<Patient> myPatientDao;
 	@Autowired

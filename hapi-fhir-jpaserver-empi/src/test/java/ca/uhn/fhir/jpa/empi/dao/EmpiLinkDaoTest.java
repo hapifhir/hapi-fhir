@@ -4,7 +4,7 @@ import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
-import ca.uhn.fhir.jpa.helper.ResourceTableHelper;
+import ca.uhn.fhir.jpa.empi.util.ResourceTableHelper;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.Test;

@@ -10,10 +10,8 @@
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
-	<artifactId>hapi-fhir-jpaserver-empi</artifactId>
+	<artifactId>hapi-fhir-jpaserver-empi-test</artifactId>
 	<packaging>jar</packaging>
-
-	<name>HAPI FHIR JPA Server - Enterprise Master Patient Index</name>
 
 	<dependencies>
 		<dependency>
@@ -22,28 +20,20 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-jpa</artifactId>
-			<version>${spring_data_version}</version>
-		</dependency>
-		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
-		<!-- test -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-test-utilities</artifactId>
 			<version>${project.version}</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-jpaserver-empi-test</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>compile</scope>
 		</dependency>
+		<!-- test -->
 	</dependencies>
 </project>

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.helper;
+package ca.uhn.fhir.jpa.empi.util;
 
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import org.hl7.fhir.instance.model.api.IAnyResource;
