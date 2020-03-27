@@ -60,7 +60,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 	@Nullable
 	Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
 
-		Predicate nextPredicate = createPredicate(myQueryRoot.getRoot(), theResourceName, theValues, theOperation, theRequest);
+		Predicate nextPredicate = createPredicate(myQueryRoot.getRoot(), theResourceName, theValues, theOperation);
 
 		if (nextPredicate != null) {
 			myQueryRoot.addPredicate(nextPredicate);
@@ -71,7 +71,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 	}
 
 	@Nullable
-	private Predicate createPredicate(Root<ResourceTable> theRoot, String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
+	private Predicate createPredicate(Root<ResourceTable> theRoot, String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation) {
 		Predicate nextPredicate = null;
 
 		Set<ResourcePersistentId> allOrPids = null;
@@ -89,7 +89,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 				if (isNotBlank(value)) {
 					haveValue = true;
 					try {
-						ResourcePersistentId pid = myIdHelperService.translateForcedIdToPid(theResourceName, valueAsId.getIdPart(), theRequest);
+						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(theResourceName, valueAsId.getIdPart());
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {
 						// This is not an error in a search, it just results in no matchesFhirResourceDaoR4InterceptorTest
@@ -110,7 +110,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 		if (allOrPids != null && allOrPids.isEmpty()) {
 
 			// This will never match
-			nextPredicate = myBuilder.equal(theRoot.get("myId").as(Long.class), -1);
+			nextPredicate = myCriteriaBuilder.equal(theRoot.get("myId").as(Long.class), -1);
 
 		} else if (allOrPids != null) {
 
@@ -121,13 +121,11 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 				default:
 				case eq:
 					codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)));
-					codePredicates.add(myBuilder.equal(myQueryRoot.get("myResourceType"), theResourceName));
-					nextPredicate = myBuilder.and(toArray(codePredicates));
+					nextPredicate = myCriteriaBuilder.and(toArray(codePredicates));
 					break;
 				case ne:
 					codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)).not());
-					codePredicates.add(myBuilder.equal(myQueryRoot.get("myResourceType"), theResourceName));
-					nextPredicate = myBuilder.and(toArray(codePredicates));
+					nextPredicate = myCriteriaBuilder.and(toArray(codePredicates));
 					break;
 			}
 

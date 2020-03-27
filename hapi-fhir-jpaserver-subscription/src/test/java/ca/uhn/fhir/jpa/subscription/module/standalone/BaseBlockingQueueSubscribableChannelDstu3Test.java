@@ -165,7 +165,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 		FhirContext context = ourListenerRestServer.getFhirContext();
 		//Preload structure definitions so the load doesn't happen during the test (first load can be a little slow)
-		context.getValidationSupport().fetchAllStructureDefinitions(context);
+		context.getValidationSupport().fetchAllStructureDefinitions();
 	}
 
 	@AfterClass

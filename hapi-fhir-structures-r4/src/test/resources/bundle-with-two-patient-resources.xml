@@ -1,0 +1,197 @@
+<Bundle xmlns="http://hl7.org/fhir">
+	<meta>
+		<profile value="http://forcare.com/fhir/createCda" />
+	</meta>
+	<type value="transaction" />
+	<entry>
+		<resource>
+			<DocumentReference>
+				<id value="doc1" />
+				<contained>
+					<Patient>
+						<id value="patient" />
+						<identifier>
+							<system value="urn:oid:1.3.6.1.4.1.21367.2005.3.7" />
+							<value value="12346" />
+						</identifier>
+						<name>
+							<use value="official" />
+							<family value="Beugels" />
+							<given value="Kees" />
+						</name>
+						<gender value="male" />
+						<birthDate value="1970-01-01" />
+					</Patient>
+				</contained>
+				<subject>
+					<reference value="#patient" />
+				</subject>
+				<type>
+					<coding>
+						<system value="2.16.840.1.113883.6.1" />
+						<code value="57016-8" />
+						<display value="Privacy Policy Acknowledgment" />
+					</coding>
+				</type>
+				<category>
+					<coding>
+						<system value="2.16.840.1.113883.6.1" />
+						<code value="57016-8" />
+						<display value="Privacy Policy Acknowledgment" />
+					</coding>
+				</category>
+				<author>
+					<reference value="#patient" />
+				</author>
+				<date value="2016-05-04T08:18:03.203Z" />
+				<status value="current" />
+				<description value="Hospital Privacy Consent" />
+				<securityLabel>
+					<coding>
+						<system value="2.16.840.1.113883.5.25" />
+						<code value="N" />
+						<display value="Normal" />
+					</coding>
+				</securityLabel>
+				<content>
+					<attachment>
+						<contentType value="text/xml" />
+						<language value="en-US" />
+						<url value="urn:uuid:d7d8ffca-e364-484b-bbf9-6a730854aea5" />
+					</attachment>
+					<format>
+						<system value="1.3.6.1.4.1.19376.1.2.3" />
+						<code value="urn:ihe:iti:bppc-sd:2007" />
+						<display value="Basic Patient Privacy Consent (scanned part)" />
+					</format>
+				</content>
+				<context>
+					<event>
+						<coding>
+							<system value="1.2.826.0.1.3680043.2.1611.2.10" />
+							<code value="allowMedicalDoctorsFromHospitalAToSeeDocuments" />
+							<display value="I allow Medical Doctors in Hospital A to access my medical record" />
+						</coding>
+					</event>
+					<event>
+						<coding>
+							<system value="1.2.826.0.1.3680043.2.1611.2.10" />
+							<code value="denyMedicalDoctorsFromHospitalBToSeeDocuments" />
+							<display value="I deny Medical Doctors in Hospital B to access my medical record" />
+						</coding>
+					</event>
+					<period>
+						<start value="2016-05-04T08:18:03.203Z" />
+						<end value="2016-09-04T08:18:03.203Z" />
+					</period>
+					<facilityType>
+						<coding>
+							<system value="2.16.840.1.113883.5.10588" />
+							<code value="HOSP" />
+							<display value="Hospital" />
+						</coding>
+					</facilityType>
+					<practiceSetting>
+						<coding>
+							<system value="2.16.840.1.113883.2.1.6.8" />
+							<code value="300" />
+							<display value="General Medicine" />
+						</coding>
+					</practiceSetting>
+				</context>
+			</DocumentReference>
+		</resource>
+	</entry>
+	<entry>
+		<resource>
+			<DocumentReference xmlns="http://hl7.org/fhir">
+				<id value="doc2" />
+				<contained>
+					<Patient xmlns="http://hl7.org/fhir">
+						<id value="patient" />
+						<identifier>
+							<system value="urn:oid:1.3.6.1.4.1.21367.2005.3.7" />
+							<value value="12345" />
+						</identifier>
+						<name>
+							<use value="official" />
+							<family value="Baker" />
+							<given value="Rob" />
+						</name>
+						<gender value="male" />
+						<birthDate value="1970-01-01" />
+					</Patient>
+				</contained>
+				<subject>
+					<reference value="#patient" />
+				</subject>
+				<type>
+					<coding>
+						<system value="2.16.840.1.113883.6.1" />
+						<code value="57016-8" />
+						<display value="Privacy Policy Acknowledgment" />
+					</coding>
+				</type>
+				<category>
+					<coding>
+						<system value="2.16.840.1.113883.6.1" />
+						<code value="57016-8" />
+						<display value="Privacy Policy Acknowledgment" />
+					</coding>
+				</category>
+				<author>
+					<reference value="#patient" />
+				</author>
+				<date value="2016-05-04T08:18:03.203Z" />
+				<status value="current" />
+				<description value="GPs Privacy Consent" />
+				<securityLabel>
+					<coding>
+						<system value="2.16.840.1.113883.5.25" />
+						<code value="N" />
+						<display value="Normal" />
+					</coding>
+				</securityLabel>
+				<content>
+					<attachment>
+						<contentType value="text/xml" />
+						<language value="en-US" />
+						<url value="urn:uuid:d7d8ffca-e364-484b-bbf9-6a730854aea5" />
+					</attachment>
+					<format>
+						<system value="1.3.6.1.4.1.19376.1.2.3" />
+						<code value="urn:ihe:iti:bppc-sd:2007" />
+						<display value="Basic Patient Privacy Consent (scanned part)" />
+					</format>
+				</content>
+				<context>
+					<event>
+						<coding>
+							<system value="1.2.826.0.1.3680043.2.1611.2.10" />
+							<code value="denyGeneralPractitionersFromHestiaToSeeDocuments" />
+							<display value="I deny Medical Doctors in Hestia General Practitioners to access my medical record" />
+						</coding>
+					</event>
+					<period>
+						<start value="2016-05-04T08:18:03.203Z" />
+						<end value="2016-09-04T08:18:03.203Z" />
+					</period>
+					<facilityType>
+						<coding>
+							<system value="2.16.840.1.113883.5.10588" />
+							<code value="HOSP" />
+							<display value="Hospital" />
+						</coding>
+					</facilityType>
+					<practiceSetting>
+						<coding>
+							<system value="2.16.840.1.113883.2.1.6.8" />
+							<code value="300" />
+							<display value="General Medicine" />
+						</coding>
+					</practiceSetting>
+				</context>
+			</DocumentReference>
+		</resource>
+	</entry>
+</Bundle>

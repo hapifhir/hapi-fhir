@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.IndexNonDeletedInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -56,7 +57,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
 	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
 })
-public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource {
+public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource, IResourceLookup {
 	public static final int RESTYPE_LEN = 40;
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final int MAX_PROFILE_LENGTH = 200;
@@ -643,7 +644,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Override
 	public IdDt getIdDt() {
 		if (getForcedId() == null) {
-			Long id = getResourceId();
+			Long id = this.getResourceId();
 			return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		} else {
 			// Avoid a join query if possible

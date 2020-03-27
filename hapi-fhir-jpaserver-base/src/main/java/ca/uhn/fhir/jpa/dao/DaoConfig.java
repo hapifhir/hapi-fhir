@@ -184,7 +184,12 @@ public class DaoConfig {
 	private boolean myPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets;
 
 	/**
-	 * @since 4.3.0
+	 * @since 5.0.0
+	 */
+	private boolean myDeleteEnabled = true;
+
+	/**
+	 * @since 5.0.0
 	 */
 	private boolean myMultiTenancyEnabled;
 
@@ -1913,9 +1918,35 @@ public class DaoConfig {
 	}
 
 	/**
+	 * This setting should be disabled (set to <code>false</code>) on servers that are not allowing
+	 * deletes. Default is <code>true</code>. If deletes are disabled, some checks for resource
+	 * deletion can be skipped, which improves performance. This is particularly helpful when large
+	 * amounts of data containing client-assigned IDs are being loaded, but it can also improve
+	 * search performance.
+	 *
+	 * @since 5.0.0
+	 */
+	public void setDeleteEnabled(boolean theDeleteEnabled) {
+		myDeleteEnabled = theDeleteEnabled;
+	}
+
+	/**
+	 * This setting should be disabled (set to <code>false</code>) on servers that are not allowing
+	 * deletes. Default is <code>true</code>. If deletes are disabled, some checks for resource
+	 * deletion can be skipped, which improves performance. This is particularly helpful when large
+	 * amounts of data containing client-assigned IDs are being loaded, but it can also improve
+	 * search performance.
+	 *
+	 * @since 5.0.0
+	 */
+	public boolean isDeleteEnabled() {
+		return myDeleteEnabled;
+	}
+
+	/**
 	 * If enabled (default is <code>false</code>) the JPA server will support multitenant queries
 	 *
-	 * @since 4.3.0
+	 * @since 5.0.0
 	 */
 	public void setMultiTenancyEnabled(boolean theMultiTenancyEnabled) {
 		myMultiTenancyEnabled = theMultiTenancyEnabled;
@@ -1924,7 +1955,7 @@ public class DaoConfig {
 	/**
 	 * If enabled (default is <code>false</code>) the JPA server will support multitenant queries
 	 *
-	 * @since 4.3.0
+	 * @since 5.0.0
 	 */
 	public boolean isMultiTenancyEnabled() {
 		return myMultiTenancyEnabled;

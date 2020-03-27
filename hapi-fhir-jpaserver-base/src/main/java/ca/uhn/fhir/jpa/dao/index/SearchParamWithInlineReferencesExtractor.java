@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
@@ -187,7 +188,9 @@ public class SearchParamWithInlineReferencesExtractor {
 				if (linksForCompositePart != null) {
 					for (ResourceLink nextLink : linksForCompositePart) {
 						if (linksForCompositePartWantPaths.contains(nextLink.getSourcePath())) {
-							String value = nextLink.getTargetResource().getIdDt().toUnqualifiedVersionless().getValue();
+							assert isNotBlank(nextLink.getTargetResourceType());
+							assert isNotBlank(nextLink.getTargetResourceId());
+							String value = nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
 							if (isNotBlank(value)) {
 								value = UrlUtil.escapeUrlParam(value);
 								nextChoicesList.add(key + "=" + value);
@@ -250,13 +253,14 @@ public class SearchParamWithInlineReferencesExtractor {
 				ResourcePersistentId match;
 				if (matches.isEmpty()) {
 
-					Optional<ResourcePersistentId> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null);
+					Optional<ResourceTable> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null);
 					if (placeholderOpt.isPresent()) {
-						match = placeholderOpt.get();
+						match = new ResourcePersistentId(placeholderOpt.get().getResourceId());
 					} else {
 						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
 						throw new ResourceNotFoundException(msg);
 					}
+
 				} else if (matches.size() > 1) {
 					String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlMultipleMatches", nextId.getValue());
 					throw new PreconditionFailedException(msg);
@@ -264,9 +268,9 @@ public class SearchParamWithInlineReferencesExtractor {
 					match = matches.iterator().next();
 				}
 
-				String newId = myIdHelperService.translatePidIdToForcedId(resourceTypeString, match);
+				IIdType newId = myIdHelperService.translatePidIdToForcedId(myContext, resourceTypeString, match);
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
-				nextRef.setReference(newId);
+				nextRef.setReference(newId.getValue());
 			}
 		}
 	}

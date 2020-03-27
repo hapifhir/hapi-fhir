@@ -37,11 +37,17 @@ public interface ISearchDao extends JpaRepository<Search, Long> {
 	@Query("SELECT s FROM Search s LEFT OUTER JOIN FETCH s.myIncludes WHERE s.myUuid = :uuid")
 	Optional<Search> findByUuidAndFetchIncludes(@Param("uuid") String theUuid);
 
-	@Query("SELECT s.myId FROM Search s WHERE (s.myCreated < :cutoff) AND (s.myExpiryOrNull IS NULL OR s.myExpiryOrNull < :now)")
+	@Query("SELECT s.myId FROM Search s WHERE (s.myCreated < :cutoff) AND (s.myExpiryOrNull IS NULL OR s.myExpiryOrNull < :now) AND (s.myDeleted IS NULL OR s.myDeleted = FALSE)")
 	Slice<Long> findWhereCreatedBefore(@Param("cutoff") Date theCutoff, @Param("now") Date theNow, Pageable thePage);
+
+	@Query("SELECT s.myId FROM Search s WHERE s.myDeleted = TRUE")
+	Slice<Long> findDeleted(Pageable thePage);
 
 	@Query("SELECT s FROM Search s WHERE s.myResourceType = :type AND mySearchQueryStringHash = :hash AND (s.myCreated > :cutoff) AND s.myDeleted = false AND s.myStatus <> 'FAILED'")
 	Collection<Search> findWithCutoffOrExpiry(@Param("type") String theResourceType, @Param("hash") int theHashCode, @Param("cutoff") Date theCreatedCutoff);
+
+	@Query("SELECT COUNT(s) FROM Search s WHERE s.myDeleted = TRUE")
+	int countDeleted();
 
 	@Modifying
 	@Query("UPDATE Search s SET s.myDeleted = :deleted WHERE s.myId = :pid")
@@ -50,4 +56,5 @@ public interface ISearchDao extends JpaRepository<Search, Long> {
 	@Modifying
 	@Query("DELETE FROM Search s WHERE s.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
+
 }

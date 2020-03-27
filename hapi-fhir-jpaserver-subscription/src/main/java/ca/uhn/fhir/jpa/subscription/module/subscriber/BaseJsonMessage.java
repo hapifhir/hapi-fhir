@@ -20,15 +20,12 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  * #L%
  */
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public abstract class BaseJsonMessage<T> implements Message<T> {
+public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 
 	private static final long serialVersionUID = 1L;
 	@JsonProperty("headers")

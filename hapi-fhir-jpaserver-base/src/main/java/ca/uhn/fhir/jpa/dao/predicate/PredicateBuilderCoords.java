@@ -161,13 +161,13 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 			Predicate singleCode = createPredicateCoords(nextOr,
 				theResourceName,
 				theParamName,
-				myBuilder,
+                    myCriteriaBuilder,
 				join
 			);
 			codePredicates.add(singleCode);
 		}
 
-		Predicate retVal = myBuilder.or(toArray(codePredicates));
+		Predicate retVal = myCriteriaBuilder.or(toArray(codePredicates));
 		myQueryRoot.addPredicate(retVal);
 		return retVal;
 	}

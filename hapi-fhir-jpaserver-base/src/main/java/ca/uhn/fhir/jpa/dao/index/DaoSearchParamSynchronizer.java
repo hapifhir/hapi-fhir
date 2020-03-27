@@ -21,7 +21,8 @@ package ca.uhn.fhir.jpa.dao.index;
  */
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,23 +37,22 @@ import java.util.List;
 
 @Service
 public class DaoSearchParamSynchronizer {
-	@Autowired
-	private DaoConfig myDaoConfig;
-
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	public AddRemoveCount synchronizeSearchParamsToDatabase(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams existingParams) {
 		AddRemoveCount retVal = new AddRemoveCount();
 
 		synchronize(theParams, theEntity, retVal, theParams.myStringParams, existingParams.myStringParams);
 		synchronize(theParams, theEntity, retVal, theParams.myTokenParams, existingParams.myTokenParams);
-		synchronize(theParams, theEntity,retVal,  theParams.myNumberParams, existingParams.myNumberParams);
-		synchronize(theParams, theEntity,retVal,  theParams.myQuantityParams, existingParams.myQuantityParams);
-		synchronize(theParams, theEntity,retVal,  theParams.myDateParams, existingParams.myDateParams);
-		synchronize(theParams, theEntity,retVal,  theParams.myUriParams, existingParams.myUriParams);
+		synchronize(theParams, theEntity, retVal, theParams.myNumberParams, existingParams.myNumberParams);
+		synchronize(theParams, theEntity, retVal, theParams.myQuantityParams, existingParams.myQuantityParams);
+		synchronize(theParams, theEntity, retVal, theParams.myDateParams, existingParams.myDateParams);
+		synchronize(theParams, theEntity, retVal, theParams.myUriParams, existingParams.myUriParams);
 		synchronize(theParams, theEntity, retVal, theParams.myCoordsParams, existingParams.myCoordsParams);
-		synchronize(theParams, theEntity,retVal,  theParams.myLinks, existingParams.myLinks);
+		synchronize(theParams, theEntity, retVal, theParams.myLinks, existingParams.myLinks);
 
 		// make sure links are indexed
 		theEntity.setResourceLinks(theParams.myLinks);
@@ -86,7 +86,7 @@ public class DaoSearchParamSynchronizer {
 	 * "one delete + one insert" with "one update"
 	 *
 	 * @param theIndexesToRemove The rows that would be removed
-	 * @param theIndexesToAdd The rows that would be added
+	 * @param theIndexesToAdd    The rows that would be added
 	 */
 	private <T extends BaseResourceIndex> void tryToReuseIndexEntities(List<T> theIndexesToRemove, List<T> theIndexesToAdd) {
 		for (int addIndex = 0; addIndex < theIndexesToAdd.size(); addIndex++) {
@@ -106,8 +106,6 @@ public class DaoSearchParamSynchronizer {
 			targetEntity.setId(entityToReuse.getId());
 		}
 	}
-
-
 
 
 	<T> List<T> subtract(Collection<T> theSubtractFrom, Collection<T> theToSubtract) {

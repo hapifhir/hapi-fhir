@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -313,6 +314,67 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		results = myEncounterDao.search(map);
 		ids = toUnqualifiedVersionlessIdValues(results);
 		assertThat(ids, empty());
+	}
+
+	@Test
+	public void testChainOnType() {
+
+		Patient sub1 = new Patient();
+		sub1.setActive(true);
+		sub1.addIdentifier().setSystem("foo").setValue("bar");
+		String sub1Id = myPatientDao.create(sub1).getId().toUnqualifiedVersionless().getValue();
+
+		Group sub2 = new Group();
+		sub2.setActive(true);
+		sub2.addIdentifier().setSystem("foo").setValue("bar");
+		String sub2Id = myGroupDao.create(sub2).getId().toUnqualifiedVersionless().getValue();
+
+		Encounter enc1 = new Encounter();
+		enc1.getSubject().setReference(sub1Id);
+		String enc1Id = myEncounterDao.create(enc1).getId().toUnqualifiedVersionless().getValue();
+
+		Encounter enc2 = new Encounter();
+		enc2.getSubject().setReference(sub2Id);
+		String enc2Id = myEncounterDao.create(enc2).getId().toUnqualifiedVersionless().getValue();
+
+		List<String> ids;
+		SearchParameterMap map;
+		IBundleProvider results;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "Patient").setChain("_type"));
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids, hasItems(enc1Id));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "Group").setChain("_type"));
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids, hasItems(enc2Id));
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "Organization").setChain("_type"));
+		try {
+			myEncounterDao.search(map);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Resource type \"Organization\" is not a valid target type for reference search parameter: Encounter:subject", e.getMessage());
+		}
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "HelpImABug").setChain("_type"));
+		try {
+			myEncounterDao.search(map);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid/unsupported resource type: \"HelpImABug\"", e.getMessage());
+		}
+
 	}
 
 	/**
@@ -1074,6 +1136,65 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.add("_id", new StringParam(id2));
 		assertEquals(0, toList(myPatientDao.search(params)).size());
 
+	}
+
+	@Test
+	public void testSearchByIdParam_QueryIsMinimal() {
+		// With only an _id parameter
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			params.add("_id", new StringParam("DiagnosticReport/123"));
+			myCaptureQueriesListener.clear();
+			myDiagnosticReportDao.search(params).size();
+			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+			assertEquals(1, selectQueries.size());
+
+			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
+			ourLog.debug("SQL Query:\n{}", sqlQuery);
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_id in"));
+			assertEquals(0, StringUtils.countMatches(sqlQuery, "join"));
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_type='diagnosticreport'"));
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_deleted_at is null"));
+		}
+		// With an _id parameter and a standard search param
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			params.add("_id", new StringParam("DiagnosticReport/123"));
+			params.add("code", new TokenParam("foo", "bar"));
+			myCaptureQueriesListener.clear();
+			myDiagnosticReportDao.search(params).size();
+			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+			assertEquals(1, selectQueries.size());
+
+			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
+			ourLog.info("SQL Query:\n{}", sqlQuery);
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_id in"));
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "join"));
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "hash_sys_and_value"));
+			assertEquals(0, StringUtils.countMatches(sqlQuery, "diagnosticreport"));
+			assertEquals(0, StringUtils.countMatches(sqlQuery, "res_deleted_at"));
+		}
+	}
+
+	@Test
+	public void testSearchByIdParamAndOtherSearchParam_QueryIsMinimal() {
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add("_id", new StringParam("DiagnosticReport/123"));
+		params.add("_id", new StringParam("DiagnosticReport/123"));
+		myCaptureQueriesListener.clear();
+		myDiagnosticReportDao.search(params).size();
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		assertEquals(1, selectQueries.size());
+
+		String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
+		ourLog.info("SQL Query:\n{}", sqlQuery);
+		assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_id in"));
+		assertEquals(0, StringUtils.countMatches(sqlQuery, "join"));
+		assertEquals(1, StringUtils.countMatches(sqlQuery,"resourceta0_.res_type='diagnosticreport'"));
+		assertEquals(1, StringUtils.countMatches(sqlQuery,"resourceta0_.res_deleted_at is null"));
 	}
 
 	@Test

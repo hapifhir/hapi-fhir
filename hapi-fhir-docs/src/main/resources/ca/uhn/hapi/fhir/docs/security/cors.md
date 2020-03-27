@@ -48,7 +48,7 @@ Note that in previous revisions of HAPI FHIR documentation we recommended using 
 
 The following examples show how to use the Apache Tomcat CorsFilter to enable CORS support. The filter being used (`org.apache.catalina.filters.CorsFilter`) is bundled with Apache Tomcat so if you are deploying to that server you can use the filter.
 
-Other containers have similar filters you can use, so consult the documentation for the given container you are using for more information. (If you have an example for how to configure a different CORS filter, please send it our way! Examples are always useful!)
+Other containers have similar filters you can use, so consult the documentation for the given container you are using for more information. (If you have an example for configuring a different CORS filter, please send it our way! Examples are always useful!)
 
 In your web.xml file (within the WEB-INF directory in your WAR file), the following filter definition adds the CORS filter, including support for the X-FHIR-Starter header defined by SMART Platforms.
 

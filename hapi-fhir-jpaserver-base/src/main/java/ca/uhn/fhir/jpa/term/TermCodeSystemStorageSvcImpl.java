@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IHapiJpaRepository;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -62,7 +63,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
@@ -117,11 +117,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Override
 	public ResourcePersistentId getValueSetResourcePid(IIdType theIdType) {
-		return getValueSetResourcePid(theIdType, null);
-	}
-
-	private ResourcePersistentId getValueSetResourcePid(IIdType theIdType, RequestDetails theRequestDetails) {
-		return myIdHelperService.translateForcedIdToPid(theIdType, theRequestDetails);
+		return myIdHelperService.resolveResourcePersistentIds(theIdType.getResourceType(), theIdType.getIdPart());
 	}
 
 	@Transactional
@@ -144,7 +140,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 		Validate.notNull(csv);
 
-		CodeSystem codeSystem = myTerminologySvc.getCodeSystemFromContext(theSystem);
+		CodeSystem codeSystem = myTerminologySvc.fetchCanonicalCodeSystemFromCompleteContext(theSystem);
 		if (codeSystem.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 			throw new InvalidRequestException("CodeSystem with url[" + Constants.codeSystemWithDefaultDescription(theSystem) + "] can not apply a delta - wrong content mode: " + codeSystem.getContent());
 		}
@@ -295,7 +291,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
 
 		IIdType csId = myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(theCodeSystemResource);
-		ResourcePersistentId codeSystemResourcePid = myIdHelperService.translateForcedIdToPid(csId, theRequest);
+		ResourcePersistentId codeSystemResourcePid = myIdHelperService.resolveResourcePersistentIds(csId.getResourceType(), csId.getIdPart());
 		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid.getIdAsLong());
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
@@ -555,11 +551,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	private ResourcePersistentId getCodeSystemResourcePid(IIdType theIdType) {
-		return getCodeSystemResourcePid(theIdType, null);
-	}
-
-	private ResourcePersistentId getCodeSystemResourcePid(IIdType theIdType, RequestDetails theRequestDetails) {
-		return myIdHelperService.translateForcedIdToPid(theIdType, theRequestDetails);
+		return myIdHelperService.resolveResourcePersistentIds(theIdType.getResourceType(), theIdType.getIdPart());
 	}
 
 	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, int theTotalConcepts) {
@@ -676,7 +668,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 
-	private <T> void doDelete(String theDescriptor, Supplier<Slice<Long>> theLoader, Supplier<Integer> theCounter, JpaRepository<T, Long> theDao) {
+	private <T> void doDelete(String theDescriptor, Supplier<Slice<Long>> theLoader, Supplier<Integer> theCounter, IHapiJpaRepository<T> theDao) {
 		int count;
 		ourLog.info(" * Deleting {}", theDescriptor);
 		int totalCount = theCounter.get();
@@ -691,7 +683,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 			txTemplate.execute(t -> {
-				link.forEach(id -> theDao.deleteById(id));
+				link.forEach(id -> theDao.deleteByPid(id));
 				return null;
 			});
 

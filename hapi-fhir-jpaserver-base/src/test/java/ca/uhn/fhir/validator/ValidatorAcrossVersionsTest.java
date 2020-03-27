@@ -2,7 +2,7 @@ package ca.uhn.fhir.validator;
 
 import static org.junit.Assert.*;
 
-import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -45,7 +45,7 @@ public class ValidatorAcrossVersionsTest {
 		FhirValidator val = ctxDstu2.newValidator();
 		val.setValidateAgainstStandardSchema(false);
 		val.setValidateAgainstStandardSchematron(false);
-		val.registerValidatorModule(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator(ctxDstu2));
 
 		QuestionnaireResponse resp = new QuestionnaireResponse();
 		resp.setAuthored(DateTimeDt.withCurrentTime());

@@ -1,16 +1,15 @@
 package ca.uhn.fhir.parser.jsonlike;
 
-import java.io.StringReader;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IJsonLikeParser;
+import ca.uhn.fhir.parser.json.JsonLikeStructure;
+import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IJsonLikeParser;
-import ca.uhn.fhir.parser.json.GsonStructure;
-import ca.uhn.fhir.parser.json.JsonLikeStructure;
-import ca.uhn.fhir.util.TestUtil;
+import java.io.StringReader;
 
 public class JsonLikeParserDstu2Test {
 	private static FhirContext ourCtx = FhirContext.forDstu2();
@@ -28,7 +27,7 @@ public class JsonLikeParserDstu2Test {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(encoded);
 		
-		JsonLikeStructure jsonLikeStructure = new GsonStructure();
+		JsonLikeStructure jsonLikeStructure = new JacksonStructure();
 		jsonLikeStructure.load(new StringReader(encoded));
 		
 		IJsonLikeParser jsonLikeparser = (IJsonLikeParser)ourCtx.newJsonParser();

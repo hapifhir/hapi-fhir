@@ -148,7 +148,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		requestValidator.setFailOnSeverity(null);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidatorDstu3());
+		requestValidator.addValidatorModule(instanceValidator());
 		requestValidator.setIgnoreValidatorExceptions(true);
 
 		return requestValidator;

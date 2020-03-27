@@ -42,14 +42,6 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	@Value(FHIR_LUCENE_LOCATION_DSTU2)
 	private String myFhirLuceneLocation;
 
-	/**
-	 * This lets the "@Value" fields reference properties from the properties file
-	 */
-	@Bean
-	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-		return new PropertySourcesPlaceholderConfigurer();
-	}
-
 	@Bean
 	public PublicSecurityInterceptor securityInterceptor() {
 		return new PublicSecurityInterceptor();
@@ -148,10 +140,18 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		requestValidator.setFailOnSeverity(null);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidatorDstu2());
+		requestValidator.addValidatorModule(instanceValidator());
 		requestValidator.setIgnoreValidatorExceptions(true);
 
 		return requestValidator;
+	}
+
+	/**
+	 * This lets the "@Value" fields reference properties from the properties file
+	 */
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+		return new PropertySourcesPlaceholderConfigurer();
 	}
 
 //	@Bean(autowire = Autowire.BY_TYPE)

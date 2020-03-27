@@ -22,20 +22,29 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
-import ca.uhn.fhir.parser.json.*;
+import ca.uhn.fhir.parser.json.JsonLikeArray;
+import ca.uhn.fhir.parser.json.JsonLikeObject;
+import ca.uhn.fhir.parser.json.JsonLikeStructure;
+import ca.uhn.fhir.parser.json.JsonLikeValue;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
+import ca.uhn.fhir.parser.json.JsonLikeWriter;
+import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.WordUtils;
@@ -45,11 +54,17 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum.ID_DATATYPE;
 import static ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum.PRIMITIVE_DATATYPE;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This class is the FHIR JSON parser/encoder. Users should not interact with this class directly, but should use
@@ -147,10 +162,9 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		theEventWriter.beginObject(arrayName);
 	}
 
-	private JsonLikeWriter createJsonWriter(Writer theWriter) {
-		JsonLikeStructure jsonStructure = new GsonStructure();
-		JsonLikeWriter retVal = jsonStructure.getJsonLikeWriter(theWriter);
-		return retVal;
+	private JsonLikeWriter createJsonWriter(Writer theWriter) throws IOException {
+		JsonLikeStructure jsonStructure = new JacksonStructure();
+		return jsonStructure.getJsonLikeWriter(theWriter);
 	}
 
 	public void doEncodeResourceToJsonLikeWriter(IBaseResource theResource, JsonLikeWriter theEventWriter, EncodeContext theEncodeContext) throws IOException {
@@ -168,11 +182,12 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	protected void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext) throws IOException {
 		JsonLikeWriter eventWriter = createJsonWriter(theWriter);
 		doEncodeResourceToJsonLikeWriter(theResource, eventWriter, theEncodeContext);
+		eventWriter.close();
 	}
 
 	@Override
 	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {
-		JsonLikeStructure jsonStructure = new GsonStructure();
+		JsonLikeStructure jsonStructure = new JacksonStructure();
 		jsonStructure.load(theReader);
 
 		T retVal = doParseResource(theResourceType, jsonStructure);
@@ -302,19 +317,14 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 			case CONTAINED_RESOURCE_LIST:
 			case CONTAINED_RESOURCES: {
-				/*
-				 * Disabled per #103 ContainedDt value = (ContainedDt) theNextValue; for (IResource next :
-				 * value.getContainedResources()) { if (getContainedResources().getResourceId(next) != null) { continue; }
-				 * encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true,
-				 * fixContainedResourceId(next.getId().getValue())); }
-				 */
 				List<IBaseResource> containedResources = getContainedResources().getContainedResources();
 				if (containedResources.size() > 0) {
 					beginArray(theEventWriter, theChildName);
 
 					for (IBaseResource next : containedResources) {
 						IIdType resourceId = getContainedResources().getResourceId(next);
-						encodeResourceToJsonStreamWriter(theResDef, next, theEventWriter, null, true, fixContainedResourceId(resourceId.getValue()), theEncodeContext);
+						String value = resourceId.getValue();
+						encodeResourceToJsonStreamWriter(theResDef, next, theEventWriter, null, true, fixContainedResourceId(value), theEncodeContext);
 					}
 
 					theEventWriter.endArray();
@@ -344,7 +354,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				RuntimeResourceDefinition def = myContext.getResourceDefinition(resource);
 
 				theEncodeContext.pushPath(def.getName(), true);
-				encodeResourceToJsonStreamWriter(def, resource, theEventWriter, theChildName, false, theEncodeContext);
+				encodeResourceToJsonStreamWriter(def, resource, theEventWriter, theChildName, theContainedResource, theEncodeContext);
 				theEncodeContext.popPath();
 
 				break;
@@ -418,10 +428,10 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			String currentChildName = null;
 			boolean inArray = false;
 
-			ArrayList<ArrayList<HeldExtension>> extensions = new ArrayList<ArrayList<HeldExtension>>(0);
-			ArrayList<ArrayList<HeldExtension>> modifierExtensions = new ArrayList<ArrayList<HeldExtension>>(0);
-			ArrayList<ArrayList<String>> comments = new ArrayList<ArrayList<String>>(0);
-			ArrayList<String> ids = new ArrayList<String>(0);
+			ArrayList<ArrayList<HeldExtension>> extensions = new ArrayList<>(0);
+			ArrayList<ArrayList<HeldExtension>> modifierExtensions = new ArrayList<>(0);
+			ArrayList<ArrayList<String>> comments = new ArrayList<>(0);
+			ArrayList<String> ids = new ArrayList<>(0);
 
 			int valueIdx = 0;
 			for (IBase nextValue : values) {
@@ -1107,7 +1117,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		} else {
 			// must be a SCALAR
 			theState.enteringNewElement(null, theName);
-			theState.attributeValue("value", theJsonVal.getAsString());
+			String asString = theJsonVal.getAsString();
+			theState.attributeValue("value", asString);
 			parseAlternates(theAlternateVal, theState, theAlternateName, theAlternateName);
 			theState.endingElement();
 		}
@@ -1374,11 +1385,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		if (StringUtils.isNotBlank(theValue)) {
 			write(theEventWriter, theElementName, theValue);
 		}
-	}
-
-	public static Gson newGson() {
-		Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-		return gson;
 	}
 
 	private static void write(JsonLikeWriter theWriter, String theName, String theValue) throws IOException {

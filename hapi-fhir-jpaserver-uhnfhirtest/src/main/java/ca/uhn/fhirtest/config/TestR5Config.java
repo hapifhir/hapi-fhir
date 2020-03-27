@@ -142,7 +142,7 @@ public class TestR5Config extends BaseJavaConfigR5 {
 		requestValidator.setFailOnSeverity(null);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidatorR5());
+		requestValidator.addValidatorModule(instanceValidator());
 		requestValidator.setIgnoreValidatorExceptions(true);
 
 		return requestValidator;

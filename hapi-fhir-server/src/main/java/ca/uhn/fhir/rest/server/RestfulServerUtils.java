@@ -45,6 +45,7 @@ import ca.uhn.fhir.rest.server.method.SummaryEnumParameter;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -163,7 +164,7 @@ public class RestfulServerUtils {
 		}
 
 		if (summaryModeCount) {
-			parser.setEncodeElements(Collections.singleton("Bundle.total"));
+			parser.setEncodeElements(Sets.newHashSet("Bundle.total", "Bundle.type"));
 		} else if (summaryMode.contains(SummaryEnum.TEXT) && summaryMode.size() == 1) {
 			parser.setEncodeElements(TEXT_ENCODE_ELEMENTS);
 			parser.setEncodeElementsAppliesToChildResourcesOnly(true);

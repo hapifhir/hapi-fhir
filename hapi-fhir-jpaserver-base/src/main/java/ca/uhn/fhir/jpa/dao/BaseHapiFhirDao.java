@@ -1168,7 +1168,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					}
 				}
 
-				// Syncrhonize composite params
+				// Synchronize composite params
 				mySearchParamWithInlineReferencesExtractor.storeCompositeStringUniques(newParams, entity, existingParams);
 			}
 		}

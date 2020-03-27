@@ -6,7 +6,7 @@ A built in parser can be used to convert HAPI FHIR Java objects into a serialize
 
 # Parsing (aka Deserializing)
 
-As with many parts of the HAPI FHIR API, parsing begins with a [FhirContext](/apidocs/hapi-fhir-base/ca/uhn/fhir/context/FhirContext.html) object. The FhirContext can be used to request an [IParser](/apidocs/hapi-fhir-base/ca/uhn/fhir/parser/IParser.html) for your chosen encodng style that is then used to parse.
+As with many parts of the HAPI FHIR API, parsing begins with a [FhirContext](/apidocs/hapi-fhir-base/ca/uhn/fhir/context/FhirContext.html) object. The FhirContext can be used to request an [IParser](/apidocs/hapi-fhir-base/ca/uhn/fhir/parser/IParser.html) for your chosen encoding style that is then used to parse.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/Parser.java|parsing}}
@@ -14,7 +14,7 @@ As with many parts of the HAPI FHIR API, parsing begins with a [FhirContext](/ap
    
 # Encoding (aka Serializing)
 
-As with many parts of the HAPI FHIR API, parsing begins with a [FhirContext](/apidocs/hapi-fhir-base/ca/uhn/fhir/context/FhirContext.html) object. The FhirContext can be used to request an [IParser](/apidocs/hapi-fhir-base/ca/uhn/fhir/parser/IParser.html) for your chosen encodng style that is then used to serialize.   
+As with many parts of the HAPI FHIR API, parsing begins with a [FhirContext](/apidocs/hapi-fhir-base/ca/uhn/fhir/context/FhirContext.html) object. The FhirContext can be used to request an [IParser](/apidocs/hapi-fhir-base/ca/uhn/fhir/parser/IParser.html) for your chosen encoding style that is then used to serialize.   
 
 The following example shows a JSON Parser being used to serialize a FHIR resource. 
 
@@ -24,7 +24,7 @@ The following example shows a JSON Parser being used to serialize a FHIR resourc
    
 ## Pretty Printing
 
-By default, the parser will output in condensed form, with no newlines or indenting. This is good for machine-to-machine communication since it reduces the amount of data to be transferred but it is harder to read. To enable pretty printed outout:
+By default, the parser will output in condensed form, with no newlines or indenting. This is good for machine-to-machine communication since it reduces the amount of data to be transferred but it is harder to read. To enable pretty printed output:
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/Parser.java|encodingPretty}}

@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
+public class ArbitrarySqlTask extends BaseTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ArbitrarySqlTask.class);
 	private final String myDescription;
@@ -104,7 +104,7 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<ArbitrarySqlTask> theOtherObject) {
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
 		ArbitrarySqlTask otherObject = (ArbitrarySqlTask) theOtherObject;
 		theBuilder.append(myTableName, otherObject.myTableName);
 	}
@@ -124,12 +124,10 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 
 	private class QueryTask extends Task {
 		private final String mySql;
-		private final QueryModeEnum myMode;
 		private final Consumer<Map<String, Object>> myConsumer;
 
 		public QueryTask(String theSql, QueryModeEnum theMode, Consumer<Map<String, Object>> theConsumer) {
 			mySql = theSql;
-			myMode = theMode;
 			myConsumer = theConsumer;
 			setDescription("Execute raw sql");
 		}
