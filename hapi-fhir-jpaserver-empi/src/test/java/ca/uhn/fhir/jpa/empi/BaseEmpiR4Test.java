@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.empi;
 
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.empi.config.EmpiConfig;
@@ -22,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.annotation.Nonnull;
 import java.util.Date;
 
+import static org.junit.Assert.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @RunWith(SpringRunner.class)
@@ -30,16 +30,18 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = getLogger(BaseEmpiR4Test.class);
 
 	protected static final String TEST_ID_SYSTEM = "http://a.tv/";
-	protected static final String JANE_ID = "JANE";
-	
+	protected static final String JANE_ID = "ID.JANE.123";
+	public static final String NAME_GIVEN_JANE = "Jane";
+	protected static final String PAUL_ID = "ID.PAUL.456";
+	public static final String NAME_GIVEN_PAUL = "Paul";
+	public static final String TEST_NAME_FAMILY = "Doe";
+
 	@Autowired
 	protected IFhirResourceDao<Person> myPersonDao;
 	@Autowired
 	protected IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
 	protected EmpiResourceComparatorSvc myEmpiResourceComparatorSvc;
-	@Autowired
-	protected IInterceptorService myInterceptorService;
 	@Autowired
 	protected IEmpiLinkDao myEmpiLinkDao;
 
@@ -83,15 +85,57 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	@Nonnull
+	protected Person buildPersonWithNameAndId(String theGivenName, String theId) {
+		return buildPersonWithNameIdAndBirthday(theGivenName, theId, null);
+	}
+
+	@Nonnull
 	protected Patient buildPatientWithNameIdAndBirthday(String theGivenName, String theId, Date theBirthday) {
 		Patient patient = new Patient();
 		patient.addName().addGiven(theGivenName);
-		patient.addName().setFamily("Doe");
+		patient.addName().setFamily(TEST_NAME_FAMILY);
 		patient.addIdentifier().setSystem(TEST_ID_SYSTEM).setValue(theId);
 		patient.setBirthDate(theBirthday);
 		DateType dateType = new DateType(theBirthday);
 		dateType.setPrecision(TemporalPrecisionEnum.DAY);
 		patient.setBirthDateElement(dateType);
 		return patient;
+	}
+
+	@Nonnull
+	protected Person buildPersonWithNameIdAndBirthday(String theGivenName, String theId, Date theBirthday) {
+		Person person = new Person();
+		person.addName().addGiven(theGivenName);
+		person.addName().setFamily(TEST_NAME_FAMILY);
+		person.addIdentifier().setSystem(TEST_ID_SYSTEM).setValue(theId);
+		person.setBirthDate(theBirthday);
+		DateType dateType = new DateType(theBirthday);
+		dateType.setPrecision(TemporalPrecisionEnum.DAY);
+		person.setBirthDateElement(dateType);
+		return person;
+	}
+
+	@Nonnull
+	protected Patient buildJanePatient() {
+		return buildPatientWithNameAndId(NAME_GIVEN_JANE, JANE_ID);
+	}
+
+	@Nonnull
+	protected Person buildJanePerson() {
+		return buildPersonWithNameAndId(NAME_GIVEN_JANE, JANE_ID);
+	}
+
+	@Nonnull
+	protected Patient buildPaulPatient() {
+		return buildPatientWithNameAndId(NAME_GIVEN_PAUL, PAUL_ID);
+	}
+
+	@Nonnull
+	protected Patient buildJaneWithBirthday(Date theToday) {
+		return buildPatientWithNameIdAndBirthday(NAME_GIVEN_JANE, JANE_ID, theToday);
+	}
+
+	protected void assertLinkCount(long theExpectedCount) {
+		assertEquals(theExpectedCount, myEmpiLinkDao.count());
 	}
 }

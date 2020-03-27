@@ -17,10 +17,10 @@ public class EmpiCandidateSearchSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void findCandidates() {
-		Patient jane = buildPatientWithNameAndId("Jane", JANE_ID);
+		Patient jane = buildJanePatient();
 		jane.setActive(true);
 		Patient createdJane = createPatient(jane);
-		Patient newJane = buildPatientWithNameAndId("Jane", JANE_ID);
+		Patient newJane = buildJanePatient();
 
 		Collection<IBaseResource> result = myEmpiCandidateSearchSvc.findCandidates("Patient", newJane);
 		assertEquals(1, result.size());
@@ -29,12 +29,12 @@ public class EmpiCandidateSearchSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void findCandidatesMultipleMatchesDoNotCauseDuplicates() {
 		Date today = new Date();
-		Patient jane = buildPatientWithNameIdAndBirthday("Jane", JANE_ID, today);
+		Patient jane = buildJaneWithBirthday(today);
 
 		jane.setActive(true);
 		createPatient(jane);
 
-		Patient newJane = buildPatientWithNameIdAndBirthday("Jane", JANE_ID, today);
+		Patient newJane = buildJaneWithBirthday(today);
 
 		Collection<IBaseResource> result = myEmpiCandidateSearchSvc.findCandidates("Patient", newJane);
 		assertEquals(1, result.size());

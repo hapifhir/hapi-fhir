@@ -36,7 +36,6 @@ public class EmpiMatchingSubscriber implements MessageHandler {
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		matchEmpiAndUpdateLinks(msg);
-
 	}
 
 	public void matchEmpiAndUpdateLinks(ResourceModifiedMessage theMsg) {

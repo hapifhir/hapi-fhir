@@ -38,20 +38,19 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	public void testCreateRemoveLink() {
 		Person person = createPerson();
 		IdType personId = person.getIdElement().toUnqualifiedVersionless();
-		long initialLinkCount = myEmpiLinkDao.count();
 		assertEquals(0, person.getLink().size());
 		Patient patient = createPatient();
 
 		{
 			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO);
-			assertEquals(1 + initialLinkCount, myEmpiLinkDao.count());
+			assertLinkCount(1);
 			Person newPerson = myPersonDao.read(personId);
 			assertEquals(1, newPerson.getLink().size());
 		}
 
 		{
 			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL);
-			assertEquals(1 + initialLinkCount, myEmpiLinkDao.count());
+			assertLinkCount(1);
 			Person newPerson = myPersonDao.read(personId);
 			assertEquals(0, newPerson.getLink().size());
 		}

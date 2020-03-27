@@ -48,8 +48,7 @@ public class EmpiInterceptor extends BaseResourceModifiedInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING)
 	public void expungeAllEmpiLinks(AtomicInteger theCounter) {
-		// FIXME KHS
-		ourLog.info(">>> Expunging all EmpiLink records");
+		ourLog.debug("Expunging all EmpiLink records");
 		theCounter.addAndGet(myExpungeEverythingService.expungeEverythingByType(EmpiLink.class));
 	}
 
