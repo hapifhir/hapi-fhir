@@ -27,6 +27,8 @@ public class EmpiMatchSvc {
 	private EmpiPersonFindingSvc myEmpiPersonFindingSvc;
 	@Autowired
 	private FhirContext myFhirContext;
+	@Autowired
+	private PersonUtil myPersonUtil;
 
 	public void updateEmpiLinksForPatient(IBaseResource theResource) {
 		Collection<IBaseResource> candidates = myEmpiCandidateSearchSvc.findCandidates("Patient", theResource);
@@ -40,7 +42,7 @@ public class EmpiMatchSvc {
 		//multiple candidates, in which case they should all be tagged as POSSIBLE_MATCH. If one is already tagged as MATCH
 		List<MatchedPersonCandidate> personCandidates = myEmpiPersonFindingSvc.findPersonCandidates(theResource);
 		if (personCandidates.isEmpty()) {
-			myEmpiLinkSvc.updateLink(PersonUtil.createPersonFromPatient(myFhirContext, theResource), theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
+			myEmpiLinkSvc.updateLink(myPersonUtil.createPersonFromPatient(theResource), theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
 		}
 		//myEmpiLinkSvc.updateLinks(theResource, matchedCandidates, EmpiLinkSourceEnum.AUTO);
 

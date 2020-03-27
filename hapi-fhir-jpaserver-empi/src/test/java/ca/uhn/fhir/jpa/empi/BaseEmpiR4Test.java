@@ -2,20 +2,17 @@ package ca.uhn.fhir.jpa.empi;
 
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.empi.config.EmpiConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfig;
-import ca.uhn.fhir.jpa.empi.interceptor.EmpiInterceptor;
+import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,19 +41,12 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected IInterceptorService myInterceptorService;
 	@Autowired
-	private EmpiInterceptor myEmpiInterceptor;
-	protected PointcutLatch myAfterEmpiLatch = new PointcutLatch(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED);
-
-	@Before
-	public void before() {
-		myEmpiInterceptor.start();
-		myInterceptorService.registerInterceptor(myEmpiInterceptor);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, myAfterEmpiLatch);
-	}
+	protected IEmpiLinkDao myEmpiLinkDao;
 
 	@After
 	public void after() {
-		myInterceptorService.unregisterInterceptor(myAfterEmpiLatch);
+		//FIXME EMPI QUESTION I don't think the interceptor should be in charge of expunging everything in test, so I've just ripped it here for now to make the new Rule work nicely. Thoughts?
+		myEmpiLinkDao.deleteAll();
 		super.after();
 	}
 

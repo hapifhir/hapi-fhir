@@ -5,9 +5,11 @@ import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
+import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
+import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,6 +21,11 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	@Autowired
 	IEmpiLinkDao myEmpiLinkDao;
 
+	@After
+	public void after() {
+		myExpungeEverythingService.expungeEverythingByType(EmpiLink.class);
+		super.after();
+	}
 	@Test
 	public void compareEmptyPatients() {
 		Patient patient = new Patient();

@@ -14,7 +14,9 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import com.google.common.collect.Maps;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,6 +64,7 @@ public class EmpiCandidateSearchSvc {
 
 		List<String> filterCriteria = buildFilterQuery(filterSearchParams, theResourceType);
 
+		/**
 		for (EmpiResourceSearchParamJson resourceSearchParam : myEmpiRulesSvc.getEmpiRules().getResourceSearchParams()) {
 
 			if (!resourceSearchParam.getResourceType().equals(theResourceType)) {
@@ -73,23 +76,61 @@ public class EmpiCandidateSearchSvc {
 				continue;
 			}
 
-			List<String> criteria = new ArrayList<>(filterCriteria);
-			criteria.add(buildResourceMatchQuery(resourceSearchParam.getSearchParam(), valuesFromResourceForSearchParam));
+			searchForIdsAndAddToMap(theResourceType, matchedPidsToResources, filterCriteria, resourceSearchParam, valuesFromResourceForSearchParam);
+		}*/
 
-			String resourceCriteria = theResourceType + "?" +  String.join("&", criteria);
-			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceType);
-
-			ourLog.info("About to execute URL query: {}", resourceCriteria);
-			SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(resourceCriteria, resourceDef);
-			//FIXME EMPI this will blow up under large scale i think.
-			searchParameterMap.setLoadSynchronous(true);
-			IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
-			IBundleProvider search = resourceDao.search(searchParameterMap);
-			List<IBaseResource> resources = search.getResources(0, search.size());
-			resources.forEach(resource -> matchedPidsToResources.put(myResourceTableHelper.getPidOrNull(resource), resource));
-		}
+		//FIXME EMPI told you i could do it! Feel free to delete this implementation and uncomment the above if you hate it :D
+		myEmpiRulesSvc.getEmpiRules().getResourceSearchParams().stream()
+			.filter(searchParam -> searchParam.getResourceType().equalsIgnoreCase(theResourceType))
+			.map(rsp -> Maps.immutableEntry(rsp, getValueFromResourceForSearchParam(theResource, rsp)))
+			.filter(searchParamValuesPair -> !searchParamValuesPair.getValue().isEmpty())
+			.forEach(pair -> {
+				searchForIdsAndAddToMap(theResourceType, matchedPidsToResources, filterCriteria, pair.getKey(), pair.getValue());
+			});
 
 		return matchedPidsToResources.values();
+	}
+
+	/*
+	 * Helper method which performs too much work currently.
+	 * 1. Build a full query string for the given filter and resource criteria.
+	 * 2. Convert that URL to a SearchParameterMap.
+	 * 3. Execute a Synchronous search on the DAO using that parameter map.
+	 * 4. Store all results in `theMatchedPidsToResources`
+	 */
+	@SuppressWarnings("rawtypes")
+	private void searchForIdsAndAddToMap(String theResourceType, Map<Long, IBaseResource> theMatchedPidsToResources, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam, List<String> theValuesFromResourceForSearchParam) {
+		//1.
+		String resourceCriteria = buildResourceQueryString(theResourceType, theFilterCriteria, resourceSearchParam, theValuesFromResourceForSearchParam);
+		ourLog.info("About to execute URL query: {}", resourceCriteria);
+
+		//2.
+		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceType);
+		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(resourceCriteria, resourceDef);
+		searchParameterMap.setLoadSynchronous(true);
+
+		//FIXME EMPI this will blow up under large scale i think.
+		//3.
+		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
+		IBundleProvider search = resourceDao.search(searchParameterMap);
+		List<IBaseResource> resources = search.getResources(0, search.size());
+
+		//4.
+		resources.forEach(resource -> theMatchedPidsToResources.put(myResourceTableHelper.getPidOrNull(resource), resource));
+	}
+
+	/*
+	 * Given a list of criteria upon which to block, a resource search parameter, and a list of values for that given search parameter,
+	 * build a query url. e.g.
+	 *
+	 * Patient?active=true&name.given=Gary,Grant
+	 */
+	@NotNull
+	private String buildResourceQueryString(String theResourceType, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam, List<String> theValuesFromResourceForSearchParam) {
+		List<String> criteria = new ArrayList<>(theFilterCriteria);
+		criteria.add(buildResourceMatchQuery(resourceSearchParam.getSearchParam(), theValuesFromResourceForSearchParam));
+
+		return theResourceType + "?" +  String.join("&", criteria);
 	}
 
 	private List<String> getValueFromResourceForSearchParam(IBaseResource theResource, EmpiResourceSearchParamJson theFilterSearchParam) {
