@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
-import ca.uhn.fhir.jpa.empi.util.ResourceTableHelper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
