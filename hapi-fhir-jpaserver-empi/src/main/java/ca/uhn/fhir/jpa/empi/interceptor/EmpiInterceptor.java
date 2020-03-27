@@ -9,6 +9,11 @@ import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.interceptor.BaseResourceModifiedInterceptor;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import net.bytebuddy.implementation.bind.annotation.TargetMethodAnnotationDrivenBinder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -56,5 +62,26 @@ public class EmpiInterceptor extends BaseResourceModifiedInterceptor implements 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE)
 	public void expungeAllMatchedEmpiLinks(AtomicInteger theCounter, IBaseResource theResource) {
 		// FIXME EMPI
+	}
+
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
+	public void blockManualPersonManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+		forbidModificationOnPerson(theBaseResource);
+	}
+
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
+	public void blockManualPersonManipulationOnUpdate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+		forbidModificationOnPerson(theBaseResource);
+	}
+
+	private void forbidModificationOnPerson(IBaseResource theBaseResource) {
+		if (extractResourceType(theBaseResource).equalsIgnoreCase("Person")) {
+			throw new ForbiddenOperationException("Cannot modify Person links when EMPI is enabled");
+		}
+	}
+
+
+	private String extractResourceType(IBaseResource theResource) {
+		return myFhirContext.getResourceDefinition(theResource).getName();
 	}
 }

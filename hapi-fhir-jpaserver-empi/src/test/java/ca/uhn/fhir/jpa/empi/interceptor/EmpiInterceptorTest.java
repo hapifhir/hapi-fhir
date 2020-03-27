@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.empi.interceptor;
 
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.util.EmpiHelper;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
@@ -14,6 +15,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class EmpiInterceptorTest extends BaseEmpiR4Test {
+
 	@Rule
 	@Autowired
 	public EmpiHelper myEmpiHelper;
@@ -39,8 +41,7 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 		try {
 			myPersonDao.create(person);
 			fail();
-			// FIXME EMPI choose right exception type
-		} catch (Exception e) {
+		} catch (ForbiddenOperationException e) {
 			assertEquals("Cannot modify Person links when EMPI is enabled.", e.getMessage());
 		}
 
@@ -48,8 +49,7 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 		try {
 			myPersonDao.update(person);
 			fail();
-			// FIXME EMPI choose right exception type
-		} catch (Exception e) {
+		} catch (ForbiddenOperationException e) {
 			assertEquals("Cannot modify Person links when EMPI is enabled.", e.getMessage());
 		}
 	}

@@ -31,7 +31,7 @@ public abstract class BaseResourceModifiedInterceptor implements IResourceModifi
 
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 	@Autowired
-	private FhirContext myFhirContext;
+	protected FhirContext myFhirContext;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
