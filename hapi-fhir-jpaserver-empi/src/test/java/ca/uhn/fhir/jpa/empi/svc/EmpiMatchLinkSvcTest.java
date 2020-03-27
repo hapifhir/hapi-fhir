@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
-import ca.uhn.fhir.jpa.empi.util.ResourceTableHelper;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.Test;
