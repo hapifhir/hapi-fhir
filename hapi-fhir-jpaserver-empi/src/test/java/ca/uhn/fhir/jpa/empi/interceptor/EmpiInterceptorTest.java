@@ -23,9 +23,9 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 		Patient patient = new Patient();
 
 		long initialCount = myEmpiLinkDao.count();
-		myAfterEmpiLatch.setExpectAtLeast(1);
+		myEmpiInterceptorRule.getAfterEmpiLatch().setExpectAtLeast(1);
 		myPatientDao.create(patient);
-		myAfterEmpiLatch.awaitExpected();
+		myEmpiInterceptorRule.getAfterEmpiLatch().awaitExpected();
 		assertEquals(initialCount + 1, myEmpiLinkDao.count());
 	}
 
