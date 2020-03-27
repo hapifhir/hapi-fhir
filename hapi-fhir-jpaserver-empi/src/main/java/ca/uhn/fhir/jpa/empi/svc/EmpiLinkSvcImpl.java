@@ -36,12 +36,13 @@ import java.util.List;
 
 @Service
 public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
+
 	@Autowired
-	FhirContext myFhirContext;
+	private IEmpiResourceDaoSvc myEmpiResourceDaoSvc;
 	@Autowired
-	IEmpiResourceDaoSvc myEmpiResourceDaoSvc;
+	private EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 	@Autowired
-	EmpiLinkDaoSvc myEmpiLinkDaoSvc;
+	private PersonUtil myPersonUtil;
 
 	@Override
 	@Transactional
@@ -52,15 +53,14 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 			case MATCH:
 				// FIXME EMPI use assurance 2 for possible and assurance 4 for no match
 			case POSSIBLE_MATCH:
-				// FIXME EMPI change ot its own bean because you don't want to make util a bean?
-				if (!PersonUtil.containsLinkTo(myFhirContext, thePerson, resourceId)) {
-					PersonUtil.addLink(myFhirContext, thePerson, resourceId);
+				if (!myPersonUtil.containsLinkTo(thePerson, resourceId)) {
+					myPersonUtil.addLink( thePerson, resourceId);
 					myEmpiResourceDaoSvc.updatePerson(thePerson);
 				}
 				break;
 			case NO_MATCH:
-				if (PersonUtil.containsLinkTo(myFhirContext, thePerson, resourceId)) {
-					PersonUtil.removeLink(myFhirContext, thePerson, resourceId);
+				if (myPersonUtil.containsLinkTo(thePerson, resourceId)) {
+					myPersonUtil.removeLink(thePerson, resourceId);
 					myEmpiResourceDaoSvc.updatePerson(thePerson);
 				}
 		}
