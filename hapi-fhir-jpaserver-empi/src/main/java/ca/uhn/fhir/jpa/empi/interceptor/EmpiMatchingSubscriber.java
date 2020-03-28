@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
+import ca.uhn.fhir.jpa.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import org.slf4j.Logger;
@@ -39,12 +40,12 @@ public class EmpiMatchingSubscriber implements MessageHandler {
 	}
 
 	public void matchEmpiAndUpdateLinks(ResourceModifiedMessage theMsg) {
+		String resourceType = theMsg.getId(myFhirContext).getResourceType();
+		validateResourceType(resourceType);
 		try {
 			switch (theMsg.getOperationType()) {
 				case CREATE:
-					if ("Patient".equals(theMsg.getId(myFhirContext).getResourceType())) {
-						myEmpiMatchLinkSvc.updateEmpiLinksForPatient(theMsg.getNewPayload(myFhirContext));
-					}
+					handleCreatePatientOrPractitioner(theMsg);
 					break;
 				case UPDATE:
 					//FIXME EMPI implement updates.
@@ -52,8 +53,6 @@ public class EmpiMatchingSubscriber implements MessageHandler {
 				case DELETE:
 				default:
 					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
-					// ignore anything else
-					return;
 			}
 		} finally {
 			// Interceptor call: EMPI_AFTER_PERSISTED_RESOURCE_CHECKED
@@ -61,5 +60,15 @@ public class EmpiMatchingSubscriber implements MessageHandler {
 				.add(ResourceModifiedMessage.class, theMsg);
 			myInterceptorBroadcaster.callHooks(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, params);
 		}
+	}
+
+	private void validateResourceType(String theResourceType) {
+		if (!EmpiUtil.supportedResourceType(theResourceType)) {
+			throw new IllegalStateException("Unsupported resource type submitted to EMPI matching queue: " + theResourceType);
+		}
+	}
+
+	private void handleCreatePatientOrPractitioner(ResourceModifiedMessage theMsg) {
+		myEmpiMatchLinkSvc.updateEmpiLinksForPatient(theMsg.getNewPayload(myFhirContext));
 	}
 }

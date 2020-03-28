@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.IEmpiInterceptor;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
+import ca.uhn.fhir.jpa.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.interceptor.BaseResourceModifiedInterceptor;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
@@ -22,6 +23,7 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -51,6 +53,34 @@ public class EmpiInterceptor extends BaseResourceModifiedInterceptor implements 
 	@Override
 	protected SubscribableChannel createMatchingChannel() {
 		return mySubscribableChannelFactory.createSubscribableChannel(EMPI_MATCHING_CHANNEL_NAME, ResourceModifiedMessage.class, 1);
+	}
+
+	@Override
+	public void resourceCreated(IBaseResource theResource, RequestDetails theRequest) {
+		if (EmpiUtil.supportedResourceType(extractResourceType(theResource))) {
+			super.resourceCreated(theResource, theRequest);
+		}
+	}
+
+	@Override
+	public void resourceDeleted(IBaseResource theResource, RequestDetails theRequest) {
+		if (EmpiUtil.supportedResourceType(extractResourceType(theResource))) {
+			super.resourceDeleted(theResource, theRequest);
+		}
+	}
+
+	@Override
+	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
+		if (EmpiUtil.supportedResourceType(extractResourceType(theOldResource))) {
+			super.resourceUpdated(theOldResource, theNewResource, theRequest);
+		}
+	}
+
+	@Nonnull
+	@Override
+	protected Pointcut getSubmitPointcut() {
+		// FIXME EMPI add EMPI submit pointcut
+		return Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED;
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING)

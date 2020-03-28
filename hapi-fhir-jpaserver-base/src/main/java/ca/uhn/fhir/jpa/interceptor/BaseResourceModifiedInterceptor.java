@@ -23,6 +23,7 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PreDestroy;
 
 // FIXME EMPI Now that this is used outside of Subscriptions, we should move it. Maybe to a `messaging` package? (see ResourceModifiedMessage)
@@ -78,17 +79,18 @@ public abstract class BaseResourceModifiedInterceptor implements IResourceModifi
 
 	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType);
-		// FIXME EMPI move this down to subscription interceptor
-		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
 		HookParams params = new HookParams()
 			.add(ResourceModifiedMessage.class, msg);
-		boolean outcome = JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
+		boolean outcome = JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, getSubmitPointcut(), params);
 		if (!outcome) {
 			return;
 		}
 
 		submitResourceModified(msg);
 	}
+
+	@Nonnull
+	protected abstract Pointcut getSubmitPointcut();
 
 	protected void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
 		ourLog.trace("Sending resource modified message to processing channel");

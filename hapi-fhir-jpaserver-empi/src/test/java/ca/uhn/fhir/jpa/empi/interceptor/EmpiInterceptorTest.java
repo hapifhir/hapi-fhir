@@ -32,8 +32,8 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testCreatePerson() throws InterruptedException {
-		myEmpiHelper.createWithLatch(new Person());
-		assertLinkCount(1);
+		myPersonDao.create(new Person());
+		assertLinkCount(0);
 	}
 
 	@Test

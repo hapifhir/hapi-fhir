@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.interceptor.BaseResourceModifiedInterceptor;
 import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriber;
@@ -11,6 +12,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Nonnull;
 
 /*-
  * #%L
@@ -58,6 +61,11 @@ public class SubscriptionMatcherInterceptor extends BaseResourceModifiedIntercep
 	@Override
 	protected SubscribableChannel createMatchingChannel() {
 		return mySubscriptionChannelFactory.newMatchingChannel(getMatchingChannelName());
+	}
 
+	@Nonnull
+	@Override
+	protected Pointcut getSubmitPointcut() {
+		return Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED;
 	}
 }

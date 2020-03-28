@@ -75,19 +75,18 @@ public class EmpiHelper extends ExternalResource {
 
 		//This sets up our basic interceptor, and also attached the latch so we can await the hook calls.
 		myEmpiInterceptor.start();
-		myIInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, myAfterEmpiLatch);
 		myIInterceptorService.registerInterceptor(myEmpiInterceptor);
+		myIInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, myAfterEmpiLatch);
 	}
 
 	@Override
 	protected void after() {
-		myIInterceptorService.unregisterInterceptor(myEmpiInterceptor);
+		myIInterceptorService.unregisterAllInterceptors();
 		myAfterEmpiLatch.clear();
-		//FIXME EMPI QUESTION how do i unregister an anonymous interceptor??
 	}
 
 	public DaoMethodOutcome createWithLatch(Patient thePatient, boolean isExternalHttpRequest) throws InterruptedException {
-		myAfterEmpiLatch.setExpectAtLeast(1);
+		myAfterEmpiLatch.setExpectedCount(1);
 		DaoMethodOutcome daoMethodOutcome = doCreatePatient(thePatient, isExternalHttpRequest);
 		myAfterEmpiLatch.awaitExpected();
 		return daoMethodOutcome;
@@ -98,7 +97,7 @@ public class EmpiHelper extends ExternalResource {
 	}
 
 	public DaoMethodOutcome createWithLatch(Person thePerson, boolean isExternalHttpRequest) throws InterruptedException {
-		myAfterEmpiLatch.setExpectAtLeast(1);
+		myAfterEmpiLatch.setExpectedCount(1);
 		DaoMethodOutcome daoMethodOutcome = doCreatePerson(thePerson, isExternalHttpRequest);
 		myAfterEmpiLatch.awaitExpected();
 		return daoMethodOutcome;
@@ -112,7 +111,7 @@ public class EmpiHelper extends ExternalResource {
 		return updateWithLatch(thePerson, true);
 	}
 	public DaoMethodOutcome updateWithLatch(Person thePerson, boolean isExternalHttpRequest) throws InterruptedException {
-		myAfterEmpiLatch.setExpectAtLeast(1);
+		myAfterEmpiLatch.setExpectedCount(1);
 		DaoMethodOutcome daoMethodOutcome =  doUpdatePerson(thePerson, isExternalHttpRequest);
 		myAfterEmpiLatch.awaitExpected();
 		return daoMethodOutcome;
