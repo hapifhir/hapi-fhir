@@ -22,6 +22,23 @@ import javax.servlet.http.HttpServletRequest;
 
 import static org.mockito.Mockito.when;
 
+/**
+ * How to use this Rule:
+ *
+ * This rule is to be used whenever you want to have the EmpiInterceptor loaded, and be able
+ * to execute creates/updates/deletes while being assured that all EMPI work has been done before exiting.
+ * Provides two types of method:
+ *
+ * 1. doUpdate/doCreate. These methods do not wait for Asynchronous EMPI work to be done. Use these when you are expecting
+ * the calls to fail, as those hooks will never be called.
+ *
+ * 2. createWithLatch/updateWithLatch. These methods will await the EMPI hooks, which are only triggered post-EMPI processing
+ * You should use these when you are expecting successful processing of the resource, and need to wait for async EMPI linking
+ * work to be done.
+ *
+ * Note: all create/update functions take an optional isExternalHttpRequest boolean, to make it appear as though the request's
+ * origin is an HTTP request.
+ */
 @Component
 public class EmpiHelper extends ExternalResource {
 	@Autowired
@@ -42,7 +59,6 @@ public class EmpiHelper extends ExternalResource {
 	protected RestfulServer myMockRestfulServer;
 	@Mock
 	protected FhirContext myMockFhirContext;
-
 
 	private PointcutLatch myAfterEmpiLatch = new PointcutLatch(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED);
 
@@ -67,7 +83,7 @@ public class EmpiHelper extends ExternalResource {
 	protected void after() {
 		myIInterceptorService.unregisterInterceptor(myEmpiInterceptor);
 		myAfterEmpiLatch.clear();
-		//FIXME EMPI how do i unregister an anonymous interceptor??
+		//FIXME EMPI QUESTION how do i unregister an anonymous interceptor??
 	}
 
 	public DaoMethodOutcome createWithLatch(Patient thePatient, boolean isExternalHttpRequest) throws InterruptedException {
