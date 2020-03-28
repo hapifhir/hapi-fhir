@@ -13,7 +13,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import com.google.common.collect.Maps;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -63,7 +62,6 @@ public class EmpiCandidateSearchSvc {
 
 		List<String> filterCriteria = buildFilterQuery(filterSearchParams, theResourceType);
 
-		/**
 		for (EmpiResourceSearchParamJson resourceSearchParam : myEmpiRulesSvc.getEmpiRules().getResourceSearchParams()) {
 
 			if (!resourceSearchParam.getResourceType().equals(theResourceType)) {
@@ -76,16 +74,7 @@ public class EmpiCandidateSearchSvc {
 			}
 
 			searchForIdsAndAddToMap(theResourceType, matchedPidsToResources, filterCriteria, resourceSearchParam, valuesFromResourceForSearchParam);
-		}*/
-
-		//FIXME EMPI told you i could do it! Feel free to delete this implementation and uncomment the above if you hate it :D
-		myEmpiRulesSvc.getEmpiRules().getResourceSearchParams().stream()
-			.filter(searchParam -> searchParam.getResourceType().equalsIgnoreCase(theResourceType))
-			.map(rsp -> Maps.immutableEntry(rsp, getValueFromResourceForSearchParam(theResource, rsp)))
-			.filter(searchParamValuesPair -> !searchParamValuesPair.getValue().isEmpty())
-			.forEach(pair -> {
-				searchForIdsAndAddToMap(theResourceType, matchedPidsToResources, filterCriteria, pair.getKey(), pair.getValue());
-			});
+		}
 
 		return matchedPidsToResources.values();
 	}
