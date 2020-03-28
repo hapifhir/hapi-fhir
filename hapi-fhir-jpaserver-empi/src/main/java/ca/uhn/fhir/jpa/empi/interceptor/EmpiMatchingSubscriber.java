@@ -47,6 +47,8 @@ public class EmpiMatchingSubscriber implements MessageHandler {
 					}
 					break;
 				case UPDATE:
+					//FIXME EMPI implement updates.
+					break;
 				case DELETE:
 				default:
 					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());

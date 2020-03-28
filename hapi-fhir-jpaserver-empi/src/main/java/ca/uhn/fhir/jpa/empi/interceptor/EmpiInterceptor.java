@@ -9,10 +9,8 @@ import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.interceptor.BaseResourceModifiedInterceptor;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Streams;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -68,12 +66,25 @@ public class EmpiInterceptor extends BaseResourceModifiedInterceptor implements 
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualPersonManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+		if (isInternalRequest(theRequestDetails)) {
+			return;
+		}
 		forbidCreationOfPersonsWithLinks(theBaseResource);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	public void blockManualPersonManipulationOnUpdate(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+		if (isInternalRequest(theRequestDetails)) {
+			return;
+		}
 		forbidModificationOnLinksPerson(theOldResource, theNewResource);
+	}
+
+	/*
+	 * We assume that if we have RequestDetails, then this was an HTTP request and not an internal one.
+	 */
+	private boolean isInternalRequest(RequestDetails theRequestDetails) {
+		return theRequestDetails == null;
 	}
 
 	/**

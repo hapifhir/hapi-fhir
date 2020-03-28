@@ -1,55 +1,118 @@
 package ca.uhn.fhir.jpa.empi.util;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.IEmpiInterceptor;
+import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.rules.ExternalResource;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
+
+import static org.mockito.Mockito.when;
+
 @Component
 public class EmpiHelper extends ExternalResource {
-
 	@Autowired
 	private IInterceptorService myIInterceptorService;
-
 	@Autowired
 	private IEmpiInterceptor myEmpiInterceptor;
 	@Autowired
 	protected IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
 	protected IFhirResourceDao<Person> myPersonDao;
+	@Mock
+	protected IInterceptorBroadcaster myMockInterceptorService;
+	@Mock
+	protected ServletRequestDetails myMockSrd;
+	@Mock
+	protected HttpServletRequest myMockServletRequest;
+	@Mock
+	protected RestfulServer myMockRestfulServer;
+	@Mock
+	protected FhirContext myMockFhirContext;
+
 
 	private PointcutLatch myAfterEmpiLatch = new PointcutLatch(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED);
 
 	@Override
 	protected void before() throws Throwable {
 		super.before();
+		//This sets up mock servlet request details, which allows our DAO requests to appear as though
+		//they are coming from an external HTTP Request.
+		MockitoAnnotations.initMocks(this);
+		when(myMockSrd.getInterceptorBroadcaster()).thenReturn(myMockInterceptorService);
+		when(myMockSrd.getServletRequest()).thenReturn(myMockServletRequest);
+		when(myMockSrd.getServer()).thenReturn(myMockRestfulServer);
+		when(myMockRestfulServer.getFhirContext()).thenReturn(myMockFhirContext);
+
+		//This sets up our basic interceptor, and also attached the latch so we can await the hook calls.
 		myEmpiInterceptor.start();
-		myIInterceptorService.registerInterceptor(myEmpiInterceptor);
 		myIInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, myAfterEmpiLatch);
+		myIInterceptorService.registerInterceptor(myEmpiInterceptor);
 	}
 
 	@Override
 	protected void after() {
 		myIInterceptorService.unregisterInterceptor(myEmpiInterceptor);
+		myAfterEmpiLatch.clear();
 		//FIXME EMPI how do i unregister an anonymous interceptor??
 	}
 
-	public void createWithLatch(Patient thePatient) throws InterruptedException {
+	public DaoMethodOutcome createWithLatch(Patient thePatient, boolean isExternalHttpRequest) throws InterruptedException {
 		myAfterEmpiLatch.setExpectAtLeast(1);
-		myPatientDao.create(thePatient);
+		DaoMethodOutcome daoMethodOutcome = doCreatePatient(thePatient, isExternalHttpRequest);
 		myAfterEmpiLatch.awaitExpected();
+		return daoMethodOutcome;
 	}
 
-	public void createWithLatch(Person thePerson) throws InterruptedException {
+	public DaoMethodOutcome createWithLatch(Patient thePatient) throws InterruptedException {
+		return createWithLatch(thePatient, true);
+	}
+
+	public DaoMethodOutcome createWithLatch(Person thePerson, boolean isExternalHttpRequest) throws InterruptedException {
 		myAfterEmpiLatch.setExpectAtLeast(1);
-		myPersonDao.create(thePerson);
+		DaoMethodOutcome daoMethodOutcome = doCreatePerson(thePerson, isExternalHttpRequest);
 		myAfterEmpiLatch.awaitExpected();
+		return daoMethodOutcome;
+	}
+
+	public DaoMethodOutcome createWithLatch(Person thePerson) throws InterruptedException {
+		return createWithLatch(thePerson, true);
+	}
+
+	public DaoMethodOutcome updateWithLatch(Person thePerson) throws InterruptedException {
+		return updateWithLatch(thePerson, true);
+	}
+	public DaoMethodOutcome updateWithLatch(Person thePerson, boolean isExternalHttpRequest) throws InterruptedException {
+		myAfterEmpiLatch.setExpectAtLeast(1);
+		DaoMethodOutcome daoMethodOutcome =  doUpdatePerson(thePerson, isExternalHttpRequest);
+		myAfterEmpiLatch.awaitExpected();
+		return daoMethodOutcome;
+	}
+	public DaoMethodOutcome doCreatePatient(Patient thePatient, boolean isExternalHttpRequest) {
+		return isExternalHttpRequest ? myPatientDao.create(thePatient, myMockSrd): myPatientDao.create(thePatient);
+	}
+	public DaoMethodOutcome doUpdatePatient(Patient thePatient, boolean isExternalHttpRequest) {
+		return isExternalHttpRequest ? myPatientDao.update(thePatient, myMockSrd): myPatientDao.update(thePatient);
+	}
+
+	public DaoMethodOutcome doCreatePerson(Person thePerson, boolean isExternalHttpRequest) {
+		return isExternalHttpRequest ? myPersonDao.create(thePerson, myMockSrd): myPersonDao.create(thePerson);
+	}
+	public DaoMethodOutcome doUpdatePerson(Person thePerson, boolean isExternalHttpRequest) {
+		return isExternalHttpRequest ? myPersonDao.update(thePerson, myMockSrd): myPersonDao.update(thePerson);
 	}
 
 }

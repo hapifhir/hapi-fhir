@@ -42,7 +42,8 @@ public class EmpiMatchLinkSvc {
 		//multiple candidates, in which case they should all be tagged as POSSIBLE_MATCH. If one is already tagged as MATCH
 		List<MatchedPersonCandidate> personCandidates = myEmpiPersonFindingSvc.findPersonCandidates(theResource);
 		if (personCandidates.isEmpty()) {
-			myEmpiLinkSvc.updateLink(myPersonUtil.createPersonFromPatient(theResource), theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
+			IBaseResource newPerson = myPersonUtil.createPersonFromPatient(theResource);
+			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
 		}
 		//myEmpiLinkSvc.updateLinks(theResource, matchedCandidates, EmpiLinkSourceEnum.AUTO);
 

@@ -10,11 +10,15 @@ import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Rule;
 import org.junit.Test;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.Assert.*;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class EmpiInterceptorTest extends BaseEmpiR4Test {
+
+	private static final Logger ourLog = getLogger(EmpiInterceptorTest.class);
 
 	@Rule
 	@Autowired
@@ -33,37 +37,47 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testCreateUpdatePersonWithLinkForbiddenWhenEmpiEnabled() {
+	public void testCreateUpdatePersonWithLinkForbiddenWhenEmpiEnabled() throws InterruptedException {
 		// When EMPI is enabled, only the EMPI system is allowed to modify Person links
 		IdType patientId = createPatient(new Patient()).getIdElement().toUnqualifiedVersionless();
-		Person person = new Person();
 
 		//With no links is fine
-		DaoMethodOutcome daoMethodOutcome = myPersonDao.create(person);
+		Person person = new Person();
+		DaoMethodOutcome daoMethodOutcome = myEmpiHelper.createWithLatch(person);
 		assertNotNull(daoMethodOutcome.getId());
 
+		//Creating a person with links should fail.
 		person.addLink().setTarget(new Reference(patientId));
 		try {
-			myPersonDao.create(person);
+			myEmpiHelper.doCreatePerson(person, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
 			assertEquals("Cannot modify Person links when EMPI is enabled.", e.getMessage());
 		}
 
+		//Updating a person with while modifying their links should fail.
 		person.setId("TESTID");
 		try {
-			myPersonDao.update(person);
+			myEmpiHelper.doCreatePerson(person, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
 			assertEquals("Cannot modify Person links when EMPI is enabled.", e.getMessage());
 		}
+
+		//Updating a person's data should work, so long as you aren't trying to modify links.
+		Person savedPerson = (Person) daoMethodOutcome.getResource();
+		savedPerson.setId(daoMethodOutcome.getId().toUnqualifiedVersionless());
+		savedPerson.getNameFirstRep().setFamily("Graham");
+		savedPerson.getLink().clear();
+		DaoMethodOutcome daoMethodOutcome1 = myEmpiHelper.updateWithLatch(savedPerson);
+		assertNotNull(daoMethodOutcome1.getId());
 	}
 
 	@Test
-	public void testUpdatingExistingLinksIsForbiddenViaPersonEndpoint() {
+	public void testUpdatingExistingLinksIsForbiddenViaPersonEndpoint() throws InterruptedException {
 		// FIXME EMPI add tests to check that modifying existing person links is not allowed (must use EMPI REST operations to do this)
 		// When EMPI is enabled, only the EMPI system is allowed to modify Person links
-		IdType patientId = createPatient(new Patient()).getIdElement().toUnqualifiedVersionless();
+		myEmpiHelper.createWithLatch(new Patient());
 		assertLinkCount(1);
 	}
 
