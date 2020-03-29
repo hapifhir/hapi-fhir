@@ -64,6 +64,7 @@ public class ResourceIndexedCompositeStringUnique implements Comparable<Resource
 	public ResourceIndexedCompositeStringUnique(ResourceTable theResource, String theIndexString) {
 		setResource(theResource);
 		setIndexString(theIndexString);
+		setTenantId(theResource.getTenantId());
 	}
 
 	public TenantId getTenantId() {

@@ -70,8 +70,9 @@ public class FhirResourceDaoSearchParameterDstu3 extends BaseHapiFhirResourceDao
 		String expression = theResource.getExpression();
 		FhirContext context = getContext();
 		Enumerations.SearchParamType type = theResource.getType();
+		String code = theResource.getCode();
 
-		FhirResourceDaoSearchParameterR4.validateSearchParam(mySearchParamExtractor, type, status, base, expression, context, getConfig());
+		FhirResourceDaoSearchParameterR4.validateSearchParam(mySearchParamRegistry, mySearchParamExtractor, code, type, status, base, expression, context, getConfig());
 	}
 
 }

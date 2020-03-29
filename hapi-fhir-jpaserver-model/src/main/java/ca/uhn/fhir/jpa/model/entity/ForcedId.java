@@ -62,6 +62,8 @@ public class ForcedId {
 	@ColumnDefault("''")
 	@Column(name = "RESOURCE_TYPE", nullable = true, length = 100, updatable = true)
 	private String myResourceType;
+	@Embedded
+	private TenantId myTenantId;
 
 	/**
 	 * Constructor
@@ -92,5 +94,13 @@ public class ForcedId {
 
 	public Long getId() {
 		return myId;
+	}
+
+	public TenantId getTenantId() {
+		return myTenantId;
+	}
+
+	public void setTenantId(TenantId theTenantId) {
+		myTenantId = theTenantId;
 	}
 }

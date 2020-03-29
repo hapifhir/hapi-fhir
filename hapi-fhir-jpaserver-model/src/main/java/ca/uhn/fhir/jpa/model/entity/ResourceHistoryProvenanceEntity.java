@@ -51,16 +51,15 @@ public class ResourceHistoryProvenanceEntity {
 	@Embedded
 	private TenantId myTenantId;
 
-	public ResourceTable getResourceTable() {
-		return myResourceTable;
+	/**
+	 * Constructor
+	 */
+	public ResourceHistoryProvenanceEntity() {
+		super();
 	}
 
 	public void setResourceTable(ResourceTable theResourceTable) {
 		myResourceTable = theResourceTable;
-	}
-
-	public ResourceHistoryTable getResourceHistoryTable() {
-		return myResourceHistoryTable;
 	}
 
 	public void setResourceHistoryTable(ResourceHistoryTable theResourceHistoryTable) {
@@ -85,5 +84,13 @@ public class ResourceHistoryProvenanceEntity {
 
 	public Long getId() {
 		return myId;
+	}
+
+	public TenantId getTenantId() {
+		return myTenantId;
+	}
+
+	public void setTenantId(TenantId theTenantId) {
+		myTenantId = theTenantId;
 	}
 }

@@ -70,7 +70,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RES_VER").modifyColumn("20200220.1", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 
 		// Add mlutiitenancy
-		version.onTable("HFJ_RESOURCE").dropColumn("20200327.1", "RES_PROFILE");
+		version.onTable("HFJ_RESOURCE").dropIndex("20200327.1", "IDX_RES_PROFILE");
+		version.onTable("HFJ_RESOURCE").dropColumn("20200327.2", "RES_PROFILE");
 	}
 
 	protected void init420() { // 20191015 - 20200217

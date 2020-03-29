@@ -2,11 +2,14 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ElementUtil;
@@ -78,14 +81,15 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 
 		Enum<?> status = theResource.getStatus();
 		List<CodeType> base = theResource.getBase();
+		String code = theResource.getCode();
 		String expression = theResource.getExpression();
 		FhirContext context = getContext();
 		Enum<?> type = theResource.getType();
 
-		FhirResourceDaoSearchParameterR4.validateSearchParam(mySearchParamExtractor, type, status, base, expression, context, getConfig());
+		FhirResourceDaoSearchParameterR4.validateSearchParam(mySearchParamRegistry, mySearchParamExtractor, code, type, status, base, expression, context, getConfig());
 	}
 
-	public static void validateSearchParam(ISearchParamExtractor theSearchParamExtractor, Enum<?> theType, Enum<?> theStatus, List<? extends IPrimitiveType> theBase, String theExpression, FhirContext theContext, DaoConfig theDaoConfig) {
+	public static void validateSearchParam(ISearchParamRegistry theSearchParamRegistry, ISearchParamExtractor theSearchParamExtractor, String theCode, Enum<?> theType, Enum<?> theStatus, List<? extends IPrimitiveType> theBase, String theExpression, FhirContext theContext, DaoConfig theDaoConfig) {
 		if (theStatus == null) {
 			throw new UnprocessableEntityException("SearchParameter.status is missing or invalid");
 		}
@@ -146,6 +150,19 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 
 			}
 		} // if have expression
+
+		// If overriding built-in SPs is disabled on this server, make sure we aren't
+		// doing that
+		if (theDaoConfig.getModelConfig().isDefaultSearchParamsCanBeOverridden() == false) {
+			for (IPrimitiveType<?> nextBaseType : theBase) {
+				String nextBase = nextBaseType.getValueAsString();
+				RuntimeSearchParam existingSearchParam = theSearchParamRegistry.getActiveSearchParam(nextBase, theCode);
+				if (existingSearchParam.getId() == null) {
+					throw new UnprocessableEntityException("Can not override built-in search parameter " + nextBase + ":" + theCode + " because overriding is disabled on this server");
+				}
+			}
+		}
+
 	}
 
 }

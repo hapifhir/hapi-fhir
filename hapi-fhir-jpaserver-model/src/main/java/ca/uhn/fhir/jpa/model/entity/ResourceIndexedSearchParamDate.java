@@ -183,9 +183,10 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("paramName", getParamName());
-		b.append("resourceId", getResource().getId()); // TODO: add a field so we don't need to resolve this
+		b.append("resourceId", getResourcePid());
 		b.append("valueLow", new InstantDt(getValueLow()));
 		b.append("valueHigh", new InstantDt(getValueHigh()));
+		b.append("missing", isMissing());
 		return b.build();
 	}
 
