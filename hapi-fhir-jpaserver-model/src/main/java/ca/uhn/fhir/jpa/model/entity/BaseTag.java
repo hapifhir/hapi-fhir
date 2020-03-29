@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
@@ -38,6 +39,9 @@ public class BaseTag implements Serializable {
 	@Column(name = "TAG_ID", insertable = false, updatable = false)
 	private Long myTagId;
 
+	@Embedded
+	private PartitionId myPartitionId;
+
 	public Long getTagId() {
 		return myTagId;
 	}
@@ -48,6 +52,14 @@ public class BaseTag implements Serializable {
 
 	public void setTag(TagDefinition theTag) {
 		myTag = theTag;
+	}
+
+	public PartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(PartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
 	}
 
 }

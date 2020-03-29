@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -51,6 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,6 +61,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -132,14 +135,14 @@ public class IdHelperService {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	public ResourcePersistentId resolveResourcePersistentIds(String theResourceType, String theId) {
+	public ResourcePersistentId resolveResourcePersistentIds(PartitionId thePartitionId, String theResourceType, String theId) {
 		Long retVal;
 		if (myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId)) {
 			if (myDaoConfig.isDeleteEnabled()) {
-				retVal = resolveResourceIdentity(theResourceType, theId);
+				retVal = resolveResourceIdentity(thePartitionId, theResourceType, theId);
 			} else {
-				String key = theResourceType + "/" + theId;
-				retVal = myPersistentIdCache.get(key, t -> resolveResourceIdentity(theResourceType, theId));
+				String key = thePartitionId + "/" + theResourceType + "/" + theId;
+				retVal = myPersistentIdCache.get(key, t -> resolveResourceIdentity(thePartitionId, theResourceType, theId));
 			}
 
 		} else {
@@ -248,12 +251,18 @@ public class IdHelperService {
 		return typeToIds;
 	}
 
-	private Long resolveResourceIdentity(String theResourceType, String theId) {
-		Long retVal;
-		retVal = myForcedIdDao
-			.findByTypeAndForcedId(theResourceType, theId)
-			.orElseThrow(() -> new ResourceNotFoundException(new IdDt(theResourceType, theId)));
-		return retVal;
+	private Long resolveResourceIdentity(@Nullable PartitionId thePartitionId, @Nonnull String theResourceType, @Nonnull String theId) {
+		Optional<Long> pid;
+		if (thePartitionId != null) {
+			pid = myForcedIdDao.findByPartitionIdAndTypeAndForcedId(thePartitionId.getPartitionId(), theResourceType, theId);
+		} else {
+			pid = myForcedIdDao.findByTypeAndForcedId(theResourceType, theId);
+		}
+
+		if (pid.isPresent() == false) {
+			throw new ResourceNotFoundException(new IdDt(theResourceType, theId));
+		}
+		return pid.get();
 	}
 
 	private Collection<IResourceLookup> translateForcedIdToPids(RequestDetails theRequest, Collection<IIdType> theId) {
@@ -274,7 +283,7 @@ public class IdHelperService {
 			if (!pids.isEmpty()) {
 				myResourceTableDao.findLookupFieldsByResourcePid(pids)
 					.stream()
-					.map(lookup -> new ResourceLookup((String)lookup[0], (Long)lookup[1], (Date)lookup[2]))
+					.map(lookup -> new ResourceLookup((String) lookup[0], (Long) lookup[1], (Date) lookup[2]))
 					.forEach(retVal::add);
 			}
 		}

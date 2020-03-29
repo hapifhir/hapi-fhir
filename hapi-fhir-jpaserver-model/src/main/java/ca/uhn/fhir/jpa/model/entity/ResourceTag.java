@@ -51,21 +51,15 @@ public class ResourceTag extends BaseTag {
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourceId;
 
-	@Embedded
-	private TenantId myTenantId;
-
 	public ResourceTag() {
 	}
 
-	public ResourceTag(ResourceTable theResourceTable, TagDefinition theTag) {
+	public ResourceTag(ResourceTable theResourceTable, TagDefinition theTag, PartitionId thePartitionId) {
 		setTag(theTag);
 		setResource(theResourceTable);
 		setResourceId(theResourceTable.getId());
 		setResourceType(theResourceTable.getResourceType());
-	}
-
-	public void setTenantId(TenantId theTenantId) {
-		myTenantId = theTenantId;
+		setPartitionId(thePartitionId);
 	}
 
 	public Long getResourceId() {

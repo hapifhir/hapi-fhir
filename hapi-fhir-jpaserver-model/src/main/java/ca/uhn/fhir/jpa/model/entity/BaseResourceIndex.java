@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
@@ -28,14 +29,21 @@ import java.io.Serializable;
 public abstract class BaseResourceIndex implements Serializable {
 
 	@Embedded
-	private TenantId myTenantId;
+	private PartitionId myPartitionId;
 
-	public TenantId getTenantId() {
-		return myTenantId;
+	/**
+	 * This is here to support queries only, do not set this field directly
+	 */
+	@SuppressWarnings("unused")
+	@Column(name = PartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
+	private Integer myPartitionIdValue;
+
+	public PartitionId getPartitionId() {
+		return myPartitionId;
 	}
 
-	public void setTenantId(TenantId theTenantId) {
-		myTenantId = theTenantId;
+	public void setPartitionId(PartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
 	}
 
 	public abstract Long getId();

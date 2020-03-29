@@ -66,7 +66,7 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 			present.setResource(theResource);
 			present.setParamName(paramName);
 			present.setPresent(next.getValue());
-			present.setTenantId(theResource.getTenantId());
+			present.setPartitionId(theResource.getPartitionId());
 			present.calculateHashes();
 
 			newHashToPresence.put(present.getHashPresence(), present);

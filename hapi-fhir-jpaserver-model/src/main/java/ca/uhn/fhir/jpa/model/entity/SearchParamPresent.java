@@ -53,7 +53,7 @@ public class SearchParamPresent implements Serializable {
 	@Column(name = "HASH_PRESENCE")
 	private Long myHashPresence;
 	@Embedded
-	private TenantId myTenantId;
+	private PartitionId myPartitionId;
 
 	/**
 	 * Constructor
@@ -112,16 +112,16 @@ public class SearchParamPresent implements Serializable {
 		b.append("resPid", myResource.getIdDt().toUnqualifiedVersionless().getValue());
 		b.append("paramName", myParamName);
 		b.append("present", myPresent);
-		b.append("tenant", myTenantId);
+		b.append("tenant", myPartitionId);
 		return b.build();
 	}
 
-	public TenantId getTenantId() {
-		return myTenantId;
+	public PartitionId getPartitionId() {
+		return myPartitionId;
 	}
 
-	public void setTenantId(TenantId theTenantId) {
-		myTenantId = theTenantId;
+	public void setPartitionId(PartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
 	}
 
 	public static long calculateHashPresence(String theResourceType, String theParamName, Boolean thePresent) {

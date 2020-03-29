@@ -59,7 +59,14 @@ public abstract class BaseHasResource implements IBaseResourceEntity, IBasePersi
 	private Date myUpdated;
 
 	@Embedded
-	private TenantId myTenantId;
+	private PartitionId myPartitionId;
+
+	/**
+	 * This is here to support queries only, do not set this field directly
+	 */
+	@SuppressWarnings("unused")
+	@Column(name = PartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
+	private Integer myPartitionIdValue;
 
 	/**
 	 * This is stored as an optimization to avoid neeind to query for this
@@ -68,12 +75,12 @@ public abstract class BaseHasResource implements IBaseResourceEntity, IBasePersi
 	@Transient
 	private transient String myTransientForcedId;
 
-	public TenantId getTenantId() {
-		return myTenantId;
+	public PartitionId getPartitionId() {
+		return myPartitionId;
 	}
 
-	public void setTenantId(TenantId theTenantId) {
-		myTenantId = theTenantId;
+	public void setPartitionId(PartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
 	}
 
 	public String getTransientForcedId() {

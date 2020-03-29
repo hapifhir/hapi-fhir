@@ -37,7 +37,7 @@ public interface ISearchCoordinatorSvc {
 
 	List<ResourcePersistentId> getResources(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails);
 
-	IBundleProvider registerSearch(IFhirResourceDao theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, @Nullable RequestDetails theRequestDetails);
+	IBundleProvider registerSearch(IFhirResourceDao<?> theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, @Nullable RequestDetails theRequestDetails);
 
 	/**
 	 * Fetch the total number of search results for the given currently executing search, if one is currently executing and

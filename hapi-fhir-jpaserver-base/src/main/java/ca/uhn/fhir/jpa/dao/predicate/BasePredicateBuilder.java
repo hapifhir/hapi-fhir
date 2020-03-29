@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
@@ -125,8 +126,10 @@ abstract class BasePredicateBuilder {
 		myQueryRoot.addPredicate(myCriteriaBuilder.equal(hashPresence, hash));
 	}
 
-	void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing, Join<ResourceTable, ? extends BaseResourceIndexedSearchParam> theJoin) {
-
+	void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing, Join<ResourceTable, ? extends BaseResourceIndexedSearchParam> theJoin, PartitionId thePartitionId) {
+		if (thePartitionId != null) {
+			myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myPartitionIdValue"), thePartitionId.getPartitionId()));
+		}
 		myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myResourceType"), theResourceName));
 		myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myParamName"), theParamName));
 		myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myMissing"), theMissing));

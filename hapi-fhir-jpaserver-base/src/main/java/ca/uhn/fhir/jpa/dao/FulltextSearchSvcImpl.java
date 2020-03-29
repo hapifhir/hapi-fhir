@@ -22,7 +22,9 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.partition.RequestPartitionHelperService;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -269,6 +271,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return doSearch(theResourceName, theParams, null);
 	}
 
+	@Autowired
+	private RequestPartitionHelperService myRequestPartitionHelperService;
+
 	@Transactional()
 	@Override
 	public List<Suggestion> suggestKeywords(String theContext, String theSearchParam, String theText, RequestDetails theRequest) {
@@ -282,7 +287,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		if (contextParts.length != 3 || "Patient".equals(contextParts[0]) == false || "$everything".equals(contextParts[2]) == false) {
 			throw new InvalidRequestException("Invalid context: " + theContext);
 		}
-		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(contextParts[0], contextParts[1]);
+
+		// FIXME: this method should require a resource type
+		PartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, null);
+		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(partitionId, contextParts[0], contextParts[1]);
 
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 

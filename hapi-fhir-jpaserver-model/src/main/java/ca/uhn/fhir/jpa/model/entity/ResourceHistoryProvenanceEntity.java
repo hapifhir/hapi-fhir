@@ -49,7 +49,7 @@ public class ResourceHistoryProvenanceEntity {
 	private String myRequestId;
 	// FIXME: make sure this gets populated
 	@Embedded
-	private TenantId myTenantId;
+	private PartitionId myPartitionId;
 
 	/**
 	 * Constructor
@@ -86,11 +86,11 @@ public class ResourceHistoryProvenanceEntity {
 		return myId;
 	}
 
-	public TenantId getTenantId() {
-		return myTenantId;
+	public PartitionId getPartitionId() {
+		return myPartitionId;
 	}
 
-	public void setTenantId(TenantId theTenantId) {
-		myTenantId = theTenantId;
+	public void setPartitionId(PartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
 	}
 }

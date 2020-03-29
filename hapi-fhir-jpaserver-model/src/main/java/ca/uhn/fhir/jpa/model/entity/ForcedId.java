@@ -62,8 +62,9 @@ public class ForcedId {
 	@ColumnDefault("''")
 	@Column(name = "RESOURCE_TYPE", nullable = true, length = 100, updatable = true)
 	private String myResourceType;
+
 	@Embedded
-	private TenantId myTenantId;
+	private PartitionId myPartitionId;
 
 	/**
 	 * Constructor
@@ -96,11 +97,11 @@ public class ForcedId {
 		return myId;
 	}
 
-	public TenantId getTenantId() {
-		return myTenantId;
+	public PartitionId getPartitionId() {
+		return myPartitionId;
 	}
 
-	public void setTenantId(TenantId theTenantId) {
-		myTenantId = theTenantId;
+	public void setPartitionId(PartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
 	}
 }

@@ -242,7 +242,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 				return next;
 			}
 		}
-		ResourceTag tag = new ResourceTag(this, theTag);
+		ResourceTag tag = new ResourceTag(this, theTag, getPartitionId());
 		getTags().add(tag);
 		return tag;
 	}
@@ -556,7 +556,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		retVal.setDeleted(getDeleted());
 		retVal.setResourceTable(this);
 		retVal.setForcedId(getForcedId());
-		retVal.setTenantId(getTenantId());
+		retVal.setPartitionId(getPartitionId());
 
 		retVal.getTags().clear();
 

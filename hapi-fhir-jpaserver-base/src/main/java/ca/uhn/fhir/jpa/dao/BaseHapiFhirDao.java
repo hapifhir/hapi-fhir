@@ -219,7 +219,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				retVal.setResourceType(theEntity.getResourceType());
 				retVal.setForcedId(theId.getIdPart());
 				retVal.setResource(theEntity);
-				retVal.setTenantId(theEntity.getTenantId());
+				retVal.setPartitionId(theEntity.getPartitionId());
 				theEntity.setForcedId(retVal);
 			}
 		}
@@ -1095,7 +1095,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				ResourceHistoryProvenanceEntity provenance = new ResourceHistoryProvenanceEntity();
 				provenance.setResourceHistoryTable(historyEntry);
 				provenance.setResourceTable(entity);
-				provenance.setTenantId(entity.getTenantId());
+				provenance.setPartitionId(entity.getPartitionId());
 				if (haveRequestId) {
 					provenance.setRequestId(left(requestId, Constants.REQUEST_ID_LENGTH));
 				}

@@ -191,7 +191,7 @@ public class DaoConfig {
 	/**
 	 * @since 5.0.0
 	 */
-	private boolean myMultiTenancyEnabled;
+	private boolean myPartitioningEnabled;
 
 	/**
 	 * Constructor
@@ -1944,21 +1944,21 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If enabled (default is <code>false</code>) the JPA server will support multitenant queries
+	 * If enabled (default is <code>false</code>) the JPA server will support data partitioning
 	 *
 	 * @since 5.0.0
 	 */
-	public void setMultiTenancyEnabled(boolean theMultiTenancyEnabled) {
-		myMultiTenancyEnabled = theMultiTenancyEnabled;
+	public void setPartitioningEnabled(boolean theMultiTenancyEnabled) {
+		myPartitioningEnabled = theMultiTenancyEnabled;
 	}
 
 	/**
-	 * If enabled (default is <code>false</code>) the JPA server will support multitenant queries
+	 * If enabled (default is <code>false</code>) the JPA server will support data partitioning
 	 *
 	 * @since 5.0.0
 	 */
-	public boolean isMultiTenancyEnabled() {
-		return myMultiTenancyEnabled;
+	public boolean isPartitioningEnabled() {
+		return myPartitioningEnabled;
 	}
 
     public enum StoreMetaSourceInformationEnum {
