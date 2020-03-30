@@ -170,7 +170,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	 * A simple matcher which allows us to check whether 2 resources (Patient/Practitioner) resolve to
 	 * the same person in the EmpiLink table.
 	 */
-	public Matcher<IBaseResource> isSamePersonAs(IBaseResource theBaseResource) {
+	public Matcher<IBaseResource> samePersonAs(IBaseResource theBaseResource) {
 		return new TypeSafeMatcher<IBaseResource>() {
 			@Override
 			protected boolean matchesSafely(IBaseResource theIncomingResource) {

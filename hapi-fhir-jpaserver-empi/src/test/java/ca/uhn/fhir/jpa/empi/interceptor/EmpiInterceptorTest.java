@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.util.EmpiHelper;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Reference;
@@ -45,8 +44,8 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 		patient.setId(patientId);
 
 		//Just a small sanity check for this custom matcher
-		assertThat(patient, isSamePersonAs(patient));
-		
+		assertThat(patient, samePersonAs(patient));
+
 		//With no links is fine
 		Person person = new Person();
 		DaoMethodOutcome daoMethodOutcome = myEmpiHelper.doCreatePerson(person, true);

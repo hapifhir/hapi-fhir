@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -42,11 +43,11 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testAddPatientLinksToNewPersonIfNoMatch() {
-		createPatientAndUpdateLinks(buildJanePatient());
-		createPatientAndUpdateLinks(buildPaulPatient());
+		Patient patient1 = createPatientAndUpdateLinks(buildJanePatient());
+		Patient patient2 = createPatientAndUpdateLinks(buildPaulPatient());
 
 		assertLinkCount(2);
-		assertDifferentPerson();
+		assertThat(patient1, is(not(samePersonAs(patient2))));
 	}
 
 	@Test
@@ -100,20 +101,11 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		}
 	}
 
-	private void createPatientAndUpdateLinks(Patient thePatient) {
-		myPatientDao.create(thePatient);
+	private Patient createPatientAndUpdateLinks(Patient thePatient) {
+		DaoMethodOutcome daoMethodOutcome = myPatientDao.create(thePatient);
+		thePatient.setId(daoMethodOutcome.getId());
 		myEmpiMatchLinkSvc.updateEmpiLinksForPatient(thePatient);
+		return thePatient;
 	}
-
-	private void assertDifferentPerson() {
-		List<EmpiLink> links = myEmpiLinkDao.findAll();
-		assertNotEquals(links.get(0).getPersonPid(), links.get(1).getPersonPid());
-	}
-
-	private void assertSamePerson() {
-		List<EmpiLink> links = myEmpiLinkDao.findAll();
-		assertEquals(links.get(0).getPersonPid(), links.get(1).getPersonPid());
-	}
-
 
 }
