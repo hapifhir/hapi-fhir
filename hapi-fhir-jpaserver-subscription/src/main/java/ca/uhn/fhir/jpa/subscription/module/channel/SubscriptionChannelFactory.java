@@ -30,12 +30,14 @@ public class SubscriptionChannelFactory {
 
 	@Autowired
 	private ISubscribableChannelFactory mySubscribableChannelFactory;
+	@Autowired
+	private SubscriptionConsumerConfig mySubscriptionConsumerConfig;
 
 	public SubscribableChannel newDeliveryChannel(String theChannelName) {
-		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName, ResourceDeliveryMessage.class, mySubscribableChannelFactory.getDeliveryChannelConcurrentConsumers());
+		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName, ResourceDeliveryMessage.class, mySubscriptionConsumerConfig.getDeliveryChannelConcurrentConsumers());
 	}
 
 	public SubscribableChannel newMatchingChannel(String theChannelName) {
-		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName, ResourceModifiedMessage.class, mySubscribableChannelFactory.getMatchingChannelConcurrentConsumers());
+		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName, ResourceModifiedMessage.class, mySubscriptionConsumerConfig.getMatchingChannelConcurrentConsumers());
 	}
 }

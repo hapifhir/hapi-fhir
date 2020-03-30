@@ -31,14 +31,4 @@ public class LinkedBlockingQueueSubscribableChannelFactory implements ISubscriba
 	public SubscribableChannel createSubscribableChannel(String theChannelName, Class theMessageType, int theConcurrentConsumers) {
 		return new LinkedBlockingQueueSubscribableChannel(new LinkedBlockingQueue<>(SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE), theChannelName + "-%d", theConcurrentConsumers);
 	}
-
-	@Override
-	public int getDeliveryChannelConcurrentConsumers() {
-		return SubscriptionConstants.DELIVERY_CHANNEL_CONCURRENT_CONSUMERS;
-	}
-
-	@Override
-	public int getMatchingChannelConcurrentConsumers() {
-		return SubscriptionConstants.MATCHING_CHANNEL_CONCURRENT_CONSUMERS;
-	}
 }

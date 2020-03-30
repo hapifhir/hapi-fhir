@@ -24,9 +24,4 @@ import org.springframework.messaging.SubscribableChannel;
 
 public interface ISubscribableChannelFactory {
 	SubscribableChannel createSubscribableChannel(String theChannelName, Class theMessageType, int theConcurrentConsumers);
-
-	// FIXME EMPI move these to a subscription specific interface
-	int getDeliveryChannelConcurrentConsumers();
-
-	int getMatchingChannelConcurrentConsumers();
 }
