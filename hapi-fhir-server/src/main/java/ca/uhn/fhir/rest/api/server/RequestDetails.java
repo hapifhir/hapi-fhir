@@ -462,6 +462,15 @@ public abstract class RequestDetails {
 		if (myRequestContents == null) {
 			myRequestContents = getByteStreamRequestContents();
 		}
+		return getRequestContentsIfLoaded();
+	}
+
+	/**
+	 * Returns the request contents if they were loaded, returns <code>null</code> otherwise
+	 *
+	 * @see #loadRequestContents()
+	 */
+	public byte[] getRequestContentsIfLoaded() {
 		return myRequestContents;
 	}
 
