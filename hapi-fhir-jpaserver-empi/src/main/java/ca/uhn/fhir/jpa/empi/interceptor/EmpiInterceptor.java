@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 public class EmpiInterceptor extends BaseResourceModifiedInterceptor implements IEmpiInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiInterceptor.class);
 
-	private static final String EMPI_MATCHING_CHANNEL_NAME = "empi-matching";
+	public static final String EMPI_MATCHING_CHANNEL_NAME = "empi-matching";
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 	@Autowired
