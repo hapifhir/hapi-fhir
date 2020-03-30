@@ -40,9 +40,13 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 	@Test
 	public void testCreateUpdatePersonWithLinkForbiddenWhenEmpiEnabled() throws InterruptedException {
 		// When EMPI is enabled, only the EMPI system is allowed to modify Person links
-		//IdType patientId = createPatient(new Patient()).getIdElement().toUnqualifiedVersionless();
+		Patient patient = new Patient();
 		IIdType patientId = myEmpiHelper.createWithLatch(new Patient()).getId().toUnqualifiedVersionless();
+		patient.setId(patientId);
 
+		//Just a small sanity check for this custom matcher
+		assertThat(patient, isSamePersonAs(patient));
+		
 		//With no links is fine
 		Person person = new Person();
 		DaoMethodOutcome daoMethodOutcome = myEmpiHelper.doCreatePerson(person, true);

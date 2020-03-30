@@ -5,17 +5,28 @@ import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Test;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 
 import java.util.List;
+import java.util.Objects;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
+	private static final Logger ourLog = getLogger(EmpiMatchLinkSvcTest.class);
+
 	@Autowired
 	private EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired
@@ -103,4 +114,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		List<EmpiLink> links = myEmpiLinkDao.findAll();
 		assertEquals(links.get(0).getPersonPid(), links.get(1).getPersonPid());
 	}
+
+
 }

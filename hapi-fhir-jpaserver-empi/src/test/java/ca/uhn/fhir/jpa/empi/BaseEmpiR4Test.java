@@ -6,8 +6,13 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.empi.config.EmpiConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfig;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
+import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
@@ -15,11 +20,13 @@ import org.junit.After;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Nonnull;
 import java.util.Date;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -138,4 +145,54 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected void assertLinkCount(long theExpectedCount) {
 		assertEquals(theExpectedCount, myEmpiLinkDao.count());
 	}
+
+
+	/**
+	 * A Matcher which allows us to check that a target patient/practitioner
+	 * is linked to a set of patients/practitioners via a person.
+	 */
+	public Matcher<IBaseResource> isLinkedTo(IBaseResource... theBaseResource) {
+		return new TypeSafeMatcher<IBaseResource>() {
+			@Override
+			protected boolean matchesSafely(IBaseResource theBaseResource) {
+				return false;
+				//FIXME GGG
+			}
+
+			@Override
+			public void describeTo(Description theDescription) {
+				//FIXME GGG
+			}
+		};
+	}
+
+	/**
+	 * A simple matcher which allows us to check whether 2 resources (Patient/Practitioner) resolve to
+	 * the same person in the EmpiLink table.
+	 */
+	public Matcher<IBaseResource> isSamePersonAs(IBaseResource theBaseResource) {
+		return new TypeSafeMatcher<IBaseResource>() {
+			@Override
+			protected boolean matchesSafely(IBaseResource theIncomingResource) {
+				Long personPid = getEmpiLink(theIncomingResource).getPersonPid();
+				Long personPid1 = getEmpiLink(theBaseResource).getPersonPid();
+
+				return personPid.equals(personPid1);
+
+			}
+			private EmpiLink getEmpiLink(IBaseResource thePatientOrPractitionerResource) {
+				EmpiLink candidate = new EmpiLink();
+				candidate.setTargetPid(thePatientOrPractitionerResource.getIdElement().getIdPartAsLong());
+				Example<EmpiLink> example = Example.of(candidate);
+				return myEmpiLinkDao.findOne(example)
+					.orElseThrow(() -> new IllegalStateException("We didn't find a Person for resource with pid: " + thePatientOrPractitionerResource.getIdElement()));
+			}
+
+			@Override
+			public void describeTo(Description theDescription) {
+				//FIXME GGG
+			}
+		};
+	}
+
 }
