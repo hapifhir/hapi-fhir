@@ -2480,6 +2480,7 @@
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jpaserver-empi</module>
+				<module>hapi-fhir-jpaserver-empi-test</module>
 				<module>hapi-fhir-jpaserver-migrate</module>
 				<module>hapi-fhir-empi</module>
 				<module>restful-server-example</module>

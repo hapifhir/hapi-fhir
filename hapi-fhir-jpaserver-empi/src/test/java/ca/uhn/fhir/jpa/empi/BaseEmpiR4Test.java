@@ -4,7 +4,7 @@ import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.empi.config.EmpiConfig;
-import ca.uhn.fhir.jpa.empi.config.TestEmpiConfig;
+import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -26,13 +26,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Nonnull;
 import java.util.Date;
-import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {EmpiConfig.class, TestEmpiConfig.class})
+@ContextConfiguration(classes = {EmpiConfig.class, TestEmpiConfigR4.class})
 abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = getLogger(BaseEmpiR4Test.class);
 
