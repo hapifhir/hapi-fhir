@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -70,22 +71,24 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 	public Predicate addPredicate(String theResourceName,
 											String theParamName,
 											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation operation) {
+											SearchFilterParser.CompareOperation theOperation,
+											PartitionId thePartitionId) {
 
 		if (theList.get(0).getMissing() != null) {
 			Join<ResourceTable, ResourceIndexedSearchParamToken> join = createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);
-			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
+			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
 			return null;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
+
 		List<IQueryParameterType> tokens = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
 
 			if (nextOr instanceof TokenParam) {
 				TokenParam id = (TokenParam) nextOr;
 				if (id.isText()) {
-					myPredicateBuilder.addPredicateString(theResourceName, theParamName, theList);
+					myPredicateBuilder.addPredicateString(theResourceName, theParamName, theList, thePartitionId);
 					break;
 				}
 			}
@@ -98,7 +101,9 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 		}
 
 		Join<ResourceTable, ResourceIndexedSearchParamToken> join = createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);
-		Collection<Predicate> singleCode = createPredicateToken(tokens, theResourceName, theParamName, myCriteriaBuilder, join, operation);
+		addPartitionIdPredicate(thePartitionId, join, codePredicates);
+
+		Collection<Predicate> singleCode = createPredicateToken(tokens, theResourceName, theParamName, myCriteriaBuilder, join, theOperation);
 		assert singleCode != null;
 		codePredicates.addAll(singleCode);
 

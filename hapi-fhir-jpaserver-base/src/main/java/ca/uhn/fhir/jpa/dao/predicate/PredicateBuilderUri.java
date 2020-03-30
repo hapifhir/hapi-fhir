@@ -67,10 +67,7 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
-		if (thePartitionId != null) {
-			Predicate partitionPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createLeftMatchLikeExpression(value));
-			codePredicates.add(partitionPredicate);
-		}
+		addPartitionIdPredicate(thePartitionId, join, codePredicates);
 
 		for (IQueryParameterType nextOr : theList) {
 
@@ -185,4 +182,5 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 		myQueryRoot.addPredicate(outerPredicate);
 		return outerPredicate;
 	}
+
 }

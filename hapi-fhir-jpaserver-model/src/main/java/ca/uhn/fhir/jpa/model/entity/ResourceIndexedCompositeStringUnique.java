@@ -50,6 +50,12 @@ public class ResourceIndexedCompositeStringUnique implements Comparable<Resource
 	private String myIndexString;
 	@Embedded
 	private PartitionId myPartitionId;
+	/**
+	 * This is here to support queries only, do not set this field directly
+	 */
+	@SuppressWarnings("unused")
+	@Column(name = PartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
+	private Integer myPartitionIdValue;
 
 	/**
 	 * Constructor

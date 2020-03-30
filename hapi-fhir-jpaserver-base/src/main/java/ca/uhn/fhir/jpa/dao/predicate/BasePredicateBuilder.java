@@ -24,9 +24,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -201,6 +203,14 @@ abstract class BasePredicateBuilder {
 			return num;
 		}
 		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, num);
+	}
+
+	void addPartitionIdPredicate(PartitionId thePartitionId, Join<ResourceTable, ? extends BaseResourceIndex> theJoin, List<Predicate> theCodePredicates) {
+		if (thePartitionId != null) {
+			Integer partitionId = thePartitionId.getPartitionId();
+			Predicate partitionPredicate = myCriteriaBuilder.equal(theJoin.get("myPartitionIdValue").as(Integer.class), partitionId);
+			myQueryRoot.addPredicate(partitionPredicate);
+		}
 	}
 
 	static String createLeftAndRightMatchLikeExpression(String likeExpression) {

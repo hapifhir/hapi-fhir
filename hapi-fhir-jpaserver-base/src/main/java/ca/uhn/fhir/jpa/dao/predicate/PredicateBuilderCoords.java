@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  */
 
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.CoordCalculator;
@@ -147,15 +148,18 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 	public Predicate addPredicate(String theResourceName,
 											String theParamName,
 											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation theOperation) {
+											SearchFilterParser.CompareOperation theOperation,
+											PartitionId thePartitionId) {
 		Join<ResourceTable, ResourceIndexedSearchParamCoords> join = createJoin(SearchBuilderJoinEnum.COORDS, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
+			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
 			return null;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		List<Predicate> codePredicates = new ArrayList<>();
+		addPartitionIdPredicate(thePartitionId, join, codePredicates);
+
 		for (IQueryParameterType nextOr : theList) {
 
 			Predicate singleCode = createPredicateCoords(nextOr,

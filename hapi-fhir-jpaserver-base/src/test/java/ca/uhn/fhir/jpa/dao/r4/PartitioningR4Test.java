@@ -8,6 +8,8 @@ import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
@@ -379,6 +381,107 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 	}
 
+	@Test
+	public void testSearch_StringParam_SearchAllTenants() {
+		IIdType patientIdNull = createPatient(null, withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
+		IIdType patientId2 = createPatient(2, withFamily("FAMILY"));
+
+		addReadTenant(null);
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_FAMILY, new StringParam("FAMILY"));
+		map.setLoadSynchronous(true);
+		IBundleProvider results = myPatientDao.search(map);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+		assertThat(ids, Matchers.contains(patientIdNull, patientId1, patientId2));
+
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		ourLog.info("Search SQL:\n{}", searchSql);
+		assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_NORMALIZED"));
+	}
+
+	@Test
+	public void testSearch_StringParam_SearchOneTenant() {
+		createPatient(null, withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
+		createPatient(2, withFamily("FAMILY"));
+
+		addReadTenant(1);
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_FAMILY, new StringParam("FAMILY"));
+		map.setLoadSynchronous(true);
+		IBundleProvider results = myPatientDao.search(map);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, Matchers.contains(patientId1));
+
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		ourLog.info("Search SQL:\n{}", searchSql);
+		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_NORMALIZED"));
+	}
+
+	@Test
+	public void testSearch_UniqueParam_SearchAllTenants() {
+		createUniqueCompositeSp();
+
+		IIdType id = createPatient(1, withBirthdate("2020-01-01"));
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-01-01"));
+		map.setLoadSynchronous(true);
+		IBundleProvider results = myPatientDao.search(map);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, Matchers.contains(id));
+
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		ourLog.info("Search SQL:\n{}", searchSql);
+		assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+		assertEquals(1, StringUtils.countMatches(searchSql, "IDX_STRING='Patient?birthdate=2020-01-01'"));
+	}
+
+
+	@Test
+	public void testSearch_UniqueParam_SearchOneTenant() {
+		createUniqueCompositeSp();
+
+		IIdType id = createPatient(1, withBirthdate("2020-01-01"));
+
+		addReadTenant(1);
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-01-01"));
+		map.setLoadSynchronous(true);
+		IBundleProvider results = myPatientDao.search(map);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, Matchers.contains(id));
+
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		ourLog.info("Search SQL:\n{}", searchSql);
+		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+		assertEquals(1, StringUtils.countMatches(searchSql, "IDX_STRING='Patient?birthdate=2020-01-01'"));
+
+		// Same query, different partition
+		addReadTenant(2);
+		myCaptureQueriesListener.clear();
+		map = new SearchParameterMap();
+		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-01-01"));
+		map.setLoadSynchronous(true);
+		results = myPatientDao.search(map);
+		ids = toUnqualifiedVersionlessIds(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, Matchers.empty());
+
+	}
+
 	private void createUniqueCompositeSp() {
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-birthdate");
@@ -445,6 +548,14 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	private Consumer<Patient> withActiveTrue() {
 		return t -> t.setActive(true);
+	}
+
+	private Consumer<Patient> withFamily(String theFamily) {
+		return t -> t.addName().setFamily(theFamily);
+	}
+
+	private Consumer<Patient> withBirthdate(String theBirthdate) {
+		return t -> t.getBirthDateElement().setValueAsString(theBirthdate);
 	}
 
 	private Consumer<Patient> withId(String theId) {

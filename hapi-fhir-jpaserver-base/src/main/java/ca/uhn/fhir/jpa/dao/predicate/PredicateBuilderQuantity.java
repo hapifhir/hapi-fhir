@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
 
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -51,16 +52,19 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 	public Predicate addPredicate(String theResourceName,
 											String theParamName,
 											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation operation) {
+											SearchFilterParser.CompareOperation theOperation,
+											PartitionId thePartitionId) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamQuantity> join = createJoin(SearchBuilderJoinEnum.QUANTITY, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
+			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
 			return null;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		addPartitionIdPredicate(thePartitionId, join, codePredicates);
+
 		for (IQueryParameterType nextOr : theList) {
 
 			Predicate singleCode = createPredicateQuantity(nextOr,
@@ -68,7 +72,7 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 				theParamName,
                     myCriteriaBuilder,
 				join,
-				operation);
+				theOperation);
 			codePredicates.add(singleCode);
 		}
 

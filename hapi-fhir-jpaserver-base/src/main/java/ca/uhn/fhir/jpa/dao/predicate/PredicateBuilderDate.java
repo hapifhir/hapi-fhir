@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  */
 
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -58,7 +59,8 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 	public Predicate addPredicate(String theResourceName,
 											String theParamName,
 											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation operation) {
+											SearchFilterParser.CompareOperation operation,
+											PartitionId thePartitionId) {
 
 		boolean newJoin = false;
 		if (myJoinMap == null) {
@@ -75,11 +77,13 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 		if (theList.get(0).getMissing() != null) {
 			Boolean missing = theList.get(0).getMissing();
-			addPredicateParamMissing(theResourceName, theParamName, missing, join);
+			addPredicateParamMissing(theResourceName, theParamName, missing, join, thePartitionId);
 			return null;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
+		addPartitionIdPredicate(thePartitionId, join, codePredicates);
+
 		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType params = nextOr;
 			Predicate p = createPredicateDate(params,

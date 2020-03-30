@@ -871,7 +871,7 @@ public class SearchBuilder implements ISearchBuilder {
 					.add(StorageProcessingMessage.class, msg);
 				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
 
-				addPredicateCompositeStringUnique(theParams, indexString);
+				addPredicateCompositeStringUnique(theParams, indexString, myPartitionId);
 			}
 		}
 	}
@@ -886,9 +886,16 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private void addPredicateCompositeStringUnique(@Nonnull SearchParameterMap theParams, String theIndexedString) {
-		myQueryRoot.setHasIndexJoins(true);
+	private void addPredicateCompositeStringUnique(@Nonnull SearchParameterMap theParams, String theIndexedString, PartitionId thePartitionId) {
 		Join<ResourceTable, ResourceIndexedCompositeStringUnique> join = myQueryRoot.join("myParamsCompositeStringUnique", JoinType.LEFT);
+
+		if (thePartitionId != null) {
+			Integer partitionId = thePartitionId.getPartitionId();
+			Predicate predicate = myCriteriaBuilder.equal(join.get("myPartitionIdValue").as(Integer.class), partitionId);
+			myQueryRoot.addPredicate(predicate);
+		}
+
+		myQueryRoot.setHasIndexJoins(true);
 		Predicate predicate = myCriteriaBuilder.equal(join.get("myIndexString"), theIndexedString);
 		myQueryRoot.addPredicate(predicate);
 

@@ -43,6 +43,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+// FIXME: add partition
 @Component
 @Scope("prototype")
 class PredicateBuilderTag extends BasePredicateBuilder {
