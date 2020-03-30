@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.subscription.dbmatcher.CompositeInMemoryDaoSubscriptionMa
 import ca.uhn.fhir.jpa.subscription.dbmatcher.DaoSubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionConsumerConfig;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
@@ -210,6 +211,11 @@ public abstract class BaseConfig {
 	@Bean
 	public ISubscribableChannelFactory subscribableChannelFactory() {
 		return new LinkedBlockingQueueSubscribableChannelFactory();
+	}
+
+	@Bean
+	public SubscriptionConsumerConfig subscriptionConsumerConfig() {
+		return new SubscriptionConsumerConfig();
 	}
 
 	@Bean
