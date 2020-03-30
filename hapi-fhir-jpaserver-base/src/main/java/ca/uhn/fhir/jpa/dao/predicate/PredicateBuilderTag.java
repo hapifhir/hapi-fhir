@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  */
 
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -38,12 +39,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-// FIXME: add partition
 @Component
 @Scope("prototype")
 class PredicateBuilderTag extends BasePredicateBuilder {
@@ -53,7 +60,7 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 		super(theSearchBuilder);
 	}
 
-	void addPredicateTag(List<List<IQueryParameterType>> theList, String theParamName) {
+	void addPredicateTag(List<List<IQueryParameterType>> theList, String theParamName, PartitionId thePartitionId) {
 		TagTypeEnum tagType;
 		if (Constants.PARAM_TAG.equals(theParamName)) {
 			tagType = TagTypeEnum.TAG;
@@ -127,6 +134,8 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 				continue;
 			}
 
+			// FIXME: add test for tag:not
+			// FIXME: add test for :missing
 			if (paramInverted) {
 				ourLog.debug("Searching for _tag:not");
 
@@ -158,7 +167,13 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 			From<ResourceTag, TagDefinition> defJoin = tagJoin.join("myTag");
 
 			Predicate tagListPredicate = createPredicateTagList(defJoin, myCriteriaBuilder, tagType, tokens);
-			myQueryRoot.addPredicate(tagListPredicate);
+			List<Predicate> predicates = Lists.newArrayList(tagListPredicate);
+
+			if (thePartitionId != null) {
+				addPartitionIdPredicate(thePartitionId, tagJoin, predicates);
+			}
+
+			myQueryRoot.addPredicates(predicates);
 
 		}
 

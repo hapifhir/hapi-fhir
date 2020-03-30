@@ -79,8 +79,8 @@ public class PredicateBuilder {
 		return myPredicateBuilderString.addPredicate(theResourceName, theParamName, theNextAnd, theOperation, thePartitionId);
 	}
 
-	void addPredicateTag(List<List<IQueryParameterType>> theAndOrParams, String theParamName) {
-		myPredicateBuilderTag.addPredicateTag(theAndOrParams, theParamName);
+	void addPredicateTag(List<List<IQueryParameterType>> theAndOrParams, String theParamName, PartitionId thePartitionId) {
+		myPredicateBuilderTag.addPredicateTag(theAndOrParams, theParamName, thePartitionId);
 	}
 
 	Predicate addPredicateToken(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation, PartitionId thePartitionId) {

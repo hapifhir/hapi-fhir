@@ -525,7 +525,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			case Constants.PARAM_TAG:
 			case Constants.PARAM_PROFILE:
 			case Constants.PARAM_SECURITY:
-				myPredicateBuilder.addPredicateTag(theAndOrParams, theParamName);
+				myPredicateBuilder.addPredicateTag(theAndOrParams, theParamName, thePartitionId);
 				break;
 
 			case Constants.PARAM_SOURCE:

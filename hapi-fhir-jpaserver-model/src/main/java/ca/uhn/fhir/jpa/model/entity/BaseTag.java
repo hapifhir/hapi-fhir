@@ -28,7 +28,7 @@ import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
 @MappedSuperclass
-public class BaseTag implements Serializable {
+public class BaseTag extends BasePartitionable implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -38,9 +38,6 @@ public class BaseTag implements Serializable {
 
 	@Column(name = "TAG_ID", insertable = false, updatable = false)
 	private Long myTagId;
-
-	@Embedded
-	private PartitionId myPartitionId;
 
 	public Long getTagId() {
 		return myTagId;
@@ -52,14 +49,6 @@ public class BaseTag implements Serializable {
 
 	public void setTag(TagDefinition theTag) {
 		myTag = theTag;
-	}
-
-	public PartitionId getPartitionId() {
-		return myPartitionId;
-	}
-
-	public void setPartitionId(PartitionId thePartitionId) {
-		myPartitionId = thePartitionId;
 	}
 
 }
