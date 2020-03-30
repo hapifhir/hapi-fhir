@@ -4,18 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.IEmpiInterceptor;
-import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
 import org.junit.rules.ExternalResource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -38,16 +33,11 @@ import static org.mockito.Mockito.when;
  * Note: all create/update functions take an optional isExternalHttpRequest boolean, to make it appear as though the request's
  * origin is an HTTP request.
  */
-@Component
-public class EmpiHelper extends ExternalResource {
+public abstract class BaseEmpiHelper extends ExternalResource {
 	@Autowired
 	private IInterceptorService myInterceptorService;
 	@Autowired
 	private IEmpiInterceptor myEmpiInterceptor;
-	@Autowired
-	protected IFhirResourceDao<Patient> myPatientDao;
-	@Autowired
-	protected IFhirResourceDao<Person> myPersonDao;
 	@Mock
 	protected ServletRequestDetails myMockSrd;
 	@Mock
@@ -57,7 +47,7 @@ public class EmpiHelper extends ExternalResource {
 	@Mock
 	protected FhirContext myMockFhirContext;
 
-	private PointcutLatch myAfterEmpiLatch = new PointcutLatch(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED);
+	protected PointcutLatch myAfterEmpiLatch = new PointcutLatch(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED);
 
 	@Override
 	protected void before() throws Throwable {
@@ -81,50 +71,4 @@ public class EmpiHelper extends ExternalResource {
 		myInterceptorService.unregisterAllInterceptors();
 		myAfterEmpiLatch.clear();
 	}
-
-	public DaoMethodOutcome createWithLatch(Patient thePatient, boolean isExternalHttpRequest) throws InterruptedException {
-		myAfterEmpiLatch.setExpectedCount(1);
-		DaoMethodOutcome daoMethodOutcome = doCreatePatient(thePatient, isExternalHttpRequest);
-		myAfterEmpiLatch.awaitExpected();
-		return daoMethodOutcome;
-	}
-
-	public DaoMethodOutcome createWithLatch(Patient thePatient) throws InterruptedException {
-		return createWithLatch(thePatient, true);
-	}
-
-	public DaoMethodOutcome createWithLatch(Person thePerson, boolean isExternalHttpRequest) throws InterruptedException {
-		myAfterEmpiLatch.setExpectedCount(1);
-		DaoMethodOutcome daoMethodOutcome = doCreatePerson(thePerson, isExternalHttpRequest);
-		myAfterEmpiLatch.awaitExpected();
-		return daoMethodOutcome;
-	}
-
-	public DaoMethodOutcome createWithLatch(Person thePerson) throws InterruptedException {
-		return createWithLatch(thePerson, true);
-	}
-
-	public DaoMethodOutcome updateWithLatch(Person thePerson) throws InterruptedException {
-		return updateWithLatch(thePerson, true);
-	}
-	public DaoMethodOutcome updateWithLatch(Person thePerson, boolean isExternalHttpRequest) throws InterruptedException {
-		myAfterEmpiLatch.setExpectedCount(1);
-		DaoMethodOutcome daoMethodOutcome =  doUpdatePerson(thePerson, isExternalHttpRequest);
-		myAfterEmpiLatch.awaitExpected();
-		return daoMethodOutcome;
-	}
-	public DaoMethodOutcome doCreatePatient(Patient thePatient, boolean isExternalHttpRequest) {
-		return isExternalHttpRequest ? myPatientDao.create(thePatient, myMockSrd): myPatientDao.create(thePatient);
-	}
-	public DaoMethodOutcome doUpdatePatient(Patient thePatient, boolean isExternalHttpRequest) {
-		return isExternalHttpRequest ? myPatientDao.update(thePatient, myMockSrd): myPatientDao.update(thePatient);
-	}
-
-	public DaoMethodOutcome doCreatePerson(Person thePerson, boolean isExternalHttpRequest) {
-		return isExternalHttpRequest ? myPersonDao.create(thePerson, myMockSrd): myPersonDao.create(thePerson);
-	}
-	public DaoMethodOutcome doUpdatePerson(Person thePerson, boolean isExternalHttpRequest) {
-		return isExternalHttpRequest ? myPersonDao.update(thePerson, myMockSrd): myPersonDao.update(thePerson);
-	}
-
 }
