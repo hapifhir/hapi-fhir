@@ -149,6 +149,8 @@ public class Constants {
 	 */
 	public static final String PARAM_BUNDLETYPE = "_bundletype";
 	public static final String PARAM_FILTER = "_filter";
+	public static final String PARAM_CONTAINED = "_contained";
+	public static final String PARAM_CONTAINED_TYPE = "_containedType";
 	public static final String PARAM_CONTENT = "_content";
 	public static final String PARAM_COUNT = "_count";
 	public static final String PARAM_DELETE = "_delete";
