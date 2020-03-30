@@ -1,41 +1,44 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service
-public class EmpiResourceDaoR4SvcImpl implements IEmpiResourceDaoSvc {
-	@Autowired
-	private IFhirResourceDao<Patient> myPatientDao;
-	@Autowired
-	private IFhirResourceDao<Person> myPersonDao;
-	@Autowired
-	private IFhirResourceDao<Practitioner> myPractitionerDao;
+import javax.annotation.PostConstruct;
 
-	@Override
+@Service
+public class EmpiResourceDaoSvc {
+	@Autowired
+	DaoRegistry myDaoRegistry;
+
+	private IFhirResourceDao myPatientDao;
+	private IFhirResourceDao myPersonDao;
+	private IFhirResourceDao myPractitionerDao;
+
+	@PostConstruct
+	public void postConstruct() {
+		myPatientDao = myDaoRegistry.getResourceDao("Patient");
+		myPersonDao = myDaoRegistry.getResourceDao("Person");
+		myPractitionerDao = myDaoRegistry.getResourceDao("Practitioner");
+	}
+
 	public IBaseResource readPatient(IIdType theId) {
 		return myPatientDao.read(theId);
 	}
 
-	@Override
 	public IBaseResource readPerson(IIdType theId) {
 		return myPersonDao.read(theId);
 	}
 
-	@Override
 	public IBaseResource readPractitioner(IIdType theId) {
 		return myPractitionerDao.read(theId);
 	}
 
-	@Override
 	public DaoMethodOutcome updatePerson(IBaseResource thePerson) {
-		return myPersonDao.update((Person) thePerson);
+		return myPersonDao.update(thePerson);
 	}
 }

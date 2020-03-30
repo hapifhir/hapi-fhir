@@ -20,17 +20,14 @@ package ca.uhn.fhir.jpa.empi.svc;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
 import ca.uhn.fhir.jpa.api.MatchedTargetCandidate;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.util.PersonUtil;
-import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +38,7 @@ import java.util.List;
 public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
 	@Autowired
-	private IEmpiResourceDaoSvc myEmpiResourceDaoSvc;
+	private EmpiResourceDaoSvc myEmpiResourceDaoSvc;
 	@Autowired
 	private EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 	@Autowired
