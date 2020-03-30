@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.empi.util;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.IEmpiInterceptor;
@@ -42,15 +41,13 @@ import static org.mockito.Mockito.when;
 @Component
 public class EmpiHelper extends ExternalResource {
 	@Autowired
-	private IInterceptorService myIInterceptorService;
+	private IInterceptorService myInterceptorService;
 	@Autowired
 	private IEmpiInterceptor myEmpiInterceptor;
 	@Autowired
 	protected IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
 	protected IFhirResourceDao<Person> myPersonDao;
-	@Mock
-	protected IInterceptorBroadcaster myMockInterceptorService;
 	@Mock
 	protected ServletRequestDetails myMockSrd;
 	@Mock
@@ -68,20 +65,20 @@ public class EmpiHelper extends ExternalResource {
 		//This sets up mock servlet request details, which allows our DAO requests to appear as though
 		//they are coming from an external HTTP Request.
 		MockitoAnnotations.initMocks(this);
-		when(myMockSrd.getInterceptorBroadcaster()).thenReturn(myMockInterceptorService);
+		when(myMockSrd.getInterceptorBroadcaster()).thenReturn(myInterceptorService);
 		when(myMockSrd.getServletRequest()).thenReturn(myMockServletRequest);
 		when(myMockSrd.getServer()).thenReturn(myMockRestfulServer);
 		when(myMockRestfulServer.getFhirContext()).thenReturn(myMockFhirContext);
 
 		//This sets up our basic interceptor, and also attached the latch so we can await the hook calls.
 		myEmpiInterceptor.start();
-		myIInterceptorService.registerInterceptor(myEmpiInterceptor);
-		myIInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, myAfterEmpiLatch);
+		myInterceptorService.registerInterceptor(myEmpiInterceptor);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, myAfterEmpiLatch);
 	}
 
 	@Override
 	protected void after() {
-		myIInterceptorService.unregisterAllInterceptors();
+		myInterceptorService.unregisterAllInterceptors();
 		myAfterEmpiLatch.clear();
 	}
 

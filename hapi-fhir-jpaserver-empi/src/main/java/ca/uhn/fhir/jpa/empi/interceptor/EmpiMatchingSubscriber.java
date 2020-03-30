@@ -36,7 +36,12 @@ public class EmpiMatchingSubscriber implements MessageHandler {
 		}
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
-		matchEmpiAndUpdateLinks(msg);
+		try {
+			matchEmpiAndUpdateLinks(msg);
+		} catch (Exception e) {
+			ourLog.error("Failed to handle EMPI Matching Resource:", e);
+			throw e;
+		}
 	}
 
 	public void matchEmpiAndUpdateLinks(ResourceModifiedMessage theMsg) {
