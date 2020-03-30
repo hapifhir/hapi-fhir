@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.util.EmpiHelper;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
@@ -39,15 +40,20 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 	@Test
 	public void testCreateUpdatePersonWithLinkForbiddenWhenEmpiEnabled() throws InterruptedException {
 		// When EMPI is enabled, only the EMPI system is allowed to modify Person links
-		IdType patientId = createPatient(new Patient()).getIdElement().toUnqualifiedVersionless();
+		Patient patient = new Patient();
+		IIdType patientId = myEmpiHelper.createWithLatch(new Patient()).getId().toUnqualifiedVersionless();
+		patient.setId(patientId);
 
+		//Just a small sanity check for this custom matcher
+		assertThat(patient, isSamePersonAs(patient));
+		
 		//With no links is fine
 		Person person = new Person();
-		DaoMethodOutcome daoMethodOutcome = myEmpiHelper.createWithLatch(person);
+		DaoMethodOutcome daoMethodOutcome = myEmpiHelper.doCreatePerson(person, true);
 		assertNotNull(daoMethodOutcome.getId());
 
 		//Creating a person with links should fail.
-		person.addLink().setTarget(new Reference(patientId));
+		person.addLink().setTarget(new Reference("123"));
 		try {
 			myEmpiHelper.doCreatePerson(person, true);
 			fail();
@@ -69,7 +75,7 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 		savedPerson.setId(daoMethodOutcome.getId().toUnqualifiedVersionless());
 		savedPerson.getNameFirstRep().setFamily("Graham");
 		savedPerson.getLink().clear();
-		DaoMethodOutcome daoMethodOutcome1 = myEmpiHelper.updateWithLatch(savedPerson);
+		DaoMethodOutcome daoMethodOutcome1 = myEmpiHelper.doUpdatePerson(savedPerson, true);
 		assertNotNull(daoMethodOutcome1.getId());
 	}
 

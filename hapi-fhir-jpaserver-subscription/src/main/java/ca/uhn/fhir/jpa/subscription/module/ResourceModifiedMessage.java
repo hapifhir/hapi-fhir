@@ -36,9 +36,6 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-// FIXME EMPI QUESTION now that this is used outside of Subscriptions, we should move it. Maybe to a `messaging` package?
-// KHS: Good call.  Leave the next FIXME in.
-
 // FIXME EMPI Now that this is used outside of Subscriptions, we should move it. Maybe to a `messaging` package? (see BaseResourceModifiedInterceptor)
 public class ResourceModifiedMessage extends BaseResourceMessage implements IResourceMessage, IModelJson {
 
