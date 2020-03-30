@@ -75,6 +75,8 @@ public class EmpiCandidateSearchSvc {
 
 			searchForIdsAndAddToMap(theResourceType, matchedPidsToResources, filterCriteria, resourceSearchParam, valuesFromResourceForSearchParam);
 		}
+		//Obviously we don't want to consider the freshly added resource as a potential candidate.
+		matchedPidsToResources.remove(myResourceTableHelper.getPidOrNull(theResource));
 
 		return matchedPidsToResources.values();
 	}

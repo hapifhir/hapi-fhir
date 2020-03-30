@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
 import ca.uhn.fhir.jpa.empi.util.PersonUtil;
+import ca.uhn.fhir.model.primitive.IdDt;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,20 +30,21 @@ public class EmpiMatchLinkSvc {
 
 	public void updateEmpiLinksForPatient(IBaseResource theResource) {
 
-		//This will either return:
-		//0 candidates, in which case you should create a person
-		//1 candidate, in which case you should use it
-		//multiple candidates, in which case they should all be tagged as POSSIBLE_MATCH. If one is already tagged as MATCH
 		List<MatchedPersonCandidate> personCandidates = myEmpiPersonFindingSvc.findPersonCandidates(theResource);
+
+		//0 candidates, in which case you should create a person
 		if (personCandidates.isEmpty()) {
 			IBaseResource newPerson = myPersonUtil.createPersonFromPatient(theResource);
 			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
+		//1 candidate, in which case you should use it
 		} else if (personCandidates.size() == 1) {
 			MatchedPersonCandidate matchedPersonCandidate = personCandidates.get(0);
-			IBaseResource person = myEmpiResourceDaoSvc.readPerson(matchedPersonCandidate.getCandidate().getIdDt());
+			IBaseResource person = myEmpiResourceDaoSvc.readPerson(new IdDt("Person/" +matchedPersonCandidate.getCandidatePersonPid().getIdAsLong()));
 			myEmpiLinkSvc.updateLink(person, theResource, matchedPersonCandidate.getEmpiLink().getMatchResult(), EmpiLinkSourceEnum.AUTO);
+		//multiple candidates, in which case they should all be tagged as POSSIBLE_MATCH. If one is already tagged as MATCH
+		} else {
+
 		}
-		//myEmpiLinkSvc.updateLinks(theResource, matchedCandidates, EmpiLinkSourceEnum.AUTO);
 
 	}
 }

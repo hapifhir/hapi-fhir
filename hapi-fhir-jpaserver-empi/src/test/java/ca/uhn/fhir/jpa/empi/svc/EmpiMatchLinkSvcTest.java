@@ -53,9 +53,11 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testAddPatientLinksToExistingPersonIfMatch() {
 		Patient patient1 = createPatientAndUpdateLinks(buildJanePatient());
-		Patient patient2 = createPatientAndUpdateLinks(buildJanePatient());
+		assertLinkCount(1);
 
+		Patient patient2 = createPatientAndUpdateLinks(buildJanePatient());
 		assertLinkCount(2);
+
 		assertThat(patient1, is(samePersonAs(patient2)));
 	}
 
