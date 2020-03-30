@@ -408,6 +408,44 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 	}
 
+
+	@Test
+	public void testValidateBundleContainingResourceContainingProfileDeclarationInvalid() {
+		String methodName = "testValidateResourceContainingProfileDeclarationInvalid";
+
+		Observation observation = new Observation();
+		String profileUri = "http://example.com/StructureDefinition/" + methodName;
+		observation.getMeta().getProfile().add(new CanonicalType(profileUri));
+		observation.addIdentifier().setSystem("http://acme").setValue("12345");
+		observation.getEncounter().setReference("http://foo.com/Encounter/9");
+		observation.setStatus(ObservationStatus.FINAL);
+		observation.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setResource(observation)
+			.setFullUrl("http://example.com/Observation")
+			.getRequest()
+			.setUrl("http://example.com/Observation")
+			.setMethod(Bundle.HTTPVerb.POST);
+
+		ValidationModeEnum mode = ValidationModeEnum.CREATE;
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+		ourLog.info(encoded);
+
+		try {
+			IBaseOperationOutcome oo = myBundleDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd).getOperationOutcome();
+			fail(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		} catch (PreconditionFailedException e) {
+			org.hl7.fhir.r4.model.OperationOutcome oo = (org.hl7.fhir.r4.model.OperationOutcome) e.getOperationOutcome();
+			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			ourLog.info(outputString);
+			assertThat(outputString, containsString("StructureDefinition reference \\\"http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid\\\" could not be resolved"));
+		}
+	}
+
+
 	@Test
 	public void testValidateWithCanonicalReference() {
 		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);

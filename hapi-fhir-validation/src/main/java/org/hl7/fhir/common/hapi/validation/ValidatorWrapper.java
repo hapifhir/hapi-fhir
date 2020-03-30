@@ -155,6 +155,9 @@ public class ValidatorWrapper {
 				i--;
 			}
 
+			if (message.startsWith("StructureDefinition reference \"") && message.endsWith("\" could not be resolved") && next.getLevel() == ValidationMessage.IssueSeverity.WARNING) {
+				next.setLevel(ValidationMessage.IssueSeverity.ERROR);
+			}
 			if (message.endsWith("' could not be resolved, so has not been checked") && next.getLevel() == ValidationMessage.IssueSeverity.WARNING) {
 				next.setLevel(ValidationMessage.IssueSeverity.ERROR);
 			}
