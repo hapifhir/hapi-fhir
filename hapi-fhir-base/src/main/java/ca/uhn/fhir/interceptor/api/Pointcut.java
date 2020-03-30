@@ -560,7 +560,7 @@ public enum Pointcut {
 	 * returns <code>false</code>, subscription processing will not proceed for the given resource;
 	 * </p>
 	 */
-	SUBSCRIPTION_RESOURCE_MODIFIED(boolean.class, "ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
+	SUBSCRIPTION_RESOURCE_MODIFIED(boolean.class, "ca.uhn.fhir.jpa.model.message.ResourceModifiedMessage"),
 
 
 	/**
@@ -593,14 +593,14 @@ public enum Pointcut {
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage - Hooks should not modify this parameter as changes will not have any effect.</li>
+	 * <li>ca.uhn.fhir.jpa.model.message.ResourceModifiedMessage - Hooks should not modify this parameter as changes will not have any effect.</li>
 	 * </ul>
 	 * </p>
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS(void.class, "ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
+	SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS(void.class, "ca.uhn.fhir.jpa.model.message.ResourceModifiedMessage"),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -712,7 +712,7 @@ public enum Pointcut {
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage - Hooks may modify this parameter. This will affect the checking process.</li>
+	 * <li>ca.uhn.fhir.jpa.model.message.ResourceModifiedMessage - Hooks may modify this parameter. This will affect the checking process.</li>
 	 * </ul>
 	 * </p>
 	 * <p>
@@ -721,7 +721,7 @@ public enum Pointcut {
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
-	SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED(boolean.class, "ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
+	SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED(boolean.class, "ca.uhn.fhir.jpa.model.message.ResourceModifiedMessage"),
 
 
 	/**
@@ -732,14 +732,14 @@ public enum Pointcut {
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage - This parameter should not be modified as processing is complete when this hook is invoked.</li>
+	 * <li>ca.uhn.fhir.jpa.model.message.ResourceModifiedMessage - This parameter should not be modified as processing is complete when this hook is invoked.</li>
 	 * </ul>
 	 * </p>
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
+	SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.jpa.model.message.ResourceModifiedMessage"),
 
 
 	/**
@@ -1328,14 +1328,14 @@ public enum Pointcut {
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage - This parameter should not be modified as processing is complete when this hook is invoked.</li>
+	 * <li>ca.uhn.fhir.jpa.model.message.ResourceModifiedMessage - This parameter should not be modified as processing is complete when this hook is invoked.</li>
 	 * </ul>
 	 * </p>
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	EMPI_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
+	EMPI_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.jpa.model.message.ResourceModifiedMessage"),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>

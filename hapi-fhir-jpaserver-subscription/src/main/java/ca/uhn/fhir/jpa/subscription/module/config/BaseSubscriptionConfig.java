@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.model.message.ISubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionConsumerConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -47,4 +48,7 @@ public abstract class BaseSubscriptionConfig {
 	public SubscriptionChannelFactory subscriptionChannelFactory() {
 		return new SubscriptionChannelFactory();
 	}
+
+	@Bean
+	public SubscriptionConsumerConfig subscriptionConsumerConfig() { return new SubscriptionConsumerConfig(); }
 }

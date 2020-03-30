@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.SubscribableChannel;
 
 public class SubscriptionChannelFactory {
-
 	@Autowired
 	private ISubscribableChannelFactory mySubscribableChannelFactory;
 	@Autowired
