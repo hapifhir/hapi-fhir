@@ -22,11 +22,11 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 
 	@Rule
 	@Autowired
-	public EmpiHelperR4 myEmpiHelperR4;
+	public EmpiHelperR4 myEmpiHelper;
 
 	@Test
 	public void testCreatePatient() throws InterruptedException {
-		myEmpiHelperR4.createWithLatch(new Patient());
+		myEmpiHelper.createWithLatch(new Patient());
 		assertLinkCount(1);
 	}
 
@@ -40,7 +40,7 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 	public void testCreateUpdatePersonWithLinkForbiddenWhenEmpiEnabled() throws InterruptedException {
 		// When EMPI is enabled, only the EMPI system is allowed to modify Person links
 		Patient patient = new Patient();
-		IIdType patientId = myEmpiHelperR4.createWithLatch(new Patient()).getId().toUnqualifiedVersionless();
+		IIdType patientId = myEmpiHelper.createWithLatch(new Patient()).getId().toUnqualifiedVersionless();
 		patient.setId(patientId);
 
 		//Just a small sanity check for this custom matcher
@@ -48,13 +48,13 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 
 		//With no links is fine
 		Person person = new Person();
-		DaoMethodOutcome daoMethodOutcome = myEmpiHelperR4.doCreatePerson(person, true);
+		DaoMethodOutcome daoMethodOutcome = myEmpiHelper.doCreatePerson(person, true);
 		assertNotNull(daoMethodOutcome.getId());
 
 		//Creating a person with links should fail.
 		person.addLink().setTarget(new Reference("123"));
 		try {
-			myEmpiHelperR4.doCreatePerson(person, true);
+			myEmpiHelper.doCreatePerson(person, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
 			assertEquals("Cannot modify Person links when EMPI is enabled.", e.getMessage());
@@ -63,7 +63,7 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 		//Updating a person with while modifying their links should fail.
 		person.setId("TESTID");
 		try {
-			myEmpiHelperR4.doCreatePerson(person, true);
+			myEmpiHelper.doCreatePerson(person, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
 			assertEquals("Cannot modify Person links when EMPI is enabled.", e.getMessage());
@@ -74,7 +74,7 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 		savedPerson.setId(daoMethodOutcome.getId().toUnqualifiedVersionless());
 		savedPerson.getNameFirstRep().setFamily("Graham");
 		savedPerson.getLink().clear();
-		DaoMethodOutcome daoMethodOutcome1 = myEmpiHelperR4.doUpdatePerson(savedPerson, true);
+		DaoMethodOutcome daoMethodOutcome1 = myEmpiHelper.doUpdatePerson(savedPerson, true);
 		assertNotNull(daoMethodOutcome1.getId());
 	}
 
@@ -82,7 +82,7 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 	public void testUpdatingExistingLinksIsForbiddenViaPersonEndpoint() throws InterruptedException {
 		// FIXME EMPI add tests to check that modifying existing person links is not allowed (must use EMPI REST operations to do this)
 		// When EMPI is enabled, only the EMPI system is allowed to modify Person links
-		myEmpiHelperR4.createWithLatch(new Patient());
+		myEmpiHelper.createWithLatch(new Patient());
 		assertLinkCount(1);
 	}
 

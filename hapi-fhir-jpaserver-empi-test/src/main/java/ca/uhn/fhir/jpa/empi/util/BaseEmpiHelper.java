@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi.util;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.IEmpiInterceptor;
@@ -46,6 +47,8 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 	protected RestfulServer myMockRestfulServer;
 	@Mock
 	protected FhirContext myMockFhirContext;
+	@Mock
+	private IInterceptorBroadcaster myMockInterceptorBroadcaster;
 
 	protected PointcutLatch myAfterEmpiLatch = new PointcutLatch(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED);
 
@@ -55,7 +58,7 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 		//This sets up mock servlet request details, which allows our DAO requests to appear as though
 		//they are coming from an external HTTP Request.
 		MockitoAnnotations.initMocks(this);
-		when(myMockSrd.getInterceptorBroadcaster()).thenReturn(myInterceptorService);
+		when(myMockSrd.getInterceptorBroadcaster()).thenReturn(myMockInterceptorBroadcaster);
 		when(myMockSrd.getServletRequest()).thenReturn(myMockServletRequest);
 		when(myMockSrd.getServer()).thenReturn(myMockRestfulServer);
 		when(myMockRestfulServer.getFhirContext()).thenReturn(myMockFhirContext);
