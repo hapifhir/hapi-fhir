@@ -25,9 +25,12 @@ import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
 import ca.uhn.fhir.jpa.api.MatchedTargetCandidate;
+import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.util.PersonUtil;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +46,8 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	private EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 	@Autowired
 	private PersonUtil myPersonUtil;
+	@Autowired
+	private ResourceTableHelper myResourceTableHelper;
 
 	@Override
 	@Transactional
@@ -68,17 +73,29 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	}
 
 	@Override
+	@Transactional
 	public void updateLinks(IBaseResource theIncomingResource, List<MatchedTargetCandidate> theMatchedResults, EmpiLinkSourceEnum theLinkSource) {
 		//FIXME EMPI
 		//Given theIncomingResource, attempt to find a person. //QUESTION GGG: How do we determine a person match?
+		theMatchedResults.stream()
+			.filter(mr -> mr.getMatchResult().equals(EmpiMatchResultEnum.MATCH))
+			.findFirst()
+			.ifPresent(mr -> {
+				EmpiLink empiLink = getEmpiLinkForResourceTarget(mr.getCandidate());
+				IBaseResource person = myEmpiResourceDaoSvc.readPerson(empiLink.getPerson().getIdDt());
+				this.updateLink(person, theIncomingResource, mr.getMatchResult(), EmpiLinkSourceEnum.AUTO);
+			});
 		//If person is found, that is our person. If not, create a new person with information from theIncomingResource
 
 		//Link theIncomingResource to the person if this is not already done
 		//Given the match results, create links where appropriate from our found person to the candidate.
 	}
 
-	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
+	private EmpiLink getEmpiLinkForResourceTarget(IBaseResource theCandidate) {
+		return myEmpiLinkDaoSvc.getLinkByTargetResourceId(myResourceTableHelper.getPidOrNull(theCandidate));
+	}
 
+	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
 		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource);
 	}
 

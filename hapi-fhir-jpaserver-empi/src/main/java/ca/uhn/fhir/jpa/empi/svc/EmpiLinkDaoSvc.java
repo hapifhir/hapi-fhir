@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,25 +19,41 @@ public class EmpiLinkDaoSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiLinkDaoSvc.class);
 
 	@Autowired
-	IEmpiLinkDao myEmpiLinkDao;
+	private IEmpiLinkDao myEmpiLinkDao;
 	@Autowired
-	ResourceTableHelper myResourceTableHelper;
+	private ResourceTableHelper myResourceTableHelper;
 
 	public void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
 		Long personPid = myResourceTableHelper.getPidOrNull(thePerson);
 		Long resourcePid = myResourceTableHelper.getPidOrNull(theResource);
 
+		EmpiLink empiLink = getEmpiLinkByTargetPid(personPid, resourcePid);
+		empiLink.setLinkSource(theLinkSource);
+		empiLink.setMatchResult(theMatchResult);
+		ourLog.debug("Creating EmpiLink from {} to {}", thePerson.getIdElement(), theResource.getIdElement());
+		myEmpiLinkDao.save(empiLink);
+	}
+
+	@NotNull
+	public EmpiLink getEmpiLinkByTargetPid(Long thePersonPid, Long theResourcePid) {
 		EmpiLink empiLink = new EmpiLink();
-		empiLink.setPersonPid(personPid);
-		empiLink.setTargetPid(resourcePid);
+		empiLink.setPersonPid(thePersonPid);
+		empiLink.setTargetPid(theResourcePid);
 		Example<EmpiLink> example = Example.of(empiLink);
 		Optional<EmpiLink> found = myEmpiLinkDao.findOne(example);
 		if (found.isPresent()) {
 			empiLink = found.get();
 		}
-		empiLink.setLinkSource(theLinkSource);
-		empiLink.setMatchResult(theMatchResult);
-		ourLog.debug("Creating EmpiLink from {} to {}", thePerson.getIdElement(), theResource.getIdElement());
-		myEmpiLinkDao.save(empiLink);
+		return empiLink;
+	}
+
+	public EmpiLink getLinkByTargetResourceId(Long theResourcePid) {
+		if (theResourcePid == null) {
+			return null;
+		}
+		EmpiLink link = new EmpiLink();
+		link.setTargetPid(theResourcePid);
+		Example<EmpiLink> example = Example.of(link);
+		return myEmpiLinkDao.findOne(example).orElse(null);
 	}
 }

@@ -52,11 +52,11 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testAddPatientLinksToExistingPersonIfMatch() {
-		createPatientAndUpdateLinks(buildJanePatient());
-		createPatientAndUpdateLinks(buildJanePatient());
+		Patient patient1 = createPatientAndUpdateLinks(buildJanePatient());
+		Patient patient2 = createPatientAndUpdateLinks(buildJanePatient());
 
 		assertLinkCount(2);
-		assertSamePerson();
+		assertThat(patient1, is(samePersonAs(patient2)));
 	}
 
 	@Test
@@ -102,6 +102,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	private Patient createPatientAndUpdateLinks(Patient thePatient) {
+		//Note that since our empi-rules block on active=true, all patients must be active.
+		thePatient.setActive(true);
 		DaoMethodOutcome daoMethodOutcome = myPatientDao.create(thePatient);
 		thePatient.setId(daoMethodOutcome.getId());
 		myEmpiMatchLinkSvc.updateEmpiLinksForPatient(thePatient);

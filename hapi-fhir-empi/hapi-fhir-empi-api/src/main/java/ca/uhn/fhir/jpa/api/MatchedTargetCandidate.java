@@ -12,11 +12,11 @@ public class MatchedTargetCandidate {
 		myMatchResult = theMatchResult;
 	}
 
-	private IBaseResource getCandidate() {
+	public IBaseResource getCandidate() {
 		return myCandidate;
 	}
 
-	private EmpiMatchResultEnum getMatchResult() {
+	public EmpiMatchResultEnum getMatchResult() {
 		return myMatchResult;
 	}
 }

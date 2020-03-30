@@ -172,12 +172,14 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	 */
 	public Matcher<IBaseResource> samePersonAs(IBaseResource theBaseResource) {
 		return new TypeSafeMatcher<IBaseResource>() {
+			private Long personIdToMatch;
+			private Long incomingPersonId;
+
 			@Override
 			protected boolean matchesSafely(IBaseResource theIncomingResource) {
-				Long personPid = getEmpiLink(theIncomingResource).getPersonPid();
-				Long personPid1 = getEmpiLink(theBaseResource).getPersonPid();
-
-				return personPid.equals(personPid1);
+				incomingPersonId= getEmpiLink(theIncomingResource).getPersonPid();
+				personIdToMatch= getEmpiLink(theBaseResource).getPersonPid();
+				return incomingPersonId.equals(personIdToMatch);
 
 			}
 			private EmpiLink getEmpiLink(IBaseResource thePatientOrPractitionerResource) {
@@ -190,7 +192,13 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 			@Override
 			public void describeTo(Description theDescription) {
-				//FIXME GGG
+				theDescription.appendText("patient/practitioner linked to Person/" +personIdToMatch);
+			}
+
+			@Override
+			protected void describeMismatchSafely(IBaseResource item, Description mismatchDescription) {
+				super.describeMismatchSafely(item, mismatchDescription);
+				mismatchDescription.appendText(" was actually linked to Person/" +incomingPersonId);
 			}
 		};
 	}

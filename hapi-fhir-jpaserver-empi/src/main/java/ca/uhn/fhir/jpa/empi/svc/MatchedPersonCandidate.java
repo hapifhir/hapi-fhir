@@ -18,11 +18,11 @@ public class MatchedPersonCandidate {
 		myEmpiLink = null;
 	}
 
-	private ResourceTable getCandidate() {
+	public ResourceTable getCandidate() {
 		return myCandidate;
 	}
 
-	private EmpiLink getEmpiLink() {
+	public EmpiLink getEmpiLink() {
 		return myEmpiLink;
 	}
 }
