@@ -190,7 +190,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		List<Predicate> codePredicates = new ArrayList<>();
 
 		// Resources by ID
-		List<ResourcePersistentId> targetPids = myIdHelperService.resolveResourcePersistentIds(targetIds, theRequest);
+		List<ResourcePersistentId> targetPids = myIdHelperService.translateForcedIdToPids(targetIds, theRequest);
 		if (!targetPids.isEmpty()) {
 			ourLog.debug("Searching for resource link with target PIDs: {}", targetPids);
 			Predicate pathPredicate;
@@ -205,7 +205,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			} else {
 				pidPredicate = join.get("myTargetResourcePid").in(ResourcePersistentId.toLongList(targetPids)).not();
 			}
-			codePredicates.add(myCriteriaBuilder.and(pathPredicate, pidPredicate));
+			codePredicates.add(myBuilder.and(pathPredicate, pidPredicate));
 		}
 
 		// Resources by fully qualified URL
@@ -223,11 +223,11 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			} else {
 				pidPredicate = join.get("myTargetResourceUrl").in(targetQualifiedUrls).not();
 			}
-			codePredicates.add(myCriteriaBuilder.and(pathPredicate, pidPredicate));
+			codePredicates.add(myBuilder.and(pathPredicate, pidPredicate));
 		}
 
 		if (codePredicates.size() > 0) {
-			Predicate predicate = myCriteriaBuilder.or(toArray(codePredicates));
+			Predicate predicate = myBuilder.or(toArray(codePredicates));
 			myQueryRoot.addPredicate(predicate);
 			return predicate;
 		} else {
@@ -330,7 +330,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				throw invalidRequestException;
 			}
 
-			Predicate targetTypeParameter = myCriteriaBuilder.equal(theJoin.get("myTargetResourceType"), typeValue);
+			Predicate targetTypeParameter = myBuilder.equal(theJoin.get("myTargetResourceType"), typeValue);
 			myQueryRoot.addPredicate(targetTypeParameter);
 			return targetTypeParameter;
 		}
@@ -389,7 +389,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theJoin);
 			Predicate pidPredicate = theJoin.get("myTargetResourcePid").in(subQ);
-			Predicate andPredicate = myCriteriaBuilder.and(pathPredicate, pidPredicate);
+			Predicate andPredicate = myBuilder.and(pathPredicate, pidPredicate);
 			theCodePredicates.add(andPredicate);
 			candidateTargetTypes.add(nextType);
 		}
@@ -402,7 +402,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, candidateTargetTypes);
 		}
 
-		Predicate predicate = myCriteriaBuilder.or(toArray(theCodePredicates));
+		Predicate predicate = myBuilder.or(toArray(theCodePredicates));
 		myQueryRoot.addPredicate(predicate);
 		return predicate;
 	}
@@ -487,8 +487,8 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		andOrParams.add(theOrValues);
 
 		// Create the subquery predicates
-		myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myResourceType"), theSubResourceName));
-		myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myDeleted")));
+		myQueryRoot.addPredicate(myBuilder.equal(myQueryRoot.get("myResourceType"), theSubResourceName));
+		myQueryRoot.addPredicate(myBuilder.isNull(myQueryRoot.get("myDeleted")));
 
 		if (theFoundChainMatch) {
 			searchForIdsWithAndOr(theSubResourceName, theChain, andOrParams, theRequest);
@@ -646,9 +646,9 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				theResourceName, theRequest);
 
 			if (((SearchFilterParser.FilterLogical) theFilter).getOperation() == SearchFilterParser.FilterLogicalOperation.and) {
-				return myCriteriaBuilder.and(xPredicate, yPredicate);
+				return myBuilder.and(xPredicate, yPredicate);
 			} else if (((SearchFilterParser.FilterLogical) theFilter).getOperation() == SearchFilterParser.FilterLogicalOperation.or) {
-				return myCriteriaBuilder.or(xPredicate, yPredicate);
+				return myBuilder.or(xPredicate, yPredicate);
 			}
 		} else if (theFilter instanceof SearchFilterParser.FilterParameterGroup) {
 			return processFilter(((SearchFilterParser.FilterParameterGroup) theFilter).getContained(),
@@ -833,10 +833,10 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			SourceParam sourceParameter = new SourceParam(nextParameter.getValueAsQueryToken(myContext));
 			String sourceUri = sourceParameter.getSourceUri();
 			String requestId = sourceParameter.getRequestId();
-			Predicate sourceUriPredicate = myCriteriaBuilder.equal(join.get("mySourceUri"), sourceUri);
-			Predicate requestIdPredicate = myCriteriaBuilder.equal(join.get("myRequestId"), requestId);
+			Predicate sourceUriPredicate = myBuilder.equal(join.get("mySourceUri"), sourceUri);
+			Predicate requestIdPredicate = myBuilder.equal(join.get("myRequestId"), requestId);
 			if (isNotBlank(sourceUri) && isNotBlank(requestId)) {
-				codePredicates.add(myCriteriaBuilder.and(sourceUriPredicate, requestIdPredicate));
+				codePredicates.add(myBuilder.and(sourceUriPredicate, requestIdPredicate));
 			} else if (isNotBlank(sourceUri)) {
 				codePredicates.add(sourceUriPredicate);
 			} else if (isNotBlank(requestId)) {
@@ -844,7 +844,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			}
 		}
 
-		Predicate retVal = myCriteriaBuilder.or(toArray(codePredicates));
+		Predicate retVal = myBuilder.or(toArray(codePredicates));
 		myQueryRoot.addPredicate(retVal);
 		return retVal;
 	}
@@ -918,9 +918,9 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			Join<ResourceTable, ResourceLink> join = myQueryRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
 
 			Predicate pathPredicate = myPredicateBuilder.createResourceLinkPathPredicate(targetResourceType, paramReference, join);
-			Predicate sourceTypePredicate = myCriteriaBuilder.equal(join.get("myTargetResourceType"), theResourceType);
+			Predicate sourceTypePredicate = myBuilder.equal(join.get("myTargetResourceType"), theResourceType);
 			Predicate sourcePidPredicate = join.get("mySourceResourcePid").in(subQ);
-			Predicate andPredicate = myCriteriaBuilder.and(pathPredicate, sourcePidPredicate, sourceTypePredicate);
+			Predicate andPredicate = myBuilder.and(pathPredicate, sourcePidPredicate, sourceTypePredicate);
 			myQueryRoot.addPredicate(andPredicate);
 		}
 	}
@@ -953,24 +953,24 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		switch (theParam.getParamType()) {
 			case STRING: {
 				From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> stringJoin = theRoot.join("myParamsString", JoinType.INNER);
-				retVal = myPredicateBuilder.createPredicateString(leftValue, theResourceName, theParam.getName(), myCriteriaBuilder, stringJoin);
+				retVal = myPredicateBuilder.createPredicateString(leftValue, theResourceName, theParam.getName(), myBuilder, stringJoin);
 				break;
 			}
 			case TOKEN: {
 				From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> tokenJoin = theRoot.join("myParamsToken", JoinType.INNER);
 				List<IQueryParameterType> tokens = Collections.singletonList(leftValue);
-				Collection<Predicate> tokenPredicates = myPredicateBuilder.createPredicateToken(tokens, theResourceName, theParam.getName(), myCriteriaBuilder, tokenJoin);
-				retVal = myCriteriaBuilder.and(tokenPredicates.toArray(new Predicate[0]));
+				Collection<Predicate> tokenPredicates = myPredicateBuilder.createPredicateToken(tokens, theResourceName, theParam.getName(), myBuilder, tokenJoin);
+				retVal = myBuilder.and(tokenPredicates.toArray(new Predicate[0]));
 				break;
 			}
 			case DATE: {
 				From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> dateJoin = theRoot.join("myParamsDate", JoinType.INNER);
-				retVal = myPredicateBuilder.createPredicateDate(leftValue, theResourceName, theParam.getName(), myCriteriaBuilder, dateJoin);
+				retVal = myPredicateBuilder.createPredicateDate(leftValue, theResourceName, theParam.getName(), myBuilder, dateJoin);
 				break;
 			}
 			case QUANTITY: {
 				From<ResourceIndexedSearchParamQuantity, ResourceIndexedSearchParamQuantity> dateJoin = theRoot.join("myParamsQuantity", JoinType.INNER);
-				retVal = myPredicateBuilder.createPredicateQuantity(leftValue, theResourceName, theParam.getName(), myCriteriaBuilder, dateJoin);
+				retVal = myPredicateBuilder.createPredicateQuantity(leftValue, theResourceName, theParam.getName(), myBuilder, dateJoin);
 				break;
 			}
 			case COMPOSITE:
