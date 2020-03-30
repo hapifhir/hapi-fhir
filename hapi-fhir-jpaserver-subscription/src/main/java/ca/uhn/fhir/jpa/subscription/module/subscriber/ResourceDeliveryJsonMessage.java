@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.message.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 

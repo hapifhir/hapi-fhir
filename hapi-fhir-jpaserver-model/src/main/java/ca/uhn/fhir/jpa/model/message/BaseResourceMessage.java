@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.module.subscriber;
+package ca.uhn.fhir.jpa.model.message;
 
 /*-
  * #%L

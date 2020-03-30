@@ -21,8 +21,10 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.message.BaseResourceMessage;
+import ca.uhn.fhir.jpa.model.message.IResourceMessage;
+import ca.uhn.fhir.jpa.model.message.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

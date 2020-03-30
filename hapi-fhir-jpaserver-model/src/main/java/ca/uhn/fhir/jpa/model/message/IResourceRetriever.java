@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.module.subscriber;
+package ca.uhn.fhir.jpa.model.message;
 
 /*-
  * #%L
@@ -20,6 +20,9 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  * #L%
  */
 
-public interface IResourceMessage {
-	String getPayloadId();
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+public interface IResourceRetriever {
+	IBaseResource getResource(IIdType theId);
 }

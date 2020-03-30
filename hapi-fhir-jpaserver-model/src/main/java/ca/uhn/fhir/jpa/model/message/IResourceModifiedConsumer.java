@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.module.subscriber;
+package ca.uhn.fhir.jpa.model.message;
 
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -20,9 +20,6 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-public interface IResourceRetriever {
-	IBaseResource getResource(IIdType theId);
+public interface IResourceModifiedConsumer {
+	void submitResourceModified(ResourceModifiedMessage theMsg);
 }

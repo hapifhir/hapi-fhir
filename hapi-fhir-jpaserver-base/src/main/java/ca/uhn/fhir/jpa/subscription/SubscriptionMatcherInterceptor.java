@@ -47,7 +47,6 @@ public class SubscriptionMatcherInterceptor extends BaseResourceModifiedIntercep
 	@Autowired
 	private SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
 
-
 	@Override
 	protected String getMatchingChannelName() {
 		return SUBSCRIPTION_MATCHING_CHANNEL_NAME;

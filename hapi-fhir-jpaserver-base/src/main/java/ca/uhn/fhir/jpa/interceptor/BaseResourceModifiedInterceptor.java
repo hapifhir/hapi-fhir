@@ -5,11 +5,10 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.subscription.IResourceModifiedConsumer;
-import ca.uhn.fhir.jpa.subscription.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.model.message.IResourceModifiedConsumer;
+import ca.uhn.fhir.jpa.model.message.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.jpa.model.message.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
-import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.annotations.VisibleForTesting;
@@ -26,11 +25,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import javax.annotation.Nonnull;
 import javax.annotation.PreDestroy;
 
-// FIXME EMPI Now that this is used outside of Subscriptions, we should move it. Maybe to a `messaging` package? (see ResourceModifiedMessage)
 public abstract class BaseResourceModifiedInterceptor implements IResourceModifiedConsumer {
 	protected SubscribableChannel myMatchingChannel;
 
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
+	private Logger ourLog = LoggerFactory.getLogger(BaseResourceModifiedInterceptor.class);
 	@Autowired
 	protected FhirContext myFhirContext;
 	@Autowired

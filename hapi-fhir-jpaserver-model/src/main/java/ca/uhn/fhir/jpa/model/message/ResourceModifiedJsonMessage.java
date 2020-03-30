@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.module.subscriber;
+package ca.uhn.fhir.jpa.model.message;
 
 /*-
  * #%L
@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 

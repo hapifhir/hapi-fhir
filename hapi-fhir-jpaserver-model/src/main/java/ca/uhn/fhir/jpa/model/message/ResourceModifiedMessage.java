@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.module;
+package ca.uhn.fhir.jpa.model.message;
 
 /*-
  * #%L
@@ -21,8 +21,6 @@ package ca.uhn.fhir.jpa.subscription.module;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.BaseResourceMessage;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.IResourceMessage;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -36,7 +34,6 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-// FIXME EMPI Now that this is used outside of Subscriptions, we should move it. Maybe to a `messaging` package? (see BaseResourceModifiedInterceptor)
 public class ResourceModifiedMessage extends BaseResourceMessage implements IResourceMessage, IModelJson {
 
 	@JsonProperty("resourceId")

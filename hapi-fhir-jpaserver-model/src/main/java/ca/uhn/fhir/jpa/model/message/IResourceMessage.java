@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.subscription;
+package ca.uhn.fhir.jpa.model.message;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Subscription Server
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -20,8 +20,6 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
-
-public interface IResourceModifiedConsumer {
-	void submitResourceModified(ResourceModifiedMessage theMsg);
+public interface IResourceMessage {
+	String getPayloadId();
 }
