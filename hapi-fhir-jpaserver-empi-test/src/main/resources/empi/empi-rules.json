@@ -23,7 +23,7 @@
 		"resourcePath" : "name.family",
 		"metric" : "JARO_WINKLER",
 		"matchThreshold" : 0.8
-	} ],
+	}],
 	"weightMap" : {
 		"patient-given" : 0.63,
 		"patient-given,patient-last" : 0.83

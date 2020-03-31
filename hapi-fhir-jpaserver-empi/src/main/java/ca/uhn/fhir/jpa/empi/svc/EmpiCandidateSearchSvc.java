@@ -68,6 +68,8 @@ public class EmpiCandidateSearchSvc {
 				continue;
 			}
 
+			//FIXME EMPI QUESTION: How should I search across resources? e.g. the incoming resource here is the Patient, but I want
+			//to compare it to all known PERSON objects, using the overlapping search parameters that they have.
 			List<String> valuesFromResourceForSearchParam = getValueFromResourceForSearchParam(theResource, resourceSearchParam);
 			if (valuesFromResourceForSearchParam.isEmpty()) {
 				continue;
@@ -92,7 +94,7 @@ public class EmpiCandidateSearchSvc {
 	private void searchForIdsAndAddToMap(String theResourceType, Map<Long, IBaseResource> theMatchedPidsToResources, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam, List<String> theValuesFromResourceForSearchParam) {
 		//1.
 		String resourceCriteria = buildResourceQueryString(theResourceType, theFilterCriteria, resourceSearchParam, theValuesFromResourceForSearchParam);
-		ourLog.info("About to execute URL query: {}", resourceCriteria);
+		ourLog.warn("About to execute URL query: {}", resourceCriteria);
 
 		//2.
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceType);
@@ -134,9 +136,13 @@ public class EmpiCandidateSearchSvc {
 
 	private List<String> buildFilterQuery(List<EmpiFilterSearchParamJson> theFilterSearchParams, String theResourceType) {
 		return Collections.unmodifiableList(theFilterSearchParams.stream()
-			.filter(spFilterJson -> spFilterJson.getResourceType().equals(theResourceType))
+			.filter(spFilterJson -> paramIsOnCorrectType(theResourceType, spFilterJson))
 			.map(this::convertToQueryString)
 			.collect(Collectors.toList()));
+	}
+
+	private boolean paramIsOnCorrectType(String theResourceType, EmpiFilterSearchParamJson spFilterJson) {
+		return spFilterJson.getResourceType().equals(theResourceType);
 	}
 
 	private String convertToQueryString(EmpiFilterSearchParamJson theSpFilterJson) {

@@ -86,6 +86,8 @@ public class EmpiResourceComparatorSvc {
 	private long getMatchVector(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		long retval = 0;
 		for (int i = 0; i < myFieldComparators.size(); ++i) {
+			//FIXME EMPI Question: Looks like we don't distinguish by resourceType here. We will have to filter out
+			//any that are not for the resourceType in question.
 			EmpiResourceFieldComparator fieldComparator = myFieldComparators.get(i);
 			if (fieldComparator.match(theLeftResource, theRightResource)) {
 				retval |= (1 << i);
