@@ -1,0 +1,6 @@
+---
+type: add
+issue: 1769
+title: A new built-in server interceptor called FhirPathFilterInterceptor has been added. This interceptor
+   evaluates an arbitrary FHIRPath expression against the resource being returned and replaces the response
+   with a Parameters resource containing the results of the evaluation.

@@ -118,6 +118,23 @@ public class SearchParamExtractorR4Test {
 
 
 	@Test
+	public void testExtractSearchParamTokenTest() {
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("sys").setValue("val");
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Patient", Patient.SP_IDENTIFIER);
+		assertNotNull(param);
+		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> params = extractor.extractSearchParamTokens(p, param);
+		assertEquals(1, params.size());
+		ResourceIndexedSearchParamToken paramValue = (ResourceIndexedSearchParamToken) params.iterator().next();
+		assertEquals("identifier", paramValue.getParamName());
+		assertEquals("sys", paramValue.getSystem());
+		assertEquals("val", paramValue.getValue());
+	}
+
+
+	@Test
 	public void testExtensionContainingReference() {
 		String path = "Patient.extension('http://patext').value.as(Reference)";
 

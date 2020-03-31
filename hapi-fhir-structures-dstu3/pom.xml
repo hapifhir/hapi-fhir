@@ -165,6 +165,16 @@
 			<version>1.1</version>
 		</dependency>
 
+		<!--
+		Gson is needed for some utility classes in org.hl7.fhir.dstu3, so
+		this is necessary for the JavaDocs to build
+		-->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<optional>true</optional>
+		</dependency>
+
 		<dependency>
 			<groupId>xpp3</groupId>
 			<artifactId>xpp3</artifactId>

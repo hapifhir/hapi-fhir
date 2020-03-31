@@ -32,11 +32,11 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import java.util.Arrays;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "RedundantThrows", "InnerClassMayBeStatic"})
 public class ServletExamples {
 
    // START SNIPPET: loggingInterceptor
-   @WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
    public class RestfulServerWithLogging extends RestfulServer {
 
       @Override
@@ -120,6 +120,24 @@ public class ServletExamples {
       
    }
    // END SNIPPET: exceptionInterceptor
+
+	// START SNIPPET: fhirPathInterceptor
+	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+	public class RestfulServerWithFhirPath extends RestfulServer {
+
+		@Override
+		protected void initialize() throws ServletException {
+
+			// ... define your resource providers here ...
+
+			// Now register the interceptor
+			FhirPathFilterInterceptor interceptor = new FhirPathFilterInterceptor();
+			registerInterceptor(interceptor);
+
+		}
+
+	}
+	// END SNIPPET: fhirPathInterceptor
 
    // START SNIPPET: responseHighlighterInterceptor
    @WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.fluentpath;
+package ca.uhn.fhir.fhirpath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
@@ -21,7 +21,7 @@ public class FluentPathTest {
 		p.addName().setFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
 		p.addName().setFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
 		
-		IFluentPath fp = ourCtx.newFluentPath();
+		IFhirPath fp = ourCtx.newFluentPath();
 		List<HumanName> names = fp.evaluate(p, "Patient.name", HumanName.class);
 		assertEquals(2, names.size());
 		assertEquals("N1F1", names.get(0).getFamily());
@@ -36,7 +36,7 @@ public class FluentPathTest {
 		p.addName().setFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
 		p.addName().setFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
 		
-		IFluentPath fp = ourCtx.newFluentPath();
+		IFhirPath fp = ourCtx.newFluentPath();
 		List<HumanName> names = fp.evaluate(p, "Patient.nameFOO", HumanName.class);
 		assertEquals(0, names.size());
 	}
@@ -47,10 +47,10 @@ public class FluentPathTest {
 		p.addName().setFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
 		p.addName().setFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
 		
-		IFluentPath fp = ourCtx.newFluentPath();
+		IFhirPath fp = ourCtx.newFluentPath();
 		try {
 			fp.evaluate(p, "Patient....nameFOO", HumanName.class);
-		} catch (FluentPathExecutionException e) {
+		} catch (FhirPathExecutionException e) {
 			assertThat(e.getMessage(), containsString("termination at unexpected token"));
 		}
 	}
@@ -61,10 +61,10 @@ public class FluentPathTest {
 		p.addName().setFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
 		p.addName().setFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
 		
-		IFluentPath fp = ourCtx.newFluentPath();
+		IFhirPath fp = ourCtx.newFluentPath();
 		try {
 			fp.evaluate(p, "Patient.name", StringType.class);
-		} catch (FluentPathExecutionException e) {
+		} catch (FhirPathExecutionException e) {
 			assertEquals("FluentPath expression \"Patient.name\" returned unexpected type HumanName - Expected org.hl7.fhir.dstu3.model.StringType", e.getMessage());
 		}
 	}

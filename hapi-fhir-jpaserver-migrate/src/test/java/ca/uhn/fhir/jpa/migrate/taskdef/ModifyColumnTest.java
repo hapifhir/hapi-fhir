@@ -269,4 +269,29 @@ public class ModifyColumnTest extends BaseTest {
 		assertTrue(existingColumnType.equals(task.getColumnType(), task.getColumnLength()));
 	}
 
+
+	@Test
+	public void testShrinkDoesntFailIfShrinkCannotProceed() throws SQLException {
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(10))");
+		executeSql("insert into SOMETABLE (PID, TEXTCOL) values (1, '0123456789')");
+
+		ModifyColumnTask task = new ModifyColumnTask("1", "123456.7");
+		task.setTableName("SOMETABLE");
+		task.setColumnName("TEXTCOL");
+		task.setColumnType(AddColumnTask.ColumnTypeEnum.STRING);
+		task.setNullable(true);
+		task.setColumnLength(5);
+
+		getMigrator().addTask(task);
+		getMigrator().migrate();
+
+		assertEquals(1, task.getExecutedStatements().size());
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 10), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
+
+		// Make sure additional migrations don't crash
+		getMigrator().migrate();
+		getMigrator().migrate();
+
+	}
+
 }

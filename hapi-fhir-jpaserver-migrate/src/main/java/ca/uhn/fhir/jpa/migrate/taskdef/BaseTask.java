@@ -173,6 +173,11 @@ public abstract class BaseTask {
 		myFailureAllowed = theFailureAllowed;
 	}
 
+	protected boolean isFailureAllowed() {
+		return myFailureAllowed;
+	}
+
+
 	public String getFlywayVersion() {
 		String releasePart = myProductVersion;
 		if (releasePart.startsWith("V")) {

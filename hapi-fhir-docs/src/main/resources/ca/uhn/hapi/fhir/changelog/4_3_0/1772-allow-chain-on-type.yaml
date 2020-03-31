@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1772
+title: "The JPA server now allows chained searches on the `_type` parameter. For example, the following
+   could be used to find all Encounters with a context of type Group: `Encounter?subject._type=Group`."

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1770
+title: When parsing Bundles, contained resoures from other entries in the Bundle could incorrecly be
+   stitched into a target resource if they had the same local ID. Thanks to August Langhout for
+   the pull request!

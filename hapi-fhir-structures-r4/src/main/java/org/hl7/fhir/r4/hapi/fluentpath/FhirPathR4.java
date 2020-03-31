@@ -2,8 +2,8 @@ package org.hl7.fhir.r4.hapi.fluentpath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.fluentpath.FluentPathExecutionException;
-import ca.uhn.fhir.fluentpath.IFluentPath;
+import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
@@ -13,11 +13,11 @@ import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import java.util.List;
 import java.util.Optional;
 
-public class FluentPathR4 implements IFluentPath {
+public class FhirPathR4 implements IFhirPath {
 
   private FHIRPathEngine myEngine;
 
-  public FluentPathR4(FhirContext theCtx) {
+  public FhirPathR4(FhirContext theCtx) {
     IValidationSupport validationSupport = theCtx.getValidationSupport();
     myEngine = new FHIRPathEngine(new HapiWorkerContext(theCtx, validationSupport));
   }
@@ -29,12 +29,12 @@ public class FluentPathR4 implements IFluentPath {
     try {
       result = myEngine.evaluate((Base) theInput, thePath);
     } catch (FHIRException e) {
-      throw new FluentPathExecutionException(e);
+      throw new FhirPathExecutionException(e);
     }
 
     for (Base next : result) {
       if (!theReturnType.isAssignableFrom(next.getClass())) {
-        throw new FluentPathExecutionException("FluentPath expression \"" + thePath + "\" returned unexpected type " + next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
+        throw new FhirPathExecutionException("FluentPath expression \"" + thePath + "\" returned unexpected type " + next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
       }
     }
 

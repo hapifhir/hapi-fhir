@@ -1,4 +1,4 @@
-package ca.uhn.fhir.fluentpath;
+package ca.uhn.fhir.fhirpath;
 
 /*
  * #%L
@@ -23,18 +23,18 @@ package ca.uhn.fhir.fluentpath;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 /**
- * This exception is thrown if a FluentPath expression can not be executed successfully
+ * This exception is thrown if a FHIRPath expression can not be executed successfully
  * for any reason
  */
-public class FluentPathExecutionException extends InternalErrorException {
+public class FhirPathExecutionException extends InternalErrorException {
 
 	private static final long serialVersionUID = 1L;
 
-	public FluentPathExecutionException(Throwable theCause) {
+	public FhirPathExecutionException(Throwable theCause) {
 		super(theCause);
 	}
 
-	public FluentPathExecutionException(String theMessage) {
+	public FhirPathExecutionException(String theMessage) {
 		super(theMessage);
 	}
 
