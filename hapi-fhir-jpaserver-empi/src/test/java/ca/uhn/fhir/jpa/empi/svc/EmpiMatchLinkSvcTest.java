@@ -99,6 +99,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		}
 	}
 
+
 	// FIXME EMPI
 	// Test: empi link record exists with MANUAL NO_MATCH, that patient is updated, and it MATCH according to rules, the NO_MATCH blocks it
 
@@ -107,6 +108,29 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	// FIXME EMPI
 	// Test: it should be impossible to have a AUTO NO_MATCH record.  The only NO_MATCH records in the system must be MANUAL.
+
+	// FIXME EMPI
+	// Test: new Person is created from a Patient that has an EID, the Patient's EID is added to the Person
+
+	// FIXME EMPI
+	// Test: new Person is created from a Patient that doesn't have an EID, a new system-assigned (random uuid) EID is created for the Person
+
+	// FIXME EMPI
+	// Test: new Person is created from a Patient.  All available relevant Patient fields (name, addr, id) are copied from the Patient to the Person
+
+	// FIXME EMPI
+	// Test: Existing Person found linked from matched Patient.  incoming Patient has no EID.  Create link all done.
+
+	// FIXME EMPI
+	// Test: Existing Person with system-assigned EID found linked from matched Patient.  incoming Patient has EID.  Replace Person system-assigned EID with Patient EID.
+
+	// FIXME EMPI
+	// Test: Existing Person with legit EID (from a Patient) found linked from matched Patient.  incoming Patient has same EID.   Create link all done.
+
+	// FIXME EMPI
+	// Test: Existing Person with legit EID (from a Patient) found linked from matched Patient.  incoming Patient has different EID.   Create new Person with incoming EID and link.
+	// Record somehow (design TBD) that these two Persons may be duplicates.  -- Maybe we have a special kind of EmpiLink table entry where the target also points to a Person and it's
+	// flagged with a special PROBABLE_DUPLICATE match status?
 
 	private Patient createPatientAndUpdateLinks(Patient thePatient) {
 		//Note that since our empi-rules block on active=true, all patients must be active.
