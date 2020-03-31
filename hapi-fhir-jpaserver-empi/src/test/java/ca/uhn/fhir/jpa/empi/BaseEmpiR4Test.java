@@ -176,10 +176,34 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 			@Override
 			protected boolean matchesSafely(IBaseResource theIncomingResource) {
-				incomingPersonId= getEmpiLink(theIncomingResource).getPersonPid();
-				personIdToMatch= getEmpiLink(theBaseResource).getPersonPid();
+				if (isPatientOrPractitioner(theIncomingResource)) {
+					incomingPersonId= getEmpiLink(theIncomingResource).getPersonPid();
+				} else if (isPerson(theIncomingResource)) {
+					incomingPersonId = theIncomingResource.getIdElement().getIdPartAsLong();
+				} else {
+					throw new IllegalArgumentException("Resources of type " + theIncomingResource.getIdElement().getResourceType()+" cannot be persons!");
+				}
+
+				if (isPatientOrPractitioner(theBaseResource)) {
+					personIdToMatch = getEmpiLink(theBaseResource).getPersonPid();
+				} else if (isPerson(theBaseResource)) {
+					personIdToMatch = theBaseResource.getIdElement().getIdPartAsLong();
+				} else {
+					throw new IllegalArgumentException("Resources of type " + theIncomingResource.getIdElement().getResourceType() + " cannot be persons!");
+				}
+
+
 				return incomingPersonId.equals(personIdToMatch);
 
+			}
+
+			private boolean isPerson(IBaseResource theIncomingResource) {
+				return (theIncomingResource.getIdElement().getResourceType().equalsIgnoreCase("Person"));
+			}
+
+			private boolean isPatientOrPractitioner(IBaseResource theResource) {
+				String resourceType = theResource.getIdElement().getResourceType();
+				return (resourceType.equalsIgnoreCase("Person") || resourceType.equalsIgnoreCase("Practitioner"));
 			}
 			private EmpiLink getEmpiLink(IBaseResource thePatientOrPractitionerResource) {
 				EmpiLink candidate = new EmpiLink();
@@ -201,5 +225,6 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 			}
 		};
 	}
+
 
 }
