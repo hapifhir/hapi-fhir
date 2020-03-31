@@ -38,11 +38,6 @@ public class EmpiPersonFindingSvc {
 	private EmpiResourceComparatorSvc myEmpiResourceComparatorSvc;
 	@Autowired
 	private EmpiLinkDaoSvc myEmpiLinkDaoSvc;
-	@Autowired
-	private EmpiResourceDaoSvc myEmpiResourceDaoSvc;
-	@Autowired
-	private IFhirResourceDao<Person> myPersonDao;
-
 
 	/**
 	 * Given an incoming IBaseResource, limited to Patient/Practitioner, return a list of {@link MatchedPersonCandidate}

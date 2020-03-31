@@ -73,11 +73,13 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		EmpiLink link = links.get(0);
 		Long linkedPersonPid = link.getPersonPid();
 		assertEquals(EmpiMatchResultEnum.MATCH, link.getMatchResult());
+
 		assertEquals(origPersonPid, linkedPersonPid);
 	}
 
 	@Test
 	public void testMatchStatusSetPossibleIfMultiplePersonMatch() {
+		//FIXME EMPI Question. How do I compare patient -> person attributes.
 		Person janePerson1 = buildJanePerson();
 		DaoMethodOutcome outcome1 = myPersonDao.create(janePerson1);
 		Long origPersonPid1 = myResourceTableHelper.getPidOrNull(outcome1.getResource());

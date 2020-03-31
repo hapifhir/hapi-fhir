@@ -80,7 +80,11 @@ public class EmpiCandidateSearchSvc {
 			searchForIdsAndAddToMap(theResourceType, matchedPidsToResources, filterCriteria, resourceSearchParam, valuesFromResourceForSearchParam);
 		}
 		//Obviously we don't want to consider the freshly added resource as a potential candidate.
-		matchedPidsToResources.remove(myResourceTableHelper.getPidOrNull(theResource));
+		//Sometimes, we are running this function on a resource that has not yet been persisted,
+		//so it may not have an ID yet, precluding the need to remove it.
+		if (theResource.getIdElement().getIdPart() != null) {
+			matchedPidsToResources.remove(myResourceTableHelper.getPidOrNull(theResource));
+		}
 
 		return matchedPidsToResources.values();
 	}
