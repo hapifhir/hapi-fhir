@@ -11,11 +11,13 @@ import ca.uhn.fhir.jpa.model.message.ResourceModifiedMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
 
+@Lazy
 @Service
 public class EmpiMatchingSubscriber implements MessageHandler {
 	private Logger ourLog = LoggerFactory.getLogger(EmpiMatchingSubscriber.class);

@@ -26,6 +26,7 @@ import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -37,6 +38,8 @@ import java.util.List;
  * It does so by comparing individual comparators, and returning a weight based on the combination of
  * field comparators that matched.
  */
+
+@Lazy
 @Service
 public class EmpiResourceComparatorSvc {
 	private final FhirContext myFhirContext;

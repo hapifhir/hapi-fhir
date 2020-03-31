@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
 import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.IEmpiInterceptor;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
@@ -19,6 +18,7 @@ import org.hl7.fhir.r4.model.Person;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-@Interceptor
+@Lazy
 @Service
 public class EmpiInterceptor extends BaseResourceModifiedInterceptor implements IEmpiInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiInterceptor.class);

@@ -8,10 +8,12 @@ import ca.uhn.fhir.jpa.empi.util.PersonUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Lazy
 @Service
 public class EmpiMatchLinkSvc {
 	@Autowired
