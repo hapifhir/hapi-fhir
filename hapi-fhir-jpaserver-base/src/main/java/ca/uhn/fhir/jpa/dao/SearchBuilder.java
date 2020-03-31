@@ -351,8 +351,7 @@ public class SearchBuilder implements ISearchBuilder {
 		 * If we have any joins to index tables, we get this behaviour already guaranteed so we don't
 		 * need an explicit predicate for it.
 		 */
-		boolean haveNoIndexSearchParams = myParams.size() == 0 || myParams.keySet().stream().allMatch(t -> t.startsWith("_"));
-		if (haveNoIndexSearchParams) {
+		if (!myQueryRoot.hasIndexJoins()) {
 			if (myParams.getEverythingMode() == null) {
 				myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myResourceType"), myResourceName));
 			}
@@ -895,7 +894,7 @@ public class SearchBuilder implements ISearchBuilder {
 			myQueryRoot.addPredicate(predicate);
 		}
 
-		myQueryRoot.setHasIndexJoins(true);
+		myQueryRoot.setHasIndexJoins();
 		Predicate predicate = myCriteriaBuilder.equal(join.get("myIndexString"), theIndexedString);
 		myQueryRoot.addPredicate(predicate);
 

@@ -60,7 +60,7 @@ class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateB
 		Join<ResourceTable, ResourceIndexedSearchParamNumber> join = createJoin(SearchBuilderJoinEnum.NUMBER, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
+			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
 			return null;
 		}
 
@@ -109,6 +109,7 @@ class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateB
 		}
 
 		Predicate predicate = myCriteriaBuilder.or(toArray(codePredicates));
+		myQueryRoot.setHasIndexJoins();
 		myQueryRoot.addPredicate(predicate);
 		return predicate;
 	}

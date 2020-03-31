@@ -153,7 +153,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 		Join<ResourceTable, ResourceIndexedSearchParamCoords> join = createJoin(SearchBuilderJoinEnum.COORDS, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
+			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
 			return null;
 		}
 
@@ -173,6 +173,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 
 		Predicate retVal = myCriteriaBuilder.or(toArray(codePredicates));
 		myQueryRoot.addPredicate(retVal);
+		myQueryRoot.setHasIndexJoins();
 		return retVal;
 	}
 }

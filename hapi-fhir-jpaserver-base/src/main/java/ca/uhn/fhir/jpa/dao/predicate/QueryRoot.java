@@ -96,7 +96,7 @@ public class QueryRoot {
 		return myHasIndexJoins;
 	}
 
-	public void setHasIndexJoins(boolean theHasIndexJoins) {
+	public void setHasIndexJoins() {
 		myHasIndexJoins = true;
 	}
 }

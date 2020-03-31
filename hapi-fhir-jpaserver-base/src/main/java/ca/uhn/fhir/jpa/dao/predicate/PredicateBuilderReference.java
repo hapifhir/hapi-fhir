@@ -137,7 +137,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing());
+			addPredicateParamMissingForReference(theResourceName, theParamName, theList.get(0).getMissing(), thePartitionId);
 			return null;
 		}
 
@@ -227,6 +227,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			codePredicates.add(myCriteriaBuilder.and(pathPredicate, pidPredicate));
 		}
 
+		myQueryRoot.setHasIndexJoins();
 		if (codePredicates.size() > 0) {
 			Predicate predicate = myCriteriaBuilder.or(toArray(codePredicates));
 			myQueryRoot.addPredicate(predicate);

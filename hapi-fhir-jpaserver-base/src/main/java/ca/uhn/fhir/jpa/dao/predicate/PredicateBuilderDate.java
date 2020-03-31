@@ -77,7 +77,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 		if (theList.get(0).getMissing() != null) {
 			Boolean missing = theList.get(0).getMissing();
-			addPredicateParamMissing(theResourceName, theParamName, missing, join, thePartitionId);
+			addPredicateParamMissingForNonReference(theResourceName, theParamName, missing, join, thePartitionId);
 			return null;
 		}
 
@@ -97,6 +97,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 		Predicate orPredicates = myCriteriaBuilder.or(toArray(codePredicates));
 
+		myQueryRoot.setHasIndexJoins();
 		if (newJoin) {
 			Predicate identityAndValuePredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicates);
 			myQueryRoot.addPredicate(identityAndValuePredicate);

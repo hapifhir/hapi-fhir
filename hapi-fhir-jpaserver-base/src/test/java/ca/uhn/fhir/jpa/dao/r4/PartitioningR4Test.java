@@ -12,11 +12,11 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -79,11 +79,14 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionId = 3;
 
 		myPartitionInterceptor = new MyInterceptor();
+		myInterceptorRegistry.registerInterceptor(myPartitionInterceptor);
 	}
 
 
 	@Test
 	public void testCreateResourceNoPartition() {
+		addCreatePartition(null, null);
+
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("system").setValue("value");
 		p.setBirthDate(new Date());
@@ -344,6 +347,142 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testSearch_MissingParamString_SearchAllPartitions() {
+		IIdType patientIdNull = createPatient(null, withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
+		IIdType patientId2 = createPatient(2, withFamily("FAMILY"));
+
+		// :missing=true
+		{
+			addReadPartition(null);
+			myCaptureQueriesListener.clear();
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_ACTIVE, new StringParam().setMissing(true));
+			map.setLoadSynchronous(true);
+			IBundleProvider results = myPatientDao.search(map);
+			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+			assertThat(ids, Matchers.contains(patientIdNull, patientId1, patientId2));
+
+			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+			ourLog.info("Search SQL:\n{}", searchSql);
+			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "SP_MISSING='true'"));
+		}
+
+		// :missing=false
+		{
+			addReadPartition(null);
+			myCaptureQueriesListener.clear();
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_FAMILY, new StringParam().setMissing(false));
+			map.setLoadSynchronous(true);
+			IBundleProvider results = myPatientDao.search(map);
+			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+			assertThat(ids, Matchers.contains(patientIdNull, patientId1, patientId2));
+
+			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+			ourLog.info("Search SQL:\n{}", searchSql);
+			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "SP_MISSING='false'"));
+		}
+	}
+
+	@Test
+	public void testSearch_MissingParamReference_SearchAllPartitions() {
+		IIdType patientIdNull = createPatient(null, withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
+		IIdType patientId2 = createPatient(2, withFamily("FAMILY"));
+
+		// :missing=true
+		{
+			addReadPartition(null);
+			myCaptureQueriesListener.clear();
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_GENERAL_PRACTITIONER, new StringParam().setMissing(true));
+			map.setLoadSynchronous(true);
+			IBundleProvider results = myPatientDao.search(map);
+			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+			assertThat(ids, Matchers.contains(patientIdNull, patientId1, patientId2));
+
+			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+			ourLog.info("Search SQL:\n{}", searchSql);
+			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "HFJ_RES_PARAM_PRESENT"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "HASH_PRESENCE='1919227773735728687'"));
+		}
+	}
+
+
+	@Test
+	public void testSearch_MissingParamString_SearchOnePartition() {
+		createPatient(null, withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
+		createPatient(2, withFamily("FAMILY"));
+
+		// :missing=true
+		{
+			addReadPartition(1);
+			myCaptureQueriesListener.clear();
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_ACTIVE, new StringParam().setMissing(true));
+			map.setLoadSynchronous(true);
+			IBundleProvider results = myPatientDao.search(map);
+			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+			assertThat(ids, Matchers.contains(patientId1));
+
+			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+			ourLog.info("Search SQL:\n{}", searchSql);
+			assertEquals(1, StringUtils.countMatches(searchSql, "myparamsto1_.PARTITION_ID='1'"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "SP_MISSING='true'"));
+		}
+
+		// :missing=false
+		{
+			addReadPartition(1);
+			myCaptureQueriesListener.clear();
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_FAMILY, new StringParam().setMissing(false));
+			map.setLoadSynchronous(true);
+			IBundleProvider results = myPatientDao.search(map);
+			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+			assertThat(ids, Matchers.contains(patientId1));
+
+			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+			ourLog.info("Search SQL:\n{}", searchSql);
+			assertEquals(1, StringUtils.countMatches(searchSql, "myparamsst1_.PARTITION_ID='1'"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "SP_MISSING='false'"));
+		}
+	}
+
+	@Test
+	public void testSearch_MissingParamReference_SearchOnePartition() {
+		createPatient(null, withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
+		createPatient(2, withFamily("FAMILY"));
+
+		// :missing=true
+		{
+			addReadPartition(1);
+			myCaptureQueriesListener.clear();
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_GENERAL_PRACTITIONER, new StringParam().setMissing(true));
+			map.setLoadSynchronous(true);
+			IBundleProvider results = myPatientDao.search(map);
+			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+			assertThat(ids, Matchers.contains(patientId1));
+
+			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+			ourLog.info("Search SQL:\n{}", searchSql);
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "mysearchpa1_.PARTITION_ID='1'"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "HFJ_RES_PARAM_PRESENT"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "HASH_PRESENCE='1919227773735728687'"));
+		}
+	}
+
+
+
+	@Test
 	public void testSearch_NoParams_SearchAllPartitions() {
 		IIdType patientIdNull = createPatient(null, withActiveTrue());
 		IIdType patientId1 = createPatient(1, withActiveTrue());
@@ -452,15 +591,65 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_TagParam_SearchOnePartition() {
-		IIdType patientIdNull = createPatient(null, withActiveTrue(), withTag("http://system", "code"));
+		createPatient(null, withActiveTrue(), withTag("http://system", "code"));
 		IIdType patientId1 = createPatient(1, withActiveTrue(), withTag("http://system", "code"));
-		IIdType patientId2 = createPatient(2, withActiveTrue(), withTag("http://system", "code"));
+		createPatient(2, withActiveTrue(), withTag("http://system", "code"));
 
 		addReadPartition(1);
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code"));
+		map.setLoadSynchronous(true);
+		IBundleProvider results = myPatientDao.search(map);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+		assertThat(ids, Matchers.contains(patientId1));
+
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		ourLog.info("Search SQL:\n{}", searchSql);
+		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+		assertEquals(1, StringUtils.countMatches(searchSql, "TAG_SYSTEM='http://system'"));
+	}
+
+	@Test
+	public void testSearch_TagParamNot_SearchAllPartitions() {
+		IIdType patientIdNull = createPatient(null, withActiveTrue(), withTag("http://system", "code"));
+		IIdType patientId1 = createPatient(1, withActiveTrue(), withTag("http://system", "code"));
+		IIdType patientId2 = createPatient(2, withActiveTrue(), withTag("http://system", "code"));
+		createPatient(null, withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
+		createPatient(1, withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
+		createPatient(2, withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
+
+		addReadPartition(null);
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code2").setModifier(TokenParamModifier.NOT));
+		map.setLoadSynchronous(true);
+		IBundleProvider results = myPatientDao.search(map);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+		assertThat(ids, Matchers.contains(patientIdNull, patientId1, patientId2));
+
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		ourLog.info("Search SQL:\n{}", searchSql);
+		assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+		assertEquals(1, StringUtils.countMatches(searchSql, "TAG_SYSTEM='http://system'"));
+	}
+
+	@Test
+	public void testSearch_TagParamNot_SearchOnePartition() {
+		createPatient(null, withActiveTrue(), withTag("http://system", "code"));
+		IIdType patientId1 = createPatient(1, withActiveTrue(), withTag("http://system", "code"));
+		createPatient(2, withActiveTrue(), withTag("http://system", "code"));
+		createPatient(null, withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
+		createPatient(1, withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
+		createPatient(2, withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
+
+		addReadPartition(1);
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code2").setModifier(TokenParamModifier.NOT));
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
@@ -557,13 +746,15 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 
-	private void addCreatePartition(int thePartitionId, LocalDate thePartitionDate) {
-		registerInterceptorIfNeeded();
-		myPartitionInterceptor.addCreatePartition(new PartitionId(thePartitionId, thePartitionDate));
+	private void addCreatePartition(Integer thePartitionId, LocalDate thePartitionDate) {
+		PartitionId partitionId = null;
+		if (thePartitionId != null) {
+			partitionId = new PartitionId(thePartitionId, thePartitionDate);
+		}
+		myPartitionInterceptor.addCreatePartition(partitionId);
 	}
 
 	private void addReadPartition(Integer thePartitionId) {
-		registerInterceptorIfNeeded();
 		PartitionId partitionId = null;
 		if (thePartitionId != null) {
 			partitionId = new PartitionId(thePartitionId, null);
@@ -571,16 +762,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionInterceptor.addReadPartition(partitionId);
 	}
 
-	private void registerInterceptorIfNeeded() {
-		if (!myInterceptorRegistry.getAllRegisteredInterceptors().contains(myPartitionInterceptor)) {
-			myInterceptorRegistry.registerInterceptor(myPartitionInterceptor);
-		}
-	}
-
 	public IIdType createPatient(Integer thePartitionId, Consumer<Patient>... theModifiers) {
-		if (thePartitionId != null) {
-			addCreatePartition(thePartitionId, null);
-		}
+		addCreatePartition(thePartitionId, null);
 
 		Patient p = new Patient();
 		for (Consumer<Patient> next : theModifiers) {
@@ -614,7 +797,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	private Consumer<Patient> withTag(String theSystem, String theCode) {
-		return t->t.getMeta().addTag(theSystem, theCode, theCode);
+		return t -> t.getMeta().addTag(theSystem, theCode, theCode);
 	}
 
 
@@ -626,7 +809,6 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		private final List<PartitionId> myReadPartitionIds = new ArrayList<>();
 
 		public void addCreatePartition(PartitionId thePartitionId) {
-			Validate.notNull(thePartitionId);
 			myCreatePartitionIds.add(thePartitionId);
 		}
 

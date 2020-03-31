@@ -134,7 +134,6 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 				continue;
 			}
 
-			// FIXME: add test for tag:not
 			// FIXME: add test for :missing
 			if (paramInverted) {
 				ourLog.debug("Searching for _tag:not");
@@ -173,6 +172,7 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 				addPartitionIdPredicate(thePartitionId, tagJoin, predicates);
 			}
 
+			myQueryRoot.setHasIndexJoins();
 			myQueryRoot.addPredicates(predicates);
 
 		}

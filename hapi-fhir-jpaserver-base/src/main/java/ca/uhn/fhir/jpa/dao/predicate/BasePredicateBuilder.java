@@ -25,11 +25,9 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -45,6 +43,7 @@ import javax.annotation.PostConstruct;
 import javax.persistence.criteria.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.ArrayList;
 import java.util.List;
 
 abstract class BasePredicateBuilder {
@@ -112,30 +111,29 @@ abstract class BasePredicateBuilder {
 		return (Join<ResourceTable, T>) join;
 	}
 
-	void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing) {
-//		if (myDontUseHashesForSearch) {
-//			Join<ResourceTable, SearchParamPresent> paramPresentJoin = myQueryRoot.join("mySearchParamPresents", JoinType.LEFT);
-//			Join<Object, Object> paramJoin = paramPresentJoin.join("mySearchParam", JoinType.LEFT);
-//
-//			myQueryRoot.addPredicate(myBuilder.equal(paramJoin.get("myResourceName"), theResourceName));
-//			myQueryRoot.addPredicate(myBuilder.equal(paramJoin.get("myParamName"), theParamName));
-//			myQueryRoot.addPredicate(myBuilder.equal(paramPresentJoin.get("myPresent"), !theMissing));
-//		}
-
+	void addPredicateParamMissingForReference(String theResourceName, String theParamName, boolean theMissing, PartitionId thePartitionId) {
 		Join<ResourceTable, SearchParamPresent> paramPresentJoin = myQueryRoot.join("mySearchParamPresents", JoinType.LEFT);
 
 		Expression<Long> hashPresence = paramPresentJoin.get("myHashPresence").as(Long.class);
 		Long hash = SearchParamPresent.calculateHashPresence(theResourceName, theParamName, !theMissing);
-		myQueryRoot.addPredicate(myCriteriaBuilder.equal(hashPresence, hash));
+
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(myCriteriaBuilder.equal(hashPresence, hash));
+
+		addPartitionIdPredicate(thePartitionId, paramPresentJoin, predicates);
+
+		myQueryRoot.setHasIndexJoins();
+		myQueryRoot.addPredicates(predicates);
 	}
 
-	void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing, Join<ResourceTable, ? extends BaseResourceIndexedSearchParam> theJoin, PartitionId thePartitionId) {
+	void addPredicateParamMissingForNonReference(String theResourceName, String theParamName, boolean theMissing, Join<ResourceTable, ? extends BaseResourceIndexedSearchParam> theJoin, PartitionId thePartitionId) {
 		if (thePartitionId != null) {
 			myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myPartitionIdValue"), thePartitionId.getPartitionId()));
 		}
 		myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myResourceType"), theResourceName));
 		myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myParamName"), theParamName));
 		myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myMissing"), theMissing));
+		myQueryRoot.setHasIndexJoins();
 	}
 
 	Predicate combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, Predicate thePredicate) {

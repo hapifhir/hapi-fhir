@@ -58,7 +58,7 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 		Join<ResourceTable, ResourceIndexedSearchParamQuantity> join = createJoin(SearchBuilderJoinEnum.QUANTITY, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
+			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
 			return null;
 		}
 
@@ -77,6 +77,7 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 		}
 
 		Predicate retVal = myCriteriaBuilder.or(toArray(codePredicates));
+		myQueryRoot.setHasIndexJoins();
 		myQueryRoot.addPredicate(retVal);
 		return retVal;
 	}

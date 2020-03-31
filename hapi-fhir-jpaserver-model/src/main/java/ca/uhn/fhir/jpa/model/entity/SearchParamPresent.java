@@ -32,7 +32,7 @@ import java.io.Serializable;
 	@Index(name = "IDX_RESPARMPRESENT_RESID", columnList = "RES_ID"),
 	@Index(name = "IDX_RESPARMPRESENT_HASHPRES", columnList = "HASH_PRESENCE")
 })
-public class SearchParamPresent implements Serializable {
+public class SearchParamPresent extends BasePartitionable implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -52,8 +52,6 @@ public class SearchParamPresent implements Serializable {
 	private transient String myParamName;
 	@Column(name = "HASH_PRESENCE")
 	private Long myHashPresence;
-	@Embedded
-	private PartitionId myPartitionId;
 
 	/**
 	 * Constructor
@@ -112,16 +110,8 @@ public class SearchParamPresent implements Serializable {
 		b.append("resPid", myResource.getIdDt().toUnqualifiedVersionless().getValue());
 		b.append("paramName", myParamName);
 		b.append("present", myPresent);
-		b.append("tenant", myPartitionId);
+		b.append("partition", getPartitionId());
 		return b.build();
-	}
-
-	public PartitionId getPartitionId() {
-		return myPartitionId;
-	}
-
-	public void setPartitionId(PartitionId thePartitionId) {
-		myPartitionId = thePartitionId;
 	}
 
 	public static long calculateHashPresence(String theResourceType, String theParamName, Boolean thePresent) {

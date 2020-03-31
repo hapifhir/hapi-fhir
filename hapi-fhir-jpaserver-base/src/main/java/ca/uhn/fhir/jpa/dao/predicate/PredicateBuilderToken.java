@@ -76,7 +76,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 
 		if (theList.get(0).getMissing() != null) {
 			Join<ResourceTable, ResourceIndexedSearchParamToken> join = createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);
-			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
+			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
 			return null;
 		}
 
@@ -108,7 +108,10 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 		codePredicates.addAll(singleCode);
 
 		Predicate spPredicate = myCriteriaBuilder.or(toArray(codePredicates));
+
+		myQueryRoot.setHasIndexJoins();
 		myQueryRoot.addPredicate(spPredicate);
+
 		return spPredicate;
 	}
 

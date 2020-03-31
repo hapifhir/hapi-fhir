@@ -53,6 +53,10 @@ public class RequestPartitionHelperService {
 	 */
 	@Nullable
 	public PartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType) {
+		if (myPartitioningBlacklist.contains(theResourceType)) {
+			return null;
+		}
+
 		PartitionId partitionId = null;
 
 		if (myDaoConfig.isPartitioningEnabled()) {
@@ -73,6 +77,10 @@ public class RequestPartitionHelperService {
 	 */
 	@Nullable
 	public PartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource) {
+		String resourceType = myFhirContext.getResourceDefinition(theResource).getName();
+		if (myPartitioningBlacklist.contains(resourceType)) {
+			return null;
+		}
 
 		PartitionId partitionId = null;
 		if (myDaoConfig.isPartitioningEnabled()) {
