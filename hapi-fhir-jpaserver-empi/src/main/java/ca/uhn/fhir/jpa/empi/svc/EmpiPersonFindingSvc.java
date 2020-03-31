@@ -45,9 +45,20 @@ public class EmpiPersonFindingSvc {
 	private IFhirResourceDao<Person> myPersonDao;
 
 
-
+	/**
+	 * Given an incoming IBaseResource, limited to Patient/Practitioner, return a list of {@link MatchedPersonCandidate}
+	 * indicating possible candidates for a matching Person. Uses several separate methods for finding candidates:
+	 *
+    *  1. First, check link table for any entries where this baseresource is the target of a person. If found, return.
+	 *  2. If none are found, attempt to find Person Resources which link to this theBaseResource.
+	 *  3. If none are found, attempt to find Persons similar to our incoming resource based on the EMPI rules and similarity metrics.
+	 *  4. If none are found, attempt to find Persons that are linked to Patients/Practitioners that are similar to our incoming resource based on the EMPI rules and
+	 *  similarity metrics.
+	 *
+	 * @param theBaseResource the {@link IBaseResource} we are attempting to find matching candidate Persons for.
+	 * @return A list of {@link MatchedPersonCandidate} indicating all potential Person matches.
+	 */
 	public List<MatchedPersonCandidate> findPersonCandidates(IBaseResource theBaseResource) {
-	 // 1. First, check link table for any entries where this baseresource is the target of a person. If found, return.
 		Optional<List<MatchedPersonCandidate>> matchedPersonCandidates;
 			matchedPersonCandidates= attemptToFindPersonCandidateFromEmpiLinkTable(theBaseResource);
 
@@ -56,13 +67,13 @@ public class EmpiPersonFindingSvc {
 		}
 
 		// 2. Next, find Person resources that link to this resource. GGG there shouldnt be any.... as our previous query returned 0.
-		// 3. Next, try to find Persons that are similar to our incoming resource based on metrics.
-		//FIXME EMPI QUESTION this is what I was going to do for fetching candidate Persons, but I can't search across resources.
+		// 3. Next, try to find Persons that are similar to our incoming resource based on similarity metrics
 		matchedPersonCandidates =  attemptToFindPersonCandidateFromSimilarPersons(theBaseResource);
 		if (matchedPersonCandidates.isPresent()) {
 			return matchedPersonCandidates.get();
 		}
 
+		//4. Finally, perform similarity matching against the existing Patient/Practitioner population as a last resort.
 		matchedPersonCandidates =  attemptToFindPersonCandidateFromSimilarTargetResource(theBaseResource);
 		if (matchedPersonCandidates.isPresent()) {
 			return matchedPersonCandidates.get();
