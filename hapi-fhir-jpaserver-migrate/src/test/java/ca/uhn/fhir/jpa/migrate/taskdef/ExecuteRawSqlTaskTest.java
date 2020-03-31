@@ -6,10 +6,15 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 
 public class ExecuteRawSqlTaskTest extends BaseTest {
+
+	public ExecuteRawSqlTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
 
 	@Test
 	public void testExecuteSql() {

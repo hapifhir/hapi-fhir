@@ -7,10 +7,15 @@ import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 
 public class CalculateHashesTest extends BaseTest {
+
+	public CalculateHashesTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
 
 	@Test
 	public void testCreateHashes() {

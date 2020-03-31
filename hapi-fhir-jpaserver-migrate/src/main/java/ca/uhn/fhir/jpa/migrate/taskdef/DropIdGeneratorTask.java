@@ -69,6 +69,8 @@ public class DropIdGeneratorTask extends BaseTask {
 				}
 				break;
 			case DERBY_EMBEDDED:
+				sql = "drop sequence " + myGeneratorName + " restrict";
+				break;
 			case H2_EMBEDDED:
 				sql = "drop sequence " + myGeneratorName;
 				break;
