@@ -19,7 +19,7 @@ public class VersionEnumTest {
 
 		String version = VersionUtil.getVersion();
 		version = "V" + version.replace(".", "_");
-		version = version.replace("-SNAPSHOT", "");
+		version = version.replaceAll("-[a-zA-Z0-9]+$", "");
 
 		assertThat(versions, hasItem(version));
 	}
