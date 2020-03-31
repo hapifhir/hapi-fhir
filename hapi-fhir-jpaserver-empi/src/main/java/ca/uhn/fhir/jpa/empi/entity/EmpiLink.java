@@ -67,6 +67,12 @@ public class EmpiLink {
 	@OptimisticLock(excluded = true)
 	private EmpiLinkSourceEnum myLinkSource;
 
+	// FIXME EMPI add 2 columns: bitmap and ruleset version.
+
+	// FIXME EMPI Note if a link is MANUAL it has no version
+
+	// FIXME EMIP batch job rule change, iterate over patient
+
 	public Long getId() {
 		return myId;
 	}
