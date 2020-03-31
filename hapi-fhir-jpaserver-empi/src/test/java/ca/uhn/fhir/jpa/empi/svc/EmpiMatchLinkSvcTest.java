@@ -5,24 +5,18 @@ import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 
 import java.util.List;
-import java.util.Objects;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
@@ -102,6 +96,15 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 			assertEquals(origPersonPid2, linkedPersonPid);
 		}
 	}
+
+	// FIXME EMPI
+	// Test: empi link record exists with MANUAL NO_MATCH, that patient is updated, and it MATCH according to rules, the NO_MATCH blocks it
+
+	// FIXME EMPI
+	// Test: empi link record exists with MANUAL NO_MATCH, that patient is updated, and it POSSIBLE_MATCH according to rules, the NO_MATCH blocks it
+
+	// FIXME EMPI
+	// Test: it should be impossible to have a AUTO NO_MATCH record.  The only NO_MATCH records in the system must be MANUAL.
 
 	private Patient createPatientAndUpdateLinks(Patient thePatient) {
 		//Note that since our empi-rules block on active=true, all patients must be active.
