@@ -6,6 +6,8 @@ import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import junit.framework.TestCase;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
@@ -14,6 +16,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	@Autowired
@@ -56,7 +59,27 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		}
 	}
 
-	// FIXME EMPI test if a link is MANUAL, it cannot be changed by the system; only by a user operation
+	@Test
+	public void testManualEmpiLinksCannotBeModifiedBySystem() {
+		Person person = createPerson(buildJanePerson());
+		Patient patient = createPatient(buildJanePatient());
 
+		myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL);
+		try {
+			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
+			fail();
+		} catch (ForbiddenOperationException e) {}
+	}
 
+	@Test
+	public void testAutomaticallyAddedNO_MATCHEmpiLinksAreNotAllowed() {
+		Person person = createPerson(buildJanePerson());
+		Patient patient = createPatient(buildJanePatient());
+
+		// Test: it should be impossible to have a AUTO NO_MATCH record.  The only NO_MATCH records in the system must be MANUAL.
+		try {
+			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.AUTO);
+			TestCase.fail();
+		} catch (IllegalArgumentException e) {}
+	}
 }

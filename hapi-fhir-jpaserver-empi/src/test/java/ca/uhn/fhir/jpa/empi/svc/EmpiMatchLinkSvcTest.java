@@ -62,7 +62,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testPatientLinksToPersonIfMatch() {
-		//FIXME EMPI QUESTION: We agreed we were not going to match to Person Attributes right? lmk.
 		Person janePerson = buildJanePerson();
 		DaoMethodOutcome outcome = myPersonDao.create(janePerson);
 		Long origPersonPid = myResourceTableHelper.getPidOrNull(outcome.getResource());
@@ -103,18 +102,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(similarJane, is(not(linkedTo(originalJane))));
 	}
 
-	// FIXME EMPI this test is in the wrong class
-	@Test
-	public void testAutomaticallyAddedNO_MATCHEmpiLinksAreNotAllowed() {
-		Person person = createPerson(buildJanePerson());
-		Patient patient = createPatient(buildJanePatient());
 
-		// Test: it should be impossible to have a AUTO NO_MATCH record.  The only NO_MATCH records in the system must be MANUAL.
-		try {
-			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.AUTO);
-			fail();
-		} catch (IllegalArgumentException e) {}
-	}
 
 	@Test
 	public void testWhenPatientIsCreatedWithEIDThatItPropagatesToNewPersons() {
@@ -157,8 +145,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 
 		Patient janePatient= buildJanePatient();
-		janePatient.addIdentifier().setSystem("FIXME_EID_SYSTEM").setValue("12345");
-		createPatientAndUpdateLinks(janePatient); //FIXME during this call, add the EID to jane patient before creation.
+		addEID(janePatient, "12345");
+		createPatientAndUpdateLinks(janePatient);
 
 
 		EmpiLink empiLink = myEmpiLinkDaoSvc.getLinkByTargetResourceId(patient.getIdElement().getIdPartAsLong());
@@ -166,14 +154,17 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(myEmpiMatchLinkSvc.getEID(person), is(equalTo("12345")));
 	}
 
+	public Patient addEID(Patient theJanePatient, String theEID) {
+		theJanePatient.addIdentifier().setSystem("FIXME_EID_SYSTEM").setValue(theEID);
+		return theJanePatient;
+	}
+
 	@Test
 	public void testIncomingPatientWithEIDMatchesAnotherPatientWithSameEIDAreLinked() {
-		Patient patient1 = buildJanePatient();
-		// FIXME GGG extract test constants
-		patient1.addIdentifier().setSystem("FIXME_EID_SYSTEM").setValue("12345");
+		Patient patient1 = addEID(buildJanePatient(), "12345");
 		patient1 = createPatientAndUpdateLinks(patient1);
-		Patient patient2 = buildPaulPatient();
-		patient2.addIdentifier().setSystem("FIXME_EID_SYSTEM").setValue("12345");
+
+		Patient patient2 = addEID(buildPaulPatient(), "12345");
 		patient2 = createPatientAndUpdateLinks(patient2);
 
 		assertThat(patient1, is(samePersonAs(patient2)));
