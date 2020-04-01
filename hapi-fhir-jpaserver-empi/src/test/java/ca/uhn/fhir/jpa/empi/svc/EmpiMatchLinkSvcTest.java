@@ -118,9 +118,9 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	public void testWhenPatientIsCreatedWithoutAnEIDThePersonGetsAutomaticallyAssignedOne() {
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 		EmpiLink empiLink = myEmpiLinkDaoSvc.getLinkByTargetResourceId(patient.getIdElement().getIdPartAsLong());
-		Person read = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
+		Person person = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
 
-		assertThat(myEmpiMatchLinkSvc.getEID(read), is(notNullValue()));
+		assertThat(myEmpiMatchLinkSvc.getEID(person), is(notNullValue()));
 	}
 
 	@Test

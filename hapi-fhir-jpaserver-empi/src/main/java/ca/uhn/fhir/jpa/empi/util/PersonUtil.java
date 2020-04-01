@@ -1,17 +1,19 @@
 package ca.uhn.fhir.jpa.empi.util;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.rules.config.EmpiConfig;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Person;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @Lazy
@@ -19,6 +21,8 @@ import java.util.stream.Stream;
 public final class PersonUtil {
 	@Autowired
 	private FhirContext myFhirContext;
+	@Autowired
+	private EmpiConfig myEmpiConfig;
 
 	private PersonUtil(){}
 
@@ -71,16 +75,43 @@ public final class PersonUtil {
 		}
 	}
 
+	/**
+	 * Create a Person from a given patient. This will carry over the Patient's EID if it exists. If it does not exist,
+	 * a randomly generated UUID EID will be created.
+	 *
+	 * @param thePatient The Patient that will be used as the starting point for the person.
+	 * @return the Person that is created.
+	 */
 	public IBaseResource createPersonFromPatient(IBaseResource thePatient) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person person = new Person();
+				person.addIdentifier(createEIDIdentifierForPerson(thePatient));
 				//FIXME EMPI populate from data from theResource
 				return person;
 			default:
 				// FIXME EMPI moar versions
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
+	}
 
+	public Identifier createEIDIdentifierForPerson(IBaseResource thePatient) {
+		Optional<Identifier> first = ((Patient) thePatient).getIdentifier().stream().filter(id -> id.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())).findFirst();
+		if (first.isPresent()) {
+			Identifier identifier = first.get();
+			identifier.setUse(Identifier.IdentifierUse.OFFICIAL);
+			return identifier;
+		} else {
+			Identifier identifier = new Identifier();
+			identifier.setSystem(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem());
+			identifier.setValue(UUID.randomUUID().toString());
+			identifier.setUse(Identifier.IdentifierUse.TEMP);
+			return identifier;
+		}
+	}
+
+	public String readEIDFromResource(IBaseResource theBaseResource) {
+		//FIXME EMPI
+		return "";
 	}
 }

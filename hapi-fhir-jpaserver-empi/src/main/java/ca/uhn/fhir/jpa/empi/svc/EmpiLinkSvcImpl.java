@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
 import ca.uhn.fhir.jpa.api.MatchedTargetCandidate;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.util.PersonUtil;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,8 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	public void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
 		IIdType resourceId = theResource.getIdElement().toUnqualifiedVersionless();
 
-		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource);
+		validateRequestIsLegal(theResource, theMatchResult, theLinkSource);
+
 		switch (theMatchResult) {
 			case MATCH:
 				// FIXME EMPI use assurance 2 for possible and assurance 4 for no match
@@ -69,6 +71,35 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 					myEmpiResourceDaoSvc.updatePerson(thePerson);
 				}
 		}
+		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource);
+	}
+
+	/**
+	 * Helper function which runs various business rules about what types of requests are allowed.
+	 */
+	private void validateRequestIsLegal(IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
+		EmpiLink existingLink = getEmpiLinkForResourceTarget(theResource);
+		if (existingLink != null && systemIsAttemptingToModifyManualLink(theLinkSource, existingLink.getLinkSource())) {
+			throw new InternalErrorException("EMPI system is not allowed to modify links on manually created links");
+		}
+
+		if (systemIsAttemptingToAddNoMatch(theLinkSource, theMatchResult)) {
+			throw new InternalErrorException("EMPI system is not allowed to automatically NO_MATCH a resource");
+		}
+	}
+
+	/**
+	 * Helper function which detects when the EMPI system is attempting to add a NO_MATCH link, which is not allowed.
+	 */
+	private boolean systemIsAttemptingToAddNoMatch(EmpiLinkSourceEnum theLinkSource, EmpiMatchResultEnum theMatchResult) {
+		return EmpiLinkSourceEnum.AUTO.equals(theLinkSource) && EmpiMatchResultEnum.NO_MATCH.equals(theMatchResult);
+	}
+
+	/**
+	 * Helper function to let us catch when System EMPI rules are attempting to override a manually defined link.
+	 */
+	private boolean systemIsAttemptingToModifyManualLink(EmpiLinkSourceEnum theIncomingSource, EmpiLinkSourceEnum theExistingSource) {
+		return EmpiLinkSourceEnum.AUTO.equals(theIncomingSource) && EmpiLinkSourceEnum.MANUAL.equals(theExistingSource);
 	}
 
 	@Override

@@ -20,10 +20,6 @@ public class EmpiMatchLinkSvc {
 	@Autowired
 	private EmpiResourceDaoSvc myEmpiResourceDaoSvc;
 	@Autowired
-	private EmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
-	@Autowired
-	private EmpiResourceComparatorSvc myEmpiResourceComparatorSvc;
-	@Autowired
 	private IEmpiLinkSvc myEmpiLinkSvc;
 	@Autowired
 	private EmpiPersonFindingSvc myEmpiPersonFindingSvc;

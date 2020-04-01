@@ -33,33 +33,13 @@ public class EmpiLinkDaoSvc {
 
 		EmpiLink empiLink = getEmpiLinkByTargetPid(personPid, resourcePid);
 
-		if (systemIsAttemptingToModifyManualLink(theLinkSource, empiLink.getLinkSource())) {
-			throw new InternalErrorException("EMPI system is not allowed to modify links on manually created links");
-		}
-
-		if (systemIsAttemptingToAddNoMatch(theLinkSource, theMatchResult)) {
-			throw new InternalErrorException("EMPI system is not allowed to automatically NO_MATCH a resource");
-		}
-
 		empiLink.setLinkSource(theLinkSource);
 		empiLink.setMatchResult(theMatchResult);
 		ourLog.debug("Creating EmpiLink from {} to {} -> {}", thePerson.getIdElement(), theResource.getIdElement(), theMatchResult);
 		myEmpiLinkDao.save(empiLink);
 	}
 
-	/**
-	 * Helper function which detects when the EMPI system is attempting to add a NO_MATCH link, which is not allowed.
-	 */
-	private boolean systemIsAttemptingToAddNoMatch(EmpiLinkSourceEnum theLinkSource, EmpiMatchResultEnum theMatchResult) {
-		return EmpiLinkSourceEnum.AUTO.equals(theLinkSource) && EmpiMatchResultEnum.NO_MATCH.equals(theMatchResult);
-	}
 
-	/**
-	 * Helper function to let us catch when System EMPI rules are attempting to override a manually defined link.
-	 */
-	private boolean systemIsAttemptingToModifyManualLink(EmpiLinkSourceEnum theIncomingSource, EmpiLinkSourceEnum theExistingSource) {
-		return EmpiLinkSourceEnum.AUTO.equals(theIncomingSource) && EmpiLinkSourceEnum.MANUAL.equals(theExistingSource);
-	}
 
 	@NotNull
 	public EmpiLink getEmpiLinkByTargetPid(Long thePersonPid, Long theResourcePid) {

@@ -40,6 +40,8 @@ public class EmpiRulesJson implements IModelJson {
 	double myNoMatchThreshold;
 	@JsonProperty("matchThreshold")
 	double myMatchThreshold;
+	@JsonProperty("enterpriseEIDSystem")
+	String myEnterpriseEIDSystem;
 
 	transient VectorWeightMap myVectorWeightMap;
 
@@ -134,4 +136,9 @@ public class EmpiRulesJson implements IModelJson {
 	public List<EmpiFilterSearchParamJson> getFilterSearchParams() {
 		return Collections.unmodifiableList(myFilterSearchParams);
 	}
+
+	public String getEnterpriseEIDSystem() {
+		return myEnterpriseEIDSystem;
+	}
+
 }
