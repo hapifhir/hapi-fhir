@@ -1,14 +1,17 @@
 package ca.uhn.fhir.jpa.empi.util;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.rules.config.EmpiConfig;
+import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Person;
+import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -23,7 +26,7 @@ public final class PersonUtil {
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private EmpiConfig myEmpiConfig;
+	private IEmpiConfig myEmpiConfig;
 
 	private PersonUtil(){}
 

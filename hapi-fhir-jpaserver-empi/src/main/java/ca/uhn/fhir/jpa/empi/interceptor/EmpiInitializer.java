@@ -1,15 +1,17 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
-import ca.uhn.fhir.empi.rules.config.EmpiConfig;
+import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.IEmpiInterceptor;
 import ca.uhn.fhir.jpa.empi.provider.EmpiProviderLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 
+@Service
 public class EmpiInitializer {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiInitializer.class);
 	public static final String EMPI_CONSUMER_COUNT_DEFAULT = "5";
@@ -21,7 +23,7 @@ public class EmpiInitializer {
 	@Autowired
 	EmpiProviderLoader myEmpiProviderLoader;
 	@Autowired
-	EmpiConfig myEmpiConfig;
+	IEmpiConfig myEmpiConfig;
 
 	@PostConstruct
 	public void init() {
