@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
 import ca.uhn.fhir.jpa.empi.util.PersonUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -48,5 +49,10 @@ public class EmpiMatchLinkSvc {
 
 		}
 
+	}
+
+	public String getEID(IBaseResource theResource) {
+		//FIXME EMPI implement this.
+		return null;
 	}
 }

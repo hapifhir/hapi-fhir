@@ -7,12 +7,15 @@ import ca.uhn.fhir.jpa.empi.config.EmpiConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
+import ca.uhn.fhir.jpa.empi.svc.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.empi.svc.EmpiLinkSvcImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
@@ -25,7 +28,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -50,6 +57,10 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected EmpiResourceComparatorSvc myEmpiResourceComparatorSvc;
 	@Autowired
 	protected IEmpiLinkDao myEmpiLinkDao;
+	@Autowired
+	protected EmpiLinkSvcImpl myEmpiLinkSvc;
+	@Autowired
+	protected EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 
 	@After
 	public void after() {
@@ -150,17 +161,47 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	 * A Matcher which allows us to check that a target patient/practitioner
 	 * is linked to a set of patients/practitioners via a person.
 	 */
-	public Matcher<IBaseResource> isLinkedTo(IBaseResource... theBaseResource) {
+	public Matcher<IBaseResource> linkedTo(IBaseResource... theBaseResource) {
+
 		return new TypeSafeMatcher<IBaseResource>() {
+			private List<Long> baseResourcePersonPids;
+			private Long incomingResourcePersonPid;
+
 			@Override
-			protected boolean matchesSafely(IBaseResource theBaseResource) {
-				return false;
-				//FIXME GGG
+			protected boolean matchesSafely(IBaseResource theIncomingResource) {
+				EmpiLink link = new EmpiLink();
+				link.setTargetPid(theIncomingResource.getIdElement().getIdPartAsLong());
+				Example<EmpiLink> exampleLink = Example.of(link);
+				Optional<EmpiLink> one = myEmpiLinkDao.findOne(exampleLink);
+				//There is no person for this patient, so obviously they are not linked to anybody.
+				if (!one.isPresent()){
+					return true;
+				} else {
+					incomingResourcePersonPid = one.get().getPersonPid();
+				}
+
+				//OK, lets grab all the person pids of the resources passed in via the constructor.
+				baseResourcePersonPids = Arrays.stream(theBaseResource)
+					.map(base -> getPersonPidFromResource(base))
+					.collect(Collectors.toList());
+
+				//The resources are linked if all person pids match the incoming person pid.
+				return baseResourcePersonPids.stream()
+					.allMatch(pid -> pid.equals(incomingResourcePersonPid));
+			}
+
+			private Long getPersonPidFromResource(IBaseResource theBase) {
+				IIdType idElement = theBase.getIdElement();
+				if (theBase.getIdElement().getResourceType().equalsIgnoreCase("Person")) {
+					return idElement.getIdPartAsLong();
+				} else {
+					return myEmpiLinkDaoSvc.getLinkByTargetResourceId(idElement.getIdPartAsLong()).getPersonPid();
+				}
+
 			}
 
 			@Override
 			public void describeTo(Description theDescription) {
-				//FIXME GGG
 			}
 		};
 	}
@@ -203,14 +244,16 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 			private boolean isPatientOrPractitioner(IBaseResource theResource) {
 				String resourceType = theResource.getIdElement().getResourceType();
-				return (resourceType.equalsIgnoreCase("Person") || resourceType.equalsIgnoreCase("Practitioner"));
+				return (resourceType.equalsIgnoreCase("Patient") || resourceType.equalsIgnoreCase("Practitioner"));
 			}
 			private EmpiLink getEmpiLink(IBaseResource thePatientOrPractitionerResource) {
-				EmpiLink candidate = new EmpiLink();
-				candidate.setTargetPid(thePatientOrPractitionerResource.getIdElement().getIdPartAsLong());
-				Example<EmpiLink> example = Example.of(candidate);
-				return myEmpiLinkDao.findOne(example)
-					.orElseThrow(() -> new IllegalStateException("We didn't find a Person for resource with pid: " + thePatientOrPractitionerResource.getIdElement()));
+				EmpiLink linkByTargetResourceId = myEmpiLinkDaoSvc.getLinkByTargetResourceId(thePatientOrPractitionerResource.getIdElement().getIdPartAsLong());
+				if (linkByTargetResourceId == null) {
+					throw new IllegalStateException("We didn't find a Person for resource with pid: " + thePatientOrPractitionerResource.getIdElement()));
+				} else {
+					return linkByTargetResourceId;
+				}
+
 			}
 
 			@Override
