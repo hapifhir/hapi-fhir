@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
-import ca.uhn.fhir.empi.rules.config.EmpiConfig;
+import ca.uhn.fhir.empi.rules.config.EmpiConfigImpl;
+import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
 import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
@@ -18,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static junit.framework.TestCase.fail;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -34,7 +34,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Autowired
 	IEmpiLinkDao myEmpiLinkDao;
 	@Autowired
-	EmpiConfig myEmpiConfig;
+	IEmpiConfig myEmpiConfig;
 	@Autowired
 	IEmpiLinkSvc myEmpiLinkSvc;
 
