@@ -103,6 +103,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(similarJane, is(not(linkedTo(originalJane))));
 	}
 
+	// FIXME EMPI this test is in the wrong class
 	@Test
 	public void testAutomaticallyAddedNO_MATCHEmpiLinksAreNotAllowed() {
 		Person person = createPerson(buildJanePerson());
@@ -168,6 +169,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testIncomingPatientWithEIDMatchesAnotherPatientWithSameEIDAreLinked() {
 		Patient patient1 = buildJanePatient();
+		// FIXME GGG extract test constants
 		patient1.addIdentifier().setSystem("FIXME_EID_SYSTEM").setValue("12345");
 		patient1 = createPatientAndUpdateLinks(patient1);
 		Patient patient2 = buildPaulPatient();
@@ -198,6 +200,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//FIXME EMPI
 		// Test: Existing Person without Meta Tag indicating they are EMPI-Managed. Requestors cannot add the tag.
 	}
+
+	// FIXME EMPI Test: Patient with "no-empi" tag is not matched
 
 	private Patient createPatientAndUpdateLinks(Patient thePatient) {
 		//Note that since our empi-rules block on active=true, all patients must be active.

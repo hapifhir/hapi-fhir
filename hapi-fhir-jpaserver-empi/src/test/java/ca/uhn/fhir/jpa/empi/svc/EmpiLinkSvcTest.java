@@ -55,4 +55,8 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 			assertEquals(0, newPerson.getLink().size());
 		}
 	}
+
+	// FIXME EMPI test if a link is MANUAL, it cannot be changed by the system; only by a user operation
+
+
 }

@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.empi;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.empi.config.EmpiConfig;
+import ca.uhn.fhir.jpa.empi.config.EmpiCtxConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
@@ -38,7 +38,7 @@ import static org.junit.Assert.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {EmpiConfig.class, TestEmpiConfigR4.class})
+@ContextConfiguration(classes = {EmpiCtxConfig.class, TestEmpiConfigR4.class})
 abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = getLogger(BaseEmpiR4Test.class);
 

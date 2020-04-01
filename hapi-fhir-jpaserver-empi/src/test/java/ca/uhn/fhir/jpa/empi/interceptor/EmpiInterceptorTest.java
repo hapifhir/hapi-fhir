@@ -36,6 +36,7 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 		assertLinkCount(0);
 	}
 
+	// FIXME EMPI restrict to empi-managed Person resources
 	@Test
 	public void testCreateUpdatePersonWithLinkForbiddenWhenEmpiEnabled() throws InterruptedException {
 		// When EMPI is enabled, only the EMPI system is allowed to modify Person links
