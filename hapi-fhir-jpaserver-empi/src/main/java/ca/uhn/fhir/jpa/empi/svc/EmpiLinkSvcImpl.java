@@ -53,6 +53,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	public void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
 		IIdType resourceId = theResource.getIdElement().toUnqualifiedVersionless();
 
+		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource);
 		switch (theMatchResult) {
 			case MATCH:
 				// FIXME EMPI use assurance 2 for possible and assurance 4 for no match
@@ -68,7 +69,6 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 					myEmpiResourceDaoSvc.updatePerson(thePerson);
 				}
 		}
-		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource);
 	}
 
 	@Override
