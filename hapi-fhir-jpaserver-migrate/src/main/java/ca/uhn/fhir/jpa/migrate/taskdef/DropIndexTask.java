@@ -111,8 +111,10 @@ public class DropIndexTask extends BaseTableTask {
 					sql.add("alter table " + theTableName + " drop index " + theIndexName);
 					break;
 				case H2_EMBEDDED:
-				case DERBY_EMBEDDED:
 					sql.add("drop index " + theIndexName);
+					break;
+				case DERBY_EMBEDDED:
+					sql.add("alter table " + theTableName + " drop constraint " + theIndexName);
 					break;
 				case POSTGRES_9_4:
 					sql.add("alter table " + theTableName + " drop constraint if exists " + theIndexName + " cascade");
