@@ -5,11 +5,16 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
 
 public class AddForeignKeyTaskTest extends BaseTest {
+
+	public AddForeignKeyTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
 
 	@Test
 	public void testAddForeignKey() throws SQLException {

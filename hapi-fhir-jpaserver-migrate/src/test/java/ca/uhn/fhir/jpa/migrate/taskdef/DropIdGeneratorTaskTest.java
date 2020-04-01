@@ -7,6 +7,7 @@ import ca.uhn.fhir.util.VersionEnum;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
@@ -14,6 +15,10 @@ import static org.junit.Assert.assertThat;
 
 public class DropIdGeneratorTaskTest extends BaseTest {
 
+
+	public DropIdGeneratorTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
 
 	@Test
 	public void testAddIdGenerator() throws SQLException {

@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.sql.SQLException;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -17,6 +18,10 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 public class AddColumnTest extends BaseTest {
+
+	public AddColumnTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
 
 	@Test
 	public void testColumnDoesntAlreadyExist() throws SQLException {

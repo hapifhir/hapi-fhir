@@ -1,17 +1,27 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.flywaydb.core.internal.command.DbMigrate;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 
 public class ModifyColumnTest extends BaseTest {
+	public ModifyColumnTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
+
 	@Test
 	public void testColumnWithJdbcTypeClob() throws SQLException {
+		if (getDriverType() == DriverTypeEnum.DERBY_EMBEDDED) {
+			return;
+		}
+
 		executeSql("create table SOMETABLE (TEXTCOL clob)");
 
 		ModifyColumnTask task = new ModifyColumnTask("1", "1");
@@ -126,7 +136,7 @@ public class ModifyColumnTest extends BaseTest {
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "DATECOL"));
 		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG, 19), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
-		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP, 26), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "DATECOL"));
+		assertEquals(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP, JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "DATECOL").getColumnTypeEnum());
 
 		getMigrator().setNoColumnShrink(true);
 
@@ -152,7 +162,7 @@ public class ModifyColumnTest extends BaseTest {
 		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "DATECOL"));
 		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG, 19), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
-		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP, 26), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "DATECOL"));
+		assertEquals(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP, JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "DATECOL").getColumnTypeEnum());
 
 		// Make sure additional migrations don't crash
 		getMigrator().migrate();
