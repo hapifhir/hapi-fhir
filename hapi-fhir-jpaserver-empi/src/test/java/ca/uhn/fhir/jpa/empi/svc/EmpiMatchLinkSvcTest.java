@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
@@ -32,7 +33,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	IEmpiLinkDao myEmpiLinkDao;
 
 	@Autowired
-	EmpiLinkSvcImpl myEmpiLinkSvc;
+	IEmpiLinkSvc myEmpiLinkSvc;
 
 	@Test
 	public void testAddPatientLinksToNewPersonIfNoneFound() {
