@@ -3,7 +3,7 @@ package ca.uhn.fhir.empi.rules.svc;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 
 public class EmpiRulesSvc {
-	private final EmpiRulesJson myEmpiRulesJson;
+	private EmpiRulesJson myEmpiRulesJson;
 
 	public EmpiRulesSvc(EmpiRulesJson theEmpiRulesJson) {
 		myEmpiRulesJson = theEmpiRulesJson;
@@ -11,5 +11,10 @@ public class EmpiRulesSvc {
 
 	public EmpiRulesJson getEmpiRules() {
 		return myEmpiRulesJson;
+	}
+
+	public EmpiRulesSvc setEmpiRules(EmpiRulesJson theEmpiRulesJson) {
+		myEmpiRulesJson = theEmpiRulesJson;
+		return this;
 	}
 }

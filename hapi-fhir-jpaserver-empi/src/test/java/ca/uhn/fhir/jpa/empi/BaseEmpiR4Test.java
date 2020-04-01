@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkDaoSvc;
-import ca.uhn.fhir.jpa.empi.svc.EmpiLinkSvcImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.hamcrest.Description;
@@ -57,8 +56,6 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected EmpiResourceComparatorSvc myEmpiResourceComparatorSvc;
 	@Autowired
 	protected IEmpiLinkDao myEmpiLinkDao;
-	@Autowired
-	protected EmpiLinkSvcImpl myEmpiLinkSvc;
 	@Autowired
 	protected EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 
