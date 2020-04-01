@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import javax.servlet.http.HttpServletRequest;
 
 /*
@@ -29,8 +30,8 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 
 public interface IFhirResourceDaoEncounter<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort);
+	IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails);
 
-	IBundleProvider encounterTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSortSpec);
+	IBundleProvider encounterTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSortSpec, RequestDetails theRequestDetails);
 
 }

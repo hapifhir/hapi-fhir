@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -39,7 +40,7 @@ import java.util.Collections;
 public class FhirResourceDaoEncounterR5 extends BaseHapiFhirResourceDao<Encounter> implements IFhirResourceDaoEncounter<Encounter> {
 
 	@Override
-	public IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort) {
+	public IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, RequestDetails theRequestDetails) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
@@ -53,13 +54,13 @@ public class FhirResourceDaoEncounterR5 extends BaseHapiFhirResourceDao<Encounte
 		if (theId != null) {
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 		}
-		IBundleProvider retVal = search(paramMap);
+		IBundleProvider retVal = search(paramMap, theRequestDetails);
 		return retVal;
 	}
 
 	@Override
-	public IBundleProvider encounterTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort) {
-		return encounterInstanceEverything(theServletRequest, null, theCount, theLastUpdated, theSort);
+	public IBundleProvider encounterTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, RequestDetails theRequestDetails) {
+		return encounterInstanceEverything(theServletRequest, null, theCount, theLastUpdated, theSort, theRequestDetails);
 	}
 
 }

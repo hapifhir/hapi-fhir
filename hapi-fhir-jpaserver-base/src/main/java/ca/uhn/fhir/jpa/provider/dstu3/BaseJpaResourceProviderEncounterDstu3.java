@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.dstu3.model.*;
 
 /*
@@ -54,12 +55,14 @@ public class BaseJpaResourceProviderEncounterDstu3 extends JpaResourceProviderDs
 			DateRangeParam theLastUpdated,
 			
 			@Sort
-			SortSpec theSortSpec
+			SortSpec theSortSpec,
+
+			RequestDetails theRequestDetails
 			) {
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoEncounter<Encounter>)getDao()).encounterInstanceEverything(theServletRequest, theId, theCount, theLastUpdated, theSortSpec);
+			return ((IFhirResourceDaoEncounter<Encounter>)getDao()).encounterInstanceEverything(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, theRequestDetails);
 		} finally {
 			endRequest(theServletRequest);
 		}}
@@ -81,12 +84,14 @@ public class BaseJpaResourceProviderEncounterDstu3 extends JpaResourceProviderDs
 				DateRangeParam theLastUpdated,
 				
 				@Sort
-				SortSpec theSortSpec
+				SortSpec theSortSpec,
+
+				RequestDetails theRequestDetails
 				) {
 
 			startRequest(theServletRequest);
 			try {
-				return ((IFhirResourceDaoEncounter<Encounter>)getDao()).encounterTypeEverything(theServletRequest, theCount, theLastUpdated, theSortSpec);
+				return ((IFhirResourceDaoEncounter<Encounter>)getDao()).encounterTypeEverything(theServletRequest, theCount, theLastUpdated, theSortSpec, theRequestDetails);
 			} finally {
 				endRequest(theServletRequest);
 			}
