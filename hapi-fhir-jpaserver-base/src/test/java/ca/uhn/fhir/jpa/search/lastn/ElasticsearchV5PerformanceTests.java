@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 
 @Ignore
 public class ElasticsearchV5PerformanceTests {
-
+/*
     private ElasticsearchV5SvcImpl elasticsearchSvc = new ElasticsearchV5SvcImpl("localhost", 9301, "elastic", "changeme");
     private List<String> patientIds = new ArrayList<>();
 
@@ -148,6 +148,6 @@ public class ElasticsearchV5PerformanceTests {
         }
         return identifiers;
     }
-
+*/
 
 }

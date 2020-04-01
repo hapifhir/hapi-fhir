@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -110,6 +111,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -152,6 +154,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private IdHelperService myIdHelperService;
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
+	@Autowired(required = false)
+	private IElasticsearchSvc myIElasticsearchSvc;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
@@ -314,22 +318,51 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		/*
-		 * Fulltext search
+		 * Fulltext search and lastn
 		 */
-		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-			if (myFulltextSearchSvc == null) {
-				if (myParams.containsKey(Constants.PARAM_TEXT)) {
-					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-				} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
+			List<ResourcePersistentId> lastnPids = new ArrayList<>();
+			List<ResourcePersistentId> fullTextSearchPids = new ArrayList<>();
+
+			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
+				if (myFulltextSearchSvc == null) {
+					if (myParams.containsKey(Constants.PARAM_TEXT)) {
+						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
+						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+					}
+				}
+
+				if (myParams.getEverythingMode() != null) {
+					fullTextSearchPids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
+				} else {
+					fullTextSearchPids = myFulltextSearchSvc.search(myResourceName, myParams);
+				}
+			} else {
+				if (myIElasticsearchSvc == null) {
+					if (myParams.isLastN()) {
+						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
+					}
+				}
+
+				if (myParams.isLastN()) {
+					lastnPids = myIElasticsearchSvc.executeLastN(myParams, theRequest, myIdHelperService);
 				}
 			}
 
+			//
 			List<ResourcePersistentId> pids;
-			if (myParams.getEverythingMode() != null) {
-				pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
+			if (fullTextSearchPids.isEmpty()) {
+				pids = lastnPids;
+			} else if (lastnPids.isEmpty()) {
+				pids = fullTextSearchPids;
 			} else {
-				pids = myFulltextSearchSvc.search(myResourceName, myParams);
+				// Intersection of the fullTextSearchPids and lastnPids
+				Set<ResourcePersistentId> pidIntersection = fullTextSearchPids.stream()
+					.distinct()
+					.filter(lastnPids::contains)
+					.collect(Collectors.toSet());
+				pids = new ArrayList<>(pidIntersection);
 			}
 			if (pids.isEmpty()) {
 				// Will never match

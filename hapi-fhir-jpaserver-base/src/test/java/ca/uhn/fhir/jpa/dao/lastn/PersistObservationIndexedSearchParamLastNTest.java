@@ -29,7 +29,7 @@ public class PersistObservationIndexedSearchParamLastNTest {
     IObservationIndexedCodeCodeableConceptSearchParamDao myCodeableConceptIndexedSearchParamNormalizedDao;
 
     @Autowired
-    ObservationLastNIndexPersistSvc myObservationLastNIndexPersistSvc;
+	 ObservationLastNIndexPersistR4Svc myObservationLastNIndexPersistR4Svc;
 
     @Before
     public void before()  {
@@ -94,7 +94,7 @@ public class PersistObservationIndexedSearchParamLastNTest {
         codeableConceptField.addCoding(new Coding("http://mysecondaltcodes.org/fhir/observation-code", "test-second-alt-code", "test-second-alt-code display"));
         myObservation.setCode(codeableConceptField);
 
-        myObservationLastNIndexPersistSvc.indexObservation(myObservation);
+        myObservationLastNIndexPersistR4Svc.indexObservation(myObservation);
 
         List<ObservationIndexedSearchParamLastNEntity> persistedObservationEntities = myResourceIndexedObservationLastNDao.findAll();
         assertEquals(1, persistedObservationEntities.size());
@@ -171,7 +171,7 @@ public class PersistObservationIndexedSearchParamLastNTest {
                 Date effectiveDtm = observationDate.getTime();
                 observation.setEffective(new DateTimeType(effectiveDtm));
 
-                myObservationLastNIndexPersistSvc.indexObservation(observation);
+                myObservationLastNIndexPersistR4Svc.indexObservation(observation);
 
             }
 
@@ -180,6 +180,11 @@ public class PersistObservationIndexedSearchParamLastNTest {
         assertEquals(100, myResourceIndexedObservationLastNDao.count());
         assertEquals(2, myCodeableConceptIndexedSearchParamNormalizedDao.count());
 
-    }
+   }
+
+   @Test
+	public void testSampleObservationResource() {
+
+	}
 
 }

@@ -25,8 +25,11 @@ public class ObservationIndexedCodeCodeableConceptEntity {
     private String myCodeableConceptText;
 
     @IndexedEmbedded(depth=2, prefix = "coding")
-    @OneToMany(mappedBy = "myCodeableConceptId", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Set<ObservationIndexedCodeCodingEntity> myObservationIndexedCodeCodingEntitySet;
+//    @OneToMany(mappedBy = "myCodeableConceptId", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	 @JoinColumn(name = "CODEABLE_CONCEPT_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_CONCEPT_CODE"))
+	 @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+//    private Set<ObservationIndexedCodeCodingEntity> myObservationIndexedCodeCodingEntitySet;
+	 private ObservationIndexedCodeCodingEntity myObservationIndexedCodeCodingEntity;
 
     public ObservationIndexedCodeCodeableConceptEntity() {
 
@@ -38,10 +41,11 @@ public class ObservationIndexedCodeCodeableConceptEntity {
     }
 
     public void addCoding(ObservationIndexedCodeCodingEntity theObservationIndexedCodeCodingEntity) {
-        if (myObservationIndexedCodeCodingEntitySet == null) {
-            myObservationIndexedCodeCodingEntitySet = new HashSet<>();
-        }
-        myObservationIndexedCodeCodingEntitySet.add(theObservationIndexedCodeCodingEntity);
+//        if (myObservationIndexedCodeCodingEntitySet == null) {
+//            myObservationIndexedCodeCodingEntitySet = new HashSet<>();
+//        }
+//        myObservationIndexedCodeCodingEntitySet.add(theObservationIndexedCodeCodingEntity);
+		 myObservationIndexedCodeCodingEntity = theObservationIndexedCodeCodingEntity;
     }
 
     public String getCodeableConceptId() {

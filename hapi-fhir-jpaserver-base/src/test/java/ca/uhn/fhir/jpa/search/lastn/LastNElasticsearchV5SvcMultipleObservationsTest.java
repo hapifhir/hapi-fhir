@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
 public class LastNElasticsearchV5SvcMultipleObservationsTest {
 
     @Autowired
-    private ElasticsearchV5SvcImpl elasticsearchSvc;
+//    private ElasticsearchV5SvcImpl elasticsearchSvc;
 
     private static ObjectMapper ourMapperNonPrettyPrint;
 
@@ -56,8 +56,8 @@ public class LastNElasticsearchV5SvcMultipleObservationsTest {
 
     @After
     public void after() throws IOException {
-        elasticsearchSvc.deleteAllDocuments(IndexConstants.OBSERVATION_INDEX);
-        elasticsearchSvc.deleteAllDocuments(IndexConstants.CODE_INDEX);
+//        elasticsearchSvc.deleteAllDocuments(IndexConstants.OBSERVATION_INDEX);
+//        elasticsearchSvc.deleteAllDocuments(IndexConstants.CODE_INDEX);
     }
 /*
     @Test

@@ -35,7 +35,8 @@ import java.util.Properties;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @SuppressWarnings("Duplicates")
-@Configuration
+// TODO: Merge this with new CommonPostgreSQLConfig or find way to avoid conflicts with it.
+//@Configuration
 public class CommonConfig {
 
 	/**

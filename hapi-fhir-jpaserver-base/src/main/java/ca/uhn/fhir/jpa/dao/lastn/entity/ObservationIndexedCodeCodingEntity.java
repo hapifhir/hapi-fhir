@@ -11,11 +11,13 @@ import javax.persistence.*;
 @Table(name = "HFJ_SPIDX_LASTN_CODING")
 public class ObservationIndexedCodeCodingEntity {
 
-    @Id
-    @SequenceGenerator(name = "SEQ_CODING_FIELD", sequenceName = "SEQ_CODING_FIELD")
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CODING_FIELD")
-    private Long myId;
+	// TODO: Fix this to allow multiple codings for observation code
+//    @Id
+//    @SequenceGenerator(name = "SEQ_CODING_FIELD", sequenceName = "SEQ_CODING_FIELD")
+//    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CODING_FIELD")
+//    private Long myId;
 
+	@Id
     @Column(name="CODEABLE_CONCEPT_ID")
     private String myCodeableConceptId;
 

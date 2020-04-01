@@ -234,6 +234,8 @@ public class LastNElasticsearchSvcSingleObservationTest {
         String code_concept_text_values = observation.getCode_concept_text();
         assertEquals(OBSERVATIONCODETEXT, code_concept_text_values);
 
+        // TODO: Temporary changes until find a solution for addressing Observation Code with multiple codings.
+ /*
         List<String> code_coding_systems = observation.getCode_coding_system();
         assertEquals(3,code_coding_systems.size());
         assertEquals(CODEFIRSTCODINGSYSTEM, code_coding_systems.get(0));
@@ -257,6 +259,18 @@ public class LastNElasticsearchSvcSingleObservationTest {
         assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), code_coding_code_system_hash.get(0));
         assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODESECONDCODINGSYSTEM, CODESECONDCODINGCODE)), code_coding_code_system_hash.get(1));
         assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODETHIRDCODINGSYSTEM, CODETHIRDCODINGCODE)), code_coding_code_system_hash.get(2));
+*/
+		 String code_coding_systems = observation.getCode_coding_system();
+		 assertEquals(CODEFIRSTCODINGSYSTEM, code_coding_systems);
+
+		 String code_coding_codes = observation.getCode_coding_code();
+		 assertEquals(CODEFIRSTCODINGCODE, code_coding_codes);
+
+		 String code_coding_display = observation.getCode_coding_display();
+		 assertEquals(CODEFIRSTCODINGDISPLAY, code_coding_display);
+
+		 String code_coding_code_system_hash = observation.getCode_coding_code_system_hash();
+		 assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), code_coding_code_system_hash);
 
         // Retrieve all Observation codes
         SearchRequest searchRequest = elasticsearchSvc.buildObservationCodesSearchRequest(1000);

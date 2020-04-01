@@ -10,7 +10,7 @@ import java.io.IOException;
 
 @Configuration
 @EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory",
-		basePackages = {"ca.uhn.fhir.jpa.dao"})
+		basePackages = {"ca.uhn.fhir.jpa.dao.data"})
 @EnableTransactionManagement
 public class TestIntegratedObservationIndexSearchConfig extends TestObservationIndexSearchConfig {
 

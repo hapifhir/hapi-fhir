@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.dstu3.TransactionProcessorVersionAdapterDstu3;
+import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistDstu3Svc;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
@@ -17,10 +18,7 @@ import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -129,6 +127,11 @@ public class BaseDstu3Config extends BaseConfigDstu3Plus {
 	@Bean
 	public ITermReadSvcDstu3 terminologyService() {
 		return new TermReadSvcDstu3();
+	}
+
+	@Bean
+	public ObservationLastNIndexPersistDstu3Svc observationLastNIndexpersistSvc() {
+		return new ObservationLastNIndexPersistDstu3Svc();
 	}
 
 }

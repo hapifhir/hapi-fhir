@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.search.lastn.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.jpa.search.lastn.ElasticsearchV5SvcImpl;
+//import ca.uhn.fhir.jpa.search.lastn.ElasticsearchV5SvcImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -13,9 +13,9 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@Configuration
-@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory")
-@EnableTransactionManagement
+//@Configuration
+//@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory")
+//@EnableTransactionManagement
 public class TestElasticsearchV5Config {
 
 	private final String elasticsearchHost = "127.0.0.1";
@@ -24,7 +24,7 @@ public class TestElasticsearchV5Config {
 
 	private static final String ELASTIC_VERSION = "5.6.16";
 
-
+/*
 	@Bean()
 	public ElasticsearchV5SvcImpl myElasticsearchSvc() throws IOException {
 		int elasticsearchPort = embeddedElasticSearch().getHttpPort();
@@ -49,5 +49,5 @@ public class TestElasticsearchV5Config {
 
 		return embeddedElastic;
 	}
-
+*/
 }

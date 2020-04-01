@@ -53,16 +53,24 @@ public class ObservationJson {
     private String myCode_concept_text;
 
     @JsonProperty(value = "codeconceptcodingcode", required = false)
-    private List<String> myCode_coding_code = new ArrayList<>();
+	 // TODO: Temporary change until sort out how to deal with multiple observation code codings
+//    private List<String> myCode_coding_code = new ArrayList<>();
+	 private String myCode_coding_code;
 
     @JsonProperty(value = "codeconceptcodingcode_system_hash", required = false)
-    private List<String> myCode_coding_code_system_hash = new ArrayList<>();
+	 // TODO: Temporary change until sort out how to deal with multiple observation code codings
+//    private List<String> myCode_coding_code_system_hash = new ArrayList<>();
+	 private String myCode_coding_code_system_hash;
 
     @JsonProperty(value = "codeconceptcodingdisplay", required = false)
-    private List<String> myCode_coding_display = new ArrayList<>();
+	 // TODO: Temporary change until sort out how to deal with multiple observation code codings
+//    private List<String> myCode_coding_display = new ArrayList<>();
+	 private String myCode_coding_display;
 
     @JsonProperty(value = "codeconceptcodingsystem", required = false)
-    private List<String> myCode_coding_system = new ArrayList<>();
+	 // TODO: Temporary change until sort out how to deal with multiple observation code codings
+//    private List<String> myCode_coding_system = new ArrayList<>();
+	 private String myCode_coding_system;
 
     @JsonProperty(value = "effectivedtm", required = true)
     private Date myEffectiveDtm;
@@ -120,10 +128,16 @@ public class ObservationJson {
     public void setCode(CodeableConcept theCode) {
         myCode_concept_text = theCode.getText();
         for(Coding theCodeCoding : theCode.getCoding()) {
-            myCode_coding_code_system_hash.add(String.valueOf(CodeSystemHash.hashCodeSystem(theCodeCoding.getSystem(), theCodeCoding.getCode())));
+        	// TODO: Temporary change until address how to manage multiple Observation Code codings.
+/*            myCode_coding_code_system_hash.add(String.valueOf(CodeSystemHash.hashCodeSystem(theCodeCoding.getSystem(), theCodeCoding.getCode())));
             myCode_coding_code.add(theCodeCoding.getCode());
             myCode_coding_display.add(theCodeCoding.getDisplay());
             myCode_coding_system.add(theCodeCoding.getSystem());
+ */
+			  myCode_coding_code_system_hash = String.valueOf(CodeSystemHash.hashCodeSystem(theCodeCoding.getSystem(), theCodeCoding.getCode()));
+			  myCode_coding_code = theCodeCoding.getCode();
+			  myCode_coding_display = theCodeCoding.getDisplay();
+			  myCode_coding_system = theCodeCoding.getSystem();
         }
 
     }
@@ -132,6 +146,8 @@ public class ObservationJson {
         return myCode_concept_text;
     }
 
+    // TODO: Temporary changes until resolve problem of how to manage Observation Code with multiple codings
+/*
     public List<String> getCode_coding_code_system_hash() {
         return myCode_coding_code_system_hash;
     }
@@ -147,6 +163,22 @@ public class ObservationJson {
     public List<String> getCode_coding_system() {
         return myCode_coding_system;
     }
+*/
+	 public String getCode_coding_code_system_hash() {
+		 return myCode_coding_code_system_hash;
+	 }
+
+	public String getCode_coding_code() {
+		return myCode_coding_code;
+	}
+
+	public String getCode_coding_display() {
+		return myCode_coding_display;
+	}
+
+	public String getCode_coding_system() {
+		return myCode_coding_system;
+	}
 
     public void setCode_concept_id(String theCodeId) {
         myCode_concept_id = theCodeId;

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r4;
+package ca.uhn.fhir.jpa.dao.dstu3;
 
 /*
  * #%L
@@ -22,8 +22,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoObservation;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoPatient;
-import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistR4Svc;
+import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistDstu3Svc;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -41,8 +40,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,17 +49,41 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 
-public class FhirResourceDaoObservationR4 extends BaseHapiFhirResourceDao<Observation> implements IFhirResourceDaoObservation<Observation> {
+public class FhirResourceDaoObservationDstu3 extends BaseHapiFhirResourceDao<Observation> implements IFhirResourceDaoObservation<Observation> {
 
 	@Autowired
-	ObservationLastNIndexPersistR4Svc myObservationLastNIndexPersistR4Svc;
+	ObservationLastNIndexPersistDstu3Svc myObservationLastNIndexPersistDstu3Svc;
 
-	@Override
-	public IBundleProvider observationsLastN(SearchParameterMap theSearchParameterMap,  RequestDetails theRequestDetails, HttpServletResponse theServletResponse) {
-		return mySearchCoordinatorSvc.registerSearch(this, theSearchParameterMap, getResourceName(), new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)), theRequestDetails);
+	private IBundleProvider doLastNOperation(IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequest) {
+		SearchParameterMap paramMap = new SearchParameterMap();
+		if (theCount != null) {
+			paramMap.setCount(theCount.getValue());
+		}
+		if (theContent != null) {
+			paramMap.add(Constants.PARAM_CONTENT, theContent);
+		}
+		if (theNarrative != null) {
+			paramMap.add(Constants.PARAM_TEXT, theNarrative);
+		}
+		paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
+		paramMap.setEverythingMode(theId != null ? EverythingModeEnum.PATIENT_INSTANCE : EverythingModeEnum.PATIENT_TYPE);
+		paramMap.setSort(theSort);
+		paramMap.setLastUpdated(theLastUpdated);
+		if (theId != null) {
+			paramMap.add("_id", new StringParam(theId.getIdPart()));
+		}
+		
+		if (!isPagingProviderDatabaseBacked(theRequest)) {
+			paramMap.setLoadSynchronous(true);
+		}
+		
+		return mySearchCoordinatorSvc.registerSearch(this, paramMap, getResourceName(), new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)), theRequest);
 	}
 
-
+	@Override
+	public IBundleProvider observationsLastN(SearchParameterMap theSearchParameterMap, RequestDetails theRequestDetails, HttpServletResponse theServletResponse) {
+		return mySearchCoordinatorSvc.registerSearch(this, theSearchParameterMap, getResourceName(), new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)), theRequestDetails);
+	}
 
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
@@ -79,9 +101,9 @@ public class FhirResourceDaoObservationR4 extends BaseHapiFhirResourceDao<Observ
 				}
 			}
 			if (subjectID != null) {
-				myObservationLastNIndexPersistR4Svc.indexObservation(observation, subjectID.toString());
+				myObservationLastNIndexPersistDstu3Svc.indexObservation(observation, subjectID.toString());
 			} else {
-				myObservationLastNIndexPersistR4Svc.indexObservation(observation);
+				myObservationLastNIndexPersistDstu3Svc.indexObservation(observation);
 			}
 		}
 

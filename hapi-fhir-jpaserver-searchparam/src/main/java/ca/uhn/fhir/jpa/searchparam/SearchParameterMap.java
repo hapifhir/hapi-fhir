@@ -61,6 +61,7 @@ public class SearchParameterMap implements Serializable {
 	private SummaryEnum mySummaryMode;
 	private SearchTotalModeEnum mySearchTotalMode;
 	private QuantityParam myNearDistanceParam;
+	private boolean myLastN;
 
 	/**
 	 * Constructor
@@ -302,6 +303,24 @@ public class SearchParameterMap implements Serializable {
 		myLoadSynchronous = theLoadSynchronous;
 		return this;
 	}
+
+	/**
+	 * If set, tells the server to use an Elasticsearch query to generate a list of
+	 * Resource IDs for the LastN operation
+	 */
+	public boolean isLastN() {
+		return myLastN;
+	}
+
+	/**
+	 * If set, tells the server to use an Elasticsearch query to generate a list of
+	 * Resource IDs for the LastN operation
+	 */
+	public SearchParameterMap setLastN(boolean theLastN) {
+		myLastN = theLastN;
+		return this;
+	}
+
 
 	/**
 	 * This method creates a URL query string representation of the parameters in this

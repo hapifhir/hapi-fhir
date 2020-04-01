@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-@Component
+//@Component
 public class ObservationLastNIndexPersistSvc {
 
     @Autowired

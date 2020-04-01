@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
 import pl.allegro.tech.embeddedelasticsearch.PopularProperties;
 
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.UUID;
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory",
-		basePackages = {"ca.uhn.fhir.jpa.dao"})
+		basePackages = {"ca.uhn.fhir.jpa.dao.data"})
 @EnableTransactionManagement
 public class TestObservationIndexSearchConfig extends TestR4Config {
 
@@ -84,5 +85,9 @@ public class TestObservationIndexSearchConfig extends TestR4Config {
 		return embeddedElastic;
 	}
 
+	@PreDestroy
+	public void stop() {
+		embeddedElasticSearch().stop();
+	}
 
 }

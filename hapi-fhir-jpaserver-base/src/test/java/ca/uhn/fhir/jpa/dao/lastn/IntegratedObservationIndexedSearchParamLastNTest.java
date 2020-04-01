@@ -1,13 +1,19 @@
 package ca.uhn.fhir.jpa.dao.lastn;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.lastn.config.TestIntegratedObservationIndexSearchConfig;
 import ca.uhn.fhir.jpa.dao.data.IObservationIndexedCodeCodeableConceptSearchParamDao;
 import ca.uhn.fhir.jpa.dao.data.IObservationIndexedSearchParamLastNDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.shadehapi.elasticsearch.action.search.SearchRequest;
 import org.shadehapi.elasticsearch.action.search.SearchResponse;
 import org.hl7.fhir.r4.model.*;
@@ -16,11 +22,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
 
@@ -35,10 +44,13 @@ public class IntegratedObservationIndexedSearchParamLastNTest {
     IObservationIndexedCodeCodeableConceptSearchParamDao myCodeableConceptIndexedSearchParamNormalizedDao;
 
     @Autowired
-    ObservationLastNIndexPersistSvc myObservationLastNIndexPersistSvc;
+	 ObservationLastNIndexPersistR4Svc myObservationLastNIndexPersistR4Svc;
 
     @Autowired
     private ElasticsearchSvcImpl elasticsearchSvc;
+
+    @Autowired
+	 private IFhirSystemDao<Bundle, Meta> myDao;
 
     final String RESOURCEPID = "123";
     final String SUBJECTID = "4567";
@@ -107,11 +119,11 @@ public class IntegratedObservationIndexedSearchParamLastNTest {
         String observationCodeText = "Test Codeable Concept Field for Code";
         CodeableConcept codeableConceptField = new CodeableConcept().setText(observationCodeText);
         codeableConceptField.addCoding(new Coding("http://mycodes.org/fhir/observation-code", "test-code", "test-code display"));
-        codeableConceptField.addCoding(new Coding("http://myalternatecodes.org/fhir/observation-code", "test-alt-code", "test-alt-code display"));
-        codeableConceptField.addCoding(new Coding("http://mysecondaltcodes.org/fhir/observation-code", "test-second-alt-code", "test-second-alt-code display"));
+//        codeableConceptField.addCoding(new Coding("http://myalternatecodes.org/fhir/observation-code", "test-alt-code", "test-alt-code display"));
+//        codeableConceptField.addCoding(new Coding("http://mysecondaltcodes.org/fhir/observation-code", "test-second-alt-code", "test-second-alt-code display"));
         myObservation.setCode(codeableConceptField);
 
-        myObservationLastNIndexPersistSvc.indexObservation(myObservation);
+        myObservationLastNIndexPersistR4Svc.indexObservation(myObservation);
 
         SearchParameterMap searchParameterMap = new SearchParameterMap();
         ReferenceParam subjectParam = new ReferenceParam("Patient", "", SUBJECTID);
@@ -131,18 +143,18 @@ public class IntegratedObservationIndexedSearchParamLastNTest {
         assertEquals(RESOURCEPID, observationIdOnly.getIdentifier());
 
         // execute Observation ID search - Composite Aggregation
-//        searchRequestIdsOnly = elasticsearchSvc.buildObservationAllFieldsCompositeSearchRequest(1000, searchParameterMap, 3);
-//        responseIds = elasticsearchSvc.executeSearchRequest(searchRequestIdsOnly);
-//        observationIdsOnly = elasticsearchSvc.buildObservationCompositeResults(responseIds);
+        searchRequestIdsOnly = elasticsearchSvc.buildObservationAllFieldsCompositeSearchRequest(1000, searchParameterMap, 3);
+        responseIds = elasticsearchSvc.executeSearchRequest(searchRequestIdsOnly);
+        observationIdsOnly = elasticsearchSvc.buildObservationCompositeResults(responseIds);
 
-//        assertEquals(1, observationIdsOnly.size());
-//        observationIdOnly = observationIdsOnly.get(0);
-//        assertEquals(RESOURCEPID, observationIdOnly.getIdentifier());
+        assertEquals(1, observationIdsOnly.size());
+        observationIdOnly = observationIdsOnly.get(0);
+        assertEquals(RESOURCEPID, observationIdOnly.getIdentifier());
 
     }
 
 
-//    @Test
+    @Test
     public void testIndexObservationMultiple() {
 
         // Create two CodeableConcept values each for a Code with three codings.
@@ -200,7 +212,7 @@ public class IntegratedObservationIndexedSearchParamLastNTest {
                 Date effectiveDtm = observationDate.getTime();
                 observation.setEffective(new DateTimeType(effectiveDtm));
 
-                myObservationLastNIndexPersistSvc.indexObservation(observation);
+                myObservationLastNIndexPersistR4Svc.indexObservation(observation);
 
             }
 
@@ -210,5 +222,58 @@ public class IntegratedObservationIndexedSearchParamLastNTest {
         assertEquals(2, myCodeableConceptIndexedSearchParamNormalizedDao.count());
 
     }
+
+    @Test
+	public void testSampleBundle() {
+		 FhirContext myFhirCtx = FhirContext.forR4();
+
+		 PathMatchingResourcePatternResolver provider = new PathMatchingResourcePatternResolver();
+		 final Resource[] bundleResources;
+		 try {
+			 bundleResources = provider.getResources("lastntestbundle.json");
+		 } catch (IOException e) {
+			 throw new RuntimeException("Unexpected error during transmission: " + e.toString(), e);
+		 }
+
+		 AtomicInteger index = new AtomicInteger();
+
+		 Arrays.stream(bundleResources).forEach(
+			 resource -> {
+				 index.incrementAndGet();
+
+				 InputStream resIs = null;
+				 String nextBundleString;
+				 try {
+					 resIs = resource.getInputStream();
+					 nextBundleString = IOUtils.toString(resIs, Charsets.UTF_8);
+				 } catch (IOException e) {
+					 return;
+				 } finally {
+					 try {
+						 if (resIs != null) {
+							 resIs.close();
+						 }
+					 } catch (final IOException ioe) {
+						 // ignore
+					 }
+				 }
+
+				 /*
+				  * SMART demo apps rely on the use of LOINC 3141-9 (Body Weight Measured)
+				  * instead of LOINC 29463-7 (Body Weight)
+				  */
+				 nextBundleString = nextBundleString.replace("\"29463-7\"", "\"3141-9\"");
+
+				 IParser parser = myFhirCtx.newJsonParser();
+				 parser.setParserErrorHandler(new LenientErrorHandler(false));
+				 Bundle bundle = parser.parseResource(Bundle.class, nextBundleString);
+
+				 myDao.transaction(null, bundle);
+
+
+			 }
+		 );
+
+	 }
 
 }

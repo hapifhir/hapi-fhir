@@ -1,25 +1,28 @@
 package ca.uhn.fhir.jpa.search.lastn;
 
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.search.lastn.util.CodeSystemHash;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import org.assertj.core.util.VisibleForTesting;
 import org.shadehapi.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.shadehapi.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.shadehapi.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.shadehapi.elasticsearch.action.admin.indices.get.GetIndexRequest;
 import org.shadehapi.elasticsearch.action.DocWriteResponse;
 import org.shadehapi.elasticsearch.action.index.IndexRequest;
 import org.shadehapi.elasticsearch.action.index.IndexResponse;
 import org.shadehapi.elasticsearch.action.search.SearchRequest;
 import org.shadehapi.elasticsearch.action.search.SearchResponse;
-import org.shadehapi.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.shadehapi.elasticsearch.client.RequestOptions;
 import org.shadehapi.elasticsearch.client.RestHighLevelClient;
 import org.shadehapi.elasticsearch.common.xcontent.XContentType;
@@ -39,7 +42,6 @@ import org.shadehapi.elasticsearch.search.aggregations.metrics.tophits.ParsedTop
 import org.shadehapi.elasticsearch.search.aggregations.support.ValueType;
 import org.shadehapi.elasticsearch.search.builder.SearchSourceBuilder;
 import org.shadehapi.elasticsearch.search.sort.SortOrder;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,7 +49,6 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-//@Component
 public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
     RestHighLevelClient myRestHighLevelClient;
@@ -56,18 +57,17 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 
     public ElasticsearchSvcImpl(String theHostname, int thePort, String theUsername, String thePassword) {
+		 myRestHighLevelClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theHostname, thePort, theUsername,thePassword);
 
-        myRestHighLevelClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theHostname, thePort, theUsername,thePassword);
+		 try {
+			 createObservationIndexIfMissing();
+			 createCodeIndexIfMissing();
+		 } catch (IOException theE) {
+			 throw new RuntimeException("Failed to create document index", theE);
+		 }
+	 }
 
-        try {
-            createObservationIndexIfMissing();
-            createCodeIndexIfMissing();
-        } catch (IOException theE) {
-            throw new RuntimeException("Failed to create document index", theE);
-        }
-    }
-
-    public void createObservationIndexIfMissing() throws IOException {
+    private void createObservationIndexIfMissing() throws IOException {
         if(indexExists(IndexConstants.OBSERVATION_INDEX)) {
             return;
         }
@@ -129,7 +129,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
     }
 
-    public void createCodeIndexIfMissing() throws IOException {
+    private void createCodeIndexIfMissing() throws IOException {
         if(indexExists(IndexConstants.CODE_INDEX)) {
             return;
         }
@@ -166,7 +166,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
     }
 
-    public boolean createIndex(String theIndexName, String theMapping) throws IOException {
+    private boolean createIndex(String theIndexName, String theMapping) throws IOException {
         CreateIndexRequest request = new CreateIndexRequest(theIndexName);
         request.source(theMapping, XContentType.JSON);
         CreateIndexResponse createIndexResponse = myRestHighLevelClient.indices().create(request, RequestOptions.DEFAULT);
@@ -174,12 +174,11 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
     }
 
-    public boolean performIndex(String theIndexName, String theDocumentId, String theIndexDocument, String theDocumentType) throws IOException {
+    boolean performIndex(String theIndexName, String theDocumentId, String theIndexDocument, String theDocumentType) throws IOException {
+      IndexResponse indexResponse = myRestHighLevelClient.index(createIndexRequest(theIndexName, theDocumentId,theIndexDocument,theDocumentType),
+			RequestOptions.DEFAULT);
 
-        IndexResponse indexResponse = myRestHighLevelClient.index(createIndexRequest(theIndexName, theDocumentId,theIndexDocument,theDocumentType),
-                RequestOptions.DEFAULT);
-
-        return (indexResponse.getResult() == DocWriteResponse.Result.CREATED) || (indexResponse.getResult() == DocWriteResponse.Result.UPDATED);
+      return (indexResponse.getResult() == DocWriteResponse.Result.CREATED) || (indexResponse.getResult() == DocWriteResponse.Result.UPDATED);
     }
 
     private IndexRequest createIndexRequest(String theIndexName, String theDocumentId, String theObservationDocument, String theDocumentType) {
@@ -191,11 +190,30 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
         return request;
     }
 
-    public boolean indexExists(String theIndexName) throws IOException {
+    private boolean indexExists(String theIndexName) throws IOException {
         GetIndexRequest request = new GetIndexRequest();
         request.indices(theIndexName);
         return myRestHighLevelClient.indices().exists(request, RequestOptions.DEFAULT);
     }
+
+    @Override
+    public List<ResourcePersistentId> executeLastN(SearchParameterMap theSearchParameterMap, RequestDetails theRequestDetails, IdHelperService theIdHelperService) {
+    	 Integer myMaxObservationsPerCode = 1;
+    	 String[] maxCountParams = theRequestDetails.getParameters().get("map");
+    	 if (maxCountParams != null && maxCountParams.length > 0) {
+			myMaxObservationsPerCode = Integer.valueOf(maxCountParams[0]);
+		 }
+		 SearchRequest myLastNRequest = buildObservationCompositeSearchRequest(10000, theSearchParameterMap, myMaxObservationsPerCode);
+		 SearchResponse lastnResponse = null;
+		 try {
+			 lastnResponse = executeSearchRequest(myLastNRequest);
+			 List<ResourcePersistentId> observationIds = buildObservationIdList(lastnResponse, theIdHelperService);
+			 return observationIds;
+		 } catch (IOException theE) {
+			 throw new InvalidRequestException("Unable to execute LastN request", theE);
+		 }
+	 }
+
 
     SearchRequest buildObservationCodesSearchRequest(int theMaxResultSetSize) {
         SearchRequest searchRequest = new SearchRequest(IndexConstants.CODE_INDEX);
@@ -236,15 +254,15 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
     }
 
     public SearchResponse executeSearchRequest(SearchRequest searchRequest) throws IOException {
-        return myRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+       return myRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
     }
 
     public List<ObservationJson> buildObservationCompositeResults(SearchResponse theSearchResponse) throws IOException {
-        Aggregations responseAggregations = theSearchResponse.getAggregations();
-        ParsedComposite aggregatedSubjects = responseAggregations.get("group_by_subject");
-        List<ParsedComposite.ParsedBucket> subjectBuckets = aggregatedSubjects.getBuckets();
-        List<ObservationJson> codes = new ArrayList<>();
-        for(ParsedComposite.ParsedBucket subjectBucket : subjectBuckets) {
+		 Aggregations responseAggregations = theSearchResponse.getAggregations();
+       ParsedComposite aggregatedSubjects = responseAggregations.get("group_by_subject");
+       List<ParsedComposite.ParsedBucket> subjectBuckets = aggregatedSubjects.getBuckets();
+       List<ObservationJson> codes = new ArrayList<>();
+       for(ParsedComposite.ParsedBucket subjectBucket : subjectBuckets) {
             Aggregations observationCodeAggregations = subjectBucket.getAggregations();
             ParsedTerms aggregatedObservationCodes = observationCodeAggregations.get("group_by_code");
             List<? extends Terms.Bucket> observationCodeBuckets = aggregatedObservationCodes.getBuckets();
@@ -262,7 +280,30 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
         return codes;
     }
 
-    public List<ObservationJson> buildObservationTermsResults(SearchResponse theSearchResponse) throws IOException {
+	private List<ResourcePersistentId> buildObservationIdList(SearchResponse theSearchResponse, IdHelperService theIdHelperService) throws IOException {
+		Aggregations responseAggregations = theSearchResponse.getAggregations();
+		ParsedComposite aggregatedSubjects = responseAggregations.get("group_by_subject");
+		List<ParsedComposite.ParsedBucket> subjectBuckets = aggregatedSubjects.getBuckets();
+		List<ResourcePersistentId> myObservationIds = new ArrayList<>();
+		for(ParsedComposite.ParsedBucket subjectBucket : subjectBuckets) {
+			Aggregations observationCodeAggregations = subjectBucket.getAggregations();ParsedTerms aggregatedObservationCodes = observationCodeAggregations.get("group_by_code");
+			List<? extends Terms.Bucket> observationCodeBuckets = aggregatedObservationCodes.getBuckets();
+			for (Terms.Bucket observationCodeBucket : observationCodeBuckets) {
+				Aggregations topHitObservationCodes = observationCodeBucket.getAggregations();
+				ParsedTopHits parsedTopHits = topHitObservationCodes.get("most_recent_effective");
+				SearchHit[] topHits = parsedTopHits.getHits().getHits();
+				for (SearchHit topHit : topHits) {
+					String sources = topHit.getSourceAsString();
+					ObservationJson code = objectMapper.readValue(sources, ObservationJson.class);
+
+					myObservationIds.add(theIdHelperService.resolveResourcePersistentIds("Observation", code.getIdentifier()));
+				}
+			}
+		}
+		return myObservationIds;
+	}
+
+	public List<ObservationJson> buildObservationTermsResults(SearchResponse theSearchResponse) throws IOException {
         Aggregations responseAggregations = theSearchResponse.getAggregations();
         ParsedTerms aggregatedSubjects = responseAggregations.get("group_by_subject");
         List<? extends Terms.Bucket> subjectBuckets = aggregatedSubjects.getBuckets();
@@ -295,7 +336,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
         return codes;
     }
 
-//    @VisibleForTesting
     public SearchRequest buildObservationAllFieldsCompositeSearchRequest(int maxResultSetSize, SearchParameterMap theSearchParameterMap, int theMaxObservationsPerCode) {
 
         return buildObservationsSearchRequest(theSearchParameterMap, createCompositeAggregationBuilder(maxResultSetSize, theMaxObservationsPerCode, null));
@@ -307,7 +347,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
         return buildObservationsSearchRequest(theSearchParameterMap, createCompositeAggregationBuilder(maxResultSetSize, theMaxObservationsPerCode, topHitsInclude));
     }
 
-//    @VisibleForTesting
     public SearchRequest buildObservationAllFieldsTermsSearchRequest(int maxResultSetSize, SearchParameterMap theSearchParameterMap, int theMaxObservationsPerCode) {
         return buildObservationsSearchRequest(theSearchParameterMap, createTermsAggregationBuilder(maxResultSetSize, theMaxObservationsPerCode, null));
     }
@@ -518,18 +557,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
     }
 
-//    @VisibleForTesting
-    public boolean deleteIndex(String theIndexName) throws IOException {
-        DeleteIndexRequest request = new DeleteIndexRequest(theIndexName);
-        AcknowledgedResponse deleteIndexResponse = myRestHighLevelClient.indices().delete(request, RequestOptions.DEFAULT);
-
-        return deleteIndexResponse.isAcknowledged();
-    }
-
-
-
-//    @VisibleForTesting
-    public void deleteAllDocuments(String theIndexName) throws IOException {
+    void deleteAllDocuments(String theIndexName) throws IOException {
         DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(theIndexName);
         deleteByQueryRequest.setQuery(QueryBuilders.matchAllQuery());
         myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
