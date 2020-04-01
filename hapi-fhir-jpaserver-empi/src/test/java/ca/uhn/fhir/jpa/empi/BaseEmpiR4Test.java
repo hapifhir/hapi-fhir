@@ -249,11 +249,10 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 			private EmpiLink getEmpiLink(IBaseResource thePatientOrPractitionerResource) {
 				EmpiLink linkByTargetResourceId = myEmpiLinkDaoSvc.getLinkByTargetResourceId(thePatientOrPractitionerResource.getIdElement().getIdPartAsLong());
 				if (linkByTargetResourceId == null) {
-					throw new IllegalStateException("We didn't find a Person for resource with pid: " + thePatientOrPractitionerResource.getIdElement()));
+					throw new IllegalStateException("We didn't find a Person for resource with pid: " + thePatientOrPractitionerResource.getIdElement());
 				} else {
 					return linkByTargetResourceId;
 				}
-
 			}
 
 			@Override

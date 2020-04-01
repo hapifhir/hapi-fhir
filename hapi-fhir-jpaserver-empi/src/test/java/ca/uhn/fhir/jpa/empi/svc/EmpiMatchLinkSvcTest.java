@@ -121,7 +121,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//FIXME EMPI fix the above to have an EID.
 		EmpiLink empiLink = myEmpiLinkDaoSvc.getLinkByTargetResourceId(patient.getIdElement().getIdPartAsLong());
 		Person read = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
-		assertThat(myEmpiMatchLinkSvc.getEID(patient), is(equalTo(myEmpiMatchLinkSvc.getEID(read)));
+		assertThat(myEmpiMatchLinkSvc.getEID(patient), is(equalTo(myEmpiMatchLinkSvc.getEID(read))));
 	}
 
 	@Test
