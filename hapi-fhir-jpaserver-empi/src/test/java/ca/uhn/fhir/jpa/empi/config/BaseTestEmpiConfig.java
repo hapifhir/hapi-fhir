@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi.config;
 
-import ca.uhn.fhir.empi.rules.config.EmpiConfig;
+import ca.uhn.fhir.empi.rules.config.EmpiConfigImpl;
+import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.springframework.context.annotation.Bean;
@@ -13,10 +14,10 @@ import java.io.IOException;
 @Configuration
 public abstract class BaseTestEmpiConfig {
 	@Bean
-	EmpiConfig empiRulesSvc() throws IOException {
+	IEmpiConfig empiRulesSvc() throws IOException {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		Resource resource = resourceLoader.getResource("empi/empi-rules.json");
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
-		return new EmpiConfig().setScriptText(json);
+		return new EmpiConfigImpl().setScriptText(json);
 	}
 }

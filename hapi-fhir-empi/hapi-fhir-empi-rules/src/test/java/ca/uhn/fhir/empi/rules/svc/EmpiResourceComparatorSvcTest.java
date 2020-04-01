@@ -1,7 +1,7 @@
 package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.empi.BaseTest;
-import ca.uhn.fhir.empi.rules.config.EmpiConfig;
+import ca.uhn.fhir.empi.rules.config.EmpiConfigImpl;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
@@ -15,7 +15,7 @@ public class EmpiResourceComparatorSvcTest extends BaseTest {
 	@Before
 	public void before() {
 		super.before();
-		myEmpiResourceComparatorSvc = new EmpiResourceComparatorSvc(ourFhirContext, new EmpiConfig().setEmpiRules(myRules));
+		myEmpiResourceComparatorSvc = new EmpiResourceComparatorSvc(ourFhirContext, new EmpiConfigImpl().setEmpiRules(myRules));
 		myEmpiResourceComparatorSvc.init();
 	}
 
