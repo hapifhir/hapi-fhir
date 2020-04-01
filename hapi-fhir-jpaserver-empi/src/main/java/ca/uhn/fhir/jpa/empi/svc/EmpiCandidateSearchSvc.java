@@ -3,9 +3,9 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.empi.rules.config.EmpiConfig;
 import ca.uhn.fhir.empi.rules.json.EmpiFilterSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
-import ca.uhn.fhir.empi.rules.svc.EmpiRulesSvc;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -34,7 +34,7 @@ public class EmpiCandidateSearchSvc {
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private EmpiRulesSvc myEmpiRulesSvc;
+	private EmpiConfig myEmpiConfig;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
@@ -60,11 +60,11 @@ public class EmpiCandidateSearchSvc {
 
 		//FIXME EMPI validate there is no overlap between filters and resource search params.
 
-		List<EmpiFilterSearchParamJson> filterSearchParams = myEmpiRulesSvc.getEmpiRules().getFilterSearchParams();
+		List<EmpiFilterSearchParamJson> filterSearchParams = myEmpiConfig.getEmpiRules().getFilterSearchParams();
 
 		List<String> filterCriteria = buildFilterQuery(filterSearchParams, theResourceType);
 
-		for (EmpiResourceSearchParamJson resourceSearchParam : myEmpiRulesSvc.getEmpiRules().getResourceSearchParams()) {
+		for (EmpiResourceSearchParamJson resourceSearchParam : myEmpiConfig.getEmpiRules().getResourceSearchParams()) {
 
 			if (!resourceSearchParam.getResourceType().equals(theResourceType)) {
 				continue;

@@ -21,6 +21,7 @@ package ca.uhn.fhir.empi.rules.svc;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.rules.config.EmpiConfig;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
@@ -43,19 +44,19 @@ import java.util.List;
 @Service
 public class EmpiResourceComparatorSvc {
 	private final FhirContext myFhirContext;
-	private final EmpiRulesSvc myEmpiRulesSvc;
+	private final EmpiConfig myEmpiConfig;
 	private EmpiRulesJson myEmpiRulesJson;
 	private final List<EmpiResourceFieldComparator> myFieldComparators = new ArrayList<>();
 
 	@Autowired
-	public EmpiResourceComparatorSvc(FhirContext theFhirContext, EmpiRulesSvc theEmpiRulesSvc) {
+	public EmpiResourceComparatorSvc(FhirContext theFhirContext, EmpiConfig theEmpiConfig) {
 		myFhirContext = theFhirContext;
-		myEmpiRulesSvc = theEmpiRulesSvc;
+		myEmpiConfig = theEmpiConfig;
 	}
 
 	@PostConstruct
 	public void init() {
-		myEmpiRulesJson = myEmpiRulesSvc.getEmpiRules();
+		myEmpiRulesJson = myEmpiConfig.getEmpiRules();
 		for (EmpiFieldMatchJson matchFieldJson : myEmpiRulesJson.getMatchFields()) {
 			myFieldComparators.add(new EmpiResourceFieldComparator(myFhirContext, matchFieldJson));
 		}
