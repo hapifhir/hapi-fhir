@@ -7,26 +7,26 @@ import java.io.IOException;
 
 // FIXME KHS collapse these two projects into hapi-fhir-empi
 public class EmpiConfig {
-	private boolean myEmpiEnabled;
-	private int myConcurrentConsumers;
+	private boolean myEnabled;
+	private int myConsumerCount;
 	private String myScriptText;
 	private EmpiRulesJson myEmpiRules;
 
-	public boolean isEmpiEnabled() {
-		return myEmpiEnabled;
+	public boolean isEnabled() {
+		return myEnabled;
 	}
 
-	public EmpiConfig setEmpiEnabled(boolean theEmpiEnabled) {
-		myEmpiEnabled = theEmpiEnabled;
+	public EmpiConfig setEnabled(boolean theEnabled) {
+		myEnabled = theEnabled;
 		return this;
 	}
 
-	public int getConcurrentConsumers() {
-		return myConcurrentConsumers;
+	public int getConsumerCount() {
+		return myConsumerCount;
 	}
 
-	public EmpiConfig setConcurrentConsumers(int theConcurrentConsumers) {
-		myConcurrentConsumers = theConcurrentConsumers;
+	public EmpiConfig setConsumerCount(int theConsumerCount) {
+		myConsumerCount = theConsumerCount;
 		return this;
 	}
 

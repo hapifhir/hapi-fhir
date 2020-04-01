@@ -24,11 +24,10 @@ public class EmpiInitializer {
 	EmpiConfig myEmpiConfig;
 
 	@PostConstruct
-	public void init() throws Exception {
-		if (!myEmpiConfig.isEmpiEnabled()) {
+	public void init() {
+		if (!myEmpiConfig.isEnabled()) {
 			return;
 		}
-
 		myInterceptorService.registerInterceptor(myEmpiInterceptor);
 		ourLog.info("EMPI interceptor registered");
 
