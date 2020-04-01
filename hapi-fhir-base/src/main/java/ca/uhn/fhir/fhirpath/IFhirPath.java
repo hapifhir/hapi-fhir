@@ -28,7 +28,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 public interface IFhirPath {
 
 	/**
-	 * Apply the given FluentPath expression against the given input and return
+	 * Apply the given FhirPath expression against the given input and return
 	 * all results in a list
 	 * 
 	 * @param theInput The input object (generally a resource or datatype)
@@ -38,7 +38,7 @@ public interface IFhirPath {
 	<T extends IBase> List<T> evaluate(IBase theInput, String thePath, Class<T> theReturnType);
 
 	/**
-	 * Apply the given FluentPath expression against the given input and return
+	 * Apply the given FhirPath expression against the given input and return
 	 * the first match (if any)
 	 *
 	 * @param theInput The input object (generally a resource or datatype)

@@ -40,7 +40,7 @@ public class EmpiRulesJson implements IModelJson {
 	double myNoMatchThreshold;
 	@JsonProperty("matchThreshold")
 	double myMatchThreshold;
-	@JsonProperty("enterpriseEIDSystem")
+	@JsonProperty("eidSystem")
 	String myEnterpriseEIDSystem;
 
 	transient VectorWeightMap myVectorWeightMap;

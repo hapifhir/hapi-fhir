@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
+import ca.uhn.fhir.empi.rules.config.EmpiConfig;
 import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
@@ -8,6 +9,7 @@ import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.model.primitive.IdDt;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.Test;
@@ -31,7 +33,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	private ResourceTableHelper myResourceTableHelper;
 	@Autowired
 	IEmpiLinkDao myEmpiLinkDao;
-
+	@Autowired
+	EmpiConfig myEmpiConfig;
 	@Autowired
 	IEmpiLinkSvc myEmpiLinkSvc;
 
@@ -107,20 +110,26 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testWhenPatientIsCreatedWithEIDThatItPropagatesToNewPersons() {
-		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
-		//FIXME EMPI fix the above to have an EID.
-		EmpiLink empiLink = myEmpiLinkDaoSvc.getLinkByTargetResourceId(patient.getIdElement().getIdPartAsLong());
-		Person read = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
-		assertThat(myEmpiMatchLinkSvc.getEID(patient), is(equalTo(myEmpiMatchLinkSvc.getEID(read))));
+		String sampleEID = "sample-eid";
+		Patient janePatient = addEID(buildJanePatient(), sampleEID);
+		janePatient = createPatientAndUpdateLinks(janePatient);
+
+		EmpiLink empiLink = myEmpiLinkDaoSvc.getLinkByTargetResourceId(janePatient.getIdElement().getIdPartAsLong());
+		Person person = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
+		Identifier identifier = person.getIdentifierFirstRep();
+		assertThat(identifier.getSystem(), is(equalTo(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())));
+		assertThat(identifier.getValue(), is(equalTo(sampleEID)));
 	}
 
 	@Test
 	public void testWhenPatientIsCreatedWithoutAnEIDThePersonGetsAutomaticallyAssignedOne() {
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 		EmpiLink empiLink = myEmpiLinkDaoSvc.getLinkByTargetResourceId(patient.getIdElement().getIdPartAsLong());
-		Person person = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
 
-		assertThat(myEmpiMatchLinkSvc.getEID(person), is(notNullValue()));
+		Person person = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
+		Identifier identifierFirstRep = person.getIdentifierFirstRep();
+		assertThat(identifierFirstRep.getSystem(), is(equalTo(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())));
+		assertThat(identifierFirstRep.getValue(), is(notNullValue()));
 	}
 
 	@Test
@@ -145,19 +154,24 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		// Test: Existing Person with system-assigned EID found linked from matched Patient.  incoming Patient has EID.  Replace Person system-assigned EID with Patient EID.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 
-		Patient janePatient= buildJanePatient();
-		addEID(janePatient, "12345");
+		Patient janePatient= addEID(buildJanePatient(), "12345");
 		createPatientAndUpdateLinks(janePatient);
 
 
+		//We want to make sure the patients were linked to the same person.
+		assertThat(patient, is(samePersonAs(janePatient)));
+
 		EmpiLink empiLink = myEmpiLinkDaoSvc.getLinkByTargetResourceId(patient.getIdElement().getIdPartAsLong());
 		Person person = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
-		assertThat(myEmpiMatchLinkSvc.getEID(person), is(equalTo("12345")));
+		Identifier identifier = person.getIdentifierFirstRep();
+
+		assertThat(identifier.getSystem(), is(equalTo(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())));
+		assertThat(identifier.getValue(), is(equalTo("12345")));
 	}
 
-	public Patient addEID(Patient theJanePatient, String theEID) {
-		theJanePatient.addIdentifier().setSystem("FIXME_EID_SYSTEM").setValue(theEID);
-		return theJanePatient;
+	public Patient addEID(Patient thePatient, String theEID) {
+		thePatient.addIdentifier().setSystem(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()).setValue(theEID);
+		return thePatient;
 	}
 
 	@Test

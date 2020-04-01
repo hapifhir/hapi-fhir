@@ -39,12 +39,19 @@ public class EmpiMatchLinkSvc {
 		} else if (personCandidates.size() == 1) {
 			MatchedPersonCandidate matchedPersonCandidate = personCandidates.get(0);
 			IBaseResource person = myEmpiResourceDaoSvc.readPerson(new IdDt("Person/" +matchedPersonCandidate.getCandidatePersonPid().getIdAsLong()));
+			handleEidOverwrite(person, theResource);
 			myEmpiLinkSvc.updateLink(person, theResource, matchedPersonCandidate.getEmpiLink().getMatchResult(), EmpiLinkSourceEnum.AUTO);
 		//multiple candidates, in which case they should all be tagged as POSSIBLE_MATCH. If one is already tagged as MATCH
 		} else {
-
 		}
 
+	}
+
+	private void handleEidOverwrite(IBaseResource thePerson, IBaseResource theResource) {
+		String eidFromResource = myPersonUtil.readEIDFromResource(theResource);
+		if (eidFromResource != null)  {
+			myPersonUtil.updatePersonFromPatient(thePerson, theResource);
+		}
 	}
 
 	public String getEID(IBaseResource theResource) {

@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.empi.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.rules.config.EmpiConfig;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -12,7 +14,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -86,7 +87,8 @@ public final class PersonUtil {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person person = new Person();
-				person.addIdentifier(createEIDIdentifierForPerson(thePatient));
+				SystemAgnosticIdentifier systemAgnosticIdentifier = getOrCreateEidFromResource(thePatient);
+				person.addIdentifier(systemAgnosticIdentifier.toR4());
 				//FIXME EMPI populate from data from theResource
 				return person;
 			default:
@@ -95,23 +97,125 @@ public final class PersonUtil {
 		}
 	}
 
-	public Identifier createEIDIdentifierForPerson(IBaseResource thePatient) {
-		Optional<Identifier> first = ((Patient) thePatient).getIdentifier().stream().filter(id -> id.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())).findFirst();
-		if (first.isPresent()) {
-			Identifier identifier = first.get();
-			identifier.setUse(Identifier.IdentifierUse.OFFICIAL);
-			return identifier;
+	public IBaseResource updatePersonFromPatient(IBaseResource thePerson, IBaseResource thePatient) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case R4:
+				//This handles overwriting an automatically assigned EID if a patient that links is coming in with an official EID.
+				Person person = ((Person)thePerson);
+				Identifier identifier = person.getIdentifier().stream().filter(theIdentifier -> theIdentifier.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())).findFirst().orElse(null);
+				SystemAgnosticIdentifier incomingEid = getOrCreateEidFromResource(thePatient);
+
+				if (identifier == null){
+					person.addIdentifier(incomingEid.toR4());
+				} else if (identifier.getUse().equals(Identifier.IdentifierUse.SECONDARY)) {
+					person.getIdentifier().remove(identifier);
+					person.addIdentifier(incomingEid.toR4());
+				} else if (identifier.getUse().equals(Identifier.IdentifierUse.OFFICIAL)) {
+					//FIXME EMPI create potential duplicate user link.
+				}
+			default:
+				//FIXME EMPI moar versions
+				break;
+		}
+		return thePerson;
+	}
+
+	private boolean currentEidIsSecondary(SystemAgnosticIdentifier theCurrentPersonEid) {
+		return theCurrentPersonEid.getUse().equals("secondary");
+	}
+
+
+	public SystemAgnosticIdentifier getEidFromResource(IBaseResource theBaseResource) {
+		String eid = readEIDFromResource(theBaseResource);
+		if (StringUtils.isBlank(eid)) {
+			return null;
 		} else {
-			Identifier identifier = new Identifier();
-			identifier.setSystem(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem());
-			identifier.setValue(UUID.randomUUID().toString());
-			identifier.setUse(Identifier.IdentifierUse.TEMP);
-			return identifier;
+			String system = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
+			String use = "official";
+			return new SystemAgnosticIdentifier(system, eid, use);
+		}
+	}
+
+	public SystemAgnosticIdentifier getOrCreateEidFromResource(IBaseResource thePatient) {
+		SystemAgnosticIdentifier eid;
+		eid = getEidFromResource(thePatient);
+
+		if (eid == null) {
+			eid = new SystemAgnosticIdentifier(
+				myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem(),
+				UUID.randomUUID().toString(),
+				"secondary"
+			);
+		}
+		return eid;
+	}
+
+
+	private static class SystemAgnosticIdentifier {
+		private String mySystem;
+		private String myUse;
+		private String myValue;
+
+		public SystemAgnosticIdentifier(String theSystem, String theValue, String theUse){
+			mySystem = theSystem;
+			myUse = theUse;
+			myValue = theValue;
+		}
+
+		public Identifier toR4() {
+			return new Identifier()
+				.setUse(Identifier.IdentifierUse.fromCode(myUse))
+				.setSystem(mySystem)
+				.setValue(myValue);
+		}
+
+		public org.hl7.fhir.dstu3.model.Identifier toDSTU3(){
+			return new org.hl7.fhir.dstu3.model.Identifier()
+				.setUse(org.hl7.fhir.dstu3.model.Identifier.IdentifierUse.fromCode(myUse))
+				.setSystem(mySystem)
+				.setValue(myValue);
+		}
+
+		private String getSystem() {
+			return mySystem;
+		}
+
+		private String getUse() {
+			return myUse;
+		}
+
+		private String getValue() {
+			return myValue;
 		}
 	}
 
 	public String readEIDFromResource(IBaseResource theBaseResource) {
-		//FIXME EMPI
-		return "";
+		List<IBase> evaluate = myFhirContext.newFhirPath().evaluate(
+			theBaseResource,
+			buildEidIdentifierFhirPath(theBaseResource),
+			IBase.class);
+
+		if (evaluate.size() > 1) {
+			//FIXME EMPI determine correct error to throw here.
+			throw new RuntimeException("Resources cannot have two EIDs!");
+		} else if (evaluate.size() == 1) {
+			return evaluate.get(0).toString();
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Get the appropriate FHIRPath expression to extract the EID identifier value, regardless of resource type.
+	 * e.g. if theBaseResource is a patient, and the EMPI EID system is test-system, this will return
+	 *
+	 * Patient.identifier.where(system='test-system').value
+	 *
+	 */
+	private String buildEidIdentifierFhirPath(IBaseResource theBaseResource) {
+		return myFhirContext.getResourceDefinition(theBaseResource).getName()
+			+ ".identifier.where(system='"
+			+ myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()
+			+ "').value";
 	}
 }

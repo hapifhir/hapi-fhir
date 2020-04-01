@@ -29,5 +29,6 @@
 		"patient-given,patient-last" : 0.83
 	},
 	"noMatchThreshold" : 0.6,
-	"matchThreshold" : 0.8
+	"matchThreshold" : 0.8,
+	"eidSystem": "enterprise-id-system"
 }
