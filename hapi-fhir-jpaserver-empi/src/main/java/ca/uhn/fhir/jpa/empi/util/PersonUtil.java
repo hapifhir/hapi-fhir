@@ -154,7 +154,7 @@ public final class PersonUtil {
 	}
 
 
-	private static class SystemAgnosticIdentifier {
+	public static class SystemAgnosticIdentifier {
 		private String mySystem;
 		private String myUse;
 		private String myValue;

@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.MatchedTargetCandidate;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
+import ca.uhn.fhir.jpa.empi.util.PersonUtil;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Person;
@@ -38,6 +39,10 @@ public class EmpiPersonFindingSvc {
 	private EmpiResourceComparatorSvc myEmpiResourceComparatorSvc;
 	@Autowired
 	private EmpiLinkDaoSvc myEmpiLinkDaoSvc;
+	@Autowired
+	private PersonUtil myPersonUtil;
+	@Autowired
+	private EmpiResourceDaoSvc myEmpiResourceDaoSvc;
 
 	/**
 	 * Given an incoming IBaseResource, limited to Patient/Practitioner, return a list of {@link MatchedPersonCandidate}
@@ -54,26 +59,47 @@ public class EmpiPersonFindingSvc {
 	 */
 	public List<MatchedPersonCandidate> findPersonCandidates(IBaseResource theBaseResource) {
 		Optional<List<MatchedPersonCandidate>> matchedPersonCandidates;
-			matchedPersonCandidates= attemptToFindPersonCandidateFromEmpiLinkTable(theBaseResource);
+
+
+		matchedPersonCandidates= attemptToFindPersonCandidateFromEmpiLinkTable(theBaseResource);
 
 		if (matchedPersonCandidates.isPresent()) {
 			return matchedPersonCandidates.get();
 		}
 
-		// 2. Next, find Person resources that link to this resource. GGG there shouldnt be any.... as our previous query returned 0.
-		// 3. Next, try to find Persons that are similar to our incoming resource based on similarity metrics
+		matchedPersonCandidates = attemptToFindPersonCandidateFromIncomingEID(theBaseResource);
+		if (matchedPersonCandidates.isPresent()) {
+			return matchedPersonCandidates.get();
+		}
+
 		matchedPersonCandidates =  attemptToFindPersonCandidateFromSimilarPersons(theBaseResource);
 		if (matchedPersonCandidates.isPresent()) {
 			return matchedPersonCandidates.get();
 		}
 
-		//4. Finally, perform similarity matching against the existing Patient/Practitioner population as a last resort.
 		matchedPersonCandidates =  attemptToFindPersonCandidateFromSimilarTargetResource(theBaseResource);
 		if (matchedPersonCandidates.isPresent()) {
 			return matchedPersonCandidates.get();
 		}
 
 		return Collections.emptyList();
+	}
+
+	private Optional<List<MatchedPersonCandidate>> attemptToFindPersonCandidateFromIncomingEID(IBaseResource theBaseResource) {
+		String eidFromResource = myPersonUtil.readEIDFromResource(theBaseResource);
+		IBaseResource iBaseResource = myEmpiResourceDaoSvc.searchPersonByEid(eidFromResource);
+		if (iBaseResource != null) {
+			Long pidOrNull = myResourceTableHelper.getPidOrNull(iBaseResource);
+			//We make a fake link here as there no link for this association yet.
+			//FIXME EMPI proobably have to re-model MatchedPersonCandidate.
+			EmpiLink fakeEmpiLink = new EmpiLink();
+			fakeEmpiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
+			fakeEmpiLink.setPersonPid(pidOrNull);
+			MatchedPersonCandidate mpc = new MatchedPersonCandidate(new ResourcePersistentId(pidOrNull), fakeEmpiLink);
+			return Optional.of(Collections.singletonList(mpc));
+		} else {
+			return Optional.empty();
+		}
 	}
 
 	/**
