@@ -48,6 +48,7 @@ public class EmpiPersonFindingSvc {
 	 * Given an incoming IBaseResource, limited to Patient/Practitioner, return a list of {@link MatchedPersonCandidate}
 	 * indicating possible candidates for a matching Person. Uses several separate methods for finding candidates:
 	 *
+	 *  0. First, check the incoming Resource for an EID. If it is present, and we can find a Person with this EID, it automatically matches.
     *  1. First, check link table for any entries where this baseresource is the target of a person. If found, return.
 	 *  2. If none are found, attempt to find Person Resources which link to this theBaseResource.
 	 *  3. If none are found, attempt to find Persons similar to our incoming resource based on the EMPI rules and similarity metrics.
@@ -60,14 +61,12 @@ public class EmpiPersonFindingSvc {
 	public List<MatchedPersonCandidate> findPersonCandidates(IBaseResource theBaseResource) {
 		Optional<List<MatchedPersonCandidate>> matchedPersonCandidates;
 
-
-		matchedPersonCandidates= attemptToFindPersonCandidateFromEmpiLinkTable(theBaseResource);
-
+		matchedPersonCandidates = attemptToFindPersonCandidateFromIncomingEID(theBaseResource);
 		if (matchedPersonCandidates.isPresent()) {
 			return matchedPersonCandidates.get();
 		}
 
-		matchedPersonCandidates = attemptToFindPersonCandidateFromIncomingEID(theBaseResource);
+		matchedPersonCandidates= attemptToFindPersonCandidateFromEmpiLinkTable(theBaseResource);
 		if (matchedPersonCandidates.isPresent()) {
 			return matchedPersonCandidates.get();
 		}
