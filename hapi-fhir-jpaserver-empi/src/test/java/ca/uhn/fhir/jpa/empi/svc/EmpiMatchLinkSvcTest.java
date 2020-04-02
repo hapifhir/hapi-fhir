@@ -96,7 +96,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testWhenPOSSIBLE_MATCHOccursOnPersonThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
 		Person person= createPerson(buildJanePerson());
-		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
+		Patient originalJane = createPatient(buildJanePatient());
 
 		myEmpiLinkSvc.updateLink(person, originalJane, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL);
 		//TODO change this so that it will only partially match.
