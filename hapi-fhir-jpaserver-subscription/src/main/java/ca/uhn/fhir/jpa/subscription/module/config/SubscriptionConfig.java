@@ -20,31 +20,51 @@ package ca.uhn.fhir.jpa.subscription.module.config;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelFactory;
+import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
+@Import({SearchParamConfig.class})
 @EnableScheduling
-@ComponentScan(basePackages = {"ca.uhn.fhir.jpa.subscription.module"})
-public abstract class BaseSubscriptionConfig {
+@ComponentScan(
+	basePackages = {"ca.uhn.fhir.jpa.subscription.module"},
+	excludeFilters = {
+		@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.subscription.module.standalone.*")
+	}
+)
+public class SubscriptionConfig {
+
+	@Autowired
+	private FhirContext myFhirContext;
+
+	@Primary
+	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChain")
+	public IValidationSupport validationSupportChainR4() {
+		return myFhirContext.getValidationSupport();
+	}
+
 	@Bean
 	public ISubscribableChannelFactory subscribableChannelFactory() {
 		return new LinkedBlockingQueueSubscribableChannelFactory();
 	}
 
 	@Bean
-	public InterceptorService interceptorRegistry() {
-		return new InterceptorService("hapi-fhir-jpa-subscription");
-	}
-
-	@Bean
 	public SubscriptionChannelFactory subscriptionChannelFactory() {
 		return new SubscriptionChannelFactory();
 	}
+
+
 }

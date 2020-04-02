@@ -37,12 +37,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service
 public class FhirClientSearchParamProvider implements ISearchParamProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirClientSearchParamProvider.class);
 
 	private IGenericClient myClient;
 
+	/**
+	 * Constructor
+	 */
 	@Autowired
 	public FhirClientSearchParamProvider(IGenericClient theClient) {
 		myClient = theClient;

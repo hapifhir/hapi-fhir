@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service
 public class FhirClientResourceRetriever implements IResourceRetriever {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirClientResourceRetriever.class);
 

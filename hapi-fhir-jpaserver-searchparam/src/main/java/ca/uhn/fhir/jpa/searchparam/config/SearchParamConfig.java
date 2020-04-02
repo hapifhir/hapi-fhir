@@ -20,8 +20,15 @@ package ca.uhn.fhir.jpa.searchparam.config;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
+import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
+import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
+import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR5;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +37,29 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Configuration
 @EnableScheduling
 @ComponentScan(basePackages = {"ca.uhn.fhir.jpa.searchparam"})
-abstract public class BaseSearchParamConfig {
+public class SearchParamConfig {
+
+	@Autowired
+	private FhirContext myFhirContext;
+
+	@Bean
+	public ISearchParamExtractor searchParamExtractor() {
+		switch (myFhirContext.getVersion().getVersion()) {
+
+			case DSTU2:
+				return new SearchParamExtractorDstu2();
+			case DSTU3:
+				return new SearchParamExtractorDstu3();
+			case R4:
+				return new SearchParamExtractorR4();
+			case R5:
+				return new SearchParamExtractorR5();
+			case DSTU2_HL7ORG:
+			case DSTU2_1:
+			default:
+				throw new IllegalStateException("Can not handle version: " + myFhirContext.getVersion().getVersion());
+		}
+	}
 
 	@Bean
 	public ISearchParamRegistry searchParamRegistry() {

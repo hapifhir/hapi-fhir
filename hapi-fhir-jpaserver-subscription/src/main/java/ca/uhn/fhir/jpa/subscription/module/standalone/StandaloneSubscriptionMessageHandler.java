@@ -39,7 +39,6 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
 
-@Service
 public class StandaloneSubscriptionMessageHandler implements MessageHandler {
 	private static final Logger ourLog = LoggerFactory.getLogger(StandaloneSubscriptionMessageHandler.class);
 
