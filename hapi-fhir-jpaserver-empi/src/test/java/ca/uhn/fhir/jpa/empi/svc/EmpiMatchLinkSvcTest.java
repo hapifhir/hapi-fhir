@@ -37,6 +37,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	IEmpiConfig myEmpiConfig;
 	@Autowired
 	IEmpiLinkSvc myEmpiLinkSvc;
+	@Autowired
+	private EmpiResourceDaoSvc myEmpiResourceDaoSvc;
 
 	@Test
 	public void testAddPatientLinksToNewPersonIfNoneFound() {

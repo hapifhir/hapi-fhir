@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.util.PersonUtil;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Person;
 import org.jetbrains.annotations.NotNull;
@@ -86,19 +87,20 @@ public class EmpiPersonFindingSvc {
 
 	private Optional<List<MatchedPersonCandidate>> attemptToFindPersonCandidateFromIncomingEID(IBaseResource theBaseResource) {
 		String eidFromResource = myPersonUtil.readEIDFromResource(theBaseResource);
+		if (!StringUtils.isBlank(eidFromResource)) {
 		IBaseResource iBaseResource = myEmpiResourceDaoSvc.searchPersonByEid(eidFromResource);
-		if (iBaseResource != null) {
-			Long pidOrNull = myResourceTableHelper.getPidOrNull(iBaseResource);
-			//We make a fake link here as there no link for this association yet.
-			//FIXME EMPI proobably have to re-model MatchedPersonCandidate.
-			EmpiLink fakeEmpiLink = new EmpiLink();
-			fakeEmpiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-			fakeEmpiLink.setPersonPid(pidOrNull);
-			MatchedPersonCandidate mpc = new MatchedPersonCandidate(new ResourcePersistentId(pidOrNull), fakeEmpiLink);
-			return Optional.of(Collections.singletonList(mpc));
-		} else {
-			return Optional.empty();
+			if (iBaseResource != null) {
+				Long pidOrNull = myResourceTableHelper.getPidOrNull(iBaseResource);
+				//We make a fake link here as there no link for this association yet.
+				//FIXME EMPI proobably have to re-model MatchedPersonCandidate?? I don't like making this fake thing to throw around.
+				EmpiLink fakeEmpiLink = new EmpiLink();
+				fakeEmpiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
+				fakeEmpiLink.setPersonPid(pidOrNull);
+				MatchedPersonCandidate mpc = new MatchedPersonCandidate(new ResourcePersistentId(pidOrNull), fakeEmpiLink);
+				return Optional.of(Collections.singletonList(mpc));
+			}
 		}
+		return Optional.empty();
 	}
 
 	/**
