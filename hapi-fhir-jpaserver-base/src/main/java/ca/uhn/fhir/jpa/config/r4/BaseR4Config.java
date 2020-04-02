@@ -52,6 +52,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableTransactionManagement
 public class BaseR4Config extends BaseConfigDstu3Plus {
+	static FhirContext ourFhirContext = FhirContext.forR4();
+	static {
+		// Don't strip versions in some places
+		ParserOptions parserOptions = ourFhirContext.getParserOptions();
+		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.what");
+	}
 
 	@Override
 	public FhirContext fhirContext() {
@@ -67,13 +73,7 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 	@Bean
 	@Primary
 	public FhirContext fhirContextR4() {
-		FhirContext retVal = FhirContext.forR4();
-
-		// Don't strip versions in some places
-		ParserOptions parserOptions = retVal.getParserOptions();
-		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.what");
-
-		return retVal;
+		return ourFhirContext;
 	}
 
 	@Bean

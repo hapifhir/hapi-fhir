@@ -18,6 +18,6 @@ public abstract class BaseTestEmpiConfig {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		Resource resource = resourceLoader.getResource("empi/empi-rules.json");
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
-		return new EmpiConfigImpl().setEnabled(true).setScriptText(json);
+		return new EmpiConfigImpl().setEnabled(false).setScriptText(json);
 	}
 }

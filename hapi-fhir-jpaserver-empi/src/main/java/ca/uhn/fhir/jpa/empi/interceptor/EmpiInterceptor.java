@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.model.message.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Person;
@@ -157,5 +158,11 @@ public class EmpiInterceptor extends BaseResourceModifiedInterceptor implements 
 
 	private String extractResourceType(IBaseResource theResource) {
 		return myFhirContext.getResourceDefinition(theResource).getName();
+	}
+
+	@Override
+	@VisibleForTesting
+	public void stopForUnitTest() {
+		this.preDestroy();
 	}
 }
