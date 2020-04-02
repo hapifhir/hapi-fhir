@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,5 +43,9 @@ public class EmpiResourceDaoSvc {
 
 	public DaoMethodOutcome updatePerson(IBaseResource thePerson) {
 		return myPersonDao.update(thePerson);
+	}
+
+	public IBaseResource readPersonByPid(ResourcePersistentId thePersonPid) {
+		return myPersonDao.readByPid(thePersonPid);
 	}
 }

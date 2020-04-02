@@ -1,13 +1,11 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
-import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
 import ca.uhn.fhir.jpa.empi.util.PersonUtil;
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -38,7 +36,8 @@ public class EmpiMatchLinkSvc {
 		//1 candidate, in which case you should use it
 		} else if (personCandidates.size() == 1) {
 			MatchedPersonCandidate matchedPersonCandidate = personCandidates.get(0);
-			IBaseResource person = myEmpiResourceDaoSvc.readPerson(new IdDt("Person/" +matchedPersonCandidate.getCandidatePersonPid().getIdAsLong()));
+			ResourcePersistentId personPid = matchedPersonCandidate.getCandidatePersonPid();
+			IBaseResource person = myEmpiResourceDaoSvc.readPersonByPid(personPid);
 			handleEidOverwrite(person, theResource);
 			myEmpiLinkSvc.updateLink(person, theResource, matchedPersonCandidate.getEmpiLink().getMatchResult(), EmpiLinkSourceEnum.AUTO);
 		//multiple candidates, in which case they should all be tagged as POSSIBLE_MATCH. If one is already tagged as MATCH
