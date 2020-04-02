@@ -29,7 +29,7 @@ public class SubscriptionTestUtil {
 	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
 	public int getExecutorQueueSize() {
-		LinkedBlockingQueueSubscribableChannel channel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+		LinkedBlockingQueueSubscribableChannel channel = (LinkedBlockingQueueSubscribableChannel) mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
 		return channel.getQueueSizeForUnitTest();
 	}
 

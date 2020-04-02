@@ -22,19 +22,8 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.model.CodeableConcept;
-import org.hl7.fhir.r5.model.Coding;
-import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.IdType;
-import org.hl7.fhir.r5.model.Observation;
-import org.hl7.fhir.r5.model.Subscription;
-import org.hl7.fhir.r5.model.Topic;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
+import org.hl7.fhir.r5.model.*;
+import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -110,7 +99,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 			waitForActivatedSubscriptionCount(0);
 		}
 
-		LinkedBlockingQueueSubscribableChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+		LinkedBlockingQueueSubscribableChannel processingChannel = (LinkedBlockingQueueSubscribableChannel) mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
 		if (processingChannel != null) {
 			processingChannel.clearInterceptorsForUnitTest();
 		}

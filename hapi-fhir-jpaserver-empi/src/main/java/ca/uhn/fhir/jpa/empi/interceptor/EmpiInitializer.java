@@ -31,6 +31,7 @@ public class EmpiInitializer {
 			return;
 		}
 		myInterceptorService.registerInterceptor(myEmpiInterceptor);
+		myEmpiInterceptor.start();
 		ourLog.info("EMPI interceptor registered");
 
 		myEmpiProviderLoader.loadProvider();

@@ -64,14 +64,12 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 		when(myMockRestfulServer.getFhirContext()).thenReturn(myMockFhirContext);
 
 		//This sets up our basic interceptor, and also attached the latch so we can await the hook calls.
-		myEmpiInterceptor.start();
-		myInterceptorService.registerInterceptor(myEmpiInterceptor);
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, myAfterEmpiLatch);
 	}
 
 	@Override
 	protected void after() {
-		myInterceptorService.unregisterAllInterceptors();
+		myInterceptorService.unregisterInterceptor(myAfterEmpiLatch);
 		myAfterEmpiLatch.clear();
 	}
 }

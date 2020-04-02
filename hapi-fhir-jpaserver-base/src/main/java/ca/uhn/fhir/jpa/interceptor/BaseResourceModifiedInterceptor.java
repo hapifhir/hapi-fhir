@@ -8,7 +8,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.message.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.model.message.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.model.message.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.annotations.VisibleForTesting;
@@ -128,7 +127,7 @@ public abstract class BaseResourceModifiedInterceptor implements IResourceModifi
 	}
 
 	@VisibleForTesting
-	public LinkedBlockingQueueSubscribableChannel getProcessingChannelForUnitTest() {
-		return (LinkedBlockingQueueSubscribableChannel) myMatchingChannel;
+	public SubscribableChannel getProcessingChannelForUnitTest() {
+		return myMatchingChannel;
 	}
 }

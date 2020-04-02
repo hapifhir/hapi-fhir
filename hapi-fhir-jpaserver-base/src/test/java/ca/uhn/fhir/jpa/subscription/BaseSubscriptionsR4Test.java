@@ -11,8 +11,8 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.BundleUtil;
 import com.google.common.collect.Lists;
 import net.ttddyy.dsproxy.QueryCount;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
@@ -98,7 +98,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 			waitForActivatedSubscriptionCount(0);
 		}
 
-		LinkedBlockingQueueSubscribableChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+		LinkedBlockingQueueSubscribableChannel processingChannel = (LinkedBlockingQueueSubscribableChannel) mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
 		if (processingChannel != null) {
 			processingChannel.clearInterceptorsForUnitTest();
 		}

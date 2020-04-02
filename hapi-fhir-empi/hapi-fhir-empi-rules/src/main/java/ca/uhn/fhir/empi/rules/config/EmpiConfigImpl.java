@@ -7,8 +7,9 @@ import java.io.IOException;
 
 // FIXME KHS collapse these two projects into hapi-fhir-empi
 public class EmpiConfigImpl implements IEmpiConfig {
+
 	private boolean myEnabled;
-	private int myConsumerCount;
+	private int myConsumerCount = EMPI_DEFAULT_CONSUMER_COUNT;
 	private String myScriptText;
 	private EmpiRulesJson myEmpiRules;
 

@@ -14,10 +14,10 @@ import java.io.IOException;
 @Configuration
 public abstract class BaseTestEmpiConfig {
 	@Bean
-	IEmpiConfig empiRulesSvc() throws IOException {
+	IEmpiConfig empiConfig() throws IOException {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		Resource resource = resourceLoader.getResource("empi/empi-rules.json");
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
-		return new EmpiConfigImpl().setScriptText(json);
+		return new EmpiConfigImpl().setEnabled(true).setScriptText(json);
 	}
 }

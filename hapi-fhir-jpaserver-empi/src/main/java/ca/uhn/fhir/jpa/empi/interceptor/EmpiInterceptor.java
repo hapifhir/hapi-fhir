@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
+import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.IEmpiInterceptor;
@@ -31,18 +32,18 @@ import java.util.stream.Stream;
 @Service
 public class EmpiInterceptor extends BaseResourceModifiedInterceptor implements IEmpiInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiInterceptor.class);
-
-	public static final String EMPI_MATCHING_CHANNEL_NAME = "empi-matching";
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 	@Autowired
 	private ISubscribableChannelFactory mySubscribableChannelFactory;
 	@Autowired
 	private EmpiMatchingSubscriber myEmpiMatchingSubscriber;
+	@Autowired
+	private IEmpiConfig myEmpiConfig;
 
 	@Override
 	protected String getMatchingChannelName() {
-		return EMPI_MATCHING_CHANNEL_NAME;
+		return IEmpiConfig.EMPI_MATCHING_CHANNEL_NAME;
 	}
 
 	@Override
@@ -51,8 +52,9 @@ public class EmpiInterceptor extends BaseResourceModifiedInterceptor implements 
 	}
 
 	@Override
+	// FIXME KHS rename this method
 	protected SubscribableChannel createMatchingChannel() {
-		return mySubscribableChannelFactory.createSubscribableChannel(EMPI_MATCHING_CHANNEL_NAME, ResourceModifiedMessage.class, 1);
+		return mySubscribableChannelFactory.createSubscribableChannel(IEmpiConfig.EMPI_MATCHING_CHANNEL_NAME, ResourceModifiedMessage.class, myEmpiConfig.getConsumerCount());
 	}
 
 	@Override
