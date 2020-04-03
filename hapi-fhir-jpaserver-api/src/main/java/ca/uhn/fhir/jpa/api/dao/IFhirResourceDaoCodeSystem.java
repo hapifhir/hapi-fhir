@@ -15,7 +15,7 @@ import java.util.List;
 
 /*
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR JPA API
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%

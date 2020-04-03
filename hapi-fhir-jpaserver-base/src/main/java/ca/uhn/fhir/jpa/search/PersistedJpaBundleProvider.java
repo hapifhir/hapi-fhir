@@ -96,6 +96,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Autowired
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired
+	private ISearchCacheSvc mySearchCacheSvc;
 
 	/*
 	 * Non autowired fields (will be different for every instance
@@ -103,7 +104,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	 */
 
 	private final RequestDetails myRequest;
-	private ISearchCacheSvc mySearchCacheSvc;
 	private Search mySearchEntity;
 	private String myUuid;
 	private boolean myCacheHit;

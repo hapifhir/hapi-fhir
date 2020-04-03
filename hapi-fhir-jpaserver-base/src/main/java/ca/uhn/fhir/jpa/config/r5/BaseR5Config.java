@@ -103,11 +103,6 @@ public class BaseR5Config extends BaseConfigDstu3Plus {
 		return searchDao;
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
-	public SearchParamExtractorR5 searchParamExtractor() {
-		return new SearchParamExtractorR5();
-	}
-
 	@Bean(name = "mySystemDaoR5", autowire = Autowire.BY_NAME)
 	public IFhirSystemDao<Bundle, Meta> systemDaoR5() {
 		ca.uhn.fhir.jpa.dao.r5.FhirSystemDaoR5 retVal = new ca.uhn.fhir.jpa.dao.r5.FhirSystemDaoR5();

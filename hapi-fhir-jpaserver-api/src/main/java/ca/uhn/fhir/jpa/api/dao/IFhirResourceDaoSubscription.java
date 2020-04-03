@@ -6,7 +6,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 /*
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR JPA API
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%

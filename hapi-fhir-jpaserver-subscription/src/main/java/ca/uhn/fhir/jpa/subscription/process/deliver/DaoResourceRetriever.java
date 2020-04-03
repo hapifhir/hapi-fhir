@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.subscription.process.deliver;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Subscription Server
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%

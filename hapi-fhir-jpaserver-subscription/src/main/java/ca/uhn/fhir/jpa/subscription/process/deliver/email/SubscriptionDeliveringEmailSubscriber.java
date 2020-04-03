@@ -38,7 +38,6 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
-@Component
 @Scope("prototype")
 public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliverySubscriber {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringEmailSubscriber.class);

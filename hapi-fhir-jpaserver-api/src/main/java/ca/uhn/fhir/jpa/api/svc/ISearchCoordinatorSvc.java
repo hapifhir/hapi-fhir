@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.api.svc;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR JPA API
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%

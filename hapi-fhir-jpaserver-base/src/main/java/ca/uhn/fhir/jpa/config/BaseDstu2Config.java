@@ -124,11 +124,6 @@ public class BaseDstu2Config extends BaseConfig {
 		return searchDao;
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
-	public SearchParamExtractorDstu2 searchParamExtractor() {
-		return new SearchParamExtractorDstu2();
-	}
-
 	@Bean(name = "mySystemDaoDstu2", autowire = Autowire.BY_NAME)
 	public IFhirSystemDao<Bundle, MetaDt> systemDaoDstu2() {
 		ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2 retVal = new ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2();

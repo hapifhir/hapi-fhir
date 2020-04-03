@@ -101,11 +101,6 @@ public class BaseDstu3Config extends BaseConfigDstu3Plus {
 		return new FulltextSearchSvcImpl();
 	}
 
-	@Bean
-	public SearchParamExtractorDstu3 searchParamExtractor() {
-		return new SearchParamExtractorDstu3();
-	}
-
 	@Bean(name = "mySystemDaoDstu3")
 	public IFhirSystemDao<Bundle, Meta> systemDaoDstu3() {
 		return new ca.uhn.fhir.jpa.dao.dstu3.FhirSystemDaoDstu3();
