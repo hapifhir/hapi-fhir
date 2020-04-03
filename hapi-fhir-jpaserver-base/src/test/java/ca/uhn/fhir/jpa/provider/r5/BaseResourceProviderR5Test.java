@@ -1,16 +1,16 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
-import ca.uhn.fhir.jpa.subscription.SubscriptionMatcherInterceptor;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -109,7 +109,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 
 			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 
-			JpaConformanceProviderR5 confProvider = new JpaConformanceProviderR5(ourRestServer, mySystemDao, myDaoConfig);
+			JpaConformanceProviderR5 confProvider = new JpaConformanceProviderR5(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(confProvider);
 
@@ -169,6 +169,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 			ourSubscriptionMatcherInterceptor.start();
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
+			confProvider.setSearchParamRegistry(ourSearchParamRegistry);
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();

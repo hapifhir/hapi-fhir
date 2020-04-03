@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.email.IEmailSender;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.email.JavaMailEmailSender;
+import ca.uhn.fhir.jpa.subscription.process.deliver.email.IEmailSender;
+import ca.uhn.fhir.jpa.subscription.process.deliver.email.JavaMailEmailSender;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;

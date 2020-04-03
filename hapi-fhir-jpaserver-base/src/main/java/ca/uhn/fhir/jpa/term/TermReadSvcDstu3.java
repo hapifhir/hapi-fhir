@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -19,7 +19,6 @@ import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -29,7 +28,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hl7.fhir.convertors.conv30_40.CodeSystem30_40.convertCodeSystem;
 import static org.hl7.fhir.convertors.conv30_40.ValueSet30_40.convertValueSet;
 
 /*
@@ -171,7 +169,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 	}
 
 	@Override
-	public ValidateCodeResult validateCodeIsInPreExpandedValueSet(ValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
+	public IFhirResourceDaoValueSet.ValidateCodeResult validateCodeIsInPreExpandedValueSet(ValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
 		ValueSet valueSet = (ValueSet) theValueSet;
 		org.hl7.fhir.r4.model.ValueSet valueSetR4 = convertValueSet(valueSet);

@@ -4,8 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.bulk.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
@@ -18,7 +18,7 @@ import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.provider.r5.JpaConformanceProviderR5;
 import ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -125,7 +125,7 @@ public class TestRestfulServer extends RestfulServer {
 				providers.add(myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
 				systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
-				JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class));
+				JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class), theSearchParamRegistry);
 				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
@@ -144,7 +144,7 @@ public class TestRestfulServer extends RestfulServer {
 				providers.add(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
 				systemDao = myAppCtx.getBean("mySystemDaoR4", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
-				JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(this, systemDao, myAppCtx.getBean(DaoConfig.class));
+				JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(this, systemDao, myAppCtx.getBean(DaoConfig.class), theSearchParamRegistry);
 				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
@@ -163,7 +163,7 @@ public class TestRestfulServer extends RestfulServer {
 				providers.add(myAppCtx.getBean("mySystemProviderR5", JpaSystemProviderR5.class));
 				systemDao = myAppCtx.getBean("mySystemDaoR5", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
-				JpaConformanceProviderR5 confProvider = new JpaConformanceProviderR5(this, systemDao, myAppCtx.getBean(DaoConfig.class));
+				JpaConformanceProviderR5 confProvider = new JpaConformanceProviderR5(this, systemDao, myAppCtx.getBean(DaoConfig.class), theSearchParamRegistry);
 				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
@@ -254,8 +254,8 @@ public class TestRestfulServer extends RestfulServer {
 		/*
 		 * Register subscription interceptors
 		 */
-		SubscriptionInterceptorLoader subscriptionInterceptorLoader = myAppCtx.getBean(SubscriptionInterceptorLoader.class);
-		subscriptionInterceptorLoader.registerInterceptors();
+		SubmitInterceptorLoader submitInterceptorLoader = myAppCtx.getBean(SubmitInterceptorLoader.class);
+		submitInterceptorLoader.registerInterceptors();
 
 		/*
 		 * Cascading deletes

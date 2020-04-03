@@ -1,13 +1,15 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
-import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelRegistry;
-import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelWithHandlers;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.email.JavaMailEmailSender;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.email.SubscriptionDeliveringEmailSubscriber;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.subscription.channel.queue.LinkedBlockingQueueChannel;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubmitInterceptorLoader;
+import ca.uhn.fhir.jpa.subscription.process.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelWithHandlers;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.process.deliver.email.JavaMailEmailSender;
+import ca.uhn.fhir.jpa.subscription.process.deliver.email.SubscriptionDeliveringEmailSubscriber;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +22,7 @@ public class SubscriptionTestUtil {
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
-	private SubscriptionInterceptorLoader mySubscriptionInterceptorLoader;
+	private SubmitInterceptorLoader mySubmitInterceptorLoader;
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 	@Autowired
@@ -29,7 +31,7 @@ public class SubscriptionTestUtil {
 	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
 	public int getExecutorQueueSize() {
-		LinkedBlockingQueueSubscribableChannel channel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+		LinkedBlockingQueueChannel channel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
 		return channel.getQueueSizeForUnitTest();
 	}
 
@@ -48,22 +50,22 @@ public class SubscriptionTestUtil {
 
 	public void registerEmailInterceptor() {
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
-		mySubscriptionInterceptorLoader.registerInterceptors();
+		mySubmitInterceptorLoader.registerInterceptors();
 	}
 
 	public void registerRestHookInterceptor() {
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
-		mySubscriptionInterceptorLoader.registerInterceptors();
+		mySubmitInterceptorLoader.registerInterceptors();
 	}
 
 	public void registerWebSocketInterceptor() {
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
-		mySubscriptionInterceptorLoader.registerInterceptors();
+		mySubmitInterceptorLoader.registerInterceptors();
 	}
 
 	public void unregisterSubscriptionInterceptor() {
 		myDaoConfig.clearSupportedSubscriptionTypesForUnitTest();
-		mySubscriptionInterceptorLoader.unregisterInterceptorsForUnitTest();
+		mySubmitInterceptorLoader.unregisterInterceptorsForUnitTest();
 	}
 
 	public int getExecutorQueueSizeForUnitTests() {

@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.config;
  */
 
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.websocket.SubscriptionWebsocketHandler;
+import ca.uhn.fhir.jpa.subscription.process.deliver.websocket.SubscriptionWebsocketHandler;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
