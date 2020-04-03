@@ -16,6 +16,8 @@ public class ResourceTableHelper {
 	@Autowired
 	IdHelperService myIdHelperService;
 
+	//FIXME EMPI QUESTION: This will actually throw ResourceNotFoundException if you call it on a
+	// unpersisted entity.
 	public Long getPidOrNull(IBaseResource theResource) {
 		IAnyResource anyResource = (IAnyResource) theResource;
 		Long retval = (Long) anyResource.getUserData(RESOURCE_PID);

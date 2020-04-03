@@ -4,8 +4,6 @@ import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
-import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -15,6 +13,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Lazy
@@ -31,7 +30,7 @@ public class EmpiLinkDaoSvc {
 		Long personPid = myResourceTableHelper.getPidOrNull(thePerson);
 		Long resourcePid = myResourceTableHelper.getPidOrNull(theResource);
 
-		EmpiLink empiLink = getEmpiLinkByTargetPid(personPid, resourcePid);
+		EmpiLink empiLink = getOrCreateEmpiLinkByPersonPidAndTargetPid(personPid, resourcePid);
 
 		empiLink.setLinkSource(theLinkSource);
 		empiLink.setMatchResult(theMatchResult);
@@ -42,25 +41,53 @@ public class EmpiLinkDaoSvc {
 
 
 	@NotNull
-	public EmpiLink getEmpiLinkByTargetPid(Long thePersonPid, Long theResourcePid) {
-		EmpiLink empiLink = new EmpiLink();
-		empiLink.setPersonPid(thePersonPid);
-		empiLink.setTargetPid(theResourcePid);
-		Example<EmpiLink> example = Example.of(empiLink);
-		Optional<EmpiLink> found = myEmpiLinkDao.findOne(example);
-		if (found.isPresent()) {
-			empiLink = found.get();
+	public EmpiLink getOrCreateEmpiLinkByPersonPidAndTargetPid(Long thePersonPid, Long theResourcePid) {
+		EmpiLink existing = getLinkByPersonPidAndTargetPid(thePersonPid, theResourcePid);
+		if (existing != null) {
+			return existing;
+		} else {
+			EmpiLink empiLink = new EmpiLink();
+			empiLink.setPersonPid(thePersonPid);
+			empiLink.setTargetPid(theResourcePid);
+			return empiLink;
 		}
-		return empiLink;
 	}
 
-	public EmpiLink getLinkByTargetResourceId(Long theResourcePid) {
-		if (theResourcePid == null) {
+	public EmpiLink getLinkByPersonPidAndTargetPid(Long thePersonPid, Long theTargetPid) {
+
+		if (theTargetPid == null || thePersonPid == null) {
 			return null;
 		}
 		EmpiLink link = new EmpiLink();
-		link.setTargetPid(theResourcePid);
+		link.setTargetPid(theTargetPid);
+		link.setPersonPid(thePersonPid);
 		Example<EmpiLink> example = Example.of(link);
 		return myEmpiLinkDao.findOne(example).orElse(null);
+	}
+
+	public List<EmpiLink> getEmpiLinksByTargetPidAndMatchResult(Long theTargetPid, EmpiMatchResultEnum theMatchResult) {
+		EmpiLink exampleLink = new EmpiLink();
+		exampleLink.setTargetPid(theTargetPid);
+		exampleLink.setMatchResult(theMatchResult);
+		Example<EmpiLink> example = Example.of(exampleLink);
+		return myEmpiLinkDao.findAll(example);
+	}
+
+	public Optional<EmpiLink> getMatchedLinkForTargetPid(Long theTargetPid) {
+		EmpiLink exampleLink = new EmpiLink();
+		exampleLink.setTargetPid(theTargetPid);
+		exampleLink.setMatchResult(EmpiMatchResultEnum.MATCH);
+		Example<EmpiLink> example = Example.of(exampleLink);
+		return myEmpiLinkDao.findOne(example);
+
+	}
+
+	public Optional<EmpiLink> getEmpiLinksByPersonPidTargetPidAndMatchResult(Long thePersonPid, Long theTargetPid, EmpiMatchResultEnum theMatchResult) {
+		EmpiLink exampleLink = new EmpiLink();
+		exampleLink.setPersonPid(thePersonPid);
+		exampleLink.setTargetPid(theTargetPid);
+		exampleLink.setMatchResult(theMatchResult);
+		Example<EmpiLink> example = Example.of(exampleLink);
+		return myEmpiLinkDao.findOne(example);
 	}
 }

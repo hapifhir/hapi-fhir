@@ -35,16 +35,4 @@ public interface IEmpiLinkSvc {
 	 * @param theLinkSource the initiator of the change in link status.
 	 */
 	void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource);
-
-	/**
-	 * Given an incoming resource, a list of matched candidates, and a link source,
-	 * 1. Attempt to find the target person. If none exists, create it.
-	 * 2. Given this target person, link theIncomingResource if not already done
-	 * 3. Create all necessary links for theMatchedResults to the found person.
-	 *
-	 * @param theIncomingResource
-	 * @param theMatchedResults
-	 * @param theLinkSource
-	 */
-	void updateLinks(IBaseResource theIncomingResource, List<MatchedTargetCandidate> theMatchedResults, EmpiLinkSourceEnum theLinkSource);
 }

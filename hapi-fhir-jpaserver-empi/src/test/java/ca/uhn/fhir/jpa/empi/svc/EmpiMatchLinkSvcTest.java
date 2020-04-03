@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
-import ca.uhn.fhir.empi.rules.config.EmpiConfigImpl;
 import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
 import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
@@ -9,7 +8,10 @@ import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
@@ -18,6 +20,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
@@ -68,6 +71,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testPatientLinksToPersonIfMatch() {
+		//FIXME EMPI QUESTION: we are no longer matching on person attributes so this test is invalid right?
 		Person janePerson = buildJanePerson();
 		DaoMethodOutcome outcome = myPersonDao.create(janePerson);
 		Long origPersonPid = myResourceTableHelper.getPidOrNull(outcome.getResource());
@@ -84,28 +88,39 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testWhenMatchOccursOnPersonThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
-		Person person= createPerson(buildJanePerson());
 		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
+		IBundleProvider search = myPersonDao.search(new SearchParameterMap());
+		IBaseResource janePerson = search.getResources(0,1).get(0);
 
-		myEmpiLinkSvc.updateLink(person, originalJane, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL);
+		//Create a manual NO_MATCH between janePerson and unmatchedJane.
+		Patient unmatchedJane= createPatient(buildJanePatient());
+		myEmpiLinkSvc.updateLink(janePerson, unmatchedJane, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL);
 
-		Patient similarJane = createPatientAndUpdateLinks(buildJanePatient());
+		//rerun EMPI rules against unmatchedJane.
+		myEmpiMatchLinkSvc.updateEmpiLinksForPatient(unmatchedJane);
 
-		assertThat(similarJane, is(not(samePersonAs(person))));
-		assertThat(similarJane, is(not(linkedTo(originalJane))));
+		assertThat(unmatchedJane, is(not(samePersonAs(janePerson))));
+		assertThat(unmatchedJane, is(not(linkedTo(originalJane))));
 	}
 
 	@Test
 	public void testWhenPOSSIBLE_MATCHOccursOnPersonThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
-		Person person= createPerson(buildJanePerson());
-		Patient originalJane = createPatient(buildJanePatient());
+		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
+		IBundleProvider search = myPersonDao.search(new SearchParameterMap());
+		IBaseResource janePerson = search.getResources(0, 1).get(0);
 
-		myEmpiLinkSvc.updateLink(person, originalJane, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL);
+		Patient unmatchedPatient = createPatient(buildJanePatient());
+
+		//This simulates an admin specifically saying that unmatchedPatient does NOT match janePerson.
+		myEmpiLinkSvc.updateLink(janePerson, unmatchedPatient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL);
 		//TODO change this so that it will only partially match.
-		Patient similarJane = createPatientAndUpdateLinks(buildJanePatient());
 
-		assertThat(similarJane, is(not(samePersonAs(person))));
-		assertThat(similarJane, is(not(linkedTo(originalJane))));
+		//Now normally, when we run update links, it should link to janePerson. However, this manual NO_MATCH link
+		//should cause a whole new Person to be created.
+		myEmpiMatchLinkSvc.updateEmpiLinksForPatient(unmatchedPatient);
+
+		assertThat(unmatchedPatient, is(not(samePersonAs(janePerson))));
+		assertThat(unmatchedPatient, is(not(linkedTo(originalJane))));
 	}
 
 
@@ -116,8 +131,10 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Patient janePatient = addEID(buildJanePatient(), sampleEID);
 		janePatient = createPatientAndUpdateLinks(janePatient);
 
-		EmpiLink empiLink = myEmpiLinkDaoSvc.getLinkByTargetResourceId(janePatient.getIdElement().getIdPartAsLong());
-		Person person = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
+		Optional<EmpiLink> empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(janePatient.getIdElement().getIdPartAsLong());
+		assertThat(empiLink.isPresent(), is(true));
+
+		Person person = myPersonDao.read(new IdDt(empiLink.get().getPersonPid()));
 		Identifier identifier = person.getIdentifierFirstRep();
 		assertThat(identifier.getSystem(), is(equalTo(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())));
 		assertThat(identifier.getValue(), is(equalTo(sampleEID)));
@@ -126,7 +143,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testWhenPatientIsCreatedWithoutAnEIDThePersonGetsAutomaticallyAssignedOne() {
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
-		EmpiLink empiLink = myEmpiLinkDaoSvc.getLinkByTargetResourceId(patient.getIdElement().getIdPartAsLong());
+		EmpiLink empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(patient.getIdElement().getIdPartAsLong()).get();
 
 		Person person = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
 		Identifier identifierFirstRep = person.getIdentifierFirstRep();
@@ -136,9 +153,11 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testPatientAttributesAreCarriedOverWhenPersonIsCreatedFromPatient() {
+		//FIXME EMPI QUESTION I need guidance on what should/shouldnt be transferred from Patient -> Person
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
-		EmpiLink empiLink = myEmpiLinkDaoSvc.getLinkByTargetResourceId(patient.getIdElement().getIdPartAsLong());
-		Person read = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
+
+		Optional<EmpiLink> empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(patient.getIdElement().getIdPartAsLong());
+		Person read = myPersonDao.read(new IdDt(empiLink.get().getPersonPid()));
 
 		assertThat(read.getName(), is(equalTo(patient.getName())));
 		assertThat(read.getAddress(), is(equalTo(patient.getAddress())));
@@ -163,7 +182,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//We want to make sure the patients were linked to the same person.
 		assertThat(patient, is(samePersonAs(janePatient)));
 
-		EmpiLink empiLink = myEmpiLinkDaoSvc.getLinkByTargetResourceId(patient.getIdElement().getIdPartAsLong());
+		EmpiLink empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(patient.getIdElement().getIdPartAsLong()).get();
 		Person person = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
 		Identifier identifier = person.getIdentifierFirstRep();
 

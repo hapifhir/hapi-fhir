@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi;
 
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
+import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.empi.config.EmpiCtxConfig;
@@ -168,11 +169,12 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 			protected boolean matchesSafely(IBaseResource theIncomingResource) {
 				EmpiLink link = new EmpiLink();
 				link.setTargetPid(theIncomingResource.getIdElement().getIdPartAsLong());
+				link.setMatchResult(EmpiMatchResultEnum.MATCH);
 				Example<EmpiLink> exampleLink = Example.of(link);
 				Optional<EmpiLink> one = myEmpiLinkDao.findOne(exampleLink);
 				//There is no person for this patient, so obviously they are not linked to anybody.
 				if (!one.isPresent()){
-					return true;
+					return false;
 				} else {
 					incomingResourcePersonPid = one.get().getPersonPid();
 				}
@@ -187,12 +189,13 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 					.allMatch(pid -> pid.equals(incomingResourcePersonPid));
 			}
 
-			private Long getPersonPidFromResource(IBaseResource theBase) {
-				IIdType idElement = theBase.getIdElement();
-				if (theBase.getIdElement().getResourceType().equalsIgnoreCase("Person")) {
+			private Long getPersonPidFromResource(IBaseResource theResource) {
+				IIdType idElement = theResource.getIdElement();
+				if (theResource.getIdElement().getResourceType().equalsIgnoreCase("Person")) {
 					return idElement.getIdPartAsLong();
 				} else {
-					return myEmpiLinkDaoSvc.getLinkByTargetResourceId(idElement.getIdPartAsLong()).getPersonPid();
+					Optional<EmpiLink> linkByPersonPidAndTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(idElement.getIdPartAsLong());
+					return linkByPersonPidAndTargetPid.get().getPersonPid();
 				}
 
 			}
@@ -244,11 +247,11 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 				return (resourceType.equalsIgnoreCase("Patient") || resourceType.equalsIgnoreCase("Practitioner"));
 			}
 			private EmpiLink getEmpiLink(IBaseResource thePatientOrPractitionerResource) {
-				EmpiLink linkByTargetResourceId = myEmpiLinkDaoSvc.getLinkByTargetResourceId(thePatientOrPractitionerResource.getIdElement().getIdPartAsLong());
-				if (linkByTargetResourceId == null) {
-					throw new IllegalStateException("We didn't find a Person for resource with pid: " + thePatientOrPractitionerResource.getIdElement());
+				Optional<EmpiLink> matchLinkForTarget = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(thePatientOrPractitionerResource.getIdElement().getIdPartAsLong());
+				if (matchLinkForTarget.isPresent()) {
+					return matchLinkForTarget.get();
 				} else {
-					return linkByTargetResourceId;
+					throw new IllegalStateException("We didn't find a related Person for resource with pid: " + thePatientOrPractitionerResource.getIdElement());
 				}
 			}
 

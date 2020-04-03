@@ -54,12 +54,12 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	public void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
 		IIdType resourceId = theResource.getIdElement().toUnqualifiedVersionless();
 
-		validateRequestIsLegal(theResource, theMatchResult, theLinkSource);
+		validateRequestIsLegal(thePerson, theResource, theMatchResult, theLinkSource);
 
 		switch (theMatchResult) {
 			case MATCH:
-				// FIXME EMPI use assurance 2 for possible and assurance 4 for no match
 			case POSSIBLE_MATCH:
+				// FIXME EMPI use assurance 2 for possible and assurance 4 for no match
 				if (!myPersonUtil.containsLinkTo(thePerson, resourceId)) {
 					myPersonUtil.addLink( thePerson, resourceId);
 					myEmpiResourceDaoSvc.updatePerson(thePerson);
@@ -77,8 +77,8 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	/**
 	 * Helper function which runs various business rules about what types of requests are allowed.
 	 */
-	private void validateRequestIsLegal(IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
-		EmpiLink existingLink = getEmpiLinkForResourceTarget(theResource);
+	private void validateRequestIsLegal(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
+		EmpiLink existingLink = getEmpiLinkForPersonTargetPair(thePerson, theResource);
 		if (existingLink != null && systemIsAttemptingToModifyManualLink(theLinkSource, existingLink.getLinkSource())) {
 			throw new InternalErrorException("EMPI system is not allowed to modify links on manually created links");
 		}
@@ -102,32 +102,21 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		return EmpiLinkSourceEnum.AUTO.equals(theIncomingSource) && EmpiLinkSourceEnum.MANUAL.equals(theExistingSource);
 	}
 
-	@Override
-	@Transactional
-	public void updateLinks(IBaseResource theIncomingResource, List<MatchedTargetCandidate> theMatchedResults, EmpiLinkSourceEnum theLinkSource) {
-		//FIXME EMPI
-		//Given theIncomingResource, attempt to find a person. //QUESTION GGG: How do we determine a person match?
-		theMatchedResults.stream()
-			.filter(mr -> mr.getMatchResult().equals(EmpiMatchResultEnum.MATCH))
-			.findFirst()
-			.ifPresent(mr -> {
-				EmpiLink empiLink = getEmpiLinkForResourceTarget(mr.getCandidate());
-				IBaseResource person = myEmpiResourceDaoSvc.readPerson(empiLink.getPerson().getIdDt());
-				this.updateLink(person, theIncomingResource, mr.getMatchResult(), EmpiLinkSourceEnum.AUTO);
-			});
-		//If person is found, that is our person. If not, create a new person with information from theIncomingResource
-
-		//Link theIncomingResource to the person if this is not already done
-		//Given the match results, create links where appropriate from our found person to the candidate.
-	}
-
-	private EmpiLink getEmpiLinkForResourceTarget(IBaseResource theCandidate) {
-		return myEmpiLinkDaoSvc.getLinkByTargetResourceId(myResourceTableHelper.getPidOrNull(theCandidate));
+	private EmpiLink getEmpiLinkForPersonTargetPair(IBaseResource thePerson, IBaseResource theCandidate) {
+		if (thePerson.getIdElement().getIdPart() == null || theCandidate.getIdElement().getIdPart() == null) {
+			return null;
+		} else {
+			return myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(
+				myResourceTableHelper.getPidOrNull(thePerson),
+				myResourceTableHelper.getPidOrNull(theCandidate)
+			);
+		}
 	}
 
 	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
 		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource);
 	}
+
 
 
 
