@@ -19,11 +19,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -208,7 +206,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//FIXME EMPI
 		// Test: Existing Person with Meta TAg indicating they are Empi-Managed. requestors cannot remove this tag.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
-		myEmpiLinkSvc.
 
 	}
 
