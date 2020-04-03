@@ -116,6 +116,7 @@ public class IntegratedObservationIndexedSearchParamLastNTest {
         myObservation.setCategory(categoryConcepts);
 
         // Create CodeableConcept for Code with three codings.
+		 // TODO: Temporarily limit this to two codings until we sort out how to manage multiple codings
         String observationCodeText = "Test Codeable Concept Field for Code";
         CodeableConcept codeableConceptField = new CodeableConcept().setText(observationCodeText);
         codeableConceptField.addCoding(new Coding("http://mycodes.org/fhir/observation-code", "test-code", "test-code display"));
@@ -224,7 +225,7 @@ public class IntegratedObservationIndexedSearchParamLastNTest {
     }
 
     @Test
-	public void testSampleBundle() {
+	public void testSampleBundleInTransaction() throws IOException {
 		 FhirContext myFhirCtx = FhirContext.forR4();
 
 		 PathMatchingResourcePatternResolver provider = new PathMatchingResourcePatternResolver();
@@ -273,6 +274,23 @@ public class IntegratedObservationIndexedSearchParamLastNTest {
 
 			 }
 		 );
+
+		 SearchParameterMap searchParameterMap = new SearchParameterMap();
+
+		 // execute Observation ID search - Composite Aggregation
+		 SearchRequest searchRequestIdsOnly = elasticsearchSvc.buildObservationAllFieldsCompositeSearchRequest(1000, searchParameterMap, 1);
+		 SearchResponse responseIds = elasticsearchSvc.executeSearchRequest(searchRequestIdsOnly);
+		 List<ObservationJson>  observationIdsOnly = elasticsearchSvc.buildObservationCompositeResults(responseIds);
+
+		 assertEquals(20, observationIdsOnly.size());
+		 ObservationJson observationIdOnly = observationIdsOnly.get(0);
+
+		 searchRequestIdsOnly = elasticsearchSvc.buildObservationAllFieldsCompositeSearchRequest(1000, searchParameterMap, 3);
+		 responseIds = elasticsearchSvc.executeSearchRequest(searchRequestIdsOnly);
+		 observationIdsOnly = elasticsearchSvc.buildObservationCompositeResults(responseIds);
+
+		 assertEquals(38, observationIdsOnly.size());
+		 observationIdOnly = observationIdsOnly.get(0);
 
 	 }
 

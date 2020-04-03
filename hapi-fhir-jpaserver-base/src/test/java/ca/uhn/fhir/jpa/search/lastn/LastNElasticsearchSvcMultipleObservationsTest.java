@@ -68,7 +68,7 @@ public class LastNElasticsearchSvcMultipleObservationsTest {
 
         validateQueryResponse(observationIdsOnly);
 
-        // execute Observation ID search (Terms Aggregation) last 3 observations for each patient
+        // execute Observation ID search (Composite Aggregation) last 3 observations for each patient
         searchRequestIdsOnly = elasticsearchSvc.buildObservationCompositeSearchRequest(1000, null, 3);
         responseIds = elasticsearchSvc.executeSearchRequest(searchRequestIdsOnly);
         observationIdsOnly = elasticsearchSvc.buildObservationCompositeResults(responseIds);
@@ -153,9 +153,9 @@ public class LastNElasticsearchSvcMultipleObservationsTest {
         TokenParam codeParam = new TokenParam("http://mycodes.org/fhir/observation-code", "test-code-1");
         searchParameterMap.add("code", codeParam);
 
-        SearchRequest searchRequestIdsOnly = elasticsearchSvc.buildObservationTermsSearchRequest(1000, searchParameterMap, 100);
+        SearchRequest searchRequestIdsOnly = elasticsearchSvc.buildObservationCompositeSearchRequest(1000, searchParameterMap, 100);
         SearchResponse responseIds = elasticsearchSvc.executeSearchRequest(searchRequestIdsOnly);
-        List<ObservationJson> observationIdsOnly = elasticsearchSvc.buildObservationTermsResults(responseIds);
+        List<ObservationJson> observationIdsOnly = elasticsearchSvc.buildObservationCompositeResults(responseIds);
 
         assertEquals(10, observationIdsOnly.size());
 
@@ -172,9 +172,9 @@ public class LastNElasticsearchSvcMultipleObservationsTest {
         TokenParam codeParam = new TokenParam("test-code-1");
         searchParameterMap.add("code", codeParam);
 
-        SearchRequest searchRequestIdsOnly = elasticsearchSvc.buildObservationTermsSearchRequest(1000, searchParameterMap, 100);
+        SearchRequest searchRequestIdsOnly = elasticsearchSvc.buildObservationCompositeSearchRequest(1000, searchParameterMap, 100);
         SearchResponse responseIds = elasticsearchSvc.executeSearchRequest(searchRequestIdsOnly);
-        List<ObservationJson> observationIdsOnly = elasticsearchSvc.buildObservationTermsResults(responseIds);
+        List<ObservationJson> observationIdsOnly = elasticsearchSvc.buildObservationCompositeResults(responseIds);
 
         assertEquals(5, observationIdsOnly.size());
 
@@ -191,9 +191,9 @@ public class LastNElasticsearchSvcMultipleObservationsTest {
         TokenParam codeParam = new TokenParam("http://mycodes.org/fhir/observation-code", null);
         searchParameterMap.add("code", codeParam);
 
-        SearchRequest searchRequestIdsOnly = elasticsearchSvc.buildObservationTermsSearchRequest(1000, searchParameterMap, 100);
+        SearchRequest searchRequestIdsOnly = elasticsearchSvc.buildObservationCompositeSearchRequest(1000, searchParameterMap, 100);
         SearchResponse responseIds = elasticsearchSvc.executeSearchRequest(searchRequestIdsOnly);
-        List<ObservationJson> observationIdsOnly = elasticsearchSvc.buildObservationTermsResults(responseIds);
+        List<ObservationJson> observationIdsOnly = elasticsearchSvc.buildObservationCompositeResults(responseIds);
 
         assertEquals(10, observationIdsOnly.size());
     }
@@ -210,9 +210,9 @@ public class LastNElasticsearchSvcMultipleObservationsTest {
         codeParam.setModifier(TokenParamModifier.TEXT);
         searchParameterMap.add("code", codeParam);
 
-        SearchRequest searchRequestIdsOnly = elasticsearchSvc.buildObservationTermsSearchRequest(1000, searchParameterMap, 100);
+        SearchRequest searchRequestIdsOnly = elasticsearchSvc.buildObservationCompositeSearchRequest(1000, searchParameterMap, 100);
         SearchResponse responseIds = elasticsearchSvc.executeSearchRequest(searchRequestIdsOnly);
-        List<ObservationJson> observationIdsOnly = elasticsearchSvc.buildObservationTermsResults(responseIds);
+        List<ObservationJson> observationIdsOnly = elasticsearchSvc.buildObservationCompositeResults(responseIds);
 
         assertEquals(5, observationIdsOnly.size());
 
@@ -223,16 +223,18 @@ public class LastNElasticsearchSvcMultipleObservationsTest {
         String codeableConceptId1 = UUID.randomUUID().toString();
         CodeableConcept codeableConceptField1 = new CodeableConcept().setText("Test Codeable Concept Field for First Code");
         codeableConceptField1.addCoding(new Coding("http://mycodes.org/fhir/observation-code", "test-code-1", "test-code-1 display"));
-        codeableConceptField1.addCoding(new Coding("http://myalternatecodes.org/fhir/observation-code", "test-alt-code-1", "test-alt-code-1 display"));
-        codeableConceptField1.addCoding(new Coding("http://mysecondaltcodes.org/fhir/observation-code", "test-second-alt-code-1", "test-second-alt-code-1 display"));
+        // TODO: uncomment the following once there is a solution to supporting multiple codings for Observation Code
+//        codeableConceptField1.addCoding(new Coding("http://myalternatecodes.org/fhir/observation-code", "test-alt-code-1", "test-alt-code-1 display"));
+//        codeableConceptField1.addCoding(new Coding("http://mysecondaltcodes.org/fhir/observation-code", "test-second-alt-code-1", "test-second-alt-code-1 display"));
         CodeJson codeJson1 = new CodeJson(codeableConceptField1, codeableConceptId1);
         String codeJson1Document = ourMapperNonPrettyPrint.writeValueAsString(codeJson1);
 
         String codeableConceptId2 = UUID.randomUUID().toString();
         CodeableConcept codeableConceptField2 = new CodeableConcept().setText("Test Codeable Concept Field for Second Code");
         codeableConceptField2.addCoding(new Coding("http://mycodes.org/fhir/observation-code", "test-code-2", "test-code-2 display"));
-        codeableConceptField2.addCoding(new Coding("http://myalternatecodes.org/fhir/observation-code", "test-alt-code-2", "test-alt-code-2 display"));
-        codeableConceptField2.addCoding(new Coding("http://mysecondaltcodes.org/fhir/observation-code", "test-second-alt-code-2", "test-second-alt-code-2 display"));
+		 // TODO: uncomment the following once there is a solution to supporting multiple codings for Observation Code
+//        codeableConceptField2.addCoding(new Coding("http://myalternatecodes.org/fhir/observation-code", "test-alt-code-2", "test-alt-code-2 display"));
+//        codeableConceptField2.addCoding(new Coding("http://mysecondaltcodes.org/fhir/observation-code", "test-second-alt-code-2", "test-second-alt-code-2 display"));
         CodeJson codeJson2 = new CodeJson(codeableConceptField2, codeableConceptId2);
         String codeJson2Document = ourMapperNonPrettyPrint.writeValueAsString(codeJson2);
 

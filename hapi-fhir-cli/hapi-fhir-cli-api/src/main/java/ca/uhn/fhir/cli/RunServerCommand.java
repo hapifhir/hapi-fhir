@@ -21,12 +21,8 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.demo.ContextHolder;
-import ca.uhn.fhir.jpa.demo.FhirServerConfig;
-import ca.uhn.fhir.jpa.demo.FhirServerConfigDstu3;
-import ca.uhn.fhir.jpa.demo.FhirServerConfigR4;
+import ca.uhn.fhir.jpa.demo.*;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
@@ -48,8 +44,10 @@ public class RunServerCommand extends BaseCommand {
 	private static final String OPTION_LOWMEM = "lowmem";
 	private static final String OPTION_ALLOW_EXTERNAL_REFS = "allow-external-refs";
 	private static final String OPTION_REUSE_SEARCH_RESULTS_MILLIS = "reuse-search-results-milliseconds";
+	private static final String OPTION_EXTERNAL_ELASTICSEARCH = "external-elasticsearch";
 	private static final int DEFAULT_PORT = 8080;
 	private static final String OPTION_P = "p";
+	private static final String OPTION_POSTGRES = "postgresql";
 
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RunServerCommand.class);
@@ -71,8 +69,12 @@ public class RunServerCommand extends BaseCommand {
 		options.addOption(null, OPTION_LOWMEM, false, "If this flag is set, the server will operate in low memory mode (some features disabled)");
 		options.addOption(null, OPTION_ALLOW_EXTERNAL_REFS, false, "If this flag is set, the server will allow resources to be persisted contaning external resource references");
 		options.addOption(null, OPTION_DISABLE_REFERENTIAL_INTEGRITY, false, "If this flag is set, the server will not enforce referential integrity");
+		options.addOption(null, OPTION_EXTERNAL_ELASTICSEARCH, false, "If this flag is set, the server will attempt to use a local elasticsearch server listening on port 9301");
+		options.addOption(null, OPTION_POSTGRES, false, "If this flag is set, the server will attempt to use a local postgresql DB instance listening on port 5432");
 
 		addOptionalOption(options, "u", "url", "Url", "If this option is set, specifies the JDBC URL to use for the database connection");
+		addOptionalOption(options, "d", "default-size", "PageSize", "If this option is set, specifies the default page size for number of query results");
+		addOptionalOption(options, "m", "max-size", "MaxSize", "If this option is set, specifies the maximum result set size for queries");
 
 		Long defaultReuseSearchResults = DaoConfig.DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
 		String defaultReuseSearchResultsStr = defaultReuseSearchResults == null ? "off" : String.valueOf(defaultReuseSearchResults);
@@ -109,7 +111,28 @@ public class RunServerCommand extends BaseCommand {
 			ContextHolder.setDisableReferentialIntegrity(true);
 		}
 
-		 ContextHolder.setDatabaseUrl(theCommandLine.getOptionValue("u"));
+		if (theCommandLine.hasOption(OPTION_EXTERNAL_ELASTICSEARCH)) {
+			ourLog.info("Server is configured to use external elasticsearch");
+			ContextHolder.setExternalElasticsearch(true);
+		}
+
+		ContextHolder.setDatabaseUrl(theCommandLine.getOptionValue("u"));
+
+		if (theCommandLine.hasOption(OPTION_POSTGRES)) {
+			ourLog.info("Server is configured to use PostgreSQL database");
+			ContextHolder.setPostgreSql(true);
+		}
+
+		String defaultPageSize = theCommandLine.getOptionValue("d");
+		String maxPageSize = theCommandLine.getOptionValue("m");
+		if (defaultPageSize != null) {
+			ContextHolder.setDefaultPageSize(Integer.valueOf(defaultPageSize));
+			if (maxPageSize != null) {
+				ContextHolder.setMaxPageSize(Integer.valueOf(maxPageSize));
+			} else {
+				ContextHolder.setMaxPageSize(Integer.valueOf(defaultPageSize));
+			}
+		}
 
 		String reuseSearchResults = theCommandLine.getOptionValue(OPTION_REUSE_SEARCH_RESULTS_MILLIS);
 		if (reuseSearchResults != null) {

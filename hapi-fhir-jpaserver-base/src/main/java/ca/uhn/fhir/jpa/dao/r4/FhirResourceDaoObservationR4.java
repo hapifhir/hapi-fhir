@@ -58,6 +58,10 @@ public class FhirResourceDaoObservationR4 extends BaseHapiFhirResourceDao<Observ
 
 	@Override
 	public IBundleProvider observationsLastN(SearchParameterMap theSearchParameterMap,  RequestDetails theRequestDetails, HttpServletResponse theServletResponse) {
+		if (!isPagingProviderDatabaseBacked(theRequestDetails)) {
+			theSearchParameterMap.setLoadSynchronous(true);
+		}
+
 		return mySearchCoordinatorSvc.registerSearch(this, theSearchParameterMap, getResourceName(), new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)), theRequestDetails);
 	}
 

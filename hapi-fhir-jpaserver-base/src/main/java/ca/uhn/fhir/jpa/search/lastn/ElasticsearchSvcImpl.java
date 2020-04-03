@@ -199,7 +199,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
     @Override
     public List<ResourcePersistentId> executeLastN(SearchParameterMap theSearchParameterMap, RequestDetails theRequestDetails, IdHelperService theIdHelperService) {
     	 Integer myMaxObservationsPerCode = 1;
-    	 String[] maxCountParams = theRequestDetails.getParameters().get("map");
+    	 String[] maxCountParams = theRequestDetails.getParameters().get("max");
     	 if (maxCountParams != null && maxCountParams.length > 0) {
 			myMaxObservationsPerCode = Integer.valueOf(maxCountParams[0]);
 		 }
@@ -237,6 +237,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
         compositeAggSubjectSources.add(subjectValuesBuilder);
         CompositeAggregationBuilder compositeAggregationSubjectBuilder = new CompositeAggregationBuilder("group_by_subject", compositeAggSubjectSources);
         compositeAggregationSubjectBuilder.subAggregation(observationCodeAggregationBuilder);
+        compositeAggregationSubjectBuilder.size(theMaximumResultSetSize);
 
         return compositeAggregationSubjectBuilder;
     }
@@ -286,7 +287,8 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		List<ParsedComposite.ParsedBucket> subjectBuckets = aggregatedSubjects.getBuckets();
 		List<ResourcePersistentId> myObservationIds = new ArrayList<>();
 		for(ParsedComposite.ParsedBucket subjectBucket : subjectBuckets) {
-			Aggregations observationCodeAggregations = subjectBucket.getAggregations();ParsedTerms aggregatedObservationCodes = observationCodeAggregations.get("group_by_code");
+			Aggregations observationCodeAggregations = subjectBucket.getAggregations();
+			ParsedTerms aggregatedObservationCodes = observationCodeAggregations.get("group_by_code");
 			List<? extends Terms.Bucket> observationCodeBuckets = aggregatedObservationCodes.getBuckets();
 			for (Terms.Bucket observationCodeBucket : observationCodeBuckets) {
 				Aggregations topHitObservationCodes = observationCodeBucket.getAggregations();
