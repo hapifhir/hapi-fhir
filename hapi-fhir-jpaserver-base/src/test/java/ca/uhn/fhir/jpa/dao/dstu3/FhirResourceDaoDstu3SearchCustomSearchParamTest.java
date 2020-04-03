@@ -951,24 +951,54 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 
 	@Test
 	public void testSearchParameterWithContainedMedication() {
-		SearchParameter sp = new SearchParameter();
-		sp.addBase("MedicationAdministration");
-		sp.setCode("my_search_param");
-		sp.setType(Enumerations.SearchParamType.TOKEN);
-		sp.setTitle("Contained Medication in MedicationAdministration");
-		sp.setExpression("MedicationAdministration.medication.resolve().code.coding");
-		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
-		mySearchParameterDao.create(sp);
+		SearchParameter sp1 = new SearchParameter();
+		sp1.setId("SearchParameter/medicationadministration-ingredient-medication");
+		sp1.setUrl("http://hapifhir.io/fhir/StructureDefinition/sp-unique");
+		sp1.setName("MEDICATIONADMINISTRATION-INGREDIENT-MEDICATION");
+		sp1.setCode("medicationadministration-ingredient-medication");
+		sp1.setExpression("MedicationAdministration.medication.resolve().code|MedicationAdministration.medication.resolve().ingredient.item.as(Reference).resolve().code|MedicationAdministration.medication.resolve().ingredient.item.as(CodeableConcept)");
+		sp1.setType(Enumerations.SearchParamType.TOKEN);
+		sp1.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp1.addBase("MedicationAdministration");
+		sp1.setTitle("Custom search parameter for ingredient level medication");
+		sp1.setDescription("This SP is using to find a MedicationAdministration by ingredient level medication");
+		sp1.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp1));
+		mySearchParameterDao.create(sp1);
 
 		mySearchParamRegistry.forceRefresh();
 
-		Medication medication = new Medication();
-		medication.getCode().addCoding(new Coding()
-			.setSystem("medicationSystem")
-			.setCode("medicationCode")
+		SearchParameter sp2 = new SearchParameter();
+		sp2.setId("SearchParameter/medicationrequest-ingredient-medication");
+		sp2.setUrl("http://hapifhir.io/fhir/StructureDefinition/sp-unique");
+		sp2.setName("MEDICATIONREQUEST-INGREDIENT-MEDICATION");
+		sp2.setCode("medicationrequest-ingredient-medication");
+		sp2.setExpression("MedicationRequest.medication.resolve().code|MedicationRequest.medication.resolve().ingredient.item.as(Reference).resolve().code|MedicationRequest.medication.resolve().ingredient.item.as(CodeableConcept)");
+		sp2.setType(Enumerations.SearchParamType.TOKEN);
+		sp2.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp2.addBase("MedicationRequest");
+		sp2.setTitle("Custom search parameter for ingredient level medication");
+		sp2.setDescription("This SP is using to find a MedicationRequest by ingredient level medication");
+		sp2.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp2));
+		mySearchParameterDao.create(sp2);
+
+		mySearchParamRegistry.forceRefresh();
+
+		// MedicationAdministration resource with contained Medication and ingredient level Medication
+		Medication administrationMedication = new Medication();
+
+		administrationMedication.getCode().addCoding(new Coding()
+			.setSystem("containedSystem")
+			.setCode("containedCode")
 			.setDisplay("medicationDisplay"));
+
+		administrationMedication.addIngredient().setItem(new CodeableConcept()).getItemCodeableConcept().addCoding()
+			.setSystem("medicationsystem")
+			.setCode("99999")
+			.setDisplay("Some medicine for Administration");
 
 		MedicationAdministration medicationAdministration = new MedicationAdministration();
 		medicationAdministration.addIdentifier()
@@ -976,7 +1006,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 			.setValue("64552569-0-77");
 		medicationAdministration.setStatus(MedicationAdministration.MedicationAdministrationStatus.COMPLETED);
 		medicationAdministration.setMedication(new Reference());
-		medicationAdministration.getMedicationReference().setResource(medication);
+		medicationAdministration.getMedicationReference().setResource(administrationMedication);
 
 		String medAdmin = myFhirCtx.newJsonParser().encodeResourceToString(medicationAdministration);
 		MedicationAdministration medicationAdministrationResource = (MedicationAdministration) myFhirCtx.newJsonParser().parseResource(medAdmin);
@@ -984,13 +1014,54 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(medicationAdministrationResource));
 		IIdType medId = myMedicationAdministrationDao.create(medicationAdministrationResource, mySrd).getId().toUnqualifiedVersionless();
 
-		SearchParameterMap params = new SearchParameterMap();
-		params.add("my_search_param", new TokenParam(medication.getCode().getCodingFirstRep()));
-		IBundleProvider outcome = myMedicationAdministrationDao.search(params);
-		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
-		ourLog.info("IDS: " + ids);
-		assertThat(ids, contains(medId.getValue()));
+		// MedicationRequest resource with contained Medication and ingredient level Medication
+		Medication requestMedication = new Medication();
+
+		requestMedication.getCode().addCoding(new Coding()
+			.setSystem("containedSystem")
+			.setCode("containedCode")
+			.setDisplay("medicationDisplay"));
+
+		requestMedication.addIngredient().setItem(new CodeableConcept()).getItemCodeableConcept().addCoding()
+			.setSystem("fake_system")
+			.setCode("11111")
+			.setDisplay("Some medicine for Request");
+
+		MedicationRequest medicationRequest = new MedicationRequest();
+		medicationRequest.addIdentifier()
+			.setSystem("urn:hssc:musc:epc:medadminid")
+			.setValue("1234354-3-43");
+		medicationRequest.setStatus(MedicationRequest.MedicationRequestStatus.COMPLETED);
+		medicationRequest.setMedication(new Reference());
+		medicationRequest.getMedicationReference().setResource(requestMedication);
+
+		String medRequest = myFhirCtx.newJsonParser().encodeResourceToString(medicationRequest);
+		MedicationRequest medicationRequestResource = (MedicationRequest) myFhirCtx.newJsonParser().parseResource(medRequest);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(medicationRequestResource));
+		IIdType medReqId = myMedicationRequestDao.create(medicationRequestResource, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap administrationParam = new SearchParameterMap();
+		administrationParam.add("medicationadministration-ingredient-medication", new TokenParam(administrationMedication.getCode().getCodingFirstRep()));
+		administrationParam.add("medicationadministration-ingredient-medication", new TokenParam(administrationMedication.getIngredient().get(0).getItemCodeableConcept().getCodingFirstRep()));
+
+		SearchParameterMap requestParam = new SearchParameterMap();
+		requestParam.add("medicationrequest-ingredient-medication", new TokenParam(requestMedication.getCode().getCodingFirstRep()));
+		requestParam.add("medicationrequest-ingredient-medication", new TokenParam(requestMedication.getIngredient().get(0).getItemCodeableConcept().getCodingFirstRep()));
+
+		IBundleProvider outcomeForMedAdmin = myMedicationAdministrationDao.search(administrationParam);
+		IBundleProvider outcomeForMedRequest = myMedicationRequestDao.search(requestParam);
+
+		List<String> ids1 = toUnqualifiedVersionlessIdValues(outcomeForMedAdmin);
+		List<String> ids2 = toUnqualifiedVersionlessIdValues(outcomeForMedRequest);
+
+		ourLog.info("IDS: " + ids1);
+		ourLog.info("IDS: " + ids2);
+
+		assertThat(ids1, contains(medId.getValue()));
+		assertThat(ids2, contains(medReqId.getValue()));
 	}
+
 
 	@Test
 	public void testSearchWithCustomParam() {
