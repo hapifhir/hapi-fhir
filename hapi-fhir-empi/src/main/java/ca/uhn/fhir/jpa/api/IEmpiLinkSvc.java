@@ -22,8 +22,6 @@ package ca.uhn.fhir.jpa.api;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.util.List;
-
 public interface IEmpiLinkSvc {
 
 	/**
