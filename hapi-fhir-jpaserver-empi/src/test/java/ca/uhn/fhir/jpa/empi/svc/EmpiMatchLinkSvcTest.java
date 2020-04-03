@@ -199,20 +199,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 
-	@Test
-	public void testEmpiManagedPersonCannotBeModifiedByPersonUpdateRequest() {
-		// Test: Existing Person with Meta TAg indicating they are Empi-Managed. requestors cannot remove this tag.
-		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
-		EmpiLink empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(patient.getIdElement().getIdPartAsLong()).get();
-		Person person = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
-		person.getLink().clear();
-
-		try {
-			myPersonDao.update(person);
-			fail();
-		} catch (ForbiddenOperationException e) {}
-
-	}
 
 	@Test
 	public void testNonEmpiManagedPersonCannotHaveEmpiManagedTagAddedToThem() {

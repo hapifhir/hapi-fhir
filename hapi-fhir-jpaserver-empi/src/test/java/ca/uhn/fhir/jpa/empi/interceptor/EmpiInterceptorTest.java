@@ -2,7 +2,9 @@ package ca.uhn.fhir.jpa.empi.interceptor;
 
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
+import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.util.EmpiHelperR4;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -93,5 +95,19 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 	@Test
 	public void testPersonRecordsManagedByEmpiAllShareSameExtension() {
 		fail();
+	}
+
+
+	@Test
+	public void testEmpiManagedPersonCannotBeModifiedByPersonUpdateRequest() throws InterruptedException {
+		// Test: Existing Person with Meta TAg indicating they are Empi-Managed. requestors cannot remove this tag.
+		Patient patient = myEmpiHelper.createWithLatch(buildJanePatient());
+		person.getLink().clear();
+
+		try {
+			myPersonDao.update(person);
+			fail();
+		} catch (ForbiddenOperationException e) {}
+
 	}
 }
