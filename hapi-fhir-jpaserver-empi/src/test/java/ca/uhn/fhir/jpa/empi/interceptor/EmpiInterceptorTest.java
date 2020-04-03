@@ -89,25 +89,9 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 		assertLinkCount(1);
 	}
 
-
-
 	// FIXME EMPI Person records managed by EMPI should all share the same extension.  (I believe cdr EMPI already does this.)
 	@Test
 	public void testPersonRecordsManagedByEmpiAllShareSameExtension() {
 		fail();
-	}
-
-
-	@Test
-	public void testEmpiManagedPersonCannotBeModifiedByPersonUpdateRequest() throws InterruptedException {
-		// Test: Existing Person with Meta TAg indicating they are Empi-Managed. requestors cannot remove this tag.
-		Patient patient = myEmpiHelper.createWithLatch(buildJanePatient());
-		person.getLink().clear();
-
-		try {
-			myPersonDao.update(person);
-			fail();
-		} catch (ForbiddenOperationException e) {}
-
 	}
 }
