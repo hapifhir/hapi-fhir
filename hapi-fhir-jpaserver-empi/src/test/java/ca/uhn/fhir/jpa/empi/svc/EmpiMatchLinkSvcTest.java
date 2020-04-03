@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -23,8 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
@@ -33,15 +33,11 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Autowired
 	private EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired
-	private ResourceTableHelper myResourceTableHelper;
-	@Autowired
 	IEmpiLinkDao myEmpiLinkDao;
 	@Autowired
 	IEmpiConfig myEmpiConfig;
 	@Autowired
 	IEmpiLinkSvc myEmpiLinkSvc;
-	@Autowired
-	private EmpiResourceDaoSvc myEmpiResourceDaoSvc;
 
 	@Test
 	public void testAddPatientLinksToNewPersonIfNoneFound() {
@@ -152,7 +148,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testPatientMatchingAnotherPatientLinksToSamePerson() {
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
-
+		fail();
 	}
 
 
@@ -205,20 +201,30 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testEmpiManagedPersonCannotBeModifiedByPersonUpdateRequest() {
-		//FIXME EMPI
 		// Test: Existing Person with Meta TAg indicating they are Empi-Managed. requestors cannot remove this tag.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
-		myEmpiLinkSvc.
+		EmpiLink empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(patient.getIdElement().getIdPartAsLong()).get();
+		Person person = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
+		person.getLink().clear();
+
+		try {
+			myPersonDao.update(person);
+			fail();
+		} catch (ForbiddenOperationException e) {}
 
 	}
 
 	@Test
 	public void testNonEmpiManagedPersonCannotHaveEmpiManagedTagAddedToThem() {
-		//FIXME EMPI
 		// Test: Existing Person without Meta Tag indicating they are EMPI-Managed. Requestors cannot add the tag.
+		fail();
 	}
 
 	// FIXME EMPI Test: Patient with "no-empi" tag is not matched
+	@Test
+	public void testPatientWithNoEmpiTagIsNotMatched() {
+
+	}
 
 	private Patient createPatientAndUpdateLinks(Patient thePatient) {
 		//Note that since our empi-rules block on active=true, all patients must be active.
