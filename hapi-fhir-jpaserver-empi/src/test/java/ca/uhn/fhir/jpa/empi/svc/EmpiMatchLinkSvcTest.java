@@ -20,7 +20,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -199,6 +198,14 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 
+	@Test
+	public void testEmpiManagedPersonCannotBeModifiedByPersonUpdateRequest() {
+		//FIXME EMPI
+		// Test: Existing Person with Meta TAg indicating they are Empi-Managed. requestors cannot remove this tag.
+		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
+		myEmpiLinkSvc.
+
+	}
 
 	@Test
 	public void testNonEmpiManagedPersonCannotHaveEmpiManagedTagAddedToThem() {
