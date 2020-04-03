@@ -10,6 +10,8 @@ import org.springframework.messaging.SubscribableChannel;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import static ca.uhn.fhir.jpa.subscription.process.matcher.subscriber.SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
+
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -32,7 +34,6 @@ import javax.annotation.PreDestroy;
 
 public class MatchingQueueSubscriberLoader {
 	private Logger ourLog = LoggerFactory.getLogger(MatchingQueueSubscriberLoader.class);
-	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
 
 	@Autowired
 	private SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;

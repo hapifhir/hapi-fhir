@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.channel.queue.IQueueChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
 public class SubscriptionChannelFactory {
@@ -35,8 +36,8 @@ public class SubscriptionChannelFactory {
 		return mySubscribableChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryMessage.class, mySubscribableChannelFactory.getDeliveryChannelConcurrentConsumers());
 	}
 
-	public SubscribableChannel newMatchingSendingChannel(String theChannelName) {
-		return mySubscribableChannelFactory.getOrCreateReceiver(theChannelName, ResourceModifiedMessage.class, mySubscribableChannelFactory.getMatchingChannelConcurrentConsumers());
+	public MessageChannel newMatchingSendingChannel(String theChannelName) {
+		return mySubscribableChannelFactory.getOrCreateSender(theChannelName, ResourceModifiedMessage.class, mySubscribableChannelFactory.getMatchingChannelConcurrentConsumers());
 	}
 
 	public SubscribableChannel newMatchingReceivingChannel(String theChannelName) {
