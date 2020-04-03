@@ -70,23 +70,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testPatientLinksToPersonIfMatch() {
-		//FIXME EMPI QUESTION: we are no longer matching on person attributes so this test is invalid right?
-		Person janePerson = buildJanePerson();
-		DaoMethodOutcome outcome = myPersonDao.create(janePerson);
-		Long origPersonPid = myResourceTableHelper.getPidOrNull(outcome.getResource());
-
-		createPatientAndUpdateLinks(buildJanePatient());
-		assertLinkCount(1);
-		List<EmpiLink> links = myEmpiLinkDao.findAll();
-		EmpiLink link = links.get(0);
-		Long linkedPersonPid = link.getPersonPid();
-		assertEquals(EmpiMatchResultEnum.MATCH, link.getMatchResult());
-
-		assertEquals(origPersonPid, linkedPersonPid);
-	}
-
-	@Test
 	public void testWhenMatchOccursOnPersonThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
 		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
 		IBundleProvider search = myPersonDao.search(new SearchParameterMap());
@@ -152,8 +135,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testPatientAttributesAreCarriedOverWhenPersonIsCreatedFromPatient() {
-		//FIXME EMPI QUESTION I need guidance on what should/shouldnt be transferred from Patient -> Person
+	public void testPatientAttributesAreCopiedOverWhenPersonIsCreatedFromPatient() {
+		//FIXME EMPI TODO write personUtil function to copy over all possible attributes.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 
 		Optional<EmpiLink> empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(patient.getIdElement().getIdPartAsLong());
@@ -165,8 +148,12 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 
-	//FIXME EMPI QUESTION I have no clue what this test means. Create link all done??
 	// Test: Existing Person found linked from matched Patient.  incoming Patient has no EID.  Create link all done.
+	@Test
+	public void testPatientMatchingAnotherPatientLinksToSamePerson() {
+		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
+
+	}
 
 
 	@Test
@@ -220,6 +207,9 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	public void testEmpiManagedPersonCannotBeModifiedByPersonUpdateRequest() {
 		//FIXME EMPI
 		// Test: Existing Person with Meta TAg indicating they are Empi-Managed. requestors cannot remove this tag.
+		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
+		myEmpiLinkSvc.
+
 	}
 
 	@Test

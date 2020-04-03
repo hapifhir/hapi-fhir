@@ -203,8 +203,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				extractor = createNumberExtractor(theResource);
 				break;
 			case REFERENCE:
-				//FIXME EMPI QUESTION unchecked generic here. Do we actually ever query EMPI on refs???
-				//KHS: I am more likely to the same person if I have the same mother
+				//FIXME EMPI unchecked generic here. Make sure EMPI matching rules relying on reference params work.
 				extractor = createReferenceExtractor();
 				break;
 			case QUANTITY:
@@ -217,8 +216,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				extractor = createSpecialExtractor(theResource.getIdElement().getResourceType());
 				break;
 			case COMPOSITE:
-				//FIXME EMPI QUESTION Again here. Will we ever need to extract composite SPs?
-				// KHS: Unlikely.  let's leave this out for now
 			default:
 				throw new UnsupportedOperationException("Type " + theSearchParam.getParamType() + " not supported for extraction");
 		}

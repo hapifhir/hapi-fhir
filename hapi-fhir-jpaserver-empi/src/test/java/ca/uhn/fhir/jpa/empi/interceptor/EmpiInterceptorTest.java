@@ -88,6 +88,10 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 	}
 
 
-	// FIXME EMPI Question: what to do about pre-existing Person records?
+
 	// FIXME EMPI Person records managed by EMPI should all share the same extension.  (I believe cdr EMPI already does this.)
+	@Test
+	public void testPersonRecordsManagedByEmpiAllShareSameExtension() {
+		fail();
+	}
 }

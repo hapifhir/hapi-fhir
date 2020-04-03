@@ -122,8 +122,6 @@ public class EmpiPersonFindingSvc {
 	 * Attempt to find matching persons by performing EMPI matching between the incoming resource (Patient/Practitioner)
 	 * and the attributes of existing Persons.
 	 *
-	 * FIXME EMPI QUESTION Having trouble working out how to query across the resource boundary with our current EmpiRules setup.
-	 *
 	 * @param theBaseResource the {@link IBaseResource} which we want to find candidate Persons for.
 	 * @return an Optional list of {@link MatchedPersonCandidate} indicating matches.
 	 */

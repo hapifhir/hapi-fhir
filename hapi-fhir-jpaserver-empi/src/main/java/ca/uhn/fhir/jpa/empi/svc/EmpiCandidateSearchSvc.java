@@ -70,7 +70,6 @@ public class EmpiCandidateSearchSvc {
 				continue;
 			}
 
-			//FIXME EMPI QUESTION: How should I search across resources? e.g. the incoming resource here is the Patient, but I want
 			//to compare it to all known PERSON objects, using the overlapping search parameters that they have.
 			List<String> valuesFromResourceForSearchParam = getValueFromResourceForSearchParam(theResource, resourceSearchParam);
 			if (valuesFromResourceForSearchParam.isEmpty()) {
