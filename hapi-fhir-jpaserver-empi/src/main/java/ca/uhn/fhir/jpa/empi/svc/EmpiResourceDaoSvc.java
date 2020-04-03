@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
-import ca.uhn.fhir.empi.rules.config.EmpiConfigImpl;
+import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
 
 @Lazy
 @Service
@@ -23,7 +22,7 @@ public class EmpiResourceDaoSvc {
 	@Autowired
 	DaoRegistry myDaoRegistry;
 	@Autowired
-	EmpiConfigImpl myEmpiConfig;
+	IEmpiConfig myEmpiConfig;
 
 	private IFhirResourceDao myPatientDao;
 	private IFhirResourceDao myPersonDao;

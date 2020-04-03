@@ -6,6 +6,6 @@ import org.springframework.context.annotation.Bean;
 public class TestEmpiConfigR4 extends BaseTestEmpiConfig {
 	@Bean
 	EmpiHelperR4 empiHelper() {
-		return new EmpiHelperR4();
+		return EmpiHelperR4.newAndStartInterceptor();
 	}
 }

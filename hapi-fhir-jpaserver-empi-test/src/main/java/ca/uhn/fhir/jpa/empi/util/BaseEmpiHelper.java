@@ -19,18 +19,18 @@ import static org.mockito.Mockito.when;
 
 /**
  * How to use this Rule:
- *
+ * <p>
  * This rule is to be used whenever you want to have the EmpiInterceptor loaded, and be able
  * to execute creates/updates/deletes while being assured that all EMPI work has been done before exiting.
  * Provides two types of method:
- *
+ * <p>
  * 1. doUpdate/doCreate. These methods do not wait for Asynchronous EMPI work to be done. Use these when you are expecting
  * the calls to fail, as those hooks will never be called.
- *
+ * <p>
  * 2. createWithLatch/updateWithLatch. These methods will await the EMPI hooks, which are only triggered post-EMPI processing
  * You should use these when you are expecting successful processing of the resource, and need to wait for async EMPI linking
  * work to be done.
- *
+ * <p>
  * Note: all create/update functions take an optional isExternalHttpRequest boolean, to make it appear as though the request's
  * origin is an HTTP request.
  */

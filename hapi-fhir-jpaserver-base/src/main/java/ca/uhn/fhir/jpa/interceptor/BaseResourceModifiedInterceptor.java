@@ -56,6 +56,7 @@ public abstract class BaseResourceModifiedInterceptor implements IResourceModifi
 
 		if (myMatchingChannel != null) {
 			myMatchingChannel.unsubscribe(getSubscriber());
+			myMatchingChannel = null;
 		}
 	}
 

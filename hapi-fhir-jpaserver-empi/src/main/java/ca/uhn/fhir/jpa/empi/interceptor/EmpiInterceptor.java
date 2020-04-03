@@ -53,7 +53,7 @@ public class EmpiInterceptor extends BaseResourceModifiedInterceptor implements 
 	}
 
 	@Override
-	// FIXME KHS rename this method
+	// FIXME KHS rename this method (after James has merged)
 	protected SubscribableChannel createMatchingChannel() {
 		return mySubscribableChannelFactory.createSubscribableChannel(IEmpiConfig.EMPI_MATCHING_CHANNEL_NAME, ResourceModifiedMessage.class, myEmpiConfig.getConsumerCount());
 	}
