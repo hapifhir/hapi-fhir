@@ -20,7 +20,7 @@ package ca.uhn.fhir.empi.rules.json;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;

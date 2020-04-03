@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 
 public class MatchedPersonCandidate {
 

@@ -20,10 +20,9 @@ package ca.uhn.fhir.jpa.empi.svc;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
-import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
-import ca.uhn.fhir.jpa.api.MatchedTargetCandidate;
+import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.util.PersonUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -34,7 +33,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
 
 @Lazy
 @Service

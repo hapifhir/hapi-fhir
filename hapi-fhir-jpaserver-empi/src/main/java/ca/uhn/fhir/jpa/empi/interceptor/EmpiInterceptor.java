@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
+import ca.uhn.fhir.empi.api.IEmpiInterceptor;
 import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.IEmpiInterceptor;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.util.EmpiUtil;

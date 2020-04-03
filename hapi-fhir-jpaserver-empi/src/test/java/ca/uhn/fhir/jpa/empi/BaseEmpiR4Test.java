@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi;
 
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
-import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.empi.config.EmpiCtxConfig;

@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
+import ca.uhn.fhir.empi.api.IEmpiInterceptor;
 import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.IEmpiInterceptor;
 import ca.uhn.fhir.jpa.empi.provider.EmpiProviderLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
+import ca.uhn.fhir.empi.api.MatchedTargetCandidate;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
-import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.jpa.api.IEmpiLinkSvc;
-import ca.uhn.fhir.jpa.api.MatchedTargetCandidate;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.util.PersonUtil;
@@ -17,7 +17,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Lazy
