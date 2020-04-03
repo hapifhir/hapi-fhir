@@ -138,15 +138,6 @@ public class SearchCoordinatorSvcImplTest {
 
 		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
 
-		when(myPersistedJpaBundleProviderFactory.newInstance(nullable(RequestDetails.class), nullable(String.class))).thenAnswer(t->{
-			String uuid = t.getArgument(1, String.class);
-			RequestDetails requestDetails = t.getArgument(0, RequestDetails.class);
-			PersistedJpaBundleProvider retVal = new PersistedJpaBundleProvider(requestDetails, uuid);
-			retVal.setTxManagerForUnitTest(myTxManager);
-			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);
-			return retVal;
-		});
-
 		when(myPersistedJpaBundleProviderFactory.newInstanceFirstPage(nullable(RequestDetails.class), nullable(Search.class), nullable(SearchCoordinatorSvcImpl.SearchTask.class), nullable(ISearchBuilder.class))).thenAnswer(t->{
 			RequestDetails requestDetails = t.getArgument(0, RequestDetails.class);
 			Search search = t.getArgument(1, Search.class);

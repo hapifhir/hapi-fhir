@@ -42,6 +42,11 @@ public class SubscriptionValidatingInterceptor {
 		validateSubmittedSubscription(theResource);
 	}
 
+	@VisibleForTesting
+	public void setFhirContextForUnitTest(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
+
 	public void validateSubmittedSubscription(IBaseResource theSubscription) {
 		if (!"Subscription".equals(myFhirContext.getResourceDefinition(theSubscription).getName())) {
 			return;

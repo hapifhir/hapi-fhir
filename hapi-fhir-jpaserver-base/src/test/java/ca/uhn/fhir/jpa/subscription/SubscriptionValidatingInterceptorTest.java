@@ -36,6 +36,7 @@ public class SubscriptionValidatingInterceptorTest {
 		mySvc.setSubscriptionCanonicalizerForUnitTest(new SubscriptionCanonicalizer(myCtx));
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 		mySvc.setSubscriptionStrategyEvaluatorForUnitTest(mySubscriptionStrategyEvaluator);
+		mySvc.setFhirContextForUnitTest(myCtx);
 	}
 
 	@Test

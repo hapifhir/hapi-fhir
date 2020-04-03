@@ -76,18 +76,14 @@ import java.util.Set;
 public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaBundleProvider.class);
-	private final RequestDetails myRequest;
-	@Autowired
-	private FhirContext myContext;
+
+	/*
+	 * Autowired fields
+	 */
+
 	@PersistenceContext
 	private EntityManager myEntityManager;
 	@Autowired
-	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
-	@Autowired
-	private ISearchCacheSvc mySearchCacheSvc;
-	private Search mySearchEntity;
-	private String myUuid;
-	private boolean myCacheHit;
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
@@ -95,6 +91,22 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
+	@Autowired
+	private FhirContext myContext;
+	@Autowired
+	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	@Autowired
+
+	/*
+	 * Non autowired fields (will be different for every instance
+	 * of this class, since it's a prototype
+	 */
+
+	private final RequestDetails myRequest;
+	private ISearchCacheSvc mySearchCacheSvc;
+	private Search mySearchEntity;
+	private String myUuid;
+	private boolean myCacheHit;
 
 	/**
 	 * Constructor
