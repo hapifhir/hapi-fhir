@@ -43,7 +43,6 @@ public class EmpiMatchLinkSvc {
 		//multiple candidates, in which case they should all be tagged as POSSIBLE_MATCH. If one is already tagged as MATCH
 		} else {
 		}
-
 	}
 
 	private void handleEidOverwrite(IBaseResource thePerson, IBaseResource theResource) {
@@ -51,10 +50,5 @@ public class EmpiMatchLinkSvc {
 		if (eidFromResource != null)  {
 			myPersonUtil.updatePersonFromPatient(thePerson, theResource);
 		}
-	}
-
-	public String getEID(IBaseResource theResource) {
-		//FIXME EMPI implement this.
-		return null;
 	}
 }

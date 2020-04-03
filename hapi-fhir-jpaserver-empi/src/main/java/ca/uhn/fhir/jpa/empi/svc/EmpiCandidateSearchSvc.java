@@ -55,7 +55,6 @@ public class EmpiCandidateSearchSvc {
 	 * @return the list of candidate resources which could be matches to theResource
 	 */
 	public Collection<IBaseResource> findCandidates(String theResourceType, IBaseResource theResource) {
-		// FIXME EMPI implement
 		Map<Long, IBaseResource> matchedPidsToResources = new HashMap<>();
 
 		//FIXME EMPI validate there is no overlap between filters and resource search params.
