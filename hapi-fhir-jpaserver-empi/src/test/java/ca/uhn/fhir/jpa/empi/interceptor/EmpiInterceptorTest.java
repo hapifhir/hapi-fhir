@@ -89,6 +89,8 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 		assertLinkCount(1);
 	}
 
+
+
 	// FIXME EMPI Person records managed by EMPI should all share the same extension.  (I believe cdr EMPI already does this.)
 	@Test
 	public void testPersonRecordsManagedByEmpiAllShareSameExtension() {

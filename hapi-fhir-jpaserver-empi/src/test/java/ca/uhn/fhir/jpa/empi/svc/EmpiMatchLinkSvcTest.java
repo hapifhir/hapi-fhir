@@ -203,6 +203,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//FIXME EMPI
 		// Test: Existing Person with Meta TAg indicating they are Empi-Managed. requestors cannot remove this tag.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
+		fail()
 
 	}
 
