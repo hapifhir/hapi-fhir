@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
-import ca.uhn.fhir.jpa.api.EmpiLinkSourceEnum;
-import ca.uhn.fhir.jpa.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import org.hl7.fhir.instance.model.api.IBaseResource;

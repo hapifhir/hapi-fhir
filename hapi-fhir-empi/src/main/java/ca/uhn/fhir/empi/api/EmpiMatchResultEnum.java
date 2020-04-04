@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.api;
+package ca.uhn.fhir.empi.api;
 
 /*-
  * #%L

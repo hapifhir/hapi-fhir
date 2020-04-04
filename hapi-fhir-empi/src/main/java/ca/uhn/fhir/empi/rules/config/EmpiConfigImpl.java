@@ -5,7 +5,6 @@ import ca.uhn.fhir.util.JsonUtil;
 
 import java.io.IOException;
 
-// FIXME KHS collapse these two projects into hapi-fhir-empi
 public class EmpiConfigImpl implements IEmpiConfig {
 
 	private boolean myEnabled;

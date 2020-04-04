@@ -5,7 +5,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.List;

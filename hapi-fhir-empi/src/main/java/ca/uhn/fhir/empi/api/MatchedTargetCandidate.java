@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.api;
+package ca.uhn.fhir.empi.api;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
