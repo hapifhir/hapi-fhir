@@ -29,6 +29,13 @@ public class SubscriptionStrategyEvaluator {
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
+	/**
+	 * Constructor
+	 */
+	public SubscriptionStrategyEvaluator() {
+		super();
+	}
+
 	public SubscriptionMatchingStrategy determineStrategy(String theCriteria) {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match(theCriteria, null, null);
 		if (result.supported()) {

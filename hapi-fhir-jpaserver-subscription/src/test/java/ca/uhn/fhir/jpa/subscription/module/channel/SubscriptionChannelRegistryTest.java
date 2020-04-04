@@ -42,8 +42,6 @@ public class SubscriptionChannelRegistryTest {
 
 	@Test
 	public void testAddAddRemoveRemove() {
-		when(myModelConfig.isSubscriptionMatchingEnabled()).thenReturn(true);
-
 		CanonicalSubscription cansubA = new CanonicalSubscription();
 		cansubA.setIdElement(new IdDt("A"));
 		ActiveSubscription activeSubscriptionA = new ActiveSubscription(cansubA, TEST_CHANNEL_NAME);

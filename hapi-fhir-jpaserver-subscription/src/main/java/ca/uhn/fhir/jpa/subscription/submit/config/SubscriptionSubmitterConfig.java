@@ -20,17 +20,23 @@ package ca.uhn.fhir.jpa.subscription.submit.config;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubmitInterceptorLoader;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
+import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
+import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 
 /**
  * This Spring config should be imported by a system that submits resources to the
  * matching queue for processing
  */
 @Configuration
+@Import(SubscriptionModelConfig.class)
 public class SubscriptionSubmitterConfig {
 
 	@Bean
@@ -44,8 +50,15 @@ public class SubscriptionSubmitterConfig {
 	}
 
 	@Bean
-	public SubmitInterceptorLoader subscriptionMatcherInterceptorLoader() {
-		return new SubmitInterceptorLoader();
+	public SubscriptionSubmitInterceptorLoader subscriptionMatcherInterceptorLoader() {
+		return new SubscriptionSubmitInterceptorLoader();
 	}
+
+	@Bean
+	@Lazy
+	public ISubscriptionTriggeringSvc subscriptionTriggeringSvc() {
+		return new SubscriptionTriggeringSvcImpl();
+	}
+
 
 }

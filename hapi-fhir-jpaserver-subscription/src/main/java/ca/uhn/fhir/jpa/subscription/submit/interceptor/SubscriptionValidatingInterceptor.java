@@ -108,12 +108,7 @@ public class SubscriptionValidatingInterceptor {
 				throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
 			}
 
-			if (subscription.getChannelType() == null) {
-				throw new UnprocessableEntityException("Subscription.channel.type must be populated");
-			} else if (subscription.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
-				validateChannelPayload(subscription);
-				validateChannelEndpoint(subscription);
-			}
+			validateChannelType(subscription);
 
 			if (!myDaoRegistry.isResourceTypeSupported(resType)) {
 				throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resType);
@@ -130,6 +125,16 @@ public class SubscriptionValidatingInterceptor {
 				throw new UnprocessableEntityException("Subscription.channel.type must be populated on this server");
 			}
 
+		}
+	}
+
+	@SuppressWarnings("WeakerAccess")
+	protected void validateChannelType(CanonicalSubscription theSubscription) {
+		if (theSubscription.getChannelType() == null) {
+			throw new UnprocessableEntityException("Subscription.channel.type must be populated");
+		} else if (theSubscription.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
+			validateChannelPayload(theSubscription);
+			validateChannelEndpoint(theSubscription);
 		}
 	}
 

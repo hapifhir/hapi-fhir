@@ -1559,28 +1559,6 @@ public class DaoConfig {
 		myEnableInMemorySubscriptionMatching = theEnableInMemorySubscriptionMatching;
 	}
 
-	/**
-	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
-	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
-	 *
-	 * @since 3.7.0
-	 */
-
-	public boolean isSubscriptionMatchingEnabled() {
-		return myModelConfig.isSubscriptionMatchingEnabled();
-	}
-
-	/**
-	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
-	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
-	 *
-	 * @since 3.7.0
-	 */
-
-	public void setSubscriptionMatchingEnabled(boolean theSubscriptionMatchingEnabled) {
-		myModelConfig.setSubscriptionMatchingEnabled(theSubscriptionMatchingEnabled);
-	}
-
 	public ModelConfig getModelConfig() {
 		return myModelConfig;
 	}
@@ -1703,6 +1681,8 @@ public class DaoConfig {
 	/**
 	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
 	 * to the server matching these types will be activated.
+	 *
+	 * @see #addSupportedSubscriptionType(Subscription.SubscriptionChannelType)
 	 */
 	public Set<Subscription.SubscriptionChannelType> getSupportedSubscriptionTypes() {
 		return myModelConfig.getSupportedSubscriptionTypes();

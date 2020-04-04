@@ -60,6 +60,13 @@ public class SubscriptionLoader {
 	private ISchedulerService mySchedulerService;
 
 	/**
+	 * Constructor
+	 */
+	public SubscriptionLoader() {
+		super();
+	}
+
+	/**
 	 * Read the existing subscriptions from the database
 	 */
 	public void syncSubscriptions() {
@@ -76,18 +83,14 @@ public class SubscriptionLoader {
 		}
 	}
 
-	@VisibleForTesting
-	void acquireSemaphoreForUnitTest() throws InterruptedException {
-		mySyncSubscriptionsSemaphore.acquire();
-	}
-
-
 	@PostConstruct
 	public void scheduleJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
 		mySchedulerService.scheduleLocalJob(DateUtils.MILLIS_PER_MINUTE, jobDetail);
+
+		syncSubscriptions();
 	}
 
 	public static class Job implements HapiJob {
@@ -158,9 +161,5 @@ public class SubscriptionLoader {
 		}
 	}
 
-	@VisibleForTesting
-	public void setSubscriptionProviderForUnitTest(ISubscriptionProvider theSubscriptionProvider) {
-		mySubscriptionProvider = theSubscriptionProvider;
-	}
 }
 

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.subscription.channel.queue.LinkedBlockingQueueChannel;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubmitInterceptorLoader;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.process.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
@@ -22,7 +22,7 @@ public class SubscriptionTestUtil {
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
-	private SubmitInterceptorLoader mySubmitInterceptorLoader;
+	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 	@Autowired
@@ -50,22 +50,22 @@ public class SubscriptionTestUtil {
 
 	public void registerEmailInterceptor() {
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
-		mySubmitInterceptorLoader.registerInterceptors();
+		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void registerRestHookInterceptor() {
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
-		mySubmitInterceptorLoader.registerInterceptors();
+		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void registerWebSocketInterceptor() {
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
-		mySubmitInterceptorLoader.registerInterceptors();
+		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void unregisterSubscriptionInterceptor() {
 		myDaoConfig.clearSupportedSubscriptionTypesForUnitTest();
-		mySubmitInterceptorLoader.unregisterInterceptorsForUnitTest();
+		mySubscriptionSubmitInterceptorLoader.unregisterInterceptorsForUnitTest();
 	}
 
 	public int getExecutorQueueSizeForUnitTests() {

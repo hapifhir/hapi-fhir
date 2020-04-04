@@ -52,8 +52,6 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
-	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
@@ -87,7 +85,11 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE, theRequest);
 	}
 
-	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
+	/**
+	 * This is an internal API - Use with caution!
+	 */
+	@Override
+	public void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType);
 
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
@@ -99,16 +101,6 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		}
 
 		submitResourceModified(msg);
-	}
-
-	protected void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
-		ourLog.trace("Sending resource modified message to processing channel");
-		Validate.notNull(myMatchingChannel, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
-		myMatchingChannel.send(new ResourceModifiedJsonMessage(theMessage));
-	}
-
-	public void setFhirContext(FhirContext theCtx) {
-		myFhirContext = theCtx;
 	}
 
 	/**
@@ -136,6 +128,16 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		} else {
 			sendToProcessingChannel(theMsg);
 		}
+	}
+
+	protected void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
+		ourLog.trace("Sending resource modified message to processing channel");
+		Validate.notNull(myMatchingChannel, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
+		myMatchingChannel.send(new ResourceModifiedJsonMessage(theMessage));
+	}
+
+	public void setFhirContext(FhirContext theCtx) {
+		myFhirContext = theCtx;
 	}
 
 	@VisibleForTesting

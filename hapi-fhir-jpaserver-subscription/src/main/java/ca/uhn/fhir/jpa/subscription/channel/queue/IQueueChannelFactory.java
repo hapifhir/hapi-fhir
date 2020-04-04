@@ -50,9 +50,4 @@ public interface IQueueChannelFactory {
 	 */
 	MessageChannel getOrCreateSender(String theChannelName, Class<?> theMessageType, int theConcurrentConsumers);
 
-	// FIXME: can these be removed?
-	int getDeliveryChannelConcurrentConsumers();
-
-	// FIXME: can these be removed?
-	int getMatchingChannelConcurrentConsumers();
 }

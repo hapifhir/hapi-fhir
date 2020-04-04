@@ -67,6 +67,13 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	@Autowired
 	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
+	/**
+	 * Constructor
+	 */
+	public SubscriptionMatchingSubscriber() {
+		super();
+	}
+
 
 	@Override
 	public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {

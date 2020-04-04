@@ -51,9 +51,6 @@ public class SubscriptionChannelRegistry {
 	private ModelConfig myModelConfig;
 
 	public synchronized void add(ActiveSubscription theActiveSubscription) {
-		if (!myModelConfig.isSubscriptionMatchingEnabled()) {
-			return;
-		}
 		String channelName = theActiveSubscription.getChannelName();
 		ourLog.info("Adding subscription {} to channel {}", theActiveSubscription.getId(), channelName);
 		myActiveSubscriptionByChannelName.put(channelName, theActiveSubscription.getId());
@@ -75,9 +72,6 @@ public class SubscriptionChannelRegistry {
 	}
 
 	public synchronized void remove(ActiveSubscription theActiveSubscription) {
-		if (!myModelConfig.isSubscriptionMatchingEnabled()) {
-			return;
-		}
 		String channelName = theActiveSubscription.getChannelName();
 		ourLog.info("Removing subscription {} from channel {}", theActiveSubscription.getId() ,channelName);
 		boolean removed = myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription.getId());

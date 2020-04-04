@@ -33,6 +33,13 @@ public class LinkedBlockingQueueChannelFactory implements IQueueChannelFactory {
 
 	private Map<String, SubscribableChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
 
+	/**
+	 * Constructor
+	 */
+	public LinkedBlockingQueueChannelFactory() {
+		super();
+	}
+
 	@Override
 	public SubscribableChannel getOrCreateReceiver(String theChannelName, Class<?> theMessageType, int theConcurrentConsumers) {
 		return getOrCreateChannel(theChannelName, theConcurrentConsumers);
@@ -44,17 +51,11 @@ public class LinkedBlockingQueueChannelFactory implements IQueueChannelFactory {
 	}
 
 	private SubscribableChannel getOrCreateChannel(String theChannelName, int theConcurrentConsumers) {
-		return myChannels.computeIfAbsent(theChannelName, t ->
-			new LinkedBlockingQueueChannel(new LinkedBlockingQueue<>(SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE), theChannelName + "-%d", theConcurrentConsumers));
+		return myChannels.computeIfAbsent(theChannelName, t -> {
+			LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE);
+			String threadNamingPattern = theChannelName + "-%d";
+			return new LinkedBlockingQueueChannel(queue, threadNamingPattern, theConcurrentConsumers);
+		});
 	}
 
-	@Override
-	public int getDeliveryChannelConcurrentConsumers() {
-		return SubscriptionConstants.DELIVERY_CHANNEL_CONCURRENT_CONSUMERS;
-	}
-
-	@Override
-	public int getMatchingChannelConcurrentConsumers() {
-		return SubscriptionConstants.MATCHING_CHANNEL_CONCURRENT_CONSUMERS;
-	}
 }

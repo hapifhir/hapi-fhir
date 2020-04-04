@@ -24,43 +24,29 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.process.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.subscription.process.matcher.matching.SubscriptionMatchingStrategy;
-import ca.uhn.fhir.jpa.subscription.process.matcher.matching.SubscriptionStrategyEvaluator;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.SubscriptionUtil;
-import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Responsible for transitioning subscription resources from REQUESTED to ACTIVE
@@ -69,14 +55,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
 public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscriptionResources implements MessageHandler {
-	private static boolean ourWaitForSubscriptionActivationSynchronouslyForUnitTest;
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
-	// FIXME: use constant if this is still needed
-	@Autowired
-	@Qualifier("hapiJpaTaskExecutor")
-	private AsyncTaskExecutor myTaskExecutor;
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
@@ -133,43 +114,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 		String statusString = mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription);
 
 		if (SubscriptionConstants.REQUESTED_STATUS.equals(statusString)) {
-			if (TransactionSynchronizationManager.isSynchronizationActive()) {
-				/*
-				 * If we're in a transaction, we don't want to try and change the status from
-				 * requested to active within the same transaction because it's too late by
-				 * the time we get here to make modifications to the payload.
-				 *
-				 * So, we register a synchronization, meaning that when the transaction is
-				 * finished, we'll schedule a task to do this in a separate worker thread
-				 * to avoid any possibility of conflict.
-				 */
-				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-					@Override
-					public void afterCommit() {
-						Future<?> activationFuture = myTaskExecutor.submit(new Runnable() {
-							@Override
-							public void run() {
-								activateSubscription(SubscriptionConstants.ACTIVE_STATUS, theSubscription, SubscriptionConstants.REQUESTED_STATUS);
-							}
-						});
-
-						/*
-						 * If we're running in a unit test, it's nice to be predictable in
-						 * terms of order... In the real world it's a recipe for deadlocks
-						 */
-						if (ourWaitForSubscriptionActivationSynchronouslyForUnitTest) {
-							try {
-								activationFuture.get(5, TimeUnit.SECONDS);
-							} catch (Exception e) {
-								ourLog.error("Failed to activate subscription", e);
-							}
-						}
-					}
-				});
-				return true;
-			} else {
-				return activateSubscription(SubscriptionConstants.ACTIVE_STATUS, theSubscription, SubscriptionConstants.REQUESTED_STATUS);
-			}
+			return activateSubscription(theSubscription);
 		} else if (SubscriptionConstants.ACTIVE_STATUS.equals(statusString)) {
 			return mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(theSubscription);
 		} else {
@@ -179,14 +124,14 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
+	private boolean activateSubscription(final IBaseResource theSubscription) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
 		IBaseResource subscription = subscriptionDao.read(theSubscription.getIdElement());
 		subscription.setId(subscription.getIdElement().toVersionless());
 
-		ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus);
+		ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), SubscriptionConstants.REQUESTED_STATUS, SubscriptionConstants.ACTIVE_STATUS);
 		try {
-			SubscriptionUtil.setStatus(myFhirContext, subscription, theActiveStatus);
+			SubscriptionUtil.setStatus(myFhirContext, subscription, SubscriptionConstants.ACTIVE_STATUS);
 			subscriptionDao.update(subscription);
 			return true;
 		} catch (final UnprocessableEntityException e) {
@@ -212,11 +157,6 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 				activateOrRegisterSubscriptionIfRequired(theSubscription);
 			}
 		});
-	}
-
-	@VisibleForTesting
-	public static void setWaitForSubscriptionActivationSynchronouslyForUnitTest(boolean theWaitForSubscriptionActivationSynchronouslyForUnitTest) {
-		ourWaitForSubscriptionActivationSynchronouslyForUnitTest = theWaitForSubscriptionActivationSynchronouslyForUnitTest;
 	}
 
 }
