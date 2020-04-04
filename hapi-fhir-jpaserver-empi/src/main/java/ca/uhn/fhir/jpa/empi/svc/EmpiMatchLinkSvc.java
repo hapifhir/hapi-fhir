@@ -42,6 +42,7 @@ public class EmpiMatchLinkSvc {
 			myEmpiLinkSvc.updateLink(person, theResource, matchedPersonCandidate.getEmpiLink().getMatchResult(), EmpiLinkSourceEnum.AUTO);
 		//multiple candidates, in which case they should all be tagged as POSSIBLE_MATCH. If one is already tagged as MATCH
 		} else {
+
 		}
 	}
 
