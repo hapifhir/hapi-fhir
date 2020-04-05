@@ -37,7 +37,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Configuration
 @Import({SearchParamConfig.class})
 @EnableScheduling
-public class SubscriptionConfig {
+public class SubscriptionTestConfig {
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -54,8 +54,8 @@ public class SubscriptionConfig {
 	}
 
 	@Bean
-	public SubscriptionChannelFactory subscriptionChannelFactory() {
-		return new SubscriptionChannelFactory();
+	public SubscriptionChannelFactory subscriptionChannelFactory(IQueueChannelFactory theQueueChannelFactory) {
+		return new SubscriptionChannelFactory(theQueueChannelFactory);
 	}
 
 

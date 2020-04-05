@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.process.registry.ActiveSubscription;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -35,10 +36,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DaoResourceRetriever implements IResourceRetriever {
 	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscription.class);
 
+	/**
+	 * Constructor
+	 */
+	public DaoResourceRetriever() {
+		super();
+	}
+
+	/**
+	 * Constructor
+	 */
+	public DaoResourceRetriever(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		myFhirContext = theFhirContext;
+		myDaoRegistry = theDaoRegistry;
+	}
+
 	@Autowired
-	FhirContext myFhirContext;
+	private FhirContext myFhirContext;
 	@Autowired
-	DaoRegistry myDaoRegistry;
+	private DaoRegistry myDaoRegistry;
 
 	@Override
 	public IBaseResource getResource(IIdType payloadId) throws ResourceGoneException {

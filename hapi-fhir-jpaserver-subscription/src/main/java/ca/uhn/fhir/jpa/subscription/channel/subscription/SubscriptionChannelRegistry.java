@@ -87,9 +87,9 @@ public class SubscriptionChannelRegistry {
 				channel.close();
 			}
 			myDeliveryReceiverChannels.closeAndRemove(channelName);
+			myChannelNameToSender.remove(channelName);
 		}
 
-		myChannelNameToSender.remove(channelName);
 	}
 
 	public synchronized SubscriptionChannelWithHandlers getDeliveryReceiverChannel(String theChannelName) {

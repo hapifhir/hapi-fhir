@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +48,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	private final String myName;
 	private final AtomicLong myLastInvoke = new AtomicLong();
 	private final AtomicReference<CountDownLatch> myCountdownLatch = new AtomicReference<>();
+	private final AtomicReference<String> myCountdownLatchSetStacktrace = new AtomicReference<>();
 	private final AtomicReference<List<String>> myFailures = new AtomicReference<>();
 	private final AtomicReference<List<HookParams>> myCalledWith = new AtomicReference<>();
 	private final Pointcut myPointcut;
@@ -80,7 +82,8 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	public void setExpectedCount(int theCount, boolean theExactMatch) {
 		if (myCountdownLatch.get() != null) {
-			throw new PointcutLatchException("setExpectedCount() called before previous awaitExpected() completed.");
+			String previousStack = myCountdownLatchSetStacktrace.get();
+			throw new PointcutLatchException("setExpectedCount() called before previous awaitExpected() completed. Previous set stack:\n" + previousStack);
 		}
 		myExactMatch = theExactMatch;
 		createLatch(theCount);
@@ -99,6 +102,11 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		myFailures.set(Collections.synchronizedList(new ArrayList<>()));
 		myCalledWith.set(Collections.synchronizedList(new ArrayList<>()));
 		myCountdownLatch.set(new CountDownLatch(theCount));
+		try {
+			throw new Exception();
+		} catch (Exception e) {
+			myCountdownLatchSetStacktrace.set(ExceptionUtils.getStackTrace(e));
+		}
 		myInitialCount = theCount;
 	}
 
@@ -151,6 +159,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	@Override
 	public void clear() {
 		myCountdownLatch.set(null);
+		myCountdownLatchSetStacktrace.set(null);
 	}
 
 	private String toCalledWithString() {

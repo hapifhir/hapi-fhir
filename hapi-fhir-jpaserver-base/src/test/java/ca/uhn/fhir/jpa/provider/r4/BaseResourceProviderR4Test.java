@@ -163,7 +163,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryImpl.class);
 			ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
-			ourSubscriptionMatcherInterceptor.start();
 
 			confProvider.setSearchParamRegistry(ourSearchParamRegistry);
 

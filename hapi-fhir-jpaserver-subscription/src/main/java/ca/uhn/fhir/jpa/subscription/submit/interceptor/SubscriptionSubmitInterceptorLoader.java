@@ -53,7 +53,6 @@ public class SubscriptionSubmitInterceptorLoader {
 		if (supportedSubscriptionTypes.isEmpty()) {
 			ourLog.info("Subscriptions are disabled on this server.  Subscriptions will not be activated and incoming resources will not be matched against subscriptions.");
 		} else {
-			mySubscriptionMatcherInterceptor.start();
 			ourLog.info("Registering subscription matcher interceptor");
 			myInterceptorRegistry.registerInterceptor(mySubscriptionMatcherInterceptor);
 		}

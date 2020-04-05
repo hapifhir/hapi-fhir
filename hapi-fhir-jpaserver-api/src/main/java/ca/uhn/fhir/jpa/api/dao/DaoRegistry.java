@@ -51,7 +51,15 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	 * Constructor
 	 */
 	public DaoRegistry() {
+		this(null);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public DaoRegistry(FhirContext theFhirContext) {
 		super();
+		myContext = theFhirContext;
 	}
 
 	public void setSupportedResourceTypes(Collection<String> theSupportedResourceTypes) {

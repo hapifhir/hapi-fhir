@@ -166,7 +166,6 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryImpl.class);
 			ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
-			ourSubscriptionMatcherInterceptor.start();
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
 			confProvider.setSearchParamRegistry(ourSearchParamRegistry);

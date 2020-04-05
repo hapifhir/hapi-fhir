@@ -4,6 +4,9 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFact
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 
@@ -46,8 +49,8 @@ public class MatchingQueueSubscriberLoader {
 
 	protected SubscribableChannel myMatchingChannel;
 
-	@PostConstruct
-	public void start() {
+	@EventListener(classes = {ContextRefreshedEvent.class})
+	public void handleContextRefreshEvent() {
 		if (myMatchingChannel == null) {
 			myMatchingChannel = mySubscriptionChannelFactory.newMatchingReceivingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 		}

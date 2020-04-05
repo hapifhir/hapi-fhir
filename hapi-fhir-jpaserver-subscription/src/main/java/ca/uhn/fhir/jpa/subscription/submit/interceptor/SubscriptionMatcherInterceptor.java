@@ -20,6 +20,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -56,7 +58,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 
-	private MessageChannel myMatchingChannel;
+	private volatile MessageChannel myMatchingChannel;
 
 	/**
 	 * Constructor
@@ -65,23 +67,28 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		super();
 	}
 
-	@PostConstruct
-	public void start() {
-		myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+	@EventListener(classes = {ContextRefreshedEvent.class})
+	public void startIfNeeded() {
+		if (myMatchingChannel == null) {
+			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+		}
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
 	public void resourceCreated(IBaseResource theResource, RequestDetails theRequest) {
+		startIfNeeded();
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE, theRequest);
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
 	public void resourceDeleted(IBaseResource theResource, RequestDetails theRequest) {
+		startIfNeeded();
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE, theRequest);
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
 	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
+		startIfNeeded();
 		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE, theRequest);
 	}
 
