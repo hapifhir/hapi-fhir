@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.subscription.process.matcher.subscriber;
  * #L%
  */
 
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -31,7 +30,6 @@ import ca.uhn.fhir.jpa.subscription.process.matcher.matching.SubscriptionStrateg
 import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionRegistry;
-import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -41,10 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 
@@ -113,12 +107,15 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 
 		if (SubscriptionConstants.REQUESTED_STATUS.equals(statusString)) {
 			return activateSubscription(theSubscription);
-		} else if (SubscriptionConstants.ACTIVE_STATUS.equals(statusString)) {
-			return mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(theSubscription);
-		} else {
-			// Status isn't "active" or "requested"
-			return mySubscriptionRegistry.unregisterSubscriptionIfRegistered(theSubscription, statusString);
+			// FIXME: remove
+//		} else if (SubscriptionConstants.ACTIVE_STATUS.equals(statusString)) {
+//			return mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(theSubscription);
+//		} else {
+//			 Status isn't "active" or "requested"
+//			return mySubscriptionRegistry.unregisterSubscriptionIfRegistered(theSubscription, statusString);
 		}
+
+		return false;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -139,12 +136,6 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 			subscriptionDao.update(subscription);
 			return false;
 		}
-	}
-
-
-	private boolean isSubscription(IBaseResource theNewResource) {
-		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theNewResource);
-		return ResourceTypeEnum.SUBSCRIPTION.getCode().equals(resourceDefinition.getName());
 	}
 
 	private void activateAndRegisterSubscriptionIfRequiredInTransaction(IBaseResource theSubscription) {

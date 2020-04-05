@@ -22,8 +22,10 @@ package ca.uhn.fhir.jpa.subscription.process.matcher.subscriber;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,8 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 	private FhirContext myFhirContext;
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
+	@Autowired
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	/**
 	 * Constructor
@@ -68,11 +72,17 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 
 		switch (payload.getOperationType()) {
 			case DELETE:
-				mySubscriptionRegistry.unregisterSubscription(payload.getId(myFhirContext).getIdPart());
+				mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payload.getId(myFhirContext).getIdPart());
 				break;
 			case CREATE:
 			case UPDATE:
-				mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(payload.getNewPayload(myFhirContext));
+				IBaseResource subscription = payload.getNewPayload(myFhirContext);
+				String statusString = mySubscriptionCanonicalizer.getSubscriptionStatus(subscription);
+				if ("active".equals(statusString)) {
+					mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(payload.getNewPayload(myFhirContext));
+				} else {
+					mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payload.getId(myFhirContext).getIdPart());
+				}
 				break;
 			case MANUALLY_TRIGGERED:
 			default:

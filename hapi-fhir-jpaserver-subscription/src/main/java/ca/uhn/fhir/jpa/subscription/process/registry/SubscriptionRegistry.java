@@ -104,7 +104,7 @@ public class SubscriptionRegistry {
 		return canonicalized;
 	}
 
-	public void unregisterSubscription(String theSubscriptionId) {
+	public void unregisterSubscriptionIfRegistered(String theSubscriptionId) {
 		Validate.notNull(theSubscriptionId);
 
 		ourLog.info("Unregistering active subscription {}", theSubscriptionId);
@@ -126,7 +126,7 @@ public class SubscriptionRegistry {
 
 		List<String> idsToDelete = myActiveSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(theAllIds);
 		for (String id : idsToDelete) {
-			unregisterSubscription(id);
+			unregisterSubscriptionIfRegistered(id);
 		}
 	}
 
@@ -145,7 +145,7 @@ public class SubscriptionRegistry {
 				updateSubscription(theSubscription);
 				return true;
 			}
-			unregisterSubscription(theSubscription.getIdElement().getIdPart());
+			unregisterSubscriptionIfRegistered(theSubscription.getIdElement().getIdPart());
 		}
 		if (Subscription.SubscriptionStatus.ACTIVE.equals(newSubscription.getStatus())) {
 			registerSubscription(theSubscription.getIdElement(), theSubscription);
@@ -177,7 +177,7 @@ public class SubscriptionRegistry {
 	public boolean unregisterSubscriptionIfRegistered(IBaseResource theSubscription, String theStatusString) {
 		if (hasSubscription(theSubscription.getIdElement()).isPresent()) {
 			ourLog.info("Removing {} subscription {}", theStatusString, theSubscription.getIdElement().toUnqualified().getValue());
-			unregisterSubscription(theSubscription.getIdElement().getIdPart());
+			unregisterSubscriptionIfRegistered(theSubscription.getIdElement().getIdPart());
 			return true;
 		}
 		return false;
