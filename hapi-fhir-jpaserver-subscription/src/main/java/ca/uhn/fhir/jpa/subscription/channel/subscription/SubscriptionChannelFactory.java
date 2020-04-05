@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.subscription.channel.queue.IQueueChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionConstants;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -60,10 +61,13 @@ public class SubscriptionChannelFactory {
 	}
 
 
-	private static class BroadcastingSubscribableChannelWrapper extends AbstractSubscribableChannel implements MessageHandler {
+	private static class BroadcastingSubscribableChannelWrapper extends AbstractSubscribableChannel implements MessageHandler, DisposableBean {
+
+		private final SubscribableChannel myWrappedChannel;
 
 		public BroadcastingSubscribableChannelWrapper(SubscribableChannel theChannel) {
 			theChannel.subscribe(this);
+			myWrappedChannel = theChannel;
 		}
 
 
@@ -78,6 +82,13 @@ public class SubscriptionChannelFactory {
 		@Override
 		public void handleMessage(Message<?> message) throws MessagingException {
 			send(message);
+		}
+
+		@Override
+		public void destroy() throws Exception {
+			if (myWrappedChannel instanceof DisposableBean) {
+				((DisposableBean) myWrappedChannel).destroy();
+			}
 		}
 	}
 

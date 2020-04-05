@@ -1,8 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.subscription.process.matcher.subscriber.SubscriptionActivatingSubscriber;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
@@ -14,7 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 
@@ -23,20 +23,13 @@ public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 
 	@After
 	public void afterResetDao() {
-		SubscriptionActivatingSubscriber.setWaitForSubscriptionActivationSynchronouslyForUnitTest(false);
 		myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
 		BaseHapiFhirDao.setValidationDisabledForUnitTest(false);
-	}
-
-	@Before
-	public void before() {
-		SubscriptionActivatingSubscriber.setWaitForSubscriptionActivationSynchronouslyForUnitTest(true);
 	}
 
 	@After
 	public void afterUnregisterRestHookListener() {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-		SubscriptionActivatingSubscriber.setWaitForSubscriptionActivationSynchronouslyForUnitTest(false);
 	}
 
 	@Before

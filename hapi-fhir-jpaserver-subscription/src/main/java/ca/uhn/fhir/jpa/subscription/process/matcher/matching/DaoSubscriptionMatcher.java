@@ -47,8 +47,6 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 	private Logger ourLog = LoggerFactory.getLogger(DaoSubscriptionMatcher.class);
 	@Autowired
 	private FhirContext myCtx;
-	@Autowired
-	private PlatformTransactionManager myTxManager;
 
 	@Override
 	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
@@ -78,10 +76,7 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 		IFhirResourceDao<? extends IBaseResource> responseDao = myDaoRegistry.getResourceDao(responseResourceDef.getImplementingClass());
 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		return txTemplate.execute(t -> responseDao.search(responseCriteriaUrl));
-
+		return responseDao.search(responseCriteriaUrl);
 	}
 
 }

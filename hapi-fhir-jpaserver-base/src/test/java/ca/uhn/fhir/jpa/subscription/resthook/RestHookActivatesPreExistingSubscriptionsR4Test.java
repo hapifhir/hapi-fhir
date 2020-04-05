@@ -46,18 +46,12 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
 	@After
-	public void afterResetSubscriptionActivatingInterceptor() {
-		SubscriptionActivatingSubscriber.setWaitForSubscriptionActivationSynchronouslyForUnitTest(false);
-	}
-
-	@After
 	public void afterUnregisterRestHookListener() {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
 	@Before
 	public void beforeSetSubscriptionActivatingInterceptor() {
-		SubscriptionActivatingSubscriber.setWaitForSubscriptionActivationSynchronouslyForUnitTest(true);
 		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 	}
 

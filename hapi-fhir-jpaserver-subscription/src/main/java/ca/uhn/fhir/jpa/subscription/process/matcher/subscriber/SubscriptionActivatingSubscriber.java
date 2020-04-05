@@ -57,8 +57,6 @@ import javax.annotation.Nonnull;
 public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscriptionResources implements MessageHandler {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
 	@Autowired
-	private PlatformTransactionManager myTransactionManager;
-	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -150,13 +148,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 	}
 
 	private void activateAndRegisterSubscriptionIfRequiredInTransaction(IBaseResource theSubscription) {
-		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		txTemplate.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				activateOrRegisterSubscriptionIfRequired(theSubscription);
-			}
-		});
+		activateOrRegisterSubscriptionIfRequired(theSubscription);
 	}
 
 }
