@@ -78,15 +78,25 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 			RuntimeSearchParam searchParam = mySearchParamRegistry.getSearchParamByName(typeDef, nextArgument.getName());
 
 			ourLog.info(String.format(
-				"{ name: %s, value: %s, searchParam: %s }",
+				"{ name: %s, values: %s, searchParam: %s, searchParam.getParamType(): %s}",
 				nextArgument.getName(),
 				nextArgument.getValues().toString(),
 				typeDef.getName(),
-				searchParam == null ? "NULL" : searchParam.toString()
+				searchParam == null ? "NULL" : searchParam.toString(),
+				searchParam == null ? "NULL" : searchParam.getParamType().toString()
 			));
 
 			for (Value nextValue : nextArgument.getValues()) {
 				String value = nextValue.getValue();
+
+				ourLog.info(String.format(
+					"{ name: %s, value: %s, searchParam: %s, searchParam.getParamType(): %s}",
+					nextArgument.getName(),
+					nextValue.getValue(),
+					typeDef.getName(),
+					searchParam == null ? "NULL" : searchParam.toString(),
+					searchParam == null ? "NULL" : searchParam.getParamType().toString()
+				));
 
 				IQueryParameterType param = null;
 				switch (searchParam.getParamType()) {
