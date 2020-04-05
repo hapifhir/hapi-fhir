@@ -164,6 +164,7 @@ public class NestedTxTest extends BaseTest {
 		try {
 			// Now exeute SQL2 and then in a nested Tx execute SQL_CONFLICT
 			executeInTx(SQL2, txTemplate, subTxSecondInsert, this::neverCalled);
+			// UNLUCKY: the first insert hasn't committed yet, so our update fails.
 			fail();
 		} catch (CannotAcquireLockException e) {
 			ourLog.info("Expected failure: {}", e.getMessage());
@@ -193,9 +194,9 @@ public class NestedTxTest extends BaseTest {
 				fail();
 			} catch (CannotAcquireLockException e) {
 				ourLog.info("Expected failure: {}", e.getMessage());
+				// LUCKY: the other Tx committed before we try to update
 				releaseFirstInsertCommitted();
 				// The insert failed, so try update instead
-				// Lucky, the other Tx committed before we committed
 				executeInTx(SQL_UPDATE, subTemplate, this::doNothing, this::doNothing);
 			}
 		};
