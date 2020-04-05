@@ -38,6 +38,10 @@ public class SubscriptionChannelFactory {
 	@Autowired
 	private IQueueChannelFactory mySubscribableChannelFactory;
 
+	public MessageChannel newDeliverySendingChannel(String theChannelName) {
+		return mySubscribableChannelFactory.getOrCreateSender(theChannelName, ResourceDeliveryMessage.class, getDeliveryChannelConcurrentConsumers());
+	}
+
 	public SubscribableChannel newDeliveryChannel(String theChannelName) {
 		SubscribableChannel channel = mySubscribableChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryMessage.class, getDeliveryChannelConcurrentConsumers());
 		return new BroadcastingSubscribableChannelWrapper(channel);

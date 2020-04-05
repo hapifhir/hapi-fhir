@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.process.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionRegistry;
 import com.google.common.annotations.VisibleForTesting;
@@ -29,46 +28,48 @@ import com.google.common.collect.MultimapBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SubscriptionChannelRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegistry.class);
 
-	private final SubscriptionChannelCache mySubscriptionChannelCache = new SubscriptionChannelCache();
+	private final SubscriptionChannelCache myDeliveryReceiverChannels = new SubscriptionChannelCache();
 	// This map is a reference count so we know to destroy the channel when there are no more active subscriptions using it
 	// Key Channel Name, Value Subscription Id
 	private final Multimap<String, String> myActiveSubscriptionByChannelName = MultimapBuilder.hashKeys().arrayListValues().build();
+	private final Map<String, MessageChannel> myChannelNameToSender = new ConcurrentHashMap<>();
 
 	@Autowired
 	private SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
-	@Autowired
-	private ModelConfig myModelConfig;
 
 	public synchronized void add(ActiveSubscription theActiveSubscription) {
 		String channelName = theActiveSubscription.getChannelName();
 		ourLog.info("Adding subscription {} to channel {}", theActiveSubscription.getId(), channelName);
 		myActiveSubscriptionByChannelName.put(channelName, theActiveSubscription.getId());
 
-		if (mySubscriptionChannelCache.containsKey(channelName)) {
+		if (myDeliveryReceiverChannels.containsKey(channelName)) {
 			ourLog.info("Channel {} already exists.  Not creating.", channelName);
 			return;
 		}
 
-		SubscribableChannel deliveryChannel;
-		Optional<MessageHandler> deliveryHandler;
-
-		deliveryChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel(channelName);
-		deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(theActiveSubscription.getChannelType());
+		SubscribableChannel deliveryChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel(channelName);
+		Optional<MessageHandler> deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(theActiveSubscription.getChannelType());
 
 		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = new SubscriptionChannelWithHandlers(channelName, deliveryChannel);
 		deliveryHandler.ifPresent(subscriptionChannelWithHandlers::addHandler);
-		mySubscriptionChannelCache.put(channelName, subscriptionChannelWithHandlers);
+		myDeliveryReceiverChannels.put(channelName, subscriptionChannelWithHandlers);
+
+		MessageChannel sendingChannel = mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(channelName);
+		myChannelNameToSender.put(channelName, sendingChannel);
 	}
 
 	public synchronized void remove(ActiveSubscription theActiveSubscription) {
@@ -81,31 +82,25 @@ public class SubscriptionChannelRegistry {
 
 		// This was the last one.  Close and remove the channel
 		if (!myActiveSubscriptionByChannelName.containsKey(channelName)) {
-			SubscriptionChannelWithHandlers channel = mySubscriptionChannelCache.get(channelName);
+			SubscriptionChannelWithHandlers channel = myDeliveryReceiverChannels.get(channelName);
 			if (channel != null) {
 				channel.close();
 			}
-			mySubscriptionChannelCache.closeAndRemove(channelName);
+			myDeliveryReceiverChannels.closeAndRemove(channelName);
 		}
+
+		myChannelNameToSender.remove(channelName);
 	}
 
-	public synchronized SubscriptionChannelWithHandlers get(String theChannelName) {
-		return mySubscriptionChannelCache.get(theChannelName);
+	public synchronized SubscriptionChannelWithHandlers getDeliveryReceiverChannel(String theChannelName) {
+		return myDeliveryReceiverChannels.get(theChannelName);
+	}
+
+	public synchronized MessageChannel getDeliverySenderChannel(String theChannelName) {
+		return myChannelNameToSender.get(theChannelName);
 	}
 
 	public synchronized int size() {
-		return mySubscriptionChannelCache.size();
-	}
-
-	@VisibleForTesting
-	public void logForUnitTest() {
-		ourLog.info("{} Channels: {}", this, size());
-		mySubscriptionChannelCache.logForUnitTest();
-		for (String key : myActiveSubscriptionByChannelName.keySet()) {
-			Collection<String> list = myActiveSubscriptionByChannelName.get(key);
-			for (String value : list) {
-				ourLog.info("ActiveSubscriptionByChannelName {}: {}", key, value);
-			}
-		}
+		return myDeliveryReceiverChannels.size();
 	}
 }

@@ -49,13 +49,13 @@ public class SubscriptionChannelRegistryTest {
 		cansubB.setIdElement(new IdDt("B"));
 		ActiveSubscription activeSubscriptionB = new ActiveSubscription(cansubB, TEST_CHANNEL_NAME);
 
-		assertNull(mySubscriptionChannelRegistry.get(TEST_CHANNEL_NAME));
+		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.add(activeSubscriptionA);
-		assertNotNull(mySubscriptionChannelRegistry.get(TEST_CHANNEL_NAME));
+		assertNotNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.add(activeSubscriptionB);
 		mySubscriptionChannelRegistry.remove(activeSubscriptionB);
-		assertNotNull(mySubscriptionChannelRegistry.get(TEST_CHANNEL_NAME));
+		assertNotNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.remove(activeSubscriptionA);
-		assertNull(mySubscriptionChannelRegistry.get(TEST_CHANNEL_NAME));
+		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 	}
 }

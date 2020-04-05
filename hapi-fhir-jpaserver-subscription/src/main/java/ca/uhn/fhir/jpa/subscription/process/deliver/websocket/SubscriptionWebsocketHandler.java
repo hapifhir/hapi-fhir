@@ -115,13 +115,13 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			mySession = theSession;
 			myActiveSubscription = theActiveSubscription;
 
-			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.get(theActiveSubscription.getChannelName());
+			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(theActiveSubscription.getChannelName());
 			subscriptionChannelWithHandlers.addHandler(this);
 		}
 
 		@Override
 		public void closing() {
-			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.get(myActiveSubscription.getChannelName());
+			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(myActiveSubscription.getChannelName());
 			subscriptionChannelWithHandlers.removeHandler(this);
 		}
 
