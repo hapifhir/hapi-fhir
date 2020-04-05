@@ -39,6 +39,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.graphql.Argument;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.graphql.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +50,7 @@ import java.util.List;
 public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implements IGraphQLStorageServices {
 
 	private static final int MAX_SEARCH_SIZE = 500;
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageServices.class);
 
 	private IFhirResourceDao<? extends IBaseResource> getDao(String theResourceType) {
 		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theResourceType);
@@ -64,9 +67,23 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(MAX_SEARCH_SIZE);
 
+		ourLog.info(String.format(
+			"{ typeDef: %s, searchParams: %s }",
+			typeDef.getName(),
+			typeDef.getSearchParams().toString()
+		));
+
 		for (Argument nextArgument : theSearchParams) {
 
 			RuntimeSearchParam searchParam = mySearchParamRegistry.getSearchParamByName(typeDef, nextArgument.getName());
+
+			ourLog.info(String.format(
+				"{ name: %s, value: %s, searchParam: %s }",
+				nextArgument.getName(),
+				nextArgument.getValues().toString(),
+				typeDef.getName(),
+				searchParam == null ? "NULL" : searchParam.toString()
+			));
 
 			for (Value nextValue : nextArgument.getValues()) {
 				String value = nextValue.getValue();
