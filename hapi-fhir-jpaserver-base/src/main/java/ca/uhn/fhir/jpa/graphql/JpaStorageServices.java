@@ -46,6 +46,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import static ca.uhn.fhir.rest.api.Constants.PARAM_FILTER;
 
 public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implements IGraphQLStorageServices {
 
@@ -55,6 +61,18 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 	private IFhirResourceDao<? extends IBaseResource> getDao(String theResourceType) {
 		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theResourceType);
 		return myDaoRegistry.getResourceDaoOrNull(typeDef.getImplementingClass());
+	}
+
+	private String graphqlArgumentToSearchParam(String name) {
+		if (name.startsWith("_")) {
+			return name;
+		} else {
+			return name.replaceAll("_", "-");
+		}
+	}
+
+	private String searchParamToGraphqlArgument(String name) {
+		return name.replaceAll("-", "_");
 	}
 
 	@Transactional(propagation = Propagation.NEVER)
@@ -73,29 +91,45 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 			typeDef.getSearchParams().toString()
 		));
 
+		Map<String, RuntimeSearchParam> searchParams = mySerarchParamRegistry.getActiveSearchParams(typeDef.getName());
+
 		for (Argument nextArgument : theSearchParams) {
 
-			RuntimeSearchParam searchParam = mySearchParamRegistry.getSearchParamByName(typeDef, nextArgument.getName());
+			if (nextArgument.getName().equals(PARAM_FILTER)) {
+				String value = nextArgument.getValues().get(0).getValue();
+				params.add(PARAM_FILTER, new StringParam(value));
+				continue;
+			}
 
-			ourLog.info(String.format(
-				"{ name: %s, values: %s, searchParam: %s, searchParam.getParamType(): %s}",
+			String searchParamName = graphqlArgumentToSearchParam(nextArgument.getName());
+			RuntimeSearchParam searchParam = searchParams.get(searchParamName);
+			if (searchParam == null) {
+				Set<String> graphqlArguments = searchParams.keySet().stream()
+					.map(this::searchParamToGraphqlArgument)
+					.collect(Collectors.toSet());
+				String msg = getContext().getLocalizer().getMessageSanitized(JpaStorageServices.class, "invalidGraphqlArgument", nextArgument.getName(), new TreeSet<>(graphqlArguments));
+				throw new InvalidRequestException(msg);
+			}
+
+			ourLog.debug(String.format(
+				"{ name: %s, values: %s, typeDef: %s, searchParam: %s, searchParam.getParamType(): %s}",
 				nextArgument.getName(),
 				nextArgument.getValues().toString(),
 				typeDef.getName(),
-				searchParam == null ? "NULL" : searchParam.toString(),
-				searchParam == null ? "NULL" : searchParam.getParamType().toString()
+				searchParam.toString(),
+				searchParam.getParamType().toString()
 			));
 
 			for (Value nextValue : nextArgument.getValues()) {
 				String value = nextValue.getValue();
 
-				ourLog.info(String.format(
-					"{ name: %s, value: %s, searchParam: %s, searchParam.getParamType(): %s}",
+				ourLog.debug(String.format(
+					"{ name: %s, value: %s, typeDef: %s, searchParam: %s, searchParam.getParamType(): %s}",
 					nextArgument.getName(),
 					nextValue.getValue(),
 					typeDef.getName(),
-					searchParam == null ? "NULL" : searchParam.toString(),
-					searchParam == null ? "NULL" : searchParam.getParamType().toString()
+					searchParam.toString(),
+					searchParam.getParamType().toString()
 				));
 
 				IQueryParameterType param = null;
@@ -129,7 +163,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 						break;
 				}
 
-				params.add(nextArgument.getName(), param);
+				params.add(searchParamName, param);
 			}
 		}
 
