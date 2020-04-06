@@ -38,7 +38,11 @@ public enum DistanceMetricEnum implements IEmpiFieldSimilarity {
 	JACCARD("Jaccard", new HapiStringSimilarity(new Jaccard())),
 	NORMALIZED_LEVENSCHTEIN("Normalized Levenschtein", new HapiStringSimilarity(new NormalizedLevenshtein())),
 	SORENSEN_DICE("Sorensen Dice", new HapiStringSimilarity(new SorensenDice())),
-	EXACT_NAME_ANY_ORDER("Exact name Any Order", new NameAnyOrderSimilarity(EmpiPersonNameMatchModeEnum.EXACT_ANY_ORDER));
+	// FIXME KHS copy over tests
+	STANDARD_NAME_ANY_ORDER("Standard name Any Order", new NameAnyOrderSimilarity(EmpiPersonNameMatchModeEnum.STANDARD_ANY_ORDER)),
+	EXACT_NAME_ANY_ORDER("Exact name Any Order", new NameAnyOrderSimilarity(EmpiPersonNameMatchModeEnum.EXACT_ANY_ORDER)),
+	STANDARD_NAME_FIRST_AND_LAST("Standard name First and Last", new NameAnyOrderSimilarity(EmpiPersonNameMatchModeEnum.STANDARD_FIRST_AND_LAST)),
+	EXACT_NAME_FIRST_AND_LAST("Exact name First and Last", new NameAnyOrderSimilarity(EmpiPersonNameMatchModeEnum.EXACT_FIRST_AND_LAST));
 
 	private final String myCode;
 	private final IEmpiFieldSimilarity myEmpiFieldSimilarity;
