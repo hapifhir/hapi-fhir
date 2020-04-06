@@ -1,7 +1,9 @@
 package ca.uhn.fhir.empi;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.rules.config.EmpiConfigImpl;
 import ca.uhn.fhir.empi.rules.json.*;
+import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 
@@ -18,13 +20,14 @@ public abstract class BaseTest {
 	protected String myBothNameFields;
 
 	@Before
-	protected void before() {
+	public void before() {
 		myGivenNameMatchField = new EmpiFieldMatchJson()
 			.setName(PATIENT_GIVEN)
 			.setResourceType("Patient")
 			.setResourcePath("name.given")
 			.setMetric(DistanceMetricEnum.COSINE)
 			.setMatchThreshold(NAME_THRESHOLD);
+		myBothNameFields = String.join(",", PATIENT_GIVEN, PATIENT_LAST);
 	}
 
 	protected Patient buildJohn() {
@@ -70,11 +73,15 @@ public abstract class BaseTest {
 		retval.addMatchField(lastNameMatchField);
 		retval.setMatchThreshold(MATCH_THRESHOLD);
 		retval.setNoMatchThreshold(NO_MATCH_THRESHOLD);
-
-		myBothNameFields = String.join(",", PATIENT_GIVEN, PATIENT_LAST);
 		retval.putWeight(myBothNameFields, EXPECTED_BOTH_NAMES_WEIGHT);
 		retval.putWeight(PATIENT_GIVEN, EXPECTED_FIRST_NAME_WEIGHT);
 
+		return retval;
+	}
+
+	protected EmpiResourceComparatorSvc buildComparator(EmpiRulesJson theEmpiRulesJson) {
+		EmpiResourceComparatorSvc retval = new EmpiResourceComparatorSvc(ourFhirContext, new EmpiConfigImpl().setEmpiRules(theEmpiRulesJson));
+		retval.init();
 		return retval;
 	}
 }

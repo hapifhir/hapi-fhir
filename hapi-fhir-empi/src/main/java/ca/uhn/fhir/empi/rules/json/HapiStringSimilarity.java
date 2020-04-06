@@ -21,16 +21,22 @@ package ca.uhn.fhir.empi.rules.json;
  */
 
 import info.debatty.java.stringsimilarity.interfaces.NormalizedStringSimilarity;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-public class HapiStringSimilarity implements NormalizedStringSimilarity {
+public class HapiStringSimilarity implements EmpiFieldSimilarity {
 	private final NormalizedStringSimilarity myStringSimilarity;
 
 	public HapiStringSimilarity(NormalizedStringSimilarity theStringSimilarity) {
 		myStringSimilarity = theStringSimilarity;
 	}
 
-	@Override
-	public double similarity(String theLeft, String theRight) {
-		return myStringSimilarity.similarity(theLeft, theRight);
+	public double similarity(IBase theLeftBase, IBase theRightBase) {
+		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
+			IPrimitiveType<?> leftString = (IPrimitiveType) theLeftBase;
+			IPrimitiveType<?> rightString = (IPrimitiveType) theRightBase;
+			return myStringSimilarity.similarity(leftString.getValueAsString(), rightString.getValueAsString());
+		}
+		return 0.0;
 	}
 }

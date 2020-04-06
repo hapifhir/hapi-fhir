@@ -2,8 +2,6 @@ package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.empi.BaseTest;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.rules.config.EmpiConfigImpl;
-import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,15 +14,12 @@ public class EmpiResourceComparatorSvcTest extends BaseTest {
 
 	private Patient myJohn;
 	private Patient myJohny;
-	private EmpiRulesJson myRules;
 
 	@Before
 	public void before() {
 		super.before();
 
-		myRules = buildActiveBirthdateIdRules();
-		myEmpiResourceComparatorSvc = new EmpiResourceComparatorSvc(ourFhirContext, new EmpiConfigImpl().setEmpiRules(myRules));
-		myEmpiResourceComparatorSvc.init();
+		myEmpiResourceComparatorSvc = buildComparator(buildActiveBirthdateIdRules());
 
 		myJohn = buildJohn();
 		myJohny = buildJohny();
