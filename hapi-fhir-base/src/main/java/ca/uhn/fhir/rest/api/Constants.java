@@ -264,6 +264,13 @@ public class Constants {
 	public static final String PARAM_FHIRPATH = "_fhirpath";
 	public static final String PARAM_TYPE = "_type";
 
+	/**
+	 * TAG system for Person resources which are managed by HAPI EMPI.
+	 * FIXME EMPI decide on a location for this URI.
+	 */
+	public static final String SYSTEM_EMPI_MANAGED = "https://hapifhir.org/system/empi-system";
+	public static final String CODE_HAPI_EMPI_MANAGED = "HAPI-EMPI";
+
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
 		CHARSET_US_ASCII = StandardCharsets.ISO_8859_1;

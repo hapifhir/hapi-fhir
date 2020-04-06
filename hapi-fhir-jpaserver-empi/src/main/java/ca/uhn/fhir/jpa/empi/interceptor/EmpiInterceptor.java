@@ -27,7 +27,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
+
+import static ca.uhn.fhir.rest.api.Constants.CODE_HAPI_EMPI_MANAGED;
+import static ca.uhn.fhir.rest.api.Constants.SYSTEM_EMPI_MANAGED;
 
 @Lazy
 @Service
@@ -102,7 +104,7 @@ public class EmpiInterceptor extends BaseResourceModifiedInterceptor implements 
 		if (isInternalRequest(theRequestDetails)) {
 			return;
 		}
-		forbidCreationOfPersonsWithLinks(theBaseResource);
+		forbidIfEmpiManagedTagIsPresent(theBaseResource);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
@@ -110,7 +112,7 @@ public class EmpiInterceptor extends BaseResourceModifiedInterceptor implements 
 		if (isInternalRequest(theRequestDetails)) {
 			return;
 		}
-		forbidModificationOnLinksPerson(theOldResource, theNewResource);
+		forbidIfEmpiManagedTagIsPresent(theOldResource);
 	}
 
 	/*
@@ -120,40 +122,16 @@ public class EmpiInterceptor extends BaseResourceModifiedInterceptor implements 
 		return theRequestDetails == null;
 	}
 
-	/**
-	 * If we find that an updated Person has some changed values in their links, we reject the incoming change.
-	 * @param theOldResource
-	 * @param theNewResource
-	 */
-	private void forbidModificationOnLinksPerson(IBaseResource theOldResource, IBaseResource theNewResource) {
-		boolean linksWereModified = false;
-		if (extractResourceType(theNewResource).equalsIgnoreCase("Person")) {
-			Person newPerson = (Person)theNewResource;
-			Person oldPerson = (Person) theOldResource;
-			if (newPerson.getLink().size() != oldPerson.getLink().size()) {
-				linksWereModified = true;
-			}
-			Stream<Boolean> linkMatches = Streams.zip(newPerson.getLink().stream(), oldPerson.getLink().stream(), Person.PersonLinkComponent::equalsDeep);
-
-			linksWereModified |= linkMatches.anyMatch(matched -> !matched);
-
-			if (linksWereModified) {
-				throwBlockedByEmpi();
-			}
-		}
-	}
-
-	private void forbidCreationOfPersonsWithLinks(IBaseResource theResource) {
+	private void forbidIfEmpiManagedTagIsPresent(IBaseResource theResource) {
 		if (extractResourceType(theResource).equalsIgnoreCase("Person")) {
-			Person p = (Person)theResource;
-			if (!p.getLink().isEmpty()) {
+			if (theResource.getMeta().getTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED) != null) {
 				throwBlockedByEmpi();
 			}
 		}
 	}
 
 	private void throwBlockedByEmpi(){
-		throw new ForbiddenOperationException("Cannot modify Person links when EMPI is enabled.");
+		throw new ForbiddenOperationException("Cannot create or modify Persons who are managed by EMPI.");
 	}
 
 	private String extractResourceType(IBaseResource theResource) {

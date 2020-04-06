@@ -8,6 +8,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Reference;
@@ -19,9 +20,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.rest.api.Constants.CODE_HAPI_EMPI_MANAGED;
+import static ca.uhn.fhir.rest.api.Constants.SYSTEM_EMPI_MANAGED;
+
 @Lazy
 @Service
 public final class PersonUtil {
+
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
@@ -91,12 +96,21 @@ public final class PersonUtil {
 				Person person = new Person();
 				SystemAgnosticIdentifier systemAgnosticIdentifier = getOrCreateEidFromResource(thePatient);
 				person.addIdentifier(systemAgnosticIdentifier.toR4());
+				person.getMeta().addTag(buildEmpiManagedTag());
 				// FIXME EMPI populate from data from theResource
 				return person;
 			default:
 				// FIXME EMPI moar versions
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
+	}
+
+	private Coding buildEmpiManagedTag() {
+		Coding empiManagedCoding = new Coding();
+		empiManagedCoding.setSystem(SYSTEM_EMPI_MANAGED);
+		empiManagedCoding.setCode(CODE_HAPI_EMPI_MANAGED);
+		empiManagedCoding.setDisplay("This Person can only be modified by Smile CDR's EMPI system.");
+		return empiManagedCoding;
 	}
 
 	public IBaseResource updatePersonFromPatient(IBaseResource thePerson, IBaseResource thePatient) {
@@ -120,10 +134,6 @@ public final class PersonUtil {
 				break;
 		}
 		return thePerson;
-	}
-
-	private boolean currentEidIsSecondary(SystemAgnosticIdentifier theCurrentPersonEid) {
-		return theCurrentPersonEid.getUse().equals("secondary");
 	}
 
 
