@@ -6,7 +6,6 @@ import ca.uhn.fhir.util.JsonUtil;
 import java.io.IOException;
 
 public class EmpiConfigImpl implements IEmpiConfig {
-
 	private boolean myEnabled;
 	private int myConsumerCount = EMPI_DEFAULT_CONSUMER_COUNT;
 	private String myScriptText;
