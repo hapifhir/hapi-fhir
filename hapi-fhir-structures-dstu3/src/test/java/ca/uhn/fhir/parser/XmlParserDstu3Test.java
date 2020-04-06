@@ -71,6 +71,7 @@ public class XmlParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 
+	@Test
 	public void testEncodedResourceWithIncorrectRepresentationOfDecimalTypeToXml() {
 		DecimalType decimalType = new DecimalType();
 		decimalType.setValueAsString(".5");
