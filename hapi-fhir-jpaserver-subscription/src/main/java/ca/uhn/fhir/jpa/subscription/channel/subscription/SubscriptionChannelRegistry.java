@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.jpa.subscription.process.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionRegistry;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import org.slf4j.Logger;
@@ -32,7 +31,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,7 +59,7 @@ public class SubscriptionChannelRegistry {
 			return;
 		}
 
-		SubscribableChannel deliveryChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel(channelName);
+		SubscribableChannel deliveryChannel = mySubscriptionDeliveryChannelFactory.newDeliveryReceivingChannel(channelName);
 		Optional<MessageHandler> deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(theActiveSubscription.getChannelType());
 
 		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = new SubscriptionChannelWithHandlers(channelName, deliveryChannel);

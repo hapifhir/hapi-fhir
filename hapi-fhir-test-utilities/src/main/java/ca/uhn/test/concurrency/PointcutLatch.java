@@ -98,6 +98,10 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		setExpectedCount(theCount, false);
 	}
 
+	public boolean isSet() {
+		return myCountdownLatch.get() != null;
+	}
+
 	private void createLatch(int theCount) {
 		myFailures.set(Collections.synchronizedList(new ArrayList<>()));
 		myCalledWith.set(Collections.synchronizedList(new ArrayList<>()));

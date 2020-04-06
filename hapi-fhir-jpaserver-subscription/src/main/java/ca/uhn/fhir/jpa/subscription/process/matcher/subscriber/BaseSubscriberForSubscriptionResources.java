@@ -36,9 +36,19 @@ public abstract class BaseSubscriberForSubscriptionResources implements MessageH
 	protected FhirContext myFhirContext;
 
 	protected boolean isSubscription(ResourceModifiedMessage theNewResource) {
-		IBaseResource payload = theNewResource.getNewPayload(myFhirContext);
-		String payloadIdType = myFhirContext.getResourceDefinition(payload).getName();
-		return payloadIdType.equals(ResourceTypeEnum.SUBSCRIPTION.getCode());
+		String payloadIdType = null;
+		IIdType payloadId = theNewResource.getId(myFhirContext);
+		if (payloadId != null) {
+			payloadIdType = payloadId.getResourceType();
+		}
+		if (isBlank(payloadIdType)) {
+			IBaseResource payload = theNewResource.getNewPayload(myFhirContext);
+			if (payload != null) {
+				payloadIdType = myFhirContext.getResourceDefinition(payload).getName();
+			}
+		}
+
+		return ResourceTypeEnum.SUBSCRIPTION.getCode().equals(payloadIdType);
 	}
 
 }

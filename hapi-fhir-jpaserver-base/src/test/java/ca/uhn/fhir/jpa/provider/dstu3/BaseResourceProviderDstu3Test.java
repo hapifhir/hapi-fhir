@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
+import ca.uhn.fhir.jpa.subscription.process.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;

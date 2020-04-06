@@ -20,10 +20,6 @@ package ca.uhn.fhir.jpa.subscription.channel.queue;
  * #L%
  */
 
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
-
-
 /**
  * This interface is the factory for Queue Channels, which are the low level abstraction over a
  * queue (e.g. memory queue, JMS queue, Kafka stream, etc.) for any purpose.
@@ -34,20 +30,38 @@ public interface IQueueChannelFactory {
 	 * Create a channel that is used to receive messages from the queue.
 	 *
 	 * <p>
-	 * Implementations can choose to return the same object for multiple invocations of this method (and {@link #getOrCreateReceiver(String, Class, int)}
+	 * Implementations can choose to return the same object for multiple invocations of this method (and {@link #getOrCreateReceiver(String, Class, QueueChannelConsumerConfig)}
 	 * when invoked with the same {@literal theChannelName} if they need to, or they can create a new instance.
 	 * </p>
+	 *
+	 * @param theChannelName The actual underlying queue name
+	 * @param theMessageType The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
+	 * @param theConfig      Contains the configuration for subscribers. Note that this parameter is provided for
+	 *                       both {@link #getOrCreateReceiver} and
+	 *                       {@link #getOrCreateSender(String, Class, QueueChannelConsumerConfig)}
+	 *                       even though this object is used to configure the sender only. We do this because the factory
+	 *                       may want to create a single object to be used for both the sender and receiver, so this allows
+	 *                       the config details to be known regardless of which method is returned first.
 	 */
-	SubscribableChannel getOrCreateReceiver(String theChannelName, Class<?> theMessageType, int theConcurrentConsumers);
+	IQueueChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, QueueChannelConsumerConfig theConfig);
 
 	/**
 	 * Create a channel that is used to send messages to the queue.
 	 *
 	 * <p>
-	 * Implementations can choose to return the same object for multiple invocations of this method (and {@link #getOrCreateReceiver(String, Class, int)}
+	 * Implementations can choose to return the same object for multiple invocations of this method (and {@link #getOrCreateReceiver(String, Class, QueueChannelConsumerConfig)}
 	 * when invoked with the same {@literal theChannelName} if they need to, or they can create a new instance.
 	 * </p>
+	 *
+	 * @param theChannelName The actual underlying queue name
+	 * @param theMessageType The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
+	 * @param theConfig      Contains the configuration for subscribers. Note that this parameter is provided for
+	 *                       both {@link #getOrCreateReceiver} and
+	 *                       {@link #getOrCreateSender(String, Class, QueueChannelConsumerConfig)}
+	 *                       even though this object is used to configure the sender only. We do this because the factory
+	 *                       may want to create a single object to be used for both the sender and receiver, so this allows
+	 *                       the config details to be known regardless of which method is returned first.
 	 */
-	MessageChannel getOrCreateSender(String theChannelName, Class<?> theMessageType, int theConcurrentConsumers);
+	IQueueChannelSender getOrCreateSender(String theChannelName, Class<?> theMessageType, QueueChannelConsumerConfig theConfig);
 
 }

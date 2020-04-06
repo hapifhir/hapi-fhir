@@ -1,6 +1,6 @@
 package ca.uhn.fhirtest.config;
 
-import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
+import ca.uhn.fhir.jpa.subscription.process.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.process.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;

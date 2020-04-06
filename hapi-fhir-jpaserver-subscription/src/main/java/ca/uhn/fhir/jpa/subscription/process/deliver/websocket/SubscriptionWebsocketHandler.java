@@ -50,6 +50,13 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 	@Autowired
 	SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
+	/**
+	 * Constructor
+	 */
+	public SubscriptionWebsocketHandler() {
+		super();
+	}
+
 	@Autowired
 	private FhirContext myCtx;
 

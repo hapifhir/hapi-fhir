@@ -36,6 +36,13 @@ public class WebsocketConnectionValidator {
 	SubscriptionRegistry mySubscriptionRegistry;
 
 
+	/**
+	 * Constructor
+	 */
+	public WebsocketConnectionValidator() {
+		super();
+	}
+
 	public WebsocketValidationResponse validate(@NotNull IdType id) {
 		if (!id.hasIdPart() || !id.isIdPartValid()) {
 			return WebsocketValidationResponse.INVALID_RESPONSE("Invalid bind request - No ID included: " + id.getValue());

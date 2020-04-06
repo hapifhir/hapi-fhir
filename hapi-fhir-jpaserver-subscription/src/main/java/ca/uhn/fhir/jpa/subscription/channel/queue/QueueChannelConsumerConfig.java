@@ -20,14 +20,16 @@ package ca.uhn.fhir.jpa.subscription.channel.queue;
  * #L%
  */
 
-import org.springframework.messaging.support.ExecutorSubscribableChannel;
+public class QueueChannelConsumerConfig {
 
-import java.util.concurrent.ThreadPoolExecutor;
+	private int myConcurrentConsumers;
 
-public class LinkedBlockingQueueChannel extends ExecutorSubscribableChannel implements IQueueChannelSender, IQueueChannelReceiver {
+	public int getConcurrentConsumers() {
+		return myConcurrentConsumers;
+	}
 
-	public LinkedBlockingQueueChannel(ThreadPoolExecutor theExecutor) {
-		super(theExecutor);
+	public void setConcurrentConsumers(int theConcurrentConsumers) {
+		myConcurrentConsumers = theConcurrentConsumers;
 	}
 
 }

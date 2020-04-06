@@ -20,14 +20,8 @@ package ca.uhn.fhir.jpa.subscription.channel.queue;
  * #L%
  */
 
-import org.springframework.messaging.support.ExecutorSubscribableChannel;
+import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.support.InterceptableChannel;
 
-import java.util.concurrent.ThreadPoolExecutor;
-
-public class LinkedBlockingQueueChannel extends ExecutorSubscribableChannel implements IQueueChannelSender, IQueueChannelReceiver {
-
-	public LinkedBlockingQueueChannel(ThreadPoolExecutor theExecutor) {
-		super(theExecutor);
-	}
-
+public interface IQueueChannelReceiver extends SubscribableChannel, InterceptableChannel {
 }

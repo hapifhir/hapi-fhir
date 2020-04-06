@@ -21,23 +21,22 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  */
 
 import ca.uhn.fhir.jpa.subscription.channel.queue.IQueueChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.queue.IQueueChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.queue.IQueueChannelSender;
+import ca.uhn.fhir.jpa.subscription.channel.queue.QueueChannelConsumerConfig;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionConstants;
 import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
+import org.springframework.messaging.support.ChannelInterceptor;
 
 public class SubscriptionChannelFactory {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionChannelFactory.class);
 	private final IQueueChannelFactory myQueueChannelFactory;
 
 	/**
@@ -48,22 +47,38 @@ public class SubscriptionChannelFactory {
 		myQueueChannelFactory = theQueueChannelFactory;
 	}
 
-	public MessageChannel newDeliverySendingChannel(String theChannelName) {
-		return myQueueChannelFactory.getOrCreateSender(theChannelName, ResourceDeliveryJsonMessage.class, getDeliveryChannelConcurrentConsumers());
+	public IQueueChannelSender newDeliverySendingChannel(String theChannelName) {
+		QueueChannelConsumerConfig config = newConfigForDeliveryChannel();
+		return myQueueChannelFactory.getOrCreateSender(theChannelName, ResourceDeliveryJsonMessage.class, config);
 	}
 
-	public SubscribableChannel newDeliveryChannel(String theChannelName) {
-		SubscribableChannel channel = myQueueChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryJsonMessage.class, getDeliveryChannelConcurrentConsumers());
+	public IQueueChannelReceiver newDeliveryReceivingChannel(String theChannelName) {
+		QueueChannelConsumerConfig config = newConfigForDeliveryChannel();
+		IQueueChannelReceiver channel = myQueueChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryJsonMessage.class, config);
 		return new BroadcastingSubscribableChannelWrapper(channel);
 	}
 
-	public MessageChannel newMatchingSendingChannel(String theChannelName) {
-		return myQueueChannelFactory.getOrCreateSender(theChannelName, ResourceModifiedJsonMessage.class, getMatchingChannelConcurrentConsumers());
+	public IQueueChannelSender newMatchingSendingChannel(String theChannelName) {
+		QueueChannelConsumerConfig config = newConfigForMatchingChannel();
+		return myQueueChannelFactory.getOrCreateSender(theChannelName, ResourceModifiedJsonMessage.class, config);
 	}
 
-	public SubscribableChannel newMatchingReceivingChannel(String theChannelName) {
-		SubscribableChannel channel = myQueueChannelFactory.getOrCreateReceiver(theChannelName, ResourceModifiedJsonMessage.class, getMatchingChannelConcurrentConsumers());
+	public IQueueChannelReceiver newMatchingReceivingChannel(String theChannelName) {
+		QueueChannelConsumerConfig config = newConfigForMatchingChannel();
+		IQueueChannelReceiver channel = myQueueChannelFactory.getOrCreateReceiver(theChannelName, ResourceModifiedJsonMessage.class, config);
 		return new BroadcastingSubscribableChannelWrapper(channel);
+	}
+
+	protected QueueChannelConsumerConfig newConfigForDeliveryChannel() {
+		QueueChannelConsumerConfig config = new QueueChannelConsumerConfig();
+		config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
+		return config;
+	}
+
+	protected QueueChannelConsumerConfig newConfigForMatchingChannel() {
+		QueueChannelConsumerConfig config = new QueueChannelConsumerConfig();
+		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
+		return config;
 	}
 
 	public int getDeliveryChannelConcurrentConsumers() {
@@ -74,12 +89,12 @@ public class SubscriptionChannelFactory {
 		return SubscriptionConstants.MATCHING_CHANNEL_CONCURRENT_CONSUMERS;
 	}
 
-	public static class BroadcastingSubscribableChannelWrapper extends AbstractSubscribableChannel implements MessageHandler, DisposableBean {
+	public static class BroadcastingSubscribableChannelWrapper extends AbstractSubscribableChannel implements IQueueChannelReceiver, DisposableBean {
 
-		private final SubscribableChannel myWrappedChannel;
+		private final IQueueChannelReceiver myWrappedChannel;
 
-		public BroadcastingSubscribableChannelWrapper(SubscribableChannel theChannel) {
-			theChannel.subscribe(this);
+		public BroadcastingSubscribableChannelWrapper(IQueueChannelReceiver theChannel) {
+			theChannel.subscribe(message -> send(message));
 			myWrappedChannel = theChannel;
 		}
 
@@ -89,20 +104,10 @@ public class SubscriptionChannelFactory {
 
 		@Override
 		protected boolean sendInternal(Message<?> theMessage, long timeout) {
-//			try {
-				for (MessageHandler next : getSubscribers()) {
-					next.handleMessage(theMessage);
-				}
-				return true;
-//			} catch (Exception e) {
-//				ourLog.error("Failiure handling message", e);
-//				return false;
-//			}
-		}
-
-		@Override
-		public void handleMessage(Message<?> message) throws MessagingException {
-			send(message);
+			for (MessageHandler next : getSubscribers()) {
+				next.handleMessage(theMessage);
+			}
+			return true;
 		}
 
 		@Override
@@ -111,6 +116,13 @@ public class SubscriptionChannelFactory {
 				((DisposableBean) myWrappedChannel).destroy();
 			}
 		}
+
+		@Override
+		public void addInterceptor(ChannelInterceptor interceptor) {
+			super.addInterceptor(interceptor);
+			myWrappedChannel.addInterceptor(interceptor);
+		}
+
 
 	}
 }

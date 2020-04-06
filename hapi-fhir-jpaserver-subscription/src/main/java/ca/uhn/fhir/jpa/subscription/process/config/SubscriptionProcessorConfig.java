@@ -98,11 +98,6 @@ public class SubscriptionProcessorConfig {
 	}
 
 	@Bean
-	public WebsocketConnectionValidator websocketConnectionValidator() {
-		return new WebsocketConnectionValidator();
-	}
-
-	@Bean
 	public SubscriptionLoader subscriptionLoader() {
 		return new SubscriptionLoader();
 	}

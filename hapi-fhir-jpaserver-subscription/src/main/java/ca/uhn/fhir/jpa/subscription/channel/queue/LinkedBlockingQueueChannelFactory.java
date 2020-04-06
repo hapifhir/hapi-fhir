@@ -21,17 +21,27 @@ package ca.uhn.fhir.jpa.subscription.channel.queue;
  */
 
 import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionConstants;
-import org.springframework.messaging.MessageChannel;
+import ca.uhn.fhir.util.StopWatch;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class LinkedBlockingQueueChannelFactory implements IQueueChannelFactory {
 
-	private Map<String, SubscribableChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
+	private Map<String, LinkedBlockingQueueChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
+	private static final Logger ourLog = LoggerFactory.getLogger(LinkedBlockingQueueChannelFactory.class);
 
 	/**
 	 * Constructor
@@ -41,20 +51,49 @@ public class LinkedBlockingQueueChannelFactory implements IQueueChannelFactory {
 	}
 
 	@Override
-	public SubscribableChannel getOrCreateReceiver(String theChannelName, Class<?> theMessageType, int theConcurrentConsumers) {
-		return getOrCreateChannel(theChannelName, theConcurrentConsumers);
+	public IQueueChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, QueueChannelConsumerConfig theConfig) {
+		return getOrCreateChannel(theChannelName, theConfig.getConcurrentConsumers());
 	}
 
 	@Override
-	public MessageChannel getOrCreateSender(String theChannelName, Class<?> theMessageType, int theConcurrentConsumers) {
-		return getOrCreateChannel(theChannelName, theConcurrentConsumers);
+	public IQueueChannelSender getOrCreateSender(String theChannelName, Class<?> theMessageType, QueueChannelConsumerConfig theConfig) {
+		return getOrCreateChannel(theChannelName, theConfig.getConcurrentConsumers());
 	}
 
-	private SubscribableChannel getOrCreateChannel(String theChannelName, int theConcurrentConsumers) {
+	private LinkedBlockingQueueChannel getOrCreateChannel(String theChannelName, int theConcurrentConsumers) {
 		return myChannels.computeIfAbsent(theChannelName, t -> {
-			LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE);
+
 			String threadNamingPattern = theChannelName + "-%d";
-			return new LinkedBlockingQueueChannel(queue, threadNamingPattern, theConcurrentConsumers);
+
+			ThreadFactory threadFactory = new BasicThreadFactory.Builder()
+				.namingPattern(threadNamingPattern)
+				.daemon(false)
+				.priority(Thread.NORM_PRIORITY)
+				.build();
+
+			LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE);
+			RejectedExecutionHandler rejectedExecutionHandler = (theRunnable, theExecutor) -> {
+				ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", queue.size());
+				StopWatch sw = new StopWatch();
+				try {
+					queue.put(theRunnable);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					throw new RejectedExecutionException("Task " + theRunnable.toString() +
+						" rejected from " + e.toString());
+				}
+				ourLog.info("Slot become available after {}ms", sw.getMillis());
+			};
+			ThreadPoolExecutor executor = new ThreadPoolExecutor(
+				1,
+				theConcurrentConsumers,
+				0L,
+				TimeUnit.MILLISECONDS,
+				queue,
+				threadFactory,
+				rejectedExecutionHandler);
+			return new LinkedBlockingQueueChannel(executor);
+
 		});
 	}
 

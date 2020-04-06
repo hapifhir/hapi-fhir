@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.config;
+package ca.uhn.fhir.jpa.subscription.process.config;
 
 /*
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Subscription Server
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.process.deliver.websocket.SubscriptionWebsocketHandler;
+import ca.uhn.fhir.jpa.subscription.process.deliver.websocket.WebsocketConnectionValidator;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -37,8 +38,14 @@ import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 @EnableWebSocket()
 @Controller
 public class WebsocketDispatcherConfig implements WebSocketConfigurer {
+
 	@Autowired
 	ModelConfig myModelConfig;
+
+	@Bean
+	public WebsocketConnectionValidator websocketConnectionValidator() {
+		return new WebsocketConnectionValidator();
+	}
 
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry theRegistry) {
