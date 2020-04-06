@@ -85,12 +85,6 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(MAX_SEARCH_SIZE);
 
-		ourLog.info(String.format(
-			"{ typeDef: %s, searchParams: %s }",
-			typeDef.getName(),
-			typeDef.getSearchParams().toString()
-		));
-
 		Map<String, RuntimeSearchParam> searchParams = mySerarchParamRegistry.getActiveSearchParams(typeDef.getName());
 
 		for (Argument nextArgument : theSearchParams) {
@@ -111,26 +105,8 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 				throw new InvalidRequestException(msg);
 			}
 
-			ourLog.debug(String.format(
-				"{ name: %s, values: %s, typeDef: %s, searchParam: %s, searchParam.getParamType(): %s}",
-				nextArgument.getName(),
-				nextArgument.getValues().toString(),
-				typeDef.getName(),
-				searchParam.toString(),
-				searchParam.getParamType().toString()
-			));
-
 			for (Value nextValue : nextArgument.getValues()) {
 				String value = nextValue.getValue();
-
-				ourLog.debug(String.format(
-					"{ name: %s, value: %s, typeDef: %s, searchParam: %s, searchParam.getParamType(): %s}",
-					nextArgument.getName(),
-					nextValue.getValue(),
-					typeDef.getName(),
-					searchParam.toString(),
-					searchParam.getParamType().toString()
-				));
 
 				IQueryParameterType param = null;
 				switch (searchParam.getParamType()) {
