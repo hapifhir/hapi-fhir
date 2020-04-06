@@ -5,6 +5,7 @@ import ca.uhn.fhir.empi.rules.json.DistanceMetricEnum;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,25 +15,31 @@ import static org.hamcrest.core.StringStartsWith.startsWith;
 
 public class EmpiResourceFieldComparatorTest extends BaseTest {
 	protected EmpiResourceFieldComparator myComparator;
+	private Patient myJohn;
+	private Patient myJohny;
 
 	@Before
 	public void before() {
 		super.before();
+
 		myComparator = new EmpiResourceFieldComparator(ourFhirContext, myGivenNameMatchField);
+		myJohn = buildJohn();
+		myJohny = buildJohny();
 	}
 
 	@Test
 	public void testBadType() {
 		Encounter encounter = new Encounter();
 		encounter.setId("Encounter/1");
+
 		try {
-			myComparator.match(encounter, myPatient2);
+			myComparator.match(encounter, myJohny);
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("Expecting resource type Patient got resource type Encounter", e.getMessage());
 		}
 		try {
-			myComparator.match(myPatient1, encounter);
+			myComparator.match(myJohn, encounter);
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("Expecting resource type Patient got resource type Encounter", e.getMessage());
@@ -49,7 +56,7 @@ public class EmpiResourceFieldComparatorTest extends BaseTest {
 				.setMetric(DistanceMetricEnum.COSINE)
 				.setMatchThreshold(NAME_THRESHOLD);
 			EmpiResourceFieldComparator comparator = new EmpiResourceFieldComparator(ourFhirContext, matchField);
-			comparator.match(myPatient1, myPatient2);
+			comparator.match(myJohn, myJohny);
 			fail();
 		} catch (DataFormatException e) {
 			assertThat(e.getMessage(), startsWith("Unknown child name 'foo' in element Patient"));
@@ -58,6 +65,6 @@ public class EmpiResourceFieldComparatorTest extends BaseTest {
 
 	@Test
 	public void testMatch() {
-		assertTrue(myComparator.match(myPatient1, myPatient2));
+		assertTrue(myComparator.match(myJohn, myJohny));
 	}
 }

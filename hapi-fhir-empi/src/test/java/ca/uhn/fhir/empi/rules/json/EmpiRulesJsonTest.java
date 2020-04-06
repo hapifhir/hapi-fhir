@@ -3,6 +3,7 @@ package ca.uhn.fhir.empi.rules.json;
 import ca.uhn.fhir.empi.BaseTest;
 import ca.uhn.fhir.util.JsonUtil;
 import junit.framework.TestCase;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,14 @@ import static junit.framework.TestCase.fail;
 
 public class EmpiRulesJsonTest extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiRulesJsonTest.class);
+	private EmpiRulesJson myRules;
+
+	@Before
+	public void before() {
+		super.before();
+
+		myRules = buildActiveBirthdateIdRules();
+	}
 
 	@Test
 	public void testSerDeser() throws IOException {
