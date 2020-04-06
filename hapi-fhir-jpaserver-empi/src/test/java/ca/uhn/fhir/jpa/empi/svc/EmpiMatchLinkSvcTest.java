@@ -131,7 +131,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testPatientAttributesAreCopiedOverWhenPersonIsCreatedFromPatient() {
-		//FIXME EMPI TODO write personUtil function to copy over all possible attributes.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 
 		Optional<EmpiLink> empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(patient.getIdElement().getIdPartAsLong());
@@ -143,7 +142,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 
-	// Test: Existing Person found linked from matched Patient.  incoming Patient has no EID.  Create link all done.
+	// Existing Person found linked from matched Patient.  incoming Patient has no EID.  Create link all done.
 	@Test
 	public void testPatientMatchingAnotherPatientLinksToSamePerson() {
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
@@ -153,13 +152,11 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testIncomingPatientWithEIDThatMatchesPersonWithDifferentEIDCausesOverwriteOnPerson(){
-		//FIXME EMPI
-		// Test: Existing Person with system-assigned EID found linked from matched Patient.  incoming Patient has EID.  Replace Person system-assigned EID with Patient EID.
+		// Existing Person with system-assigned EID found linked from matched Patient.  incoming Patient has EID.  Replace Person system-assigned EID with Patient EID.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 
 		Patient janePatient= addEID(buildJanePatient(), "12345");
 		createPatientAndUpdateLinks(janePatient);
-
 
 		//We want to make sure the patients were linked to the same person.
 		assertThat(patient, is(samePersonAs(janePatient)));
@@ -191,32 +188,30 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testDuplicatePersonLinkIsCreatedWhenAnIncomingPatientArrivesWithEIDThatMatchesAnotherEIDPatient() {
-		//FIXME EMPI
-		// Test: Existing Person with legit EID (from a Patient) found linked from matched Patient.  incoming Patient has different EID.   Create new Person with incoming EID and link.
+		// Existing Person with legit EID (from a Patient) found linked from matched Patient.  incoming Patient has different EID.   Create new Person with incoming EID and link.
 		// Record somehow (design TBD) that these two Persons may be duplicates.  -- Maybe we have a special kind of EmpiLink table entry where the target also points to a Person and it's
 		// flagged with a special PROBABLE_DUPLICATE match status?
+		fail();
 	}
 
 
 	@Test
 	public void testEmpiManagedPersonCannotBeModifiedByPersonUpdateRequest() {
-		//FIXME EMPI
-		// Test: Existing Person with Meta TAg indicating they are Empi-Managed. requestors cannot remove this tag.
+		// Existing Person with Meta TAg indicating they are Empi-Managed. requestors cannot remove this tag.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
-		fail()
-
+		fail();
 	}
 
 	@Test
 	public void testNonEmpiManagedPersonCannotHaveEmpiManagedTagAddedToThem() {
-		// Test: Existing Person without Meta Tag indicating they are EMPI-Managed. Requestors cannot add the tag.
+		// Existing Person without Meta Tag indicating they are EMPI-Managed. Requestors cannot add the tag.
 		fail();
 	}
 
-	// FIXME EMPI Test: Patient with "no-empi" tag is not matched
 	@Test
 	public void testPatientWithNoEmpiTagIsNotMatched() {
-
+		// Patient with "no-empi" tag is not matched
+		fail();
 	}
 
 	private Patient createPatientAndUpdateLinks(Patient thePatient) {

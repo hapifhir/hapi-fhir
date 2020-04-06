@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * This SearchParamJson, unlike EmpiREsourceSearchParamJson, is responsible for doing inclusions during empi
  * candidate searching. e.g. When doing candidate matching, only consider candidates that match all EmpiFilterSearchParams.
  */
-//FIXME EMPI validate search param upon ingestion.
 public class EmpiFilterSearchParamJson implements IModelJson {
 	@JsonProperty("resourceType")
 	String myResourceType;

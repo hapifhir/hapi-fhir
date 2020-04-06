@@ -57,8 +57,6 @@ public class EmpiCandidateSearchSvc {
 	public Collection<IBaseResource> findCandidates(String theResourceType, IBaseResource theResource) {
 		Map<Long, IBaseResource> matchedPidsToResources = new HashMap<>();
 
-		//FIXME EMPI validate there is no overlap between filters and resource search params.
-
 		List<EmpiFilterSearchParamJson> filterSearchParams = myEmpiConfig.getEmpiRules().getFilterSearchParams();
 
 		List<String> filterCriteria = buildFilterQuery(filterSearchParams, theResourceType);
@@ -105,7 +103,7 @@ public class EmpiCandidateSearchSvc {
 		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(resourceCriteria, resourceDef);
 		searchParameterMap.setLoadSynchronous(true);
 
-		//FIXME EMPI this will blow up under large scale i think.
+		//TODO EMPI this will blow up under large scale i think.
 		//3.
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		IBundleProvider search = resourceDao.search(searchParameterMap);

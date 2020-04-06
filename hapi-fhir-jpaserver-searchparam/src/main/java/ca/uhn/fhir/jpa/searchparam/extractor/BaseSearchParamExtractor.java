@@ -203,7 +203,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				extractor = createNumberExtractor(theResource);
 				break;
 			case REFERENCE:
-				//FIXME EMPI unchecked generic here. Make sure EMPI matching rules relying on reference params work.
+				// FIXME EMPI unchecked generic here. Make sure EMPI matching rules relying on reference params work.
 				extractor = createReferenceExtractor();
 				break;
 			case QUANTITY:

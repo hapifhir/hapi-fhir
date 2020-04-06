@@ -30,8 +30,6 @@ import javax.persistence.*;
 @Entity
 @Table(name = "HFJ_EMPI_LINK", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_EMPI_PERSON_TGT", columnNames = {"PERSON_PID", "TARGET_PID"}),
-	// FIXME EMPI what happens when we find new patients we think should be in the same person--i.e. we want to request a merge, or if we match people in more than one eid
-	// Fundamentally, matching might not be transitive.  If unsure send to manual sorting
 })
 public class EmpiLink {
 	private static final int MATCH_RESULT_LENGTH = 16;
@@ -66,12 +64,6 @@ public class EmpiLink {
 	@Enumerated(EnumType.ORDINAL)
 	@OptimisticLock(excluded = true)
 	private EmpiLinkSourceEnum myLinkSource;
-
-	// FIXME EMPI add 2 columns: bitmap and ruleset version.
-
-	// FIXME EMPI Note if a link is MANUAL it has no version
-
-	// FIXME EMIP batch job rule change, iterate over patient
 
 	public Long getId() {
 		return myId;

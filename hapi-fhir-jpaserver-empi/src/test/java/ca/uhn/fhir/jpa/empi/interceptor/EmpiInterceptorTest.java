@@ -83,15 +83,10 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testUpdatingExistingLinksIsForbiddenViaPersonEndpoint() throws InterruptedException {
-		// FIXME EMPI add tests to check that modifying existing person links is not allowed (must use EMPI REST operations to do this)
-		// When EMPI is enabled, only the EMPI system is allowed to modify Person links
 		myEmpiHelper.createWithLatch(new Patient());
 		assertLinkCount(1);
 	}
 
-
-
-	// FIXME EMPI Person records managed by EMPI should all share the same extension.  (I believe cdr EMPI already does this.)
 	@Test
 	public void testPersonRecordsManagedByEmpiAllShareSameExtension() {
 		fail();

@@ -91,7 +91,7 @@ public final class PersonUtil {
 				Person person = new Person();
 				SystemAgnosticIdentifier systemAgnosticIdentifier = getOrCreateEidFromResource(thePatient);
 				person.addIdentifier(systemAgnosticIdentifier.toR4());
-				//FIXME EMPI populate from data from theResource
+				// FIXME EMPI populate from data from theResource
 				return person;
 			default:
 				// FIXME EMPI moar versions
@@ -113,10 +113,10 @@ public final class PersonUtil {
 					person.getIdentifier().remove(identifier);
 					person.addIdentifier(incomingEid.toR4());
 				} else if (identifier.getUse().equals(Identifier.IdentifierUse.OFFICIAL)) {
-					//FIXME EMPI create potential duplicate user link.
+					// FIXME EMPI create potential duplicate user link.
 				}
 			default:
-				//FIXME EMPI moar versions
+				// FIXME EMPI moar versions
 				break;
 		}
 		return thePerson;
@@ -198,7 +198,7 @@ public final class PersonUtil {
 			IBase.class);
 
 		if (evaluate.size() > 1) {
-			//FIXME EMPI determine correct error to throw here.
+			// FIXME EMPI determine correct error to throw here.
 			throw new RuntimeException("Resources cannot have two EIDs!");
 		} else if (evaluate.size() == 1) {
 			return evaluate.get(0).toString();
