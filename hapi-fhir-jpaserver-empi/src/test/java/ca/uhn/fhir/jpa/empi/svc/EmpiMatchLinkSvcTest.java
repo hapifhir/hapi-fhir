@@ -22,8 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
-import static ca.uhn.fhir.rest.api.Constants.CODE_HAPI_EMPI_MANAGED;
-import static ca.uhn.fhir.rest.api.Constants.SYSTEM_EMPI_MANAGED;
+import static ca.uhn.fhir.rest.api.Constants.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -201,7 +200,10 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testPatientWithNoEmpiTagIsNotMatched() {
 		// Patient with "no-empi" tag is not matched
-		fail();
+		Patient janePatient = buildJanePatient();
+		janePatient.getMeta().addTag(SYSTEM_EMPI_MANAGED, CODE_NO_EMPI_MANAGED, "Don't EMPI on me!");
+		createPatientAndUpdateLinks(janePatient);
+		assertLinkCount(0);
 	}
 
 	private Patient createPatientAndUpdateLinks(Patient thePatient) {
