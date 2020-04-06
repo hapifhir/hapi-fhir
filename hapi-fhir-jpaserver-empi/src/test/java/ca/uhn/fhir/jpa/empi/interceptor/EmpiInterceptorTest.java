@@ -6,7 +6,10 @@ import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.svc.ResourceTableHelper;
 import ca.uhn.fhir.jpa.empi.util.EmpiHelperR4;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -18,11 +21,13 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Optional;
 
 import static ca.uhn.fhir.rest.api.Constants.CODE_HAPI_EMPI_MANAGED;
 import static ca.uhn.fhir.rest.api.Constants.SYSTEM_EMPI_MANAGED;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -97,13 +102,11 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 		DaoMethodOutcome janePatient = myEmpiHelper.createWithLatch(buildJanePatient());
 		DaoMethodOutcome paulPatient = myEmpiHelper.createWithLatch(buildPaulPatient());
 
-		EmpiLink janeLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTableHelper.getPidOrNull(janePatient.getResource())).get();
-		EmpiLink paulLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTableHelper.getPidOrNull(paulPatient.getResource())).get();
+		IBundleProvider search = myPersonDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		List<IBaseResource> resources = search.getResources(0, search.size());
 
-		boolean janeHasTag = janeLink.getPerson().getTags().stream().anyMatch(tag -> tag.getTag().getSystem().equalsIgnoreCase("EMPI-MANAGED"));
-		boolean paulHasTag = paulLink.getPerson().getTags().stream().anyMatch(tag -> tag.getTag().getSystem().equalsIgnoreCase("EMPI-MANAGED"));
-
-		assertThat(janeHasTag, is(true));
-		assertThat(paulHasTag, is(true));
+		for (IBaseResource person: resources) {
+			assertThat(person.getMeta().getTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED), is(notNullValue()));
+		}
 	}
 }
