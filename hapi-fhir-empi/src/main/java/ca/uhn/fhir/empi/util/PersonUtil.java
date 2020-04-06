@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.empi.util;
+package ca.uhn.fhir.empi.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
@@ -26,7 +26,6 @@ import static ca.uhn.fhir.rest.api.Constants.SYSTEM_EMPI_MANAGED;
 @Lazy
 @Service
 public final class PersonUtil {
-
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired

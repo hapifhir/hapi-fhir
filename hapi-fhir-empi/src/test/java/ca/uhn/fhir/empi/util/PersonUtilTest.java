@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.empi.util;
+package ca.uhn.fhir.empi.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
