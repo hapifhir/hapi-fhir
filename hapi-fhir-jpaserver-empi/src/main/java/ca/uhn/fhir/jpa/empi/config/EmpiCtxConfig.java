@@ -28,7 +28,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.empi.dao")
 @ComponentScan(basePackages = {
 	"ca.uhn.fhir.jpa.empi",
-	"ca.uhn.fhir.empi.rules.svc"
+	"ca.uhn.fhir.empi.util",
+	"ca.uhn.fhir.empi.rules.svc",
 })
 public class EmpiCtxConfig {
 }
