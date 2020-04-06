@@ -4,6 +4,7 @@ import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.util.PersonUtil;
+import ca.uhn.fhir.jpa.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static ca.uhn.fhir.rest.api.Constants.CODE_HAPI_EMPI_MANAGED;
+import static ca.uhn.fhir.rest.api.Constants.SYSTEM_EMPI_MANAGED;
 
 @Lazy
 @Service
@@ -26,7 +30,13 @@ public class EmpiMatchLinkSvc {
 
 
 	public void updateEmpiLinksForPatient(IBaseResource theResource) {
+		if (EmpiUtil.isManagedByEmpi(theResource)) {
+			doEmpiUpdate(theResource);
+		}
+	}
 
+
+	private void doEmpiUpdate(IBaseResource theResource) {
 		List<MatchedPersonCandidate> personCandidates = myEmpiPersonFindingSvc.findPersonCandidates(theResource);
 
 		//0 candidates, in which case you should create a person
