@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.empi.svc.ResourceTableHelper;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.hamcrest.Description;
@@ -59,6 +60,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected IEmpiLinkDao myEmpiLinkDao;
 	@Autowired
 	protected EmpiLinkDaoSvc myEmpiLinkDaoSvc;
+	@Autowired
+	protected ResourceTableHelper myResourceTableHelper;
 
 	@After
 	public void after() {
@@ -210,30 +213,27 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	 */
 	public Matcher<IBaseResource> samePersonAs(IBaseResource theBaseResource) {
 		return new TypeSafeMatcher<IBaseResource>() {
-			private Long personIdToMatch;
-			private Long incomingPersonId;
+			private Long personPidToMatch;
+			private Long incomingPersonPid;
 
 			@Override
 			protected boolean matchesSafely(IBaseResource theIncomingResource) {
 				if (isPatientOrPractitioner(theIncomingResource)) {
-					incomingPersonId= getEmpiLink(theIncomingResource).getPersonPid();
+					incomingPersonPid = getEmpiLink(theIncomingResource).getPersonPid();
 				} else if (isPerson(theIncomingResource)) {
-					incomingPersonId = theIncomingResource.getIdElement().getIdPartAsLong();
+					incomingPersonPid = myResourceTableHelper.getPidOrNull(theIncomingResource);
 				} else {
 					throw new IllegalArgumentException("Resources of type " + theIncomingResource.getIdElement().getResourceType()+" cannot be persons!");
 				}
 
 				if (isPatientOrPractitioner(theBaseResource)) {
-					personIdToMatch = getEmpiLink(theBaseResource).getPersonPid();
+					personPidToMatch = getEmpiLink(theBaseResource).getPersonPid();
 				} else if (isPerson(theBaseResource)) {
-					personIdToMatch = theBaseResource.getIdElement().getIdPartAsLong();
+					personPidToMatch = myResourceTableHelper.getPidOrNull(theBaseResource);
 				} else {
 					throw new IllegalArgumentException("Resources of type " + theIncomingResource.getIdElement().getResourceType() + " cannot be persons!");
 				}
-
-
-				return incomingPersonId.equals(personIdToMatch);
-
+				return incomingPersonPid.equals(personPidToMatch);
 			}
 
 			private boolean isPerson(IBaseResource theIncomingResource) {
@@ -245,7 +245,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 				return (resourceType.equalsIgnoreCase("Patient") || resourceType.equalsIgnoreCase("Practitioner"));
 			}
 			private EmpiLink getEmpiLink(IBaseResource thePatientOrPractitionerResource) {
-				Optional<EmpiLink> matchLinkForTarget = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(thePatientOrPractitionerResource.getIdElement().getIdPartAsLong());
+				Long pidOrNull = myResourceTableHelper.getPidOrNull(thePatientOrPractitionerResource);
+				Optional<EmpiLink> matchLinkForTarget = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(pidOrNull);
 				if (matchLinkForTarget.isPresent()) {
 					return matchLinkForTarget.get();
 				} else {
@@ -255,13 +256,13 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 			@Override
 			public void describeTo(Description theDescription) {
-				theDescription.appendText("patient/practitioner linked to Person/" +personIdToMatch);
+				theDescription.appendText("patient/practitioner linked to Person/" + personPidToMatch);
 			}
 
 			@Override
 			protected void describeMismatchSafely(IBaseResource item, Description mismatchDescription) {
 				super.describeMismatchSafely(item, mismatchDescription);
-				mismatchDescription.appendText(" was actually linked to Person/" +incomingPersonId);
+				mismatchDescription.appendText(" was actually linked to Person/" + incomingPersonPid);
 			}
 		};
 	}
