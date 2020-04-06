@@ -143,11 +143,11 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 
-	// Existing Person found linked from matched Patient.  incoming Patient has no EID.  Create link all done.
 	@Test
 	public void testPatientMatchingAnotherPatientLinksToSamePerson() {
-		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
-		fail();
+		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
+		Patient sameJanePatient = createPatientAndUpdateLinks(buildJanePatient());
+		assertThat(janePatient, is(samePersonAs(sameJanePatient)));
 	}
 
 
