@@ -113,6 +113,29 @@ public class EmpiInterceptor extends BaseResourceModifiedInterceptor implements 
 			return;
 		}
 		forbidIfEmpiManagedTagIsPresent(theOldResource);
+		forbidModifyingEmpiTag(theNewResource, theOldResource);
+	}
+
+	/*
+	 * Will throw a forbidden error if a request attempts to add/remove the EMPI tag on a Person.
+	 */
+	private void forbidModifyingEmpiTag(IBaseResource theNewResource, IBaseResource theOldResource) {
+		if (extractResourceType(theNewResource).equalsIgnoreCase("Person")) {
+			if (isEmpiManaged(theNewResource) != isEmpiManaged(theOldResource)) {
+				throwBlockEmpiStatusChange();
+			}
+		}
+	}
+
+	/**
+	 * Checks for the presence of the EMPI-managed tag, indicating the EMPI system has ownership
+	 * of this Person's links.
+	 *
+	 * @param theBaseResource the Person to check .
+	 * @return a boolean indicating whether or not EMPI manages this Person.
+	 */
+	private boolean isEmpiManaged(IBaseResource theBaseResource) {
+		return theBaseResource.getMeta().getTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED) != null;
 	}
 
 	/*
@@ -122,15 +145,19 @@ public class EmpiInterceptor extends BaseResourceModifiedInterceptor implements 
 		return theRequestDetails == null;
 	}
 
+
 	private void forbidIfEmpiManagedTagIsPresent(IBaseResource theResource) {
 		if (extractResourceType(theResource).equalsIgnoreCase("Person")) {
 			if (theResource.getMeta().getTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED) != null) {
-				throwBlockedByEmpi();
+				throwModificationBlockedByEmpi();
 			}
 		}
 	}
 
-	private void throwBlockedByEmpi(){
+	private void throwBlockEmpiStatusChange(){
+		throw new ForbiddenOperationException("The EMPI status of a Person may not be changed once created.");
+	}
+	private void throwModificationBlockedByEmpi(){
 		throw new ForbiddenOperationException("Cannot create or modify Persons who are managed by EMPI.");
 	}
 

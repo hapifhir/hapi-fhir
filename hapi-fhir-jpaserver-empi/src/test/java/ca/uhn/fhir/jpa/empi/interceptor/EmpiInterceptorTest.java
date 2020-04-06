@@ -54,7 +54,7 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testCreateUpdatePersonWithLinkForbiddenWhenEmpiEnabledAndPersonIsEmpiManaged() throws InterruptedException {
+	public void testCreateUpdatePersonWithEmpiTagForbiddenWhenPersonIsEmpiManaged() throws InterruptedException {
 		// When EMPI is enabled, only the EMPI system is allowed to modify Person links of Persons with the EMPI-MANAGED tag.
 		Patient patient = new Patient();
 		IIdType patientId = myEmpiHelper.createWithLatch(new Patient()).getId().toUnqualifiedVersionless();
@@ -107,6 +107,23 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 
 		for (IBaseResource person: resources) {
 			assertThat(person.getMeta().getTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED), is(notNullValue()));
+		}
+	}
+
+	@Test
+	public void testNonEmpiManagedPersonCannotHaveEmpiManagedTagAddedToThem() {
+		//Person created manually.
+		Person person = new Person();
+		DaoMethodOutcome daoMethodOutcome = myEmpiHelper.doCreatePerson(person, true);
+		assertNotNull(daoMethodOutcome.getId());
+
+		//Updating that person to set them as EMPI managed is not allowd.
+		person.getMeta().addTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED, "User is managed by EMPI");
+		try {
+			myEmpiHelper.doUpdatePerson(person, true);
+			fail();
+		} catch (ForbiddenOperationException e) {
+			assertEquals(e.getMessage(), "The EMPI status of a Person may not be changed once created.");
 		}
 	}
 }

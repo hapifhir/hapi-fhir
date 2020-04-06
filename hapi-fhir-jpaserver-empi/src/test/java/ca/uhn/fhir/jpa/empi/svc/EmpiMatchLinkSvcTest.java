@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
+import static ca.uhn.fhir.rest.api.Constants.CODE_HAPI_EMPI_MANAGED;
+import static ca.uhn.fhir.rest.api.Constants.SYSTEM_EMPI_MANAGED;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -202,11 +204,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		fail();
 	}
 
-	@Test
-	public void testNonEmpiManagedPersonCannotHaveEmpiManagedTagAddedToThem() {
-		// Existing Person without Meta Tag indicating they are EMPI-Managed. Requestors cannot add the tag.
-		fail();
-	}
 
 	@Test
 	public void testPatientWithNoEmpiTagIsNotMatched() {
