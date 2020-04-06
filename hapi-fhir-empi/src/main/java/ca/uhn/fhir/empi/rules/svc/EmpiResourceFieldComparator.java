@@ -25,8 +25,8 @@ import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.IEmpiMatcher;
 import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
 
@@ -54,19 +54,17 @@ public class EmpiResourceFieldComparator implements IEmpiMatcher<IBaseResource> 
 		validate(theRightResource);
 
 		FhirTerser terser = myFhirContext.newTerser();
-		List<IPrimitiveType> leftValues = terser.getValues(theLeftResource, myResourcePath, IPrimitiveType.class);
-		List<IPrimitiveType> rightValues = terser.getValues(theRightResource, myResourcePath, IPrimitiveType.class);
+		List<IBase> leftValues = terser.getValues(theLeftResource, myResourcePath, IBase.class);
+		List<IBase> rightValues = terser.getValues(theRightResource, myResourcePath, IBase.class);
 		return match(leftValues, rightValues);
 	}
 
 	@SuppressWarnings("rawtypes")
-	private boolean match(List<IPrimitiveType> theLeftValues, List<IPrimitiveType> theRightValues) {
+	private boolean match(List<IBase> theLeftValues, List<IBase> theRightValues) {
 	boolean retval = false;
-		for (IPrimitiveType leftValue : theLeftValues) {
-			String leftString = leftValue.getValueAsString();
-			for (IPrimitiveType rightValue : theRightValues) {
-				String rightString = rightValue.getValueAsString();
-				retval |= myEmpiFieldMatchJson.match(leftString, rightString);
+		for (IBase leftValue : theLeftValues) {
+			for (IBase rightValue : theRightValues) {
+				retval |= myEmpiFieldMatchJson.match(leftValue, rightValue);
 			}
 		}
 		return retval;

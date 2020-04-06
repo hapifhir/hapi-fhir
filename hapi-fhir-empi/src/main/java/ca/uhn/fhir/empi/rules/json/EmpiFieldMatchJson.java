@@ -22,6 +22,7 @@ package ca.uhn.fhir.empi.rules.json;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hl7.fhir.instance.model.api.IBase;
 
 import javax.annotation.Nonnull;
 
@@ -32,7 +33,7 @@ import javax.annotation.Nonnull;
  * 2. A given resource type (e.g. Patient)
  * 3. A given FHIRPath expression for finding the particular primitive to be used for comparison. (e.g. name.given)
  */
-public class EmpiFieldMatchJson implements IModelJson, IEmpiMatcher<String> {
+public class EmpiFieldMatchJson implements IModelJson, IEmpiMatcher<IBase> {
 	@JsonProperty("name")
 	String myName;
 	@JsonProperty("resourceType")
@@ -90,7 +91,7 @@ public class EmpiFieldMatchJson implements IModelJson, IEmpiMatcher<String> {
 	}
 
 	@Override
-	public boolean match(String theLeftString, String theRightString) {
+	public boolean match(IBase theLeftString, IBase theRightString) {
 		return myMetric.similarity(theLeftString, theRightString) >= myMatchThreshold;
 	}
 }
