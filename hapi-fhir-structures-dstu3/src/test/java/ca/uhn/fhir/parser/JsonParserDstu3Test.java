@@ -58,6 +58,24 @@ public class JsonParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 
+	@Test
+	public void testEncodedResourceWithIncorrectRepresentationOfDecimalTypeToJson() {
+		DecimalType decimalType = new DecimalType();
+		decimalType.setValueAsString(".5");
+		MedicationRequest mr = new MedicationRequest();
+		Dosage dosage = new Dosage();
+		dosage.setDose(new SimpleQuantity()
+			.setValue(decimalType.getValue())
+			.setUnit("{tablet}")
+			.setSystem("http://unitsofmeasure.org")
+			.setCode("{tablet}"));
+		mr.addDosageInstruction(dosage);
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(mr);
+		ourLog.info(encoded);
+		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
+		assertEquals(BigDecimal.valueOf(0.5), mr.getDosageInstructionFirstRep().getDoseSimpleQuantity().getValue());
+		assertTrue(encoded.contains("0.5"));
+	}
 
 	/**
 	 * See #563
