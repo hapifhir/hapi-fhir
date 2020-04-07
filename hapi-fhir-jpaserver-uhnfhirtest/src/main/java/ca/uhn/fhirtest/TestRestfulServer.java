@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.bulk.BulkDataExportProvider;
-import ca.uhn.fhir.jpa.subscription.process.config.WebsocketDispatcherConfig;
+import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;

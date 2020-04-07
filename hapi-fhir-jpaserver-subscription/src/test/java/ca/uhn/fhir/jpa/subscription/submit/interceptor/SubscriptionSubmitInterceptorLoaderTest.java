@@ -52,7 +52,7 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 
 	/**
 	 * It should be possible to run only the {@link SubscriptionSubmitterConfig} without the
-	 * {@link ca.uhn.fhir.jpa.subscription.process.config.SubscriptionProcessorConfig}
+	 * {@link ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig}
 	 */
 	@Test
 	public void testLoaderCanRunWithoutProcessorConfigLoaded() {

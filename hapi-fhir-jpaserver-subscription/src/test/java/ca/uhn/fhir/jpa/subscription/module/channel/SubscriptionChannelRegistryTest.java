@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.subscription.module.channel;
 
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.process.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryHandlerFactory;
@@ -17,7 +17,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class SubscriptionChannelRegistryTest {

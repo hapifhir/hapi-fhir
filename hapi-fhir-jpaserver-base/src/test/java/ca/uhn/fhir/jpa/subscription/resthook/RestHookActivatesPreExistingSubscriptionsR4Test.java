@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.subscription.process.matcher.subscriber.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;

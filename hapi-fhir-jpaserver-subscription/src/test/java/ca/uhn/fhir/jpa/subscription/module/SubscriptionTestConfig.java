@@ -23,8 +23,8 @@ package ca.uhn.fhir.jpa.subscription.module;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
-import ca.uhn.fhir.jpa.subscription.channel.queue.LinkedBlockingQueueChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.queue.IQueueChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,12 +49,12 @@ public class SubscriptionTestConfig {
 	}
 
 	@Bean
-	public IQueueChannelFactory subscribableChannelFactory() {
-		return new LinkedBlockingQueueChannelFactory();
+	public IChannelFactory subscribableChannelFactory() {
+		return new LinkedBlockingChannelFactory();
 	}
 
 	@Bean
-	public SubscriptionChannelFactory subscriptionChannelFactory(IQueueChannelFactory theQueueChannelFactory) {
+	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelFactory theQueueChannelFactory) {
 		return new SubscriptionChannelFactory(theQueueChannelFactory);
 	}
 

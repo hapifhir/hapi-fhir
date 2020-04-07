@@ -6,12 +6,12 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.subscription.channel.queue.LinkedBlockingQueueChannel;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.process.matcher.matching.IResourceModifiedConsumer;
-import ca.uhn.fhir.jpa.subscription.process.matcher.subscriber.SubscriptionMatchingSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.annotations.VisibleForTesting;
@@ -25,8 +25,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
-import javax.annotation.PostConstruct;
 
 /*-
  * #%L
@@ -70,7 +68,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void startIfNeeded() {
 		if (myMatchingChannel == null) {
-			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME, null);
 		}
 	}
 
@@ -148,7 +146,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	}
 
 	@VisibleForTesting
-	public LinkedBlockingQueueChannel getProcessingChannelForUnitTest() {
-		return (LinkedBlockingQueueChannel) myMatchingChannel;
+	public LinkedBlockingChannel getProcessingChannelForUnitTest() {
+		return (LinkedBlockingChannel) myMatchingChannel;
 	}
 }

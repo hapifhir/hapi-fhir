@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
-import ca.uhn.fhir.jpa.subscription.channel.queue.IQueueChannelReceiver;
-import ca.uhn.fhir.jpa.subscription.channel.queue.LinkedBlockingQueueChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +36,7 @@ public class SubscriptionChannelFactoryTest {
 
 	@Before
 	public void before() {
-		mySvc = new SubscriptionChannelFactory(new LinkedBlockingQueueChannelFactory());
+		mySvc = new SubscriptionChannelFactory(new LinkedBlockingChannelFactory());
 	}
 
 	/**
@@ -45,7 +45,7 @@ public class SubscriptionChannelFactoryTest {
 	@Test
 	public void testInterceptorsOnChannelWrapperArePropagated() {
 
-		IQueueChannelReceiver channel = mySvc.newDeliveryReceivingChannel("CHANNEL_NAME");
+		IChannelReceiver channel = mySvc.newDeliveryReceivingChannel("CHANNEL_NAME", null);
 		channel.subscribe(new NpeThrowingHandler());
 		channel.addInterceptor(myInterceptor);
 

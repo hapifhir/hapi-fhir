@@ -1,8 +1,8 @@
 package ca.uhn.fhirtest.config;
 
-import ca.uhn.fhir.jpa.subscription.process.config.WebsocketDispatcherConfig;
+import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
-import ca.uhn.fhir.jpa.subscription.process.config.SubscriptionProcessorConfig;
+import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;

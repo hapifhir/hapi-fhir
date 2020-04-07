@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.subscription.module;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionCanonicalizer;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;

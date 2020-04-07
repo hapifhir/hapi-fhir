@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.process.registry.ActiveSubscription;
-import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import org.slf4j.Logger;
@@ -29,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.SubscribableChannel;
 
 import java.util.Map;
 import java.util.Optional;
@@ -42,7 +43,7 @@ public class SubscriptionChannelRegistry {
 	// This map is a reference count so we know to destroy the channel when there are no more active subscriptions using it
 	// Key Channel Name, Value Subscription Id
 	private final Multimap<String, String> myActiveSubscriptionByChannelName = MultimapBuilder.hashKeys().arrayListValues().build();
-	private final Map<String, MessageChannel> myChannelNameToSender = new ConcurrentHashMap<>();
+	private final Map<String, IChannelProducer> myChannelNameToSender = new ConcurrentHashMap<>();
 
 	@Autowired
 	private SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
@@ -59,23 +60,31 @@ public class SubscriptionChannelRegistry {
 			return;
 		}
 
-		SubscribableChannel deliveryChannel = mySubscriptionDeliveryChannelFactory.newDeliveryReceivingChannel(channelName);
+		IChannelReceiver channelReceiver = newReceivingChannel(channelName);
 		Optional<MessageHandler> deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(theActiveSubscription.getChannelType());
 
-		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = new SubscriptionChannelWithHandlers(channelName, deliveryChannel);
+		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = new SubscriptionChannelWithHandlers(channelName, channelReceiver);
 		deliveryHandler.ifPresent(subscriptionChannelWithHandlers::addHandler);
 		myDeliveryReceiverChannels.put(channelName, subscriptionChannelWithHandlers);
 
-		MessageChannel sendingChannel = mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(channelName);
+		IChannelProducer sendingChannel = newSendingChannel(channelName);
 		myChannelNameToSender.put(channelName, sendingChannel);
+	}
+
+	protected IChannelReceiver newReceivingChannel(String theChannelName) {
+		return mySubscriptionDeliveryChannelFactory.newDeliveryReceivingChannel(theChannelName, null);
+	}
+
+	protected IChannelProducer newSendingChannel(String theChannelName) {
+		return mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(theChannelName, null);
 	}
 
 	public synchronized void remove(ActiveSubscription theActiveSubscription) {
 		String channelName = theActiveSubscription.getChannelName();
-		ourLog.info("Removing subscription {} from channel {}", theActiveSubscription.getId() ,channelName);
+		ourLog.info("Removing subscription {} from channel {}", theActiveSubscription.getId(), channelName);
 		boolean removed = myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription.getId());
 		if (!removed) {
-			ourLog.warn("Failed to remove subscription {} from channel {}", theActiveSubscription.getId() ,channelName);
+			ourLog.warn("Failed to remove subscription {} from channel {}", theActiveSubscription.getId(), channelName);
 		}
 
 		// This was the last one.  Close and remove the channel

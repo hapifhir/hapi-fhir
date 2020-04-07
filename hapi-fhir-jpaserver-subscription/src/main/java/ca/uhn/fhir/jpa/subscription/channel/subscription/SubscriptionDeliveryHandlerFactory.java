@@ -21,14 +21,12 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  */
 
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
-import ca.uhn.fhir.jpa.subscription.process.deliver.email.IEmailSender;
-import ca.uhn.fhir.jpa.subscription.process.deliver.email.SubscriptionDeliveringEmailSubscriber;
-import ca.uhn.fhir.jpa.subscription.process.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 

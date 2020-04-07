@@ -24,7 +24,7 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
-import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionLoader;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;

@@ -1,15 +1,15 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.subscription.channel.queue.LinkedBlockingQueueChannel;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
-import ca.uhn.fhir.jpa.subscription.process.registry.ActiveSubscription;
-import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelWithHandlers;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
-import ca.uhn.fhir.jpa.subscription.process.deliver.email.JavaMailEmailSender;
-import ca.uhn.fhir.jpa.subscription.process.deliver.email.SubscriptionDeliveringEmailSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.JavaMailEmailSender;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class SubscriptionTestUtil {
 	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
 	public int getExecutorQueueSize() {
-		LinkedBlockingQueueChannel channel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+		LinkedBlockingChannel channel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
 		return channel.getQueueSizeForUnitTest();
 	}
 

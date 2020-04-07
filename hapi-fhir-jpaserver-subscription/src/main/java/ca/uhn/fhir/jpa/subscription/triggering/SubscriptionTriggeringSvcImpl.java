@@ -33,7 +33,7 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.process.matcher.matching.IResourceModifiedConsumer;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.CacheControlDirective;

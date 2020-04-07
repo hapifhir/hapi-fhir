@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.process.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -2,9 +2,8 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.subscription.process.matcher.subscriber.SubscriptionActivatingSubscriber;
-import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionCanonicalizer;
-import ca.uhn.fhir.jpa.subscription.process.matcher.matching.SubscriptionStrategyEvaluator;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.r4.model.Subscription;

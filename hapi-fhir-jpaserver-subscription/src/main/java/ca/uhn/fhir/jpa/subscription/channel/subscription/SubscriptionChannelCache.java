@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.provider.r5;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.subscription.process.config.WebsocketDispatcherConfig;
+import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
@@ -10,7 +10,7 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
-import ca.uhn.fhir.jpa.subscription.process.registry.SubscriptionLoader;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;

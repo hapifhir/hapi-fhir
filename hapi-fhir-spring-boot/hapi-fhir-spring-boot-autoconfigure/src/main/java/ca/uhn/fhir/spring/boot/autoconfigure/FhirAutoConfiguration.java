@@ -31,7 +31,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
-import ca.uhn.fhir.jpa.subscription.process.config.SubscriptionProcessorConfig;
+import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
