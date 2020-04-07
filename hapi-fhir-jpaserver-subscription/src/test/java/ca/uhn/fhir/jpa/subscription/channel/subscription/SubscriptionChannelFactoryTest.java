@@ -52,7 +52,6 @@ public class SubscriptionChannelFactoryTest {
 		Message<?> input = new GenericMessage<>("TEST");
 
 		when(myInterceptor.preSend(any(),any())).thenAnswer(t->t.getArgument(0, Message.class));
-		when(myInterceptor.postReceive(any(),any())).thenAnswer(t->t.getArgument(0, Message.class));
 
 		try {
 			channel.send(input);

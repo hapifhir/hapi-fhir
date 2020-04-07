@@ -127,5 +127,11 @@ public class WebsocketConnectionValidatorTest {
 			return mock(AsyncTaskExecutor.class);
 		}
 
+		@Bean
+		public WebsocketConnectionValidator websocketConnectionValidator() {
+			return new WebsocketConnectionValidator();
+		}
+
+
 	}
 }

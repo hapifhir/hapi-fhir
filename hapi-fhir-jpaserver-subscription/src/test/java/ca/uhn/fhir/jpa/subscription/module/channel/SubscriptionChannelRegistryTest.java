@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.channel;
 
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -17,6 +18,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class SubscriptionChannelRegistryTest {
@@ -47,6 +51,8 @@ public class SubscriptionChannelRegistryTest {
 		CanonicalSubscription cansubB = new CanonicalSubscription();
 		cansubB.setIdElement(new IdDt("B"));
 		ActiveSubscription activeSubscriptionB = new ActiveSubscription(cansubB, TEST_CHANNEL_NAME);
+
+		when(mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(any(), any())).thenReturn(mock(IChannelProducer.class));
 
 		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.add(activeSubscriptionA);
