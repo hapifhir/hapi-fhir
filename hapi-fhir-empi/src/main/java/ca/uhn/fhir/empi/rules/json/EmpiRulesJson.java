@@ -110,4 +110,7 @@ public class EmpiRulesJson implements IModelJson {
 		return myEnterpriseEIDSystem;
 	}
 
+	public void setEnterpriseEIDSystem(String theEnterpriseEIDSystem) {
+		myEnterpriseEIDSystem = theEnterpriseEIDSystem;
+	}
 }

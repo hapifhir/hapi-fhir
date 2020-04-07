@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
 import ca.uhn.fhir.empi.api.IEmpiConfig;
+import ca.uhn.fhir.empi.api.IEmpiRuleValidator;
 import ca.uhn.fhir.empi.api.IEmpiInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.empi.provider.EmpiProviderLoader;
@@ -23,12 +24,15 @@ public class EmpiInitializer {
 	IInterceptorService myInterceptorService;
 	@Autowired
 	IEmpiConfig myEmpiConfig;
+	@Autowired
+	IEmpiRuleValidator myEmpiRuleValidator;
 
 	@PostConstruct
 	public void init() {
 		if (!myEmpiConfig.isEnabled()) {
 			return;
 		}
+		myEmpiRuleValidator.validate(myEmpiConfig.getEmpiRules());
 		IEmpiInterceptor empiInterceptor = myBeanFactory.getBean(IEmpiInterceptor.class);
 		myInterceptorService.registerInterceptor(empiInterceptor);
 		empiInterceptor.start();
