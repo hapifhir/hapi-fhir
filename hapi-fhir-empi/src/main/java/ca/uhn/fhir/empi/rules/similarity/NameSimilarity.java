@@ -9,10 +9,10 @@ import org.hl7.fhir.instance.model.api.IBase;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NameAnyOrderSimilarity implements IEmpiFieldSimilarity {
+public class NameSimilarity implements IEmpiFieldSimilarity {
 	private final EmpiPersonNameMatchModeEnum myMatchMode;
 
-	public NameAnyOrderSimilarity(EmpiPersonNameMatchModeEnum theMatchMode) {
+	public NameSimilarity(EmpiPersonNameMatchModeEnum theMatchMode) {
 		myMatchMode = theMatchMode;
 	}
 
@@ -39,7 +39,6 @@ public class NameAnyOrderSimilarity implements IEmpiFieldSimilarity {
 			rightGivenNames = rightGivenNames.stream().map(StringNormalizer::normalizeString).collect(Collectors.toList());
 		}
 
-		// FIXME KHS test empty values, exact and inexact
 		for (String leftGivenName : leftGivenNames) {
 			for (String rightGivenName : rightGivenNames) {
 				match |= leftGivenName.equals(rightGivenName) && leftFamilyName.equals(rightFamilyName);

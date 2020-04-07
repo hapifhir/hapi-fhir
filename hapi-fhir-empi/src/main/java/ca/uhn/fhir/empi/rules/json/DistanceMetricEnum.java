@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.rules.similarity.EmpiPersonNameMatchModeEnum;
 import ca.uhn.fhir.empi.rules.similarity.HapiStringSimilarity;
 import ca.uhn.fhir.empi.rules.similarity.IEmpiFieldSimilarity;
-import ca.uhn.fhir.empi.rules.similarity.NameAnyOrderSimilarity;
+import ca.uhn.fhir.empi.rules.similarity.NameSimilarity;
 import info.debatty.java.stringsimilarity.*;
 import org.hl7.fhir.instance.model.api.IBase;
 
@@ -38,11 +38,10 @@ public enum DistanceMetricEnum implements IEmpiFieldSimilarity {
 	JACCARD("Jaccard", new HapiStringSimilarity(new Jaccard())),
 	NORMALIZED_LEVENSCHTEIN("Normalized Levenschtein", new HapiStringSimilarity(new NormalizedLevenshtein())),
 	SORENSEN_DICE("Sorensen Dice", new HapiStringSimilarity(new SorensenDice())),
-	// FIXME KHS copy over tests
-	STANDARD_NAME_ANY_ORDER("Standard name Any Order", new NameAnyOrderSimilarity(EmpiPersonNameMatchModeEnum.STANDARD_ANY_ORDER)),
-	EXACT_NAME_ANY_ORDER("Exact name Any Order", new NameAnyOrderSimilarity(EmpiPersonNameMatchModeEnum.EXACT_ANY_ORDER)),
-	STANDARD_NAME_FIRST_AND_LAST("Standard name First and Last", new NameAnyOrderSimilarity(EmpiPersonNameMatchModeEnum.STANDARD_FIRST_AND_LAST)),
-	EXACT_NAME_FIRST_AND_LAST("Exact name First and Last", new NameAnyOrderSimilarity(EmpiPersonNameMatchModeEnum.EXACT_FIRST_AND_LAST));
+	STANDARD_NAME_ANY_ORDER("Standard name Any Order", new NameSimilarity(EmpiPersonNameMatchModeEnum.STANDARD_ANY_ORDER)),
+	EXACT_NAME_ANY_ORDER("Exact name Any Order", new NameSimilarity(EmpiPersonNameMatchModeEnum.EXACT_ANY_ORDER)),
+	STANDARD_NAME_FIRST_AND_LAST("Standard name First and Last", new NameSimilarity(EmpiPersonNameMatchModeEnum.STANDARD_FIRST_AND_LAST)),
+	EXACT_NAME_FIRST_AND_LAST("Exact name First and Last", new NameSimilarity(EmpiPersonNameMatchModeEnum.EXACT_FIRST_AND_LAST));
 
 	private final String myCode;
 	private final IEmpiFieldSimilarity myEmpiFieldSimilarity;
