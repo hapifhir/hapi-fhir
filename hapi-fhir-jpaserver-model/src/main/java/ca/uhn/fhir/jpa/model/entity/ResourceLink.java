@@ -218,6 +218,7 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append("path=").append(mySourcePath);
 		b.append(", src=").append(mySourceResourcePid);
 		b.append(", target=").append(myTargetResourcePid);
+		b.append(", targetType=").append(myTargetResourceType);
 		b.append(", targetUrl=").append(myTargetResourceUrl);
 
 		b.append("]");
