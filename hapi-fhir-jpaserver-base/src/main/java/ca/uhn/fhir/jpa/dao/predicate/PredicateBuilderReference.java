@@ -447,7 +447,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 		// one value
 		if (path.size() == 1) {
-			return myCriteriaBuilder.equal(from.get("mySourcePath").as(String.class), path.get(0));
+			return myBuilder.equal(from.get("mySourcePath").as(String.class), path.get(0));
 		}
 
 		// multiple values
