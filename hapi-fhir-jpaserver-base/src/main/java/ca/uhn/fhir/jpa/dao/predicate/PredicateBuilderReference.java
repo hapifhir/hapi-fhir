@@ -328,9 +328,12 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				throw newInvalidTargetTypeForChainException(theResourceName, theParamName, typeValue);
 			}
 
+			Predicate sourceTypeParameter = myCriteriaBuilder.equal(theJoin.get("mySourceResourceType"), myResourceName);
 			Predicate targetTypeParameter = myCriteriaBuilder.equal(theJoin.get("myTargetResourceType"), typeValue);
-			myQueryRoot.addPredicate(targetTypeParameter);
-			return targetTypeParameter;
+
+			Predicate composite = myCriteriaBuilder.and(sourceTypeParameter, targetTypeParameter);
+			myQueryRoot.addPredicate(composite);
+			return composite;
 		}
 
 		boolean foundChainMatch = false;
