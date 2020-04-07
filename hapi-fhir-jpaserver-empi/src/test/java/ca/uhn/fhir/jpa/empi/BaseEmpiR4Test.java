@@ -17,6 +17,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
@@ -29,10 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -49,6 +47,9 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected static final String PAUL_ID = "ID.PAUL.456";
 	public static final String NAME_GIVEN_PAUL = "Paul";
 	public static final String TEST_NAME_FAMILY = "Doe";
+	private static final ContactPoint TEST_TELECOM = new ContactPoint()
+		.setSystem(ContactPoint.ContactPointSystem.PHONE)
+		.setValue("555-555-5555");
 
 	@Autowired
 	protected IFhirResourceDao<Person> myPersonDao;
@@ -112,6 +113,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		patient.addName().setFamily(TEST_NAME_FAMILY);
 		patient.addIdentifier().setSystem(TEST_ID_SYSTEM).setValue(theId);
 		patient.setBirthDate(theBirthday);
+		patient.setTelecom(Collections.singletonList(TEST_TELECOM));
 		DateType dateType = new DateType(theBirthday);
 		dateType.setPrecision(TemporalPrecisionEnum.DAY);
 		patient.setBirthDateElement(dateType);

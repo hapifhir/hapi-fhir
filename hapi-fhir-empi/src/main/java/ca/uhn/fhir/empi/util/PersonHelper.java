@@ -114,6 +114,7 @@ public final class PersonHelper {
 		thePerson.setTelecom(thePatient.getTelecom());
 		thePerson.setBirthDate(thePatient.getBirthDate());
 		thePerson.setGender(thePatient.getGender());
+		thePerson.setPhoto(thePatient.getPhotoFirstRep());
 	}
 
 

@@ -142,6 +142,9 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(read.getNameFirstRep().getFamily(), is(equalTo(patient.getNameFirstRep().getFamily())));
 		assertThat(read.getNameFirstRep().getGivenAsSingleString(), is(equalTo(patient.getNameFirstRep().getGivenAsSingleString())));
 		assertThat(read.getBirthDateElement().toHumanDisplay(), is(equalTo(patient.getBirthDateElement().toHumanDisplay())));
+		assertThat(read.getTelecomFirstRep().getValue(), is(equalTo(patient.getTelecomFirstRep().getValue())));
+		assertThat(read.getPhoto().getData(), is(equalTo(patient.getPhotoFirstRep().getData())));
+		assertThat(read.getGender(), is(equalTo(patient.getGender())));
 	}
 
 
