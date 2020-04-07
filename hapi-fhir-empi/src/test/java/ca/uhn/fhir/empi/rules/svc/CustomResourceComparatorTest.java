@@ -1,6 +1,7 @@
 package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.empi.BaseTest;
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.rules.json.DistanceMetricEnum;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
@@ -8,22 +9,19 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Test;
 
-import static ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvcTest.NAME_DELTA;
 import static org.junit.Assert.assertEquals;
 
 public class CustomResourceComparatorTest extends BaseTest {
 
 	public static final String FIELD_EXACT_MATCH_NAME = DistanceMetricEnum.EXACT_NAME_ANY_ORDER.name();
-	public static final double EXPECTED_MATCH_WEIGHT = 9.1;
-
 
 	@Test
 	public void testNameAnyOrder() {
 		EmpiResourceComparatorSvc nameAnyOrderComparator = buildComparator(buildNameAnyOrderRules());
 		Patient johnHenry = buildJohnHenry();
 		Patient henryJohn = buildHenryJohn();
-		double result = nameAnyOrderComparator.compare(johnHenry, henryJohn);
-		assertEquals(EXPECTED_MATCH_WEIGHT, result, NAME_DELTA);
+		EmpiMatchResultEnum result = nameAnyOrderComparator.compare(johnHenry, henryJohn);
+		assertEquals(EmpiMatchResultEnum.MATCH, result);
 	}
 
 	protected Patient buildJohnHenry() {
@@ -54,9 +52,7 @@ public class CustomResourceComparatorTest extends BaseTest {
 
 		EmpiRulesJson retval = new EmpiRulesJson();
 		retval.addMatchField(nameAnyOrderFieldMatch);
-		retval.putWeight(FIELD_EXACT_MATCH_NAME, EXPECTED_MATCH_WEIGHT);
-		retval.setMatchThreshold(MATCH_THRESHOLD);
-		retval.setNoMatchThreshold(NO_MATCH_THRESHOLD);
+		retval.putMatchResult(FIELD_EXACT_MATCH_NAME, EmpiMatchResultEnum.MATCH);
 
 		return retval;
 	}

@@ -63,13 +63,12 @@ public class EmpiResourceComparatorSvc {
 
 	}
 	public EmpiMatchResultEnum getMatchResult(IBaseResource theLeftResource, IBaseResource theRightResource) {
-		double weight = compare(theLeftResource, theRightResource);
-		return myEmpiRulesJson.getMatchResult(weight);
+		return compare(theLeftResource, theRightResource);
 	}
 
-	double compare(IBaseResource theLeftResource, IBaseResource theRightResource) {
+	EmpiMatchResultEnum compare(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		long matchVector = getMatchVector(theLeftResource, theRightResource);
-		return myEmpiRulesJson.getWeight(matchVector);
+		return myEmpiRulesJson.getMatchResult(matchVector);
 	}
 
 	/**

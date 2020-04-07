@@ -1,6 +1,7 @@
 package ca.uhn.fhir.empi.rules.json;
 
 import ca.uhn.fhir.empi.BaseTest;
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.util.JsonUtil;
 import junit.framework.TestCase;
 import org.junit.Before;
@@ -30,7 +31,7 @@ public class EmpiRulesJsonTest extends BaseTest {
 		ourLog.info(json);
 		EmpiRulesJson rulesDeser = JsonUtil.deserialize(json, EmpiRulesJson.class);
 		assertEquals(2, rulesDeser.size());
-		assertEquals(EXPECTED_BOTH_NAMES_WEIGHT, rulesDeser.getWeight(myBothNameFields));
+		assertEquals(EmpiMatchResultEnum.MATCH, rulesDeser.getMatchResult(myBothNameFields));
 		EmpiFieldMatchJson second = rulesDeser.get(1);
 		assertEquals("name.family", second.getResourcePath());
 		TestCase.assertEquals(DistanceMetricEnum.JARO_WINKLER, second.getMetric());
@@ -38,7 +39,7 @@ public class EmpiRulesJsonTest extends BaseTest {
 
 	@Test
 	public void testWeightMap() {
-		assertEquals(EXPECTED_BOTH_NAMES_WEIGHT, myRules.getWeight(3L));
+		assertEquals(EmpiMatchResultEnum.MATCH, myRules.getMatchResult(3L));
 	}
 
 	@Test

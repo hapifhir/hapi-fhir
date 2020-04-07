@@ -25,10 +25,8 @@
 		"matchThreshold" : 0.8
 	}],
 	"weightMap" : {
-		"patient-given" : 0.63,
-		"patient-given,patient-last" : 0.83
+		"patient-given" : "POSSIBLE_MATCH",
+		"patient-given,patient-last" : "MATCH"
 	},
-	"noMatchThreshold" : 0.6,
-	"matchThreshold" : 0.8,
 	"eidSystem": "enterprise-id-system"
 }

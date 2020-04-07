@@ -20,13 +20,15 @@ package ca.uhn.fhir.empi.rules.json;
  * #L%
  */
 
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
 public class VectorWeightMap {
 	private final EmpiRulesJson myEmpiRulesJson;
-	private Map<Long, Double> myMap = new HashMap<>();
+	private Map<Long, EmpiMatchResultEnum> myMap = new HashMap<>();
 
 	VectorWeightMap(EmpiRulesJson theEmpiRulesJson) {
 		myEmpiRulesJson = theEmpiRulesJson;
@@ -35,18 +37,18 @@ public class VectorWeightMap {
 	}
 
 	private void initMap() {
-		for (Map.Entry<String, Double> entry : myEmpiRulesJson.getWeightMap().entrySet()) {
+		for (Map.Entry<String, EmpiMatchResultEnum> entry : myEmpiRulesJson.getMatchResultMap().entrySet()) {
 			put(entry.getKey(), entry.getValue());
 		}
 	}
 
-	public Double get(Long theMatchVector) {
+	public EmpiMatchResultEnum get(Long theMatchVector) {
 		return myMap.get(theMatchVector);
 	}
 
-	public void put(String theFieldMatchNames, double theWeight) {
+	public void put(String theFieldMatchNames, EmpiMatchResultEnum theMatchResult) {
 		long vector = getVector(theFieldMatchNames);
-		myMap.put(vector, theWeight);
+		myMap.put(vector, theMatchResult);
 	}
 
 	public long getVector(String theFieldMatchNames) {

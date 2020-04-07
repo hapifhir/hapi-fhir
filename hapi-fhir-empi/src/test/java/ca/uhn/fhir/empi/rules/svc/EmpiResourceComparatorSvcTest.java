@@ -27,16 +27,16 @@ public class EmpiResourceComparatorSvcTest extends BaseTest {
 
 	@Test
 	public void testCompareFirstNameMatch() {
-		double result = myEmpiResourceComparatorSvc.compare(myJohn, myJohny);
-		assertEquals(EXPECTED_FIRST_NAME_WEIGHT, result, NAME_DELTA);
+		EmpiMatchResultEnum result = myEmpiResourceComparatorSvc.compare(myJohn, myJohny);
+		assertEquals(EmpiMatchResultEnum.POSSIBLE_MATCH, result);
 	}
 
 	@Test
 	public void testCompareBothNamesMatch() {
 		myJohn.addName().setFamily("Smith");
 		myJohny.addName().setFamily("Smith");
-		double result = myEmpiResourceComparatorSvc.compare(myJohn, myJohny);
-		assertEquals(EXPECTED_BOTH_NAMES_WEIGHT, result, NAME_DELTA);
+		EmpiMatchResultEnum result = myEmpiResourceComparatorSvc.compare(myJohn, myJohny);
+		assertEquals(EmpiMatchResultEnum.MATCH, result);
 	}
 
 	@Test

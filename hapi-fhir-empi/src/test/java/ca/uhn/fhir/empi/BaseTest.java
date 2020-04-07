@@ -1,6 +1,7 @@
 package ca.uhn.fhir.empi;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.rules.config.EmpiConfigImpl;
 import ca.uhn.fhir.empi.rules.json.*;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
@@ -12,10 +13,6 @@ public abstract class BaseTest {
 	public static final String PATIENT_GIVEN = "patient-given";
 	public static final String PATIENT_LAST = "patient-last";
 	public static final double NAME_THRESHOLD = 0.8;
-	public static final double NO_MATCH_THRESHOLD = 0.60;
-	public static final double MATCH_THRESHOLD = 0.80;
-	public static final double EXPECTED_FIRST_NAME_WEIGHT = 0.63;
-	public static final double EXPECTED_BOTH_NAMES_WEIGHT = 0.83;
 	protected EmpiFieldMatchJson myGivenNameMatchField;
 	protected String myBothNameFields;
 
@@ -71,10 +68,8 @@ public abstract class BaseTest {
 		retval.addFilterSearchParam(activePatientsBlockingFilter);
 		retval.addMatchField(myGivenNameMatchField);
 		retval.addMatchField(lastNameMatchField);
-		retval.setMatchThreshold(MATCH_THRESHOLD);
-		retval.setNoMatchThreshold(NO_MATCH_THRESHOLD);
-		retval.putWeight(myBothNameFields, EXPECTED_BOTH_NAMES_WEIGHT);
-		retval.putWeight(PATIENT_GIVEN, EXPECTED_FIRST_NAME_WEIGHT);
+		retval.putMatchResult(myBothNameFields, EmpiMatchResultEnum.MATCH);
+		retval.putMatchResult(PATIENT_GIVEN, EmpiMatchResultEnum.POSSIBLE_MATCH);
 
 		return retval;
 	}

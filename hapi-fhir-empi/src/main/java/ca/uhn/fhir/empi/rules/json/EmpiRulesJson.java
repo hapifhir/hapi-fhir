@@ -35,11 +35,7 @@ public class EmpiRulesJson implements IModelJson {
 	@JsonProperty("matchFields")
 	List<EmpiFieldMatchJson> myMatchFieldJsonList = new ArrayList<>();
 	@JsonProperty("weightMap")
-	Map<String, Double> myWeightMap = new HashMap<>();
-	@JsonProperty("noMatchThreshold")
-	double myNoMatchThreshold;
-	@JsonProperty("matchThreshold")
-	double myMatchThreshold;
+	Map<String, EmpiMatchResultEnum> myMatchResultMap = new HashMap<>();
 	@JsonProperty("eidSystem")
 	String myEnterpriseEIDSystem;
 
@@ -65,35 +61,25 @@ public class EmpiRulesJson implements IModelJson {
 		return myMatchFieldJsonList.get(theIndex);
 	}
 
-	public EmpiMatchResultEnum getMatchResult(double theWeight) {
-		if (theWeight <= myNoMatchThreshold) {
-			return EmpiMatchResultEnum.NO_MATCH;
-		} else if (theWeight >= myMatchThreshold) {
-			return EmpiMatchResultEnum.MATCH;
-		} else {
-			return EmpiMatchResultEnum.POSSIBLE_MATCH;
-		}
+	EmpiMatchResultEnum getMatchResult(String theFieldMatchNames) {
+		return myMatchResultMap.get(theFieldMatchNames);
 	}
 
-	double getWeight(String theFieldMatchNames) {
-		return myWeightMap.get(theFieldMatchNames);
-	}
-
-	public double getWeight(Long theMatchVector) {
+	public EmpiMatchResultEnum getMatchResult(Long theMatchVector) {
 		initVectorWeightMapIfRequired();
-		Double result = myVectorWeightMap.get(theMatchVector);
-		return MoreObjects.firstNonNull(result, 0.0);
+		EmpiMatchResultEnum result = myVectorWeightMap.get(theMatchVector);
+		return MoreObjects.firstNonNull(result, EmpiMatchResultEnum.NO_MATCH);
 	}
 
-	public void putWeight(String theFieldMatchNames, double theWeight) {
-		myWeightMap.put(theFieldMatchNames, theWeight);
+	public void putMatchResult(String theFieldMatchNames, EmpiMatchResultEnum theMatchResult) {
+		myMatchResultMap.put(theFieldMatchNames, theMatchResult);
 
 		initVectorWeightMapIfRequired();
-		myVectorWeightMap.put(theFieldMatchNames, theWeight);
+		myVectorWeightMap.put(theFieldMatchNames, theMatchResult);
 	}
 
-	Map<String, Double> getWeightMap() {
-		return Collections.unmodifiableMap(myWeightMap);
+	Map<String, EmpiMatchResultEnum> getMatchResultMap() {
+		return Collections.unmodifiableMap(myMatchResultMap);
 	}
 
 	VectorWeightMap getVectorWeightMap() {
@@ -105,24 +91,6 @@ public class EmpiRulesJson implements IModelJson {
 		if (myVectorWeightMap == null) {
 			myVectorWeightMap = new VectorWeightMap(this);
 		}
-	}
-
-	public double getMatchThreshold() {
-		return myMatchThreshold;
-	}
-
-	public EmpiRulesJson setMatchThreshold(double theMatchThreshold) {
-		myMatchThreshold = theMatchThreshold;
-		return this;
-	}
-
-	public double getNoMatchThreshold() {
-		return myNoMatchThreshold;
-	}
-
-	public EmpiRulesJson setNoMatchThreshold(double theNoMatchThreshold) {
-		myNoMatchThreshold = theNoMatchThreshold;
-		return this;
 	}
 
 	public List<EmpiFieldMatchJson> getMatchFields() {
