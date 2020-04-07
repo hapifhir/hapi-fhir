@@ -103,7 +103,7 @@ public final class PersonHelper {
 
 	/**
 	 * This will copy over all attributes that are copiable from Patient/Practitioner to Person.
-	 * FIXME EMPI this will eventually need to involve a whole ton of heuristics for merging rules.
+	 * TODO Is Shallow copying OK? Seemsgood.
 	 *
 	 * @param thePatient The incoming {@link Patient} who's data we want to copy into Person.
 	 * @param thePerson The incoming {@link Person} who needs to have their data updated.
@@ -116,7 +116,6 @@ public final class PersonHelper {
 		thePerson.setGender(thePatient.getGender());
 		thePerson.setPhoto(thePatient.getPhotoFirstRep());
 	}
-
 
 	private Coding buildEmpiManagedTag() {
 		Coding empiManagedCoding = new Coding();
