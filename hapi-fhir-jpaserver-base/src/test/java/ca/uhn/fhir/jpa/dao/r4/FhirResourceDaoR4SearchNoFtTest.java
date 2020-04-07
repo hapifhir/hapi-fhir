@@ -416,6 +416,39 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testChainOnType2() {
+
+		CareTeam ct = new CareTeam();
+		ct.addNote().setText("Care Team");
+		IIdType ctId = myCareTeamDao.create(ct).getId().toUnqualifiedVersionless();
+
+		DiagnosticReport dr1 = new DiagnosticReport();
+		dr1.getPerformerFirstRep().setReferenceElement(ctId);
+		IIdType drId1 = myDiagnosticReportDao.create(dr1).getId().toUnqualifiedVersionless();
+
+		DiagnosticReport dr2 = new DiagnosticReport();
+		dr2.getResultsInterpreterFirstRep().setReferenceElement(ctId);
+		myDiagnosticReportDao.create(dr2).getId().toUnqualifiedVersionless();
+
+		// Log the link rows
+		runInTransaction(() -> myResourceLinkDao.findAll().forEach(t -> ourLog.info("ResLink: {}", t.toString())));
+
+		List<String> ids;
+		SearchParameterMap map;
+		IBundleProvider results;
+
+		myCaptureQueriesListener.clear();
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam( "CareTeam").setChain(PARAM_TYPE));
+		results = myDiagnosticReportDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids.toString(), ids, contains(drId1.getValue()));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+	}
+
 	/**
 	 * See #441
 	 */
