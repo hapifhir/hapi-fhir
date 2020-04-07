@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
-import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
+import ca.uhn.fhir.empi.api.IEmpiConfig;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;

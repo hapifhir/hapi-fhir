@@ -1,5 +1,6 @@
 package ca.uhn.fhir.empi.rules.config;
 
+import ca.uhn.fhir.empi.api.IEmpiConfig;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.util.JsonUtil;
 

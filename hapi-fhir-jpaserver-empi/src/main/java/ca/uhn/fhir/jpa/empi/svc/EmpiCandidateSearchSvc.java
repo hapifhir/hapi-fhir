@@ -3,7 +3,8 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
+import ca.uhn.fhir.empi.api.IEmpiCandidateSearchSvc;
+import ca.uhn.fhir.empi.api.IEmpiConfig;
 import ca.uhn.fhir.empi.rules.json.EmpiFilterSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
@@ -27,7 +28,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 @Lazy
 @Service
-public class EmpiCandidateSearchSvc {
+public class EmpiCandidateSearchSvc implements IEmpiCandidateSearchSvc {
 
 	private static final Logger ourLog = getLogger(EmpiCandidateSearchSvc.class);
 

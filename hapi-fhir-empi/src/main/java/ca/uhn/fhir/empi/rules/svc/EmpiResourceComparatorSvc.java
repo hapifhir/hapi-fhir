@@ -22,7 +22,7 @@ package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
+import ca.uhn.fhir.empi.api.IEmpiConfig;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import org.hl7.fhir.instance.model.api.IBaseResource;

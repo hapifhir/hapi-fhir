@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
+import ca.uhn.fhir.empi.api.IEmpiConfig;
 import ca.uhn.fhir.empi.api.IEmpiInterceptor;
-import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
@@ -14,9 +14,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Streams;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Person;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

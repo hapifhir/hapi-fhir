@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
+import ca.uhn.fhir.empi.api.IEmpiCandidateSearchSvc;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
@@ -13,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 
 public class EmpiCandidateSearchSvcTest extends BaseEmpiR4Test {
 	@Autowired
-	EmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
+	IEmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
 
 	@Test
 	public void findCandidates() {

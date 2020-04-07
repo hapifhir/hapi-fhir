@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.IEmpiConfig;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
-import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
@@ -11,7 +11,6 @@ import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -23,9 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Date;
 import java.util.Optional;
 
-import static ca.uhn.fhir.rest.api.Constants.*;
+import static ca.uhn.fhir.rest.api.Constants.CODE_NO_EMPI_MANAGED;
+import static ca.uhn.fhir.rest.api.Constants.SYSTEM_EMPI_MANAGED;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {

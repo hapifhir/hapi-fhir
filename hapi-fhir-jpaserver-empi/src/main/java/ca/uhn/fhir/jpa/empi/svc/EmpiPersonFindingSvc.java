@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.IEmpiCandidateSearchSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.MatchedTargetCandidate;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
@@ -32,7 +33,7 @@ public class EmpiPersonFindingSvc {
 	@Autowired
 	ResourceTableHelper myResourceTableHelper;
 	@Autowired
-	private EmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
+	private IEmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired

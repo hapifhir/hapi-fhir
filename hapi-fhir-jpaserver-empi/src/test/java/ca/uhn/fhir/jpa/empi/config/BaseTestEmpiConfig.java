@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.config;
 
+import ca.uhn.fhir.empi.api.IEmpiConfig;
 import ca.uhn.fhir.empi.rules.config.EmpiConfigImpl;
-import ca.uhn.fhir.empi.rules.config.IEmpiConfig;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.springframework.context.annotation.Bean;

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules.config;
+package ca.uhn.fhir.empi.api;
 
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 
