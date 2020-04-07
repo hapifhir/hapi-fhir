@@ -68,6 +68,8 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 					myPersonHelper.removeLink(thePerson, resourceId);
 					myEmpiResourceDaoSvc.updatePerson(thePerson);
 				}
+			case POSSIBLE_DUPLICATE:
+				break;
 		}
 		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource);
 	}

@@ -90,4 +90,17 @@ public class EmpiLinkDaoSvc {
 		Example<EmpiLink> example = Example.of(exampleLink);
 		return myEmpiLinkDao.findOne(example);
 	}
+
+	/**
+	 * Get all {@link EmpiLink} which have {@link EmpiMatchResultEnum#POSSIBLE_DUPLICATE} as their match result.
+	 *
+	 * @return A list of EmpiLinks that hold potential duplicate persons.
+	 */
+    public List<EmpiLink> getPossibleDuplicates() {
+		 EmpiLink exampleLink = new EmpiLink();
+		 exampleLink.setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE);
+		 Example<EmpiLink> example = Example.of(exampleLink);
+		 return myEmpiLinkDao.findAll(example);
+	 }
+
 }

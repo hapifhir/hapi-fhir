@@ -19,12 +19,16 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static ca.uhn.fhir.rest.api.Constants.CODE_NO_EMPI_MANAGED;
 import static ca.uhn.fhir.rest.api.Constants.SYSTEM_EMPI_MANAGED;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -183,21 +187,36 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testIncomingPatientWithEIDMatchesAnotherPatientWithSameEIDAreLinked() {
 		Patient patient1 = addEID(buildJanePatient(), "12345");
-		patient1 = createPatientAndUpdateLinks(patient1);
+		createPatientAndUpdateLinks(patient1);
 
 		Patient patient2 = addEID(buildPaulPatient(), "12345");
-		patient2 = createPatientAndUpdateLinks(patient2);
+		createPatientAndUpdateLinks(patient2);
 
 		assertThat(patient1, is(samePersonAs(patient2)));
-	}
 
+	}
 
 	@Test
 	public void testDuplicatePersonLinkIsCreatedWhenAnIncomingPatientArrivesWithEIDThatMatchesAnotherEIDPatient() {
 		// Existing Person with legit EID (from a Patient) found linked from matched Patient.  incoming Patient has different EID.   Create new Person with incoming EID and link.
 		// Record somehow (design TBD) that these two Persons may be duplicates.  -- Maybe we have a special kind of EmpiLink table entry where the target also points to a Person and it's
 		// flagged with a special PROBABLE_DUPLICATE match status?
-		fail();
+
+		Patient patient1 = addEID(buildJanePatient(), "eid-1");
+		patient1 = createPatientAndUpdateLinks(patient1);
+
+		Patient patient2 = addEID(buildJanePatient(), "eid-2");
+		patient2 = createPatientAndUpdateLinks(patient2);
+
+		List<EmpiLink> possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
+		assertThat(possibleDuplicates, hasSize(1));
+
+		Person person1 = getPersonFromResource(patient1);
+		Person person2 = getPersonFromResource(patient2);
+		List<Long> duplicatePids = Arrays.asList(myResourceTableHelper.getPidOrNull(person1), myResourceTableHelper.getPidOrNull(person2));
+
+		assertThat(possibleDuplicates.get(0).getPersonPid(), is(in(duplicatePids)));
+		assertThat(possibleDuplicates.get(0).getTargetPid(), is(in(duplicatePids)));
 	}
 
 	@Test

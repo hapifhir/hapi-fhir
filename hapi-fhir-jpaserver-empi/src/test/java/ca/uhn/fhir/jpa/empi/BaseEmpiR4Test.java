@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.empi.svc.ResourceTableHelper;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.hamcrest.Description;
@@ -207,6 +208,21 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 			public void describeTo(Description theDescription) {
 			}
 		};
+	}
+
+	/**
+	 * Helper function which will fetch you the matched Person based on the IBaseResource.
+	 * @param theBaseResource
+	 * @return
+	 */
+	protected Person getPersonFromResource(IBaseResource theBaseResource) {
+		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTableHelper.getPidOrNull(theBaseResource));
+		if (matchedLinkForTargetPid.isPresent()) {
+			Long personPid = matchedLinkForTargetPid.get().getPersonPid();
+			return (Person)myPersonDao.readByPid(new ResourcePersistentId(personPid));
+		} else {
+			return null;
+		}
 	}
 
 	/**

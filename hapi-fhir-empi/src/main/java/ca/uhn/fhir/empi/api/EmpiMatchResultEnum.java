@@ -34,7 +34,12 @@ public enum EmpiMatchResultEnum {
 	/**
 	 * Match weight was above high threshold for a match
 	 */
-	MATCH
+	MATCH,
+
+	/**
+	 * Link that can exist between two PERSON objects indicating they may be duplicates.
+	 */
+	POSSIBLE_DUPLICATE
 
 	// Stored in database as ORDINAL.  Only add new values to bottom!
 }

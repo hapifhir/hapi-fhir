@@ -201,15 +201,15 @@ public final class PersonHelper {
 				.setValue(myValue);
 		}
 
-		private String getSystem() {
+		public  String getSystem() {
 			return mySystem;
 		}
 
-		private String getUse() {
+		public  String getUse() {
 			return myUse;
 		}
 
-		private String getValue() {
+		public  String getValue() {
 			return myValue;
 		}
 	}
