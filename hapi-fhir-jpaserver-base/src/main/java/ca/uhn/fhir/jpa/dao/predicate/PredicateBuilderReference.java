@@ -328,10 +328,10 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				throw newInvalidTargetTypeForChainException(theResourceName, theParamName, typeValue);
 			}
 
-			Predicate sourceTypeParameter = myCriteriaBuilder.equal(theJoin.get("mySourceResourceType"), myResourceName);
-			Predicate targetTypeParameter = myCriteriaBuilder.equal(theJoin.get("myTargetResourceType"), typeValue);
+			Predicate sourceTypeParameter = myBuilder.equal(theJoin.get("mySourceResourceType"), myResourceName);
+			Predicate targetTypeParameter = myBuilder.equal(theJoin.get("myTargetResourceType"), typeValue);
 
-			Predicate composite = myCriteriaBuilder.and(sourceTypeParameter, targetTypeParameter);
+			Predicate composite = myBuilder.and(sourceTypeParameter, targetTypeParameter);
 			myQueryRoot.addPredicate(composite);
 			return composite;
 		}

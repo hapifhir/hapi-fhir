@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.jpa.util.CoordCalculatorTest;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -64,15 +65,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -1156,8 +1149,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-<<<<<<< HEAD
-=======
 	public void testSearchByIdParam_QueryIsMinimal() {
 		// With only an _id parameter
 		{
@@ -1217,7 +1208,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
->>>>>>> c2e00bb73b... Bugfix on #1772
 	public void testSearchByIdParamAnd() {
 		IIdType id1;
 		{
@@ -3455,8 +3445,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-<<<<<<< HEAD
-=======
 	public void testSearchWithDateAndReusesExistingJoin() {
 		// Add a search parameter to Observation.issued, so that between that one
 		// and the existing one on Observation.effective, we have 2 date search parameters
@@ -3555,7 +3543,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 
 	@Test
->>>>>>> c2e00bb73b... Bugfix on #1772
 	public void testSearchWithFetchSizeDefaultMaximum() {
 		myDaoConfig.setFetchSizeDefaultMaximum(5);
 
