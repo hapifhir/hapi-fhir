@@ -22,6 +22,7 @@ package ca.uhn.fhir.empi.rules.json;
 
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.Constants;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 
@@ -36,7 +37,7 @@ public class EmpiRulesJson implements IModelJson {
 	List<EmpiFieldMatchJson> myMatchFieldJsonList = new ArrayList<>();
 	@JsonProperty("weightMap")
 	Map<String, EmpiMatchResultEnum> myMatchResultMap = new HashMap<>();
-	@JsonProperty("eidSystem")
+	@JsonProperty(value = "eidSystem", defaultValue = Constants.ENTERPRISE_IDENTIFIER_SYSTEM)
 	String myEnterpriseEIDSystem;
 
 	transient VectorWeightMap myVectorWeightMap;

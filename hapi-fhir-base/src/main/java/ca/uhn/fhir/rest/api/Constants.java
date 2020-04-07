@@ -268,9 +268,10 @@ public class Constants {
 	 * TAG system for Person resources which are managed by HAPI EMPI.
 	 * FIXME EMPI decide on a location for this URI.
 	 */
-	public static final String SYSTEM_EMPI_MANAGED = "https://hapifhir.org/system/empi-system";
+	public static final String SYSTEM_EMPI_MANAGED = "https://hapifhir.org/NamingSystem/managing-empi-system";
 	public static final String CODE_HAPI_EMPI_MANAGED = "HAPI-EMPI";
 	public static final String CODE_NO_EMPI_MANAGED = "NO-EMPI";
+	public static final String ENTERPRISE_IDENTIFIER_SYSTEM = "http://hapifhir.io/fhir/NamingSystem/empi-person-enterprise-id";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

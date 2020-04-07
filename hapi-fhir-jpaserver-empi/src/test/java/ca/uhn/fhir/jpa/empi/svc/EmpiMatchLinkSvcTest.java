@@ -200,8 +200,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		fail();
 	}
 
-
-
 	@Test
 	public void testPatientWithNoEmpiTagIsNotMatched() {
 		// Patient with "no-empi" tag is not matched

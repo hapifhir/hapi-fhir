@@ -28,5 +28,5 @@
 		"patient-given" : "POSSIBLE_MATCH",
 		"patient-given,patient-last" : "MATCH"
 	},
-	"eidSystem": "enterprise-id-system"
+	"eidSystem": "http://hapifhir.io/fhir/NamingSystem/empi-person-enterprise-id"
 }
