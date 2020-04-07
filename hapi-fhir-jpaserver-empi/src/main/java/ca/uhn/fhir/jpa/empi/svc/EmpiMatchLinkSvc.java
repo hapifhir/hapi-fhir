@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
-import ca.uhn.fhir.empi.util.PersonUtil;
+import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -12,9 +12,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
-import static ca.uhn.fhir.rest.api.Constants.CODE_HAPI_EMPI_MANAGED;
-import static ca.uhn.fhir.rest.api.Constants.SYSTEM_EMPI_MANAGED;
 
 @Lazy
 @Service
@@ -26,7 +23,7 @@ public class EmpiMatchLinkSvc {
 	@Autowired
 	private EmpiPersonFindingSvc myEmpiPersonFindingSvc;
 	@Autowired
-	private PersonUtil myPersonUtil;
+	private PersonHelper myPersonHelper;
 
 
 	public void updateEmpiLinksForPatient(IBaseResource theResource) {
@@ -41,7 +38,7 @@ public class EmpiMatchLinkSvc {
 
 		//0 candidates, in which case you should create a person
 		if (personCandidates.isEmpty()) {
-			IBaseResource newPerson = myPersonUtil.createPersonFromPatient(theResource);
+			IBaseResource newPerson = myPersonHelper.createPersonFromPatient(theResource);
 			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
 		//1 candidate, in which case you should use it
 		} else if (personCandidates.size() == 1) {
@@ -57,9 +54,9 @@ public class EmpiMatchLinkSvc {
 	}
 
 	private void handleEidOverwrite(IBaseResource thePerson, IBaseResource theResource) {
-		String eidFromResource = myPersonUtil.readEIDFromResource(theResource);
+		String eidFromResource = myPersonHelper.readEIDFromResource(theResource);
 		if (eidFromResource != null)  {
-			myPersonUtil.updatePersonFromPatient(thePerson, theResource);
+			myPersonHelper.updatePersonFromPatient(thePerson, theResource);
 		}
 	}
 }

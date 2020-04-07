@@ -22,16 +22,16 @@ import static ca.uhn.fhir.rest.api.Constants.SYSTEM_EMPI_MANAGED;
 
 @Lazy
 @Service
-public final class PersonUtil {
+public final class PersonHelper {
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
 	private IEmpiConfig myEmpiConfig;
 
-	private PersonUtil(){}
+	private PersonHelper(){}
 
 	@VisibleForTesting
-	PersonUtil(FhirContext theFhirContext) {
+	PersonHelper(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
 	}
 

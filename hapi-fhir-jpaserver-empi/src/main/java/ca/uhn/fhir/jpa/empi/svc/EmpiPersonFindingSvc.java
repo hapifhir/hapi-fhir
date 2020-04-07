@@ -5,7 +5,7 @@ import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.MatchedTargetCandidate;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
-import ca.uhn.fhir.empi.util.PersonUtil;
+import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
@@ -42,7 +42,7 @@ public class EmpiPersonFindingSvc {
 	@Autowired
 	private IEmpiLinkSvc myEmpiLinkSvc;
 	@Autowired
-	private PersonUtil myPersonUtil;
+	private PersonHelper myPersonHelper;
 	@Autowired
 	private EmpiResourceDaoSvc myEmpiResourceDaoSvc;
 
@@ -87,7 +87,7 @@ public class EmpiPersonFindingSvc {
 	}
 
 	private Optional<List<MatchedPersonCandidate>> attemptToFindPersonCandidateFromIncomingEID(IBaseResource theBaseResource) {
-		String eidFromResource = myPersonUtil.readEIDFromResource(theBaseResource);
+		String eidFromResource = myPersonHelper.readEIDFromResource(theBaseResource);
 		if (!StringUtils.isBlank(eidFromResource)) {
 		IBaseResource iBaseResource = myEmpiResourceDaoSvc.searchPersonByEid(eidFromResource);
 			if (iBaseResource != null) {

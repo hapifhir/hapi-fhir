@@ -17,37 +17,33 @@ public class CustomResourceComparatorTest extends BaseTest {
 
 	@Test
 	public void testNameAnyOrder() {
-		EmpiResourceComparatorSvc nameAnyOrderComparator = buildComparator(buildNameAnyOrderRules());
-		Patient johnHenry = buildJohnHenry();
-		Patient henryJohn = buildHenryJohn();
+		EmpiResourceComparatorSvc nameAnyOrderComparator = buildComparator(buildNameAnyOrderRules(DistanceMetricEnum.EXACT_NAME_ANY_ORDER));
+		Patient johnHenry = buildPatientWithNames("Henry", "John");
+		Patient henryJohn = buildPatientWithNames("John", "Henry");
 		EmpiMatchResultEnum result = nameAnyOrderComparator.compare(johnHenry, henryJohn);
 		assertEquals(EmpiMatchResultEnum.MATCH, result);
 	}
 
-	protected Patient buildJohnHenry() {
+	@Test
+
+
+	protected Patient buildPatientWithNames(String theFamilyName, String... theGivenNames) {
 		Patient patient = new Patient();
 		HumanName name = patient.addName();
-		name.addGiven("John");
-		name.setFamily("Henry");
+		name.setFamily(theFamilyName);
+		for (String givenName : theGivenNames) {
+			name.addGiven(givenName);
+		}
 		patient.setId("Patient/1");
 		return patient;
 	}
 
-	protected Patient buildHenryJohn() {
-		Patient patient = new Patient();
-		HumanName name = patient.addName();
-		name.addGiven("Henry");
-		name.setFamily("John");
-		patient.setId("Patient/2");
-		return patient;
-	}
-
-	private EmpiRulesJson buildNameAnyOrderRules() {
+	private EmpiRulesJson buildNameAnyOrderRules(DistanceMetricEnum theExactNameAnyOrder) {
 		EmpiFieldMatchJson nameAnyOrderFieldMatch = new EmpiFieldMatchJson()
 			.setName(FIELD_EXACT_MATCH_NAME)
 			.setResourceType("Patient")
 			.setResourcePath("name")
-			.setMetric(DistanceMetricEnum.EXACT_NAME_ANY_ORDER)
+			.setMetric(theExactNameAnyOrder)
 			.setMatchThreshold(NAME_THRESHOLD);
 
 		EmpiRulesJson retval = new EmpiRulesJson();

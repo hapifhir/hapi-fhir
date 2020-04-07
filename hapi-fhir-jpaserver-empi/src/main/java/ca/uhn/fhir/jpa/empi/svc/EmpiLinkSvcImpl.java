@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
-import ca.uhn.fhir.empi.util.PersonUtil;
+import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -43,7 +43,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	@Autowired
 	private EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 	@Autowired
-	private PersonUtil myPersonUtil;
+	private PersonHelper myPersonHelper;
 	@Autowired
 	private ResourceTableHelper myResourceTableHelper;
 
@@ -58,14 +58,14 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 			case MATCH:
 			case POSSIBLE_MATCH:
 				// FIXME EMPI use assurance 2 for possible and assurance 4 for no match
-				if (!myPersonUtil.containsLinkTo(thePerson, resourceId)) {
-					myPersonUtil.addLink( thePerson, resourceId);
+				if (!myPersonHelper.containsLinkTo(thePerson, resourceId)) {
+					myPersonHelper.addLink( thePerson, resourceId);
 					myEmpiResourceDaoSvc.updatePerson(thePerson);
 				}
 				break;
 			case NO_MATCH:
-				if (myPersonUtil.containsLinkTo(thePerson, resourceId)) {
-					myPersonUtil.removeLink(thePerson, resourceId);
+				if (myPersonHelper.containsLinkTo(thePerson, resourceId)) {
+					myPersonHelper.removeLink(thePerson, resourceId);
 					myEmpiResourceDaoSvc.updatePerson(thePerson);
 				}
 		}
