@@ -24,9 +24,6 @@ import ca.uhn.fhir.rest.api.Constants;
 
 public class JpaConstants {
 
-	public static final String SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID = "resourceId";
-	public static final String SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL = "searchUrl";
-
 	/**
 	 * Non-instantiable
 	 */

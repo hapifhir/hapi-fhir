@@ -49,7 +49,7 @@ public class SubscriptionChannelFactory {
 
 	public IChannelProducer newDeliverySendingChannel(String theChannelName, ChannelConsumerOptions theOptions) {
 		ChannelConsumerOptions config = newConfigForDeliveryChannel(theOptions);
-		return myQueueChannelFactory.getOrCreateSender(theChannelName, ResourceDeliveryJsonMessage.class, config);
+		return myQueueChannelFactory.getOrCreateProducer(theChannelName, ResourceDeliveryJsonMessage.class, config);
 	}
 
 	public IChannelReceiver newDeliveryReceivingChannel(String theChannelName, ChannelConsumerOptions theOptions) {
@@ -60,7 +60,7 @@ public class SubscriptionChannelFactory {
 
 	public IChannelProducer newMatchingSendingChannel(String theChannelName, ChannelConsumerOptions theOptions) {
 		ChannelConsumerOptions config = newConfigForMatchingChannel(theOptions);
-		return myQueueChannelFactory.getOrCreateSender(theChannelName, ResourceModifiedJsonMessage.class, config);
+		return myQueueChannelFactory.getOrCreateProducer(theChannelName, ResourceModifiedJsonMessage.class, config);
 	}
 
 	public IChannelReceiver newMatchingReceivingChannel(String theChannelName, ChannelConsumerOptions theOptions) {

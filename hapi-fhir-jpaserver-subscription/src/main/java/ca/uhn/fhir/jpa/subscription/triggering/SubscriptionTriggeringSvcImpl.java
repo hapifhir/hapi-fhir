@@ -74,7 +74,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID;
+import static ca.uhn.fhir.jpa.model.util.ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

@@ -26,7 +26,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -42,6 +41,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 
+import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -493,7 +493,7 @@ public class SearchCoordinatorSvcImplTest {
 		myExpectedNumberOfSearchBuildersCreated = 3;
 	}
 
-	@NotNull
+	@Nonnull
 	private PersistedJpaBundleProvider newPersistedJpaBundleProvider(String theUuid) {
 		PersistedJpaBundleProvider provider;
 		provider = new PersistedJpaBundleProvider(null, theUuid);

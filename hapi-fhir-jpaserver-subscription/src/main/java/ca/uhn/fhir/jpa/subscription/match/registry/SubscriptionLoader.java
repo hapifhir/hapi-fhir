@@ -93,14 +93,9 @@ public class SubscriptionLoader {
 		syncSubscriptions();
 	}
 
-	public static class Job implements HapiJob {
-		@Autowired
-		private SubscriptionLoader myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.syncSubscriptions();
-		}
+	@VisibleForTesting
+	public void acquireSemaphoreForUnitTest() throws InterruptedException {
+		mySyncSubscriptionsSemaphore.acquire();
 	}
 
 	@VisibleForTesting
@@ -158,6 +153,16 @@ public class SubscriptionLoader {
 			ourLog.debug("Finished sync subscriptions - found {}", resourceList.size());
 
 			return changesCount;
+		}
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private SubscriptionLoader myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.syncSubscriptions();
 		}
 	}
 

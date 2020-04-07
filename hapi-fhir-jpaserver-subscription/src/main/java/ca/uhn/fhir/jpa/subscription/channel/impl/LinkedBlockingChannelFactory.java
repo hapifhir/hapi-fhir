@@ -30,6 +30,7 @@ import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PreDestroy;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,8 +43,8 @@ import java.util.concurrent.TimeUnit;
 
 public class LinkedBlockingChannelFactory implements IChannelFactory {
 
-	private Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
 	private static final Logger ourLog = LoggerFactory.getLogger(LinkedBlockingChannelFactory.class);
+	private Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
 
 	/**
 	 * Constructor
@@ -58,7 +59,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 	}
 
 	@Override
-	public IChannelProducer getOrCreateSender(String theChannelName, Class<?> theMessageType, ChannelConsumerOptions theConfig) {
+	public IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelConsumerOptions theConfig) {
 		return getOrCreateChannel(theChannelName, theConfig.getConcurrentConsumers());
 	}
 
@@ -97,6 +98,12 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 			return new LinkedBlockingChannel(executor, queue);
 
 		});
+	}
+
+
+	@PreDestroy
+	public void stop() {
+		myChannels.clear();
 	}
 
 }

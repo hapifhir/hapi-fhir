@@ -47,7 +47,6 @@ import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -256,7 +255,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		template.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(@NotNull TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				boolean entityLoaded = ensureSearchEntityLoaded();
 				assert entityLoaded;
 			}

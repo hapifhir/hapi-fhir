@@ -36,19 +36,19 @@ public class SubscriptionDeliveryHandlerFactory {
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
-	protected SubscriptionDeliveringEmailSubscriber getSubscriptionDeliveringEmailSubscriber(IEmailSender theEmailSender) {
+	protected SubscriptionDeliveringEmailSubscriber newSubscriptionDeliveringEmailSubscriber(IEmailSender theEmailSender) {
 		return myApplicationContext.getBean(SubscriptionDeliveringEmailSubscriber.class, theEmailSender);
 	}
 
-	protected SubscriptionDeliveringRestHookSubscriber getSubscriptionDeliveringRestHookSubscriber() {
+	protected SubscriptionDeliveringRestHookSubscriber newSubscriptionDeliveringRestHookSubscriber() {
 		return myApplicationContext.getBean(SubscriptionDeliveringRestHookSubscriber.class);
 	}
 
 	public Optional<MessageHandler> createDeliveryHandler(CanonicalSubscriptionChannelType theChannelType) {
 		if (theChannelType == CanonicalSubscriptionChannelType.EMAIL) {
-			return Optional.of(getSubscriptionDeliveringEmailSubscriber(myEmailSender));
+			return Optional.of(newSubscriptionDeliveringEmailSubscriber(myEmailSender));
 		} else if (theChannelType == CanonicalSubscriptionChannelType.RESTHOOK) {
-			return Optional.of(getSubscriptionDeliveringRestHookSubscriber());
+			return Optional.of(newSubscriptionDeliveringRestHookSubscriber());
 		} else {
 			return Optional.empty();
 		}

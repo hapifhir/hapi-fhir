@@ -24,8 +24,6 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegi
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryHandlerFactory;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
-import ca.uhn.fhir.jpa.subscription.match.deliver.DaoResourceRetriever;
-import ca.uhn.fhir.jpa.subscription.match.deliver.IResourceRetriever;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
@@ -86,11 +84,6 @@ public class SubscriptionProcessorConfig {
 	@Bean
 	public ISubscriptionProvider subscriptionProvider() {
 		return new DaoSubscriptionProvider();
-	}
-
-	@Bean
-	public IResourceRetriever resourceRetriever() {
-		return new DaoResourceRetriever();
 	}
 
 	@Bean
