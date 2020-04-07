@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerOptions;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
@@ -54,12 +54,12 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 	}
 
 	@Override
-	public IChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, ChannelConsumerOptions theConfig) {
+	public IChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theConfig) {
 		return getOrCreateChannel(theChannelName, theConfig.getConcurrentConsumers());
 	}
 
 	@Override
-	public IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelConsumerOptions theConfig) {
+	public IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theConfig) {
 		return getOrCreateChannel(theChannelName, theConfig.getConcurrentConsumers());
 	}
 

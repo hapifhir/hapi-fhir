@@ -20,12 +20,12 @@ package ca.uhn.fhir.jpa.subscription.channel.api;
  * #L%
  */
 
-public class ChannelConsumerOptions {
+public class ChannelConsumerSettings {
 
 	/**
 	 * Constructor
 	 */
-	public ChannelConsumerOptions() {
+	public ChannelConsumerSettings() {
 		super();
 	}
 
@@ -35,7 +35,7 @@ public class ChannelConsumerOptions {
 		return myConcurrentConsumers;
 	}
 
-	public ChannelConsumerOptions setConcurrentConsumers(int theConcurrentConsumers) {
+	public ChannelConsumerSettings setConcurrentConsumers(int theConcurrentConsumers) {
 		myConcurrentConsumers = theConcurrentConsumers;
 		return this;
 	}

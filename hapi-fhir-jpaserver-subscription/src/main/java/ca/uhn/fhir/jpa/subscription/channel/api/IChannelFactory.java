@@ -30,7 +30,7 @@ public interface IChannelFactory {
 	 * Create a channel that is used to receive messages from the queue.
 	 *
 	 * <p>
-	 * Implementations can choose to return the same object for multiple invocations of this method (and {@link #getOrCreateReceiver(String, Class, ChannelConsumerOptions)}
+	 * Implementations can choose to return the same object for multiple invocations of this method (and {@link #getOrCreateReceiver(String, Class, ChannelConsumerSettings)}
 	 * when invoked with the same {@literal theChannelName} if they need to, or they can create a new instance.
 	 * </p>
 	 *
@@ -38,18 +38,18 @@ public interface IChannelFactory {
 	 * @param theMessageType The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
 	 * @param theConfig      Contains the configuration for subscribers. Note that this parameter is provided for
 	 *                       both {@link #getOrCreateReceiver} and
-	 *                       {@link #getOrCreateProducer(String, Class, ChannelConsumerOptions)}
+	 *                       {@link #getOrCreateProducer(String, Class, ChannelConsumerSettings)}
 	 *                       even though this object is used to configure the sender only. We do this because the factory
 	 *                       may want to create a single object to be used for both the sender and receiver, so this allows
 	 *                       the config details to be known regardless of which method is returned first.
 	 */
-	IChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, ChannelConsumerOptions theConfig);
+	IChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theConfig);
 
 	/**
 	 * Create a channel that is used to send messages to the queue.
 	 *
 	 * <p>
-	 * Implementations can choose to return the same object for multiple invocations of this method (and {@link #getOrCreateReceiver(String, Class, ChannelConsumerOptions)}
+	 * Implementations can choose to return the same object for multiple invocations of this method (and {@link #getOrCreateReceiver(String, Class, ChannelConsumerSettings)}
 	 * when invoked with the same {@literal theChannelName} if they need to, or they can create a new instance.
 	 * </p>
 	 *
@@ -57,11 +57,11 @@ public interface IChannelFactory {
 	 * @param theMessageType The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
 	 * @param theConfig      Contains the configuration for subscribers. Note that this parameter is provided for
 	 *                       both {@link #getOrCreateReceiver} and
-	 *                       {@link #getOrCreateProducer(String, Class, ChannelConsumerOptions)}
+	 *                       {@link #getOrCreateProducer(String, Class, ChannelConsumerSettings)}
 	 *                       even though this object is used to configure the sender only. We do this because the factory
 	 *                       may want to create a single object to be used for both the sender and receiver, so this allows
 	 *                       the config details to be known regardless of which method is returned first.
 	 */
-	IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelConsumerOptions theConfig);
+	IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theConfig);
 
 }
