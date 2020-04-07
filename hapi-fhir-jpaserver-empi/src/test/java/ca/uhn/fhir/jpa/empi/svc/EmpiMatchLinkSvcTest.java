@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
 import java.util.Optional;
 
 import static ca.uhn.fhir.rest.api.Constants.*;
@@ -132,14 +133,14 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testPatientAttributesAreCopiedOverWhenPersonIsCreatedFromPatient() {
-		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
+		Patient patient = createPatientAndUpdateLinks(buildPatientWithNameIdAndBirthday("Gary", "GARY_ID", new Date()));;
 
 		Optional<EmpiLink> empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(patient.getIdElement().getIdPartAsLong());
 		Person read = myPersonDao.read(new IdDt(empiLink.get().getPersonPid()));
 
-		assertThat(read.getName(), is(equalTo(patient.getName())));
-		assertThat(read.getAddress(), is(equalTo(patient.getAddress())));
-		assertThat(read.getIdentifier(), is(equalTo(patient.getIdentifier())));
+		assertThat(read.getNameFirstRep().getFamily(), is(equalTo(patient.getNameFirstRep().getFamily())));
+		assertThat(read.getNameFirstRep().getGivenAsSingleString(), is(equalTo(patient.getNameFirstRep().getGivenAsSingleString())));
+		assertThat(read.getBirthDateElement().toHumanDisplay(), is(equalTo(patient.getBirthDateElement().toHumanDisplay())));
 	}
 
 

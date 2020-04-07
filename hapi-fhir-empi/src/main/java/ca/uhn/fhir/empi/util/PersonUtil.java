@@ -8,10 +8,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Person;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -96,13 +93,29 @@ public final class PersonUtil {
 				SystemAgnosticIdentifier systemAgnosticIdentifier = getOrCreateEidFromResource(thePatient);
 				person.addIdentifier(systemAgnosticIdentifier.toR4());
 				person.getMeta().addTag(buildEmpiManagedTag());
-				// FIXME EMPI populate from data from theResource
+				copyPatientDataIntoPerson((Patient)thePatient, person);
 				return person;
 			default:
 				// FIXME EMPI moar versions
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
 	}
+
+	/**
+	 * This will copy over all attributes that are copiable from Patient/Practitioner to Person.
+	 * FIXME EMPI this will eventually need to involve a whole ton of heuristics for merging rules.
+	 *
+	 * @param thePatient The incoming {@link Patient} who's data we want to copy into Person.
+	 * @param thePerson The incoming {@link Person} who needs to have their data updated.
+	 */
+	public void copyPatientDataIntoPerson(Patient thePatient, Person thePerson) {
+		thePerson.setName(thePatient.getName());
+		thePerson.setAddress(thePatient.getAddress());
+		thePerson.setTelecom(thePatient.getTelecom());
+		thePerson.setBirthDate(thePatient.getBirthDate());
+		thePerson.setGender(thePatient.getGender());
+	}
+
 
 	private Coding buildEmpiManagedTag() {
 		Coding empiManagedCoding = new Coding();
