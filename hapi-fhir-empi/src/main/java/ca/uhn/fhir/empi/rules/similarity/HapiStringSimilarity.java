@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules.json;
+package ca.uhn.fhir.empi.rules.similarity;
 
 /*-
  * #%L
@@ -20,18 +20,19 @@ package ca.uhn.fhir.empi.rules.json;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import info.debatty.java.stringsimilarity.interfaces.NormalizedStringSimilarity;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-public class HapiStringSimilarity implements EmpiFieldSimilarity {
+public class HapiStringSimilarity implements IEmpiFieldSimilarity {
 	private final NormalizedStringSimilarity myStringSimilarity;
 
 	public HapiStringSimilarity(NormalizedStringSimilarity theStringSimilarity) {
 		myStringSimilarity = theStringSimilarity;
 	}
 
-	public double similarity(IBase theLeftBase, IBase theRightBase) {
+	public double similarity(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
 			IPrimitiveType<?> leftString = (IPrimitiveType) theLeftBase;
 			IPrimitiveType<?> rightString = (IPrimitiveType) theRightBase;

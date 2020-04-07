@@ -32,7 +32,6 @@ import java.util.List;
 
 /**
  * This class is responsible for performing matching between raw-typed values of a left record and a right record.
- *
  */
 public class EmpiResourceFieldComparator implements IEmpiMatcher<IBaseResource> {
 	private final FhirContext myFhirContext;
@@ -61,18 +60,22 @@ public class EmpiResourceFieldComparator implements IEmpiMatcher<IBaseResource> 
 
 	@SuppressWarnings("rawtypes")
 	private boolean match(List<IBase> theLeftValues, List<IBase> theRightValues) {
-	boolean retval = false;
+		boolean retval = false;
 		for (IBase leftValue : theLeftValues) {
 			for (IBase rightValue : theRightValues) {
-				retval |= myEmpiFieldMatchJson.match(leftValue, rightValue);
+				retval |= match(leftValue, rightValue);
 			}
 		}
 		return retval;
 	}
 
+	private boolean match(IBase theLeftValue, IBase theRightValue) {
+		return myEmpiFieldMatchJson.getMetric().similarity(myFhirContext, theLeftValue, theRightValue) >= myEmpiFieldMatchJson.getMatchThreshold();
+	}
+
 	private void validate(IBaseResource theResource) {
 		String resourceType = theResource.getIdElement().getResourceType();
 		Validate.notNull(resourceType, "Resource type may not be null");
-		Validate.isTrue(myResourceType.equals(resourceType),"Expecting resource type %s got resource type %s", myResourceType, resourceType);
+		Validate.isTrue(myResourceType.equals(resourceType), "Expecting resource type %s got resource type %s", myResourceType, resourceType);
 	}
 }
