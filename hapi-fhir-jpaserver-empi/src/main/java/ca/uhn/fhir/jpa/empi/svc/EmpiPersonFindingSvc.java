@@ -2,10 +2,8 @@ package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.api.IEmpiCandidateSearchSvc;
-import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
+import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.MatchedTargetCandidate;
-import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
@@ -18,7 +16,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -29,23 +26,19 @@ import java.util.stream.Collectors;
 public class EmpiPersonFindingSvc {
 
 	@Autowired
+	private FhirContext myFhirContext;
+	@Autowired
 	IEmpiLinkDao myEmpiLinkDao;
 	@Autowired
 	ResourceTableHelper myResourceTableHelper;
 	@Autowired
-	private IEmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private EmpiResourceComparatorSvc myEmpiResourceComparatorSvc;
-	@Autowired
 	private EmpiLinkDaoSvc myEmpiLinkDaoSvc;
-	@Autowired
-	private IEmpiLinkSvc myEmpiLinkSvc;
 	@Autowired
 	private PersonHelper myPersonHelper;
 	@Autowired
 	private EmpiResourceDaoSvc myEmpiResourceDaoSvc;
+	@Autowired
+	private IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
 
 	/**
 	 * Given an incoming IBaseResource, limited to Patient/Practitioner, return a list of {@link MatchedPersonCandidate}
@@ -150,15 +143,7 @@ public class EmpiPersonFindingSvc {
 		//OK, so we have not found any links in the EmpiLink table with us as a target. Next, let's find possible Patient/Practitioner
 		//matches by following EMPI rules.
 		List<Long> unmatchablePersonPids = getNoMatchPersonPids(theBaseResource);
-		Collection<IBaseResource> targetCandidates = myEmpiCandidateSearchSvc.findCandidates(
-			myFhirContext.getResourceDefinition(theBaseResource).getName(),
-			theBaseResource
-		);
-
-		List<MatchedTargetCandidate> matchedCandidates = targetCandidates.stream()
-			.map(candidate -> new MatchedTargetCandidate(candidate, myEmpiResourceComparatorSvc.getMatchResult(theBaseResource, candidate)))
-			.collect(Collectors.toList());
-
+		List<MatchedTargetCandidate> matchedCandidates = myEmpiMatchFinderSvc.getMatchedTargetCandidates(myFhirContext.getResourceDefinition(theBaseResource).getName(), theBaseResource);
 
 		//Convert all possible match targets to their equivalent Persons by looking up in the EmpiLink table,
 		//while ensuring that the matches aren't in our NO_MATCH list.

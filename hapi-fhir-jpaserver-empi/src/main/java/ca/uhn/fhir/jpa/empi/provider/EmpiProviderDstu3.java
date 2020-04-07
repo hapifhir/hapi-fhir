@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.empi.provider;
 
-import ca.uhn.fhir.empi.api.IEmpiCandidateSearchSvc;
+import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -20,11 +20,11 @@ import java.util.UUID;
 @Service
 public class EmpiProviderDstu3 {
 	@Autowired
-	IEmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
+	private IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
 
 	@Operation(name="$match", type = Patient.class)
 	public Bundle match(@OperationParam(name="resource", min = 1, max = 1) Patient thePatient) {
-		Collection<IBaseResource> matches = myEmpiCandidateSearchSvc.findCandidates("Patient", thePatient);
+		Collection<IBaseResource> matches = myEmpiMatchFinderSvc.findMatches("Patient", thePatient);
 
 		Bundle retVal = new Bundle();
 		retVal.setType(Bundle.BundleType.SEARCHSET);
