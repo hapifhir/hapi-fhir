@@ -2,15 +2,15 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -51,7 +51,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.junit.Assert.fail;
 
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
@@ -202,19 +201,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	}
 
 	protected void waitForActivatedSubscriptionCount(int theSize) throws Exception {
-		// FIXME: remove?
-//		for (int i = 0; ; i++) {
-//			if (i == 10) {
-//				fail("Failed to init subscriptions");
-//			}
-//			try {
-//				mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
-//				break;
-//			} catch (ResourceVersionConflictException e) {
-//				Thread.sleep(250);
-//			}
-//		}
-
 		TestUtil.waitForSize(theSize, () -> mySubscriptionRegistry.size());
 		Thread.sleep(500);
 	}

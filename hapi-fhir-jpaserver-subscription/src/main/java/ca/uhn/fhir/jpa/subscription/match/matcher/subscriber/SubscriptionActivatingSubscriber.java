@@ -83,7 +83,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 		switch (payload.getOperationType()) {
 			case CREATE:
 			case UPDATE:
-				activateAndRegisterSubscriptionIfRequiredInTransaction(payload.getNewPayload(myFhirContext));
+				activateOrRegisterSubscriptionIfRequired(payload.getNewPayload(myFhirContext));
 				break;
 			case DELETE:
 			case MANUALLY_TRIGGERED:
@@ -107,12 +107,6 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 
 		if (SubscriptionConstants.REQUESTED_STATUS.equals(statusString)) {
 			return activateSubscription(theSubscription);
-			// FIXME: remove
-//		} else if (SubscriptionConstants.ACTIVE_STATUS.equals(statusString)) {
-//			return mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(theSubscription);
-//		} else {
-//			 Status isn't "active" or "requested"
-//			return mySubscriptionRegistry.unregisterSubscriptionIfRegistered(theSubscription, statusString);
 		}
 
 		return false;
@@ -136,10 +130,6 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 			subscriptionDao.update(subscription);
 			return false;
 		}
-	}
-
-	private void activateAndRegisterSubscriptionIfRequiredInTransaction(IBaseResource theSubscription) {
-		activateOrRegisterSubscriptionIfRequired(theSubscription);
 	}
 
 }

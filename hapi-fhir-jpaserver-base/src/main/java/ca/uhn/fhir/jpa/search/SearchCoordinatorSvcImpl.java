@@ -24,10 +24,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -294,16 +294,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
 		return new ResourceGoneException(msg);
 	}
-
-//	FIXME: remove?
-//	private void populateBundleProvider(PersistedJpaBundleProvider theRetVal) {
-//		theRetVal.setContext(myContext);
-//		theRetVal.setEntityManager(myEntityManager);
-//		theRetVal.setPlatformTransactionManager(myManagedTxManager);
-//		theRetVal.setSearchCacheSvc(mySearchCacheSvc);
-//		theRetVal.setSearchCoordinatorSvc(this);
-//		theRetVal.setInterceptorBroadcaster(myInterceptorBroadcaster);
-//	}
 
 	@Override
 	public IBundleProvider registerSearch(final IFhirResourceDao theCallingDao, final SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, RequestDetails theRequestDetails) {

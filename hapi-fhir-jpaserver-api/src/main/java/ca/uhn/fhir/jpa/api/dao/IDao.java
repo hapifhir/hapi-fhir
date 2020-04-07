@@ -41,12 +41,6 @@ public interface IDao {
 
 	FhirContext getContext();
 
-	// FIXME: remove
-//	/**
-//	 * Populate all of the runtime dependencies that a bundle provider requires in order to work
-//	 */
-//	void injectDependenciesIntoBundleProvider(PersistedJpaBundleProvider theProvider);
-
 	IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation);
 
 	<R extends IBaseResource> R toResource(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<ResourceTag> theTagList, boolean theForHistoryOperation);
