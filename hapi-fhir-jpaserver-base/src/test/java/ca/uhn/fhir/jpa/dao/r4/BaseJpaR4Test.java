@@ -140,6 +140,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myCarePlanDaoR4")
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired
+	@Qualifier("myCareTeamDaoR4")
+	protected IFhirResourceDao<CareTeam> myCareTeamDao;
+	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
 	@Autowired
