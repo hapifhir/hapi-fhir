@@ -30,11 +30,10 @@ public final class EIDHelper {
 	@Autowired
 	private IEmpiConfig myEmpiConfig;
 
-	private EIDHelper(){}
-
 	@VisibleForTesting
-	EIDHelper(FhirContext theFhirContext) {
+	EIDHelper(FhirContext theFhirContext, IEmpiConfig theEmpiConfig) {
 		myFhirContext = theFhirContext;
+		myEmpiConfig = theEmpiConfig;
 	}
 
 
