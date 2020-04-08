@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.dao.predicate;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -328,9 +327,13 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				throw newInvalidTargetTypeForChainException(theResourceName, theParamName, typeValue);
 			}
 
+			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theJoin);
+			Predicate sourceTypeParameter = myCriteriaBuilder.equal(theJoin.get("mySourceResourceType"), myResourceName);
 			Predicate targetTypeParameter = myCriteriaBuilder.equal(theJoin.get("myTargetResourceType"), typeValue);
-			myQueryRoot.addPredicate(targetTypeParameter);
-			return targetTypeParameter;
+
+			Predicate composite = myCriteriaBuilder.and(pathPredicate, sourceTypeParameter, targetTypeParameter);
+			myQueryRoot.addPredicate(composite);
+			return composite;
 		}
 
 		boolean foundChainMatch = false;
@@ -424,12 +427,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	}
 
 	Predicate createResourceLinkPathPredicate(String theResourceName, String theParamName, From<?, ? extends ResourceLink> from) {
-		return createResourceLinkPathPredicate(myContext, theParamName, from, theResourceName);
-	}
-
-	private Predicate createResourceLinkPathPredicate(FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> theFrom,
-																	  String theResourceType) {
-		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(theResourceType);
+		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceName);
 		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
 		List<String> path = param.getPathsSplit();
 
@@ -442,12 +440,18 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		ListIterator<String> iter = path.listIterator();
 		while (iter.hasNext()) {
 			String nextPath = trim(iter.next());
-			if (!nextPath.contains(theResourceType + ".")) {
+			if (!nextPath.contains(theResourceName + ".")) {
 				iter.remove();
 			}
 		}
 
-		return theFrom.get("mySourcePath").in(path);
+		// one value
+		if (path.size() == 1) {
+			return myCriteriaBuilder.equal(from.get("mySourcePath").as(String.class), path.get(0));
+		}
+
+		// multiple values
+		return from.get("mySourcePath").in(path);
 	}
 
 	private IQueryParameterType mapReferenceChainToRawParamType(String remainingChain, RuntimeSearchParam param, String theParamName, String qualifier, Class<? extends IBaseResource> nextType, String chain, boolean isMeta, String resourceId) {
