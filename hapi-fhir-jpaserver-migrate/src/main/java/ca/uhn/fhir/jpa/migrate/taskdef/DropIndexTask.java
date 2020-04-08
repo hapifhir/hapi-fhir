@@ -35,7 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class DropIndexTask extends BaseTableTask<DropIndexTask> {
+public class DropIndexTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropIndexTask.class);
 	private String myIndexName;
@@ -111,8 +111,10 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 					sql.add("alter table " + theTableName + " drop index " + theIndexName);
 					break;
 				case H2_EMBEDDED:
-				case DERBY_EMBEDDED:
 					sql.add("drop index " + theIndexName);
+					break;
+				case DERBY_EMBEDDED:
+					sql.add("alter table " + theTableName + " drop constraint " + theIndexName);
 					break;
 				case POSTGRES_9_4:
 					sql.add("alter table " + theTableName + " drop constraint if exists " + theIndexName + " cascade");

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
@@ -8,12 +9,17 @@ import org.junit.Test;
 
 import java.sql.SQLException;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 
 public class AddTableByColumnTaskTest extends BaseTest {
+	public AddTableByColumnTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
+
 	@Test
 	public void testAddTable() throws SQLException {
 
@@ -27,7 +33,13 @@ public class AddTableByColumnTaskTest extends BaseTest {
 			.filter(s -> !s.startsWith("FK_REF_INDEX_"))
 			.filter(s -> !s.startsWith("PRIMARY_KEY_"))
 			.collect(Collectors.toSet());
-		assertThat(indexes, containsInAnyOrder("IDX_BONJOUR"));
+
+		// Derby auto-creates constraints with a system name for unique indexes
+		if (getDriverType().equals(DriverTypeEnum.DERBY_EMBEDDED)) {
+			indexes.removeIf(t->t.startsWith("SQL"));
+		}
+
+		assertThat(indexes.toString(), indexes, containsInAnyOrder("IDX_BONJOUR"));
 	}
 
 	private static class MyMigrationTasks extends BaseMigrationTasks<VersionEnum> {

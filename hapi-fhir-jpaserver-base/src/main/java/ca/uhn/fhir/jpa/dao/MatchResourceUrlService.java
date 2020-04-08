@@ -81,7 +81,6 @@ public class MatchResourceUrlService {
 				.add(StorageProcessingMessage.class, message);
 			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
 		}
-
 		return retVal;
 	}
 

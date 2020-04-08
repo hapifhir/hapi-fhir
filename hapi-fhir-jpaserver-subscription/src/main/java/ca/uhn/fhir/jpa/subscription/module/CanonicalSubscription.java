@@ -21,8 +21,7 @@ package ca.uhn.fhir.jpa.subscription.module;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -39,9 +38,7 @@ import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class CanonicalSubscription implements Serializable, Cloneable {
+public class CanonicalSubscription implements Serializable, Cloneable, IModelJson {
 
 	private static final long serialVersionUID = 1L;
 
@@ -279,9 +276,7 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 		}
 	}
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-	public static class EmailDetails {
+	public static class EmailDetails implements IModelJson {
 
 		@JsonProperty("from")
 		private String myFrom;
@@ -334,9 +329,7 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 		}
 	}
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-	public static class RestHookDetails {
+	public static class RestHookDetails implements IModelJson {
 
 		@JsonProperty("stripVersionId")
 		private boolean myStripVersionId;
@@ -391,9 +384,7 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 
 	}
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-	public static class CanonicalEventDefinition {
+	public static class CanonicalEventDefinition implements IModelJson {
 
 		/**
 		 * Constructor

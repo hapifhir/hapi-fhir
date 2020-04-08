@@ -91,7 +91,7 @@ public class BlockingContentR4Test {
 			if (myByteCount++ == 10) {
 				ourLog.info("About to block...");
 				try {
-					Thread.sleep(30000);
+					Thread.sleep(3000);
 				} catch (InterruptedException e) {
 					ourLog.warn("Interrupted", e);
 				}

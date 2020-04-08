@@ -10,7 +10,7 @@ This page outlines ways that the client can be configured for specific behaviour
 
 By default, the client will query the server before the very first operation to download the server's conformance/metadata statement and verify that the server is appropriate for the given client. This check is only done once per server endpoint for a given FhirContext.
 
-This check is useful to prevent bugs or unexpected behaviour when talking to servers. It may introduce unneccesary overhead however in circumstances where the client and server are known to be compatible. The following example shows how to disable this check.
+This check is useful to prevent bugs or unexpected behaviour when talking to servers. It may introduce unnecessary overhead however in circumstances where the client and server are known to be compatible. The following example shows how to disable this check.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|dontValidate}}
@@ -36,7 +36,7 @@ REST clients (both Generic and Annotation-Driven) use [Apache HTTP Client](http:
 
 The Apache HTTP Client is very powerful and extremely flexible, but can be confusing at first to configure, because of the low-level approach that the library uses.
 
-In many cases, the default configuration should suffice. HAPI FHIR also encapsulates some of the more common configuration settings you might want to use (socket timesouts, proxy settings, etc.) so that these can be configured through HAPI's API without needing to understand the underlying HTTP Client library.
+In many cases, the default configuration should suffice. HAPI FHIR also encapsulates some of the more common configuration settings you might want to use (socket timeouts, proxy settings, etc.) so that these can be configured through HAPI's API without needing to understand the underlying HTTP Client library.
 
 This configuration is provided by accessing the [IRestfulClientFactory](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/client/api/IRestfulClientFactory.html) class from the FhirContext.
 
@@ -62,7 +62,7 @@ The following example shows how to configure the use of an HTTP proxy in the cli
 
 As of HAPI FHIR 2.0, an alternate client implementation is available. This client replaces the low-level Apache HttpClient implementation with the Square [OkHttp](http://square.github.io/okhttp/) library.
 
-Changing HTTP implementations should be mostly ransparent (it has no effect on the actual FHIR semantics which are transmitted over the wire) but might be useful if you have an application that uses OkHttp in other parts of the application and has specific configuration for that library.
+Changing HTTP implementations should be mostly transparent (it has no effect on the actual FHIR semantics which are transmitted over the wire) but might be useful if you have an application that uses OkHttp in other parts of the application and has specific configuration for that library.
 
 Note that as of HAPI FHIR 2.1, OkHttp is the default provider on Android, and will be used without any configuration being required. This is done because HttpClient is deprecated on Android and has caused problems in the past.
 

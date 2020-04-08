@@ -950,9 +950,9 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 			.operation()
 			.onType(ValueSet.class)
 			.named("validate-code")
-			.withParameter(Parameters.class, "code", new StringType("Y"))
-			.andParameter("url", new StringType("http://hl7.org/fhir/ValueSet/yesnodontknow"))
-			.andParameter("system", new StringType("http://terminology.hl7.org/CodeSystem/v2-0136"))
+			.withParameter(Parameters.class, "code", new StringType("male"))
+			.andParameter("url", new StringType("http://hl7.org/fhir/ValueSet/administrative-gender"))
+			.andParameter("system", new StringType("http://hl7.org/fhir/administrative-gender"))
 			.useHttpGet()
 			.execute();
 
@@ -966,7 +966,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), containsStringIgnoringCase("succeeded"));
 
 		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Yes", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("Male", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	@Test

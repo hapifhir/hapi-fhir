@@ -27,7 +27,12 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Value for {@link Hook#value()}
@@ -373,6 +378,44 @@ public enum Pointcut {
 		"javax.servlet.http.HttpServletResponse"
 	),
 
+
+	/**
+	 * <b>Server Hook:</b>
+	 * This method is called when a stream writer is generated that will be used to stream a non-binary response to
+	 * a client. Hooks may return a wrapped writer which adds additional functionality as needed.
+	 *
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * java.io.Writer - The response writing Writer. Typically a hook will wrap this writer and layer additional functionality
+	 * into the wrapping writer.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hook methods should return a {@link Writer} instance that will be used to stream the response. Hook methods
+	 * should not throw any exception.
+	 * </p>
+	 *
+	 * @since 5.0.0
+	 */
+	SERVER_OUTGOING_WRITER_CREATED(Writer.class,
+		"java.io.Writer",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+		),
 
 
 	/**
@@ -1643,12 +1686,12 @@ public enum Pointcut {
 	 * </p>
 	 * <p>
 	 * THIS IS AN EXPERIMENTAL HOOK AND MAY BE REMOVED OR CHANGED WITHOUT WARNING.
-	 *	</p>
-	 *	<p>
+	 * </p>
+	 * <p>
 	 * Note that this is a performance tracing hook. Use with caution in production
 	 * systems, since calling it may (or may not) carry a cost.
-	 *	</p>
-	 *	<p>
+	 * </p>
+	 * <p>
 	 * Hooks may accept the following parameters:
 	 * </p>
 	 * <ul>
@@ -1722,9 +1765,7 @@ public enum Pointcut {
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.
 	 */
-	TEST_RO(BaseServerResponseException.class, String.class.getName(), String.class.getName())
-
-	;
+	TEST_RO(BaseServerResponseException.class, String.class.getName(), String.class.getName());
 
 	private final List<String> myParameterTypes;
 	private final Class<?> myReturnType;

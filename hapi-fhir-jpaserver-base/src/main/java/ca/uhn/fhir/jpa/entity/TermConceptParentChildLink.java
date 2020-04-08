@@ -32,14 +32,14 @@ import java.io.Serializable;
 public class TermConceptParentChildLink implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	@ManyToOne()
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CHILD_PID", nullable = false, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CHILD"))
 	private TermConcept myChild;
 
 	@Column(name = "CHILD_PID", insertable = false, updatable = false)
 	private Long myChildPid;
 
-	@ManyToOne()
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CODESYSTEM_PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CS"))
 	private TermCodeSystemVersion myCodeSystem;
 
@@ -47,7 +47,7 @@ public class TermConceptParentChildLink implements Serializable {
 	@Fields({@Field(name = "myCodeSystemVersionPid")})
 	private long myCodeSystemVersionPid;
 
-	@ManyToOne(cascade = {})
+	@ManyToOne(fetch = FetchType.LAZY, cascade = {})
 	@JoinColumn(name = "PARENT_PID", nullable = false, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_PARENT"))
 	private TermConcept myParent;
 

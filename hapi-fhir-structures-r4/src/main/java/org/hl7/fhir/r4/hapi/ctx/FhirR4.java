@@ -26,13 +26,12 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.r4.hapi.fluentpath.FluentPathR4;
+import org.hl7.fhir.r4.hapi.fluentpath.FhirPathR4;
 import org.hl7.fhir.r4.hapi.rest.server.R4BundleFactory;
 import org.hl7.fhir.r4.model.*;
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
-import ca.uhn.fhir.fluentpath.IFluentPath;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
@@ -43,13 +42,8 @@ public class FhirR4 implements IFhirVersion {
 	private String myId;
 
 	@Override
-	public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
-		return new FluentPathR4(theFhirContext);
-	}
-
-	@Override
-	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
-		return ReflectionUtil.newInstanceOfFhirProfileValidationSupport("org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport");
+	public IFhirPath createFhirPathExecutor(FhirContext theFhirContext) {
+		return new FhirPathR4(theFhirContext);
 	}
 
 	@Override

@@ -19,34 +19,38 @@
  */
 package ca.uhn.fhir.parser.json;
 
+import ca.uhn.fhir.parser.DataFormatException;
+
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 
-import ca.uhn.fhir.parser.DataFormatException;
-
 /**
- * This interface is the generic representation of any sort of data 
+ * This interface is the generic representation of any sort of data
  * structure that looks and smells like JSON. These data structures
  * can be abstractly viewed as a <code.Map</code> or <code>List</code>
  * whose members are other Maps, Lists, or scalars (Strings, Numbers, Boolean)
- * 
+ *
  * @author Bill.Denton
  */
 public interface JsonLikeStructure {
-	public JsonLikeStructure getInstance();
-	
+	JsonLikeStructure getInstance();
+
 	/**
 	 * Parse the JSON document into the Json-like structure
 	 * so that it can be navigated.
-	 * 
+	 *
 	 * @param theReader a <code>Reader</code> that will
-	 * 			process the JSON input stream
+	 *                  process the JSON input stream
 	 * @throws DataFormatException when invalid JSON is received
 	 */
-	public void load (Reader theReader) throws DataFormatException;
-	public void load (Reader theReader, boolean allowArray) throws DataFormatException;
-	public JsonLikeObject getRootObject () throws DataFormatException;
-	public JsonLikeArray getRootArray () throws DataFormatException;
-	public JsonLikeWriter getJsonLikeWriter ();
-	public JsonLikeWriter getJsonLikeWriter (Writer writer);
+	void load(Reader theReader) throws DataFormatException;
+
+	void load(Reader theReader, boolean allowArray) throws DataFormatException;
+
+	JsonLikeObject getRootObject() throws DataFormatException;
+
+	JsonLikeWriter getJsonLikeWriter();
+
+	JsonLikeWriter getJsonLikeWriter(Writer writer) throws IOException;
 }

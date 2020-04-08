@@ -1,0 +1,7 @@
+---
+type: add
+issue: 1774
+title: The REST Server will now raise an error if a client tries to perform a FHIR *read* operation while using
+   URL paramaters that are specific to FHIR *search* operations. This should help clients who are mistaking the
+   semantics between the two operations, as previously the search parameters were simply ignored leading to
+   confusion. Thanks to Jafer Khan for implementing this!

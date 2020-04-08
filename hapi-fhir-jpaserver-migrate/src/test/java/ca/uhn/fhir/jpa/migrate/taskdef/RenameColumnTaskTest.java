@@ -6,11 +6,18 @@ import org.junit.Test;
 
 import java.sql.SQLException;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class RenameColumnTaskTest extends BaseTest {
+
+	public RenameColumnTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
 
 	@Test
 	public void testColumnAlreadyExists() throws SQLException {

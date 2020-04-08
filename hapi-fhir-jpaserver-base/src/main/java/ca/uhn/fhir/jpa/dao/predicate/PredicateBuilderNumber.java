@@ -94,7 +94,7 @@ class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateB
 
 				String invalidMessageName = "invalidNumberPrefix";
 
-				Predicate predicateNumeric = createPredicateNumeric(theResourceName, theParamName, join, myBuilder, nextOr, prefix, value, fromObj, invalidMessageName);
+				Predicate predicateNumeric = createPredicateNumeric(theResourceName, theParamName, join, myCriteriaBuilder, nextOr, prefix, value, fromObj, invalidMessageName);
 				Predicate predicateOuter = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, predicateNumeric);
 				codePredicates.add(predicateOuter);
 
@@ -104,7 +104,7 @@ class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateB
 
 		}
 
-		Predicate predicate = myBuilder.or(toArray(codePredicates));
+		Predicate predicate = myCriteriaBuilder.or(toArray(codePredicates));
 		myQueryRoot.addPredicate(predicate);
 		return predicate;
 	}

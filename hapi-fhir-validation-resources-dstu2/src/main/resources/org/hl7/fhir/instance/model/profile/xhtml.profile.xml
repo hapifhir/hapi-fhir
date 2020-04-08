@@ -1,0 +1,118 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="xhtml"/>
+ <url value="http://hl7.org/fhir/StructureDefinition/xhtml"/>
+ <name value="xhtml"/>
+ <status value="draft"/>
+ <publisher value="HL7 FHIR Standard"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <date value="2017-07-27T08:19:05-04:00"/>
+ <description value="Base StructureDefinition for xhtml Type: A sequence of Unicode characters"/>
+ <fhirVersion value="1.0.2"/>
+ <kind value="datatype"/>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
+ <snapshot>
+  <element>
+   <path value="xhtml"/>
+   <short value="Primitive Type xhtml"/>
+   <definition value="A sequence of Unicode characters"/>
+   <comments value="Note that FHIR xhtmls may not exceed 1MB in size"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Element"/>
+   </type>
+  </element>
+  <element>
+   <path value="xhtml.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="xhtml.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="xhtml.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+   </type>
+  </element>
+  <element>
+   <path value="xhtml.value"/>
+   <representation value="xmlAttr"/>
+   <short value="Primitive value for xhtml"/>
+   <definition value="The actual value"/>
+   <min value="0"/>
+   <max value="1"/>
+   <!-- Note: primitive values do not have an assigned type
+e.g. this is compiler magic
+XML and JSON types provided by extension -->
+   <type>
+    <code>
+     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
+      <valueString value="xhtml"/>
+     </extension>
+     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type">
+      <valueString value="xhtml"/>
+     </extension>
+    </code>
+   </type>
+   <maxLength value="1048576"/>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="xhtml"/>
+   <short value="Primitive Type xhtml"/>
+   <definition value="A sequence of Unicode characters"/>
+   <comments value="Note that FHIR xhtmls may not exceed 1MB in size"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Element"/>
+   </type>
+  </element>
+  <element>
+   <path value="xhtml.value"/>
+   <representation value="xmlAttr"/>
+   <short value="Primitive value for xhtml"/>
+   <definition value="Primitive value for xhtml"/>
+   <min value="0"/>
+   <max value="1"/>
+   <!-- Note: primitive values do not have an assigned type
+e.g. this is compiler magic
+XML and JSON types provided by extension -->
+   <type>
+    <code>
+     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
+      <valueString value="xhtml"/>
+     </extension>
+     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type">
+      <valueString value="xhtml"/>
+     </extension>
+    </code>
+   </type>
+   <maxLength value="1048576"/>
+  </element>
+ </differential>
+</StructureDefinition>
