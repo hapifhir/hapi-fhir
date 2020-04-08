@@ -8,7 +8,7 @@ to create your server) and the overlay drops a number of files into your project
 
 # Adding the Overlay
 
-These instructions assume that you have an exsiting web project which uses Maven to build. The POM.xml should have a "packaging" type of "war".
+These instructions assume that you have an existing web project which uses Maven to build. The POM.xml should have a "packaging" type of "war".
 
 Adding the overlay to your project is relatively simple. First, add the "hapi-fhir-testpage-overlay" dependency to the dependencies section of your POM.xml file.
 
@@ -54,7 +54,7 @@ Then, add the following WAR plugin to the plugins section of your POM.xml
 </build>
 ```
 
-Then, create a Java source file called `FhirTesterConfig.java` and copy in the following contents:
+Then, create a Java source file called `FhirTesterConfig.java` and copy the following contents:
 
 <macro name="snippet">
 <param name="file" value="restful-server-example/src/main/java/ca/uhn/example/config/FhirTesterConfig.java" />

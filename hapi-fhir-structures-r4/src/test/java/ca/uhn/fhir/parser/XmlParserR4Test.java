@@ -7,18 +7,26 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 
 import ca.uhn.fhir.test.BaseTest;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 
 import java.io.IOException;
+import java.net.URL;
 
 public class XmlParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(XmlParserR4Test.class);
@@ -79,6 +87,23 @@ public class XmlParserR4Test extends BaseTest {
 
 	}
 
+	@Test
+	public void testParseBundleWithMultipleNestedContainedResources() throws Exception {
+		URL url = Resources.getResource("bundle-with-two-patient-resources.xml");
+		String text = Resources.toString(url, Charsets.UTF_8);
+
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, text);
+		
+		assertEquals("12346", getPatientIdValue(bundle, 0));
+		assertEquals("12345", getPatientIdValue(bundle, 1));
+	}
+
+	private String getPatientIdValue(Bundle input, int entry) {
+		final DocumentReference documentReference = (DocumentReference)input.getEntry().get(entry).getResource();
+		final Patient patient = (Patient) documentReference.getSubject().getResource();
+		return patient.getIdentifier().get(0).getValue();
+	}
+
 	/**
 	 * See #1658
 	 */
@@ -90,6 +115,44 @@ public class XmlParserR4Test extends BaseTest {
 		assertThat(encoded, containsString("lang=\"en-US\""));
 		ourLog.info(encoded);
 	}
+
+	/**
+	 * Ensure that a contained bundle doesn't cause a crash
+	 */
+	@Test
+	public void testEncodeContainedBundle() {
+		String auditEvent = "<AuditEvent xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <contained>\n" +
+			"      <Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"         <id value=\"REASONS\"/>\n" +
+			"         <entry>\n" +
+			"            <resource>\n" +
+			"               <Condition xmlns=\"http://hl7.org/fhir\">\n" +
+			"                  <id value=\"123\"/>\n" +
+			"               </Condition>\n" +
+			"            </resource>\n" +
+			"         </entry>\n" +
+			"      </Bundle>\n" +
+			"   </contained>\n" +
+			"   <contained>\n" +
+			"      <MeasureReport xmlns=\"http://hl7.org/fhir\">\n" +
+			"         <id value=\"MRPT5000602611RD\"/>\n" +
+			"         <evaluatedResource>\n" +
+			"            <reference value=\"#REASONS\"/>\n" +
+			"         </evaluatedResource>\n" +
+			"      </MeasureReport>\n" +
+			"   </contained>\n" +
+			"   <entity>\n" +
+			"      <what>\n" +
+			"         <reference value=\"#MRPT5000602611RD\"/>\n" +
+			"      </what>\n" +
+			"   </entity>\n" +
+			"</AuditEvent>";
+		AuditEvent ae = ourCtx.newXmlParser().parseResource(AuditEvent.class, auditEvent);
+		String auditEventAsString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(ae);
+		assertEquals(auditEvent, auditEventAsString);
+	}
+
 
 
 }

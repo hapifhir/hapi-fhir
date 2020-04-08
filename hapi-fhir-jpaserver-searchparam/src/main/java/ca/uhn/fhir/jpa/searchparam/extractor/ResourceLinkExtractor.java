@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -39,6 +40,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -63,15 +66,17 @@ public class ResourceLinkExtractor {
 
 		ISearchParamExtractor.SearchParamSet<PathAndRef> refs = mySearchParamExtractor.extractResourceLinks(theResource);
 		SearchParamExtractorService.handleWarnings(theRequest, myInterceptorBroadcaster, refs);
+
+		Map<String, IResourceLookup> resourceIdToResolvedTarget = new HashMap<>();
 		for (PathAndRef nextPathAndRef : refs) {
 			RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(resourceName, nextPathAndRef.getSearchParamName());
-			extractResourceLinks(theParams, theEntity, theUpdateTime, theResourceLinkResolver, searchParam, nextPathAndRef, theFailOnInvalidReference, theRequest);
+			extractResourceLinks(theParams, theEntity, theUpdateTime, theResourceLinkResolver, searchParam, nextPathAndRef, theFailOnInvalidReference, theRequest, resourceIdToResolvedTarget);
 		}
 
 		theEntity.setHasLinks(theParams.myLinks.size() > 0);
 	}
 
-	private void extractResourceLinks(ResourceIndexedSearchParams theParams, ResourceTable theEntity, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, RuntimeSearchParam theRuntimeSearchParam, PathAndRef thePathAndRef, boolean theFailOnInvalidReference, RequestDetails theRequest) {
+	private void extractResourceLinks(ResourceIndexedSearchParams theParams, ResourceTable theEntity, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, RuntimeSearchParam theRuntimeSearchParam, PathAndRef thePathAndRef, boolean theFailOnInvalidReference, RequestDetails theRequest, Map<String, IResourceLookup> theResourceIdToResolvedTarget) {
 		IBaseReference nextReference = thePathAndRef.getRef();
 		IIdType nextId = nextReference.getReferenceElement();
 		String path = thePathAndRef.getPath();
@@ -87,8 +92,10 @@ public class ResourceLinkExtractor {
 
 		theParams.myPopulatedResourceLinkParameters.add(thePathAndRef.getSearchParamName());
 
-		if (LogicalReferenceHelper.isLogicalReference(myModelConfig, nextId)) {
-			ResourceLink resourceLink = new ResourceLink(thePathAndRef.getPath(), theEntity, nextId, theUpdateTime);
+		boolean canonical = thePathAndRef.isCanonical();
+		if (LogicalReferenceHelper.isLogicalReference(myModelConfig, nextId) || canonical) {
+			String value = nextId.getValue();
+			ResourceLink resourceLink = ResourceLink.forLogicalReference(thePathAndRef.getPath(), theEntity, value, theUpdateTime);
 			if (theParams.myLinks.add(resourceLink)) {
 				ourLog.debug("Indexing remote resource reference URL: {}", nextId);
 			}
@@ -130,7 +137,7 @@ public class ResourceLinkExtractor {
 				String msg = myContext.getLocalizer().getMessage(BaseSearchParamExtractor.class, "externalReferenceNotAllowed", nextId.getValue());
 				throw new InvalidRequestException(msg);
 			} else {
-				ResourceLink resourceLink = new ResourceLink(thePathAndRef.getPath(), theEntity, nextId, theUpdateTime);
+				ResourceLink resourceLink = ResourceLink.forAbsoluteReference(thePathAndRef.getPath(), theEntity, nextId, theUpdateTime);
 				if (theParams.myLinks.add(resourceLink)) {
 					ourLog.debug("Indexing remote resource reference URL: {}", nextId);
 				}
@@ -151,21 +158,36 @@ public class ResourceLinkExtractor {
 		}
 
 		theResourceLinkResolver.validateTypeOrThrowException(type);
-		ResourceLink resourceLink = createResourceLink(theEntity, theUpdateTime, theResourceLinkResolver, theRuntimeSearchParam, path, thePathAndRef, nextId, typeString, type, nextReference, theRequest);
+		ResourceLink resourceLink = createResourceLink(theEntity, theUpdateTime, theResourceLinkResolver, theRuntimeSearchParam, path, thePathAndRef, nextId, typeString, type, nextReference, theRequest, theResourceIdToResolvedTarget);
 		if (resourceLink == null) {
 			return;
 		}
 		theParams.myLinks.add(resourceLink);
 	}
 
-	private ResourceLink createResourceLink(ResourceTable theEntity, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
-		ResourceTable targetResource = theResourceLinkResolver.findTargetResource(nextSpDef, theNextPathsUnsplit, theNextId, theTypeString, theType, theReference, theRequest);
+	private ResourceLink createResourceLink(ResourceTable theEntity, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, Map<String, IResourceLookup> theResourceIdToResolvedTarget) {
+		/*
+		 * We keep a cache of resolved target resources. This is good since for some resource types, there
+		 * are multiple search parameters that map to the same element path within a resource (e.g.
+		 * Observation:patient and Observation.subject and we don't want to force a resolution of the
+		 * target any more times than we have to.
+		 */
+
+		IResourceLookup targetResource = theResourceIdToResolvedTarget.get(theNextId.getValue());
+		if (targetResource == null) {
+			targetResource = theResourceLinkResolver.findTargetResource(nextSpDef, theNextPathsUnsplit, theNextId, theTypeString, theType, theReference, theRequest);
+		}
 
 		if (targetResource == null) {
 			return null;
 		}
 
-		return new ResourceLink(nextPathAndRef.getPath(), theEntity, targetResource, theUpdateTime);
+		theResourceIdToResolvedTarget.put(theNextId.getValue(), targetResource);
+
+		String targetResourceType = targetResource.getResourceType();
+		Long targetResourcePid = targetResource.getResourceId();
+		String targetResourceIdPart = theNextId.getIdPart();
+		return ResourceLink.forLocalReference(nextPathAndRef.getPath(), theEntity, targetResourceType, targetResourcePid, targetResourceIdPart, theUpdateTime);
 	}
 
 }

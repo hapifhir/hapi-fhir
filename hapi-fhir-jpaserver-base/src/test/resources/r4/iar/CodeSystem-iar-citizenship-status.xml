@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeSystem xmlns="http://hl7.org/fhir">
+	<id value="iar-citizenship-status"/>
+	<url value="http://ccim.on.ca/fhir/iar/CodeSystem/iar-citizenship-status"/>
+	<version value="0.1"/>
+	<name value="Citizenship Status"/>
+	<status value="draft"/>
+	<date value="2019-08-22"/>
+	<publisher value="CCIM"/>
+	<contact>
+		<telecom>
+			<system value="other"/>
+			<value value="https://www.ccim.on.ca"/>
+		</telecom>
+	</contact>
+	<compositional value="false"/>
+	<content value="complete"/>
+	<concept>
+		<code value="CDN"/>
+		<display value="Canadian Citizen"/>
+	</concept>
+	<concept>
+		<code value="PR"/>
+		<display value="Permanent Resident"/>
+	</concept>
+	<concept>
+		<code value="TR"/>
+		<display value="Temporary Resident "/>
+	</concept>
+	<concept>
+		<code value="REF"/>
+		<display value="Refugee"/>
+	</concept>
+</CodeSystem>

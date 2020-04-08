@@ -51,6 +51,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -153,6 +154,22 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	@Override
 	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		IIdType requestId = theRequest.getId();
+		FhirContext ctx = theRequest.getServer().getFhirContext();
+
+		String[] invalidQueryStringParams = new String[]{Constants.PARAM_CONTAINED, Constants.PARAM_COUNT, Constants.PARAM_INCLUDE, Constants.PARAM_REVINCLUDE, Constants.PARAM_SORT, Constants.PARAM_SEARCH_TOTAL_MODE};
+		List<String> invalidQueryStringParamsInRequest = new ArrayList<>();
+		Set<String> queryStringParamsInRequest = theRequest.getParameters().keySet();
+
+		for (String queryStringParamName : queryStringParamsInRequest) {
+			String lowercaseQueryStringParamName = queryStringParamName.toLowerCase();
+			if (StringUtils.startsWithAny(lowercaseQueryStringParamName, invalidQueryStringParams)) {
+				invalidQueryStringParamsInRequest.add(queryStringParamName);
+			}
+		}
+
+		if (!invalidQueryStringParamsInRequest.isEmpty()) {
+			throw new InvalidRequestException(ctx.getLocalizer().getMessage(ReadMethodBinding.class, "invalidParamsInRequest", invalidQueryStringParamsInRequest));
+		}
 
 		theMethodParams[myIdIndex] = ParameterUtil.convertIdToType(requestId, myIdParameterType);
 
@@ -160,7 +177,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		IBundleProvider retVal = toResourceList(response);
 
 
-		if (retVal.size() == 1) {
+		if (Integer.valueOf(1).equals(retVal.size())) {
 			List<IBaseResource> responseResources = retVal.getResources(0, 1);
 			IBaseResource responseResource = responseResources.get(0);
 
@@ -201,7 +218,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 				
 		} // if we have at least 1 result
-		
+
 		
 		return retVal;
 	}

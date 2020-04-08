@@ -25,10 +25,10 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.hapi.validation.PrePopulatedValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
@@ -56,9 +56,9 @@ public class ValidateDirectory {
       IParser xmlParser = ctx.newXmlParser();
       IParser jsonParser = ctx.newJsonParser();
 
-      Map<String, StructureDefinition> structureDefinitions = new HashMap<String, StructureDefinition>();
-      Map<String, CodeSystem> codeSystems = new HashMap<String, CodeSystem>();
-      Map<String, ValueSet> valueSets = new HashMap<String, ValueSet>();
+      Map<String, IBaseResource> structureDefinitions = new HashMap<>();
+      Map<String, IBaseResource> codeSystems = new HashMap<>();
+      Map<String, IBaseResource> valueSets = new HashMap<>();
 
       // Load all profile files
       for (File nextFile : profileDirectory.listFiles()) {
@@ -90,11 +90,11 @@ public class ValidateDirectory {
          }
       }
 
-      FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
+      FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 
       ValidationSupportChain validationSupportChain = new ValidationSupportChain();
-      validationSupportChain.addValidationSupport(new DefaultProfileValidationSupport());
-      validationSupportChain.addValidationSupport(new PrePopulatedValidationSupport(structureDefinitions, valueSets, codeSystems));
+      validationSupportChain.addValidationSupport((ca.uhn.fhir.context.support.IValidationSupport) new DefaultProfileValidationSupport(ctx));
+      validationSupportChain.addValidationSupport((ca.uhn.fhir.context.support.IValidationSupport) new PrePopulatedValidationSupport(ctx, structureDefinitions, valueSets, codeSystems));
 
       instanceValidator.setValidationSupport(validationSupportChain);
 

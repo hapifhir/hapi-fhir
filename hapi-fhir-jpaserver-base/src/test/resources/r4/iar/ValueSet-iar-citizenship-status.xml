@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValueSet xmlns="http://hl7.org/fhir">
+	<id value="iar-citizenship-status"/>
+	<url value="http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status"/>
+	<version value="0.1"/>
+	<name value="Citizenship Status"/>
+	<status value="draft"/>
+	<date value="2019-08-08"/>
+	<publisher value="CCIM"/>
+	<contact>
+		<telecom>
+			<system value="other"/>
+			<value value="https://www.ccim.on.ca"/>
+		</telecom>
+	</contact>
+	<compose>
+		<include>
+			<system value="http://ccim.on.ca/fhir/iar/CodeSystem/iar-citizenship-status"/>
+			<version value="0.1"/>
+		</include>
+		<include>
+			<system value="http://terminology.hl7.org/CodeSystem/v3-NullFlavor"/>
+			<concept>
+				<code value="UNK"/>
+				<display value="unknown"/>
+			</concept>
+		</include>
+		<include>
+			<system value="http://terminology.hl7.org/CodeSystem/v3-NullFlavor"/>
+			<concept>
+				<code value="ASKU"/>
+				<display value="asked but unknown"/>
+			</concept>
+		</include>
+	</compose>
+</ValueSet>

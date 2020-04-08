@@ -71,13 +71,13 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 			Predicate singleCode = createPredicateString(theParameter,
 				theResourceName,
 				theParamName,
-				myBuilder,
+                    myCriteriaBuilder,
 				join,
 				operation);
 			codePredicates.add(singleCode);
 		}
 
-		Predicate retVal = myBuilder.or(toArray(codePredicates));
+		Predicate retVal = myCriteriaBuilder.or(toArray(codePredicates));
 		myQueryRoot.addPredicate(retVal);
 		return retVal;
 	}

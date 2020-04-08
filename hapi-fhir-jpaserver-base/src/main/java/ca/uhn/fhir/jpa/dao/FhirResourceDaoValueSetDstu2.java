@@ -21,7 +21,8 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -41,9 +42,8 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.codec.binary.StringUtils;
-import org.hl7.fhir.instance.hapi.validation.CachingValidationSupport;
-import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +64,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 
 	@Autowired
-	private IJpaValidationSupportDstu2 myJpaValidationSupport;
+	private IValidationSupport myJpaValidationSupport;
 
 	@Autowired
 	@Qualifier("myFhirContextDstu2Hl7Org")
@@ -154,7 +154,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		}
 		ValueSet source;
 
-		org.hl7.fhir.dstu2.model.ValueSet defaultValueSet = myDefaultProfileValidationSupport.fetchResource(myRiCtx, org.hl7.fhir.dstu2.model.ValueSet.class, theUri);
+		ValueSet defaultValueSet = myDefaultProfileValidationSupport.fetchResource(ValueSet.class, theUri);
 		if (defaultValueSet != null) {
 			source = getContext().newJsonParser().parseResource(ValueSet.class, myRiCtx.newJsonParser().encodeResourceToString(defaultValueSet));
 		} else {
@@ -184,7 +184,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 
 		List<IIdType> valueSetIds;
 		Set<ResourcePersistentId> ids = searchForIds(new SearchParameterMap(ValueSet.SP_CODE, new TokenParam(theSystem, theCode)), theRequest);
-		valueSetIds = new ArrayList<IIdType>();
+		valueSetIds = new ArrayList<>();
 		for (ResourcePersistentId next : ids) {
 			IIdType id = myIdHelperService.translatePidIdToForcedId(myFhirContext, "ValueSet", next);
 			valueSetIds.add(id);
@@ -194,7 +194,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 
 	private ValueSet loadValueSetForExpansion(IIdType theId, RequestDetails theRequest) {
 		if (theId.getValue().startsWith("http://hl7.org/fhir/")) {
-			org.hl7.fhir.dstu2.model.ValueSet valueSet = myValidationSupport.fetchResource(myRiCtx, org.hl7.fhir.dstu2.model.ValueSet.class, theId.getValue());
+			org.hl7.fhir.dstu2.model.ValueSet valueSet = myValidationSupport.fetchResource(org.hl7.fhir.dstu2.model.ValueSet.class, theId.getValue());
 			if (valueSet != null) {
 				return getContext().newJsonParser().parseResource(ValueSet.class, myRiCtx.newJsonParser().encodeResourceToString(valueSet));
 			}
@@ -207,13 +207,13 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		return source;
 	}
 
-	private IContextValidationSupport.LookupCodeResult lookup(List<ExpansionContains> theContains, String theSystem, String theCode) {
+	private IValidationSupport.LookupCodeResult lookup(List<ExpansionContains> theContains, String theSystem, String theCode) {
 		for (ExpansionContains nextCode : theContains) {
 
 			String system = nextCode.getSystem();
 			String code = nextCode.getCode();
 			if (theSystem.equals(system) && theCode.equals(code)) {
-				IContextValidationSupport.LookupCodeResult retVal = new IContextValidationSupport.LookupCodeResult();
+				IValidationSupport.LookupCodeResult retVal = new IValidationSupport.LookupCodeResult();
 				retVal.setSearchedForCode(code);
 				retVal.setSearchedForSystem(system);
 				retVal.setFound(true);
@@ -232,7 +232,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	}
 
 	@Override
-	public IContextValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, RequestDetails theRequest) {
+	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, RequestDetails theRequest) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
@@ -258,13 +258,13 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		for (IIdType nextId : valueSetIds) {
 			ValueSet expansion = expand(nextId, null, theRequest);
 			List<ExpansionContains> contains = expansion.getExpansion().getContains();
-			IContextValidationSupport.LookupCodeResult result = lookup(contains, system, code);
+			IValidationSupport.LookupCodeResult result = lookup(contains, system, code);
 			if (result != null) {
 				return result;
 			}
 		}
 
-		IContextValidationSupport.LookupCodeResult retVal = new IContextValidationSupport.LookupCodeResult();
+		IValidationSupport.LookupCodeResult retVal = new IValidationSupport.LookupCodeResult();
 		retVal.setFound(false);
 		retVal.setSearchedForCode(code);
 		retVal.setSearchedForSystem(system);
@@ -280,7 +280,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	@PostConstruct
 	public void postConstruct() {
 		super.postConstruct();
-		myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
+		myDefaultProfileValidationSupport = new DefaultProfileValidationSupport(myFhirContext);
 		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(myDefaultProfileValidationSupport, myJpaValidationSupport));
 	}
 

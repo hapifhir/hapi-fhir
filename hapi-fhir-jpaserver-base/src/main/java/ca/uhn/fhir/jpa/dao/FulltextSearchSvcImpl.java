@@ -229,7 +229,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 				StringParam idParm = (StringParam) idParam;
 				idParamValue = idParm.getValue();
 			}
-			pid = myIdHelperService.translateForcedIdToPid(theResourceName, idParamValue, theRequest);
+//			pid = myIdHelperService.translateForcedIdToPid_(theResourceName, idParamValue, theRequest);
 		}
 
 		ResourcePersistentId referencingPid = pid;
@@ -282,7 +282,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		if (contextParts.length != 3 || "Patient".equals(contextParts[0]) == false || "$everything".equals(contextParts[2]) == false) {
 			throw new InvalidRequestException("Invalid context: " + theContext);
 		}
-		ResourcePersistentId pid = myIdHelperService.translateForcedIdToPid(contextParts[0], contextParts[1], theRequest);
+		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(contextParts[0], contextParts[1]);
 
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 

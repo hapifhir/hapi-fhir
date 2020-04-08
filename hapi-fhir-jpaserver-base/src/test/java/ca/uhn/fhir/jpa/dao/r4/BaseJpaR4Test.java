@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
@@ -9,6 +10,7 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -26,10 +28,13 @@ import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
-import ca.uhn.fhir.jpa.term.api.*;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
@@ -43,10 +48,9 @@ import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.CachingValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
@@ -82,7 +86,7 @@ import static org.mockito.Mockito.mock;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
 public abstract class BaseJpaR4Test extends BaseJpaTest {
-	private static JpaValidationSupportChainR4 ourJpaValidationSupportChainR4;
+	private static IValidationSupport ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
 	@Autowired
@@ -162,12 +166,18 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myConditionDaoR4")
 	protected IFhirResourceDao<Condition> myConditionDao;
 	@Autowired
+	@Qualifier("myEpisodeOfCareDaoR4")
+	protected IFhirResourceDao<EpisodeOfCare> myEpisodeOfCareDao;
+	@Autowired
 	protected DaoConfig myDaoConfig;
 	@Autowired
 	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoR4")
 	protected IFhirResourceDao<Device> myDeviceDao;
+	@Autowired
+	@Qualifier("myProvenanceDaoR4")
+	protected IFhirResourceDao<Provenance> myProvenanceDao;
 	@Autowired
 	@Qualifier("myDiagnosticReportDaoR4")
 	protected IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
@@ -199,6 +209,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myLocationDaoR4")
 	protected IFhirResourceDao<Location> myLocationDao;
+	@Autowired
+	@Qualifier("myPractitionerRoleDaoR4")
+	protected IFhirResourceDao<PractitionerRole> myPractitionerRoleDao;
 	@Autowired
 	@Qualifier("myMediaDaoR4")
 	protected IFhirResourceDao<Media> myMediaDao;
@@ -315,7 +328,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
-	@Qualifier("myJpaValidationSupportChainR4")
+	@Qualifier("myJpaValidationSupportChain")
 	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
@@ -336,13 +349,15 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected SubscriptionRegistry mySubscriptionRegistry;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
-	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
+	private IValidationSupport myJpaValidationSupportChainR4;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	private List<Object> mySystemInterceptors;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
+	@Autowired
+	private IdHelperService myIdHelperService;
 
 	@After()
 	public void afterCleanupDao() {
@@ -371,6 +386,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl termDeferredStorageSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
 		termDeferredStorageSvc.clearDeferred();
+
+		myIdHelperService.clearCache();
 	}
 
 	@After()
@@ -497,7 +514,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@AfterClass
 	public static void afterClassClearContextBaseJpaR4Test() {
 		ourValueSetDao.purgeCaches();
-		ourJpaValidationSupportChainR4.flush();
+		ourJpaValidationSupportChainR4.invalidateCaches();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 

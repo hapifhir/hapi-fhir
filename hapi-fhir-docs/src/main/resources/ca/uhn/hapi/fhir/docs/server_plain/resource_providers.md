@@ -76,7 +76,7 @@ In some cases, it may be useful to have access to the underlying HttpServletRequ
 
 # REST Exception/Error Handling
 
-Within your RESTful operations, you will generally be returning resources or bundles of resources under normal operation. During execution you may also need to propagate errors back to the client for a variety of reasons.
+Within your RESTful operations, you will generally be returning resources or bundles of resources under normal operation. During execution, you may also need to propagate errors back to the client for a variety of reasons.
 
 ## Automatic Exception Handling
 

@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public abstract class BaseTableColumnTypeTask<T extends BaseTableColumnTypeTask<T>> extends BaseTableColumnTask<T> {
+public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 	private ColumnTypeEnum myColumnType;
 	private Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> myColumnTypeToDriverTypeToSqlType = new HashMap<>();
 	private Boolean myNullable;
@@ -111,10 +111,9 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableColumnTypeTask<
 		return myColumnType;
 	}
 
-	@SuppressWarnings("unchecked")
-	public T setColumnType(ColumnTypeEnum theColumnType) {
+	public BaseTableColumnTask setColumnType(ColumnTypeEnum theColumnType) {
 		myColumnType = theColumnType;
-		return (T) this;
+		return this;
 	}
 
 	private void setColumnType(ColumnTypeEnum theColumnType, DriverTypeEnum theDriverType, String theColumnTypeSql) {
@@ -157,9 +156,9 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableColumnTypeTask<
 		return myNullable;
 	}
 
-	public T setNullable(boolean theNullable) {
+	public BaseTableColumnTask setNullable(boolean theNullable) {
 		myNullable = theNullable;
-		return (T) this;
+		return this;
 	}
 
 	protected String getSqlNotNull() {
@@ -170,7 +169,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableColumnTypeTask<
 		return myColumnLength;
 	}
 
-	public BaseTableColumnTypeTask<T> setColumnLength(long theColumnLength) {
+	public BaseTableColumnTypeTask setColumnLength(long theColumnLength) {
 		myColumnLength = theColumnLength;
 		return this;
 	}
@@ -184,7 +183,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableColumnTypeTask<
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<T> theOtherObject) {
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
 		BaseTableColumnTypeTask otherObject = (BaseTableColumnTypeTask) theOtherObject;
 		super.generateEquals(theBuilder, otherObject);
 		theBuilder.append(getColumnTypeName(myColumnType), getColumnTypeName(otherObject.myColumnType));

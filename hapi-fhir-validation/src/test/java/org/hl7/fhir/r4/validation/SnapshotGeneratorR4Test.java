@@ -4,10 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.SnapshotGeneratingValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -31,12 +31,12 @@ public class SnapshotGeneratorR4Test {
 
 		// Create a validation chain that includes default validation support and a
 		// snapshot generator
-		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport();
-		SnapshotGeneratingValidationSupport snapshotGenerator = new SnapshotGeneratingValidationSupport(myFhirCtx, defaultSupport);
+		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(myFhirCtx);
+		SnapshotGeneratingValidationSupport snapshotGenerator = new SnapshotGeneratingValidationSupport(myFhirCtx);
 		ValidationSupportChain chain = new ValidationSupportChain(defaultSupport, snapshotGenerator);
 
 		// Generate the snapshot
-		StructureDefinition snapshot = chain.generateSnapshot(differential, "http://foo", null, "THE BEST PROFILE");
+		StructureDefinition snapshot = (StructureDefinition) chain.generateSnapshot(chain, differential, "http://foo", null, "THE BEST PROFILE");
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(snapshot));
 

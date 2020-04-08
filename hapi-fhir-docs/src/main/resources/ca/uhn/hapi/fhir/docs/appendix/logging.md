@@ -62,5 +62,5 @@ To enable detailed logging of client requests and responses (what URL is being r
 
 # Server Request Logging
 
-To enable detailed logging of server requests and responses, an interceptor may be added to the server which logs each transaction. See [Logging Interceptr](/docs/interceptors/built_in_server_interceptors.html#logging_interceptor) for more information.
+To enable detailed logging of server requests and responses, an interceptor may be added to the server which logs each transaction. See [Logging Interceptor](/docs/interceptors/built_in_server_interceptors.html#logging_interceptor) for more information.
 

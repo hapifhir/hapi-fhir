@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -44,23 +45,27 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	private static final FhirObjectPrinter ourFhirObjectToStringMapper = new FhirObjectPrinter();
 
 	private final String name;
-
+	private final AtomicLong myLastInvoke = new AtomicLong();
 	private final AtomicReference<CountDownLatch> myCountdownLatch = new AtomicReference<>();
 	private final AtomicReference<List<String>> myFailures = new AtomicReference<>();
 	private final AtomicReference<List<HookParams>> myCalledWith = new AtomicReference<>();
-	private int myDefaultTimeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
 	private final Pointcut myPointcut;
+	private int myDefaultTimeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
 	private int myInitialCount;
-
-
+	private boolean myExactMatch;
 	public PointcutLatch(Pointcut thePointcut) {
 		this.name = thePointcut.name();
 		myPointcut = thePointcut;
 	}
 
+
 	public PointcutLatch(String theName) {
 		this.name = theName;
 		myPointcut = null;
+	}
+
+	public long getLastInvoke() {
+		return myLastInvoke.get();
 	}
 
 	public PointcutLatch setDefaultTimeoutSeconds(int theDefaultTimeoutSeconds) {
@@ -69,19 +74,32 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	}
 
 	@Override
-	public void setExpectedCount(int count) {
+	public void setExpectedCount(int theCount) {
+		this.setExpectedCount(theCount, true);
+	}
+
+	public void setExpectedCount(int theCount, boolean theExactMatch) {
 		if (myCountdownLatch.get() != null) {
 			throw new PointcutLatchException("setExpectedCount() called before previous awaitExpected() completed.");
 		}
-		createLatch(count);
-		ourLog.info("Expecting {} calls to {} latch", count, name);
+		myExactMatch = theExactMatch;
+		createLatch(theCount);
+		if (theExactMatch) {
+			ourLog.info("Expecting exactly {} calls to {} latch", theCount, name);
+		} else {
+			ourLog.info("Expecting at least {} calls to {} latch", theCount, name);
+		}
 	}
 
-	private void createLatch(int count) {
+	public void setExpectAtLeast(int theCount) {
+		setExpectedCount(theCount, false);
+	}
+
+	private void createLatch(int theCount) {
 		myFailures.set(Collections.synchronizedList(new ArrayList<>()));
 		myCalledWith.set(Collections.synchronizedList(new ArrayList<>()));
-		myCountdownLatch.set(new CountDownLatch(count));
-		myInitialCount = count;
+		myCountdownLatch.set(new CountDownLatch(theCount));
+		myInitialCount = theCount;
 	}
 
 	private void addFailure(String failure) {
@@ -152,11 +170,17 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	@Override
 	public void invoke(Pointcut thePointcut, HookParams theArgs) {
+		myLastInvoke.set(System.currentTimeMillis());
+		
 		CountDownLatch latch = myCountdownLatch.get();
-		if (latch == null) {
-			throw new PointcutLatchException("invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke() arrived.", theArgs);
-		} else if (latch.getCount() <= 0) {
-			addFailure("invoke() called when countdown was zero.");
+		if (myExactMatch) {
+			if (latch == null) {
+				throw new PointcutLatchException("invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke() arrived.", theArgs);
+			} else if (latch.getCount() <= 0) {
+				addFailure("invoke() called when countdown was zero.");
+			}
+		} else if (latch == null || latch.getCount() <= 0) {
+			return;
 		}
 
 		if (myCalledWith.get() != null) {
@@ -169,6 +193,21 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	public void call(Object arg) {
 		this.invoke(myPointcut, new HookParams(arg));
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("name", name)
+			.append("myCountdownLatch", myCountdownLatch)
+//			.append("myFailures", myFailures)
+//			.append("myCalledWith", myCalledWith)
+			.append("myInitialCount", myInitialCount)
+			.toString();
+	}
+
+	public Object getLatchInvocationParameter() {
+		return getLatchInvocationParameter(myCalledWith.get());
 	}
 
 	private class PointcutLatchException extends IllegalStateException {
@@ -185,21 +224,6 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	private static String hookParamsToString(HookParams hookParams) {
 		return hookParams.values().stream().map(ourFhirObjectToStringMapper).collect(Collectors.joining(", "));
-	}
-
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-			.append("name", name)
-			.append("myCountdownLatch", myCountdownLatch)
-//			.append("myFailures", myFailures)
-//			.append("myCalledWith", myCalledWith)
-			.append("myInitialCount", myInitialCount)
-			.toString();
-	}
-
-	public Object getLatchInvocationParameter() {
-		return getLatchInvocationParameter(myCalledWith.get());
 	}
 
 	public static Object getLatchInvocationParameter(List<HookParams> theHookParams) {

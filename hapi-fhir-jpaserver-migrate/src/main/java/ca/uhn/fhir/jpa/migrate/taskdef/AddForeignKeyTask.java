@@ -32,7 +32,7 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
+public class AddForeignKeyTask extends BaseTableColumnTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddForeignKeyTask.class);
 	private String myConstraintName;

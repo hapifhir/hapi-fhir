@@ -43,6 +43,7 @@ public class HapiLocalizer {
 	private List<ResourceBundle> myBundle = new ArrayList<>();
 	private final Map<String, String> myHardcodedMessages = new HashMap<>();
 	private String[] myBundleNames;
+	private Locale myLocale = Locale.getDefault();
 
 	public HapiLocalizer() {
 		this(HapiLocalizer.class.getPackage().getName() + ".hapi-messages");
@@ -164,7 +165,11 @@ public class HapiLocalizer {
 		}
 	}
 
-	/**
+    public Locale getLocale() {
+		return myLocale;
+    }
+
+    /**
 	 * This <b>global setting</b> causes the localizer to fail if any attempts
 	 * are made to retrieve a key that does not exist. This method is primarily for
 	 * unit tests.

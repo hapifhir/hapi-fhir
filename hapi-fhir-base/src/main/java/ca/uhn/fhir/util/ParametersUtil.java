@@ -238,7 +238,7 @@ public class ParametersUtil {
 		addPart(theContext, theParameter, theName, coding);
 	}
 
-	private static void addPart(FhirContext theContext, IBase theParameter, String theName, IBase theValue) {
+	public static void addPart(FhirContext theContext, IBase theParameter, String theName, IBase theValue) {
 		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theParameter.getClass());
 		BaseRuntimeChildDefinition partChild = def.getChildByName("part");
 
@@ -251,5 +251,20 @@ public class ParametersUtil {
 		partChildElem.getChildByName("name").getMutator().addValue(part, name);
 
 		partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
+	}
+
+	public static void addPartResource(FhirContext theContext, IBase theParameter, String theName, IBaseResource theValue) {
+		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theParameter.getClass());
+		BaseRuntimeChildDefinition partChild = def.getChildByName("part");
+
+		BaseRuntimeElementCompositeDefinition<?> partChildElem = (BaseRuntimeElementCompositeDefinition<?>) partChild.getChildByName("part");
+		IBase part = partChildElem.newInstance();
+		partChild.getMutator().addValue(theParameter, part);
+
+		IPrimitiveType<String> name = (IPrimitiveType<String>) theContext.getElementDefinition("string").newInstance();
+		name.setValue(theName);
+		partChildElem.getChildByName("name").getMutator().addValue(part, name);
+
+		partChildElem.getChildByName("resource").getMutator().addValue(part, theValue);
 	}
 }

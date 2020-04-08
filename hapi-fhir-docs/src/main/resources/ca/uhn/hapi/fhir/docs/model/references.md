@@ -135,7 +135,7 @@ This will give the following output:
 </Patient>
 ```
 
-Note that you may also "contain" resources manually in your own code if you prefer. The following example show how to do this:
+Note that you may also "contain" resources manually in your own code if you prefer. The following example shows how to do this:
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ResourceRefs.java|manualContained}}
@@ -147,7 +147,7 @@ By default, HAPI will strip resource versions from references between resources.
 
 This is because in most circumstances, references between resources should be versionless (e.g. the reference just points to the latest version, whatever version that might be).
 
-There are valid circumstances however for wanting versioned references. If you need HAPI to emit versionned references, you have a few options:
+There are valid circumstances however for wanting versioned references. If you need HAPI to emit versioned references, you have a few options:
 
 You can force the parser to never strip versions:
 

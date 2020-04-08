@@ -10,7 +10,7 @@ import ca.uhn.fhir.tests.integration.karaf.ValidationConstants;
 import ca.uhn.fhir.validation.*;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;

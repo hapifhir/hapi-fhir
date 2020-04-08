@@ -85,7 +85,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(MAX_SEARCH_SIZE);
 
-		Map<String, RuntimeSearchParam> searchParams = mySerarchParamRegistry.getActiveSearchParams(typeDef.getName());
+		Map<String, RuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveSearchParams(typeDef.getName());
 
 		for (Argument nextArgument : theSearchParams) {
 

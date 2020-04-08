@@ -75,7 +75,7 @@
    issue: "1658"
    type: "fix"
    title: "When parsing HTML Narratives, the `lang` attribute was stripped from the outer DIV tag if present. Thanks to
-Sean McIlvenna for reporting!"
+      Sean McIlvenna for reporting!"
 - item:
    issue: "1655"
    type: "fix"
@@ -90,9 +90,8 @@ Sean McIlvenna for reporting!"
    issue: 1689
    title: "A correction was made to the narrative generation documentation. Thanks to GitHub user
        dionmcm for the pull request!"
-   title: "A meomery leak was resolved in the JPA terminology service delta upload operations."
 - item:
      type: "add"
      title: "Searching Location.position by latitude, longitude and distance for DSTU3, R4 and R5 is now supported using a simple 'box' search.
-     Locations falling within a box with length and width of 2 * distance, centred on specified latitude,longitude are matched.  If no distance
-     is provided, the coordinates must match exactly."
+        Locations falling within a box with length and width of 2 * distance, centred on specified latitude,longitude are matched.  If no distance
+        is provided, the coordinates must match exactly."

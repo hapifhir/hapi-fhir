@@ -27,15 +27,21 @@ public class PathAndRef {
 	private final String myPath;
 	private final IBaseReference myRef;
 	private final String mySearchParamName;
+	private final boolean myCanonical;
 
 	/**
 	 * Constructor
 	 */
-	public PathAndRef(String theSearchParamName, String thePath, IBaseReference theRef) {
+	public PathAndRef(String theSearchParamName, String thePath, IBaseReference theRef, boolean theCanonical) {
 		super();
 		mySearchParamName = theSearchParamName;
 		myPath = thePath;
 		myRef = theRef;
+		myCanonical = theCanonical;
+	}
+
+	public boolean isCanonical() {
+		return myCanonical;
 	}
 
 	public String getSearchParamName() {
