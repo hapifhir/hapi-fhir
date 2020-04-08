@@ -25,3 +25,11 @@
     has been replaced with an equivalent `FhirContext.newFhirPath()`. The FhirPath expression language was initially
     called FluentPath before being renamed, so this change brings HAPI FHIR inline with the correct naming.
     "
+- item:
+     issue: "1790"
+     type: "change"
+     title: "**Breaking Change**:
+    Several classes in the JPA server have been moved to new packages, including the DaoConfig and IDao interfaces.
+    These classes have not changed in terms of functionality, but existing projects may need to adjust some
+    package import statements.
+    "
