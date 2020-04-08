@@ -4,10 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.MatchedTargetCandidate;
+import ca.uhn.fhir.empi.util.CanonicalEID;
+import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import net.bytebuddy.asm.Advice;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +36,11 @@ public class EmpiPersonFindingSvc {
 	@Autowired
 	private EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 	@Autowired
-	private PersonHelper myPersonHelper;
-	@Autowired
 	private EmpiResourceDaoSvc myEmpiResourceDaoSvc;
 	@Autowired
 	private IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
+	@Autowired
+	private EIDHelper myEIDHelper;
 
 	/**
 	 * Given an incoming IBaseResource, limited to Patient/Practitioner, return a list of {@link MatchedPersonCandidate}
@@ -80,11 +83,12 @@ public class EmpiPersonFindingSvc {
 	}
 
 	private Optional<List<MatchedPersonCandidate>> attemptToFindPersonCandidateFromIncomingEID(IBaseResource theBaseResource) {
-		PersonHelper.SystemAgnosticIdentifier eidFromResource = myPersonHelper.readEIDFromResource(theBaseResource);
-		if (eidFromResource != null)  {
-		IBaseResource iBaseResource = myEmpiResourceDaoSvc.searchPersonByEid(eidFromResource.getValue());
-			if (iBaseResource != null) {
-				Long pidOrNull = myResourceTableHelper.getPidOrNull(iBaseResource);
+		Optional<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theBaseResource);
+		if (eidFromResource.isPresent()) {
+		IBaseResource foundPerson = myEmpiResourceDaoSvc.searchPersonByEid(eidFromResource.get().getValue());
+			if (foundPerson != null) {
+				Long pidOrNull = myResourceTableHelper.getPidOrNull(foundPerson);
+
 				//We make a fake link here as there no link for this association yet.
 				//FIXME EMPI proobably have to re-model MatchedPersonCandidate?? I don't like making this fake thing to throw around.
 				EmpiLink fakeEmpiLink = new EmpiLink();
@@ -186,8 +190,6 @@ public class EmpiPersonFindingSvc {
 	@NotNull
 	public Optional<EmpiLink> findEmpiLinkByTargetId(IBaseResource theBaseResource) {
 		EmpiLink empiLink = new EmpiLink().setTargetPid(myResourceTableHelper.getPidOrNull(theBaseResource));
-
-
 		Example<EmpiLink> example = Example.of(empiLink);
 		return myEmpiLinkDao.findOne(example);
 	}

@@ -24,13 +24,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static ca.uhn.fhir.rest.api.Constants.CODE_NO_EMPI_MANAGED;
-import static ca.uhn.fhir.rest.api.Constants.SYSTEM_EMPI_MANAGED;
+import static ca.uhn.fhir.rest.api.Constants.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.in;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
@@ -173,10 +171,17 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		EmpiLink empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(patient.getIdElement().getIdPartAsLong()).get();
 		Person person = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
-		Identifier identifier = person.getIdentifierFirstRep();
+		List<Identifier> identifier = person.getIdentifier();
 
-		assertThat(identifier.getSystem(), is(equalTo(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())));
-		assertThat(identifier.getValue(), is(equalTo("12345")));
+		//The collision should have kept the old identifier
+		Identifier firstIdentifier = identifier.get(0);
+		assertThat(firstIdentifier.getSystem(), is(equalTo(INTERNAL_ENTERPRISE_IDENTIFIER_SYSTEM)));
+		assertThat(firstIdentifier.getValue(), is(notNullValue()));
+
+		//The collision should have added a new identifier with the official system.
+		Identifier secondIdentifier = identifier.get(1);
+		assertThat(secondIdentifier.getSystem(), is(equalTo(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())));
+		assertThat(secondIdentifier.getValue(), is(equalTo("12345")));
 	}
 
 	public Patient addEID(Patient thePatient, String theEID) {

@@ -3,15 +3,19 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
+import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
+import ca.uhn.fhir.empi.util.CanonicalEID;
 import ca.uhn.fhir.jpa.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import net.bytebuddy.asm.Advice;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Lazy
 @Service
@@ -24,13 +28,14 @@ public class EmpiMatchLinkSvc {
 	private EmpiPersonFindingSvc myEmpiPersonFindingSvc;
 	@Autowired
 	private PersonHelper myPersonHelper;
+	@Autowired
+	private EIDHelper myEIDHelper;
 
 	public void updateEmpiLinksForPatient(IBaseResource theResource) {
 		if (EmpiUtil.isManagedByEmpi(theResource)) {
 			doEmpiUpdate(theResource);
 		}
 	}
-
 
 	private void doEmpiUpdate(IBaseResource theResource) {
 		List<MatchedPersonCandidate> personCandidates = myEmpiPersonFindingSvc.findPersonCandidates(theResource);
@@ -44,7 +49,7 @@ public class EmpiMatchLinkSvc {
 			MatchedPersonCandidate matchedPersonCandidate = personCandidates.get(0);
 			ResourcePersistentId personPid = matchedPersonCandidate.getCandidatePersonPid();
 			IBaseResource person = myEmpiResourceDaoSvc.readPersonByPid(personPid);
-			if (isPotentialDuplicate(person, theResource)) {
+			if (myPersonHelper.isPotentialDuplicate(person, theResource)) {
 				IBaseResource newPerson = myPersonHelper.createPersonFromPatient(theResource);
 				myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
 				myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO);
@@ -58,23 +63,9 @@ public class EmpiMatchLinkSvc {
 		}
 	}
 
-	/**
-	 * An incoming resource is a potential duplicate if it matches a Patient that has a Person with an official EID, but
-	 * the incoming resource also has an EID.
-	 *
-	 * @param theExistingPerson
-	 * @param theComparingPerson
-	 * @return
-	 */
-	private boolean isPotentialDuplicate(IBaseResource theExistingPerson, IBaseResource theComparingPerson) {
-		PersonHelper.SystemAgnosticIdentifier firstEid = myPersonHelper.readEIDFromResource(theExistingPerson);
-		PersonHelper.SystemAgnosticIdentifier secondEid = myPersonHelper.readEIDFromResource(theComparingPerson);
-		return firstEid != null && firstEid.getUse().equals("official") && secondEid != null && !firstEid.getValue().equals(secondEid.getValue());
-	}
-
 	private void handleEidOverwrite(IBaseResource thePerson, IBaseResource theResource) {
-		PersonHelper.SystemAgnosticIdentifier eidFromResource = myPersonHelper.readEIDFromResource(theResource);
-		if (eidFromResource != null)  {
+		Optional<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theResource);
+		if (eidFromResource.isPresent()) {
 			myPersonHelper.updatePersonFromPatient(thePerson, theResource);
 		}
 	}

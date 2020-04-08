@@ -37,7 +37,7 @@ public class EmpiRulesJson implements IModelJson {
 	List<EmpiFieldMatchJson> myMatchFieldJsonList = new ArrayList<>();
 	@JsonProperty("weightMap")
 	Map<String, EmpiMatchResultEnum> myMatchResultMap = new HashMap<>();
-	@JsonProperty(value = "eidSystem", defaultValue = Constants.ENTERPRISE_IDENTIFIER_SYSTEM)
+	@JsonProperty(value = "eidSystem")
 	String myEnterpriseEIDSystem;
 
 	transient VectorWeightMap myVectorWeightMap;

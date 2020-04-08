@@ -2,10 +2,7 @@ package ca.uhn.fhir.empi.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiConfig;
-import ca.uhn.fhir.fhirpath.IFhirPath;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -15,11 +12,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.rest.api.Constants.CODE_HAPI_EMPI_MANAGED;
-import static ca.uhn.fhir.rest.api.Constants.SYSTEM_EMPI_MANAGED;
+import static ca.uhn.fhir.rest.api.Constants.*;
 
 @Lazy
 @Service
@@ -28,6 +26,8 @@ public final class PersonHelper {
 	private FhirContext myFhirContext;
 	@Autowired
 	private IEmpiConfig myEmpiConfig;
+	@Autowired
+	private EIDHelper myEIDHelper;
 
 	private PersonHelper(){}
 
@@ -88,18 +88,19 @@ public final class PersonHelper {
 	 * @return the Person that is created.
 	 */
 	public IBaseResource createPersonFromPatient(IBaseResource thePatient) {
+		String eidSystem = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person person = new Person();
+				CanonicalEID eidToApply;
+				Optional<CanonicalEID> officialEID = CanonicalEID.extractFromResource(myFhirContext, eidSystem, thePatient);
 
-				SystemAgnosticIdentifier systemAgnosticIdentifier = readEIDFromResource(thePatient);
-				if (systemAgnosticIdentifier == null) {
-					systemAgnosticIdentifier = createRandomEid();
+				if (officialEID.isPresent()) {
+					eidToApply = officialEID.get();
 				} else {
-					//Any incoming EID is automatically official regardless of what they say.
-					systemAgnosticIdentifier.setUse("official");
+					eidToApply =  myEIDHelper.createInternalEid();
 				}
-				person.addIdentifier(systemAgnosticIdentifier.toR4());
+				person.addIdentifier(eidToApply.toR4());
 				person.getMeta().addTag(buildEmpiManagedTag());
 				copyPatientDataIntoPerson((Patient)thePatient, person);
 				return person;
@@ -116,7 +117,7 @@ public final class PersonHelper {
 	 * @param thePatient The incoming {@link Patient} who's data we want to copy into Person.
 	 * @param thePerson The incoming {@link Person} who needs to have their data updated.
 	 */
-	public void copyPatientDataIntoPerson(Patient thePatient, Person thePerson) {
+	private void copyPatientDataIntoPerson(Patient thePatient, Person thePerson) {
 		thePerson.setName(thePatient.getName());
 		thePerson.setAddress(thePatient.getAddress());
 		thePerson.setTelecom(thePatient.getTelecom());
@@ -134,22 +135,20 @@ public final class PersonHelper {
 	}
 
 	public IBaseResource updatePersonFromPatient(IBaseResource thePerson, IBaseResource thePatient) {
+		//This handles overwriting an automatically assigned EID if a patient that links is coming in with an official EID.
+		Person person = ((Person)thePerson);
+		Optional<CanonicalEID> incomingPatientEid = myEIDHelper.getExternalEid(thePatient);
+		Optional<CanonicalEID> personOfficialEid = myEIDHelper.getExternalEid(thePerson);
+
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				//This handles overwriting an automatically assigned EID if a patient that links is coming in with an official EID.
-				Person person = ((Person)thePerson);
-				Identifier identifier = person.getIdentifier().stream().filter(theIdentifier -> theIdentifier.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())).findFirst().orElse(null);
-				SystemAgnosticIdentifier incomingEid = readEIDFromResource(thePatient);
-				if (StringUtils.isBlank(incomingEid.getUse())) {
-					incomingEid.setUse("official");
-				}
-				if (identifier == null){
-					person.addIdentifier(incomingEid.toR4());
-				} else if (identifier.getUse().equals(Identifier.IdentifierUse.SECONDARY)) {
-					person.getIdentifier().remove(identifier);
-					person.addIdentifier(incomingEid.toR4());
-				} else if (identifier.getUse().equals(Identifier.IdentifierUse.OFFICIAL)) {
-					// FIXME EMPI create potential duplicate user link.
+				if (incomingPatientEid.isPresent()) {
+					//The person has no EID. This should be impossible given that we auto-assign an EID at creation time.
+					if (!personOfficialEid.isPresent()) {
+						person.addIdentifier(incomingPatientEid.get().toR4());
+					} else {
+						throw new IllegalArgumentException("This should create  duplicate person");
+					}
 				}
 			default:
 				// FIXME EMPI moar versions
@@ -158,108 +157,20 @@ public final class PersonHelper {
 		return thePerson;
 	}
 
-
-	public SystemAgnosticIdentifier createRandomEid() {
-		return new SystemAgnosticIdentifier(
-			myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem(),
-			UUID.randomUUID().toString(),
-			"secondary"
-		);
-	}
-
-	public static class SystemAgnosticIdentifier {
-		private String mySystem;
-		private String myUse;
-		private String myValue;
-
-		public SystemAgnosticIdentifier(String theSystem, String theValue, String theUse){
-			mySystem = theSystem;
-			myUse = theUse;
-			myValue = theValue;
-		}
-
-		/** Constructor which takes in an IBase representing an EID Identifier
-		 *  and builds a SystemAgnosticIdentifier out of it.
-		 * @param theFhirPath
-		 * @param theIBase
-		 */
-		public SystemAgnosticIdentifier(IFhirPath theFhirPath, IBase theIBase, String theSystem) {
-			List<PrimitiveType> value = theFhirPath.evaluate(theIBase, "value", PrimitiveType.class);
-			List<PrimitiveType> system = theFhirPath.evaluate(theIBase, "system", PrimitiveType.class);
-			List<PrimitiveType> use = theFhirPath.evaluate(theIBase, "use", PrimitiveType.class);
-
-			myUse = use.size() > 0 ? use.get(0).getValueAsString() : null;
-			myValue= value.size() > 0 ? value.get(0).getValueAsString() : null;
-			mySystem = system.size() > 0 ? system.get(0).getValueAsString() : null;
-		}
-
-		public Identifier toR4() {
-			return new Identifier()
-				.setUse(Identifier.IdentifierUse.fromCode(myUse))
-				.setSystem(mySystem)
-				.setValue(myValue);
-		}
-
-		public org.hl7.fhir.dstu3.model.Identifier toDSTU3(){
-			return new org.hl7.fhir.dstu3.model.Identifier()
-				.setUse(org.hl7.fhir.dstu3.model.Identifier.IdentifierUse.fromCode(myUse))
-				.setSystem(mySystem)
-				.setValue(myValue);
-		}
-
-		public  String getSystem() {
-			return mySystem;
-		}
-
-		public  String getUse() {
-			return myUse;
-		}
-
-		public  String getValue() {
-			return myValue;
-		}
-
-		private void setSystem(String theSystem) {
-			mySystem = theSystem;
-		}
-
-		private void setUse(String theUse) {
-			myUse = theUse;
-		}
-
-		private void setValue(String theValue) {
-			myValue = theValue;
-		}
-	}
-
-
-	public SystemAgnosticIdentifier readEIDFromResource(IBaseResource theBaseResource) {
-		IFhirPath fhirPath = myFhirContext.newFhirPath();
-		List<IBase> evaluate = fhirPath.evaluate(
-			theBaseResource,
-			buildEidFhirPath(theBaseResource),
-			IBase.class);
-
-		if (evaluate.size() > 1) {
-			throw new RuntimeException("Resources cannot have two EIDs!");
-		} else if (evaluate.size() == 1) {
-			return new SystemAgnosticIdentifier(fhirPath, evaluate.get(0), myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem());
-		} else {
-			return null;
-		}
-	}
-
 	/**
-	 * Get the appropriate FHIRPath expression to extract the EID identifier value, regardless of resource type.
-	 * e.g. if theBaseResource is a patient, and the EMPI EID system is test-system, this will return
+	 * An incoming resource is a potential duplicate if it matches a Patient that has a Person with an official EID, but
+	 * the incoming resource also has an EID.
 	 *
-	 * Patient.identifier.where(system='test-system').value
-	 *
+	 * @param theExistingPerson
+	 * @param theComparingPerson
+	 * @return
 	 */
-	private String buildEidFhirPath(IBaseResource theBaseResource) {
-		return myFhirContext.getResourceDefinition(theBaseResource).getName()
-			+ ".identifier.where(system='"
-			+ myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()
-			+ "')";
+	public boolean isPotentialDuplicate(IBaseResource theExistingPerson, IBaseResource theComparingPerson) {
+		String enterpriseEIDSystem = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
+		Optional<CanonicalEID> firstEid = CanonicalEID.extractFromResource(myFhirContext, enterpriseEIDSystem, theExistingPerson);
+		Optional<CanonicalEID> secondEid = CanonicalEID.extractFromResource(myFhirContext, enterpriseEIDSystem, theComparingPerson);
+		return firstEid.isPresent() && secondEid.isPresent() && !Objects.equals(firstEid.get().getValue(), secondEid.get().getValue());
 	}
+
+
 }
