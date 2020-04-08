@@ -2,7 +2,7 @@ package ca.uhn.fhir.empi.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiConfig;
-import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -91,7 +91,14 @@ public final class PersonHelper {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person person = new Person();
-				SystemAgnosticIdentifier systemAgnosticIdentifier = getOrCreateEidFromResource(thePatient);
+
+				SystemAgnosticIdentifier systemAgnosticIdentifier = readEIDFromResource(thePatient);
+				if (systemAgnosticIdentifier == null) {
+					systemAgnosticIdentifier = createRandomEid();
+				} else {
+					//Any incoming EID is automatically official regardless of what they say.
+					systemAgnosticIdentifier.setUse("official");
+				}
 				person.addIdentifier(systemAgnosticIdentifier.toR4());
 				person.getMeta().addTag(buildEmpiManagedTag());
 				copyPatientDataIntoPerson((Patient)thePatient, person);
@@ -132,8 +139,10 @@ public final class PersonHelper {
 				//This handles overwriting an automatically assigned EID if a patient that links is coming in with an official EID.
 				Person person = ((Person)thePerson);
 				Identifier identifier = person.getIdentifier().stream().filter(theIdentifier -> theIdentifier.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())).findFirst().orElse(null);
-				SystemAgnosticIdentifier incomingEid = getOrCreateEidFromResource(thePatient);
-
+				SystemAgnosticIdentifier incomingEid = readEIDFromResource(thePatient);
+				if (StringUtils.isBlank(incomingEid.getUse())) {
+					incomingEid.setUse("official");
+				}
 				if (identifier == null){
 					person.addIdentifier(incomingEid.toR4());
 				} else if (identifier.getUse().equals(Identifier.IdentifierUse.SECONDARY)) {
@@ -150,31 +159,13 @@ public final class PersonHelper {
 	}
 
 
-	public SystemAgnosticIdentifier getEidFromResource(IBaseResource theBaseResource) {
-		String eid = readEIDFromResource(theBaseResource);
-		if (StringUtils.isBlank(eid)) {
-			return null;
-		} else {
-			String system = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
-			String use = "official";
-			return new SystemAgnosticIdentifier(system, eid, use);
-		}
+	public SystemAgnosticIdentifier createRandomEid() {
+		return new SystemAgnosticIdentifier(
+			myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem(),
+			UUID.randomUUID().toString(),
+			"secondary"
+		);
 	}
-
-	public SystemAgnosticIdentifier getOrCreateEidFromResource(IBaseResource thePatient) {
-		SystemAgnosticIdentifier eid;
-		eid = getEidFromResource(thePatient);
-
-		if (eid == null) {
-			eid = new SystemAgnosticIdentifier(
-				myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem(),
-				UUID.randomUUID().toString(),
-				"secondary"
-			);
-		}
-		return eid;
-	}
-
 
 	public static class SystemAgnosticIdentifier {
 		private String mySystem;
@@ -185,6 +176,21 @@ public final class PersonHelper {
 			mySystem = theSystem;
 			myUse = theUse;
 			myValue = theValue;
+		}
+
+		/** Constructor which takes in an IBase representing an EID Identifier
+		 *  and builds a SystemAgnosticIdentifier out of it.
+		 * @param theFhirPath
+		 * @param theIBase
+		 */
+		public SystemAgnosticIdentifier(IFhirPath theFhirPath, IBase theIBase) {
+			List<IBase> use = theFhirPath.evaluate(theIBase, "use", IBase.class);
+			List<IBase> value = theFhirPath.evaluate(theIBase, "value", IBase.class);
+			List<IBase> system = theFhirPath.evaluate(theIBase, "system", IBase.class);
+
+			myUse = use.size() > 0 ? use.get(0).toString(): null;
+			myValue= value.size() > 0 ? value.get(0).toString(): null;
+			mySystem= system.size() > 0 ? system.get(0).toString(): null;
 		}
 
 		public Identifier toR4() {
@@ -212,19 +218,32 @@ public final class PersonHelper {
 		public  String getValue() {
 			return myValue;
 		}
+
+		private void setSystem(String theSystem) {
+			mySystem = theSystem;
+		}
+
+		private void setUse(String theUse) {
+			myUse = theUse;
+		}
+
+		private void setValue(String theValue) {
+			myValue = theValue;
+		}
 	}
 
-	public String readEIDFromResource(IBaseResource theBaseResource) {
-		List<IBase> evaluate = myFhirContext.newFhirPath().evaluate(
+
+	public SystemAgnosticIdentifier readEIDFromResource(IBaseResource theBaseResource) {
+		IFhirPath fhirPath = myFhirContext.newFhirPath();
+		List<IBase> evaluate = fhirPath.evaluate(
 			theBaseResource,
-			buildEidIdentifierFhirPath(theBaseResource),
+			buildEidFhirPath(theBaseResource),
 			IBase.class);
 
 		if (evaluate.size() > 1) {
-			// FIXME EMPI determine correct error to throw here.
 			throw new RuntimeException("Resources cannot have two EIDs!");
 		} else if (evaluate.size() == 1) {
-			return evaluate.get(0).toString();
+			return new SystemAgnosticIdentifier(fhirPath, evaluate.get(0));
 		} else {
 			return null;
 		}
@@ -237,10 +256,10 @@ public final class PersonHelper {
 	 * Patient.identifier.where(system='test-system').value
 	 *
 	 */
-	private String buildEidIdentifierFhirPath(IBaseResource theBaseResource) {
+	private String buildEidFhirPath(IBaseResource theBaseResource) {
 		return myFhirContext.getResourceDefinition(theBaseResource).getName()
 			+ ".identifier.where(system='"
 			+ myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()
-			+ "').value";
+			+ "')";
 	}
 }

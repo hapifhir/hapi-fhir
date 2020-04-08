@@ -186,10 +186,10 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testIncomingPatientWithEIDMatchesAnotherPatientWithSameEIDAreLinked() {
-		Patient patient1 = addEID(buildJanePatient(), "12345");
+		Patient patient1 = addEID(buildJanePatient(), "uniqueid");
 		createPatientAndUpdateLinks(patient1);
 
-		Patient patient2 = addEID(buildPaulPatient(), "12345");
+		Patient patient2 = addEID(buildPaulPatient(), "uniqueid");
 		createPatientAndUpdateLinks(patient2);
 
 		assertThat(patient1, is(samePersonAs(patient2)));
@@ -198,9 +198,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testDuplicatePersonLinkIsCreatedWhenAnIncomingPatientArrivesWithEIDThatMatchesAnotherEIDPatient() {
-		// Existing Person with legit EID (from a Patient) found linked from matched Patient.  incoming Patient has different EID.   Create new Person with incoming EID and link.
-		// Record somehow (design TBD) that these two Persons may be duplicates.  -- Maybe we have a special kind of EmpiLink table entry where the target also points to a Person and it's
-		// flagged with a special PROBABLE_DUPLICATE match status?
 
 		Patient patient1 = addEID(buildJanePatient(), "eid-1");
 		patient1 = createPatientAndUpdateLinks(patient1);

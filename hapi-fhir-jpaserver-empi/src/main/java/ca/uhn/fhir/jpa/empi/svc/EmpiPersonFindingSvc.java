@@ -8,7 +8,6 @@ import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,9 +80,9 @@ public class EmpiPersonFindingSvc {
 	}
 
 	private Optional<List<MatchedPersonCandidate>> attemptToFindPersonCandidateFromIncomingEID(IBaseResource theBaseResource) {
-		String eidFromResource = myPersonHelper.readEIDFromResource(theBaseResource);
-		if (!StringUtils.isBlank(eidFromResource)) {
-		IBaseResource iBaseResource = myEmpiResourceDaoSvc.searchPersonByEid(eidFromResource);
+		PersonHelper.SystemAgnosticIdentifier eidFromResource = myPersonHelper.readEIDFromResource(theBaseResource);
+		if (eidFromResource != null)  {
+		IBaseResource iBaseResource = myEmpiResourceDaoSvc.searchPersonByEid(eidFromResource.getValue());
 			if (iBaseResource != null) {
 				Long pidOrNull = myResourceTableHelper.getPidOrNull(iBaseResource);
 				//We make a fake link here as there no link for this association yet.

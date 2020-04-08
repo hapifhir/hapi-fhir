@@ -6,7 +6,6 @@ import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
-import com.mchange.util.impl.StringEnumerationHelperBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -45,8 +44,7 @@ public class EmpiMatchLinkSvc {
 			MatchedPersonCandidate matchedPersonCandidate = personCandidates.get(0);
 			ResourcePersistentId personPid = matchedPersonCandidate.getCandidatePersonPid();
 			IBaseResource person = myEmpiResourceDaoSvc.readPersonByPid(personPid);
-			//FIXME EMPI QUESTION this is gross, can we pair to fix it??
-			if (isPotentialDuplicate(theResource, person)) {
+			if (isPotentialDuplicate(person, theResource)) {
 				IBaseResource newPerson = myPersonHelper.createPersonFromPatient(theResource);
 				myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
 				myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO);
@@ -69,13 +67,13 @@ public class EmpiMatchLinkSvc {
 	 * @return
 	 */
 	private boolean isPotentialDuplicate(IBaseResource theExistingPerson, IBaseResource theComparingPerson) {
-		PersonHelper.SystemAgnosticIdentifier firstEid = myPersonHelper.getEidFromResource(theExistingPerson);
-		PersonHelper.SystemAgnosticIdentifier secondEid = myPersonHelper.getEidFromResource(theComparingPerson);
-		return firstEid != null && firstEid.getUse().equals("official") && secondEid != null;
+		PersonHelper.SystemAgnosticIdentifier firstEid = myPersonHelper.readEIDFromResource(theExistingPerson);
+		PersonHelper.SystemAgnosticIdentifier secondEid = myPersonHelper.readEIDFromResource(theComparingPerson);
+		return firstEid != null && firstEid.getUse().equals("official") && secondEid != null && !firstEid.getValue().equals(secondEid.getValue());
 	}
 
 	private void handleEidOverwrite(IBaseResource thePerson, IBaseResource theResource) {
-		String eidFromResource = myPersonHelper.readEIDFromResource(theResource);
+		PersonHelper.SystemAgnosticIdentifier eidFromResource = myPersonHelper.readEIDFromResource(theResource);
 		if (eidFromResource != null)  {
 			myPersonHelper.updatePersonFromPatient(thePerson, theResource);
 		}

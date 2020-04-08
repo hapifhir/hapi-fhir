@@ -56,6 +56,7 @@ public class EmpiResourceDaoSvc {
 	}
 
 	public IBaseResource searchPersonByEid(String theEidFromResource) {
+		//FIXME EMPI QUESTION WHY DOESNT THIS WORK???????
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add("identifier", new TokenParam(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem(), theEidFromResource));
