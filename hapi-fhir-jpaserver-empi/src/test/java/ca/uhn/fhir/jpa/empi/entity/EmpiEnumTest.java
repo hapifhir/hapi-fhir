@@ -11,7 +11,7 @@ public class EmpiEnumTest {
 	public void empiEnumOrdinals() {
 		// This test is here to enforce that new values in these enums are always added to the end
 
-		assertEquals(3, EmpiMatchResultEnum.values().length);
+		assertEquals(4, EmpiMatchResultEnum.values().length);
 		assertEquals(EmpiMatchResultEnum.MATCH, EmpiMatchResultEnum.values()[EmpiMatchResultEnum.values().length - 1]);
 
 		assertEquals(2, EmpiLinkSourceEnum.values().length);
