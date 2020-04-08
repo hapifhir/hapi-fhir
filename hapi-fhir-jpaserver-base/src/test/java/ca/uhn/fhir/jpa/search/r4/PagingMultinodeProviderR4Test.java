@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.*;
 import org.springframework.test.util.AopTestUtils;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.parser.StrictErrorHandler;

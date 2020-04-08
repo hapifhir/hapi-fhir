@@ -27,7 +27,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
-import org.jetbrains.annotations.NotNull;
 import org.quartz.*;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.StdSchedulerFactory;
@@ -35,6 +34,7 @@ import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -85,7 +85,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		addProperty("org.quartz.threadPool.threadNamePrefix", getThreadPrefix());
 	}
 
-	@NotNull
+	@Nonnull
 	private String getThreadPrefix() {
 		return myThreadNamePrefix + "-" + myInstanceName;
 	}

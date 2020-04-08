@@ -44,7 +44,6 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-@Service
 public class MatchUrlService {
 
 	@Autowired
