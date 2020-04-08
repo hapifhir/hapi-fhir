@@ -183,14 +183,14 @@ public final class PersonHelper {
 		 * @param theFhirPath
 		 * @param theIBase
 		 */
-		public SystemAgnosticIdentifier(IFhirPath theFhirPath, IBase theIBase) {
-			List<IBase> use = theFhirPath.evaluate(theIBase, "use", IBase.class);
-			List<IBase> value = theFhirPath.evaluate(theIBase, "value", IBase.class);
-			List<IBase> system = theFhirPath.evaluate(theIBase, "system", IBase.class);
+		public SystemAgnosticIdentifier(IFhirPath theFhirPath, IBase theIBase, String theSystem) {
+			List<PrimitiveType> value = theFhirPath.evaluate(theIBase, "value", PrimitiveType.class);
+			List<PrimitiveType> system = theFhirPath.evaluate(theIBase, "system", PrimitiveType.class);
+			List<PrimitiveType> use = theFhirPath.evaluate(theIBase, "use", PrimitiveType.class);
 
-			myUse = use.size() > 0 ? use.get(0).toString(): null;
-			myValue= value.size() > 0 ? value.get(0).toString(): null;
-			mySystem= system.size() > 0 ? system.get(0).toString(): null;
+			myUse = use.size() > 0 ? use.get(0).getValueAsString() : null;
+			myValue= value.size() > 0 ? value.get(0).getValueAsString() : null;
+			mySystem = system.size() > 0 ? system.get(0).getValueAsString() : null;
 		}
 
 		public Identifier toR4() {
@@ -243,7 +243,7 @@ public final class PersonHelper {
 		if (evaluate.size() > 1) {
 			throw new RuntimeException("Resources cannot have two EIDs!");
 		} else if (evaluate.size() == 1) {
-			return new SystemAgnosticIdentifier(fhirPath, evaluate.get(0));
+			return new SystemAgnosticIdentifier(fhirPath, evaluate.get(0), myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem());
 		} else {
 			return null;
 		}
