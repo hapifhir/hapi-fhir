@@ -3,7 +3,14 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -33,7 +40,11 @@ import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -44,11 +55,30 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
@@ -337,27 +367,36 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		enc2.getSubject().setReference(sub2Id);
 		String enc2Id = myEncounterDao.create(enc2).getId().toUnqualifiedVersionless().getValue();
 
+		Observation obs = new Observation();
+		obs.getSubject().setReference(sub1Id);
+		myObservationDao.create(obs);
+
+		// Log the link rows
+		runInTransaction(() -> myResourceLinkDao.findAll().forEach(t -> ourLog.info("ResLink: {}", t.toString())));
+
 		List<String> ids;
 		SearchParameterMap map;
 		IBundleProvider results;
 
+		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "Patient").setChain("_type"));
+		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "Patient").setChain(PARAM_TYPE));
 		results = myEncounterDao.search(map);
 		ids = toUnqualifiedVersionlessIdValues(results);
-		assertThat(ids, hasItems(enc1Id));
+		assertThat(ids, contains(enc1Id));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "Group").setChain("_type"));
+		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "Group").setChain(PARAM_TYPE));
 		results = myEncounterDao.search(map);
 		ids = toUnqualifiedVersionlessIdValues(results);
-		assertThat(ids, hasItems(enc2Id));
+		assertThat(ids, contains(enc2Id));
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "Organization").setChain("_type"));
+		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "Organization").setChain(PARAM_TYPE));
 		try {
 			myEncounterDao.search(map);
 			fail();
@@ -367,13 +406,46 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "HelpImABug").setChain("_type"));
+		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "HelpImABug").setChain(PARAM_TYPE));
 		try {
 			myEncounterDao.search(map);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Invalid/unsupported resource type: \"HelpImABug\"", e.getMessage());
 		}
+
+	}
+
+	@Test
+	public void testChainOnType2() {
+
+		CareTeam ct = new CareTeam();
+		ct.addNote().setText("Care Team");
+		IIdType ctId = myCareTeamDao.create(ct).getId().toUnqualifiedVersionless();
+
+		DiagnosticReport dr1 = new DiagnosticReport();
+		dr1.getPerformerFirstRep().setReferenceElement(ctId);
+		IIdType drId1 = myDiagnosticReportDao.create(dr1).getId().toUnqualifiedVersionless();
+
+		DiagnosticReport dr2 = new DiagnosticReport();
+		dr2.getResultsInterpreterFirstRep().setReferenceElement(ctId);
+		myDiagnosticReportDao.create(dr2).getId().toUnqualifiedVersionless();
+
+		// Log the link rows
+		runInTransaction(() -> myResourceLinkDao.findAll().forEach(t -> ourLog.info("ResLink: {}", t.toString())));
+
+		List<String> ids;
+		SearchParameterMap map;
+		IBundleProvider results;
+
+		myCaptureQueriesListener.clear();
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam( "CareTeam").setChain(PARAM_TYPE));
+		results = myDiagnosticReportDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids.toString(), ids, contains(drId1.getValue()));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 	}
 
@@ -1193,8 +1265,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		ourLog.info("SQL Query:\n{}", sqlQuery);
 		assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_id in"));
 		assertEquals(0, StringUtils.countMatches(sqlQuery, "join"));
-		assertEquals(1, StringUtils.countMatches(sqlQuery,"resourceta0_.res_type='diagnosticreport'"));
-		assertEquals(1, StringUtils.countMatches(sqlQuery,"resourceta0_.res_deleted_at is null"));
+		assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_type='diagnosticreport'"));
+		assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_deleted_at is null"));
 	}
 
 	@Test
@@ -3530,7 +3602,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 
 	}
-
 
 
 	@Test
