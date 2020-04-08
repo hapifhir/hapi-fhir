@@ -7,6 +7,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -18,10 +19,13 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.rest.api.Constants.*;
+import static org.slf4j.LoggerFactory.getLogger;
 
 @Lazy
 @Service
 public final class PersonHelper {
+	private static final Logger ourLog = getLogger(PersonHelper.class);
+
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
@@ -145,9 +149,12 @@ public final class PersonHelper {
 				if (incomingPatientEid.isPresent()) {
 					//The person has no EID. This should be impossible given that we auto-assign an EID at creation time.
 					if (!personOfficialEid.isPresent()) {
+						ourLog.debug("Incoming patient with EID {} is applying this EID to its related Person, as this person does not yet have an external EID", incomingPatientEid.get().getValue());
 						person.addIdentifier(incomingPatientEid.get().toR4());
+					} else if (personOfficialEid.isPresent() && eidsMatch(personOfficialEid, incomingPatientEid)){
+						ourLog.debug("incoming patient with EID {} does not need to overwrite person, as this EID is already present", incomingPatientEid.get().getValue());
 					} else {
-						throw new IllegalArgumentException("This should create  duplicate person");
+						throw new IllegalArgumentException("This would create a duplicate person!");
 					}
 				}
 			default:
@@ -155,6 +162,12 @@ public final class PersonHelper {
 				break;
 		}
 		return thePerson;
+	}
+
+	private boolean eidsMatch(Optional<CanonicalEID> thePersonOfficialEid, Optional<CanonicalEID> theIncomingPatientEid) {
+		return thePersonOfficialEid.isPresent()
+			&& theIncomingPatientEid.isPresent()
+			&& Objects.equals(thePersonOfficialEid.get().getValue(), theIncomingPatientEid.get().getValue());
 	}
 
 	/**

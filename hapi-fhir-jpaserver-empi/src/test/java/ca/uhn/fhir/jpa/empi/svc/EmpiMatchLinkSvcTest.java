@@ -130,7 +130,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		Person person = myPersonDao.read(new IdDt(empiLink.getPersonPid()));
 		Identifier identifierFirstRep = person.getIdentifierFirstRep();
-		assertThat(identifierFirstRep.getSystem(), is(equalTo(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())));
+		assertThat(identifierFirstRep.getSystem(), is(equalTo(INTERNAL_ENTERPRISE_IDENTIFIER_SYSTEM)));
 		assertThat(identifierFirstRep.getValue(), is(notNullValue()));
 	}
 
