@@ -86,7 +86,7 @@ public class StrictErrorHandler extends BaseErrorHandler implements IParserError
 
 	@Override
 	public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation) {
-		throw new DataFormatException(describeLocation(theLocation) + "Extension contains both a value and nested extensions: " + theLocation);
+		throw new DataFormatException(describeLocation(theLocation) + "Extension contains both a value and nested extensions");
 	}
 
 }

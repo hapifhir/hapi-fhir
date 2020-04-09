@@ -161,7 +161,7 @@ public class LenientErrorHandler extends BaseErrorHandler implements IParserErro
 	@Override
 	public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation) {
 		if (myLogErrors) {
-			ourLog.warn("Extension contains both a value and nested extensions: {}", describeLocation(theLocation));
+			ourLog.warn("{}Extension contains both a value and nested extensions", describeLocation(theLocation));
 		}
 	}
 

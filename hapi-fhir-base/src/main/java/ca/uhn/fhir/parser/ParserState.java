@@ -1282,7 +1282,7 @@ class ParserState<T> {
 			if ("value".equals(theName)) {
 				if ("".equals(theValue)) {
 					ParseLocation location = ParseLocation.fromElementName(myChildName);
-					myErrorHandler.invalidValue(location, theValue, "Attribute value for element must not be empty (\"\")");
+					myErrorHandler.invalidValue(location, theValue, "Attribute value must not be empty (\"\")");
 				} else {
 					try {
 						myInstance.setValueAsString(theValue);
