@@ -31,7 +31,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Service;
 
-@Service
 public class InlineResourceLinkResolver implements IResourceLinkResolver {
 
 	@Override

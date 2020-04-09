@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import org.junit.Test;
 
 import java.util.Arrays;

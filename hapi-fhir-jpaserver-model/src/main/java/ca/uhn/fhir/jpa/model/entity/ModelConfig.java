@@ -58,7 +58,6 @@ public class ModelConfig {
 	private boolean myDefaultSearchParamsCanBeOverridden = false;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private String myEmailFromAddress = "noreply@unknown.com";
-	private boolean mySubscriptionMatchingEnabled = true;
 	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
 
 	/**
@@ -328,27 +327,6 @@ public class ModelConfig {
 	 */
 	public Set<Subscription.SubscriptionChannelType> getSupportedSubscriptionTypes() {
 		return Collections.unmodifiableSet(mySupportedSubscriptionTypes);
-	}
-
-	/**
-	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
-	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
-	 * @since 3.7.0
-	 */
-
-	public boolean isSubscriptionMatchingEnabled() {
-		return mySubscriptionMatchingEnabled;
-	}
-
-	/**
-	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
-	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
-	 * @since 3.7.0
-	 */
-
-
-	public void setSubscriptionMatchingEnabled(boolean theSubscriptionMatchingEnabled) {
-		mySubscriptionMatchingEnabled = theSubscriptionMatchingEnabled;
 	}
 
 	@VisibleForTesting

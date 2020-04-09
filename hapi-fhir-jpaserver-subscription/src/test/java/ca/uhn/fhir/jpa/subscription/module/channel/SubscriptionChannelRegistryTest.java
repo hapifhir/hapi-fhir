@@ -1,8 +1,12 @@
 package ca.uhn.fhir.jpa.subscription.module.channel;
 
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryHandlerFactory;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +18,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -39,8 +45,6 @@ public class SubscriptionChannelRegistryTest {
 
 	@Test
 	public void testAddAddRemoveRemove() {
-		when(myModelConfig.isSubscriptionMatchingEnabled()).thenReturn(true);
-
 		CanonicalSubscription cansubA = new CanonicalSubscription();
 		cansubA.setIdElement(new IdDt("A"));
 		ActiveSubscription activeSubscriptionA = new ActiveSubscription(cansubA, TEST_CHANNEL_NAME);
@@ -48,13 +52,15 @@ public class SubscriptionChannelRegistryTest {
 		cansubB.setIdElement(new IdDt("B"));
 		ActiveSubscription activeSubscriptionB = new ActiveSubscription(cansubB, TEST_CHANNEL_NAME);
 
-		assertNull(mySubscriptionChannelRegistry.get(TEST_CHANNEL_NAME));
+		when(mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(any(), any())).thenReturn(mock(IChannelProducer.class));
+
+		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.add(activeSubscriptionA);
-		assertNotNull(mySubscriptionChannelRegistry.get(TEST_CHANNEL_NAME));
+		assertNotNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.add(activeSubscriptionB);
 		mySubscriptionChannelRegistry.remove(activeSubscriptionB);
-		assertNotNull(mySubscriptionChannelRegistry.get(TEST_CHANNEL_NAME));
+		assertNotNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.remove(activeSubscriptionA);
-		assertNull(mySubscriptionChannelRegistry.get(TEST_CHANNEL_NAME));
+		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 	}
 }

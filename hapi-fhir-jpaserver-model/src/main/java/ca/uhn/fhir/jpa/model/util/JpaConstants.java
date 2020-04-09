@@ -25,6 +25,10 @@ import ca.uhn.fhir.rest.api.Constants;
 public class JpaConstants {
 
 	/**
+	 * Userdata key for tracking the fact that a resource ID was assigned by the server
+	 */
+	public static final String RESOURCE_ID_SERVER_ASSIGNED = JpaConstants.class.getName() + "_RESOURCE_ID_SERVER_ASSIGNED";
+	/**
 	 * Operation name for the $apply-codesystem-delta-add operation
 	 */
 	public static final String OPERATION_APPLY_CODESYSTEM_DELTA_ADD = "$apply-codesystem-delta-add";

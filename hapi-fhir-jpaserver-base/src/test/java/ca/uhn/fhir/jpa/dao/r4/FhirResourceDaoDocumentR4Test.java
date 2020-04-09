@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.util.TestUtil;
 
 public class FhirResourceDaoDocumentR4Test extends BaseJpaR4Test {

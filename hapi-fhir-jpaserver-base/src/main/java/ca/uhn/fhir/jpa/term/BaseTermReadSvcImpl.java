@@ -24,11 +24,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.IDao;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.api.model.TranslationQuery;
+import ca.uhn.fhir.jpa.api.model.TranslationRequest;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
@@ -1143,7 +1145,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return true;
 	}
 
-	protected ValidateCodeResult validateCodeIsInPreExpandedValueSet(
+	protected IFhirResourceDaoValueSet.ValidateCodeResult validateCodeIsInPreExpandedValueSet(
 		ValidationOptions theValidationOptions,
 		ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Coding theCoding, CodeableConcept theCodeableConcept) {
 
@@ -1174,12 +1176,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		for (TermValueSetConcept concept : concepts) {
 			if (isNotBlank(theDisplay) && theDisplay.equals(concept.getDisplay())) {
-				return new ValidateCodeResult(true, "Validation succeeded", concept.getDisplay());
+				return new IFhirResourceDaoValueSet.ValidateCodeResult(true, "Validation succeeded", concept.getDisplay());
 			}
 		}
 
 		if (!concepts.isEmpty()) {
-			return new ValidateCodeResult(true, "Validation succeeded", concepts.get(0).getDisplay());
+			return new IFhirResourceDaoValueSet.ValidateCodeResult(true, "Validation succeeded", concepts.get(0).getDisplay());
 		}
 
 		return null;
@@ -1889,7 +1891,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			Long pid = IDao.RESOURCE_PID.get((IAnyResource) valueSet);
 			if (pid != null) {
 				if (isValueSetPreExpandedForCodeValidation(valueSet)) {
-					ValidateCodeResult outcome = validateCodeIsInPreExpandedValueSet(new ValidationOptions(), valueSet, theCodeSystem, theCode, null, null, null);
+					IFhirResourceDaoValueSet.ValidateCodeResult outcome = validateCodeIsInPreExpandedValueSet(new ValidationOptions(), valueSet, theCodeSystem, theCode, null, null, null);
 					if (outcome != null && outcome.isResult()) {
 						return Optional.of(new VersionIndependentConcept(theCodeSystem, theCode));
 					}

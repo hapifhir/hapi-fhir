@@ -21,8 +21,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IDao;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
@@ -40,7 +39,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
@@ -54,7 +58,6 @@ abstract class BasePredicateBuilder {
 	DaoConfig myDaoConfig;
 
 	boolean myDontUseHashesForSearch;
-	final IDao myCallingDao;
 	final CriteriaBuilder myCriteriaBuilder;
 	final QueryRoot myQueryRoot;
 	final Class<? extends IBaseResource> myResourceType;
@@ -62,7 +65,6 @@ abstract class BasePredicateBuilder {
 	final SearchParameterMap myParams;
 
 	BasePredicateBuilder(SearchBuilder theSearchBuilder) {
-		myCallingDao = theSearchBuilder.getCallingDao();
 		myCriteriaBuilder = theSearchBuilder.getBuilder();
 		myQueryRoot = theSearchBuilder.getQueryRoot();
 		myResourceType = theSearchBuilder.getResourceType();

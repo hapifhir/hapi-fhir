@@ -36,8 +36,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 
-@Service
-@Lazy
 public class SearchParamExtractorService {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorService.class);
 

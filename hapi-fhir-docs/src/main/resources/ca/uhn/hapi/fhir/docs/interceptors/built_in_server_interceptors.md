@@ -154,3 +154,10 @@ If you wish to override the value of `Resource.meta.source` using the value	supp
 * [CaptureResourceSourceFromHeaderInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/CaptureResourceSourceFromHeaderInterceptor.html)
 * [CaptureResourceSourceFromHeaderInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/CaptureResourceSourceFromHeaderInterceptor.java)
 
+# Utility: ResponseSizeCapturingInterceptor
+
+The ResponseSizeCapturingInterceptor can be used to capture the number of characters written in each HTTP FHIR response.
+
+* [ResponseSizeCapturingInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/ResponseSizeCapturingInterceptor.html)
+* [ResponseSizeCapturingInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/ResponseSizeCapturingInterceptor.java)
+

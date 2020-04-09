@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -38,6 +38,7 @@ import java.util.Collections;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 
@@ -382,7 +383,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testValidateResourceContainingProfileDeclarationInvalid() throws Exception {
+	public void testValidateResourceContainingProfileDeclarationInvalid() {
 		String methodName = "testValidateResourceContainingProfileDeclarationInvalid";
 
 		Observation input = new Observation();
@@ -399,6 +400,42 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		try {
 			myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
+			fail();
+		} catch (PreconditionFailedException e) {
+			org.hl7.fhir.r4.model.OperationOutcome oo = (org.hl7.fhir.r4.model.OperationOutcome) e.getOperationOutcome();
+			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			ourLog.info(outputString);
+			assertThat(outputString, containsString("Profile reference \\\"http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid\\\" could not be resolved, so has not been checked"));
+		}
+	}
+
+	@Test
+	public void testValidateBundleContainingResourceContainingProfileDeclarationInvalid() {
+		String methodName = "testValidateResourceContainingProfileDeclarationInvalid";
+
+		Observation observation = new Observation();
+		String profileUri = "http://example.com/StructureDefinition/" + methodName;
+		observation.getMeta().getProfile().add(new CanonicalType(profileUri));
+		observation.addIdentifier().setSystem("http://acme").setValue("12345");
+		observation.getEncounter().setReference("http://foo.com/Encounter/9");
+		observation.setStatus(ObservationStatus.FINAL);
+		observation.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setResource(observation)
+			.setFullUrl("http://example.com/Observation")
+			.getRequest()
+			.setUrl("http://example.com/Observation")
+			.setMethod(Bundle.HTTPVerb.POST);
+
+		ValidationModeEnum mode = ValidationModeEnum.CREATE;
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+		ourLog.info(encoded);
+
+		try {
+			myBundleDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
 			org.hl7.fhir.r4.model.OperationOutcome oo = (org.hl7.fhir.r4.model.OperationOutcome) e.getOperationOutcome();

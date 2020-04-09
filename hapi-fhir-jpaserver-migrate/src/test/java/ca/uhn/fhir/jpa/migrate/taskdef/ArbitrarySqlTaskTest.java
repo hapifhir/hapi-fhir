@@ -8,10 +8,15 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 
 public class ArbitrarySqlTaskTest extends BaseTest {
+
+	public ArbitrarySqlTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
 
 	@Test
 	public void test350MigrateSearchParams() {
@@ -106,8 +111,8 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		};
 		migrator
 			.forVersion(VersionEnum.V3_5_0)
-			.executeRawSql("1", DriverTypeEnum.H2_EMBEDDED, "delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'")
-			.executeRawSql("2", DriverTypeEnum.H2_EMBEDDED, "delete from TEST_UPDATE_TASK where RES_TYPE = 'Encounter'");
+			.executeRawSql("1", getDriverType(), "delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'")
+			.executeRawSql("2", getDriverType(), "delete from TEST_UPDATE_TASK where RES_TYPE = 'Encounter'");
 
 		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();

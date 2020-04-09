@@ -4,11 +4,16 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertThat;
 
 public class DropIndexTest extends BaseTest {
+
+	public DropIndexTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
 
 	@Test
 	public void testIndexAlreadyExists() throws SQLException {
