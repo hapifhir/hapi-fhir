@@ -2,16 +2,13 @@ package ca.uhn.fhir.jpa.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.BaseConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
-import ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
-import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcR4;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR4;
@@ -52,12 +49,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableTransactionManagement
 public class BaseR4Config extends BaseConfigDstu3Plus {
-	static FhirContext ourFhirContext = FhirContext.forR4();
-	static {
-		// Don't strip versions in some places
-		ParserOptions parserOptions = ourFhirContext.getParserOptions();
-		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.what");
-	}
 
 	@Override
 	public FhirContext fhirContext() {
@@ -73,7 +64,13 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 	@Bean
 	@Primary
 	public FhirContext fhirContextR4() {
-		return ourFhirContext;
+		FhirContext retVal = FhirContext.forR4();
+
+		// Don't strip versions in some places
+		ParserOptions parserOptions = retVal.getParserOptions();
+		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.what");
+
+		return retVal;
 	}
 
 	@Bean
@@ -105,20 +102,15 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 		return searchDao;
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
-	public SearchParamExtractorR4 searchParamExtractor() {
-		return new SearchParamExtractorR4();
-	}
-
 	@Bean(name = "mySystemDaoR4", autowire = Autowire.BY_NAME)
 	public IFhirSystemDao<Bundle, Meta> systemDaoR4() {
-		FhirSystemDaoR4 retVal = new FhirSystemDaoR4();
+		ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4 retVal = new ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4();
 		return retVal;
 	}
 
 	@Bean(name = "mySystemProviderR4")
-	public JpaSystemProviderR4 systemProviderR4() {
-		JpaSystemProviderR4 retVal = new JpaSystemProviderR4();
+	public ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4 systemProviderR4() {
+		ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4 retVal = new ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4();
 		retVal.setContext(fhirContextR4());
 		retVal.setDao(systemDaoR4());
 		return retVal;
@@ -134,4 +126,5 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 	public ITermReadSvcR4 terminologyService() {
 		return new TermReadSvcR4();
 	}
+
 }

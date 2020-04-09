@@ -1,11 +1,10 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.util.*;
-
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -14,14 +13,18 @@ import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
 
-import com.google.common.base.Charsets;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.TreeSet;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.util.TestUtil;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 @SuppressWarnings("Duplicates")
 public class PatientEverythingR4Test extends BaseResourceProviderR4Test {

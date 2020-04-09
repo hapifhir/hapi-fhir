@@ -1,13 +1,13 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
+import ca.uhn.fhir.jpa.model.util.ProviderConstants;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.subscription.SubscriptionTriggeringSvcImpl;
+import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -21,35 +21,20 @@ import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.Subscription;
-import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Test the rest-hook subscriptions
@@ -182,7 +167,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.operation()
 			.onInstance(subscriptionId)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.RESOURCE_ID, new UriType(obsId.toUnqualifiedVersionless().getValue()))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID, new UriType(obsId.toUnqualifiedVersionless().getValue()))
 			.execute();
 
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
@@ -231,8 +216,8 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.operation()
 			.onInstance(sub1id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Observation?"))
-			.andParameter(SubscriptionTriggeringProvider.RESOURCE_ID, new UriType("Observation/O2"))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Observation?"))
+			.andParameter(ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID, new UriType("Observation/O2"))
 			.execute();
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
@@ -241,7 +226,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.operation()
 			.onInstance(sub2id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Patient?"))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?"))
 			.execute();
 		responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
@@ -280,9 +265,9 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.operation()
 			.onInstance(sub2id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Patient?_id=P0"))
-			.andParameter(SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Patient?_id=P1"))
-			.andParameter(SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Patient?_id=P2"))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_id=P0"))
+			.andParameter(ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_id=P1"))
+			.andParameter(ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_id=P2"))
 			.execute();
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
@@ -324,7 +309,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.operation()
 			.onInstance(sub2id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Patient?_id=P0,P1,P2"))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_id=P0,P1,P2"))
 			.execute();
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
@@ -368,7 +353,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.operation()
 			.onInstance(sub1id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Observation?_count=10"))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Observation?_count=10"))
 			.execute();
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
@@ -377,7 +362,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.operation()
 			.onInstance(sub2id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Patient?_count=16"))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_count=16"))
 			.execute();
 		responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
@@ -400,7 +385,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 				.operation()
 				.onType(Subscription.class)
 				.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-				.withParameter(Parameters.class, SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Observation"))
+				.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Observation"))
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
@@ -434,7 +419,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.operation()
 			.onType(Subscription.class)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Observation?"))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Observation?"))
 			.execute();
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
@@ -471,7 +456,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.operation()
 			.onInstance(subscriptionId)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.RESOURCE_ID, new UriType(obsId.toUnqualifiedVersionless().getValue()))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID, new UriType(obsId.toUnqualifiedVersionless().getValue()))
 			.execute();
 
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();

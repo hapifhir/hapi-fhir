@@ -2,12 +2,13 @@ package ca.uhn.fhir.jpa.empi.provider;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
+import ca.uhn.fhir.jpa.api.rp.ResourceProviderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 @Service
+// FIXME KHS move these
 public class EmpiProviderLoader {
 	@Autowired
 	private FhirContext myFhirContext;

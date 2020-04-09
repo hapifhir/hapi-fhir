@@ -2,24 +2,14 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
-import ca.uhn.fhir.jpa.entity.TermConceptMap;
-import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
-import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
-import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
-import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.api.model.TranslationRequest;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
-import org.hl7.fhir.r4.model.UriType;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.junit.AfterClass;
@@ -36,12 +26,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplR4Test.class);
@@ -1796,7 +1781,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValidateCodeResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
 		assertNull(result);
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "BOGUS", null, null, null);
@@ -1852,7 +1837,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValidateCodeResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
 		assertNull(result);
 
 

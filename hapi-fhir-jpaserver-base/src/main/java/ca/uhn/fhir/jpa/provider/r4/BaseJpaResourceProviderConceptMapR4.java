@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.provider.r4;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
-import ca.uhn.fhir.jpa.term.TranslationRequest;
-import ca.uhn.fhir.jpa.term.TranslationResult;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
+import ca.uhn.fhir.jpa.api.model.TranslationRequest;
+import ca.uhn.fhir.jpa.api.model.TranslationResult;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;

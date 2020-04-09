@@ -3,15 +3,15 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
 import ca.uhn.fhir.jpa.term.TermReadSvcDstu2;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
@@ -123,13 +123,8 @@ public class BaseDstu2Config extends BaseConfig {
 		return searchDao;
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
-	public SearchParamExtractorDstu2 searchParamExtractor() {
-		return new SearchParamExtractorDstu2();
-	}
-
 	@Bean(name = "mySystemDaoDstu2", autowire = Autowire.BY_NAME)
-	public IFhirSystemDao<ca.uhn.fhir.model.dstu2.resource.Bundle, MetaDt> systemDaoDstu2() {
+	public IFhirSystemDao<Bundle, MetaDt> systemDaoDstu2() {
 		ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2 retVal = new ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2();
 		return retVal;
 	}

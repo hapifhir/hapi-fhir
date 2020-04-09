@@ -21,8 +21,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IDao;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
@@ -51,7 +50,6 @@ abstract class BasePredicateBuilder {
 	DaoConfig myDaoConfig;
 
 	boolean myDontUseHashesForSearch;
-	final IDao myCallingDao;
 	final CriteriaBuilder myCriteriaBuilder;
 	final QueryRoot myQueryRoot;
 	final Class<? extends IBaseResource> myResourceType;
@@ -59,7 +57,6 @@ abstract class BasePredicateBuilder {
 	final SearchParameterMap myParams;
 
 	BasePredicateBuilder(SearchBuilder theSearchBuilder) {
-		myCallingDao = theSearchBuilder.getCallingDao();
 		myCriteriaBuilder = theSearchBuilder.getBuilder();
 		myQueryRoot = theSearchBuilder.getQueryRoot();
 		myResourceType = theSearchBuilder.getResourceType();

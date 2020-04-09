@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.Rule;

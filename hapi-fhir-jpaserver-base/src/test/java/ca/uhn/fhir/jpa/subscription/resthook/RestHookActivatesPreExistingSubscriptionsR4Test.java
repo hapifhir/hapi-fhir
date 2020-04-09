@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingInterceptor;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -10,6 +9,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -29,8 +29,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-import ca.uhn.fhir.test.utilities.JettyUtil;
-
 public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookActivatesPreExistingSubscriptionsR4Test.class);
@@ -46,18 +44,12 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
 	@After
-	public void afterResetSubscriptionActivatingInterceptor() {
-		SubscriptionActivatingInterceptor.setWaitForSubscriptionActivationSynchronouslyForUnitTest(false);
-	}
-
-	@After
 	public void afterUnregisterRestHookListener() {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
 	@Before
 	public void beforeSetSubscriptionActivatingInterceptor() {
-		SubscriptionActivatingInterceptor.setWaitForSubscriptionActivationSynchronouslyForUnitTest(true);
 		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 	}
 

@@ -119,8 +119,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Create
-	public MethodOutcome create(@ResourceParam T theResource) {
-		createInternal(theResource);
+	public MethodOutcome create(@ResourceParam T theResource, RequestDetails theRequestDetails) {
+		createInternal(theResource, theRequestDetails);
 
 		myCreateCount.incrementAndGet();
 
@@ -130,17 +130,17 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			.setId(theResource.getIdElement());
 	}
 
-	private void createInternal(@ResourceParam T theResource) {
+	private void createInternal(@ResourceParam T theResource, RequestDetails theRequestDetails) {
 		long idPart = myNextId++;
 		String idPartAsString = Long.toString(idPart);
 		Long versionIdPart = 1L;
 
-		IIdType id = store(theResource, idPartAsString, versionIdPart);
+		IIdType id = store(theResource, idPartAsString, versionIdPart, theRequestDetails);
 		theResource.setId(id);
 	}
 
 	@Delete
-	public MethodOutcome delete(@IdParam IIdType theId) {
+	public MethodOutcome delete(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
 		if (versions == null || versions.isEmpty()) {
 			throw new ResourceNotFoundException(theId);
@@ -148,7 +148,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 
 		long nextVersion = versions.lastEntry().getKey() + 1L;
-		IIdType id = store(null, theId.getIdPart(), nextVersion);
+		IIdType id = store(null, theId.getIdPart(), nextVersion, theRequestDetails);
 
 		myDeleteCount.incrementAndGet();
 
@@ -310,7 +310,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		return fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
 	}
 
-	private IIdType store(@ResourceParam T theResource, String theIdPart, Long theVersionIdPart) {
+	private IIdType store(@ResourceParam T theResource, String theIdPart, Long theVersionIdPart, RequestDetails theRequestDetails) {
 		IIdType id = myFhirContext.getVersion().newIdType();
 		String versionIdPart = Long.toString(theVersionIdPart);
 		id.setParts(null, myResourceName, theIdPart, versionIdPart);
@@ -348,6 +348,35 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		TreeMap<Long, T> versionToResource = getVersionToResource(theIdPart);
 		versionToResource.put(theVersionIdPart, theResource);
 
+		if (theRequestDetails != null) {
+			IInterceptorBroadcaster interceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
+
+			if (theResource != null) {
+				if (!myIdToHistory.containsKey(theIdPart)) {
+
+					// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_CREATED
+					HookParams params = new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(IBaseResource.class, theResource);
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, params);
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, params);
+
+				} else {
+
+					// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_UPDATED
+					HookParams params = new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
+						.add(IBaseResource.class, theResource);
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, params);
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
+
+				}
+			}
+		}
+
 		// Store to type history map
 		myTypeHistory.addFirst(theResource);
 
@@ -365,11 +394,12 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	@Update
 	public MethodOutcome update(
 		@ResourceParam T theResource,
-		@ConditionalUrlParam String theConditional) {
+		@ConditionalUrlParam String theConditional,
+		RequestDetails theRequestDetails) {
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(isBlank(theConditional), "This server doesn't support conditional update");
 
-		boolean created = updateInternal(theResource);
+		boolean created = updateInternal(theResource, theRequestDetails);
 		myUpdateCount.incrementAndGet();
 
 		return new MethodOutcome()
@@ -378,7 +408,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			.setId(theResource.getIdElement());
 	}
 
-	private boolean updateInternal(@ResourceParam T theResource) {
+	private boolean updateInternal(@ResourceParam T theResource, RequestDetails theRequestDetails) {
 		String idPartAsString = theResource.getIdElement().getIdPart();
 		TreeMap<Long, T> versionToResource = getVersionToResource(idPartAsString);
 
@@ -392,7 +422,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			created = false;
 		}
 
-		IIdType id = store(theResource, idPartAsString, versionIdPart);
+		IIdType id = store(theResource, idPartAsString, versionIdPart, theRequestDetails);
 		theResource.setId(id);
 		return created;
 	}
@@ -411,9 +441,9 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	 */
 	public IIdType store(T theResource) {
 		if (theResource.getIdElement().hasIdPart()) {
-			updateInternal(theResource);
+			updateInternal(theResource, null);
 		} else {
-			createInternal(theResource);
+			createInternal(theResource, null);
 		}
 		return theResource.getIdElement();
 	}

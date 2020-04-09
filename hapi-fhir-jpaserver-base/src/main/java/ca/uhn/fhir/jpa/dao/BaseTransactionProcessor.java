@@ -25,14 +25,18 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.delete.DeleteConflictList;
-import ca.uhn.fhir.jpa.delete.DeleteConflictOutcome;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.IJpaDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.DeleteConflict;
+import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
-import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -54,24 +58,13 @@ import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
-import ca.uhn.fhir.util.ElementUtil;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.ResourceReferenceInfo;
-import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.*;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,9 +75,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.PostConstruct;
 import java.util.*;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public abstract class BaseTransactionProcessor {
 
@@ -667,7 +658,7 @@ public abstract class BaseTransactionProcessor {
 						// DELETE
 						String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
-						ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
+						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						int status = Constants.STATUS_HTTP_204_NO_CONTENT;
 						if (parts.getResourceId() != null) {
 							IIdType deleteId = newIdType(parts.getResourceType(), parts.getResourceId());
@@ -770,7 +761,7 @@ public abstract class BaseTransactionProcessor {
 							throw new InvalidRequestException(msg);
 						}
 
-						ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
+						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						PatchTypeEnum patchType = PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(contentType);
 						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
 						DaoMethodOutcome outcome = dao.patch(patchId, matchUrl, patchType, patchBody, theRequest);
@@ -986,7 +977,7 @@ public abstract class BaseTransactionProcessor {
 		return url;
 	}
 
-	private ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> toDao(UrlUtil.UrlParts theParts, String theVerb, String theUrl) {
+	private IFhirResourceDao<? extends IBaseResource> toDao(UrlUtil.UrlParts theParts, String theVerb, String theUrl) {
 		RuntimeResourceDefinition resType;
 		try {
 			resType = myContext.getResourceDefinition(theParts.getResourceType());

@@ -4,6 +4,11 @@ import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.dao.IJpaDao;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
@@ -18,13 +23,11 @@ import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.LogicalReferenceHelper;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
@@ -392,8 +395,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		search = mySearchCacheSvc.save(search);
 
-		return new PersistedJpaBundleProvider(theRequest, search.getUuid(), this, mySearchBuilderFactory);
+		return myPersistedJpaBundleProviderFactory.newInstance(theRequest, search.getUuid());
 	}
+
+	@Autowired
+	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+
 
 	void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
 		String newVersion;
@@ -410,16 +417,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		IIdType newId = theResourceId.withVersion(newVersion);
 		theResource.getIdElement().setValue(newId.getValue());
 		theSavedEntity.setVersion(newVersionLong);
-	}
-
-	@Override
-	public void injectDependenciesIntoBundleProvider(PersistedJpaBundleProvider theProvider) {
-		theProvider.setContext(getContext());
-		theProvider.setEntityManager(myEntityManager);
-		theProvider.setPlatformTransactionManager(myPlatformTransactionManager);
-		theProvider.setSearchCacheSvc(mySearchCacheSvc);
-		theProvider.setSearchCoordinatorSvc(mySearchCoordinatorSvc);
-		theProvider.setInterceptorBroadcaster(myInterceptorBroadcaster);
 	}
 
 	public boolean isLogicalReference(IIdType theId) {
@@ -1360,11 +1357,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		validateMetaCount(totalMetaCount);
 
-	}
-
-	@Override
-	public ISearchParamRegistry getSearchParamRegistry() {
-		return mySearchParamRegistry;
 	}
 
 	@PostConstruct
