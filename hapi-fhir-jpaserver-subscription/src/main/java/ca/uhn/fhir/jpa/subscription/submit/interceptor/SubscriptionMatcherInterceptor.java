@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.*;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -21,6 +22,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /*-
  * #%L
@@ -54,6 +56,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 
 	private volatile Map<String, MessageChannel> myMessageChannels = new HashMap<>();
+	private volatile Map<String, Set<String>> mySupportedResourceTypes = new HashMap<>();
 
 	/**
 	 * Constructor
@@ -98,14 +101,37 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 			return;
 		}
 
-		submitResourceModified(msg);
+		for (Map.Entry<String, MessageChannel> entry : myMessageChannels.entrySet()) {
+			try {
+				if (resourceTypeSupported(entry.getKey(), theNewResource)) {
+					submitResourceModified(entry.getValue(), msg);
+				}
+			} catch (Exception e) {
+				ourLog.error("Failed to send {} to channel {}: {}", msg.getPayloadId(), entry.getKey(), e.getMessage());
+				ourLog.error("Send Exception:", e);
+			}
+		}
+	}
+
+	private boolean resourceTypeSupported(String theChannelName, IBaseResource theNewResource) {
+		Set<String> supportedResourceTypes = mySupportedResourceTypes.get(theChannelName);
+		if (supportedResourceTypes != null) {
+			String resourceType = myFhirContext.getResourceDefinition(theNewResource).getName();
+			return supportedResourceTypes.contains(resourceType);
+		}
+		return true;
+	}
+
+	// FIXME KHS move this
+	public void submitResourceModified(ResourceModifiedMessage theMsg) {
+		submitResourceModified(myMessageChannels.get(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME), theMsg);
 	}
 
 	/**
 	 * This is an internal API - Use with caution!
 	 */
 	@Override
-	public void submitResourceModified(final ResourceModifiedMessage theMsg) {
+	public void submitResourceModified(MessageChannel theChannel, final ResourceModifiedMessage theMsg) {
 		/*
 		 * We only want to submit the message to the processing queue once the
 		 * transaction is committed. We do this in order to make sure that the
@@ -120,25 +146,19 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 
 				@Override
 				public void afterCommit() {
-					sendToProcessingChannel(theMsg);
+					sendToProcessingChannel(theChannel, theMsg);
 				}
 			});
 		} else {
-			sendToProcessingChannel(theMsg);
+			sendToProcessingChannel(theChannel, theMsg);
 		}
 	}
 
-	protected void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
+	protected void sendToProcessingChannel(MessageChannel theChannel, final ResourceModifiedMessage theMessage) {
 		ourLog.trace("Sending resource modified message to processing channel");
 		Validate.notNull(myMessageChannels, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
-		for (Map.Entry<String, MessageChannel> entry : myMessageChannels.entrySet()) {
-			try {
-				entry.getValue().send(new ResourceModifiedJsonMessage(theMessage));
-			} catch (Exception e) {
-				ourLog.error("Failed to send message {} to channel {}: {}", theMessage, entry.getKey(), e.getMessage());
-				ourLog.error("Send Exception:", e);
-			}
-		}
+
+		theChannel.send(new ResourceModifiedJsonMessage(theMessage));
 	}
 
 	public void setFhirContext(FhirContext theCtx) {
@@ -148,5 +168,10 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	@VisibleForTesting
 	public LinkedBlockingChannel getProcessingChannelForUnitTest(String theChannelName) {
 		return (LinkedBlockingChannel) myMessageChannels.get(theChannelName);
+	}
+
+	public void addChannel(String theChannelName, Set<String> theResourceTypes) {
+		addChannel(theChannelName);
+		mySupportedResourceTypes.put(theChannelName, theResourceTypes);
 	}
 }

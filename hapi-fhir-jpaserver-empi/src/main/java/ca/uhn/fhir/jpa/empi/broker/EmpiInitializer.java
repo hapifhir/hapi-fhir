@@ -5,6 +5,7 @@ import ca.uhn.fhir.empi.api.IEmpiRuleValidator;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.empi.provider.EmpiProviderLoader;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import org.apache.commons.collections4.SetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.Set;
 
 @Service
 public class EmpiInitializer {
@@ -35,7 +37,8 @@ public class EmpiInitializer {
 			return;
 		}
 		myEmpiRuleValidator.validate(myEmpiConfig.getEmpiRules());
-		mySubscriptionMatcherInterceptor.addChannel(IEmpiConfig.EMPI_MATCHING_CHANNEL_NAME);
+		Set<String> resourceTypes = SetUtils.hashSet("Patient", "Practitioner");
+		mySubscriptionMatcherInterceptor.addChannel(IEmpiConfig.EMPI_MATCHING_CHANNEL_NAME, resourceTypes);
 		myInterceptorService.registerInterceptor(mySubscriptionMatcherInterceptor);
 		ourLog.info("EMPI interceptor registered");
 

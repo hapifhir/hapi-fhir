@@ -48,12 +48,7 @@ public class EmpiMatchingConsumer implements MessageHandler {
 
 	public void matchEmpiAndUpdateLinks(ResourceModifiedMessage theMsg) {
 	String resourceType = theMsg.getId(myFhirContext).getResourceType();
-	// FIXME KHS remove
-	if (!resourceType.equals("Patient") && !resourceType.equals("Practitioner")) {
-		return;
-	}
-	// FIXME KHS restore this functionality
-//		validateResourceType(resourceType);
+		validateResourceType(resourceType);
 		try {
 			switch (theMsg.getOperationType()) {
 				case CREATE:
