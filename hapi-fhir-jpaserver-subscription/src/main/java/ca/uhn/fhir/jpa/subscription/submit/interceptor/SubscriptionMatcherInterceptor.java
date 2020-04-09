@@ -77,7 +77,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
 	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
-		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE, theRequest);
+		submitResourceModified(theOldResource, theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE, theRequest);
 	}
 
 	/**
@@ -99,20 +99,20 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 			return;
 		}
 
+		submitToAllChannels(theOldResource, theNewResource, theRequest, msg);
+	}
+
+	private void submitToAllChannels(@Nullable IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest, ResourceModifiedMessage theMsg) {
 		for (Map.Entry<String, MessageChannel> entry : myMessageChannels.entrySet()) {
-			try {
-				if (canSubmitResource(entry.getKey(), theOldResource, theNewResource, theRequest)) {
-					submitResourceModified(entry.getValue(), msg);
-				}
-			} catch (Exception e) {
-				ourLog.error("Failed to send {} to channel {}: {}", msg.getPayloadId(), entry.getKey(), e.getMessage());
-				ourLog.error("Send Exception:", e);
+			if (canSubmitResource(entry.getKey(), theOldResource, theNewResource, theRequest)) {
+				submitResourceModified(entry.getValue(), theMsg);
 			}
 		}
 	}
 
 	private boolean canSubmitResource(String theChannelName, @Nullable IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
-		return myResourceInterceptorFilters.get(theChannelName).canSubmitResource(theOldResource, theNewResource, theRequest);
+		IResourceInterceptorFilter resourceInterceptorFilter = myResourceInterceptorFilters.get(theChannelName);
+		return resourceInterceptorFilter.canSubmitResource(theOldResource, theNewResource, theRequest);
 	}
 
 	// FIXME KHS move this

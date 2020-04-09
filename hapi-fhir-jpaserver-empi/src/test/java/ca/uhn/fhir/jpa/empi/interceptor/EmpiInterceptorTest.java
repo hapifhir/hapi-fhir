@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.Rule;
@@ -104,6 +105,7 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 		EmpiLink empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTableHelper.getPidOrNull(patient)).get();
 		Long personPid = empiLink.getPersonPid();
 		Person empiPerson= (Person)myPersonDao.readByPid(new ResourcePersistentId(personPid));
+		empiPerson.setGender(Enumerations.AdministrativeGender.MALE);
 		try {
 			myEmpiHelper.doUpdatePerson(empiPerson, true);
 			fail();
