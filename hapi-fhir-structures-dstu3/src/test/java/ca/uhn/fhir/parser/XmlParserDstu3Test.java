@@ -1542,7 +1542,7 @@ public class XmlParserDstu3Test {
 			parser.encodeResourceToString(p);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions: [element=\"Patient(res).extension\"]", e.getMessage());
+			assertEquals("[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
 	}
