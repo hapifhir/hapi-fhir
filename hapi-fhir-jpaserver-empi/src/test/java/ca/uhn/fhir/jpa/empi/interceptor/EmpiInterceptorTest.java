@@ -14,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -45,6 +46,12 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 	}
 
 	@Test
+	public void testCreatePractitioner() throws InterruptedException {
+		myEmpiHelper.createWithLatch(new Practitioner());
+		assertLinkCount(1);
+	}
+
+	@Test
 	public void testCreatePerson() throws InterruptedException {
 		myPersonDao.create(new Person());
 		assertLinkCount(0);
@@ -56,7 +63,7 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 		Person person = new Person();
 		person.getMeta().addTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED, "User is managed by EMPI");
 		try {
-			myEmpiHelper.doCreatePerson(person, true);
+			myEmpiHelper.doCreateResource(person, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
 			assertEquals("Cannot create or modify Persons who are managed by EMPI.", e.getMessage());
@@ -80,13 +87,13 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 	public void testNonEmpiManagedPersonCannotHaveEmpiManagedTagAddedToThem() {
 		//Person created manually.
 		Person person = new Person();
-		DaoMethodOutcome daoMethodOutcome = myEmpiHelper.doCreatePerson(person, true);
+		DaoMethodOutcome daoMethodOutcome = myEmpiHelper.doCreateResource(person, true);
 		assertNotNull(daoMethodOutcome.getId());
 
 		//Updating that person to set them as EMPI managed is not allowed.
 		person.getMeta().addTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED, "User is managed by EMPI");
 		try {
-			myEmpiHelper.doUpdatePerson(person, true);
+			myEmpiHelper.doUpdateResource(person, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
 			assertEquals(e.getMessage(), "The EMPI status of a Person may not be changed once created.");
@@ -107,7 +114,7 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 		Person empiPerson= (Person)myPersonDao.readByPid(new ResourcePersistentId(personPid));
 		empiPerson.setGender(Enumerations.AdministrativeGender.MALE);
 		try {
-			myEmpiHelper.doUpdatePerson(empiPerson, true);
+			myEmpiHelper.doUpdateResource(empiPerson, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
 			assertEquals("Cannot create or modify Persons who are managed by EMPI.", e.getMessage());

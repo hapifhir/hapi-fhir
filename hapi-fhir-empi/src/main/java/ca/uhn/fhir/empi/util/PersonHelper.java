@@ -88,16 +88,16 @@ public final class PersonHelper {
 	 * Create a Person from a given patient. This will carry over the Patient's EID if it exists. If it does not exist,
 	 * a randomly generated UUID EID will be created.
 	 *
-	 * @param thePatient The Patient that will be used as the starting point for the person.
+	 * @param theSourceResource The Patient that will be used as the starting point for the person.
 	 * @return the Person that is created.
 	 */
-	public IBaseResource createPersonFromPatient(IBaseResource thePatient) {
+	public IBaseResource createPersonFromPatientOrPractitioner(IBaseResource theSourceResource) {
 		String eidSystem = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person person = new Person();
 				CanonicalEID eidToApply;
-				Optional<CanonicalEID> officialEID = CanonicalEID.extractFromResource(myFhirContext, eidSystem, thePatient);
+				Optional<CanonicalEID> officialEID = CanonicalEID.extractFromResource(myFhirContext, eidSystem, theSourceResource);
 
 				if (officialEID.isPresent()) {
 					eidToApply = officialEID.get();
@@ -106,7 +106,7 @@ public final class PersonHelper {
 				}
 				person.addIdentifier(eidToApply.toR4());
 				person.getMeta().addTag(buildEmpiManagedTag());
-				copyPatientDataIntoPerson((Patient)thePatient, person);
+				copyPatientDataIntoPerson(theSourceResource, person);
 				return person;
 			default:
 				// FIXME EMPI moar versions
@@ -116,18 +116,31 @@ public final class PersonHelper {
 
 	/**
 	 * This will copy over all attributes that are copiable from Patient/Practitioner to Person.
-	 * TODO Is Shallow copying OK? Seemsgood.
 	 *
-	 * @param thePatient The incoming {@link Patient} who's data we want to copy into Person.
+	 * @param theBaseResource The incoming {@link Patient} or {@link Practitioner} who's data we want to copy into Person.
 	 * @param thePerson The incoming {@link Person} who needs to have their data updated.
 	 */
-	private void copyPatientDataIntoPerson(Patient thePatient, Person thePerson) {
-		thePerson.setName(thePatient.getName());
-		thePerson.setAddress(thePatient.getAddress());
-		thePerson.setTelecom(thePatient.getTelecom());
-		thePerson.setBirthDate(thePatient.getBirthDate());
-		thePerson.setGender(thePatient.getGender());
-		thePerson.setPhoto(thePatient.getPhotoFirstRep());
+	private void copyPatientDataIntoPerson(IBaseResource theBaseResource, Person thePerson) {
+		switch (myFhirContext.getResourceDefinition(theBaseResource).getName()) {
+			case "Patient":
+				Patient patient = (Patient)theBaseResource;
+				thePerson.setName(patient.getName());
+				thePerson.setAddress(patient.getAddress());
+				thePerson.setTelecom(patient.getTelecom());
+				thePerson.setBirthDate(patient.getBirthDate());
+				thePerson.setGender(patient.getGender());
+				thePerson.setPhoto(patient.getPhotoFirstRep());
+				break;
+			case "Practitioner":
+				Practitioner practitioner = (Practitioner)theBaseResource;
+				thePerson.setName(practitioner.getName());
+				thePerson.setAddress(practitioner.getAddress());
+				thePerson.setTelecom(practitioner.getTelecom());
+				thePerson.setBirthDate(practitioner.getBirthDate());
+				thePerson.setGender(practitioner.getGender());
+				thePerson.setPhoto(practitioner.getPhotoFirstRep());
+				break;
+		}
 	}
 
 	private Coding buildEmpiManagedTag() {

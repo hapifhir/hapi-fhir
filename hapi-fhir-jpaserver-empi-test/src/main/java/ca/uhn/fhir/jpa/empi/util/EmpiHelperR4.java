@@ -1,60 +1,78 @@
 package ca.uhn.fhir.jpa.empi.util;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class EmpiHelperR4 extends BaseEmpiHelper {
 	@Autowired
 	protected IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
+	protected IFhirResourceDao<Practitioner> myPractitionerDao;
+	@Autowired
 	protected IFhirResourceDao<Person> myPersonDao;
+	@Autowired
+	protected FhirContext myFhirContext;
 
-	public DaoMethodOutcome createWithLatch(Patient thePatient, boolean isExternalHttpRequest) throws InterruptedException {
+	public DaoMethodOutcome createWithLatch(IBaseResource theResource) throws InterruptedException {
+		return createWithLatch(theResource, true);
+	}
+
+	public DaoMethodOutcome createWithLatch(IBaseResource theBaseResource, boolean isExternalHttpRequest) throws InterruptedException {
 		myAfterEmpiLatch.setExpectedCount(1);
-		DaoMethodOutcome daoMethodOutcome = doCreatePatient(thePatient, isExternalHttpRequest);
+		DaoMethodOutcome daoMethodOutcome = doCreateResource(theBaseResource, isExternalHttpRequest);
 		myAfterEmpiLatch.awaitExpected();
 		return daoMethodOutcome;
 	}
 
-	public DaoMethodOutcome createWithLatch(Patient thePatient) throws InterruptedException {
-		return createWithLatch(thePatient, true);
+	public DaoMethodOutcome updateWithLatch(IBaseResource theIBaseResource) throws InterruptedException {
+		return updateWithLatch(theIBaseResource, true);
 	}
 
-	public DaoMethodOutcome createWithLatch(Person thePerson, boolean isExternalHttpRequest) throws InterruptedException {
+	public DaoMethodOutcome updateWithLatch(IBaseResource theIBaseResource, boolean isExternalHttpRequest) throws InterruptedException {
 		myAfterEmpiLatch.setExpectedCount(1);
-		DaoMethodOutcome daoMethodOutcome = doCreatePerson(thePerson, isExternalHttpRequest);
+		DaoMethodOutcome daoMethodOutcome = doUpdateResource(theIBaseResource, isExternalHttpRequest);
 		myAfterEmpiLatch.awaitExpected();
 		return daoMethodOutcome;
 	}
 
-	public DaoMethodOutcome createWithLatch(Person thePerson) throws InterruptedException {
-		return createWithLatch(thePerson, true);
+	public DaoMethodOutcome doCreateResource(IBaseResource theResource, boolean isExternalHttpRequest) {
+		String resourceType = myFhirContext.getResourceDefinition(theResource).getName();
+
+		switch (resourceType) {
+			case "Patient":
+				Patient patient = (Patient)theResource;
+				return isExternalHttpRequest ? myPatientDao.create(patient, myMockSrd): myPatientDao.create(patient);
+			case "Practitioner":
+				Practitioner practitioner = (Practitioner)theResource;
+				return isExternalHttpRequest ? myPractitionerDao.create(practitioner, myMockSrd): myPractitionerDao.create(practitioner);
+			case "Person":
+				Person person = (Person) theResource;
+				return isExternalHttpRequest ? myPersonDao.create(person, myMockSrd): myPersonDao.create(person);
+		}
+		return null;
 	}
 
-	public DaoMethodOutcome updateWithLatch(Person thePerson) throws InterruptedException {
-		return updateWithLatch(thePerson, true);
-	}
-	public DaoMethodOutcome updateWithLatch(Person thePerson, boolean isExternalHttpRequest) throws InterruptedException {
-		myAfterEmpiLatch.setExpectedCount(1);
-		DaoMethodOutcome daoMethodOutcome =  doUpdatePerson(thePerson, isExternalHttpRequest);
-		myAfterEmpiLatch.awaitExpected();
-		return daoMethodOutcome;
-	}
-	public DaoMethodOutcome doCreatePatient(Patient thePatient, boolean isExternalHttpRequest) {
-		return isExternalHttpRequest ? myPatientDao.create(thePatient, myMockSrd): myPatientDao.create(thePatient);
-	}
-	public DaoMethodOutcome doUpdatePatient(Patient thePatient, boolean isExternalHttpRequest) {
-		return isExternalHttpRequest ? myPatientDao.update(thePatient, myMockSrd): myPatientDao.update(thePatient);
-	}
+	public DaoMethodOutcome doUpdateResource(IBaseResource theResource, boolean isExternalHttpRequest) {
+		String resourceType = myFhirContext.getResourceDefinition(theResource).getName();
 
-	public DaoMethodOutcome doCreatePerson(Person thePerson, boolean isExternalHttpRequest) {
-		return isExternalHttpRequest ? myPersonDao.create(thePerson, myMockSrd): myPersonDao.create(thePerson);
-	}
-	public DaoMethodOutcome doUpdatePerson(Person thePerson, boolean isExternalHttpRequest) {
-		return isExternalHttpRequest ? myPersonDao.update(thePerson, myMockSrd): myPersonDao.update(thePerson);
+		switch (resourceType) {
+			case "Patient":
+				Patient patient = (Patient)theResource;
+				return isExternalHttpRequest ? myPatientDao.update(patient, myMockSrd): myPatientDao.update(patient);
+			case "Practitioner":
+				Practitioner practitioner = (Practitioner)theResource;
+				return isExternalHttpRequest ? myPractitionerDao.update(practitioner, myMockSrd): myPractitionerDao.update(practitioner);
+			case "Person":
+				Person person = (Person) theResource;
+				return isExternalHttpRequest ? myPersonDao.update(person, myMockSrd): myPersonDao.update(person);
+		}
+		return null;
 	}
 
 }

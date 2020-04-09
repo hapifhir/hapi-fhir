@@ -8,7 +8,6 @@ import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.empi.util.CanonicalEID;
 import ca.uhn.fhir.jpa.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
-import net.bytebuddy.asm.Advice;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -42,7 +41,7 @@ public class EmpiMatchLinkSvc {
 
 		//0 candidates, in which case you should create a person
 		if (personCandidates.isEmpty()) {
-			IBaseResource newPerson = myPersonHelper.createPersonFromPatient(theResource);
+			IBaseResource newPerson = myPersonHelper.createPersonFromPatientOrPractitioner(theResource);
 			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
 		//1 candidate, in which case you should use it
 		} else if (personCandidates.size() == 1) {
@@ -50,7 +49,7 @@ public class EmpiMatchLinkSvc {
 			ResourcePersistentId personPid = matchedPersonCandidate.getCandidatePersonPid();
 			IBaseResource person = myEmpiResourceDaoSvc.readPersonByPid(personPid);
 			if (myPersonHelper.isPotentialDuplicate(person, theResource)) {
-				IBaseResource newPerson = myPersonHelper.createPersonFromPatient(theResource);
+				IBaseResource newPerson = myPersonHelper.createPersonFromPatientOrPractitioner(theResource);
 				myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
 				myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO);
 			} else {
