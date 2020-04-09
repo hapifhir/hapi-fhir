@@ -35,7 +35,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	private static final Logger ourLog = getLogger(EmpiMatchLinkSvcTest.class);
 
 	@Autowired
-	private EmpiMatchLinkSvc myEmpiMatchLinkSvc;
+	EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired
 	IEmpiLinkDao myEmpiLinkDao;
 	@Autowired
@@ -184,11 +184,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(secondIdentifier.getValue(), is(equalTo("12345")));
 	}
 
-	public Patient addEID(Patient thePatient, String theEID) {
-		thePatient.addIdentifier().setSystem(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()).setValue(theEID);
-		return thePatient;
-	}
-
 	@Test
 	public void testIncomingPatientWithEIDMatchesAnotherPatientWithSameEIDAreLinked() {
 		Patient patient1 = addEID(buildJanePatient(), "uniqueid");
@@ -198,7 +193,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		createPatientAndUpdateLinks(patient2);
 
 		assertThat(patient1, is(samePersonAs(patient2)));
-
 	}
 
 	@Test
@@ -236,6 +230,11 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		DaoMethodOutcome daoMethodOutcome = myPatientDao.create(thePatient);
 		thePatient.setId(daoMethodOutcome.getId());
 		myEmpiMatchLinkSvc.updateEmpiLinksForPatient(thePatient);
+		return thePatient;
+	}
+
+	public Patient addEID(Patient thePatient, String theEID) {
+		thePatient.addIdentifier().setSystem(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()).setValue(theEID);
 		return thePatient;
 	}
 }

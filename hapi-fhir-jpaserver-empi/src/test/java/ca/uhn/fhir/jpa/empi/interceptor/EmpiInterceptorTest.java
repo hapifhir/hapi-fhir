@@ -67,12 +67,6 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testUpdatingExistingLinksIsForbiddenViaPersonEndpoint() throws InterruptedException {
-		myEmpiHelper.createWithLatch(new Patient());
-		assertLinkCount(1);
-	}
-
-	@Test
 	public void testPersonRecordsManagedByEmpiAllShareSameTag() throws InterruptedException {
 		myEmpiHelper.createWithLatch(buildJanePatient());
 		myEmpiHelper.createWithLatch(buildPaulPatient());
