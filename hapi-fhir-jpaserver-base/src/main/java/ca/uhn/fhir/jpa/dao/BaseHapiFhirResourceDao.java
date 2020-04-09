@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -164,6 +165,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (myDaoConfig.getResourceServerIdStrategy() == DaoConfig.IdStrategyEnum.UUID) {
 			theResource.setId(UUID.randomUUID().toString());
+			theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
 		}
 
 		return doCreate(theResource, theIfNoneExist, thePerformIndexing, theUpdateTimestamp, theRequestDetails);
@@ -419,22 +421,27 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		boolean serverAssignedId;
 		if (isNotBlank(theResource.getIdElement().getIdPart())) {
-			switch (myDaoConfig.getResourceClientIdStrategy()) {
-				case NOT_ALLOWED:
-					throw new ResourceNotFoundException(
-						getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedIdNotAllowed", theResource.getIdElement().getIdPart()));
-				case ALPHANUMERIC:
-					if (theResource.getIdElement().isIdPartValidLong()) {
-						throw new InvalidRequestException(
-							getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getIdElement().getIdPart()));
-					}
-					createForcedIdIfNeeded(entity, theResource.getIdElement(), false);
-					break;
-				case ANY:
-					createForcedIdIfNeeded(entity, theResource.getIdElement(), true);
-					break;
+			if (theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE) {
+				createForcedIdIfNeeded(entity, theResource.getIdElement(), true);
+				serverAssignedId = true;
+			} else {
+				switch (myDaoConfig.getResourceClientIdStrategy()) {
+					case NOT_ALLOWED:
+						throw new ResourceNotFoundException(
+							getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedIdNotAllowed", theResource.getIdElement().getIdPart()));
+					case ALPHANUMERIC:
+						if (theResource.getIdElement().isIdPartValidLong()) {
+							throw new InvalidRequestException(
+								getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getIdElement().getIdPart()));
+						}
+						createForcedIdIfNeeded(entity, theResource.getIdElement(), false);
+						break;
+					case ANY:
+						createForcedIdIfNeeded(entity, theResource.getIdElement(), true);
+						break;
+				}
+				serverAssignedId = false;
 			}
-			serverAssignedId = false;
 		} else {
 			serverAssignedId = true;
 		}

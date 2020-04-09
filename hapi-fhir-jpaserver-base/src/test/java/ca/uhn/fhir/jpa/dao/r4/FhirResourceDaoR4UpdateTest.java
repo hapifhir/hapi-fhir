@@ -34,6 +34,8 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	public void afterResetDao() {
 		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
+		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
 	}
 
 	@Before
@@ -924,6 +926,24 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		assertEquals("Hello", p.getName().get(0).getFamily());
 
 	}
+
+	@Test
+	public void testUpdateWithUuidServerResourceStrategy_ClientIdNotAllowed() {
+		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
+		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
+
+		Patient p = new Patient();
+		p.setId(UUID.randomUUID().toString());
+		p.addName().setFamily("FAM");
+		try {
+			myPatientDao.update(p);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertThat(e.getMessage(), matchesPattern("No resource exists on this server resource with ID.*, and client-assigned IDs are not enabled."));
+		}
+
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {
