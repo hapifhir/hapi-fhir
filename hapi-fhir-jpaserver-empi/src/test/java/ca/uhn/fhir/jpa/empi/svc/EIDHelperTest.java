@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
-import static ca.uhn.fhir.rest.api.Constants.INTERNAL_ENTERPRISE_IDENTIFIER_SYSTEM;
+import static ca.uhn.fhir.rest.api.Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -27,15 +27,15 @@ public class EIDHelperTest extends BaseEmpiR4Test {
 	public void testExtractionOfInternalEID() {
 		Patient patient = new Patient();
 		patient.addIdentifier()
-			.setSystem(INTERNAL_ENTERPRISE_IDENTIFIER_SYSTEM)
+			.setSystem(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)
 			.setValue("simpletest")
 			.setUse(Identifier.IdentifierUse.SECONDARY);
 
-		Optional<CanonicalEID> externalEid = myEIDHelper.getInternalEid(patient);
+		Optional<CanonicalEID> externalEid = myEIDHelper.getHapiEid(patient);
 
 		assertThat(externalEid.isPresent(), is(true));
 		assertThat(externalEid.get().getValue(), is(equalTo("simpletest")));
-		assertThat(externalEid.get().getSystem(), is(equalTo(INTERNAL_ENTERPRISE_IDENTIFIER_SYSTEM)));
+		assertThat(externalEid.get().getSystem(), is(equalTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
 		assertThat(externalEid.get().getUse(), is(equalTo("secondary")));
 	}
 
@@ -62,7 +62,7 @@ public class EIDHelperTest extends BaseEmpiR4Test {
 
 		CanonicalEID internalEid = myEIDHelper.createInternalEid();
 
-		assertThat(internalEid.getSystem(), is(equalTo(INTERNAL_ENTERPRISE_IDENTIFIER_SYSTEM)));
+		assertThat(internalEid.getSystem(), is(equalTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
 		assertThat(internalEid.getValue().length(), is(equalTo(36)));
 		assertThat(internalEid.getUse(), is(equalTo("secondary")));
 	}
