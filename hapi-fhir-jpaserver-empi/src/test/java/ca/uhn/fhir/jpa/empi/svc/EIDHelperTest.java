@@ -53,7 +53,7 @@ public class EIDHelperTest extends BaseEmpiR4Test {
 
 		assertThat(externalEid.isPresent(), is(true));
 		assertThat(externalEid.get().getValue(), is(equalTo(uniqueID)));
-		assertThat(externalEid.get().getSystem(), is(equalTo(INTERNAL_ENTERPRISE_IDENTIFIER_SYSTEM)));
+		assertThat(externalEid.get().getSystem(), is(equalTo(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())));
 		assertThat(externalEid.get().getUse(), is(equalTo("official")));
 	}
 
