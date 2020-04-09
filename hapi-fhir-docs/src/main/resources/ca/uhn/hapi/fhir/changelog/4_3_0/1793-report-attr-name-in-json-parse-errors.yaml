@@ -1,0 +1,7 @@
+---
+type: add
+issue: 1793
+title: "When parsing JSON resources, if an element contains an invalid value, the Parser Error Handler
+   did not have access to the actual name of the element being parsed. This meant that errors lacked useful
+   detail in order to diagnose the issue. This has been corrected. Thanks to GitHub user
+   @jwalter for reporting!"

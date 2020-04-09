@@ -1562,7 +1562,7 @@ public class XmlParserDstu3Test {
 			parser.encodeResourceToString(p);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Extension contains both a value and nested extensions: Patient(res).extension", e.getMessage());
+			assertEquals("[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
 	}
@@ -3139,7 +3139,7 @@ public class XmlParserDstu3Test {
 			p.parseResource(resource);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: [element=\"active\"] Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
 		}
 
 		LenientErrorHandler errorHandler = new LenientErrorHandler();
