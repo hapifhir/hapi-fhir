@@ -20,9 +20,9 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /*-
  * #%L
@@ -56,19 +56,13 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 
 	private volatile Map<String, MessageChannel> myMessageChannels = new HashMap<>();
-	private volatile Map<String, Set<String>> mySupportedResourceTypes = new HashMap<>();
+	private volatile Map<String, IResourceInterceptorFilter> myResourceInterceptorFilters = new HashMap<>();
 
 	/**
 	 * Constructor
 	 */
 	public SubscriptionMatcherInterceptor() {
 		super();
-	}
-
-	public void addChannel(String channelName) {
-		if (myMessageChannels.get(channelName) == null) {
-			myMessageChannels.put(channelName, mySubscriptionChannelFactory.newMatchingSendingChannel(channelName, null));
-		}
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
@@ -91,6 +85,10 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	 */
 	@Override
 	public void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
+		submitResourceModified(null, theNewResource, theOperationType, theRequest);
+	}
+
+	public void submitResourceModified(@Nullable IBaseResource theOldResource, IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType);
 
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
@@ -103,7 +101,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 
 		for (Map.Entry<String, MessageChannel> entry : myMessageChannels.entrySet()) {
 			try {
-				if (resourceTypeSupported(entry.getKey(), theNewResource)) {
+				if (canSubmitResource(entry.getKey(), theOldResource, theNewResource, theRequest)) {
 					submitResourceModified(entry.getValue(), msg);
 				}
 			} catch (Exception e) {
@@ -113,13 +111,8 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		}
 	}
 
-	private boolean resourceTypeSupported(String theChannelName, IBaseResource theNewResource) {
-		Set<String> supportedResourceTypes = mySupportedResourceTypes.get(theChannelName);
-		if (supportedResourceTypes != null) {
-			String resourceType = myFhirContext.getResourceDefinition(theNewResource).getName();
-			return supportedResourceTypes.contains(resourceType);
-		}
-		return true;
+	private boolean canSubmitResource(String theChannelName, @Nullable IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
+		return myResourceInterceptorFilters.get(theChannelName).canSubmitResource(theOldResource, theNewResource, theRequest);
 	}
 
 	// FIXME KHS move this
@@ -170,8 +163,14 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		return (LinkedBlockingChannel) myMessageChannels.get(theChannelName);
 	}
 
-	public void addChannel(String theChannelName, Set<String> theResourceTypes) {
-		addChannel(theChannelName);
-		mySupportedResourceTypes.put(theChannelName, theResourceTypes);
+	public void addChannel(String theChannelName) {
+		addChannel(theChannelName, (theOldResource, theNewResource, request) -> true);
+	}
+
+	public void addChannel(String theChannelName, IResourceInterceptorFilter theResourceInterceptorFilter) {
+		myResourceInterceptorFilters.put(theChannelName, theResourceInterceptorFilter);
+		if (myMessageChannels.get(theChannelName) == null) {
+			myMessageChannels.put(theChannelName, mySubscriptionChannelFactory.newMatchingSendingChannel(theChannelName, null));
+		}
 	}
 }
