@@ -191,7 +191,7 @@ class ParserState<T> {
 		return thePrimitiveTarget.newInstance(theDefinition.getInstanceConstructorArguments());
 	}
 
-	public IPrimitiveType<?> getPrimitiveInstance(BaseRuntimeChildDefinition theChild, RuntimePrimitiveDatatypeDefinition thePrimitiveTarget) {
+	public IPrimitiveType<?> getPrimitiveInstance(BaseRuntimeChildDefinition theChild, RuntimePrimitiveDatatypeDefinition thePrimitiveTarget, String theChildName) {
 		return thePrimitiveTarget.newInstance(theChild.getInstanceConstructorArguments());
 	}
 
@@ -456,7 +456,7 @@ class ParserState<T> {
 					RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
 					IPrimitiveType<?> newChildInstance = newPrimitiveInstance(myDefinition, primitiveTarget);
 					myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
-					PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
+					PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance, theLocalPart);
 					push(newState);
 					return;
 				}
@@ -583,9 +583,9 @@ class ParserState<T> {
 				case PRIMITIVE_DATATYPE: {
 					RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
 					IPrimitiveType<?> newChildInstance;
-					newChildInstance = getPrimitiveInstance(child, primitiveTarget);
+					newChildInstance = getPrimitiveInstance(child, primitiveTarget, theChildName);
 					child.getMutator().addValue(myInstance, newChildInstance);
-					PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
+					PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance, theChildName);
 					push(newState);
 					return;
 				}
@@ -752,7 +752,7 @@ class ParserState<T> {
 						RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
 						IPrimitiveType<?> newChildInstance = newInstance(primitiveTarget);
 						myExtension.setValue(newChildInstance);
-						PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
+						PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance, theLocalPart);
 						push(newState);
 						return;
 					}
@@ -824,7 +824,7 @@ class ParserState<T> {
 					break;
 				case "lastUpdated":
 					InstantDt updated = new InstantDt();
-					push(new PrimitiveState(getPreResourceState(), updated));
+					push(new PrimitiveState(getPreResourceState(), updated, theLocalPart));
 					myMap.put(ResourceMetadataKeyEnum.UPDATED, updated);
 					break;
 				case "security":
@@ -850,7 +850,7 @@ class ParserState<T> {
 						newProfiles = new ArrayList<>(1);
 					}
 					IdDt profile = new IdDt();
-					push(new PrimitiveState(getPreResourceState(), profile));
+					push(new PrimitiveState(getPreResourceState(), profile, theLocalPart));
 					newProfiles.add(profile);
 					myMap.put(ResourceMetadataKeyEnum.PROFILES, Collections.unmodifiableList(newProfiles));
 					break;
@@ -891,7 +891,7 @@ class ParserState<T> {
 
 	private class MetaVersionElementState extends BaseState {
 
-		private ResourceMetadataMap myMap;
+		private final ResourceMetadataMap myMap;
 
 		MetaVersionElementState(ParserState<T>.PreResourceState thePreResourceState, ResourceMetadataMap theMap) {
 			super(thePreResourceState);
@@ -1268,23 +1268,27 @@ class ParserState<T> {
 	}
 
 	private class PrimitiveState extends BaseState {
+		private final String myChildName;
 		private IPrimitiveType<?> myInstance;
 
-		PrimitiveState(PreResourceState thePreResourceState, IPrimitiveType<?> theInstance) {
+		PrimitiveState(PreResourceState thePreResourceState, IPrimitiveType<?> theInstance, String theChildName) {
 			super(thePreResourceState);
 			myInstance = theInstance;
+			myChildName = theChildName;
 		}
 
 		@Override
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			if ("value".equals(theName)) {
 				if ("".equals(theValue)) {
-					myErrorHandler.invalidValue(null, theValue, "Attribute values must not be empty (\"\")");
+					ParseLocation location = ParseLocation.fromElementName(myChildName);
+					myErrorHandler.invalidValue(location, theValue, "Attribute value for element must not be empty (\"\")");
 				} else {
 					try {
 						myInstance.setValueAsString(theValue);
 					} catch (DataFormatException | IllegalArgumentException e) {
-						myErrorHandler.invalidValue(null, theValue, e.getMessage());
+						ParseLocation location = ParseLocation.fromElementName(myChildName);
+						myErrorHandler.invalidValue(location, theValue, e.getMessage());
 					}
 				}
 			} else if ("id".equals(theName)) {
@@ -1295,7 +1299,8 @@ class ParserState<T> {
 				} else if (myInstance instanceof IBaseResource) {
 					new IdDt(theValue).applyTo((org.hl7.fhir.instance.model.api.IBaseResource) myInstance);
 				} else {
-					myErrorHandler.unknownAttribute(null, theName);
+					ParseLocation location = ParseLocation.fromElementName(myChildName);
+					myErrorHandler.unknownAttribute(location, theName);
 				}
 			} else {
 				super.attributeValue(theName, theValue);
@@ -1343,7 +1348,7 @@ class ParserState<T> {
 		@Override
 		public void enteringNewElement(String theNamespace, String theChildName) throws DataFormatException {
 			if ("id".equals(theChildName)) {
-				push(new PrimitiveState(getPreResourceState(), myInstance.getId()));
+				push(new PrimitiveState(getPreResourceState(), myInstance.getId(), theChildName));
 			} else if ("meta".equals(theChildName)) {
 				push(new MetaElementState(getPreResourceState(), myInstance.getResourceMetadata()));
 			} else {

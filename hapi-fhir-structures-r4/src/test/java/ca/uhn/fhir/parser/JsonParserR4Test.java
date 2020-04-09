@@ -569,6 +569,32 @@ public class JsonParserR4Test extends BaseTest {
 
 	}
 
+	/**
+	 * See #1793
+	 */
+	@Test
+	public void testParseEmptyAttribute() {
+		String input = "{\n" +
+			"  \"resourceType\": \"Patient\",\n" +
+			"  \"identifier\": [\n" +
+			"    {\n" +
+			"      \"system\": \"https://example.com\",\n" +
+			"      \"value\": \"\"\n" +
+			"    }\n" +
+			"  ]\n" +
+			"}";
+
+		IParser jsonParser = ourCtx.newJsonParser();
+		jsonParser.setParserErrorHandler(new StrictErrorHandler());
+		try {
+			jsonParser.parseResource(Patient.class, input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("[element=\"value\"] Invalid attribute value \"\": Attribute value for element must not be empty (\"\")", e.getMessage());
+		}
+
+	}
+
 	@Test
 	public void testParseExtensionOnPrimitive() throws IOException {
 		String input = IOUtils.toString(JsonParserR4Test.class.getResourceAsStream("/extension-on-line.txt"), Constants.CHARSET_UTF8);
