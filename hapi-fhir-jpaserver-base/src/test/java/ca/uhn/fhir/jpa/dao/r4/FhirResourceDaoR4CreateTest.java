@@ -60,8 +60,24 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateWithUuidResourceStrategy() {
+	public void testCreateWithUuidServerResourceStrategy() {
 		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
+
+		Patient p = new Patient();
+		p.addName().setFamily("FAM");
+		IIdType id = myPatientDao.create(p).getId().toUnqualified();
+
+		assertThat(id.getIdPart(), matchesPattern("[a-z0-9]{8}-.*"));
+
+		p = myPatientDao.read(id);
+		assertEquals("FAM", p.getNameFirstRep().getFamily());
+
+	}
+
+	@Test
+	public void testCreateWithUuidServerResourceStrategy_ClientIdNotAllowed() {
+		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
+		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
 
 		Patient p = new Patient();
 		p.addName().setFamily("FAM");
