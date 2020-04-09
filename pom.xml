@@ -2451,6 +2451,7 @@
             <module>hapi-fhir-bom</module>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
+				<module>hapi-fhir-broker</module>
 				<module>hapi-fhir-docs</module>
 				<module>hapi-fhir-test-utilities</module>
 				<module>hapi-fhir-jpaserver-test-utilities</module>
@@ -2473,6 +2474,7 @@
 				<module>hapi-fhir-structures-r5</module>
 				<module>hapi-fhir-validation-resources-r5</module>
 				<module>hapi-fhir-igpacks</module>
+				<module>hapi-fhir-jpaserver-api</module>
 				<module>hapi-fhir-jpaserver-model</module>
 				<module>hapi-fhir-jpaserver-searchparam</module>
 				<module>hapi-fhir-jpaserver-subscription</module>

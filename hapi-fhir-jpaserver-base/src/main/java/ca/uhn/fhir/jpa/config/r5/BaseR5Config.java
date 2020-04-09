@@ -2,14 +2,13 @@ package ca.uhn.fhir.jpa.config.r5;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.BaseConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.r5.TransactionProcessorVersionAdapterR5;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR5;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcR5;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR5;
@@ -17,11 +16,9 @@ import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.r5.model.Meta;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -105,13 +102,8 @@ public class BaseR5Config extends BaseConfigDstu3Plus {
 		return searchDao;
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
-	public SearchParamExtractorR5 searchParamExtractor() {
-		return new SearchParamExtractorR5();
-	}
-
 	@Bean(name = "mySystemDaoR5", autowire = Autowire.BY_NAME)
-	public IFhirSystemDao<Bundle, org.hl7.fhir.r5.model.Meta> systemDaoR5() {
+	public IFhirSystemDao<Bundle, Meta> systemDaoR5() {
 		ca.uhn.fhir.jpa.dao.r5.FhirSystemDaoR5 retVal = new ca.uhn.fhir.jpa.dao.r5.FhirSystemDaoR5();
 		return retVal;
 	}

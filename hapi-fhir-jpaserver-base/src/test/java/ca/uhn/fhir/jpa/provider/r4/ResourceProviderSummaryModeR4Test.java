@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -14,8 +13,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.springframework.test.util.AopTestUtils;
-
-import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 

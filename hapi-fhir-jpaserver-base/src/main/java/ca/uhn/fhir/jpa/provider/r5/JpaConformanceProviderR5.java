@@ -22,8 +22,8 @@ package ca.uhn.fhir.jpa.provider.r5;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -64,13 +64,13 @@ public class JpaConformanceProviderR5 extends org.hl7.fhir.r5.hapi.rest.server.S
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderR5(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig) {
+	public JpaConformanceProviderR5(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
 		super();
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
 		myDaoConfig = theDaoConfig;
 		setIncludeResourceCounts(true);
-		setSearchParamRegistry(theSystemDao.getSearchParamRegistry());
+		setSearchParamRegistry(theSearchParamRegistry);
 	}
 
 	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.empi.util;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.api.IEmpiInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -37,8 +36,6 @@ import static org.mockito.Mockito.when;
 public abstract class BaseEmpiHelper extends ExternalResource {
 	@Autowired
 	private IInterceptorService myInterceptorService;
-	@Autowired
-	private IEmpiInterceptor myEmpiInterceptor;
 	@Mock
 	protected ServletRequestDetails myMockSrd;
 	@Mock
@@ -65,14 +62,16 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 
 		//This sets up our basic interceptor, and also attached the latch so we can await the hook calls.
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, myAfterEmpiLatch);
-		myInterceptorService.registerInterceptor(myEmpiInterceptor);
-		myEmpiInterceptor.start();
+		// FIXME KHS
+//		myInterceptorService.registerInterceptor(myEmpiInterceptor);
+//		myEmpiInterceptor.start();
 	}
 
 	@Override
 	protected void after() {
-		myInterceptorService.unregisterInterceptor(myEmpiInterceptor);
-		myEmpiInterceptor.stopForUnitTest();
+		// FIXME KHS
+//		myInterceptorService.unregisterInterceptor(myEmpiInterceptor);
+//		myEmpiInterceptor.stopForUnitTest();
 		myInterceptorService.unregisterInterceptor(myAfterEmpiLatch);
 		myAfterEmpiLatch.clear();
 	}

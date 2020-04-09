@@ -24,11 +24,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.IDao;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.api.model.TranslationQuery;
+import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
@@ -45,11 +47,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
@@ -63,11 +61,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.TermsQuery;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.RegexpQuery;
-import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.*;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.search.jpa.FullTextEntityManager;
@@ -102,21 +96,14 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNoneBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
@@ -1143,7 +1130,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return true;
 	}
 
-	protected ValidateCodeResult validateCodeIsInPreExpandedValueSet(
+	protected IFhirResourceDaoValueSet.ValidateCodeResult validateCodeIsInPreExpandedValueSet(
 		ValidationOptions theValidationOptions,
 		ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Coding theCoding, CodeableConcept theCodeableConcept) {
 
@@ -1174,12 +1161,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		for (TermValueSetConcept concept : concepts) {
 			if (isNotBlank(theDisplay) && theDisplay.equals(concept.getDisplay())) {
-				return new ValidateCodeResult(true, "Validation succeeded", concept.getDisplay());
+				return new IFhirResourceDaoValueSet.ValidateCodeResult(true, "Validation succeeded", concept.getDisplay());
 			}
 		}
 
 		if (!concepts.isEmpty()) {
-			return new ValidateCodeResult(true, "Validation succeeded", concepts.get(0).getDisplay());
+			return new IFhirResourceDaoValueSet.ValidateCodeResult(true, "Validation succeeded", concepts.get(0).getDisplay());
 		}
 
 		return null;
@@ -1889,7 +1876,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			Long pid = IDao.RESOURCE_PID.get((IAnyResource) valueSet);
 			if (pid != null) {
 				if (isValueSetPreExpandedForCodeValidation(valueSet)) {
-					ValidateCodeResult outcome = validateCodeIsInPreExpandedValueSet(new ValidationOptions(), valueSet, theCodeSystem, theCode, null, null, null);
+					IFhirResourceDaoValueSet.ValidateCodeResult outcome = validateCodeIsInPreExpandedValueSet(new ValidationOptions(), valueSet, theCodeSystem, theCode, null, null, null);
 					if (outcome != null && outcome.isResult()) {
 						return Optional.of(new VersionIndependentConcept(theCodeSystem, theCode));
 					}

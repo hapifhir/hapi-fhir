@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelRegistry;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.config.TestSubscriptionDstu3Config;
 import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.dstu3.model.Subscription;

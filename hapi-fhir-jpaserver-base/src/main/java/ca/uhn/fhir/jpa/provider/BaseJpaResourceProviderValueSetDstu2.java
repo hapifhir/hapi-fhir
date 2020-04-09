@@ -21,9 +21,8 @@ package ca.uhn.fhir.jpa.provider;
  */
 
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -139,7 +138,7 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> dao = (IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt>) getDao();
-			ValidateCodeResult result = dao.validateCode(theValueSetIdentifier, theId, theCode, theSystem, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
+			IFhirResourceDaoValueSet.ValidateCodeResult result = dao.validateCode(theValueSetIdentifier, theId, theCode, theSystem, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
 			Parameters retVal = new Parameters();
 			retVal.addParameter().setName("result").setValue(new BooleanDt(result.isResult()));
 			if (isNotBlank(result.getMessage())) {

@@ -8,7 +8,7 @@ import java.io.IOException;
 
 public class EmpiConfigImpl implements IEmpiConfig {
 	private boolean myEnabled;
-	private int myConsumerCount = EMPI_DEFAULT_CONSUMER_COUNT;
+	private int myConcurrentConsumers = EMPI_DEFAULT_CONCURRENT_CONSUMERS;
 	private String myScriptText;
 	private EmpiRulesJson myEmpiRules;
 
@@ -23,12 +23,12 @@ public class EmpiConfigImpl implements IEmpiConfig {
 	}
 
 	@Override
-	public int getConsumerCount() {
-		return myConsumerCount;
+	public int getConcurrentConsumers() {
+		return myConcurrentConsumers;
 	}
 
-	public EmpiConfigImpl setConsumerCount(int theConsumerCount) {
-		myConsumerCount = theConsumerCount;
+	public EmpiConfigImpl setConcurrentConsumers(int theConcurrentConsumers) {
+		myConcurrentConsumers = theConcurrentConsumers;
 		return this;
 	}
 
