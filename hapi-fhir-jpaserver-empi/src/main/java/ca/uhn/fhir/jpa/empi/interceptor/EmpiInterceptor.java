@@ -23,6 +23,8 @@ public class EmpiInterceptor {
 	@Autowired
 	private IEmpiConfig myEmpiConfig;
 
+	// FIXME KHS pull out empi intercept stuff from filter and move it back here
+// FIXME use EmpiUtil for resource types
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING)
 	public void expungeAllEmpiLinks(AtomicInteger theCounter) {
 		ourLog.debug("Expunging all EmpiLink records");

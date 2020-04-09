@@ -27,15 +27,16 @@ import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DaoRegistry implements IDaoRegistry {
-	@Autowired
+public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	private ApplicationContext myAppCtx;
 
 	@Autowired
@@ -69,6 +70,10 @@ public class DaoRegistry implements IDaoRegistry {
 
 	}
 
+	@Override
+	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+		myAppCtx = theApplicationContext;
+	}
 	public IFhirSystemDao getSystemDao() {
 		IFhirSystemDao retVal = mySystemDao;
 		if (retVal == null) {

@@ -88,7 +88,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		submitResourceModified(null, theNewResource, theOperationType, theRequest);
 	}
 
-	public void submitResourceModified(@Nullable IBaseResource theOldResource, IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
+	private void submitResourceModified(@Nullable IBaseResource theOldResource, IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType);
 
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
@@ -115,7 +115,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		return resourceInterceptorFilter.canSubmitResource(theOldResource, theNewResource, theRequest);
 	}
 
-	// FIXME KHS move this
+	@Override
 	public void submitResourceModified(ResourceModifiedMessage theMsg) {
 		submitResourceModified(myMessageChannels.get(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME), theMsg);
 	}
@@ -123,7 +123,6 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	/**
 	 * This is an internal API - Use with caution!
 	 */
-	@Override
 	public void submitResourceModified(MessageChannel theChannel, final ResourceModifiedMessage theMsg) {
 		/*
 		 * We only want to submit the message to the processing queue once the
