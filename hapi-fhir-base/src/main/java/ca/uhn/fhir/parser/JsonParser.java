@@ -174,7 +174,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		theEventWriter.init();
 
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
-		encodeResourceToJsonStreamWriter(resDef, theResource, theEventWriter, null, false,  theEncodeContext);
+		encodeResourceToJsonStreamWriter(resDef, theResource, theEventWriter, null, false, theEncodeContext);
 		theEventWriter.flush();
 	}
 
@@ -258,9 +258,9 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					break;
 				} else if (valueObj instanceof Long) {
 					if (theChildName != null) {
-						theEventWriter.write(theChildName, (long)valueObj);
+						theEventWriter.write(theChildName, (long) valueObj);
 					} else {
-						theEventWriter.write((long)valueObj);
+						theEventWriter.write((long) valueObj);
 					}
 					break;
 				}
@@ -604,7 +604,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		return maxCardinality > 1 || maxCardinality == Child.MAX_UNLIMITED;
 	}
 
-	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theNextValue, JsonLikeWriter theEventWriter, boolean theContainedResource, 																	  CompositeChildElement theParent, EncodeContext theEncodeContext) throws IOException, DataFormatException {
+	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theNextValue, JsonLikeWriter theEventWriter, boolean theContainedResource, CompositeChildElement theParent, EncodeContext theEncodeContext) throws IOException, DataFormatException {
 
 		writeCommentsPreAndPost(theNextValue, theEventWriter);
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theNextValue, theEventWriter, theContainedResource, theParent, theEncodeContext);
@@ -1387,10 +1387,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 	}
 
-	private static void write(JsonLikeWriter theWriter, String theName, String theValue) throws IOException {
-		theWriter.write(theName, theValue);
-	}
-
 	private class HeldExtension implements Comparable<HeldExtension> {
 
 		private CompositeChildElement myChildElem;
@@ -1485,7 +1481,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					extractAndWriteExtensionsAsDirectChild(myValue, theEventWriter, def, theResDef, theResource, myChildElem, null, theEncodeContext, theContainedResource);
 				} else {
 					String childName = myDef.getChildNameByDatatype(myValue.getClass());
-					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, myValue, def, childName, false,  myParent, false, theEncodeContext);
+					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, myValue, def, childName, false, myParent, false, theEncodeContext);
 					managePrimitiveExtension(myValue, theResDef, theResource, theEventWriter, def, childName, theEncodeContext, theContainedResource);
 				}
 
@@ -1562,7 +1558,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					if (childDef == null) {
 						throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
 					}
-					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName, false, myParent,false, theEncodeContext);
+					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName, false, myParent, false, theEncodeContext);
 					managePrimitiveExtension(value, theResDef, theResource, theEventWriter, childDef, childName, theEncodeContext, theContainedResource);
 
 					theEncodeContext.popPath();
@@ -1573,5 +1569,9 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 			theEventWriter.endObject();
 		}
+	}
+
+	private static void write(JsonLikeWriter theWriter, String theName, String theValue) throws IOException {
+		theWriter.write(theName, theValue);
 	}
 }

@@ -72,7 +72,7 @@ public class ResponseSizeCapturingInterceptor {
 		CountingWriter countingWriter = (CountingWriter) theRequestDetails.getUserData().get(COUNTING_WRITER_KEY);
 		if (countingWriter != null) {
 			int charCount = countingWriter.getCount();
-			Result result = new Result(charCount);
+			Result result = new Result(theRequestDetails, charCount);
 			notifyConsumers(result);
 
 			theRequestDetails.getUserData().put(RESPONSE_RESULT_KEY, result);
@@ -99,7 +99,14 @@ public class ResponseSizeCapturingInterceptor {
 	public static class Result {
 		private final int myWrittenChars;
 
-		public Result(int theWrittenChars) {
+		public RequestDetails getRequestDetails() {
+			return myRequestDetails;
+		}
+
+		private final RequestDetails myRequestDetails;
+
+		public Result(RequestDetails theRequestDetails, int theWrittenChars) {
+			myRequestDetails = theRequestDetails;
 			myWrittenChars = theWrittenChars;
 		}
 

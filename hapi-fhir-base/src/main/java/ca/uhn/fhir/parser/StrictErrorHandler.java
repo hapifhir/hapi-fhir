@@ -3,6 +3,7 @@ package ca.uhn.fhir.parser;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
+import ca.uhn.fhir.util.UrlUtil;
 
 /*
  * #%L
@@ -31,7 +32,7 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
  * @see IParser#setParserErrorHandler(IParserErrorHandler)
  * @see FhirContext#setParserErrorHandler(IParserErrorHandler)
  */
-public class StrictErrorHandler implements IParserErrorHandler {
+public class StrictErrorHandler extends BaseErrorHandler implements IParserErrorHandler {
 
 	@Override
 	public void containedResourceWithNoId(IParseLocation theLocation) {
@@ -46,7 +47,7 @@ public class StrictErrorHandler implements IParserErrorHandler {
 
 	@Override
 	public void invalidValue(IParseLocation theLocation, String theValue, String theError) {
-		throw new DataFormatException("Invalid attribute value \"" + theValue + "\": " + theError);
+		throw new DataFormatException(describeLocation(theLocation) + "Invalid attribute value \"" + UrlUtil.sanitizeUrlPart(theValue) + "\": " + theError);
 	}
 
 	@Override
@@ -65,27 +66,27 @@ public class StrictErrorHandler implements IParserErrorHandler {
 
 	@Override
 	public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
-		throw new DataFormatException("Multiple repetitions of non-repeatable element '" + theElementName + "' found during parse");
+		throw new DataFormatException(describeLocation(theLocation) + "Multiple repetitions of non-repeatable element '" + theElementName + "' found during parse");
 	}
 
 	@Override
 	public void unknownAttribute(IParseLocation theLocation, String theAttributeName) {
-		throw new DataFormatException("Unknown attribute '" + theAttributeName + "' found during parse");
+		throw new DataFormatException(describeLocation(theLocation) + "Unknown attribute '" + theAttributeName + "' found during parse");
 	}
 
 	@Override
 	public void unknownElement(IParseLocation theLocation, String theElementName) {
-		throw new DataFormatException("Unknown element '" + theElementName + "' found during parse");
+		throw new DataFormatException(describeLocation(theLocation) + "Unknown element '" + theElementName + "' found during parse");
 	}
 
 	@Override
 	public void unknownReference(IParseLocation theLocation, String theReference) {
-		throw new DataFormatException("Resource has invalid reference: " + theReference);
+		throw new DataFormatException(describeLocation(theLocation) + "Resource has invalid reference: " + theReference);
 	}
 
 	@Override
 	public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation) {
-		throw new DataFormatException("Extension contains both a value and nested extensions: " + theLocation);
+		throw new DataFormatException(describeLocation(theLocation) + "Extension contains both a value and nested extensions");
 	}
 
 }
