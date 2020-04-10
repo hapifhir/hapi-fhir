@@ -22,33 +22,20 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoObservation;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistR4Svc;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 
 public class FhirResourceDaoObservationR4 extends BaseHapiFhirResourceDao<Observation> implements IFhirResourceDaoObservation<Observation> {
@@ -75,18 +62,9 @@ public class FhirResourceDaoObservationR4 extends BaseHapiFhirResourceDao<Observ
 		if(thePerformIndexing) {
 			// Update indexes here for LastN operation.
 			Observation observation = (Observation)theResource;
-			Collection<ResourceLink> myResourceLinks = retVal.getResourceLinks();
-			Long subjectID = null;
-			for (ResourceLink resourceLink : myResourceLinks) {
-				if(resourceLink.getSourcePath().equals("Observation.subject")) {
-					subjectID = resourceLink.getTargetResourcePid();
-				}
-			}
-			if (subjectID != null) {
-				myObservationLastNIndexPersistR4Svc.indexObservation(observation, subjectID.toString());
-			} else {
-				myObservationLastNIndexPersistR4Svc.indexObservation(observation);
-			}
+			Reference subjectReference = observation.getSubject();
+			String subjectID = subjectReference.getIdElement().getValue();
+			myObservationLastNIndexPersistR4Svc.indexObservation(observation, subjectID);
 		}
 
 		return retVal;

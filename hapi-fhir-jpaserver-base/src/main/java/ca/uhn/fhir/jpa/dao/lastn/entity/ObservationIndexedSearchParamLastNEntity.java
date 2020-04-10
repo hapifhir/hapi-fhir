@@ -17,7 +17,7 @@ public class ObservationIndexedSearchParamLastNEntity {
     private Long myId;
 
     @Field(name = "subject", analyze = Analyze.NO)
-    @Column(name = "LASTN_SUBJECT_ID", nullable = false)
+    @Column(name = "LASTN_SUBJECT_ID", nullable = true)
     private String mySubject;
 
     @ManyToOne(fetch = FetchType.LAZY)

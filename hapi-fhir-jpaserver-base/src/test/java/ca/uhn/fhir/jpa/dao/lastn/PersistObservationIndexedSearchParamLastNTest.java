@@ -94,12 +94,12 @@ public class PersistObservationIndexedSearchParamLastNTest {
         codeableConceptField.addCoding(new Coding("http://mysecondaltcodes.org/fhir/observation-code", "test-second-alt-code", "test-second-alt-code display"));
         myObservation.setCode(codeableConceptField);
 
-        myObservationLastNIndexPersistR4Svc.indexObservation(myObservation);
+        myObservationLastNIndexPersistR4Svc.indexObservation(myObservation, "4567");
 
         List<ObservationIndexedSearchParamLastNEntity> persistedObservationEntities = myResourceIndexedObservationLastNDao.findAll();
         assertEquals(1, persistedObservationEntities.size());
         ObservationIndexedSearchParamLastNEntity persistedObservationEntity = persistedObservationEntities.get(0);
-        assertEquals("Patient/"+subjectId.getReference(), persistedObservationEntity.getSubject());
+        assertEquals(subjectId.getReference(), persistedObservationEntity.getSubject());
         assertEquals(resourcePID, persistedObservationEntity.getIdentifier());
         assertEquals(effectiveDtm, persistedObservationEntity.getEffectiveDtm());
 
@@ -171,7 +171,7 @@ public class PersistObservationIndexedSearchParamLastNTest {
                 Date effectiveDtm = observationDate.getTime();
                 observation.setEffective(new DateTimeType(effectiveDtm));
 
-                myObservationLastNIndexPersistR4Svc.indexObservation(observation);
+                myObservationLastNIndexPersistR4Svc.indexObservation(observation, subjectId);
 
             }
 

@@ -9,6 +9,7 @@ import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -73,10 +74,6 @@ public class BaseJpaResourceProviderObservationDstu2 extends JpaResourceProvider
 		@OperationParam(name="date")
 			DateRangeParam theDate,
 
-		@Description(shortDefinition="The maximum number of observations to return for each each observation code")
-		@OperationParam(name="max", max=1, min=0)
-			NumberParam theMax,
-
 		@Description(shortDefinition="The subject that the observation is about (if patient)")
 		@OperationParam(name="patient")
 			ReferenceAndListParam thePatient,
@@ -127,19 +124,27 @@ public class BaseJpaResourceProviderObservationDstu2 extends JpaResourceProvider
 			paramMap.add("category", theCategory);
 			paramMap.add("code", theCode);
 			paramMap.add("date", theDate);
-			paramMap.add("max", theMax);
 			paramMap.add("patient", thePatient);
 			paramMap.add("subject", theSubject);
 			paramMap.setRevIncludes(theRevIncludes);
 			paramMap.setLastUpdated(theLastUpdated);
 			paramMap.setIncludes(theIncludes);
 			paramMap.setLastN(true);
+			if (theSort == null) {
+				SortSpec effectiveDtm = new SortSpec("date").setOrder(SortOrderEnum.DESC);
+				SortSpec observationCode = new SortSpec("code").setOrder(SortOrderEnum.ASC).setChain(effectiveDtm);
+				if (thePatient != null && theSubject == null) {
+					theSort = new SortSpec("patient").setChain(observationCode);
+				} else {
+					theSort = new SortSpec("subject").setChain(observationCode);
+				}
+			}
 			paramMap.setSort(theSort);
 			paramMap.setCount(theCount);
 			paramMap.setSummaryMode(theSummaryMode);
 			paramMap.setSearchTotalMode(theSearchTotalMode);
 
-			return ((IFhirResourceDaoObservation<Observation>) getDao()).observationsLastN(paramMap, theRequestDetails, theServletResponse);
+			return ((IFhirResourceDaoObservation) getDao()).observationsLastN(paramMap, theRequestDetails, theServletResponse);
 		} finally {
 			endRequest(theServletRequest);
 		}

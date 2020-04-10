@@ -415,11 +415,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
             if (nextOr instanceof ReferenceParam) {
                 ReferenceParam ref = (ReferenceParam) nextOr;
                 if (isBlank(ref.getChain())) {
-                    if (ref.getResourceType() != null) {
-                        referenceList.add(ref.getResourceType() + "/" + ref.getValue());
-                    } else {
-                        referenceList.add(ref.getValue());
-                    }
+                    referenceList.add(ref.getValue());
                 }
             } else {
                 throw new IllegalArgumentException("Invalid token type (expecting ReferenceParam): " + nextOr.getClass());

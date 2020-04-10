@@ -124,7 +124,7 @@ public class IntegratedObservationIndexedSearchParamLastNTest {
 //        codeableConceptField.addCoding(new Coding("http://mysecondaltcodes.org/fhir/observation-code", "test-second-alt-code", "test-second-alt-code display"));
         myObservation.setCode(codeableConceptField);
 
-        myObservationLastNIndexPersistR4Svc.indexObservation(myObservation);
+        myObservationLastNIndexPersistR4Svc.indexObservation(myObservation, "4567");
 
         SearchParameterMap searchParameterMap = new SearchParameterMap();
         ReferenceParam subjectParam = new ReferenceParam("Patient", "", SUBJECTID);
@@ -213,7 +213,7 @@ public class IntegratedObservationIndexedSearchParamLastNTest {
                 Date effectiveDtm = observationDate.getTime();
                 observation.setEffective(new DateTimeType(effectiveDtm));
 
-                myObservationLastNIndexPersistR4Svc.indexObservation(observation);
+                myObservationLastNIndexPersistR4Svc.indexObservation(observation, String.valueOf(patientCount));
 
             }
 

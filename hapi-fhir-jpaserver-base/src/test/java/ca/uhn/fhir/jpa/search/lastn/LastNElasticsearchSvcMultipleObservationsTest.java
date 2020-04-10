@@ -260,7 +260,7 @@ public class LastNElasticsearchSvcMultipleObservationsTest {
 
         for (int patientCount = 0; patientCount < 10 ; patientCount++) {
 
-            String subject = "Patient/"+patientCount;
+            String subject = String.valueOf(patientCount);
 
             for ( int entryCount = 0; entryCount < 10 ; entryCount++ ) {
 

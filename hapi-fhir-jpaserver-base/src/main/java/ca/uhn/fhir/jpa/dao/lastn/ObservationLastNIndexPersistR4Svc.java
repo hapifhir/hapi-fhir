@@ -79,10 +79,4 @@ public class ObservationLastNIndexPersistR4Svc {
 
 	}
 
-	// TODO: Remove this once Unit tests are updated.
-   public void indexObservation(Observation theObservation) {
-		String subjectId = "Patient/" + theObservation.getSubject().getReference();
-
-		indexObservation(theObservation, subjectId);
-   }
 }

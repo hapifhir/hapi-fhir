@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistR5Svc;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -40,12 +39,11 @@ import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.Observation;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 
@@ -93,19 +91,11 @@ public class FhirResourceDaoObservationR5 extends BaseHapiFhirResourceDao<Observ
 		if(thePerformIndexing) {
 			// Update indexes here for LastN operation.
 			Observation observation = (Observation)theResource;
-			Collection<ResourceLink> myResourceLinks = retVal.getResourceLinks();
-			Long subjectID = null;
-			for (ResourceLink resourceLink : myResourceLinks) {
-				if(resourceLink.getSourcePath().equals("Observation.subject")) {
-					subjectID = resourceLink.getTargetResourcePid();
-				}
-			}
-			if (subjectID != null) {
-				myObservationLastNIndexPersistR5Svc.indexObservation(observation, subjectID.toString());
-			} else {
-				myObservationLastNIndexPersistR5Svc.indexObservation(observation);
-			}
+			Reference subjectReference = observation.getSubject();
+			String subjectID = subjectReference.getIdElement().getValue();
+			myObservationLastNIndexPersistR5Svc.indexObservation(observation, subjectID);
 		}
+
 
 		return retVal;
 	}
