@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -49,6 +50,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -96,6 +98,8 @@ public class IdHelperService {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private FhirContext myFhirCtx;
 
 	private Cache<String, Long> myPersistentIdCache;
 	private Cache<String, IResourceLookup> myResourceLookupCache;
@@ -141,7 +145,7 @@ public class IdHelperService {
 			if (myDaoConfig.isDeleteEnabled()) {
 				retVal = resolveResourceIdentity(thePartitionId, theResourceType, theId);
 			} else {
-				String key = thePartitionId + "/" + theResourceType + "/" + theId;
+				String key = thePartitionId.getPartitionIdStringOrNullString() + "/" + theResourceType + "/" + theId;
 				retVal = myPersistentIdCache.get(key, t -> resolveResourceIdentity(thePartitionId, theResourceType, theId));
 			}
 
@@ -254,9 +258,23 @@ public class IdHelperService {
 	private Long resolveResourceIdentity(@Nullable PartitionId thePartitionId, @Nonnull String theResourceType, @Nonnull String theId) {
 		Optional<Long> pid;
 		if (thePartitionId != null) {
-			pid = myForcedIdDao.findByPartitionIdAndTypeAndForcedId(thePartitionId.getPartitionId(), theResourceType, theId);
+			if (thePartitionId.getPartitionId() == null) {
+				pid = myForcedIdDao.findByPartitionIdNullAndTypeAndForcedId(theResourceType, theId);
+			} else {
+				pid = myForcedIdDao.findByPartitionIdAndTypeAndForcedId(thePartitionId.getPartitionId(), theResourceType, theId);
+			}
 		} else {
-			pid = myForcedIdDao.findByTypeAndForcedId(theResourceType, theId);
+			try {
+				pid = myForcedIdDao.findByTypeAndForcedId(theResourceType, theId);
+			} catch (IncorrectResultSizeDataAccessException e) {
+				/*
+				 *  This means that:
+				 *  1. There are two resources with the exact same resource type and forced id
+				 *  2. The unique constraint on this column-pair has been dropped
+				 */
+				String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
+				throw new PreconditionFailedException(msg);
+			}
 		}
 
 		if (pid.isPresent() == false) {

@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.dao.partition.RequestPartitionHelperService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
@@ -154,6 +155,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private boolean myCustomIsolationSupported;
 	@Autowired
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+	@Autowired
+	private RequestPartitionHelperService myRequestPartitionHelperService;
 
 	/**
 	 * Constructor
@@ -296,9 +299,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
 		return new ResourceGoneException(msg);
 	}
-
-	@Autowired
-	private RequestPartitionHelperService myRequestPartitionHelperService;
 
 	@Override
 	public IBundleProvider registerSearch(final IFhirResourceDao<?> theCallingDao, final SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, RequestDetails theRequestDetails) {

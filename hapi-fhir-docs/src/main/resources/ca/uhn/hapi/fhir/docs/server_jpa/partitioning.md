@@ -14,5 +14,8 @@ None of the limitations listed here are considered permanent. Over time the HAPI
    * ValueSet
    * CodeSystem
    * ConceptMap
+
+* **Search Parameters are not partitioned**: There is only one set of SearchParameter resources for the entire system, and any search parameters will apply to resources in all partitions. All SearchParameter resources must be stored in the default partition.
    
 * **Bulk Operations are not partition aware**: Bulk export operations will export data across all partitions.
+

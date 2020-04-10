@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.time.LocalDate;
@@ -27,26 +27,27 @@ public class PartitionId implements Cloneable {
 	/**
 	 * Constructor
 	 */
-	public PartitionId(int thePartitionId, LocalDate thePartitionDate) {
+	public PartitionId(@Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
 		setPartitionId(thePartitionId);
 		setPartitionDate(thePartitionDate);
 	}
 
-	@Nonnull
+	@Nullable
 	public Integer getPartitionId() {
 		return myPartitionId;
 	}
 
-	public PartitionId setPartitionId(@Nonnull Integer thePartitionId) {
+	public PartitionId setPartitionId(@Nullable Integer thePartitionId) {
 		myPartitionId = thePartitionId;
 		return this;
 	}
 
+	@Nullable
 	public LocalDate getPartitionDate() {
 		return myPartitionDate;
 	}
 
-	public PartitionId setPartitionDate(LocalDate thePartitionDate) {
+	public PartitionId setPartitionDate(@Nullable LocalDate thePartitionDate) {
 		myPartitionDate = thePartitionDate;
 		return this;
 	}
@@ -61,6 +62,13 @@ public class PartitionId implements Cloneable {
 
 	@Override
 	public String toString() {
+		return getPartitionIdStringOrNullString();
+	}
+
+	/**
+	 * Returns the partition ID (numeric) as a string, or the string "null"
+	 */
+	public String getPartitionIdStringOrNullString() {
 		return defaultIfNull(myPartitionId, "null").toString();
 	}
 }

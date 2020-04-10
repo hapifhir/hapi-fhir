@@ -30,6 +30,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.dao.partition.RequestPartitionHelperService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
@@ -46,8 +49,6 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.jsonpatch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.util.xmlpatch.XmlPatchUtils;
@@ -1006,7 +1007,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Verify that the resource is for the correct partition
 		if (partitionId != null) {
-			if (entity.getPartitionId() != null) {
+			if (partitionId.getPartitionId() == null) {
+				if (entity.getPartitionId() != null) {
+					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", partitionId, entity.getPartitionId());
+					entity = null;
+				}
+			} else if (entity.getPartitionId() != null) {
 				if (!entity.getPartitionId().getPartitionId().equals(partitionId.getPartitionId())) {
 					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", partitionId, entity.getPartitionId());
 					entity = null;

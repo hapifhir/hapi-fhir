@@ -25,7 +25,7 @@ import org.hibernate.annotations.ColumnDefault;
 import javax.persistence.*;
 
 @Entity()
-@Table(name = "HFJ_FORCED_ID", uniqueConstraints = {
+@Table(name = ForcedId.HFJ_FORCED_ID, uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_FORCEDID_RESID", columnNames = {"RESOURCE_PID"}),
 	@UniqueConstraint(name = ForcedId.IDX_FORCEDID_TYPE_FID, columnNames = {"RESOURCE_TYPE", "FORCED_ID"})
 }, indexes = {
@@ -40,6 +40,7 @@ public class ForcedId {
 
 	public static final int MAX_FORCED_ID_LENGTH = 100;
 	public static final String IDX_FORCEDID_TYPE_FID = "IDX_FORCEDID_TYPE_FID";
+	public static final String HFJ_FORCED_ID = "HFJ_FORCED_ID";
 
 	@Column(name = "FORCED_ID", nullable = false, length = MAX_FORCED_ID_LENGTH, updatable = false)
 	private String myForcedId;
