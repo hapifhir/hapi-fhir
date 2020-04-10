@@ -20,6 +20,7 @@ package ca.uhn.fhir.empi.rules.svc;
  * #L%
  */
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiConfig;
@@ -57,6 +58,9 @@ public class EmpiResourceComparatorSvc {
 	@PostConstruct
 	public void init() {
 		myEmpiRulesJson = myEmpiConfig.getEmpiRules();
+		if (myEmpiRulesJson == null) {
+			throw new ConfigurationException("Failed to load EMPI Rules.  If EMPI is enabled, then EMPI rules must be available in context.");
+		}
 		for (EmpiFieldMatchJson matchFieldJson : myEmpiRulesJson.getMatchFields()) {
 			myFieldComparators.add(new EmpiResourceFieldComparator(myFhirContext, matchFieldJson));
 		}

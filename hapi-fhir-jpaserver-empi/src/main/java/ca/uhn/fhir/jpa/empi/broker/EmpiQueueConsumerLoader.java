@@ -1,15 +1,16 @@
 package ca.uhn.fhir.jpa.empi.broker;
 
 import ca.uhn.fhir.empi.api.IEmpiConfig;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.messaging.SubscribableChannel;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 /*-
@@ -32,6 +33,7 @@ import javax.annotation.PreDestroy;
  * #L%
  */
 
+@Lazy
 @Service
 public class EmpiQueueConsumerLoader {
 	private Logger ourLog = LoggerFactory.getLogger(EmpiQueueConsumerLoader.class);
@@ -41,10 +43,10 @@ public class EmpiQueueConsumerLoader {
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 
-	protected SubscribableChannel myEmpiChannel;
+	protected IChannelReceiver myEmpiChannel;
 
 	// FIXME KHS add this back to the subscription one
-	@EventListener(classes = {ContextRefreshedEvent.class})
+	@PostConstruct
 	public void handleContextRefreshEvent() {
 		if (myEmpiChannel == null) {
 			myEmpiChannel = mySubscriptionChannelFactory.newMatchingReceivingChannel(IEmpiConfig.EMPI_MATCHING_CHANNEL_NAME, null);
@@ -63,4 +65,8 @@ public class EmpiQueueConsumerLoader {
 		}
 	}
 
+	@VisibleForTesting
+	public IChannelReceiver getEmpiChannelForUnitTest() {
+		return myEmpiChannel;
+	}
 }
