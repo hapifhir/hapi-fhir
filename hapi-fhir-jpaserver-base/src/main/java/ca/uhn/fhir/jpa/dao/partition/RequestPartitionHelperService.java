@@ -8,6 +8,8 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +32,6 @@ public class RequestPartitionHelperService {
 	private FhirContext myFhirContext;
 
 	public RequestPartitionHelperService() {
-		// FIXME: document this list
-
 		myPartitioningBlacklist = new HashSet<>();
 
 		// Infrastructure
@@ -77,10 +77,6 @@ public class RequestPartitionHelperService {
 	 */
 	@Nullable
 	public PartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource) {
-		String resourceType = myFhirContext.getResourceDefinition(theResource).getName();
-		if (myPartitioningBlacklist.contains(resourceType)) {
-			return null;
-		}
 
 		PartitionId partitionId = null;
 		if (myDaoConfig.isPartitioningEnabled()) {
@@ -99,10 +95,10 @@ public class RequestPartitionHelperService {
 	}
 
 	private void validatePartition(@Nullable PartitionId thePartitionId, @Nonnull String theResourceName) {
-		if (thePartitionId != null) {
+		if (thePartitionId != null && thePartitionId.getPartitionId() != null) {
 			if (myPartitioningBlacklist.contains(theResourceName)) {
 				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperService.class, "blacklistedResourceTypeForPartitioning", theResourceName);
-				throw new InvalidRequestException(msg);
+				throw new UnprocessableEntityException(msg);
 			}
 		}
 	}

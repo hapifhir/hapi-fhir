@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -16,6 +15,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +33,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.test.annotation.DirtiesContext;
 
 import javax.servlet.ServletException;
 import java.time.LocalDate;
@@ -53,11 +52,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
-/**
- * This should be marked as DIRTIES_CONTEXT because it drops an index
- */
 @SuppressWarnings("unchecked")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PartitioningR4Test.class);
@@ -65,7 +60,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	private MyInterceptor myPartitionInterceptor;
 	private LocalDate myPartitionDate;
 	private int myPartitionId;
-	private static boolean ourHaveDroppedForcedIdUniqueConstraint;
+	private boolean myHaveDroppedForcedIdUniqueConstraint;
 
 	@After
 	public void after() {
@@ -75,6 +70,13 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyInterceptor);
 		myInterceptor = null;
+
+		if (myHaveDroppedForcedIdUniqueConstraint) {
+			runInTransaction(() -> {
+				myEntityManager.createNativeQuery("delete from HFJ_FORCED_ID").executeUpdate();
+				myEntityManager.createNativeQuery("alter table HFJ_FORCED_ID add constraint IDX_FORCEDID_TYPE_FID unique (RESOURCE_TYPE, FORCED_ID)");
+			});
+		}
 	}
 
 	@Override
@@ -91,14 +93,6 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 		myPartitionInterceptor = new MyInterceptor();
 		myInterceptorRegistry.registerInterceptor(myPartitionInterceptor);
-
-		if (!ourHaveDroppedForcedIdUniqueConstraint) {
-			runInTransaction(() -> {
-				myEntityManager.createNativeQuery("alter table " + ForcedId.HFJ_FORCED_ID + " drop constraint " + ForcedId.IDX_FORCEDID_TYPE_FID).executeUpdate();
-			});
-			ourHaveDroppedForcedIdUniqueConstraint = true;
-		}
-
 	}
 
 	@Test
@@ -136,7 +130,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
 			ResourceTable resourceTable = myResourceTableDao.findById(id).orElseThrow(IllegalArgumentException::new);
-			assertEquals(myPartitionId, resourceTable.getPartitionId().getPartitionId().intValue());
+			assertEquals(null, resourceTable.getPartitionId().getPartitionId());
 			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
 		});
 	}
@@ -156,8 +150,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		try {
 			mySearchParameterDao.create(sp);
 			fail();
-		} catch (PreconditionFailedException e) {
-			assertEquals("", e.getMessage());
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Resource type SearchParameter can not be partitioned", e.getMessage());
 		}
 	}
 
@@ -683,6 +677,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testRead_ForcedId_AllPartition_WithDuplicate() {
+		dropForcedIdUniqueConstraint();
 		IIdType patientIdNull = createPatient(null, withActiveTrue(), withId("FOO"));
 		IIdType patientId1 = createPatient(1, withActiveTrue(), withId("FOO"));
 		IIdType patientId2 = createPatient(2, withActiveTrue(), withId("FOO"));
@@ -1165,6 +1160,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	private void createUniqueCompositeSp() {
+		addCreateNoPartition();
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-birthdate");
 		sp.setType(Enumerations.SearchParamType.DATE);
@@ -1174,6 +1170,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.addBase("Patient");
 		mySearchParameterDao.update(sp);
 
+		addCreateNoPartition();
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-birthdate-unique");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
@@ -1190,6 +1187,13 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		mySearchParamRegistry.forceRefresh();
 	}
 
+
+	private void dropForcedIdUniqueConstraint() {
+		runInTransaction(() -> {
+			myEntityManager.createNativeQuery("alter table " + ForcedId.HFJ_FORCED_ID + " drop constraint " + ForcedId.IDX_FORCEDID_TYPE_FID).executeUpdate();
+		});
+		myHaveDroppedForcedIdUniqueConstraint = true;
+	}
 
 	private void addCreatePartition(Integer thePartitionId, LocalDate thePartitionDate) {
 		Validate.notNull(thePartitionId);
