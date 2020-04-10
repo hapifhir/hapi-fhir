@@ -16,6 +16,7 @@ import static ca.uhn.fhir.rest.api.Constants.SYSTEM_EMPI_MANAGED;
 
 @Service
 public class EmpiResourceSubmitFilter implements IResourceInterceptorFilter {
+
 	@Autowired
 	FhirContext myFhirContext;
 

@@ -270,7 +270,7 @@ public class Constants {
 	public static final String SYSTEM_EMPI_MANAGED = "https://hapifhir.org/NamingSystem/managing-empi-system";
 	public static final String CODE_HAPI_EMPI_MANAGED = "HAPI-EMPI";
 	public static final String CODE_NO_EMPI_MANAGED = "NO-EMPI";
-	public static final String INTERNAL_ENTERPRISE_IDENTIFIER_SYSTEM = "http://hapifhir.io/fhir/NamingSystem/empi-person-enterprise-id";
+	public static final String HAPI_ENTERPRISE_IDENTIFIER_SYSTEM = "http://hapifhir.io/fhir/NamingSystem/empi-person-enterprise-id";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

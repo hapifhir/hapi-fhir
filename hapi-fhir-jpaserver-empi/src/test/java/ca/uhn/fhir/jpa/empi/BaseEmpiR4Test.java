@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi;
 
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.IEmpiConfig;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -9,6 +10,7 @@ import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.empi.svc.ResourceTableHelper;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -64,6 +66,10 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 	@Autowired
 	protected ResourceTableHelper myResourceTableHelper;
+	@Autowired
+	protected IEmpiConfig myEmpiConfig;
+	@Autowired
+	protected EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 
 	@After
 	public void after() {
@@ -286,4 +292,21 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 
+	protected Person getPersonFromEmpiLink(EmpiLink theEmpiLink) {
+		return (Person)myPersonDao.readByPid(new ResourcePersistentId(theEmpiLink.getPersonPid()));
+	}
+
+	protected Patient addExternalEID(Patient thePatient, String theEID) {
+		thePatient.addIdentifier().setSystem(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()).setValue(theEID);
+		return thePatient;
+	}
+
+	protected Patient createPatientAndUpdateLinks(Patient thePatient) {
+		//Note that since our empi-rules block on active=true, all patients must be active.
+		thePatient.setActive(true);
+		DaoMethodOutcome daoMethodOutcome = myPatientDao.create(thePatient);
+		thePatient.setId(daoMethodOutcome.getId());
+		myEmpiMatchLinkSvc.updateEmpiLinksForPatient(thePatient);
+		return thePatient;
+	}
 }
