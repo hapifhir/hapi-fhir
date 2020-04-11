@@ -4,7 +4,9 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.partition.IPartitionConfigSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
@@ -13,6 +15,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -33,6 +36,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.ServletException;
 import java.time.LocalDate;
@@ -61,6 +65,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	private LocalDate myPartitionDate;
 	private int myPartitionId;
 	private boolean myHaveDroppedForcedIdUniqueConstraint;
+	@Autowired
+	private IPartitionConfigSvc myPartitionConfigSvc;
 
 	@After
 	public void after() {
@@ -93,6 +99,10 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 		myPartitionInterceptor = new MyInterceptor();
 		myInterceptorRegistry.registerInterceptor(myPartitionInterceptor);
+
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"));
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName("PART-2"));
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(3).setName("PART-3"));
 	}
 
 	@Test
@@ -153,6 +163,22 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		} catch (UnprocessableEntityException e) {
 			assertEquals("Resource type SearchParameter can not be partitioned", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testCreate_UnknownPartition() {
+		addCreatePartition(99, null);
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("system").setValue("value");
+		p.setBirthDate(new Date());
+		try {
+			myPatientDao.create(p);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Unknown partition ID: 99", e.getMessage());
+		}
+
 	}
 
 	@Test

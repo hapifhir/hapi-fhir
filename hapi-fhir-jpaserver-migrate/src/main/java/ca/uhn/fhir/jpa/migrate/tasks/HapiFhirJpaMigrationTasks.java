@@ -69,9 +69,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RES_VER").addForeignKey("20200218.3", "FK_RESOURCE_HISTORY_RESOURCE").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 		version.onTable("HFJ_RES_VER").modifyColumn("20200220.1", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 
-		// Add mlutiitenancy
+		// Add multiitenancy
 		version.onTable("HFJ_RESOURCE").dropIndex("20200327.1", "IDX_RES_PROFILE");
 		version.onTable("HFJ_RESOURCE").dropColumn("20200327.2", "RES_PROFILE");
+
+		Builder.BuilderAddTableByColumns partition = version.addTableByColumns("20200410.1", "HFJ_PARTITION", "PART_ID");
+		partition.addColumn("PART_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		partition.addColumn("PART_NAME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		partition.addColumn("PART_DESC").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 	}
 
 	protected void init420() { // 20191015 - 20200217

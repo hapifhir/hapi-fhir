@@ -23,4 +23,18 @@ package ca.uhn.fhir.jpa.model.util;
 public class ProviderConstants {
 	public static final String SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID = "resourceId";
 	public static final String SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL = "searchUrl";
+
+	/**
+	 * Operation name: add partition
+	 */
+	public static final String PARTITION_MANAGEMENT_ADD_PARTITION = "partition-management-add-partition";
+
+	/**
+	 * Operation name: update partition
+	 */
+	public static final String PARTITION_MANAGEMENT_MODIFY_PARTITION = "partition-management-update-partition";
+
+	public static final String PARTITION_MANAGEMENT_PARTITION_ID = "partitionId";
+	public static final String PARTITION_MANAGEMENT_PARTITION_NAME = "partitionName";
+	public static final String PARTITION_MANAGEMENT_PARTITION_DESC = "description";
 }

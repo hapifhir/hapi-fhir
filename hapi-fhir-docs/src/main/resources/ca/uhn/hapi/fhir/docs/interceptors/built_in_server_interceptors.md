@@ -146,6 +146,13 @@ Some security audit tools require that servers return an HTTP 405 if an unsuppor
 * [BanUnsupportedHttpMethodsInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/BanUnsupportedHttpMethodsInterceptor.html)
 * [BanUnsupportedHttpMethodsInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/BanUnsupportedHttpMethodsInterceptor.java)
 
+# Subscription: Subscription Debug Log Interceptor
+
+When using Subscriptions, the debug log interceptor can be used to add a number of additional lines to the server logs showing the internals of the subscription processing pipeline.
+
+* [SubscriptionDebugLogInterceptor JavaDoc](/apidocs/hapi-fhir-jpaserver-base/ca/uhn/fhir/jpa/subscription/util/SubscriptionDebugLogInterceptor.html)
+* [SubscriptionDebugLogInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master//hapi-fhir-jpaserver-base/ca/uhn/fhir/jpa/subscription/util/SubscriptionDebugLogInterceptor.java)
+
 
 # Request Pre-Processing: Override Meta.source
 

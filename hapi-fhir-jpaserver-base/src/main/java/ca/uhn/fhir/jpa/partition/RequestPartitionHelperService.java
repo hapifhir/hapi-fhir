@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.partition;
+package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -28,6 +27,8 @@ public class RequestPartitionHelperService {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private IPartitionConfigSvc myPartitionConfigSvc;
 	@Autowired
 	private FhirContext myFhirContext;
 
@@ -66,7 +67,7 @@ public class RequestPartitionHelperService {
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			partitionId = (PartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
 
-			validatePartition(partitionId, theResourceType);
+			validatePartition(partitionId, theResourceType, theRequest);
 		}
 
 		return partitionId;
@@ -88,18 +89,29 @@ public class RequestPartitionHelperService {
 			partitionId = (PartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
 
 			String resourceName = myFhirContext.getResourceDefinition(theResource).getName();
-			validatePartition(partitionId, resourceName);
+			validatePartition(partitionId, resourceName, theRequest);
 		}
 
 		return partitionId;
 	}
 
-	private void validatePartition(@Nullable PartitionId thePartitionId, @Nonnull String theResourceName) {
+	private void validatePartition(@Nullable PartitionId thePartitionId, @Nonnull String theResourceName, RequestDetails theRequestDetails) {
 		if (thePartitionId != null && thePartitionId.getPartitionId() != null) {
+
+			// Make sure we're not using one of the conformance resources in a non-default partition
 			if (myPartitioningBlacklist.contains(theResourceName)) {
 				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperService.class, "blacklistedResourceTypeForPartitioning", theResourceName);
 				throw new UnprocessableEntityException(msg);
 			}
+
+			// Make sure the partition exists
+			try {
+				myPartitionConfigSvc.getPartitionById(thePartitionId.getPartitionId());
+			} catch (IllegalArgumentException e) {
+				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperService.class, "unknownPartitionId", thePartitionId.getPartitionId());
+				throw new InvalidRequestException(msg);
+			}
+
 		}
 	}
 }

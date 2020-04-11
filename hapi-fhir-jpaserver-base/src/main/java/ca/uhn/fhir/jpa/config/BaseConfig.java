@@ -11,7 +11,10 @@ import ca.uhn.fhir.jpa.bulk.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.partition.RequestPartitionHelperService;
+import ca.uhn.fhir.jpa.partition.IPartitionConfigSvc;
+import ca.uhn.fhir.jpa.partition.PartitionConfigSvcImpl;
+import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
+import ca.uhn.fhir.jpa.partition.RequestPartitionHelperService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
@@ -223,6 +226,18 @@ public abstract class BaseConfig {
 	@Bean
 	public IConsentContextServices consentContextServices() {
 		return new JpaConsentContextServices();
+	}
+
+	@Bean
+	@Lazy
+	public IPartitionConfigSvc partitionConfigSvc() {
+		return new PartitionConfigSvcImpl();
+	}
+
+	@Bean
+	@Lazy
+	public PartitionManagementProvider partitionManagementProvider() {
+		return new PartitionManagementProvider();
 	}
 
 	@Bean
