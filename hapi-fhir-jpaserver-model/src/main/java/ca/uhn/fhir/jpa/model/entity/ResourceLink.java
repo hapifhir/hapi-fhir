@@ -123,6 +123,10 @@ public class ResourceLink extends BaseResourceIndex {
 		mySourcePath = theSourcePath;
 	}
 
+	public Long getSourceResourcePid() {
+		return mySourceResourcePid;
+	}
+
 	public ResourceTable getSourceResource() {
 		return mySourceResource;
 	}

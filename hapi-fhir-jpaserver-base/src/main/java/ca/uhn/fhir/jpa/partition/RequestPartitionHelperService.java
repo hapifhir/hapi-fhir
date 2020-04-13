@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -19,7 +20,7 @@ import java.util.HashSet;
 
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooksAndReturnObject;
 
-public class RequestPartitionHelperService {
+public class RequestPartitionHelperService implements IRequestPartitionHelperService {
 
 	private final HashSet<Object> myPartitioningBlacklist;
 
@@ -31,6 +32,8 @@ public class RequestPartitionHelperService {
 	private IPartitionConfigSvc myPartitionConfigSvc;
 	@Autowired
 	private FhirContext myFhirContext;
+	@Autowired
+	private PartitionConfig myPartitionConfig;
 
 	public RequestPartitionHelperService() {
 		myPartitioningBlacklist = new HashSet<>();
@@ -53,6 +56,7 @@ public class RequestPartitionHelperService {
 	 * Invoke the <code>STORAGE_PARTITION_IDENTIFY_READ</code> interceptor pointcut to determine the tenant for a read request
 	 */
 	@Nullable
+	@Override
 	public PartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType) {
 		if (myPartitioningBlacklist.contains(theResourceType)) {
 			return null;
@@ -60,14 +64,14 @@ public class RequestPartitionHelperService {
 
 		PartitionId partitionId = null;
 
-		if (myDaoConfig.isPartitioningEnabled()) {
+		if (myPartitionConfig.isPartitioningEnabled()) {
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
 			HookParams params = new HookParams()
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			partitionId = (PartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
 
-			validatePartition(partitionId, theResourceType, theRequest);
+			validatePartition(partitionId, theResourceType);
 		}
 
 		return partitionId;
@@ -77,10 +81,11 @@ public class RequestPartitionHelperService {
 	 * Invoke the <code>STORAGE_PARTITION_IDENTIFY_CREATE</code> interceptor pointcut to determine the tenant for a read request
 	 */
 	@Nullable
+	@Override
 	public PartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource) {
 
 		PartitionId partitionId = null;
-		if (myDaoConfig.isPartitioningEnabled()) {
+		if (myPartitionConfig.isPartitioningEnabled()) {
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
 			HookParams params = new HookParams()
 				.add(IBaseResource.class, theResource)
@@ -89,13 +94,13 @@ public class RequestPartitionHelperService {
 			partitionId = (PartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
 
 			String resourceName = myFhirContext.getResourceDefinition(theResource).getName();
-			validatePartition(partitionId, resourceName, theRequest);
+			validatePartition(partitionId, resourceName);
 		}
 
 		return partitionId;
 	}
 
-	private void validatePartition(@Nullable PartitionId thePartitionId, @Nonnull String theResourceName, RequestDetails theRequestDetails) {
+	private void validatePartition(@Nullable PartitionId thePartitionId, @Nonnull String theResourceName) {
 		if (thePartitionId != null && thePartitionId.getPartitionId() != null) {
 
 			// Make sure we're not using one of the conformance resources in a non-default partition

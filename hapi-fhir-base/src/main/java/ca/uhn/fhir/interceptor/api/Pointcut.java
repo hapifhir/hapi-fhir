@@ -65,12 +65,16 @@ public enum Pointcut {
 	 * <li>
 	 * ca.uhn.fhir.rest.client.api.IHttpRequest - The details of the request
 	 * </li>
+	 * <li>
+	 *    ca.uhn.fhir.rest.client.api.IRestfulClient - The client object making the request
+	 * </li>
 	 * </ul>
 	 * </p>
 	 * Hook methods must return <code>void</code>.
 	 */
 	CLIENT_REQUEST(void.class,
-		"ca.uhn.fhir.rest.client.api.IHttpRequest"
+		"ca.uhn.fhir.rest.client.api.IHttpRequest",
+		"ca.uhn.fhir.rest.client.api.IRestfulClient"
 	),
 
 	/**
@@ -82,7 +86,12 @@ public enum Pointcut {
 	 * <ul>
 	 * <li>
 	 * ca.uhn.fhir.rest.client.api.IHttpRequest - The details of the request
-	 * ca.uhn.fhir.rest.client.api.IHttpRequest - The details of the response
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.client.api.IHttpResponse - The details of the response
+	 * </li>
+	 * <li>
+	 *    ca.uhn.fhir.rest.client.api.IRestfulClient - The client object making the request
 	 * </li>
 	 * </ul>
 	 * </p>
@@ -90,7 +99,8 @@ public enum Pointcut {
 	 */
 	CLIENT_RESPONSE(void.class,
 		"ca.uhn.fhir.rest.client.api.IHttpRequest",
-		"ca.uhn.fhir.rest.client.api.IHttpResponse"
+		"ca.uhn.fhir.rest.client.api.IHttpResponse",
+		"ca.uhn.fhir.rest.client.api.IRestfulClient"
 	),
 
 	/**

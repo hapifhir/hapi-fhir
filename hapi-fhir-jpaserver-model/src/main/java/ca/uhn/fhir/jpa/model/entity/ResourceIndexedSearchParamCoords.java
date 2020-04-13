@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -61,7 +62,8 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	public ResourceIndexedSearchParamCoords() {
 	}
 
-	public ResourceIndexedSearchParamCoords(String theResourceType, String theParamName, double theLatitude, double theLongitude) {
+	public ResourceIndexedSearchParamCoords(PartitionConfig thePartitionConfig, String theResourceType, String theParamName, double theLatitude, double theLongitude) {
+		setPartitionConfig(thePartitionConfig);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setLatitude(theLatitude);
@@ -74,7 +76,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		if (myHashIdentity == null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
-			setHashIdentity(calculateHashIdentity(resourceType, paramName));
+			setHashIdentity(calculateHashIdentity(getPartitionConfig(), getPartitionId(), resourceType, paramName));
 		}
 	}
 

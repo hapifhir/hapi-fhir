@@ -9,11 +9,13 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -57,7 +60,7 @@ public class PartitionManagementProviderTest {
 
 	@Test
 	public void testAddPartition() {
-		when(myPartitionConfigSvc.createPartition(any())).thenAnswer(t -> t.getArgument(0, PartitionEntity.class));
+		when(myPartitionConfigSvc.createPartition(any())).thenAnswer(createAnswer());
 
 		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(123));
@@ -81,6 +84,49 @@ public class PartitionManagementProviderTest {
 		assertEquals("a description", ((StringType) response.getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
 	}
 
+	@Test
+	public void testUpdatePartition() {
+		when(myPartitionConfigSvc.updatePartition(any())).thenAnswer(createAnswer());
+
+		Parameters input = new Parameters();
+		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(123));
+		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType("PARTITION-123"));
+		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, new CodeType("a description"));
+
+		Parameters response = myClient
+			.operation()
+			.onServer()
+			.named(ProviderConstants.PARTITION_MANAGEMENT_UPDATE_PARTITION)
+			.withParameters(input)
+			.encodedXml()
+			.execute();
+
+		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		verify(myPartitionConfigSvc, times(1)).updatePartition(any());
+		verifyNoMoreInteractions(myPartitionConfigSvc);
+
+		assertEquals(123, ((IntegerType) response.getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
+		assertEquals("PARTITION-123", ((StringType) response.getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
+		assertEquals("a description", ((StringType) response.getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
+	}
+
+	@Test
+	public void testDeletePartition() {
+		Parameters input = new Parameters();
+		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(123));
+		Parameters response = myClient
+			.operation()
+			.onServer()
+			.named(ProviderConstants.PARTITION_MANAGEMENT_DELETE_PARTITION)
+			.withParameters(input)
+			.encodedXml()
+			.execute();
+
+		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		verify(myPartitionConfigSvc, times(1)).deletePartition(eq(123));
+		verifyNoMoreInteractions(myPartitionConfigSvc);
+	}
+
 	@Configuration
 	public static class MyConfig {
 
@@ -94,6 +140,13 @@ public class PartitionManagementProviderTest {
 			return ourCtx;
 		}
 
+	}
+
+	@NotNull
+	private static Answer<Object> createAnswer() {
+		return t -> {
+			return t.getArgument(0, PartitionEntity.class);
+		};
 	}
 
 }

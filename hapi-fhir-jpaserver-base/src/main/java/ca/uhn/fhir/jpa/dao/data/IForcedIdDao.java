@@ -60,6 +60,20 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 	Collection<Object[]> findByTypeAndForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedId);
 
 	/**
+	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
+	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
+	 */
+	@Query("SELECT f.myForcedId, f.myResourcePid FROM ForcedId f WHERE myPartitionIdValue = :partition_id AND myResourceType = :resource_type AND myForcedId IN ( :forced_id )")
+	Collection<Object[]> findByTypeAndForcedIdInPartition(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedId, @Param("partition_id") Integer thePartitionId);
+
+	/**
+	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
+	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
+	 */
+	@Query("SELECT f.myForcedId, f.myResourcePid FROM ForcedId f WHERE myPartitionIdValue IS NULL AND myResourceType = :resource_type AND myForcedId IN ( :forced_id )")
+	Collection<Object[]> findByTypeAndForcedIdInPartitionNull(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedId);
+
+	/**
 	 * Warning: No DB index exists for this particular query, so it may not perform well
 	 *
 	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
@@ -84,4 +98,31 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 		"JOIN ResourceTable t ON t.myId = f.myResourcePid " +
 		"WHERE f.myResourceType = :resource_type AND f.myForcedId IN ( :forced_id )")
 	Collection<Object[]> findAndResolveByForcedIdWithNoType(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedIds);
+
+	/**
+	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
+	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
+	 */
+	@Query("" +
+		"SELECT " +
+		"   f.myResourceType, f.myResourcePid, f.myForcedId, t.myDeleted " +
+		"FROM ForcedId f " +
+		"JOIN ResourceTable t ON t.myId = f.myResourcePid " +
+		"WHERE f.myResourceType = :resource_type AND f.myForcedId IN ( :forced_id ) AND f.myPartitionIdValue = :partition_id")
+	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartition(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedIds, @Param("partition_id") Integer thePartitionId);
+
+
+	/**
+	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
+	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
+	 */
+	@Query("" +
+		"SELECT " +
+		"   f.myResourceType, f.myResourcePid, f.myForcedId, t.myDeleted " +
+		"FROM ForcedId f " +
+		"JOIN ResourceTable t ON t.myId = f.myResourcePid " +
+		"WHERE f.myResourceType = :resource_type AND f.myForcedId IN ( :forced_id ) AND f.myPartitionIdValue IS NULL")
+	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionNull(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedIds);
+
+
 }

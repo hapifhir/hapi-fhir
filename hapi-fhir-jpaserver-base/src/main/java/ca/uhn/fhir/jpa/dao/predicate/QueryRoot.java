@@ -99,4 +99,8 @@ public class QueryRoot {
 	public void setHasIndexJoins() {
 		myHasIndexJoins = true;
 	}
+
+	public void clearHasIndexJoins() {
+		myHasIndexJoins = false;
+	}
 }

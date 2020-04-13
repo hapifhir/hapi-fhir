@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -55,50 +56,6 @@ import static org.apache.commons.lang3.StringUtils.left;
 	@Index(name = "IDX_SP_STRING_RESID", columnList = "RES_ID")
 })
 @Indexed()
-//@AnalyzerDefs({
-//	@AnalyzerDef(name = "autocompleteEdgeAnalyzer",
-//		tokenizer = @TokenizerDef(factory = PatternTokenizerFactory.class, params= {
-//			@Parameter(name="pattern", value="(.*)"),
-//			@Parameter(name="group", value="1")
-//		}),
-//		filters = {
-//			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
-//			@TokenFilterDef(factory = StopFilterFactory.class),
-//			@TokenFilterDef(factory = EdgeNGramFilterFactory.class, params = {
-//				@Parameter(name = "minGramSize", value = "3"),
-//				@Parameter(name = "maxGramSize", value = "50") 
-//			}), 
-//		}),
-//	@AnalyzerDef(name = "autocompletePhoneticAnalyzer",
-//		tokenizer = @TokenizerDef(factory=StandardTokenizerFactory.class),
-//		filters = {
-//			@TokenFilterDef(factory=StandardFilterFactory.class),
-//			@TokenFilterDef(factory=StopFilterFactory.class),
-//			@TokenFilterDef(factory=PhoneticFilterFactory.class, params = {
-//				@Parameter(name="encoder", value="DoubleMetaphone")
-//			}),
-//			@TokenFilterDef(factory=SnowballPorterFilterFactory.class, params = {
-//				@Parameter(name="language", value="English") 
-//			})
-//		}),
-//	@AnalyzerDef(name = "autocompleteNGramAnalyzer",
-//		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
-//		filters = {
-//			@TokenFilterDef(factory = WordDelimiterFilterFactory.class),
-//			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
-//			@TokenFilterDef(factory = NGramFilterFactory.class, params = {
-//				@Parameter(name = "minGramSize", value = "3"),
-//				@Parameter(name = "maxGramSize", value = "20") 
-//			}),
-//		}),
-//	@AnalyzerDef(name = "standardAnalyzer",
-//		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
-//		filters = {
-//			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
-//		}) // Def
-//	}
-//)
-//@formatter:on
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	/*
@@ -151,7 +108,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		super();
 	}
 
-	public ResourceIndexedSearchParamString(ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized, String theValueExact) {
+	public ResourceIndexedSearchParamString(PartitionConfig thePartitionConfig, ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized, String theValueExact) {
+		setPartitionConfig(thePartitionConfig);
 		setModelConfig(theModelConfig);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
@@ -172,9 +130,9 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			String paramName = getParamName();
 			String valueNormalized = getValueNormalized();
 			String valueExact = getValueExact();
-			setHashNormalizedPrefix(calculateHashNormalized(myModelConfig, resourceType, paramName, valueNormalized));
-			setHashExact(calculateHashExact(resourceType, paramName, valueExact));
-			setHashIdentity(calculateHashIdentity(resourceType, paramName));
+			setHashNormalizedPrefix(calculateHashNormalized(getPartitionConfig(), getPartitionId(), myModelConfig, resourceType, paramName, valueNormalized));
+			setHashExact(calculateHashExact(getPartitionConfig(), getPartitionId(), resourceType, paramName, valueExact));
+			setHashIdentity(calculateHashIdentity(getPartitionConfig(), getPartitionId(), resourceType, paramName));
 		}
 	}
 
@@ -293,11 +251,11 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return b.build();
 	}
 
-	public static long calculateHashExact(String theResourceType, String theParamName, String theValueExact) {
-		return hash(theResourceType, theParamName, theValueExact);
+	public static long calculateHashExact(PartitionConfig thePartitionConfig, PartitionId thePartitionId, String theResourceType, String theParamName, String theValueExact) {
+		return hash(thePartitionConfig, thePartitionId, theResourceType, theParamName, theValueExact);
 	}
 
-	public static long calculateHashNormalized(ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized) {
+	public static long calculateHashNormalized(PartitionConfig thePartitionConfig, PartitionId thePartitionId, ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized) {
 		/*
 		 * If we're not allowing contained searches, we'll add the first
 		 * bit of the normalized value to the hash. This helps to
@@ -309,8 +267,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			hashPrefixLength = 0;
 		}
 
-		long hash = hash(theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
-		return hash;
+		return hash(thePartitionConfig, thePartitionId, theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
 	}
 
 	@Override

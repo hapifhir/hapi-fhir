@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  */
 
 import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
@@ -59,6 +60,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private ModelConfig myModelConfig;
+	@Autowired
+	private PartitionConfig myPartitionConfig;
 	private Set<String> myIgnoredForSearchDatatypes;
 	private BaseRuntimeChildDefinition myQuantityValueValueChild;
 	private BaseRuntimeChildDefinition myQuantitySystemValueChild;
@@ -455,7 +458,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			String system = extractValueAsString(myQuantitySystemValueChild, theValue);
 			String code = extractValueAsString(myQuantityCodeValueChild, theValue);
 
-			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(theResourceType, theSearchParam.getName(), nextValueValue, system, code);
+			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(myPartitionConfig, theResourceType, theSearchParam.getName(), nextValueValue, system, code);
 			theParams.add(nextEntity);
 		}
 
@@ -470,7 +473,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			String nextValueString = "urn:iso:std:iso:4217";
 			String nextValueCode = extractValueAsString(myMoneyCurrencyChild, theValue);
 			String searchParamName = theSearchParam.getName();
-			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(theResourceType, searchParamName, nextValueValue, nextValueString, nextValueCode);
+			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(myPartitionConfig, theResourceType, searchParamName, nextValueValue, nextValueString, nextValueCode);
 			theParams.add(nextEntity);
 		}
 
@@ -547,7 +550,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		Date end = extractValueAsDate(myPeriodEndValueChild, theValue);
 
 		if (start != null || end != null) {
-			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(theResourceType, theSearchParam.getName(), start, end, startAsString);
+			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(myPartitionConfig, theResourceType, theSearchParam.getName(), start, end, startAsString);
 			theParams.add(nextEntity);
 		}
 	}
@@ -581,7 +584,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 
 		if (!dates.isEmpty()) {
-			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(theResourceType, theSearchParam.getName(), dates.first(), dates.last(), firstValue);
+			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(myPartitionConfig, theResourceType, theSearchParam.getName(), dates.first(), dates.last(), firstValue);
 			theParams.add(nextEntity);
 		}
 	}
@@ -592,7 +595,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		BigDecimal value = extractValueAsBigDecimal(myDurationValueValueChild, theValue);
 		if (value != null) {
 			value = normalizeQuantityContainingTimeUnitsIntoDaysForNumberParam(system, code, value);
-			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(theResourceType, theSearchParam.getName(), value);
+			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(myPartitionConfig, theResourceType, theSearchParam.getName(), value);
 			theParams.add(nextEntity);
 		}
 	}
@@ -603,7 +606,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			String system = extractValueAsString(myQuantitySystemValueChild, theValue);
 			String code = extractValueAsString(myQuantityCodeValueChild, theValue);
 			value = normalizeQuantityContainingTimeUnitsIntoDaysForNumberParam(system, code, value);
-			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(theResourceType, theSearchParam.getName(), value);
+			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(myPartitionConfig, theResourceType, theSearchParam.getName(), value);
 			theParams.add(nextEntity);
 		}
 	}
@@ -613,7 +616,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		IPrimitiveType<Integer> value = (IPrimitiveType<Integer>) theValue;
 		if (value.getValue() != null) {
 			BigDecimal valueDecimal = new BigDecimal(value.getValue());
-			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(theResourceType, theSearchParam.getName(), valueDecimal);
+			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(myPartitionConfig, theResourceType, theSearchParam.getName(), valueDecimal);
 			theParams.add(nextEntity);
 		}
 
@@ -624,7 +627,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		IPrimitiveType<BigDecimal> value = (IPrimitiveType<BigDecimal>) theValue;
 		if (value.getValue() != null) {
 			BigDecimal valueDecimal = value.getValue();
-			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(theResourceType, theSearchParam.getName(), valueDecimal);
+			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(myPartitionConfig, theResourceType, theSearchParam.getName(), valueDecimal);
 			theParams.add(nextEntity);
 		}
 
@@ -651,7 +654,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		if (latitude != null && longitude != null) {
 			double normalizedLatitude = Point.normalizeLatitude(latitude.doubleValue());
 			double normalizedLongitude = Point.normalizeLongitude(longitude.doubleValue());
-			ResourceIndexedSearchParamCoords nextEntity = new ResourceIndexedSearchParamCoords(theResourceType, theSearchParam.getName(), normalizedLatitude, normalizedLongitude);
+			ResourceIndexedSearchParamCoords nextEntity = new ResourceIndexedSearchParamCoords(myPartitionConfig, theResourceType, theSearchParam.getName(), normalizedLatitude, normalizedLongitude);
 			theParams.add(nextEntity);
 		}
 	}
@@ -772,7 +775,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private void addDateTimeTypes(String theResourceType, Set<ResourceIndexedSearchParamDate> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		IPrimitiveType<Date> nextBaseDateTime = (IPrimitiveType<Date>) theValue;
 		if (nextBaseDateTime.getValue() != null) {
-			ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(theResourceType, theSearchParam.getName(), nextBaseDateTime.getValue(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString());
+			ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(myPartitionConfig, theResourceType, theSearchParam.getName(), nextBaseDateTime.getValue(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString());
 			theParams.add(param);
 		}
 	}
@@ -782,7 +785,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		IPrimitiveType<?> value = (IPrimitiveType<?>) theValue;
 		String valueAsString = value.getValueAsString();
 		if (isNotBlank(valueAsString)) {
-			ResourceIndexedSearchParamUri nextEntity = new ResourceIndexedSearchParamUri(theResourceType, theSearchParam.getName(), valueAsString);
+			ResourceIndexedSearchParamUri nextEntity = new ResourceIndexedSearchParamUri(myPartitionConfig, theResourceType, theSearchParam.getName(), valueAsString);
 			theParams.add(nextEntity);
 		}
 	}
@@ -801,7 +804,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				valueNormalized = valueNormalized.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 			}
 
-			ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getModelConfig(), theResourceType, searchParamName, valueNormalized, value);
+			ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(myPartitionConfig, getModelConfig(), theResourceType, searchParamName, valueNormalized, value);
 
 			Set params = theParams;
 			params.add(nextEntity);
@@ -820,7 +823,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			ResourceIndexedSearchParamToken nextEntity;
-			nextEntity = new ResourceIndexedSearchParamToken(theResourceType, theSearchParam.getName(), system, value);
+			nextEntity = new ResourceIndexedSearchParamToken(myPartitionConfig, theResourceType, theSearchParam.getName(), system, value);
 			theParams.add(nextEntity);
 		}
 	}

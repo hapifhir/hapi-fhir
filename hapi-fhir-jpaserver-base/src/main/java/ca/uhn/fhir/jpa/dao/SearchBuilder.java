@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.PartitionId;
@@ -169,6 +170,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private Set<ResourcePersistentId> myPidSet;
 	private PredicateBuilder myPredicateBuilder;
 	private PartitionId myPartitionId;
+	@Autowired
+	private PartitionConfig myPartitionConfig;
 
 	/**
 	 * Constructor
@@ -483,7 +486,7 @@ public class SearchBuilder implements ISearchBuilder {
 					Predicate joinParam1 = theBuilder.equal(join.get("myParamName"), theSort.getParamName());
 					theQueryRoot.addPredicate(joinParam1);
 				} else {
-					Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myResourceName, theSort.getParamName());
+					Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionConfig, myPartitionId, myResourceName, theSort.getParamName());
 					Predicate joinParam1 = theBuilder.equal(join.get("myHashIdentity"), hashIdentity);
 					theQueryRoot.addPredicate(joinParam1);
 				}

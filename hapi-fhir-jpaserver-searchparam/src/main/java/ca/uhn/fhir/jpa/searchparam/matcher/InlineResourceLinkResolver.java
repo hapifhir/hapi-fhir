@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
+import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -34,7 +35,7 @@ import org.springframework.stereotype.Service;
 public class InlineResourceLinkResolver implements IResourceLinkResolver {
 
 	@Override
-	public IResourceLookup findTargetResource(RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
+	public IResourceLookup findTargetResource(PartitionId thePartitionId, RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
 
 		/*
 		 * TODO: JA - This gets used during runtime in-memory matching for subscription. It's not

@@ -187,10 +187,6 @@ public class DaoConfig {
 	 */
 	private boolean myDeleteEnabled = true;
 
-	/**
-	 * @since 5.0.0
-	 */
-	private boolean myPartitioningEnabled;
 
 	/**
 	 * Constructor
@@ -1916,24 +1912,6 @@ public class DaoConfig {
 	 */
 	public boolean isDeleteEnabled() {
 		return myDeleteEnabled;
-	}
-
-	/**
-	 * If enabled (default is <code>false</code>) the JPA server will support data partitioning
-	 *
-	 * @since 5.0.0
-	 */
-	public void setPartitioningEnabled(boolean theMultiTenancyEnabled) {
-		myPartitioningEnabled = theMultiTenancyEnabled;
-	}
-
-	/**
-	 * If enabled (default is <code>false</code>) the JPA server will support data partitioning
-	 *
-	 * @since 5.0.0
-	 */
-	public boolean isPartitioningEnabled() {
-		return myPartitioningEnabled;
 	}
 
     public enum StoreMetaSourceInformationEnum {

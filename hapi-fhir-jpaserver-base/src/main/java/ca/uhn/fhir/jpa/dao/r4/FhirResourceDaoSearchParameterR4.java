@@ -156,7 +156,7 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 			for (IPrimitiveType<?> nextBaseType : theBase) {
 				String nextBase = nextBaseType.getValueAsString();
 				RuntimeSearchParam existingSearchParam = theSearchParamRegistry.getActiveSearchParam(nextBase, theCode);
-				if (existingSearchParam.getId() == null) {
+				if (existingSearchParam != null && existingSearchParam.getId() == null) {
 					throw new UnprocessableEntityException("Can not override built-in search parameter " + nextBase + ":" + theCode + " because overriding is disabled on this server");
 				}
 			}

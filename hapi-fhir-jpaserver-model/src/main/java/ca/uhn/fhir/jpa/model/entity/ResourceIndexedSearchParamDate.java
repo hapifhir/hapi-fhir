@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -77,7 +78,8 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamDate(String theResourceType, String theParamName, Date theLow, Date theHigh, String theOriginalValue) {
+	public ResourceIndexedSearchParamDate(PartitionConfig thePartitionConfig, String theResourceType, String theParamName, Date theLow, Date theHigh, String theOriginalValue) {
+		setPartitionConfig(thePartitionConfig);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValueLow(theLow);
@@ -91,7 +93,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		if (myHashIdentity == null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
-			setHashIdentity(calculateHashIdentity(resourceType, paramName));
+			setHashIdentity(calculateHashIdentity(getPartitionConfig(), getPartitionId(), resourceType, paramName));
 		}
 	}
 
@@ -205,6 +207,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 			return false;
 		}
 
+		// FIXME: below is always true
 		boolean result = true;
 		if (lowerBound != null) {
 			result &= (myValueLow.after(lowerBound) || myValueLow.equals(lowerBound));

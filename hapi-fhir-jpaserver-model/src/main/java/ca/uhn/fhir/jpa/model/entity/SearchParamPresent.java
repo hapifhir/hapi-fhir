@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -52,6 +53,8 @@ public class SearchParamPresent extends BasePartitionable implements Serializabl
 	private transient String myParamName;
 	@Column(name = "HASH_PRESENCE")
 	private Long myHashPresence;
+	@Transient
+	private transient PartitionConfig myPartitionConfig;
 
 	/**
 	 * Constructor
@@ -67,7 +70,7 @@ public class SearchParamPresent extends BasePartitionable implements Serializabl
 			String resourceType = getResource().getResourceType();
 			String paramName = getParamName();
 			boolean present = myPresent;
-			setHashPresence(calculateHashPresence(resourceType, paramName, present));
+			setHashPresence(calculateHashPresence(getPartitionConfig(), getPartitionId(), resourceType, paramName, present));
 		}
 	}
 
@@ -114,9 +117,17 @@ public class SearchParamPresent extends BasePartitionable implements Serializabl
 		return b.build();
 	}
 
-	public static long calculateHashPresence(String theResourceType, String theParamName, Boolean thePresent) {
+	public void setPartitionConfig(PartitionConfig thePartitionConfig) {
+		myPartitionConfig = thePartitionConfig;
+	}
+
+	public PartitionConfig getPartitionConfig() {
+		return myPartitionConfig;
+	}
+
+	public static long calculateHashPresence(PartitionConfig thePartitionConfig, PartitionId thePartitionId, String theResourceType, String theParamName, Boolean thePresent) {
 		String string = thePresent != null ? Boolean.toString(thePresent) : Boolean.toString(false);
-		return BaseResourceIndexedSearchParam.hash(theResourceType, theParamName, string);
+		return BaseResourceIndexedSearchParam.hash(thePartitionConfig, thePartitionId, theResourceType, theParamName, string);
 	}
 
 }

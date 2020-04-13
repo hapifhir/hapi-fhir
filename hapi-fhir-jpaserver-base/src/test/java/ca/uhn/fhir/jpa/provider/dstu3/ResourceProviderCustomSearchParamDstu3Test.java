@@ -167,60 +167,6 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 	}
 
-	@Test
-	public void testConformanceOverrideNotAllowed() {
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(false);
-
-		CapabilityStatement conformance = ourClient
-				.fetchConformance()
-				.ofType(CapabilityStatement.class)
-				.execute();
-		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = extractSearchParams(conformance, "Patient");
-
-		CapabilityStatementRestResourceSearchParamComponent param = map.get("foo");
-		assertNull(param);
-
-		param = map.get("gender");
-		assertNotNull(param);
-
-		// Add a custom search parameter
-		SearchParameter fooSp = new SearchParameter();
-		fooSp.addBase("Patient");
-		fooSp.setCode("foo");
-		fooSp.setName("foo");
-		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
-		fooSp.setTitle("FOO SP");
-		fooSp.setExpression("Patient.gender");
-		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(fooSp, mySrd);
-
-		// Disable an existing parameter
-		fooSp = new SearchParameter();
-		fooSp.addBase("Patient");
-		fooSp.setCode("gender");
-		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
-		fooSp.setTitle("Gender");
-		fooSp.setExpression("Patient.gender");
-		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.RETIRED);
-		mySearchParameterDao.create(fooSp, mySrd);
-
-		mySearchParamRegistry.forceRefresh();
-
-		conformance = ourClient
-				.capabilities()
-				.ofType(CapabilityStatement.class)
-				.execute();
-		map = extractSearchParams(conformance, "Patient");
-
-		param = map.get("foo");
-		assertEquals("foo", param.getName());
-
-		param = map.get("gender");
-		assertNotNull(param);
-
-	}
 
 	@Test
 	public void testCreatingParamMarksCorrectResourcesForReindexing() {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -9,7 +10,7 @@ public class ResourceIndexedSearchParamTokenTest {
 
 	@Test
 	public void testHashFunctions() {
-		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken("Patient", "NAME", "SYSTEM", "VALUE");
+		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken(new PartitionConfig(), "Patient", "NAME", "SYSTEM", "VALUE");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
 
 		// Make sure our hashing function gives consistent results
@@ -20,7 +21,7 @@ public class ResourceIndexedSearchParamTokenTest {
 
 	@Test
 	public void testHashFunctionsWithOverlapNames() {
-		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken("Patient", "NAME", "SYSTEM", "VALUE");
+		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken(new PartitionConfig(), "Patient", "NAME", "SYSTEM", "VALUE");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
 
 		// Make sure our hashing function gives consistent results

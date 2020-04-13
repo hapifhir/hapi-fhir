@@ -22,17 +22,21 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.api.Constants;
 import org.hibernate.annotations.OptimisticLock;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import java.util.Collection;
 import java.util.Date;
 
 @MappedSuperclass
-public abstract class BaseHasResource implements IBaseResourceEntity, IBasePersistedResource {
+public abstract class BaseHasResource extends BasePartitionable implements IBaseResourceEntity, IBasePersistedResource {
 
 	@Column(name = "RES_DELETED_AT", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -58,30 +62,12 @@ public abstract class BaseHasResource implements IBaseResourceEntity, IBasePersi
 	@OptimisticLock(excluded = true)
 	private Date myUpdated;
 
-	@Embedded
-	private PartitionId myPartitionId;
-
 	/**
-	 * This is here to support queries only, do not set this field directly
-	 */
-	@SuppressWarnings("unused")
-	@Column(name = PartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
-	private Integer myPartitionIdValue;
-
-	/**
-	 * This is stored as an optimization to avoid neeind to query for this
+	 * This is stored as an optimization to avoid needing to query for this
 	 * after an update
 	 */
 	@Transient
 	private transient String myTransientForcedId;
-
-	public PartitionId getPartitionId() {
-		return myPartitionId;
-	}
-
-	public void setPartitionId(PartitionId thePartitionId) {
-		myPartitionId = thePartitionId;
-	}
 
 	public String getTransientForcedId() {
 		return myTransientForcedId;

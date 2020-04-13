@@ -22,16 +22,17 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.math.BigDecimal;
 
 import static ca.uhn.fhir.model.primitive.IdDt.isValidLong;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/ {
 
@@ -76,6 +77,17 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		}
 
 		setValueAsQueryToken(null, null, qualifier, theValue);
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @since 5.0.0
+	 */
+	public ReferenceParam(IIdType theValue) {
+		if (theValue != null) {
+			setValueAsQueryToken(null, null, null, theValue.getValue());
+		}
 	}
 
 	@Override
@@ -209,7 +221,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 */
 	public ReferenceParam setValue(String theValue) {
 		IdDt id = new IdDt(theValue);
-		String qualifier= null;
+		String qualifier = null;
 		if (id.hasResourceType()) {
 			qualifier = ":" + id.getResourceType();
 		}

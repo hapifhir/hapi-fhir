@@ -582,15 +582,15 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			myOrganizationDao.update(p2, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			// good
+			assertEquals("Existing resource ID[Patient/1] is of type[Patient] - Cannot update with [Organization]", e.getMessage());
 		}
 
 		try {
 			p2.setId(new IdType("Patient/" + p1id.getIdPart()));
 			myOrganizationDao.update(p2, mySrd);
 			fail();
-		} catch (UnprocessableEntityException e) {
-			ourLog.error("Good", e);
+		} catch (InvalidRequestException e) {
+			assertEquals("Incorrect resource type (Patient) for this DAO, wanted: Organization", e.getMessage());
 		}
 
 	}

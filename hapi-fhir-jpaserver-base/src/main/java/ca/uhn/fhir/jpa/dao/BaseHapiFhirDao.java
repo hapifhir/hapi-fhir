@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -177,6 +178,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private SearchBuilderFactory mySearchBuilderFactory;
 	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
+	@Autowired
+	private PartitionConfig myPartitionConfig;
 
 	@Override
 	protected IInterceptorBroadcaster getInterceptorBroadcaster() {
@@ -983,7 +986,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (thePerformIndexing) {
 
 				newParams = new ResourceIndexedSearchParams();
-				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, theUpdateTime, entity, theResource, existingParams, theRequest);
+				mySearchParamWithInlineReferencesExtractor.populateFromResource(myPartitionConfig, newParams, theUpdateTime, entity, theResource, existingParams, theRequest);
 
 				changed = populateResourceIntoEntity(theRequest, theResource, entity, true);
 				if (changed.isChanged()) {

@@ -27,7 +27,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class PartitionConfigSvcImpl implements IPartitionConfigSvc {
 
 	public static final int DEFAULT_PERSISTED_PARTITION_ID = 0;
-	private static final String DEFAULT_PERSISTED_PARTITION_NAME = "DEFAULT";
+	public static final String DEFAULT_PERSISTED_PARTITION_NAME = "DEFAULT";
 	private static final String DEFAULT_PERSISTED_PARTITION_DESC = "Default partition";
 	private static final Pattern PARTITION_NAME_VALID_PATTERN = Pattern.compile("[a-zA-Z0-9_-]+");
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionConfigSvcImpl.class);

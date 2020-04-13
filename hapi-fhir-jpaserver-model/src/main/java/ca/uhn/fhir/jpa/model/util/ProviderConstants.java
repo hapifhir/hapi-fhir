@@ -32,9 +32,15 @@ public class ProviderConstants {
 	/**
 	 * Operation name: update partition
 	 */
-	public static final String PARTITION_MANAGEMENT_MODIFY_PARTITION = "partition-management-update-partition";
+	public static final String PARTITION_MANAGEMENT_UPDATE_PARTITION = "partition-management-update-partition";
+
+	/**
+	 * Operation name: update partition
+	 */
+	public static final String PARTITION_MANAGEMENT_DELETE_PARTITION = "partition-management-delete-partition";
 
 	public static final String PARTITION_MANAGEMENT_PARTITION_ID = "partitionId";
 	public static final String PARTITION_MANAGEMENT_PARTITION_NAME = "partitionName";
 	public static final String PARTITION_MANAGEMENT_PARTITION_DESC = "description";
+
 }

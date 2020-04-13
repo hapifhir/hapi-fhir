@@ -6,6 +6,7 @@
     <ul>
     <li>Hibernate ORM (JPA): 5.4.6 -&gt; 5.4.12</li>
     <li>Hibernate Search (JPA): 5.11.3 -&gt; 5.11.5</li>
+    <li>Hibernate Validator (JPA): 5.4.2.Final -&gt; 6.1.3.Final</li>
     <li>Guava (JPA): 28.0 -&gt; 28.2</li>
     </ul>"
 - item:

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.UriParam;
 import org.apache.commons.lang3.StringUtils;
@@ -80,7 +81,8 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamUri(String theResourceType, String theParamName, String theUri) {
+	public ResourceIndexedSearchParamUri(PartitionConfig thePartitionConfig, String theResourceType, String theParamName, String theUri) {
+		setPartitionConfig(thePartitionConfig);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setUri(theUri);
@@ -93,8 +95,8 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 			String resourceType = getResourceType();
 			String paramName = getParamName();
 			String uri = getUri();
-			setHashIdentity(calculateHashIdentity(resourceType, paramName));
-			setHashUri(calculateHashUri(resourceType, paramName, uri));
+			setHashIdentity(calculateHashIdentity(getPartitionConfig(), getPartitionId(), resourceType, paramName));
+			setHashUri(calculateHashUri(getPartitionConfig(), getPartitionId(), resourceType, paramName, uri));
 		}
 	}
 
@@ -196,8 +198,8 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		return defaultString(getUri()).equalsIgnoreCase(uri.getValueNotNull());
 	}
 
-	public static long calculateHashUri(String theResourceType, String theParamName, String theUri) {
-		return hash(theResourceType, theParamName, theUri);
+	public static long calculateHashUri(PartitionConfig thePartitionConfig, PartitionId thePartitionId, String theResourceType, String theParamName, String theUri) {
+		return hash(thePartitionConfig, thePartitionId, theResourceType, theParamName, theUri);
 	}
 
 

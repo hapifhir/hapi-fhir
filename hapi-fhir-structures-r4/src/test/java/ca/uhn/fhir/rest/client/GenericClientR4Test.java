@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.client;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -15,7 +13,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
-import ca.uhn.fhir.rest.client.impl.BaseClient;
 import ca.uhn.fhir.rest.client.interceptor.CookieInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.UserInfoInterceptor;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -23,32 +20,22 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import ca.uhn.fhir.util.VersionUtil;
 import com.google.common.base.Charsets;
 import com.helger.commons.io.stream.StringInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.http.Header;
-import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -66,67 +53,12 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class GenericClientR4Test {
+public class GenericClientR4Test extends BaseGenericClientR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClientR4Test.class);
-	private static FhirContext ourCtx;
-	private int myAnswerCount;
-	private HttpClient myHttpClient;
-	private HttpResponse myHttpResponse;
-
-	@Before
-	public void before() {
-		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
-		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
-		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
-		myAnswerCount = 0;
-		System.setProperty(BaseClient.HAPI_CLIENT_KEEPRESPONSES, "true");
-	}
-
-	private String expectedUserAgent() {
-		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR " + FhirVersionEnum.R4.getFhirVersionString() + "/R4; apache)";
-	}
-
-	private byte[] extractBodyAsByteArray(ArgumentCaptor<HttpUriRequest> capt) throws IOException {
-		byte[] body = IOUtils.toByteArray(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0)).getEntity().getContent());
-		return body;
-	}
-
-	private String extractBodyAsString(ArgumentCaptor<HttpUriRequest> capt) throws IOException {
-		String body = IOUtils.toString(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0)).getEntity().getContent(), "UTF-8");
-		return body;
-	}
-
-	private ArgumentCaptor<HttpUriRequest> prepareClientForSearchResponse() throws IOException {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
-			@Override
-			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}
-		});
-		return capt;
-	}
 
 	@Test
 	public void testAcceptHeaderCustom() throws Exception {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
-			@Override
-			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}
-		});
+		ArgumentCaptor<HttpUriRequest> capt = prepareClientForSearchResponse();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
@@ -1493,18 +1425,7 @@ public class GenericClientR4Test {
 
 	@Test
 	public void testSearchByDate() throws Exception {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
-			@Override
-			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}
-		});
+		ArgumentCaptor<HttpUriRequest> capt = prepareClientForSearchResponse();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
@@ -1600,18 +1521,7 @@ public class GenericClientR4Test {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testSearchByQuantity() throws Exception {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
-			@Override
-			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}
-		});
+		ArgumentCaptor<HttpUriRequest> capt = prepareClientForSearchResponse();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
@@ -1710,18 +1620,7 @@ public class GenericClientR4Test {
 
 	@Test
 	public void testSearchByString() throws Exception {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
-			@Override
-			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}
-		});
+		ArgumentCaptor<HttpUriRequest> capt = prepareClientForSearchResponse();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
@@ -1802,18 +1701,7 @@ public class GenericClientR4Test {
 
 	@Test
 	public void testSearchByUrl() throws Exception {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
-			@Override
-			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}
-		});
+		ArgumentCaptor<HttpUriRequest> capt = prepareClientForSearchResponse();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
@@ -1911,18 +1799,7 @@ public class GenericClientR4Test {
 
 	@Test
 	public void testSearchWithNullParameters() throws Exception {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
-			@Override
-			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}
-		});
+		ArgumentCaptor<HttpUriRequest> capt = prepareClientForSearchResponse();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
@@ -2432,27 +2309,6 @@ public class GenericClientR4Test {
 
 		assertEquals(1, bundle.getEntry().size());
 		assertEquals(MyPatientWithExtensions.class, bundle.getEntry().get(0).getResource().getClass());
-	}
-
-	private List<Class<? extends IBaseResource>> toTypeList(Class<? extends IBaseResource> theClass) {
-		ArrayList<Class<? extends IBaseResource>> retVal = new ArrayList<Class<? extends IBaseResource>>();
-		retVal.add(theClass);
-		return retVal;
-	}
-
-	private void validateUserAgent(ArgumentCaptor<HttpUriRequest> capt) {
-		assertEquals(1, capt.getAllValues().get(0).getHeaders("User-Agent").length);
-		assertEquals(expectedUserAgent(), capt.getAllValues().get(0).getHeaders("User-Agent")[0].getValue());
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void beforeClass() {
-		ourCtx = FhirContext.forR4();
 	}
 
 

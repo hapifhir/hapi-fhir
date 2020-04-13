@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.PartitionId;
@@ -52,17 +53,18 @@ import java.util.List;
 
 abstract class BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(BasePredicateBuilder.class);
-	@Autowired
-	FhirContext myContext;
-	@Autowired
-	DaoConfig myDaoConfig;
-
-	boolean myDontUseHashesForSearch;
 	final CriteriaBuilder myCriteriaBuilder;
 	final QueryRoot myQueryRoot;
 	final Class<? extends IBaseResource> myResourceType;
 	final String myResourceName;
 	final SearchParameterMap myParams;
+	@Autowired
+	FhirContext myContext;
+	@Autowired
+	DaoConfig myDaoConfig;
+	boolean myDontUseHashesForSearch;
+	@Autowired
+	private PartitionConfig myPartitionConfig;
 
 	BasePredicateBuilder(SearchBuilder theSearchBuilder) {
 		myCriteriaBuilder = theSearchBuilder.getBuilder();
@@ -117,7 +119,7 @@ abstract class BasePredicateBuilder {
 		Join<ResourceTable, SearchParamPresent> paramPresentJoin = myQueryRoot.join("mySearchParamPresents", JoinType.LEFT);
 
 		Expression<Long> hashPresence = paramPresentJoin.get("myHashPresence").as(Long.class);
-		Long hash = SearchParamPresent.calculateHashPresence(theResourceName, theParamName, !theMissing);
+		Long hash = SearchParamPresent.calculateHashPresence(myPartitionConfig, thePartitionId, theResourceName, theParamName, !theMissing);
 
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(myCriteriaBuilder.equal(hashPresence, hash));
@@ -142,7 +144,7 @@ abstract class BasePredicateBuilder {
 		myQueryRoot.setHasIndexJoins();
 	}
 
-	Predicate combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, Predicate thePredicate) {
+	Predicate combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, Predicate thePredicate, PartitionId thePartitionId) {
 		if (myDontUseHashesForSearch) {
 			Predicate resourceTypePredicate = myCriteriaBuilder.equal(theFrom.get("myResourceType"), theResourceName);
 			Predicate paramNamePredicate = myCriteriaBuilder.equal(theFrom.get("myParamName"), theParamName);
@@ -150,9 +152,13 @@ abstract class BasePredicateBuilder {
 			return outerPredicate;
 		}
 
-		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(theResourceName, theParamName);
+		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionConfig, thePartitionId, theResourceName, theParamName);
 		Predicate hashIdentityPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentity"), hashIdentity);
 		return myCriteriaBuilder.and(hashIdentityPredicate, thePredicate);
+	}
+
+	public PartitionConfig getPartitionConfig() {
+		return myPartitionConfig;
 	}
 
 	Predicate createPredicateNumeric(String theResourceName,
@@ -163,7 +169,7 @@ abstract class BasePredicateBuilder {
 												ParamPrefixEnum thePrefix,
 												BigDecimal theValue,
 												final Expression<BigDecimal> thePath,
-												String invalidMessageName) {
+												String invalidMessageName, PartitionId thePartitionId) {
 		Predicate num;
 		// Per discussions with Grahame Grieve and James Agnew on 11/13/19, modified logic for EQUAL and NOT_EQUAL operators below so as to
 		//   use exact value matching.  The "fuzz amount" matching is still used with the APPROXIMATE operator.
@@ -207,13 +213,13 @@ abstract class BasePredicateBuilder {
 		if (theParamName == null) {
 			return num;
 		}
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, num);
+		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, num, thePartitionId);
 	}
 
 	void addPartitionIdPredicate(PartitionId thePartitionId, Join<ResourceTable, ? extends BasePartitionable> theJoin, List<Predicate> theCodePredicates) {
 		if (thePartitionId != null) {
 			Integer partitionId = thePartitionId.getPartitionId();
-				Predicate partitionPredicate;
+			Predicate partitionPredicate;
 			if (partitionId != null) {
 				partitionPredicate = myCriteriaBuilder.equal(theJoin.get("myPartitionIdValue").as(Integer.class), partitionId);
 			} else {

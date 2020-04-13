@@ -14,6 +14,8 @@ import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
+import ca.uhn.fhir.jpa.partition.RequestPartitionHelperService;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -108,6 +110,8 @@ public class SearchCoordinatorSvcImplTest {
 	private SearchBuilderFactory mySearchBuilderFactory;
 	@Mock
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+	@Mock
+	private IRequestPartitionHelperService myPartitionHelperSvc;
 
 	@After
 	public void after() {
@@ -131,6 +135,7 @@ public class SearchCoordinatorSvcImplTest {
 		mySvc.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
 		mySvc.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 		mySvc.setPersistedJpaBundleProviderFactoryForUnitTest(myPersistedJpaBundleProviderFactory);
+		mySvc.setRequestPartitionHelperService(myPartitionHelperSvc);
 
 		DaoConfig daoConfig = new DaoConfig();
 		mySvc.setDaoConfigForUnitTest(daoConfig);

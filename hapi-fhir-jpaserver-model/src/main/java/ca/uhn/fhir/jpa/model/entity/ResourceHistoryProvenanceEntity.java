@@ -29,7 +29,7 @@ import javax.persistence.*;
 	@Index(name = "IDX_RESVERPROV_REQUESTID", columnList = "REQUEST_ID")
 })
 @Entity
-public class ResourceHistoryProvenanceEntity {
+public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 
 	public static final int SOURCE_URI_LENGTH = 100;
 
@@ -47,9 +47,6 @@ public class ResourceHistoryProvenanceEntity {
 	private String mySourceUri;
 	@Column(name = "REQUEST_ID", length = Constants.REQUEST_ID_LENGTH, nullable = true)
 	private String myRequestId;
-	// FIXME: make sure this gets populated
-	@Embedded
-	private PartitionId myPartitionId;
 
 	/**
 	 * Constructor
@@ -86,11 +83,4 @@ public class ResourceHistoryProvenanceEntity {
 		return myId;
 	}
 
-	public PartitionId getPartitionId() {
-		return myPartitionId;
-	}
-
-	public void setPartitionId(PartitionId thePartitionId) {
-		myPartitionId = thePartitionId;
-	}
 }

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.UrlUtil;
@@ -39,6 +40,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import java.util.Date;
 
 @MappedSuperclass
@@ -48,6 +50,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	 * Don't change this without careful consideration. You will break existing hashes!
 	 */
 	private static final HashFunction HASH_FUNCTION = Hashing.murmur3_128(0);
+
 	/**
 	 * Don't make this public 'cause nobody better be able to modify it!
 	 */
@@ -79,6 +82,9 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
+
+	@Transient
+	private transient PartitionConfig myPartitionConfig;
 
 	/**
 	 * Subclasses may override
@@ -145,15 +151,29 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		throw new UnsupportedOperationException("No parameter matcher for " + theParam);
 	}
 
-	public static long calculateHashIdentity(String theResourceType, String theParamName) {
-		return hash(theResourceType, theParamName);
+	public void setPartitionConfig(PartitionConfig thePartitionConfig) {
+		myPartitionConfig = thePartitionConfig;
+	}
+
+	public PartitionConfig getPartitionConfig() {
+		return myPartitionConfig;
+	}
+
+	public static long calculateHashIdentity(PartitionConfig thePartitionConfig, PartitionId thePartitionId, String theResourceType, String theParamName) {
+		return hash(thePartitionConfig, thePartitionId, theResourceType, theParamName);
 	}
 
 	/**
 	 * Applies a fast and consistent hashing algorithm to a set of strings
 	 */
-	static long hash(String... theValues) {
+	static long hash(PartitionConfig thePartitionConfig, PartitionId thePartitionId, String... theValues) {
 		Hasher hasher = HASH_FUNCTION.newHasher();
+
+		if (thePartitionConfig.isPartitioningEnabled() && thePartitionConfig.isIncludePartitionInSearchHashes() && thePartitionId != null) {
+			if (thePartitionId.getPartitionId() != null) {
+				hasher.putInt(thePartitionId.getPartitionId());
+			}
+		}
 
 		for (String next : theValues) {
 			if (next == null) {

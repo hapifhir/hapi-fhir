@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.util.BigDecimalNumericFieldBridge;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.NumberParam;
@@ -65,7 +66,8 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	public ResourceIndexedSearchParamNumber() {
 	}
 
-	public ResourceIndexedSearchParamNumber(String theResourceType, String theParamName, BigDecimal theValue) {
+	public ResourceIndexedSearchParamNumber(PartitionConfig thePartitionConfig, String theResourceType, String theParamName, BigDecimal theValue) {
+		setPartitionConfig(thePartitionConfig);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValue(theValue);
@@ -77,7 +79,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		if (myHashIdentity == null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
-			setHashIdentity(calculateHashIdentity(resourceType, paramName));
+			setHashIdentity(calculateHashIdentity(getPartitionConfig(), getPartitionId(), resourceType, paramName));
 		}
 	}
 
@@ -104,11 +106,6 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		b.append(getValue(), obj.getValue());
 		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
-	}
-
-	public Long getHashIdentity() {
-		calculateHashes();
-		return myHashIdentity;
 	}
 
 	public void setHashIdentity(Long theHashIdentity) {

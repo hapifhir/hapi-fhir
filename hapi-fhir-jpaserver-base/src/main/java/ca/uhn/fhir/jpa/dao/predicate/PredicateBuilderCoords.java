@@ -59,7 +59,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 														 String theResourceName,
 														 String theParamName,
 														 CriteriaBuilder theBuilder,
-														 From<?, ResourceIndexedSearchParamCoords> theFrom) {
+														 From<?, ResourceIndexedSearchParamCoords> theFrom, PartitionId thePartitionId) {
 		String latitudeValue;
 		String longitudeValue;
 		Double distanceKm = 0.0;
@@ -120,7 +120,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 			longitudePredicate = longitudePredicateFromBox(theBuilder, theFrom, box);
 		}
 		Predicate singleCode = theBuilder.and(latitudePredicate, longitudePredicate);
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
+		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, thePartitionId);
 	}
 
 	private Predicate latitudePredicateFromBox(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamCoords> theFrom, SearchBox theBox) {
@@ -166,8 +166,8 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 				theResourceName,
 				theParamName,
                     myCriteriaBuilder,
-				join
-			);
+				join,
+				thePartitionId);
 			codePredicates.add(singleCode);
 		}
 

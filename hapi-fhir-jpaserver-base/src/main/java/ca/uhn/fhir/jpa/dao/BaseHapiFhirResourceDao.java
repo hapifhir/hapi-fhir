@@ -32,8 +32,8 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
-import ca.uhn.fhir.jpa.partition.RequestPartitionHelperService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -144,7 +145,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private String myResourceName;
 	private Class<T> myResourceType;
 	@Autowired
-	private RequestPartitionHelperService myRequestPartitionHelperService;
+	private IRequestPartitionHelperService myRequestPartitionHelperService;
+	@Autowired
+	private PartitionConfig myPartitionConfig;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel, RequestDetails theRequest) {
@@ -686,6 +689,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails) {
+		if (myPartitionConfig.isPartitioningEnabled()) {
+			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "noSystemOrTypeHistoryForPartitionAwareServer");
+			throw new MethodNotAllowedException(msg);
+		}
+
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.HISTORY_TYPE, requestDetails);

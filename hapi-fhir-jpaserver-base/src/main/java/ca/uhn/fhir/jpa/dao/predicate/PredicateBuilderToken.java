@@ -103,7 +103,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 		Join<ResourceTable, ResourceIndexedSearchParamToken> join = createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);
 		addPartitionIdPredicate(thePartitionId, join, codePredicates);
 
-		Collection<Predicate> singleCode = createPredicateToken(tokens, theResourceName, theParamName, myCriteriaBuilder, join, theOperation);
+		Collection<Predicate> singleCode = createPredicateToken(tokens, theResourceName, theParamName, myCriteriaBuilder, join, theOperation, thePartitionId);
 		assert singleCode != null;
 		codePredicates.addAll(singleCode);
 
@@ -119,14 +119,16 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 																	  String theResourceName,
 																	  String theParamName,
 																	  CriteriaBuilder theBuilder,
-																	  From<?, ResourceIndexedSearchParamToken> theFrom) {
+																	  From<?, ResourceIndexedSearchParamToken> theFrom,
+																	  PartitionId thePartitionId) {
 		return createPredicateToken(
 			theParameters,
 			theResourceName,
 			theParamName,
 			theBuilder,
 			theFrom,
-			null);
+			null,
+			thePartitionId);
 	}
 
 	private Collection<Predicate> createPredicateToken(Collection<IQueryParameterType> theParameters,
@@ -134,7 +136,8 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 																		String theParamName,
 																		CriteriaBuilder theBuilder,
 																		From<?, ResourceIndexedSearchParamToken> theFrom,
-																		SearchFilterParser.CompareOperation operation) {
+																		SearchFilterParser.CompareOperation operation,
+																		PartitionId thePartitionId) {
 		final List<VersionIndependentConcept> codes = new ArrayList<>();
 
 		TokenParamModifier modifier = null;
@@ -210,19 +213,19 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 		// System only
 		List<VersionIndependentConcept> systemOnlyCodes = sortedCodesList.stream().filter(t -> isBlank(t.getCode())).collect(Collectors.toList());
 		if (!systemOnlyCodes.isEmpty()) {
-			retVal.add(addPredicate(theResourceName, theParamName, theBuilder, theFrom, systemOnlyCodes, modifier, SearchBuilderTokenModeEnum.SYSTEM_ONLY));
+			retVal.add(addPredicate(theResourceName, theParamName, theBuilder, theFrom, systemOnlyCodes, modifier, SearchBuilderTokenModeEnum.SYSTEM_ONLY, thePartitionId));
 		}
 
 		// Code only
 		List<VersionIndependentConcept> codeOnlyCodes = sortedCodesList.stream().filter(t -> t.getSystem() == null).collect(Collectors.toList());
 		if (!codeOnlyCodes.isEmpty()) {
-			retVal.add(addPredicate(theResourceName, theParamName, theBuilder, theFrom, codeOnlyCodes, modifier, SearchBuilderTokenModeEnum.VALUE_ONLY));
+			retVal.add(addPredicate(theResourceName, theParamName, theBuilder, theFrom, codeOnlyCodes, modifier, SearchBuilderTokenModeEnum.VALUE_ONLY, thePartitionId));
 		}
 
 		// System and code
 		List<VersionIndependentConcept> systemAndCodeCodes = sortedCodesList.stream().filter(t -> isNotBlank(t.getCode()) && t.getSystem() != null).collect(Collectors.toList());
 		if (!systemAndCodeCodes.isEmpty()) {
-			retVal.add(addPredicate(theResourceName, theParamName, theBuilder, theFrom, systemAndCodeCodes, modifier, SearchBuilderTokenModeEnum.SYSTEM_AND_VALUE));
+			retVal.add(addPredicate(theResourceName, theParamName, theBuilder, theFrom, systemAndCodeCodes, modifier, SearchBuilderTokenModeEnum.SYSTEM_AND_VALUE, thePartitionId));
 		}
 
 		return retVal;
@@ -274,7 +277,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 		}
 	}
 
-	private Predicate addPredicate(String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamToken> theFrom, List<VersionIndependentConcept> theTokens, TokenParamModifier theModifier, SearchBuilderTokenModeEnum theTokenMode) {
+	private Predicate addPredicate(String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamToken> theFrom, List<VersionIndependentConcept> theTokens, TokenParamModifier theModifier, SearchBuilderTokenModeEnum theTokenMode, PartitionId thePartitionId) {
 		if (myDontUseHashesForSearch) {
 			final Path<String> systemExpression = theFrom.get("mySystem");
 			final Path<String> valueExpression = theFrom.get("myValue");
@@ -307,7 +310,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 				or = theBuilder.not(or);
 			}
 
-			return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, or);
+			return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, or, thePartitionId);
 		}
 
 		/*
@@ -322,14 +325,14 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 				hashField = theFrom.get("myHashSystem").as(Long.class);
 				values = theTokens
 					.stream()
-					.map(t -> ResourceIndexedSearchParamToken.calculateHashSystem(theResourceName, theParamName, t.getSystem()))
+					.map(t -> ResourceIndexedSearchParamToken.calculateHashSystem(getPartitionConfig(), thePartitionId, theResourceName, theParamName, t.getSystem()))
 					.collect(Collectors.toList());
 				break;
 			case VALUE_ONLY:
 				hashField = theFrom.get("myHashValue").as(Long.class);
 				values = theTokens
 					.stream()
-					.map(t -> ResourceIndexedSearchParamToken.calculateHashValue(theResourceName, theParamName, t.getCode()))
+					.map(t -> ResourceIndexedSearchParamToken.calculateHashValue(getPartitionConfig(), thePartitionId, theResourceName, theParamName, t.getCode()))
 					.collect(Collectors.toList());
 				break;
 			case SYSTEM_AND_VALUE:
@@ -337,14 +340,14 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 				hashField = theFrom.get("myHashSystemAndValue").as(Long.class);
 				values = theTokens
 					.stream()
-					.map(t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(theResourceName, theParamName, t.getSystem(), t.getCode()))
+					.map(t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(getPartitionConfig(), thePartitionId, theResourceName, theParamName, t.getSystem(), t.getCode()))
 					.collect(Collectors.toList());
 				break;
 		}
 
 		Predicate predicate = hashField.in(values);
 		if (theModifier == TokenParamModifier.NOT) {
-			Predicate identityPredicate = theBuilder.equal(theFrom.get("myHashIdentity").as(Long.class), BaseResourceIndexedSearchParam.calculateHashIdentity(theResourceName, theParamName));
+			Predicate identityPredicate = theBuilder.equal(theFrom.get("myHashIdentity").as(Long.class), BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionConfig(), thePartitionId, theResourceName, theParamName));
 			Predicate disjunctionPredicate = theBuilder.not(predicate);
 			predicate = theBuilder.and(identityPredicate, disjunctionPredicate);
 		}

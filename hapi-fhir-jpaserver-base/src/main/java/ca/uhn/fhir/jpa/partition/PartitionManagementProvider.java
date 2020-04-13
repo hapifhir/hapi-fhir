@@ -12,8 +12,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Optional;
-
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class PartitionManagementProvider {
@@ -50,7 +48,7 @@ public class PartitionManagementProvider {
 	 * $partition-management-update-partition
 	 * </code>
 	 */
-	@Operation(name = ProviderConstants.PARTITION_MANAGEMENT_ADD_PARTITION)
+	@Operation(name = ProviderConstants.PARTITION_MANAGEMENT_UPDATE_PARTITION)
 	public IBaseParameters updatePartition(
 		@ResourceParam IBaseParameters theRequest,
 		@OperationParam(name=ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, min = 1, max = 1, typeName = "integer") IPrimitiveType<Integer> thePartitionId,
@@ -71,7 +69,7 @@ public class PartitionManagementProvider {
 	 * $partition-management-delete-partition
 	 * </code>
 	 */
-	@Operation(name = ProviderConstants.PARTITION_MANAGEMENT_ADD_PARTITION)
+	@Operation(name = ProviderConstants.PARTITION_MANAGEMENT_DELETE_PARTITION)
 	public IBaseParameters updatePartition(
 		@ResourceParam IBaseParameters theRequest,
 		@OperationParam(name=ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, min = 1, max = 1, typeName = "integer") IPrimitiveType<Integer> thePartitionId

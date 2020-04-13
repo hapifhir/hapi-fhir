@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -187,6 +188,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDao<EpisodeOfCare> myEpisodeOfCareDao;
 	@Autowired
 	protected DaoConfig myDaoConfig;
+	@Autowired
+	protected PartitionConfig myPartitionConfig;
 	@Autowired
 	protected ModelConfig myModelConfig;
 	@Autowired

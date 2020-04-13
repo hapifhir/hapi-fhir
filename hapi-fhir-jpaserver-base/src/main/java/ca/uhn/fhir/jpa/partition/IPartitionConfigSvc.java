@@ -23,4 +23,5 @@ public interface IPartitionConfigSvc {
 	PartitionEntity updatePartition(PartitionEntity thePartition);
 
 	void deletePartition(Integer thePartitionId);
+
 }

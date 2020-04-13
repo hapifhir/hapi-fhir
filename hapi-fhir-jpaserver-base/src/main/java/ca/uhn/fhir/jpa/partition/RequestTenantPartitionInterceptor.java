@@ -11,7 +11,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class RequestTenantSelectingInterceptor {
+public class RequestTenantPartitionInterceptor {
 
 	@Autowired
 	private IPartitionConfigSvc myPartitionConfigSvc;
@@ -36,7 +36,7 @@ public class RequestTenantSelectingInterceptor {
 		try {
 			partition = myPartitionConfigSvc.getPartitionByName(tenantId);
 		} catch (IllegalArgumentException e) {
-			String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestTenantSelectingInterceptor.class, "unknownTenantName", tenantId);
+			String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestTenantPartitionInterceptor.class, "unknownTenantName", tenantId);
 			throw new ResourceNotFoundException(msg);
 		}
 

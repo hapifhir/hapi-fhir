@@ -11,7 +11,9 @@ import ca.uhn.fhir.jpa.bulk.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.partition.IPartitionConfigSvc;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
 import ca.uhn.fhir.jpa.partition.PartitionConfigSvcImpl;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperService;
@@ -19,6 +21,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
@@ -202,7 +205,7 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public RequestPartitionHelperService requestPartitionHelperService() {
+	public IRequestPartitionHelperService requestPartitionHelperService() {
 		return new RequestPartitionHelperService();
 	}
 
@@ -229,6 +232,11 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
+	public PartitionConfig partitionConfig() {
+		return new PartitionConfig();
+	}
+
+	@Bean
 	@Lazy
 	public IPartitionConfigSvc partitionConfigSvc() {
 		return new PartitionConfigSvcImpl();
@@ -238,6 +246,12 @@ public abstract class BaseConfig {
 	@Lazy
 	public PartitionManagementProvider partitionManagementProvider() {
 		return new PartitionManagementProvider();
+	}
+
+	@Bean
+	@Lazy
+	public RequestTenantPartitionInterceptor requestTenantPartitionInterceptor() {
+		return new RequestTenantPartitionInterceptor();
 	}
 
 	@Bean

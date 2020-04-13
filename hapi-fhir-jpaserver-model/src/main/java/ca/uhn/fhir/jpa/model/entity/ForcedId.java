@@ -36,7 +36,7 @@ import javax.persistence.*;
 	 * so don't reuse these names
 	 */
 })
-public class ForcedId {
+public class ForcedId extends BasePartitionable {
 
 	public static final int MAX_FORCED_ID_LENGTH = 100;
 	public static final String IDX_FORCEDID_TYPE_FID = "IDX_FORCEDID_TYPE_FID";
@@ -63,9 +63,6 @@ public class ForcedId {
 	@ColumnDefault("''")
 	@Column(name = "RESOURCE_TYPE", nullable = true, length = 100, updatable = true)
 	private String myResourceType;
-
-	@Embedded
-	private PartitionId myPartitionId;
 
 	/**
 	 * Constructor
@@ -98,11 +95,4 @@ public class ForcedId {
 		return myId;
 	}
 
-	public PartitionId getPartitionId() {
-		return myPartitionId;
-	}
-
-	public void setPartitionId(PartitionId thePartitionId) {
-		myPartitionId = thePartitionId;
-	}
 }

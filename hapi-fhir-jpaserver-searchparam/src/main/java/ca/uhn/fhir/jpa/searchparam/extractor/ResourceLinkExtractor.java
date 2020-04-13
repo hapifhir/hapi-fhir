@@ -24,8 +24,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -37,7 +39,6 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -51,6 +52,8 @@ public class ResourceLinkExtractor {
 
 	@Autowired
 	private ModelConfig myModelConfig;
+	@Autowired
+	private PartitionConfig myPartitionConfig;
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
@@ -174,7 +177,14 @@ public class ResourceLinkExtractor {
 
 		IResourceLookup targetResource = theResourceIdToResolvedTarget.get(theNextId.getValue());
 		if (targetResource == null) {
-			targetResource = theResourceLinkResolver.findTargetResource(nextSpDef, theNextPathsUnsplit, theNextId, theTypeString, theType, theReference, theRequest);
+
+			// If we're allowing references across partitions, we just don't include the partition ID when resolving the target
+			PartitionId targetPartitionId = theEntity.getPartitionId();
+			if (myPartitionConfig.isAllowReferencesAcrossPartitions()) {
+				targetPartitionId = null;
+			}
+
+			targetResource = theResourceLinkResolver.findTargetResource(targetPartitionId, nextSpDef, theNextPathsUnsplit, theNextId, theTypeString, theType, theReference, theRequest);
 		}
 
 		if (targetResource == null) {

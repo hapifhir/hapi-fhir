@@ -91,7 +91,8 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 				theParamName,
 				myCriteriaBuilder,
 				join,
-				operation);
+				operation,
+				thePartitionId);
 			codePredicates.add(p);
 		}
 
@@ -99,7 +100,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 		myQueryRoot.setHasIndexJoins();
 		if (newJoin) {
-			Predicate identityAndValuePredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicates);
+			Predicate identityAndValuePredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicates, thePartitionId);
 			myQueryRoot.addPredicate(identityAndValuePredicate);
 		} else {
 			myQueryRoot.addPredicate(orPredicates);
@@ -112,14 +113,15 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 													 String theResourceName,
 													 String theParamName,
 													 CriteriaBuilder theBuilder,
-													 From<?, ResourceIndexedSearchParamDate> theFrom) {
+													 From<?, ResourceIndexedSearchParamDate> theFrom,
+													 PartitionId thePartitionId) {
 		Predicate predicateDate = createPredicateDate(theParam,
 			theResourceName,
 			theParamName,
 			theBuilder,
 			theFrom,
 			null);
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, predicateDate);
+		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, predicateDate, thePartitionId);
 	}
 
 	private Predicate createPredicateDate(IQueryParameterType theParam,
@@ -127,7 +129,8 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 													  String theParamName,
 													  CriteriaBuilder theBuilder,
 													  From<?, ResourceIndexedSearchParamDate> theFrom,
-													  SearchFilterParser.CompareOperation theOperation) {
+													  SearchFilterParser.CompareOperation theOperation,
+													  PartitionId thePartitionId) {
 
 		Predicate p;
 		if (theParam instanceof DateParam) {
@@ -155,6 +158,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		return p;
 	}
 
+	// FIXME: does this need a partition ID?
 	private Predicate createPredicateDateFromRange(CriteriaBuilder theBuilder,
 																  From<?, ResourceIndexedSearchParamDate> theFrom,
 																  DateRangeParam theRange,
