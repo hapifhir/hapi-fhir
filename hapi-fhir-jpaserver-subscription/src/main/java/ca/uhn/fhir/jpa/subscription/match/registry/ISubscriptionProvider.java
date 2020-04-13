@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+// FIXME KHS remove and inline
 public interface ISubscriptionProvider {
 	IBundleProvider search(SearchParameterMap theMap);
 

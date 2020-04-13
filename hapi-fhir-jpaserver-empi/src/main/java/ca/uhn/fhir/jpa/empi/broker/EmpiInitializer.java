@@ -8,8 +8,8 @@ import ca.uhn.fhir.jpa.empi.provider.EmpiProviderLoader;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -20,7 +20,7 @@ public class EmpiInitializer {
 	public static final String EMPI_CONSUMER_COUNT_DEFAULT = "5";
 
 	@Autowired
-	BeanFactory myBeanFactory;
+	ApplicationContext myApplicationContext;
 	@Autowired
 	IInterceptorService myInterceptorService;
 	@Autowired
@@ -40,13 +40,15 @@ public class EmpiInitializer {
 			return;
 		}
 		myEmpiRuleValidator.validate(myEmpiConfig.getEmpiRules());
-		myEmpiSubscriptionLoader.loadEmpiSubscriptions();
+		myEmpiSubscriptionLoader.registerEmpiSubscriptions();
 		myInterceptorService.registerInterceptor(myEmpiInterceptor);
-		// FIXME KHS reconcile this with subscription interceptor loader--probably uncomment the following line
-//		myInterceptorService.registerInterceptor(mySubscriptionMatcherInterceptor);
 		ourLog.info("EMPI interceptor registered");
 
-		EmpiProviderLoader empiProviderLoader = myBeanFactory.getBean(EmpiProviderLoader.class);
+		// FIXME KHS reconcile this with subscription interceptor loader--probably uncomment the following line
+//		myInterceptorService.registerInterceptor(mySubscriptionMatcherInterceptor);
+
+		myApplicationContext.getBean(EmpiQueueConsumerLoader.class);
+		EmpiProviderLoader empiProviderLoader = myApplicationContext.getBean(EmpiProviderLoader.class);
 		empiProviderLoader.loadProvider();
 	}
 }

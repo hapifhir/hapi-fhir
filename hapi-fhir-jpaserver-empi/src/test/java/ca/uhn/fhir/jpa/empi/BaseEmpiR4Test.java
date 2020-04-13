@@ -13,6 +13,8 @@ import ca.uhn.fhir.jpa.empi.svc.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.empi.svc.ResourceTableHelper;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.hamcrest.Description;
@@ -25,6 +27,7 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +39,12 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {EmpiCtxConfig.class, TestEmpiConfigR4.class})
+@ContextConfiguration(classes = {EmpiCtxConfig.class, TestEmpiConfigR4.class, SubscriptionProcessorConfig.class})
 abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = getLogger(BaseEmpiR4Test.class);
 
@@ -70,6 +74,18 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected IEmpiConfig myEmpiConfig;
 	@Autowired
 	protected EmpiMatchLinkSvc myEmpiMatchLinkSvc;
+	@Autowired
+	protected SubscriptionRegistry mySubscriptionRegistry;
+
+	@Before
+	public void before() throws Exception {
+		// FIXME KHS 2
+		waitForActivatedSubscriptionCount(1);
+	}
+
+	protected void waitForActivatedSubscriptionCount(int theSize) throws Exception {
+		await("Active Subscription Count has reached " + theSize).until(() -> mySubscriptionRegistry.size() >= theSize);
+	}
 
 	@After
 	public void after() {
