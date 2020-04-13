@@ -14,14 +14,14 @@ import static ca.uhn.fhir.rest.api.Constants.CODE_HAPI_EMPI_MANAGED;
 import static ca.uhn.fhir.rest.api.Constants.SYSTEM_EMPI_MANAGED;
 
 @Service
-public class EmpiResourceSubmitFilter implements IResourceInterceptorFilter {
+public class EmpiResourceSubmitFilter  {
 
 	@Autowired
 	FhirContext myFhirContext;
 
 	static final Set<String> ourSupportedResourceTypes = SetUtils.hashSet("Patient", "Practitioner");
 
-	@Override
+	// FIXME KHS move back to interceptor
 	public boolean canSubmitResource(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequestDetails) {
 		String resourcetype = extractResourceType(theNewResource);
 		if (isInternalRequest(theRequestDetails)) {

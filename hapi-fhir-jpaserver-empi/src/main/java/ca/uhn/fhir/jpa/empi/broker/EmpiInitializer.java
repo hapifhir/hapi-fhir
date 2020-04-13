@@ -29,7 +29,7 @@ public class EmpiInitializer {
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 	@Autowired
-	private IResourceInterceptorFilter myEmpiResourceSubmitFilter;
+	EmpiSubscriptionLoader myEmpiSubscriptionLoader;
 
 	@PostConstruct
 	public void init() {
@@ -37,7 +37,7 @@ public class EmpiInitializer {
 			return;
 		}
 		myEmpiRuleValidator.validate(myEmpiConfig.getEmpiRules());
-		mySubscriptionMatcherInterceptor.addChannel(IEmpiConfig.EMPI_MATCHING_CHANNEL_NAME, myEmpiResourceSubmitFilter);
+		myEmpiSubscriptionLoader.loadEmpiSubscriptions();
 		myInterceptorService.registerInterceptor(mySubscriptionMatcherInterceptor);
 		ourLog.info("EMPI interceptor registered");
 
