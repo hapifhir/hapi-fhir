@@ -1,6 +1,5 @@
 package ca.uhn.fhir.empi.api;
 
-import ca.uhn.fhir.empi.rules.config.EmpiConfigImpl;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 
 public interface IEmpiConfig {
@@ -9,7 +8,7 @@ public interface IEmpiConfig {
 
 	boolean isEnabled();
 
-	EmpiConfigImpl setEnabled(boolean theEnabled);
+	IEmpiConfig setEnabled(boolean theEnabled);
 
 	int getConcurrentConsumers();
 
