@@ -4,7 +4,6 @@ import ca.uhn.fhir.empi.api.IEmpiConfig;
 import ca.uhn.fhir.empi.api.IEmpiRuleValidator;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.empi.provider.EmpiProviderLoader;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.IResourceInterceptorFilter;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

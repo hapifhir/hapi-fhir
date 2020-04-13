@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.empi.broker;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.IResourceInterceptorFilter;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import org.apache.commons.collections4.SetUtils;
