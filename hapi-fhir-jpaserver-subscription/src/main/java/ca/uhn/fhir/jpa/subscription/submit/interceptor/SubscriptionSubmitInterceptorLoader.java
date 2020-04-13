@@ -22,12 +22,12 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import javax.annotation.PostConstruct;
 import java.util.Set;
@@ -42,6 +42,8 @@ public class SubscriptionSubmitInterceptorLoader {
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
+	private ApplicationContext myApplicationContext;
+	@Autowired
 	private IInterceptorService myInterceptorRegistry;
 
 	@PostConstruct
@@ -52,7 +54,6 @@ public class SubscriptionSubmitInterceptorLoader {
 			ourLog.info("Subscriptions are disabled on this server.  Subscriptions will not be activated and incoming resources will not be matched against subscriptions.");
 		} else {
 			ourLog.info("Registering subscription matcher interceptor");
-			mySubscriptionMatcherInterceptor.addChannel(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 			myInterceptorRegistry.registerInterceptor(mySubscriptionMatcherInterceptor);
 		}
 

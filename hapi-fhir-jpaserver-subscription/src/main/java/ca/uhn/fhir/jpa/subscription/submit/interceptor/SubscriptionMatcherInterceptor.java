@@ -16,13 +16,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
-import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
 
 /*-
  * #%L
@@ -45,7 +43,6 @@ import java.util.Map;
  */
 
 @Interceptor
-// FIXME KHS move and rename
 public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 	@Autowired
@@ -55,8 +52,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 
-	private volatile Map<String, MessageChannel> myMessageChannels = new HashMap<>();
-	private volatile Map<String, IResourceInterceptorFilter> myResourceInterceptorFilters = new HashMap<>();
+	private volatile MessageChannel myMatchingChannel;
 
 	/**
 	 * Constructor
@@ -65,19 +61,29 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		super();
 	}
 
+	@EventListener(classes = {ContextRefreshedEvent.class})
+	public void startIfNeeded() {
+		if (myMatchingChannel == null) {
+			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME, null);
+		}
+	}
+
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
 	public void resourceCreated(IBaseResource theResource, RequestDetails theRequest) {
+		startIfNeeded();
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE, theRequest);
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
 	public void resourceDeleted(IBaseResource theResource, RequestDetails theRequest) {
+		startIfNeeded();
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE, theRequest);
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
 	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
-		submitResourceModified(theOldResource, theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE, theRequest);
+		startIfNeeded();
+		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE, theRequest);
 	}
 
 	/**
@@ -85,10 +91,6 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	 */
 	@Override
 	public void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
-		submitResourceModified(null, theNewResource, theOperationType, theRequest);
-	}
-
-	private void submitResourceModified(@Nullable IBaseResource theOldResource, IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType);
 
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
@@ -99,31 +101,14 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 			return;
 		}
 
-		submitToAllChannels(theOldResource, theNewResource, theRequest, msg);
-	}
-
-	private void submitToAllChannels(@Nullable IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest, ResourceModifiedMessage theMsg) {
-		for (Map.Entry<String, MessageChannel> entry : myMessageChannels.entrySet()) {
-			if (canSubmitResource(entry.getKey(), theOldResource, theNewResource, theRequest)) {
-				submitResourceModified(entry.getValue(), theMsg);
-			}
-		}
-	}
-
-	private boolean canSubmitResource(String theChannelName, @Nullable IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
-		IResourceInterceptorFilter resourceInterceptorFilter = myResourceInterceptorFilters.get(theChannelName);
-		return resourceInterceptorFilter.canSubmitResource(theOldResource, theNewResource, theRequest);
-	}
-
-	@Override
-	public void submitResourceModified(ResourceModifiedMessage theMsg) {
-		submitResourceModified(myMessageChannels.get(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME), theMsg);
+		submitResourceModified(msg);
 	}
 
 	/**
 	 * This is an internal API - Use with caution!
 	 */
-	public void submitResourceModified(MessageChannel theChannel, final ResourceModifiedMessage theMsg) {
+	@Override
+	public void submitResourceModified(final ResourceModifiedMessage theMsg) {
 		/*
 		 * We only want to submit the message to the processing queue once the
 		 * transaction is committed. We do this in order to make sure that the
@@ -138,19 +123,18 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 
 				@Override
 				public void afterCommit() {
-					sendToProcessingChannel(theChannel, theMsg);
+					sendToProcessingChannel(theMsg);
 				}
 			});
 		} else {
-			sendToProcessingChannel(theChannel, theMsg);
+			sendToProcessingChannel(theMsg);
 		}
 	}
 
-	protected void sendToProcessingChannel(MessageChannel theChannel, final ResourceModifiedMessage theMessage) {
+	protected void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
 		ourLog.trace("Sending resource modified message to processing channel");
-		Validate.notNull(myMessageChannels, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
-
-		theChannel.send(new ResourceModifiedJsonMessage(theMessage));
+		Validate.notNull(myMatchingChannel, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
+		myMatchingChannel.send(new ResourceModifiedJsonMessage(theMessage));
 	}
 
 	public void setFhirContext(FhirContext theCtx) {
@@ -158,18 +142,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	}
 
 	@VisibleForTesting
-	public LinkedBlockingChannel getProcessingChannelForUnitTest(String theChannelName) {
-		return (LinkedBlockingChannel) myMessageChannels.get(theChannelName);
-	}
-
-	public void addChannel(String theChannelName) {
-		addChannel(theChannelName, (theOldResource, theNewResource, request) -> true);
-	}
-
-	public void addChannel(String theChannelName, IResourceInterceptorFilter theResourceInterceptorFilter) {
-		myResourceInterceptorFilters.put(theChannelName, theResourceInterceptorFilter);
-		if (myMessageChannels.get(theChannelName) == null) {
-			myMessageChannels.put(theChannelName, mySubscriptionChannelFactory.newMatchingSendingChannel(theChannelName, null));
-		}
+	public LinkedBlockingChannel getProcessingChannelForUnitTest() {
+		return (LinkedBlockingChannel) myMatchingChannel;
 	}
 }
