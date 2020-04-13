@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.empi.broker;
 import ca.uhn.fhir.empi.api.IEmpiConfig;
 import ca.uhn.fhir.empi.api.IEmpiRuleValidator;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.empi.interceptor.EmpiInterceptor;
 import ca.uhn.fhir.jpa.empi.provider.EmpiProviderLoader;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import org.slf4j.Logger;
@@ -30,6 +31,8 @@ public class EmpiInitializer {
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 	@Autowired
 	EmpiSubscriptionLoader myEmpiSubscriptionLoader;
+	@Autowired
+	EmpiInterceptor myEmpiInterceptor;
 
 	@PostConstruct
 	public void init() {
@@ -38,7 +41,9 @@ public class EmpiInitializer {
 		}
 		myEmpiRuleValidator.validate(myEmpiConfig.getEmpiRules());
 		myEmpiSubscriptionLoader.loadEmpiSubscriptions();
-		myInterceptorService.registerInterceptor(mySubscriptionMatcherInterceptor);
+		myInterceptorService.registerInterceptor(myEmpiInterceptor);
+		// FIXME KHS reconcile this with subscription interceptor loader--probably uncomment the following line
+//		myInterceptorService.registerInterceptor(mySubscriptionMatcherInterceptor);
 		ourLog.info("EMPI interceptor registered");
 
 		EmpiProviderLoader empiProviderLoader = myBeanFactory.getBean(EmpiProviderLoader.class);
