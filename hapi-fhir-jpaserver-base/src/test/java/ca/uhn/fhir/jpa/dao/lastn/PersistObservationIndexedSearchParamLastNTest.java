@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.dao.lastn;
 
 import ca.uhn.fhir.jpa.dao.lastn.config.TestObservationIndexSearchConfig;
 import ca.uhn.fhir.jpa.dao.data.IObservationIndexedCodeCodeableConceptSearchParamDao;
-import ca.uhn.fhir.jpa.dao.lastn.entity.ObservationIndexedCodeCodeableConceptEntity;
-import ca.uhn.fhir.jpa.dao.lastn.entity.ObservationIndexedSearchParamLastNEntity;
+import ca.uhn.fhir.jpa.model.entity.ObservationIndexedCodeCodeableConceptEntity;
+import ca.uhn.fhir.jpa.model.entity.ObservationIndexedSearchParamLastNEntity;
 import ca.uhn.fhir.jpa.dao.data.IObservationIndexedSearchParamLastNDao;
 import org.hl7.fhir.r4.model.*;
 import org.junit.After;

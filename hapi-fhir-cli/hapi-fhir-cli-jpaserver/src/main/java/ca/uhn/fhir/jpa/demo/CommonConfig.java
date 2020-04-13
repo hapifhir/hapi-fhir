@@ -233,18 +233,20 @@ public class CommonConfig {
 	public EmbeddedElastic embeddedElasticSearch() {
 		String ELASTIC_VERSION = "6.5.4";
 
-		EmbeddedElastic embeddedElastic;
-		try {
-			embeddedElastic = EmbeddedElastic.builder()
-				.withElasticVersion(ELASTIC_VERSION)
-				.withSetting(PopularProperties.TRANSPORT_TCP_PORT, 0)
-				.withSetting(PopularProperties.HTTP_PORT, 0)
-				.withSetting(PopularProperties.CLUSTER_NAME, UUID.randomUUID())
-				.withStartTimeout(60, TimeUnit.SECONDS)
-				.build()
-				.start();
-		} catch (IOException | InterruptedException e) {
-			throw new ConfigurationException(e);
+		EmbeddedElastic embeddedElastic = null;
+		if(!ContextHolder.isExternalElasticsearch()) {
+			try {
+				embeddedElastic = EmbeddedElastic.builder()
+					.withElasticVersion(ELASTIC_VERSION)
+					.withSetting(PopularProperties.TRANSPORT_TCP_PORT, 0)
+					.withSetting(PopularProperties.HTTP_PORT, 0)
+					.withSetting(PopularProperties.CLUSTER_NAME, UUID.randomUUID())
+					.withStartTimeout(60, TimeUnit.SECONDS)
+					.build()
+					.start();
+			} catch (IOException | InterruptedException e) {
+				throw new ConfigurationException(e);
+			}
 		}
 
 		return embeddedElastic;

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.lastn.entity;
+package ca.uhn.fhir.jpa.model.entity;
 
 import org.hibernate.search.annotations.DocumentId;
 import org.hibernate.search.annotations.Field;
@@ -6,8 +6,6 @@ import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.IndexedEmbedded;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Indexed(index = "code_index")

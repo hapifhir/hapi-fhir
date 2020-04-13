@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.lastn;
 import ca.uhn.fhir.jpa.dao.data.IObservationIndexedCodeCodeableConceptSearchParamDao;
 import ca.uhn.fhir.jpa.dao.data.IObservationIndexedCodeCodingSearchParamDao;
 import ca.uhn.fhir.jpa.dao.data.IObservationIndexedSearchParamLastNDao;
-import ca.uhn.fhir.jpa.dao.lastn.entity.*;
+import ca.uhn.fhir.jpa.model.entity.*;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Observation;
@@ -25,7 +25,6 @@ public class ObservationLastNIndexPersistDstu3Svc {
    @Autowired
 	IObservationIndexedCodeCodingSearchParamDao myObservationIndexedCodeCodingSearchParamDao;
 
-   // TODO: Change theSubjectId to be a Long
    public void indexObservation(Observation theObservation, String theSubjectId) {
 		ObservationIndexedSearchParamLastNEntity indexedObservation = new ObservationIndexedSearchParamLastNEntity();
 		String resourcePID = theObservation.getIdElement().getIdPart();

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.dao.lastn.entity.ObservationIndexedSearchParamLastNEntity;
+import ca.uhn.fhir.jpa.model.entity.ObservationIndexedSearchParamLastNEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

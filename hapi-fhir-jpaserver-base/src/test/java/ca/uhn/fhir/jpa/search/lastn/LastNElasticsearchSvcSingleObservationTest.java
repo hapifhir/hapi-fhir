@@ -37,8 +37,9 @@ public class LastNElasticsearchSvcSingleObservationTest {
     static ObjectMapper ourMapperNonPrettyPrint;
 
     final String RESOURCEPID = "123";
-    final String SUBJECTID = "4567";
-    final String SUBJECTTYPEANDID = "Patient/4567";
+//    final String SUBJECTID = "4567";
+//    final String SUBJECTTYPEANDID = "Patient/4567";
+    final String SUBJECTID = "Patient/4567";
     final Date EFFECTIVEDTM = new Date();
     final String FIRSTCATEGORYTEXT = "Test Codeable Concept Field for first category";
     final String CATEGORYFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-category";
@@ -150,7 +151,8 @@ public class LastNElasticsearchSvcSingleObservationTest {
         ObservationJson observation = observations.get(0);
         assertEquals(RESOURCEPID, observation.getIdentifier());
 
-        assertEquals(SUBJECTTYPEANDID, observation.getSubject());
+//        assertEquals(SUBJECTTYPEANDID, observation.getSubject());
+		 assertEquals(SUBJECTID, observation.getSubject());
         assertEquals(RESOURCEPID, observation.getIdentifier());
         assertEquals(EFFECTIVEDTM, observation.getEffectiveDtm());
         assertEquals(OBSERVATIONSINGLECODEID, observation.getCode_concept_id());
@@ -322,7 +324,8 @@ public class LastNElasticsearchSvcSingleObservationTest {
     private void createSingleObservation() throws IOException {
         ObservationJson indexedObservation = new ObservationJson();
         indexedObservation.setIdentifier(RESOURCEPID);
-        indexedObservation.setSubject(SUBJECTTYPEANDID);
+//        indexedObservation.setSubject(SUBJECTTYPEANDID);
+		 indexedObservation.setSubject(SUBJECTID);
         indexedObservation.setEffectiveDtm(EFFECTIVEDTM);
 
         // Add three CodeableConcepts for category
