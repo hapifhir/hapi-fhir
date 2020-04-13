@@ -39,6 +39,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testCreateRemoveLink() {
+		assertLinkCount(0);
 		Person person = createPerson();
 		IdType personId = person.getIdElement().toUnqualifiedVersionless();
 		assertEquals(0, person.getLink().size());

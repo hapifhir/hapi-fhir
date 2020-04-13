@@ -1,9 +1,13 @@
-package ca.uhn.fhir.jpa.empi.util;
+package ca.uhn.fhir.jpa.empi.helper;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
@@ -14,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.when;
 
 /**
@@ -34,8 +39,6 @@ import static org.mockito.Mockito.when;
  * origin is an HTTP request.
  */
 public abstract class BaseEmpiHelper extends ExternalResource {
-	@Autowired
-	private IInterceptorService myInterceptorService;
 	@Mock
 	protected ServletRequestDetails myMockSrd;
 	@Mock
@@ -46,6 +49,13 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 	protected FhirContext myMockFhirContext;
 	@Mock
 	private IInterceptorBroadcaster myMockInterceptorBroadcaster;
+
+	@Autowired
+	private IInterceptorService myInterceptorService;
+	@Autowired
+	EmpiQueueConsumerLoader myEmpiQueueConsumerLoader;
+	@Autowired
+	SubscriptionRegistry mySubscriptionRegistry;
 
 	protected PointcutLatch myAfterEmpiLatch = new PointcutLatch(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED);
 
@@ -62,9 +72,11 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 
 		//This sets up our basic interceptor, and also attached the latch so we can await the hook calls.
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, myAfterEmpiLatch);
-		// FIXME KHS
-//		myInterceptorService.registerInterceptor(myEmpiInterceptor);
-//		myEmpiInterceptor.start();
+		waitForActivatedSubscriptionCount(2);
+	}
+
+	protected void waitForActivatedSubscriptionCount(int theSize) throws Exception {
+		await("Active Subscription Count has reached " + theSize).until(() -> mySubscriptionRegistry.size() >= theSize);
 	}
 
 	@Override
@@ -74,5 +86,18 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 //		myEmpiInterceptor.stopForUnitTest();
 		myInterceptorService.unregisterInterceptor(myAfterEmpiLatch);
 		myAfterEmpiLatch.clear();
+
+		waitUntilEmpiQueueIsEmpty();
 	}
+
+	private void waitUntilEmpiQueueIsEmpty() {
+		await().until(() -> getExecutorQueueSize() == 0);
+	}
+
+	public int getExecutorQueueSize() {
+		SubscriptionChannelFactory.BroadcastingSubscribableChannelWrapper wrapper = (SubscriptionChannelFactory.BroadcastingSubscribableChannelWrapper) myEmpiQueueConsumerLoader.getEmpiChannelForUnitTest();
+		LinkedBlockingChannel channel = (LinkedBlockingChannel) wrapper.getWrappedChannel();
+		return channel.getQueueSizeForUnitTest();
+	}
+
 }

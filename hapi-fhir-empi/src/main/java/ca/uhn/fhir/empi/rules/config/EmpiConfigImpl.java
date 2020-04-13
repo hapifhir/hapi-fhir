@@ -17,6 +17,7 @@ public class EmpiConfigImpl implements IEmpiConfig {
 		return myEnabled;
 	}
 
+	@Override
 	public EmpiConfigImpl setEnabled(boolean theEnabled) {
 		myEnabled = theEnabled;
 		return this;

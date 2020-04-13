@@ -39,7 +39,7 @@ public class EmpiQueueConsumerLoader {
 	private Logger ourLog = LoggerFactory.getLogger(EmpiQueueConsumerLoader.class);
 
 	@Autowired
-	private EmpiMatchingConsumer myEmpiMatchingConsumer;
+	private EmpiConsumer myEmpiConsumer;
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 
@@ -47,12 +47,12 @@ public class EmpiQueueConsumerLoader {
 
 	// FIXME KHS add this back to the subscription one
 	@PostConstruct
-	public void handleContextRefreshEvent() {
+	public void init() {
 		if (myEmpiChannel == null) {
 			myEmpiChannel = mySubscriptionChannelFactory.newMatchingReceivingChannel(IEmpiConfig.EMPI_MATCHING_CHANNEL_NAME, null);
 		}
 		if (myEmpiChannel != null) {
-			myEmpiChannel.subscribe(myEmpiMatchingConsumer);
+			myEmpiChannel.subscribe(myEmpiConsumer);
 			ourLog.info("EMPI Matching Subscriber subscribed to Matching Channel {} with name {}", myEmpiChannel.getClass().getName(), IEmpiConfig.EMPI_MATCHING_CHANNEL_NAME);
 		}
 	}
@@ -61,7 +61,7 @@ public class EmpiQueueConsumerLoader {
 	@PreDestroy
 	public void stop() {
 		if (myEmpiChannel != null) {
-			myEmpiChannel.unsubscribe(myEmpiMatchingConsumer);
+			myEmpiChannel.unsubscribe(myEmpiConsumer);
 		}
 	}
 

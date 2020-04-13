@@ -19,8 +19,8 @@ import org.springframework.stereotype.Service;
 
 @Lazy
 @Service
-public class EmpiMatchingConsumer implements MessageHandler {
-	private Logger ourLog = LoggerFactory.getLogger(EmpiMatchingConsumer.class);
+public class EmpiConsumer implements MessageHandler {
+	private Logger ourLog = LoggerFactory.getLogger(EmpiConsumer.class);
 	@Autowired
 	private EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired

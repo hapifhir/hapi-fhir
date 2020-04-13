@@ -3,8 +3,9 @@ package ca.uhn.fhir.jpa.empi.interceptor;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
+import ca.uhn.fhir.jpa.empi.helper.EmpiHelperConfig;
+import ca.uhn.fhir.jpa.empi.helper.EmpiHelperR4;
 import ca.uhn.fhir.jpa.empi.svc.ResourceTableHelper;
-import ca.uhn.fhir.jpa.empi.util.EmpiHelperR4;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -19,6 +20,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
 
@@ -29,6 +32,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ContextConfiguration(classes = {EmpiHelperConfig.class})
 public class EmpiInterceptorTest extends BaseEmpiR4Test {
 
 	private static final Logger ourLog = getLogger(EmpiInterceptorTest.class);

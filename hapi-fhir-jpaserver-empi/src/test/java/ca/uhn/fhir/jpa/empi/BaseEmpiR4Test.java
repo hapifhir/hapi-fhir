@@ -5,6 +5,7 @@ import ca.uhn.fhir.empi.api.IEmpiConfig;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
 import ca.uhn.fhir.jpa.empi.config.EmpiCtxConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
@@ -27,7 +28,6 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,6 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -76,16 +75,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
-
-	@Before
-	public void before() throws Exception {
-		// FIXME KHS 2
-		waitForActivatedSubscriptionCount(1);
-	}
-
-	protected void waitForActivatedSubscriptionCount(int theSize) throws Exception {
-		await("Active Subscription Count has reached " + theSize).until(() -> mySubscriptionRegistry.size() >= theSize);
-	}
+	@Autowired
+	private EmpiQueueConsumerLoader myEmpiQueueConsumerLoader;
 
 	@After
 	public void after() {
