@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.entity;
+package ca.uhn.fhir.jpa.dao.lastn.entity;
 
 import ca.uhn.fhir.jpa.dao.lastn.util.CodeSystemHash;
 import org.hibernate.search.annotations.Analyze;

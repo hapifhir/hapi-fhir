@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.entity;
+package ca.uhn.fhir.jpa.dao.lastn.entity;
 
 import org.hibernate.search.annotations.*;
 

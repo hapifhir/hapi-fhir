@@ -92,7 +92,7 @@ public class FhirResourceDaoObservationR5 extends BaseHapiFhirResourceDao<Observ
 			// Update indexes here for LastN operation.
 			Observation observation = (Observation)theResource;
 			Reference subjectReference = observation.getSubject();
-			String subjectID = subjectReference.getIdElement().getValue();
+			String subjectID = subjectReference.getReference();
 			myObservationLastNIndexPersistR5Svc.indexObservation(observation, subjectID);
 		}
 

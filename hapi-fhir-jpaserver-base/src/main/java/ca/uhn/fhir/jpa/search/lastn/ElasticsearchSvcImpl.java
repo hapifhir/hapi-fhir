@@ -73,7 +73,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
         }
         String observationMapping = "{\n" +
                 "  \"mappings\" : {\n" +
-                "    \"ca.uhn.fhir.jpa.model.entity.ObservationIndexedSearchParamLastNEntity\" : {\n" +
+                "    \"ca.uhn.fhir.jpa.dao.lastn.entity.ObservationIndexedSearchParamLastNEntity\" : {\n" +
                 "      \"properties\" : {\n" +
                 "        \"codeconceptid\" : {\n" +
                 "          \"type\" : \"keyword\",\n" +
@@ -135,7 +135,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
         }
         String codeMapping = "{\n" +
                 "  \"mappings\" : {\n" +
-                "    \"ca.uhn.fhir.jpa.model.entity.ObservationIndexedCodeCodeableConceptEntity\" : {\n" +
+                "    \"ca.uhn.fhir.jpa.dao.lastn.entity.ObservationIndexedCodeCodeableConceptEntity\" : {\n" +
                 "      \"properties\" : {\n" +
                 "        \"codeable_concept_id\" : {\n" +
                 "          \"type\" : \"keyword\",\n" +

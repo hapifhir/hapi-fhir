@@ -44,7 +44,6 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 
@@ -93,7 +92,7 @@ public class FhirResourceDaoObservationDstu3 extends BaseHapiFhirResourceDao<Obs
 			// Update indexes here for LastN operation.
 			Observation observation = (Observation)theResource;
 			Reference subjectReference = observation.getSubject();
-			String subjectID = subjectReference.getIdElement().getValue();
+			String subjectID = subjectReference.getReference();
 			myObservationLastNIndexPersistDstu3Svc.indexObservation(observation, subjectID);
 		}
 
