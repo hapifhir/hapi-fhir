@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -13,8 +12,8 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.collect.Lists;
 import net.ttddyy.dsproxy.QueryCount;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
@@ -100,7 +99,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 			waitForActivatedSubscriptionCount(0);
 		}
 
-		LinkedBlockingChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+		LinkedBlockingChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
 		if (processingChannel != null) {
 			processingChannel.clearInterceptorsForUnitTest();
 		}

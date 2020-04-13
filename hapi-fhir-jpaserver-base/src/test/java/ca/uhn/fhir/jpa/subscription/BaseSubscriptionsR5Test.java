@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r5.BaseResourceProviderR5Test;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -24,8 +23,19 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r5.model.*;
-import org.junit.*;
+import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.Subscription;
+import org.hl7.fhir.r5.model.Topic;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -101,7 +111,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 			waitForActivatedSubscriptionCount(0);
 		}
 
-		LinkedBlockingChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+		LinkedBlockingChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
 		if (processingChannel != null) {
 			processingChannel.clearInterceptorsForUnitTest();
 		}

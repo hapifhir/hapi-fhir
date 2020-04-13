@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -28,6 +27,8 @@ import java.util.Enumeration;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourceProviderR4Test {
 
