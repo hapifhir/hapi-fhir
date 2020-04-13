@@ -2379,7 +2379,7 @@ public class XmlParserDstu2_1Test {
 			p.parseResource(resource);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: [element=\"active\"] Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
 		}
 		
 		LenientErrorHandler errorHandler = new LenientErrorHandler();

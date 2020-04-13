@@ -2,10 +2,10 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTask;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -108,8 +108,8 @@ public class MigrationTaskSkipperTest {
 		assertThat(taskVersions, equalTo(expectedVersions));
 	}
 
-	@NotNull
-	private Stream<String> integersToVersions(Integer[] theVersions) {
+	@Nonnull
+private Stream<String> integersToVersions(Integer[] theVersions) {
 		return Stream.of(theVersions).map(s -> VERSION_PREFIX + s);
 	}
 }

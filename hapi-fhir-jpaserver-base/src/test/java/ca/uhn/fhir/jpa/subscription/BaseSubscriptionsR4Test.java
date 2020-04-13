@@ -1,9 +1,10 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -98,13 +99,13 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 			waitForActivatedSubscriptionCount(0);
 		}
 
-		LinkedBlockingQueueSubscribableChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+		LinkedBlockingChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
 		if (processingChannel != null) {
 			processingChannel.clearInterceptorsForUnitTest();
 		}
 		myCountingInterceptor = new CountingInterceptor();
 		if (processingChannel != null) {
-			processingChannel.addInterceptorForUnitTest(myCountingInterceptor);
+			processingChannel.addInterceptor(myCountingInterceptor);
 		}
 	}
 

@@ -1,5 +1,25 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+/*-
+ * #%L
+ * HAPI FHIR - Server Framework
+ * %%
+ * Copyright (C) 2014 - 2020 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -52,7 +72,7 @@ public class ResponseSizeCapturingInterceptor {
 		CountingWriter countingWriter = (CountingWriter) theRequestDetails.getUserData().get(COUNTING_WRITER_KEY);
 		if (countingWriter != null) {
 			int charCount = countingWriter.getCount();
-			Result result = new Result(charCount);
+			Result result = new Result(theRequestDetails, charCount);
 			notifyConsumers(result);
 
 			theRequestDetails.getUserData().put(RESPONSE_RESULT_KEY, result);
@@ -79,7 +99,14 @@ public class ResponseSizeCapturingInterceptor {
 	public static class Result {
 		private final int myWrittenChars;
 
-		public Result(int theWrittenChars) {
+		public RequestDetails getRequestDetails() {
+			return myRequestDetails;
+		}
+
+		private final RequestDetails myRequestDetails;
+
+		public Result(RequestDetails theRequestDetails, int theWrittenChars) {
+			myRequestDetails = theRequestDetails;
 			myWrittenChars = theWrittenChars;
 		}
 

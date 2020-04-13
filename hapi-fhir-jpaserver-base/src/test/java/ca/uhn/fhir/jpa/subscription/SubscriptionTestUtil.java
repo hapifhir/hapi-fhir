@@ -1,13 +1,15 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
-import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelRegistry;
-import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelWithHandlers;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.email.JavaMailEmailSender;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.email.SubscriptionDeliveringEmailSubscriber;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelWithHandlers;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.JavaMailEmailSender;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +22,7 @@ public class SubscriptionTestUtil {
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
-	private SubscriptionInterceptorLoader mySubscriptionInterceptorLoader;
+	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 	@Autowired
@@ -29,7 +31,7 @@ public class SubscriptionTestUtil {
 	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
 	public int getExecutorQueueSize() {
-		LinkedBlockingQueueSubscribableChannel channel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+		LinkedBlockingChannel channel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
 		return channel.getQueueSizeForUnitTest();
 	}
 
@@ -48,22 +50,22 @@ public class SubscriptionTestUtil {
 
 	public void registerEmailInterceptor() {
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
-		mySubscriptionInterceptorLoader.registerInterceptors();
+		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void registerRestHookInterceptor() {
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
-		mySubscriptionInterceptorLoader.registerInterceptors();
+		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void registerWebSocketInterceptor() {
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
-		mySubscriptionInterceptorLoader.registerInterceptors();
+		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void unregisterSubscriptionInterceptor() {
 		myDaoConfig.clearSupportedSubscriptionTypesForUnitTest();
-		mySubscriptionInterceptorLoader.unregisterInterceptorsForUnitTest();
+		mySubscriptionSubmitInterceptorLoader.unregisterInterceptorsForUnitTest();
 	}
 
 	public int getExecutorQueueSizeForUnitTests() {
@@ -79,7 +81,7 @@ public class SubscriptionTestUtil {
 
 	public void setEmailSender(IIdType theIdElement) {
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(theIdElement.getIdPart());
-		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.get(activeSubscription.getChannelName());
+		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(activeSubscription.getChannelName());
 		SubscriptionDeliveringEmailSubscriber subscriber = (SubscriptionDeliveringEmailSubscriber) subscriptionChannelWithHandlers.getDeliveryHandlerForUnitTest();
 		subscriber.setEmailSender(myEmailSender);
 	}

@@ -1301,6 +1301,43 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ourLog.info(output.getMessages().get(0).getMessage());
 	}
 
+	@Test
+	public void testValidateCurrency() {
+		String input = "{\n" +
+			" \"resourceType\": \"Invoice\",\n" +
+			" \"status\": \"draft\",\n" +
+			" \"date\": \"2020-01-08\",\n" +
+			" \"totalGross\": {\n" +
+			"  \"value\": 150,\n" +
+			"  \"currency\": \"USD\"\n" +
+			" }\n" +
+			"}";
+		ValidationResult output = myVal.validateWithResult(input);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(errors.toString(), 0, errors.size());
+
+
+	}
+
+	@Test
+	public void testValidateCurrency_Wrong() {
+		String input = "{\n" +
+			" \"resourceType\": \"Invoice\",\n" +
+			" \"status\": \"draft\",\n" +
+			" \"date\": \"2020-01-08\",\n" +
+			" \"totalGross\": {\n" +
+			"  \"value\": 150,\n" +
+			"  \"currency\": \"BLAH\"\n" +
+			" }\n" +
+			"}";
+		ValidationResult output = myVal.validateWithResult(input);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(errors.toString(), 1, errors.size());
+		assertThat(errors.get(0).getMessage(), containsString("The value provided (\"BLAH\") is not in the value set http://hl7.org/fhir/ValueSet/currencies"));
+
+
+	}
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport.flush();

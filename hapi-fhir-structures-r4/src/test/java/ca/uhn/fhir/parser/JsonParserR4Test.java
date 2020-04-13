@@ -350,7 +350,7 @@ public class JsonParserR4Test extends BaseTest {
 			parser.encodeResourceToString(p);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Extension contains both a value and nested extensions: Patient(res).extension", e.getMessage());
+			assertEquals("[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
 	}
@@ -566,6 +566,32 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(jsonParser.setPrettyPrint(true).encodeResourceToString(parsed));
 		assertThat(xmlParser.encodeResourceToString(parsed), containsString("Underweight"));
 		assertThat(jsonParser.encodeResourceToString(parsed), containsString("Underweight"));
+
+	}
+
+	/**
+	 * See #1793
+	 */
+	@Test
+	public void testParseEmptyAttribute() {
+		String input = "{\n" +
+			"  \"resourceType\": \"Patient\",\n" +
+			"  \"identifier\": [\n" +
+			"    {\n" +
+			"      \"system\": \"https://example.com\",\n" +
+			"      \"value\": \"\"\n" +
+			"    }\n" +
+			"  ]\n" +
+			"}";
+
+		IParser jsonParser = ourCtx.newJsonParser();
+		jsonParser.setParserErrorHandler(new StrictErrorHandler());
+		try {
+			jsonParser.parseResource(Patient.class, input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("[element=\"value\"] Invalid attribute value \"\": Attribute value must not be empty (\"\")", e.getMessage());
+		}
 
 	}
 

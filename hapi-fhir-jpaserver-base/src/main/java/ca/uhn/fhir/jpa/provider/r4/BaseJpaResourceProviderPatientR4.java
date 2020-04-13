@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -24,6 +22,8 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 
 import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L

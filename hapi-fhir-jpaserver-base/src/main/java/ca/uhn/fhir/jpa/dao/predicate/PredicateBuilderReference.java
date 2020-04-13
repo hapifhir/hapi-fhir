@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.dao.predicate;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -31,10 +30,10 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.IDao;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
@@ -68,13 +67,13 @@ import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nonnull;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
@@ -328,9 +327,13 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				throw newInvalidTargetTypeForChainException(theResourceName, theParamName, typeValue);
 			}
 
+			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theJoin);
+			Predicate sourceTypeParameter = myCriteriaBuilder.equal(theJoin.get("mySourceResourceType"), myResourceName);
 			Predicate targetTypeParameter = myCriteriaBuilder.equal(theJoin.get("myTargetResourceType"), typeValue);
-			myQueryRoot.addPredicate(targetTypeParameter);
-			return targetTypeParameter;
+
+			Predicate composite = myCriteriaBuilder.and(pathPredicate, sourceTypeParameter, targetTypeParameter);
+			myQueryRoot.addPredicate(composite);
+			return composite;
 		}
 
 		boolean foundChainMatch = false;
@@ -424,12 +427,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	}
 
 	Predicate createResourceLinkPathPredicate(String theResourceName, String theParamName, From<?, ? extends ResourceLink> from) {
-		return createResourceLinkPathPredicate(myContext, theParamName, from, theResourceName);
-	}
-
-	private Predicate createResourceLinkPathPredicate(FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> theFrom,
-																	  String theResourceType) {
-		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(theResourceType);
+		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceName);
 		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
 		List<String> path = param.getPathsSplit();
 
@@ -442,12 +440,18 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		ListIterator<String> iter = path.listIterator();
 		while (iter.hasNext()) {
 			String nextPath = trim(iter.next());
-			if (!nextPath.contains(theResourceType + ".")) {
+			if (!nextPath.contains(theResourceName + ".")) {
 				iter.remove();
 			}
 		}
 
-		return theFrom.get("mySourcePath").in(path);
+		// one value
+		if (path.size() == 1) {
+			return myCriteriaBuilder.equal(from.get("mySourcePath").as(String.class), path.get(0));
+		}
+
+		// multiple values
+		return from.get("mySourcePath").in(path);
 	}
 
 	private IQueryParameterType mapReferenceChainToRawParamType(String remainingChain, RuntimeSearchParam param, String theParamName, String qualifier, Class<? extends IBaseResource> nextType, String chain, boolean isMeta, String resourceId) {
@@ -988,14 +992,14 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		return retVal;
 	}
 
-	@NotNull
+	@Nonnull
 	private InvalidRequestException newInvalidTargetTypeForChainException(String theResourceName, String theParamName, String theTypeValue) {
 		String searchParamName = theResourceName + ":" + theParamName;
 		String msg = myContext.getLocalizer().getMessage(PredicateBuilderReference.class, "invalidTargetTypeForChain", theTypeValue, searchParamName);
 		return new InvalidRequestException(msg);
 	}
 
-	@NotNull
+	@Nonnull
 	private InvalidRequestException newInvalidResourceTypeException(String theResourceType) {
 		String msg = myContext.getLocalizer().getMessageSanitized(PredicateBuilderReference.class, "invalidResourceType", theResourceType);
 		throw new InvalidRequestException(msg);

@@ -2,9 +2,9 @@ package ca.uhn.fhir.jpa.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.BaseConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistR4Svc;
@@ -19,6 +19,8 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Meta;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -102,13 +104,8 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 		return searchDao;
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
-	public SearchParamExtractorR4 searchParamExtractor() {
-		return new SearchParamExtractorR4();
-	}
-
 	@Bean(name = "mySystemDaoR4", autowire = Autowire.BY_NAME)
-	public IFhirSystemDao<org.hl7.fhir.r4.model.Bundle, org.hl7.fhir.r4.model.Meta> systemDaoR4() {
+	public IFhirSystemDao<Bundle, Meta> systemDaoR4() {
 		ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4 retVal = new ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4();
 		return retVal;
 	}

@@ -46,7 +46,6 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-@Service
 public class ResourceLinkExtractor {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceLinkExtractor.class);
 

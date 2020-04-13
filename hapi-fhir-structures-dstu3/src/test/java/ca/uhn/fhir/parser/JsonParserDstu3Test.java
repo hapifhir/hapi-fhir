@@ -58,6 +58,24 @@ public class JsonParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 
+	@Test
+	public void testEncodedResourceWithIncorrectRepresentationOfDecimalTypeToJson() {
+		DecimalType decimalType = new DecimalType();
+		decimalType.setValueAsString(".5");
+		MedicationRequest mr = new MedicationRequest();
+		Dosage dosage = new Dosage();
+		dosage.setDose(new SimpleQuantity()
+			.setValue(decimalType.getValue())
+			.setUnit("{tablet}")
+			.setSystem("http://unitsofmeasure.org")
+			.setCode("{tablet}"));
+		mr.addDosageInstruction(dosage);
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(mr);
+		ourLog.info(encoded);
+		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
+		assertEquals(BigDecimal.valueOf(0.5), mr.getDosageInstructionFirstRep().getDoseSimpleQuantity().getValue());
+		assertTrue(encoded.contains("0.5"));
+	}
 
 	/**
 	 * See #563
@@ -1504,7 +1522,7 @@ public class JsonParserDstu3Test {
 		assertEquals("foo", parsed.getValueDateTimeType().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(), eq("foo"), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(any(), eq("foo"), msgCaptor.capture());
 		assertEquals("Invalid date/time format: \"foo\"", msgCaptor.getValue());
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1536,8 +1554,8 @@ public class JsonParserDstu3Test {
 		assertEquals(null, parsed.getGenderElement().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(), eq(""), msgCaptor.capture());
-		assertEquals("Attribute values must not be empty (\"\")", msgCaptor.getValue());
+		verify(errorHandler, times(1)).invalidValue(any(), eq(""), msgCaptor.capture());
+		assertEquals("Attribute value must not be empty (\"\")", msgCaptor.getValue());
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
 		assertEquals("{\"resourceType\":\"Patient\"}", encoded);
@@ -1556,7 +1574,7 @@ public class JsonParserDstu3Test {
 		assertEquals("foo", parsed.getGenderElement().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(), eq("foo"), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(any(), eq("foo"), msgCaptor.capture());
 		assertEquals("Unknown AdministrativeGender code 'foo'", msgCaptor.getValue());
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);

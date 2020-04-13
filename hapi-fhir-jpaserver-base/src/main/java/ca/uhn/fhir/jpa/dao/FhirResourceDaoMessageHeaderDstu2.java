@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoMessageHeader;
 import ca.uhn.fhir.model.dstu2.resource.MessageHeader;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
