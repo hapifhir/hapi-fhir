@@ -100,7 +100,10 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		super.before();
 
 		myPartitionConfig.setPartitioningEnabled(true);
+		myPartitionConfig.setIncludePartitionInSearchHashes(new PartitionConfig().isIncludePartitionInSearchHashes());
+
 		myDaoConfig.setUniqueIndexesEnabled(true);
+
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
 
 		myPartitionDate = LocalDate.of(2020, Month.JANUARY, 14);
@@ -883,6 +886,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_MissingParamString_SearchAllPartitions() {
+		myPartitionConfig.setIncludePartitionInSearchHashes(false);
+
 		IIdType patientIdNull = createPatient(null, withFamily("FAMILY"));
 		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
 		IIdType patientId2 = createPatient(2, withFamily("FAMILY"));
@@ -1007,6 +1012,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_MissingParamReference_SearchAllPartitions() {
+		myPartitionConfig.setIncludePartitionInSearchHashes(false);
+
 		IIdType patientIdNull = createPatient(null, withFamily("FAMILY"));
 		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
 		IIdType patientId2 = createPatient(2, withFamily("FAMILY"));
@@ -1031,7 +1038,37 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testSearch_MissingParamReference_SearchOnePartition() {
+	public void testSearch_MissingParamReference_SearchOnePartition_IncludePartitionInHashes() {
+		myPartitionConfig.setIncludePartitionInSearchHashes(true);
+
+		createPatient(null, withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
+		createPatient(2, withFamily("FAMILY"));
+
+		// :missing=true
+		{
+			addReadPartition(1);
+			myCaptureQueriesListener.clear();
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_GENERAL_PRACTITIONER, new StringParam().setMissing(true));
+			map.setLoadSynchronous(true);
+			IBundleProvider results = myPatientDao.search(map);
+			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+			assertThat(ids, Matchers.contains(patientId1));
+
+			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+			ourLog.info("Search SQL:\n{}", searchSql);
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "mysearchpa1_.PARTITION_ID='1'"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "HFJ_RES_PARAM_PRESENT"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "HASH_PRESENCE='-3438137196820602023'"));
+		}
+	}
+
+	@Test
+	public void testSearch_MissingParamReference_SearchOnePartition_DontIncludePartitionInHashes() {
+		myPartitionConfig.setIncludePartitionInSearchHashes(false);
+
 		createPatient(null, withFamily("FAMILY"));
 		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
 		createPatient(2, withFamily("FAMILY"));
@@ -1055,7 +1092,6 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 			assertEquals(1, StringUtils.countMatches(searchSql, "HASH_PRESENCE='1919227773735728687'"));
 		}
 	}
-
 
 	@Test
 	public void testSearch_MissingParamReference_SearchDefaultPartition() {
@@ -1124,8 +1160,12 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 	}
 
+	// FIXME: add DATE and DATE RANGE test
+
 	@Test
 	public void testSearch_StringParam_SearchAllPartitions() {
+		myPartitionConfig.setIncludePartitionInSearchHashes(false);
+
 		IIdType patientIdNull = createPatient(null, withFamily("FAMILY"));
 		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
 		IIdType patientId2 = createPatient(2, withFamily("FAMILY"));

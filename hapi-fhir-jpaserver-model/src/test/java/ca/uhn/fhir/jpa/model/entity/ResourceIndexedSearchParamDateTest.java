@@ -122,10 +122,12 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate val1 = new ResourceIndexedSearchParamDate()
 			.setValueHigh(new Date(100000000L))
 			.setValueLow(new Date(111111111L));
+		val1.setPartitionConfig(new PartitionConfig());
 		val1.calculateHashes();
 		ResourceIndexedSearchParamDate val2 = new ResourceIndexedSearchParamDate()
 			.setValueHigh(new Date(100000000L))
 			.setValueLow(new Date(111111111L));
+		val2.setPartitionConfig(new PartitionConfig());
 		val2.calculateHashes();
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);

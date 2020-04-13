@@ -5,9 +5,9 @@ package ca.uhn.fhir.jpa.model.config;
  */
 public class PartitionConfig {
 
-	private boolean myPartitioningEnabled = true;
-	private boolean myAllowReferencesAcrossPartitions;
-	private boolean myIncludePartitionInSearchHashes;
+	private boolean myPartitioningEnabled = false;
+	private boolean myAllowReferencesAcrossPartitions = false;
+	private boolean myIncludePartitionInSearchHashes = true;
 
 	/**
 	 * If set to <code>true</code> (default is <code>true</code>) the <code>PARTITION_ID</code> value will be factored into the

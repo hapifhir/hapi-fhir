@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.InMemorySubscriptionMatcher;
@@ -15,6 +16,11 @@ import org.springframework.test.context.TestPropertySource;
 	"scheduling_disabled=true"
 })
 public class TestSubscriptionConfig {
+
+	@Bean
+	public PartitionConfig partitionConfig() {
+		return new PartitionConfig();
+	}
 
 	@Bean
 	public ModelConfig modelConfig() {

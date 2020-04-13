@@ -34,9 +34,11 @@ public class ResourceIndexedSearchParamTokenTest {
 	public void testEquals() {
 		ResourceIndexedSearchParamToken val1 = new ResourceIndexedSearchParamToken()
 			.setValue("AAA");
+		val1.setPartitionConfig(new PartitionConfig());
 		val1.calculateHashes();
 		ResourceIndexedSearchParamToken val2 = new ResourceIndexedSearchParamToken()
 			.setValue("AAA");
+		val2.setPartitionConfig(new PartitionConfig());
 		val2.calculateHashes();
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);

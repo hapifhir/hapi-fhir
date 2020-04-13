@@ -89,9 +89,19 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	}
 
 	@Override
+	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+		super.copyMutableValuesFrom(theSource);
+		ResourceIndexedSearchParamUri source = (ResourceIndexedSearchParamUri) theSource;
+		myUri = source.myUri;
+		myHashUri = source.myHashUri;
+		myHashIdentity = source.myHashIdentity;
+	}
+
+
+	@Override
 	@PrePersist
 	public void calculateHashes() {
-		if (myHashUri == null) {
+		if (myHashUri == null && getParamName() != null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
 			String uri = getUri();

@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
@@ -65,6 +66,11 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 		@Bean
 		public FhirContext fhirContext() {
 			return FhirContext.forR4();
+		}
+
+		@Bean
+		public PartitionConfig partitionConfig() {
+			return new PartitionConfig();
 		}
 
 		@Bean

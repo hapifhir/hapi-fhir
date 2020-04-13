@@ -66,7 +66,7 @@ public class SearchParamPresent extends BasePartitionable implements Serializabl
 	@SuppressWarnings("unused")
 	@PrePersist
 	public void calculateHashes() {
-		if (myHashPresence == null) {
+		if (myHashPresence == null && getParamName() != null) {
 			String resourceType = getResource().getResourceType();
 			String paramName = getParamName();
 			boolean present = myPresent;

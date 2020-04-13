@@ -33,7 +33,6 @@ import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -73,9 +72,8 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@Column(name = "RES_ID", insertable = false, updatable = false, nullable = false)
 	private Long myResourcePid;
 
-	// FIXME: replace with join
 	@Field()
-	@Column(name = "RES_TYPE", nullable = false, length = Constants.MAX_RESOURCE_NAME_LENGTH)
+	@Column(name = "RES_TYPE", updatable = false, nullable = false, length = Constants.MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
 
 	@Field()
@@ -116,6 +114,14 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		return this;
 	}
 
+	@Override
+	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+		BaseResourceIndexedSearchParam source = (BaseResourceIndexedSearchParam) theSource;
+		myMissing = source.myMissing;
+		myParamName = source.myParamName;
+		myUpdated = source.myUpdated;
+	}
+
 	public Long getResourcePid() {
 		return myResourcePid;
 	}
@@ -151,8 +157,9 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		throw new UnsupportedOperationException("No parameter matcher for " + theParam);
 	}
 
-	public void setPartitionConfig(PartitionConfig thePartitionConfig) {
+	public BaseResourceIndexedSearchParam setPartitionConfig(PartitionConfig thePartitionConfig) {
 		myPartitionConfig = thePartitionConfig;
+		return this;
 	}
 
 	public PartitionConfig getPartitionConfig() {

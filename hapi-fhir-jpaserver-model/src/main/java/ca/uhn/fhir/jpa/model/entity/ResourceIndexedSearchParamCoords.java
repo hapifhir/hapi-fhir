@@ -73,7 +73,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	@Override
 	@PrePersist
 	public void calculateHashes() {
-		if (myHashIdentity == null) {
+		if (myHashIdentity == null && getParamName() != null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
 			setHashIdentity(calculateHashIdentity(getPartitionConfig(), getPartitionId(), resourceType, paramName));
@@ -104,6 +104,15 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		b.append(getLongitude(), obj.getLongitude());
 		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
+	}
+
+	@Override
+	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+		super.copyMutableValuesFrom(theSource);
+		ResourceIndexedSearchParamCoords source = (ResourceIndexedSearchParamCoords) theSource;
+		myLatitude = source.getLatitude();
+		myLongitude = source.getLongitude();
+		myHashIdentity = source.myHashIdentity;
 	}
 
 	public void setHashIdentity(Long theHashIdentity) {

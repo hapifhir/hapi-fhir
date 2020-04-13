@@ -112,9 +112,23 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	@Override
+	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+		super.copyMutableValuesFrom(theSource);
+		ResourceIndexedSearchParamToken source = (ResourceIndexedSearchParamToken) theSource;
+
+		mySystem = source.mySystem;
+		myValue = source.myValue;
+		myHashSystem = source.myHashSystem;
+		myHashSystemAndValue = source.getHashSystemAndValue();
+		myHashValue = source.myHashValue;
+		myHashIdentity = source.myHashIdentity;
+	}
+
+
+	@Override
 	@PrePersist
 	public void calculateHashes() {
-		if (myHashSystem == null) {
+		if (myHashSystem == null && getParamName() != null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
 			String system = getSystem();

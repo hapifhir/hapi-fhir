@@ -83,7 +83,7 @@ public class ClientInvocationHandlerFactory {
 	class RegisterInterceptorLambda implements ILambda {
 		@Override
 		public Object handle(ClientInvocationHandler theTarget, Object[] theArgs) {
-			IClientInterceptor interceptor = (IClientInterceptor) theArgs[0];
+			Object interceptor = theArgs[0];
 			theTarget.registerInterceptor(interceptor);
 			return null;
 		}
@@ -130,7 +130,7 @@ public class ClientInvocationHandlerFactory {
 	class UnregisterInterceptorLambda implements ILambda {
 		@Override
 		public Object handle(ClientInvocationHandler theTarget, Object[] theArgs) {
-			IClientInterceptor interceptor = (IClientInterceptor) theArgs[0];
+			Object interceptor = theArgs[0];
 			theTarget.unregisterInterceptor(interceptor);
 			return null;
 		}

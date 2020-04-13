@@ -55,7 +55,7 @@ public class ResourceLink extends BaseResourceIndex {
 	@Column(name = "SRC_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
 	private Long mySourceResourcePid;
 
-	@Column(name = "SOURCE_RESOURCE_TYPE", nullable = false, length = ResourceTable.RESTYPE_LEN)
+	@Column(name = "SOURCE_RESOURCE_TYPE", updatable = false, nullable = false, length = ResourceTable.RESTYPE_LEN)
 	@Field()
 	private String mySourceResourceType;
 
@@ -115,6 +115,16 @@ public class ResourceLink extends BaseResourceIndex {
 		return b.isEquals();
 	}
 
+	@Override
+	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+		ResourceLink source = (ResourceLink) theSource;
+		myTargetResource = source.getTargetResource();
+		myTargetResourceId = source.getTargetResourceId();
+		myTargetResourcePid = source.getTargetResourcePid();
+		myTargetResourceType = source.getTargetResourceType();
+		myTargetResourceUrl = source.getTargetResourceUrl();
+	}
+
 	public String getSourcePath() {
 		return mySourcePath;
 	}
@@ -143,6 +153,10 @@ public class ResourceLink extends BaseResourceIndex {
 		myTargetResourceType = theResourceType;
 		myTargetResourcePid = theResourcePid;
 		myTargetResourceId = theTargetResourceId;
+	}
+
+	public String getTargetResourceUrl() {
+		return myTargetResourceUrl;
 	}
 
 	public Long getTargetResourcePid() {

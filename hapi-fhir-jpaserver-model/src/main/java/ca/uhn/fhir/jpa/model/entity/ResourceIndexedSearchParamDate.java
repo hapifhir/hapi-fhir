@@ -88,9 +88,18 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	}
 
 	@Override
+	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+		super.copyMutableValuesFrom(theSource);
+		ResourceIndexedSearchParamDate source = (ResourceIndexedSearchParamDate) theSource;
+		myValueHigh = source.myValueHigh;
+		myValueLow = source.myValueLow;
+		myHashIdentity = source.myHashIdentity;
+	}
+
+	@Override
 	@PrePersist
 	public void calculateHashes() {
-		if (myHashIdentity == null) {
+		if (myHashIdentity == null && getParamName() != null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
 			setHashIdentity(calculateHashIdentity(getPartitionConfig(), getPartitionId(), resourceType, paramName));

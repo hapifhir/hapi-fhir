@@ -120,7 +120,8 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 			theParamName,
 			theBuilder,
 			theFrom,
-			null);
+			null,
+			thePartitionId);
 		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, predicateDate, thePartitionId);
 	}
 

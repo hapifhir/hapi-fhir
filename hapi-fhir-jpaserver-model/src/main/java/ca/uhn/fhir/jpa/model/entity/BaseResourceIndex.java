@@ -44,4 +44,6 @@ public abstract class BaseResourceIndex extends BasePartitionable implements Ser
 	@Override
 	public abstract boolean equals(Object obj);
 
+	public abstract <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource);
+
 }

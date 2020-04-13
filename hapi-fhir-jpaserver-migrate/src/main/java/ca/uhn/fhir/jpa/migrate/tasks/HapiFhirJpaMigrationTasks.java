@@ -78,6 +78,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		partition.addColumn("PART_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 		partition.addColumn("PART_NAME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 		partition.addColumn("PART_DESC").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.1", "HASH_NORM_PREFIX").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.1", "HASH_IDENTITY").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.1", "HASH_EXACT").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 	}
 
 	protected void init420() { // 20191015 - 20200217

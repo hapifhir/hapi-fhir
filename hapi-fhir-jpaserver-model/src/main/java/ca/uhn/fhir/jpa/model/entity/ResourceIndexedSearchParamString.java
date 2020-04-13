@@ -89,17 +89,17 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
-	@Column(name = "HASH_NORM_PREFIX", nullable = true)
+	@Column(name = "HASH_NORM_PREFIX", nullable = false)
 	private Long myHashNormalizedPrefix;
 	/**
 	 * @since 3.6.0 - At some point this should be made not-null
 	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
+	@Column(name = "HASH_IDENTITY", nullable = false)
 	private Long myHashIdentity;
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
-	@Column(name = "HASH_EXACT", nullable = true)
+	@Column(name = "HASH_EXACT", nullable = false)
 	private Long myHashExact;
 	@Transient
 	private transient ModelConfig myModelConfig;
@@ -117,6 +117,18 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		setValueExact(theValueExact);
 	}
 
+	@Override
+	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+		super.copyMutableValuesFrom(theSource);
+		ResourceIndexedSearchParamString source = (ResourceIndexedSearchParamString) theSource;
+		myValueExact = source.myValueExact;
+		myValueNormalized = source.myValueNormalized;
+		myHashExact = source.myHashExact;
+		myHashIdentity = source.myHashIdentity;
+		myHashNormalizedPrefix = source.myHashNormalizedPrefix;
+	}
+
+
 	public void setHashIdentity(Long theHashIdentity) {
 		myHashIdentity = theHashIdentity;
 	}
@@ -125,7 +137,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@PrePersist
 	@PreUpdate
 	public void calculateHashes() {
-		if ((myHashIdentity == null || myHashNormalizedPrefix == null || myHashExact == null) && myModelConfig != null) {
+		if ((myHashIdentity == null || myHashNormalizedPrefix == null || myHashExact == null) && getParamName() != null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
 			String valueNormalized = getValueNormalized();
@@ -140,6 +152,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	protected void clearHashes() {
 		myHashNormalizedPrefix = null;
 		myHashExact = null;
+		myHashIdentity = null;
 	}
 
 	@Override

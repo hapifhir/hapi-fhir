@@ -111,7 +111,9 @@ public class SearchParamExtractorService {
 
 	private void populateResourceTable(Collection<? extends BaseResourceIndexedSearchParam> theParams, ResourceTable theResourceTable) {
 		for (BaseResourceIndexedSearchParam next : theParams) {
-			next.setResource(theResourceTable);
+			if (next.getResourcePid() == null) {
+				next.setResource(theResourceTable);
+			}
 		}
 	}
 

@@ -582,7 +582,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			myOrganizationDao.update(p2, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Existing resource ID[Patient/1] is of type[Patient] - Cannot update with [Organization]", e.getMessage());
+			assertEquals("Existing resource ID[Patient/" + p1id.getIdPartAsLong() + "] is of type[Patient] - Cannot update with [Organization]", e.getMessage());
 		}
 
 		try {

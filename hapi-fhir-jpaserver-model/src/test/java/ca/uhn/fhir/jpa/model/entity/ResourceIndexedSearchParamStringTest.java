@@ -37,10 +37,12 @@ public class ResourceIndexedSearchParamStringTest {
 		ResourceIndexedSearchParamString val1 = new ResourceIndexedSearchParamString()
 			.setValueExact("aaa")
 			.setValueNormalized("AAA");
+		val1.setPartitionConfig(new PartitionConfig());
 		val1.calculateHashes();
 		ResourceIndexedSearchParamString val2 = new ResourceIndexedSearchParamString()
 			.setValueExact("aaa")
 			.setValueNormalized("AAA");
+		val2.setPartitionConfig(new PartitionConfig());
 		val2.calculateHashes();
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);
