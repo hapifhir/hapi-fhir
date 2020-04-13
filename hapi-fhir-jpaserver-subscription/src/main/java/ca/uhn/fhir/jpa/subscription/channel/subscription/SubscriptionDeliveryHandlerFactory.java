@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.MessageHandler;

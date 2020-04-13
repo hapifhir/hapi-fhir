@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  */
 
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import org.springframework.stereotype.Service;
 
 public class SubscriptionDeliveryChannelNamer implements ISubscriptionDeliveryChannelNamer {
 	@Override
