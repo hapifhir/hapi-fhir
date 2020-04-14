@@ -161,10 +161,10 @@ public final class PersonHelper {
 				if (incomingTargetEid.isPresent()) {
 					//The person has no EID. This should be impossible given that we auto-assign an EID at creation time.
 					if (!personOfficialEid.isPresent()) {
-						ourLog.debug("Incoming patient/practitioner with EID {} is applying this EID to its related Person, as this person does not yet have an external EID", incomingTargetEid.get().getValue());
+						ourLog.debug("Incoming resource:{} with EID {} is applying this EID to its related Person, as this person does not yet have an external EID", theEmpiTarget.getIdElement().getValueAsString(), incomingTargetEid.get().getValue());
 						person.addIdentifier(incomingTargetEid.get().toR4());
 					} else if (personOfficialEid.isPresent() && eidsMatch(personOfficialEid, incomingTargetEid)){
-						ourLog.debug("incoming patient/practitioner with EID {} does not need to overwrite person, as this EID is already present", incomingTargetEid.get().getValue());
+						ourLog.debug("incoming resource:{} with EID {} does not need to overwrite person, as this EID is already present", theEmpiTarget.getIdElement().getValueAsString(), incomingTargetEid.get().getValue());
 					} else {
 						throw new IllegalArgumentException("This would create a duplicate person!");
 					}

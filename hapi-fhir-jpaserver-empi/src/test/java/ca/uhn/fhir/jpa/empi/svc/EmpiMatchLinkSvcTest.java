@@ -246,4 +246,24 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(anotherJanePractitioner, is(samePersonAs(janePractitioner)));
 	}
 
+	@Test
+	public void testCase1(){
+
+	}
+
+	@Test
+	public void testCase2(){
+
+	}
+
+	@Test
+	public void testCase3(){
+
+	}
+	@Test
+	public void testCase4(){
+
+	}
+
+
 }
