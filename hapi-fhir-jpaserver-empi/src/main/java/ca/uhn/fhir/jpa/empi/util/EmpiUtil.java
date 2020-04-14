@@ -1,8 +1,7 @@
 package ca.uhn.fhir.jpa.empi.util;
 
+import ca.uhn.fhir.empi.api.Constants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import static ca.uhn.fhir.rest.api.Constants.*;
 
 public final class EmpiUtil {
 	private EmpiUtil() {}
@@ -17,6 +16,6 @@ public final class EmpiUtil {
 	 * @return A boolean indicating whether EMPI should manage this resource.
 	 */
 	public static boolean isManagedByEmpi(IBaseResource theBaseResource) {
-		return theBaseResource.getMeta().getTag(SYSTEM_EMPI_MANAGED, CODE_NO_EMPI_MANAGED) == null;
+		return theBaseResource.getMeta().getTag(Constants.SYSTEM_EMPI_MANAGED, Constants.CODE_NO_EMPI_MANAGED) == null;
 	}
 }

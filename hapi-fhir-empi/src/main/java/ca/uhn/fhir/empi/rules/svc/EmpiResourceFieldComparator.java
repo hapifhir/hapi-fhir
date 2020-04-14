@@ -30,6 +30,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
 
+import static ca.uhn.fhir.empi.api.Constants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
+
 /**
  * This class is responsible for performing matching between raw-typed values of a left record and a right record.
  */
@@ -76,6 +78,11 @@ public class EmpiResourceFieldComparator implements IEmpiMatcher<IBaseResource> 
 	private void validate(IBaseResource theResource) {
 		String resourceType = theResource.getIdElement().getResourceType();
 		Validate.notNull(resourceType, "Resource type may not be null");
-		Validate.isTrue(myResourceType.equals(resourceType), "Expecting resource type %s got resource type %s", myResourceType, resourceType);
+		if (myResourceType.equalsIgnoreCase(ALL_RESOURCE_SEARCH_PARAM_TYPE)) {
+			Validate.isTrue("Patient".equalsIgnoreCase(resourceType) || "Practitioner".equalsIgnoreCase(resourceType),
+				"Expecting resource type Patient/Practitioner got resource type %s", resourceType);
+		} else {
+			Validate.isTrue(myResourceType.equals(resourceType), "Expecting resource type %s got resource type %s", myResourceType, resourceType);
+		}
 	}
 }

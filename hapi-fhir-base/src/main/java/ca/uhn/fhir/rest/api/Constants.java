@@ -22,12 +22,7 @@ package ca.uhn.fhir.rest.api;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
@@ -263,14 +258,6 @@ public class Constants {
 	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
 	public static final String PARAM_FHIRPATH = "_fhirpath";
 	public static final String PARAM_TYPE = "_type";
-
-	/**
-	 * TAG system for Person resources which are managed by HAPI EMPI.
-	 */
-	public static final String SYSTEM_EMPI_MANAGED = "https://hapifhir.org/NamingSystem/managing-empi-system";
-	public static final String CODE_HAPI_EMPI_MANAGED = "HAPI-EMPI";
-	public static final String CODE_NO_EMPI_MANAGED = "NO-EMPI";
-	public static final String HAPI_ENTERPRISE_IDENTIFIER_SYSTEM = "http://hapifhir.io/fhir/NamingSystem/empi-person-enterprise-id";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

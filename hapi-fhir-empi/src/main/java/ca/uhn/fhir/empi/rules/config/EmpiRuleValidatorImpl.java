@@ -18,7 +18,7 @@ public class EmpiRuleValidatorImpl implements IEmpiRuleValidator {
 
 	private void validateSystemIsUri(EmpiRulesJson theEmpiRulesJson) {
 		try {
-			new URI(theEmpiRulesJson.getEnterpriseEIDSystem()).parseServerAuthority();
+			new URI(theEmpiRulesJson.getEnterpriseEIDSystem());
 		} catch (URISyntaxException e) {
 			throw new ConfigurationException("Enterprise Identifier System (eidSystem) must be a valid URI");
 		}

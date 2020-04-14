@@ -3,11 +3,12 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
+import ca.uhn.fhir.empi.util.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
-import ca.uhn.fhir.empi.util.CanonicalEID;
 import ca.uhn.fhir.jpa.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -30,7 +31,14 @@ public class EmpiMatchLinkSvc {
 	@Autowired
 	private EIDHelper myEIDHelper;
 
-	public void updateEmpiLinksForPatient(IBaseResource theResource) {
+	/**
+	 * Given an Empi Target (consisting of either a Patient or a Practitioner), find a suitable Person candidate for them,
+	 * or create one if one does not exist. Performs matching based on rules defined in empi-rules.json.
+	 * Does nothing if resource is determined to be not managed by EMPI.
+	 *
+	 * @param theResource the incoming EMPI target, which is either a Patient or Practitioner.
+	 */
+	public void updateEmpiLinksForEmpiTarget(IBaseResource theResource) {
 		if (EmpiUtil.isManagedByEmpi(theResource)) {
 			doEmpiUpdate(theResource);
 		}
@@ -39,33 +47,50 @@ public class EmpiMatchLinkSvc {
 	private void doEmpiUpdate(IBaseResource theResource) {
 		List<MatchedPersonCandidate> personCandidates = myEmpiPersonFindingSvc.findPersonCandidates(theResource);
 
-		//0 candidates, in which case you should create a person
 		if (personCandidates.isEmpty()) {
-			IBaseResource newPerson = myPersonHelper.createPersonFromPatientOrPractitioner(theResource);
-			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
-		//1 candidate, in which case you should use it
+			handleNoCandidates(theResource);
 		} else if (personCandidates.size() == 1) {
-			MatchedPersonCandidate matchedPersonCandidate = personCandidates.get(0);
-			ResourcePersistentId personPid = matchedPersonCandidate.getCandidatePersonPid();
-			IBaseResource person = myEmpiResourceDaoSvc.readPersonByPid(personPid);
-			if (myPersonHelper.isPotentialDuplicate(person, theResource)) {
-				IBaseResource newPerson = myPersonHelper.createPersonFromPatientOrPractitioner(theResource);
-				myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
-				myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO);
-			} else {
-				handleEidOverwrite(person, theResource);
-				myEmpiLinkSvc.updateLink(person, theResource, matchedPersonCandidate.getEmpiLink().getMatchResult(), EmpiLinkSourceEnum.AUTO);
-			}
-		//multiple candidates, in which case they should all be tagged as POSSIBLE_MATCH. If one is already tagged as MATCH
+			handleSingleCandidate(theResource, personCandidates);
 		} else {
+			handleMultipleCandidates(theResource, personCandidates);
+		}
+	}
 
+	private void handleMultipleCandidates(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates) {
+		Long samplePersonPid = thePersonCandidates.get(0).getCandidatePersonPid().getIdAsLong();
+		boolean allSamePerson = thePersonCandidates.stream()
+			.allMatch(candidate -> candidate.getCandidatePersonPid().getIdAsLong().equals(samplePersonPid));
+
+		if (allSamePerson) {
+			handleSingleCandidate(theResource, thePersonCandidates);
+		} else {
+			throw new InternalErrorException("Error during EMPI matching, more than 1 full match occurred.");
+		}
+	}
+
+	private void handleNoCandidates(IBaseResource theResource) {
+		IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
+		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
+	}
+
+	private void handleSingleCandidate(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates) {
+		MatchedPersonCandidate matchedPersonCandidate = thePersonCandidates.get(0);
+		ResourcePersistentId personPid = matchedPersonCandidate.getCandidatePersonPid();
+		IBaseResource person = myEmpiResourceDaoSvc.readPersonByPid(personPid);
+		if (myPersonHelper.isPotentialDuplicate(person, theResource)) {
+			IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
+			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
+			myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO);
+		} else {
+			handleEidOverwrite(person, theResource);
+			myEmpiLinkSvc.updateLink(person, theResource, matchedPersonCandidate.getEmpiLink().getMatchResult(), EmpiLinkSourceEnum.AUTO);
 		}
 	}
 
 	private void handleEidOverwrite(IBaseResource thePerson, IBaseResource theResource) {
 		Optional<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theResource);
 		if (eidFromResource.isPresent()) {
-			myPersonHelper.updatePersonFromPatient(thePerson, theResource);
+			myPersonHelper.updatePersonFromEmpiTarget(thePerson, theResource);
 		}
 	}
 }

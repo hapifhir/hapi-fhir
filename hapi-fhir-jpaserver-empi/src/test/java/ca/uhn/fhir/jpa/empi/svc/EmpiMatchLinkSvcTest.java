@@ -1,35 +1,32 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
+import ca.uhn.fhir.empi.api.Constants;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.api.IEmpiConfig;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.util.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static ca.uhn.fhir.rest.api.Constants.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.in;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -80,7 +77,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		myEmpiLinkSvc.updateLink(janePerson, unmatchedJane, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL);
 
 		//rerun EMPI rules against unmatchedJane.
-		myEmpiMatchLinkSvc.updateEmpiLinksForPatient(unmatchedJane);
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(unmatchedJane);
 
 		assertThat(unmatchedJane, is(not(samePersonAs(janePerson))));
 		assertThat(unmatchedJane, is(not(linkedTo(originalJane))));
@@ -100,14 +97,14 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		//Now normally, when we run update links, it should link to janePerson. However, this manual NO_MATCH link
 		//should cause a whole new Person to be created.
-		myEmpiMatchLinkSvc.updateEmpiLinksForPatient(unmatchedPatient);
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(unmatchedPatient);
 
 		assertThat(unmatchedPatient, is(not(samePersonAs(janePerson))));
 		assertThat(unmatchedPatient, is(not(linkedTo(originalJane))));
 	}
 
 	@Test
-	public void testWhenPatientIsCreatedWithEIDThatItPropagatesToNewPersons() {
+	public void testWhenPatientIsCreatedWithEIDThatItPropagatesToNewPerson() {
 		String sampleEID = "sample-eid";
 		Patient janePatient = addExternalEID(buildJanePatient(), sampleEID);
 		janePatient = createPatientAndUpdateLinks(janePatient);
@@ -129,13 +126,13 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		Person person = getPersonFromEmpiLink(empiLink);
 		Identifier identifierFirstRep = person.getIdentifierFirstRep();
-		assertThat(identifierFirstRep.getSystem(), is(equalTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
-		assertThat(identifierFirstRep.getValue(), is(notNullValue()));
+		assertThat(identifierFirstRep.getSystem(), is(equalTo(Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
+		assertThat(identifierFirstRep.getValue(), not(blankOrNullString()));
 	}
 
 	@Test
 	public void testPatientAttributesAreCopiedOverWhenPersonIsCreatedFromPatient() {
-		Patient patient = createPatientAndUpdateLinks(buildPatientWithNameIdAndBirthday("Gary", "GARY_ID", new Date()));;
+		Patient patient = createPatientAndUpdateLinks(buildPatientWithNameIdAndBirthday("Gary", "GARY_ID", new Date()));
 
 		Optional<EmpiLink> empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(patient.getIdElement().getIdPartAsLong());
 		Person read = getPersonFromEmpiLink(empiLink.get());
@@ -178,7 +175,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		//The collision should have kept the old identifier
 		Identifier firstIdentifier = identifier.get(0);
-		assertThat(firstIdentifier.getSystem(), is(equalTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
+		assertThat(firstIdentifier.getSystem(), is(equalTo(Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
 		assertThat(firstIdentifier.getValue(), is(equalTo(foundHapiEid)));
 
 		//The collision should have added a new identifier with the external system.
@@ -210,21 +207,94 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		List<EmpiLink> possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));
 
-		Person person1 = getPersonFromResource(patient1);
-		Person person2 = getPersonFromResource(patient2);
-		List<Long> duplicatePids = Arrays.asList(myResourceTableHelper.getPidOrNull(person1), myResourceTableHelper.getPidOrNull(person2));
 
-		assertThat(possibleDuplicates.get(0).getPersonPid(), is(in(duplicatePids)));
-		assertThat(possibleDuplicates.get(0).getTargetPid(), is(in(duplicatePids)));
+		List<Long> duplicatePids = Stream.of(patient1, patient2)
+			.map(this::getPersonFromResource)
+			.map(myResourceTableHelper::getPidOrNull)
+			.collect(Collectors.toList());
+
+		//The two Persons related to the patients should both show up in the only existing POSSIBLE_DUPLICATE EmpiLink.
+		EmpiLink empiLink = possibleDuplicates.get(0);
+		assertThat(empiLink.getPersonPid(), is(in(duplicatePids)));
+		assertThat(empiLink.getTargetPid(), is(in(duplicatePids)));
 	}
 
 	@Test
 	public void testPatientWithNoEmpiTagIsNotMatched() {
 		// Patient with "no-empi" tag is not matched
 		Patient janePatient = buildJanePatient();
-		janePatient.getMeta().addTag(SYSTEM_EMPI_MANAGED, CODE_NO_EMPI_MANAGED, "Don't EMPI on me!");
+		janePatient.getMeta().addTag(Constants.SYSTEM_EMPI_MANAGED, Constants.CODE_NO_EMPI_MANAGED, "Don't EMPI on me!");
 		createPatientAndUpdateLinks(janePatient);
 		assertLinkCount(0);
 	}
+
+	@Test
+	public void testPractitionersDoNotMatchToPatients() {
+		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
+		Practitioner janePractitioner = createPractitionerAndUpdateLinks(buildJanePractitioner());
+
+		assertLinkCount(2);
+		assertThat(janePatient, is(not(samePersonAs(janePractitioner))));
+	}
+
+	@Test
+	public void testPractitionersThatMatchShouldLink() {
+		Practitioner janePractitioner = createPractitionerAndUpdateLinks(buildJanePractitioner());
+		Practitioner anotherJanePractitioner = createPractitionerAndUpdateLinks(buildJanePractitioner());
+
+		assertLinkCount(2);
+		assertThat(anotherJanePractitioner, is(samePersonAs(janePractitioner)));
+	}
+
+	@Test
+	public void testCase1(){
+		/**
+		 * CASE 1: No MATCHED and no PROBABLE_MATCHED outcomes -> a new Person resource
+		 * is created and linked to that Pat/Prac. All fields are copied from the Pat/Prac to the Person.
+		 * If the incoming resource has an EID, it is copied to the Person. Otherwise a new unique uuid is created and used as the EID.
+		 */
+		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
+		assertLinkCount(1);
+		Person person = getPersonFromResource(janePatient);
+		assertThat(janePatient, is(linkedTo(person)));
+	}
+
+	@Test
+	public void testCase2(){
+		/**
+		 * CASE 2: All of the MATCHED Pat/Prac resources are already linked to the same Person ->
+		 * a new Link is created between the new Pat/Prac and that Person and is set to MATCHED.
+		 */
+		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
+		Patient janePatient2 = createPatientAndUpdateLinks(buildJanePatient());
+
+		assertLinkCount(2);
+		assertThat(janePatient, is(samePersonAs(janePatient2)));
+
+		Patient incomingJanePatient = createPatientAndUpdateLinks(buildJanePatient());
+		Person personFromResource = getPersonFromResource(incomingJanePatient);
+		assertThat(personFromResource, is(notNullValue()));
+		assertThat(incomingJanePatient, is(samePersonAs(janePatient)));
+		assertThat(incomingJanePatient, is(samePersonAs(janePatient2)));
+	}
+
+	@Test
+	public void testCase3(){
+		/**
+		 * CASE 3: The MATCHED Pat/Prac resources link to more than one Person -> Mark all links as PROBABLE_MATCHED.
+		 * All other Person resources are marked as POSSIBLE_DUPLICATE of this first Person.
+		 * These duplicates are manually reviewed later and either merged or marked as NO_MATCH
+		 * and the system will no longer consider them as a POSSIBLE_DUPLICATE going forward.
+		 */
+
+	}
+	@Test
+	public void testCase4(){
+		/**
+		 * CASE 4: Only PROBABLE_MATCH outcomes -> In this case, empi-link records are created with PROBABLE_MATCH
+		 * outcome and await manual assignment to either NO_MATCH or MATCHED. Person resources are not changed.
+		 */
+	}
+
 
 }
