@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.util.TolerantJsonParser;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
@@ -850,8 +851,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// 4. parse the text to FHIR
 		R retVal;
 		if (resourceEncoding != ResourceEncodingEnum.DEL) {
-			IParser parser = resourceEncoding.newParser(getContext(theEntity.getFhirVersion()));
-			parser.setParserErrorHandler(new LenientErrorHandler(false).setErrorOnInvalidValue(false));
+
+			LenientErrorHandler errorHandler = new LenientErrorHandler(false).setErrorOnInvalidValue(false);
+			IParser parser = new TolerantJsonParser(getContext(theEntity.getFhirVersion()), errorHandler);
 
 			try {
 				retVal = parser.parseResource(resourceType, resourceText);
