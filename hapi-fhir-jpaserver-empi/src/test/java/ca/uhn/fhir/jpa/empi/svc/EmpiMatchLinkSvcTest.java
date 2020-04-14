@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import info.debatty.java.stringsimilarity.Jaccard;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -248,21 +249,52 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testCase1(){
-
+		/**
+		 * CASE 1: No MATCHED and no PROBABLE_MATCHED outcomes -> a new Person resource
+		 * is created and linked to that Pat/Prac. All fields are copied from the Pat/Prac to the Person.
+		 * If the incoming resource has an EID, it is copied to the Person. Otherwise a new unique uuid is created and used as the EID.
+		 */
+		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
+		assertLinkCount(1);
+		Person person = getPersonFromResource(janePatient);
+		assertThat(janePatient, is(linkedTo(person)));
 	}
 
 	@Test
 	public void testCase2(){
+		/**
+		 * CASE 2: All of the MATCHED Pat/Prac resources are already linked to the same Person ->
+		 * a new Link is created between the new Pat/Prac and that Person and is set to MATCHED.
+		 */
+		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
+		Patient janePatient2 = createPatientAndUpdateLinks(buildJanePatient());
 
+		assertLinkCount(2);
+		assertThat(janePatient, is(samePersonAs(janePatient2)));
+
+		Patient incomingJanePatient = createPatientAndUpdateLinks(buildJanePatient());
+		Person personFromResource = getPersonFromResource(incomingJanePatient);
+		assertThat(personFromResource, is(notNullValue()));
+		assertThat(incomingJanePatient, is(samePersonAs(janePatient)));
+		assertThat(incomingJanePatient, is(samePersonAs(janePatient2)));
 	}
 
 	@Test
 	public void testCase3(){
+		/**
+		 * CASE 3: The MATCHED Pat/Prac resources link to more than one Person -> Mark all links as PROBABLE_MATCHED.
+		 * All other Person resources are marked as POSSIBLE_DUPLICATE of this first Person.
+		 * These duplicates are manually reviewed later and either merged or marked as NO_MATCH
+		 * and the system will no longer consider them as a POSSIBLE_DUPLICATE going forward.
+		 */
 
 	}
 	@Test
 	public void testCase4(){
-
+		/**
+		 * CASE 4: Only PROBABLE_MATCH outcomes -> In this case, empi-link records are created with PROBABLE_MATCH
+		 * outcome and await manual assignment to either NO_MATCH or MATCHED. Person resources are not changed.
+		 */
 	}
 
 
