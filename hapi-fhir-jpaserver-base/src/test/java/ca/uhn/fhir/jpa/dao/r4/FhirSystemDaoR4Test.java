@@ -645,7 +645,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		runInTransaction(()->{
 			Long i = myEntityManager
-				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity IS null", Long.class)
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity IS nullhir", Long.class)
 				.getSingleResult();
 			assertEquals(0L, i.longValue());
 		});

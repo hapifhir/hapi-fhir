@@ -23,8 +23,8 @@ package ca.uhn.fhir.jpa.dao.index;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.searchparam.extractor.ResourceLinkExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -84,8 +83,6 @@ public class SearchParamWithInlineReferencesExtractor {
 	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
 	@Autowired
-	private ResourceLinkExtractor myResourceLinkExtractor;
-	@Autowired
 	private DaoResourceLinkResolver myDaoResourceLinkResolver;
 	@Autowired
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
@@ -96,18 +93,14 @@ public class SearchParamWithInlineReferencesExtractor {
 	protected EntityManager myEntityManager;
 
 	public void populateFromResource(ResourceIndexedSearchParams theParams, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
-		mySearchParamExtractorService.extractFromResource(theRequest, theParams, theEntity, theResource);
+		extractInlineReferences(theResource, theRequest);
+
+		mySearchParamExtractorService.extractFromResource(theRequest, theParams, theEntity, theResource, theUpdateTime, true);
 
 		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
 			theParams.findMissingSearchParams(myDaoConfig.getModelConfig(), theEntity, activeSearchParams);
 		}
-
-		theParams.setUpdatedTime(theUpdateTime);
-
-		extractInlineReferences(theResource, theRequest);
-
-		myResourceLinkExtractor.extractResourceLinks(theParams, theEntity, theResource, theUpdateTime, myDaoResourceLinkResolver, true, theRequest);
 
 		/*
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them

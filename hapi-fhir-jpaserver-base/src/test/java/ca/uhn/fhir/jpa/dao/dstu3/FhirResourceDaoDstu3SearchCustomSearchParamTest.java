@@ -1058,7 +1058,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
-	public void testContained() {
+	public void testProgramaticallyContainedByReferenceAreStillResolvable() {
 		String sp = "{" +
 			"\"resourceType\": \"SearchParameter\",\n" +
 			"  \"id\": \"medicationadministration-ingredient-medication\",\n" +
@@ -1086,14 +1086,9 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		MedicationAdministration medAdmin = new MedicationAdministration();
 		medAdmin.setMedication(new Reference(medication));
 
-//		IParser p = myFhirCtx.newJsonParser().setPrettyPrint(true);
-//		ourLog.info(p.encodeResourceToString(medAdmin));
-//		medAdmin = (MedicationAdministration) p.parseResource(p.encodeResourceToString(medAdmin));
-
 		myMedicationAdministrationDao.create(medAdmin);
 		
 		runInTransaction(()->{
-
 			List<ResourceIndexedSearchParamToken> tokens = myResourceIndexedSearchParamTokenDao
 				.findAll()
 				.stream()
@@ -1105,7 +1100,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		});
 
 		SearchParameterMap map = new SearchParameterMap();
-		map.add("medicationadministration-ingredient-medication", new TokenParam("urn:hssc:srhs:ads:medicationcode","01549"));
+		map.add("medicationadministration-ingredient-medication", new TokenParam("system","code"));
 		assertEquals(1, myMedicationAdministrationDao.search(map).size().intValue());
 
 	}
