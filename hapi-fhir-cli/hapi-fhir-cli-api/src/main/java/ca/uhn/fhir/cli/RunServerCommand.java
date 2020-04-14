@@ -20,7 +20,6 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.demo.*;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.demo.ContextHolder;

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.lastn.config.TestIntegratedObservationIndexSearchConfig;
 import ca.uhn.fhir.jpa.dao.data.IObservationIndexedCodeCodeableConceptSearchParamDao;
 import ca.uhn.fhir.jpa.dao.data.IObservationIndexedSearchParamLastNDao;

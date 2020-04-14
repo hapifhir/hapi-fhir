@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoObservation;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;

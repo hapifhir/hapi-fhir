@@ -122,6 +122,7 @@ public class JpaServerDemo extends RestfulServer {
 					myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
+
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
 			IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, org.hl7.fhir.dstu3.model.Meta> systemDao = myAppCtx
 					.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
