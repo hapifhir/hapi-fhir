@@ -163,7 +163,7 @@ public class SubscriptionLoader {
 		}
 		return retval;
 	}
-// FIXME KHS remove
+// FIXME KHS remove ?
 	public void addInternalSubscriptionSupplier(Supplier<Collection<IBaseResource>> theInternalSubscriptionSupplier) {
 		myInternalSubscriptionSuppliers.add(theInternalSubscriptionSupplier);
 	}
