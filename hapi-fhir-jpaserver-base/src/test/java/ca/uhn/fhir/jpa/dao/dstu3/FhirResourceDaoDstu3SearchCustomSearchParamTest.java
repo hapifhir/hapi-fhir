@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -20,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -1053,6 +1056,60 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		assertThat(foundResources, contains(patId.getValue()));
 
 	}
+
+	@Test
+	public void testContained() {
+		String sp = "{" +
+			"\"resourceType\": \"SearchParameter\",\n" +
+			"  \"id\": \"medicationadministration-ingredient-medication\",\n" +
+			"  \"url\": \"http://hapifhir.io/fhir/StructureDefinition/sp-unique\",\n" +
+			"  \"name\": \"MEDICATIONADMINISTRATION-INGREDIENT-MEDICATION\",\n" +
+			"  \"status\": \"active\",\n" +
+			"  \"code\": \"medicationadministration-ingredient-medication\",\n" +
+			"  \"base\": [\n" +
+			"    \"MedicationAdministration\"\n" +
+			"  ],\n" +
+			"  \"type\": \"token\",\n" +
+			"  \"description\": \"This search parameter is used to find a MedicationAdministration by contained medication\",\n" +
+			"  \"expression\": \"MedicationAdministration.medication.resolve().ingredient.item.as(Reference).resolve().code\",\n" +
+			"  \"xpathUsage\": \"normal\"\n" +
+			"}\n";
+		mySearchParameterDao.create(myFhirCtx.newJsonParser().parseResource(SearchParameter.class, sp));
+		mySearchParamRegistry.forceRefresh();
+
+		Medication ingredient = new Medication();
+		ingredient.getCode().addCoding().setSystem("system").setCode("code");
+
+		Medication medication = new Medication();
+		medication.addIngredient().setItem(new Reference(ingredient));
+
+		MedicationAdministration medAdmin = new MedicationAdministration();
+		medAdmin.setMedication(new Reference(medication));
+
+//		IParser p = myFhirCtx.newJsonParser().setPrettyPrint(true);
+//		ourLog.info(p.encodeResourceToString(medAdmin));
+//		medAdmin = (MedicationAdministration) p.parseResource(p.encodeResourceToString(medAdmin));
+
+		myMedicationAdministrationDao.create(medAdmin);
+		
+		runInTransaction(()->{
+
+			List<ResourceIndexedSearchParamToken> tokens = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().equals("medicationadministration-ingredient-medication"))
+				.collect(Collectors.toList());
+			ourLog.info("Tokens: {}", tokens);
+			assertEquals(tokens.toString(), 1, tokens.size());
+
+		});
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("medicationadministration-ingredient-medication", new TokenParam("urn:hssc:srhs:ads:medicationcode","01549"));
+		assertEquals(1, myMedicationAdministrationDao.search(map).size().intValue());
+
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {
