@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.channel.config;
 
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,8 +39,16 @@ public class SubscriptionChannelConfig {
 	}
 
 	@Bean
-	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelFactory theQueueChannelFactory) {
-		return new SubscriptionChannelFactory(theQueueChannelFactory);
+	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelNamer theChannelNamer, IChannelFactory theQueueChannelFactory) {
+		return new SubscriptionChannelFactory(theQueueChannelFactory, theChannelNamer);
 	}
 
+	/**
+	 * Create a @Primary @Bean if you need a different implementation
+	 */
+	@Bean
+	// Default implementation returns the name unchanged
+	public IChannelNamer channelNamer() {
+		return theNameComponent -> theNameComponent;
+	}
 }

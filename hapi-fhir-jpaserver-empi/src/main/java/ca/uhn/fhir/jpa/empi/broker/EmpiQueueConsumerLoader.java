@@ -49,7 +49,7 @@ public class EmpiQueueConsumerLoader {
 	@PostConstruct
 	public void init() {
 		if (myEmpiChannel == null) {
-			myEmpiChannel = mySubscriptionChannelFactory.newMatchingReceivingChannel(IEmpiConfig.EMPI_MATCHING_CHANNEL_NAME, null);
+			myEmpiChannel = mySubscriptionChannelFactory.newDeliveryReceivingChannel(IEmpiConfig.EMPI_MATCHING_CHANNEL_NAME, null);
 		}
 		if (myEmpiChannel != null) {
 			myEmpiChannel.subscribe(myEmpiConsumer);

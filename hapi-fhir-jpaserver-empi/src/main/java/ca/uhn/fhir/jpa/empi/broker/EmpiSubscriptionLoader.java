@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.empi.broker;
 
 import ca.uhn.fhir.empi.api.IEmpiConfig;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.rest.api.Constants;
@@ -21,6 +22,8 @@ public class EmpiSubscriptionLoader {
 	public SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	DaoConfig myDaoConfig;
+	@Autowired
+	IChannelNamer myChannelNamer;
 
 	public void registerEmpiSubscriptions() {
 		// FIXME KHS works without ? ?
@@ -41,7 +44,7 @@ public class EmpiSubscriptionLoader {
 		retval.getMeta().addTag().setSystem(Constants.SYSTEM_EMPI_MANAGED).setCode(Constants.CODE_HAPI_EMPI_MANAGED);
 		Subscription.SubscriptionChannelComponent channel = retval.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
-		channel.setEndpoint("jms:queue:"+ IEmpiConfig.EMPI_MATCHING_CHANNEL_NAME);
+		channel.setEndpoint("jms:queue:"+ myChannelNamer.getChannelName(IEmpiConfig.EMPI_MATCHING_CHANNEL_NAME));
 		channel.setPayload("application/json");
 		return retval;
 	}
