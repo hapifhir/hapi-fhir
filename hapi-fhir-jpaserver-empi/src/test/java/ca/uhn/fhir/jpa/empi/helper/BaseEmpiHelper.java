@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -56,6 +57,8 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 	EmpiQueueConsumerLoader myEmpiQueueConsumerLoader;
 	@Autowired
 	SubscriptionRegistry mySubscriptionRegistry;
+	@Autowired
+	SubscriptionLoader mySubscriptionLoader;
 
 	protected PointcutLatch myAfterEmpiLatch = new PointcutLatch(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED);
 
@@ -75,7 +78,7 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 		waitForActivatedSubscriptionCount(2);
 	}
 
-	protected void waitForActivatedSubscriptionCount(int theSize) throws Exception {
+	protected void waitForActivatedSubscriptionCount(int theSize) {
 		await("Active Subscription Count has reached " + theSize).until(() -> mySubscriptionRegistry.size() >= theSize);
 	}
 

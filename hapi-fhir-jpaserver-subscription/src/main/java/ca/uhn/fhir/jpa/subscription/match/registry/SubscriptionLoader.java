@@ -39,10 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.function.Supplier;
 
@@ -140,7 +137,7 @@ public class SubscriptionLoader {
 			}
 
 			List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionCount);
-			addInternalSubscriptions(resourceList);
+			resourceList.addAll(addInternalSubscriptions());
 			Set<String> allIds = new HashSet<>();
 			int changesCount = 0;
 			for (IBaseResource resource : resourceList) {
@@ -159,12 +156,14 @@ public class SubscriptionLoader {
 		}
 	}
 
-	private void addInternalSubscriptions(List<IBaseResource> theResourceList) {
+	private List<IBaseResource> addInternalSubscriptions() {
+		List<IBaseResource> retval = new ArrayList<>();
 		for (Supplier<Collection<IBaseResource>> supplier : myInternalSubscriptionSuppliers) {
-			theResourceList.addAll(supplier.get());
+			retval.addAll(supplier.get());
 		}
+		return retval;
 	}
-
+// FIXME KHS remove
 	public void addInternalSubscriptionSupplier(Supplier<Collection<IBaseResource>> theInternalSubscriptionSupplier) {
 		myInternalSubscriptionSuppliers.add(theInternalSubscriptionSupplier);
 	}
