@@ -1,6 +1,7 @@
 package ca.uhn.fhir.empi.util;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.Constants;
 import ca.uhn.fhir.empi.api.IEmpiConfig;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -10,8 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
-
-import static ca.uhn.fhir.rest.api.Constants.*;
 
 @Lazy
 @Service
@@ -29,7 +28,7 @@ public final class EIDHelper {
 
 	public CanonicalEID createInternalEid() {
 		return new CanonicalEID(
-			HAPI_ENTERPRISE_IDENTIFIER_SYSTEM,
+			Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM,
 			UUID.randomUUID().toString(),
 			"secondary"
 		);
@@ -40,7 +39,7 @@ public final class EIDHelper {
 	}
 
 	public Optional<CanonicalEID> getHapiEid(IBaseResource theResource) {
-		return CanonicalEID.extractFromResource(myFhirContext, HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, theResource);
+		return CanonicalEID.extractFromResource(myFhirContext, Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, theResource);
 	}
 
 }

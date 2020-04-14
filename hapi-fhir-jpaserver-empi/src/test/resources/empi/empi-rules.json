@@ -3,30 +3,30 @@
 		"resourceType" : "Patient",
 		"searchParam" : "birthdate"
 	}, {
-		"resourceType" : "Patient",
+		"resourceType" : "All",
 		"searchParam" : "identifier"
 	} ],
 	"filterSearchParams" : [ {
-		"resourceType" : "Patient",
+		"resourceType" : "All",
 		"searchParam" : "active",
 		"fixedValue" : "true"
 	} ],
 	"matchFields" : [ {
-		"name" : "patient-given",
-		"resourceType" : "Patient",
+		"name" : "given-name",
+		"resourceType" : "All",
 		"resourcePath" : "name.given",
 		"metric" : "COSINE",
 		"matchThreshold" : 0.8
 	}, {
-		"name" : "patient-last",
-		"resourceType" : "Patient",
+		"name" : "last-name",
+		"resourceType" : "All",
 		"resourcePath" : "name.family",
 		"metric" : "JARO_WINKLER",
 		"matchThreshold" : 0.8
 	}],
 	"weightMap" : {
-		"patient-given" : "POSSIBLE_MATCH",
-		"patient-given,patient-last" : "MATCH"
+		"given-name" : "POSSIBLE_MATCH",
+		"given-name,last-name" : "MATCH"
 	},
 	"eidSystem": "http://company.io/fhir/NamingSystem/custom-eid-system"
 }

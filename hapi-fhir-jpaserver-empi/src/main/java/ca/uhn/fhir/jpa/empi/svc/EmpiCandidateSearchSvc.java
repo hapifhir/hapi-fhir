@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.empi.api.Constants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Lazy
@@ -63,7 +64,7 @@ public class EmpiCandidateSearchSvc {
 
 		for (EmpiResourceSearchParamJson resourceSearchParam : myEmpiConfig.getEmpiRules().getResourceSearchParams()) {
 
-			if (!resourceSearchParam.getResourceType().equals(theResourceType)) {
+			if (!isSearchParamForResource(theResourceType, resourceSearchParam)) {
 				continue;
 			}
 
@@ -83,6 +84,11 @@ public class EmpiCandidateSearchSvc {
 		}
 
 		return matchedPidsToResources.values();
+	}
+
+	private boolean isSearchParamForResource(String theResourceType, EmpiResourceSearchParamJson resourceSearchParam) {
+		String resourceType = resourceSearchParam.getResourceType();
+		return resourceType.equals(theResourceType) || resourceType.equalsIgnoreCase(ALL_RESOURCE_SEARCH_PARAM_TYPE);
 	}
 
 	/*
@@ -128,7 +134,8 @@ public class EmpiCandidateSearchSvc {
 	}
 
 	private List<String> getValueFromResourceForSearchParam(IBaseResource theResource, EmpiResourceSearchParamJson theFilterSearchParam) {
-		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(theFilterSearchParam.getResourceType(), theFilterSearchParam.getSearchParam());
+		String resourceType = myFhirContext.getResourceDefinition(theResource).getName();
+		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(resourceType, theFilterSearchParam.getSearchParam());
 		return mySearchParamExtractorService.extractParamValuesAsStrings(activeSearchParam, theResource);
 	}
 
@@ -144,7 +151,7 @@ public class EmpiCandidateSearchSvc {
 	}
 
 	private boolean paramIsOnCorrectType(String theResourceType, EmpiFilterSearchParamJson spFilterJson) {
-		return spFilterJson.getResourceType().equals(theResourceType);
+		return spFilterJson.getResourceType().equals(theResourceType) || spFilterJson.getResourceType().equalsIgnoreCase(ALL_RESOURCE_SEARCH_PARAM_TYPE);
 	}
 
 	private String convertToQueryString(EmpiFilterSearchParamJson theSpFilterJson) {

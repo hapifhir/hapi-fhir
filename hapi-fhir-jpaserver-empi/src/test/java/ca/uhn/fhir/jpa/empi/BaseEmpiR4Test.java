@@ -23,10 +23,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.ContactPoint;
-import org.hl7.fhir.r4.model.DateType;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
+import org.hl7.fhir.r4.model.*;
 import org.junit.After;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -61,6 +58,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected IFhirResourceDao<Person> myPersonDao;
 	@Autowired
 	protected IFhirResourceDao<Patient> myPatientDao;
+	@Autowired
+	protected IFhirResourceDao<Practitioner> myPractitionerDao;
 	@Autowired
 	protected EmpiResourceComparatorSvc myEmpiResourceComparatorSvc;
 	@Autowired
@@ -116,6 +115,11 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	@Nonnull
+	protected Practitioner buildPractitionerWithNameAndId(String theGivenName, String theId) {
+		return buildPractitionerWithNameIdAndBirthday(theGivenName, theId, null);
+	}
+
+	@Nonnull
 	protected Person buildPersonWithNameAndId(String theGivenName, String theId) {
 		return buildPersonWithNameIdAndBirthday(theGivenName, theId, null);
 	}
@@ -135,6 +139,20 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	@Nonnull
+	protected Practitioner buildPractitionerWithNameIdAndBirthday(String theGivenName, String theId, Date theBirthday) {
+		Practitioner practitioner = new Practitioner();
+		practitioner.addName().addGiven(theGivenName);
+		practitioner.addName().setFamily(TEST_NAME_FAMILY);
+		practitioner.addIdentifier().setSystem(TEST_ID_SYSTEM).setValue(theId);
+		practitioner.setBirthDate(theBirthday);
+		practitioner.setTelecom(Collections.singletonList(TEST_TELECOM));
+		DateType dateType = new DateType(theBirthday);
+		dateType.setPrecision(TemporalPrecisionEnum.DAY);
+		practitioner.setBirthDateElement(dateType);
+		return practitioner;
+	}
+
+	@Nonnull
 	protected Person buildPersonWithNameIdAndBirthday(String theGivenName, String theId, Date theBirthday) {
 		Person person = new Person();
 		person.addName().addGiven(theGivenName);
@@ -150,6 +168,11 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Nonnull
 	protected Patient buildJanePatient() {
 		return buildPatientWithNameAndId(NAME_GIVEN_JANE, JANE_ID);
+	}
+
+	@Nonnull
+	protected Practitioner buildJanePractitioner() {
+		return buildPractitionerWithNameAndId(NAME_GIVEN_JANE, JANE_ID);
 	}
 
 	@Nonnull
@@ -313,7 +336,15 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		thePatient.setActive(true);
 		DaoMethodOutcome daoMethodOutcome = myPatientDao.create(thePatient);
 		thePatient.setId(daoMethodOutcome.getId());
-		myEmpiMatchLinkSvc.updateEmpiLinksForPatient(thePatient);
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient);
 		return thePatient;
+	}
+
+	protected Practitioner createPractitionerAndUpdateLinks(Practitioner thePractitioner) {
+		thePractitioner.setActive(true);
+		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(thePractitioner);
+		thePractitioner.setId(daoMethodOutcome.getId());
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePractitioner);
+		return thePractitioner;
 	}
 }

@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.Constants;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -63,7 +63,7 @@ public class EmpiInterceptor {
 	 * @return a boolean indicating whether or not EMPI manages this Person.
 	 */
 	private boolean isEmpiManaged(IBaseResource theBaseResource) {
-		return theBaseResource.getMeta().getTag(Constants.SYSTEM_EMPI_MANAGED, Constants.CODE_HAPI_EMPI_MANAGED) != null;
+		return theBaseResource.getMeta().getTag(ca.uhn.fhir.empi.api.Constants.SYSTEM_EMPI_MANAGED, ca.uhn.fhir.empi.api.Constants.CODE_HAPI_EMPI_MANAGED) != null;
 	}
 
 	/*
@@ -76,7 +76,7 @@ public class EmpiInterceptor {
 
 	private void forbidIfEmpiManagedTagIsPresent(IBaseResource theResource) {
 		if (extractResourceType(theResource).equalsIgnoreCase("Person")) {
-			if (theResource.getMeta().getTag(Constants.SYSTEM_EMPI_MANAGED, Constants.CODE_HAPI_EMPI_MANAGED) != null) {
+			if (theResource.getMeta().getTag(ca.uhn.fhir.empi.api.Constants.SYSTEM_EMPI_MANAGED, Constants.CODE_HAPI_EMPI_MANAGED) != null) {
 				throwModificationBlockedByEmpi();
 			}
 		}

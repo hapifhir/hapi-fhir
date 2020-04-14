@@ -30,7 +30,14 @@ public class EmpiMatchLinkSvc {
 	@Autowired
 	private EIDHelper myEIDHelper;
 
-	public void updateEmpiLinksForPatient(IBaseResource theResource) {
+	/**
+	 * Given an Empi Target (consisting of either a Patient or a Practitioner), find a suitable Person candidate for them,
+	 * or create one if one does not exist. Performs matching based on rules defined in empi-rules.json.
+	 * Does nothing if resource is determined to be not managed by EMPI.
+	 *
+	 * @param theResource the incoming EMPI target, which is either a Patient or Practitioner.
+	 */
+	public void updateEmpiLinksForEmpiTarget(IBaseResource theResource) {
 		if (EmpiUtil.isManagedByEmpi(theResource)) {
 			doEmpiUpdate(theResource);
 		}
@@ -41,7 +48,7 @@ public class EmpiMatchLinkSvc {
 
 		//0 candidates, in which case you should create a person
 		if (personCandidates.isEmpty()) {
-			IBaseResource newPerson = myPersonHelper.createPersonFromPatientOrPractitioner(theResource);
+			IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
 			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
 		//1 candidate, in which case you should use it
 		} else if (personCandidates.size() == 1) {
@@ -49,7 +56,7 @@ public class EmpiMatchLinkSvc {
 			ResourcePersistentId personPid = matchedPersonCandidate.getCandidatePersonPid();
 			IBaseResource person = myEmpiResourceDaoSvc.readPersonByPid(personPid);
 			if (myPersonHelper.isPotentialDuplicate(person, theResource)) {
-				IBaseResource newPerson = myPersonHelper.createPersonFromPatientOrPractitioner(theResource);
+				IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
 				myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
 				myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO);
 			} else {
@@ -65,7 +72,7 @@ public class EmpiMatchLinkSvc {
 	private void handleEidOverwrite(IBaseResource thePerson, IBaseResource theResource) {
 		Optional<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theResource);
 		if (eidFromResource.isPresent()) {
-			myPersonHelper.updatePersonFromPatient(thePerson, theResource);
+			myPersonHelper.updatePersonFromEmpiTarget(thePerson, theResource);
 		}
 	}
 }

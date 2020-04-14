@@ -76,6 +76,6 @@ public class EmpiConsumer implements MessageHandler {
 	}
 
 	private void handleCreatePatientOrPractitioner(ResourceModifiedMessage theMsg) {
-		myEmpiMatchLinkSvc.updateEmpiLinksForPatient(theMsg.getNewPayload(myFhirContext));
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theMsg.getNewPayload(myFhirContext));
 	}
 }

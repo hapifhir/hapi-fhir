@@ -1,6 +1,7 @@
 package ca.uhn.fhir.empi.util;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.Constants;
 import ca.uhn.fhir.empi.api.IEmpiConfig;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -15,10 +16,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.rest.api.Constants.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Lazy
@@ -91,7 +90,7 @@ public final class PersonHelper {
 	 * @param theSourceResource The Patient that will be used as the starting point for the person.
 	 * @return the Person that is created.
 	 */
-	public IBaseResource createPersonFromPatientOrPractitioner(IBaseResource theSourceResource) {
+	public IBaseResource createPersonFromEmpiTarget(IBaseResource theSourceResource) {
 		String eidSystem = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
@@ -145,27 +144,27 @@ public final class PersonHelper {
 
 	private Coding buildEmpiManagedTag() {
 		Coding empiManagedCoding = new Coding();
-		empiManagedCoding.setSystem(SYSTEM_EMPI_MANAGED);
-		empiManagedCoding.setCode(CODE_HAPI_EMPI_MANAGED);
+		empiManagedCoding.setSystem(Constants.SYSTEM_EMPI_MANAGED);
+		empiManagedCoding.setCode(Constants.CODE_HAPI_EMPI_MANAGED);
 		empiManagedCoding.setDisplay("This Person can only be modified by Smile CDR's EMPI system.");
 		return empiManagedCoding;
 	}
 
-	public IBaseResource updatePersonFromPatient(IBaseResource thePerson, IBaseResource thePatient) {
+	public IBaseResource updatePersonFromEmpiTarget(IBaseResource thePerson, IBaseResource theEmpiTarget) {
 		//This handles overwriting an automatically assigned EID if a patient that links is coming in with an official EID.
 		Person person = ((Person)thePerson);
-		Optional<CanonicalEID> incomingPatientEid = myEIDHelper.getExternalEid(thePatient);
+		Optional<CanonicalEID> incomingTargetEid = myEIDHelper.getExternalEid(theEmpiTarget);
 		Optional<CanonicalEID> personOfficialEid = myEIDHelper.getExternalEid(thePerson);
 
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				if (incomingPatientEid.isPresent()) {
+				if (incomingTargetEid.isPresent()) {
 					//The person has no EID. This should be impossible given that we auto-assign an EID at creation time.
 					if (!personOfficialEid.isPresent()) {
-						ourLog.debug("Incoming patient with EID {} is applying this EID to its related Person, as this person does not yet have an external EID", incomingPatientEid.get().getValue());
-						person.addIdentifier(incomingPatientEid.get().toR4());
-					} else if (personOfficialEid.isPresent() && eidsMatch(personOfficialEid, incomingPatientEid)){
-						ourLog.debug("incoming patient with EID {} does not need to overwrite person, as this EID is already present", incomingPatientEid.get().getValue());
+						ourLog.debug("Incoming patient/practitioner with EID {} is applying this EID to its related Person, as this person does not yet have an external EID", incomingTargetEid.get().getValue());
+						person.addIdentifier(incomingTargetEid.get().toR4());
+					} else if (personOfficialEid.isPresent() && eidsMatch(personOfficialEid, incomingTargetEid)){
+						ourLog.debug("incoming patient/practitioner with EID {} does not need to overwrite person, as this EID is already present", incomingTargetEid.get().getValue());
 					} else {
 						throw new IllegalArgumentException("This would create a duplicate person!");
 					}

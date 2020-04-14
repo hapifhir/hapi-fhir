@@ -11,9 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
-import static ca.uhn.fhir.rest.api.Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static ca.uhn.fhir.empi.api.Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 
@@ -54,7 +53,7 @@ public class EIDHelperTest extends BaseEmpiR4Test {
 		assertThat(externalEid.isPresent(), is(true));
 		assertThat(externalEid.get().getValue(), is(equalTo(uniqueID)));
 		assertThat(externalEid.get().getSystem(), is(equalTo(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())));
-		assertThat(externalEid.get().getUse(), is(equalTo("official")));
+		assertThat(externalEid.get().getUse(), is(nullValue()));
 	}
 
 	@Test
@@ -64,7 +63,7 @@ public class EIDHelperTest extends BaseEmpiR4Test {
 
 		assertThat(internalEid.getSystem(), is(equalTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
 		assertThat(internalEid.getValue().length(), is(equalTo(36)));
-		assertThat(internalEid.getUse(), is(equalTo("secondary")));
+		assertThat(internalEid.getUse(), is(nullValue()));
 	}
 
 }
