@@ -167,7 +167,6 @@ public class EmpiPersonFindingSvc {
 		} else {
 			return Optional.of(matchedPersons);
 		}
-
 	}
 
 	private List<Long> getNoMatchPersonPids(IBaseResource theBaseResource) {

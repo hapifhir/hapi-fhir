@@ -156,7 +156,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(janePatient, is(samePersonAs(sameJanePatient)));
 	}
 
-
 	@Test
 	public void testIncomingPatientWithEIDThatMatchesPersonWithHapiEidAddsExternalEidToPerson(){
 		// Existing Person with system-assigned EID found linked from matched Patient.  incoming Patient has EID.  Replace Person system-assigned EID with Patient EID.
@@ -277,6 +276,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Patient incomingJanePatient = createPatientAndUpdateLinks(buildJanePatient());
 		assertThat(incomingJanePatient, is(samePersonAs(janePatient)));
 		assertThat(incomingJanePatient, is(samePersonAs(janePatient2)));
+
+		assertThat(incomingJanePatient, is(linkedTo(janePatient, janePatient2)));
 	}
 
 	@Test
@@ -294,12 +295,17 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are their
 		//own individual Persons for the purpose of this test.
 		IBaseResource person = myPersonHelper.createPersonFromEmpiTarget(janePatient2);
-		person.getMeta().addTag().setSystem("ASDASDASD").setCode("ASDASDASD");
 		myEmpiLinkSvc.updateLink(person, janePatient2, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
 		assertThat(janePatient, is(not(samePersonAs(janePatient2))));
 
 		//In theory, this will match both Persons!
 		Patient incomingJanePatient = createPatientAndUpdateLinks(buildJanePatient());
+
+		//There should now be a single POSSIBLE_DUPLICATE link with
+		assertThat(janePatient, is(possibleDuplicateOf(janePatient2)));
+
+		//There should now be 2 POSSIBLE_MATCH links with this person.
+		assertThat(incomingJanePatient, is(possibleMatchWith(janePatient, janePatient2)));
 
 	}
 	@Test

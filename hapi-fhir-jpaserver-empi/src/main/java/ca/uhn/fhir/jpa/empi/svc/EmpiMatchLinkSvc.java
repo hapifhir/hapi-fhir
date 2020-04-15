@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Lazy
 @Service
@@ -63,11 +64,19 @@ public class EmpiMatchLinkSvc {
 		if (allSamePerson) {
 			handleEmpiWithSingleCandidate(theResource, thePersonCandidates);
 		} else {
-			// FIXME GGG this didn't compile:
-//			thePersonCandidates.stream().forEach();
-//			myEmpiLinkSvc.updateLink(person, theResource, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO);
 
-			throw new InternalErrorException("Error during EMPI matching, more than 1 full match occurred.");
+			//Set them all as POSSIBLE_MATCH
+			List<IBaseResource> persons = thePersonCandidates.stream().map(mpc -> getPersonFromMatchedPersonCandidate(mpc)).collect(Collectors.toList());
+				persons.forEach(person -> {
+					myEmpiLinkSvc.updateLink(person, theResource, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO);
+				});
+
+			//Set all Persons as POSSIBLE_DUPLICATE of the first person.
+			IBaseResource samplePerson = persons.get(0);
+			persons.subList(1, persons.size()).stream()
+				.forEach(possibleDuplicatePerson -> {
+					myEmpiLinkSvc.updateLink(samplePerson, possibleDuplicatePerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO);
+				});
 		}
 	}
 
@@ -78,8 +87,7 @@ public class EmpiMatchLinkSvc {
 
 	private void handleEmpiWithSingleCandidate(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates) {
 		MatchedPersonCandidate matchedPersonCandidate = thePersonCandidates.get(0);
-		ResourcePersistentId personPid = matchedPersonCandidate.getCandidatePersonPid();
-		IBaseResource person = myEmpiResourceDaoSvc.readPersonByPid(personPid);
+		IBaseResource person = getPersonFromMatchedPersonCandidate(matchedPersonCandidate);
 		if (myPersonHelper.isPotentialDuplicate(person, theResource)) {
 			IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
 			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
@@ -88,6 +96,11 @@ public class EmpiMatchLinkSvc {
 			handleEidOverwrite(person, theResource);
 			myEmpiLinkSvc.updateLink(person, theResource, matchedPersonCandidate.getEmpiLink().getMatchResult(), EmpiLinkSourceEnum.AUTO);
 		}
+	}
+
+	private IBaseResource getPersonFromMatchedPersonCandidate(MatchedPersonCandidate theMatchedPersonCandidate) {
+		ResourcePersistentId personPid = theMatchedPersonCandidate.getCandidatePersonPid();
+		return myEmpiResourceDaoSvc.readPersonByPid(personPid);
 	}
 
 	private void handleEidOverwrite(IBaseResource thePerson, IBaseResource theResource) {
