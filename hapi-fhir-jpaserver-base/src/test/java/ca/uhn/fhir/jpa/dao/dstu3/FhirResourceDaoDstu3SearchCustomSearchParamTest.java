@@ -1059,22 +1059,15 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 
 	@Test
 	public void testProgramaticallyContainedByReferenceAreStillResolvable() {
-		String sp = "{" +
-			"\"resourceType\": \"SearchParameter\",\n" +
-			"  \"id\": \"medicationadministration-ingredient-medication\",\n" +
-			"  \"url\": \"http://hapifhir.io/fhir/StructureDefinition/sp-unique\",\n" +
-			"  \"name\": \"MEDICATIONADMINISTRATION-INGREDIENT-MEDICATION\",\n" +
-			"  \"status\": \"active\",\n" +
-			"  \"code\": \"medicationadministration-ingredient-medication\",\n" +
-			"  \"base\": [\n" +
-			"    \"MedicationAdministration\"\n" +
-			"  ],\n" +
-			"  \"type\": \"token\",\n" +
-			"  \"description\": \"This search parameter is used to find a MedicationAdministration by contained medication\",\n" +
-			"  \"expression\": \"MedicationAdministration.medication.resolve().ingredient.item.as(Reference).resolve().code\",\n" +
-			"  \"xpathUsage\": \"normal\"\n" +
-			"}\n";
-		mySearchParameterDao.create(myFhirCtx.newJsonParser().parseResource(SearchParameter.class, sp));
+		SearchParameter sp = new SearchParameter();
+		sp.setUrl("http://hapifhir.io/fhir/StructureDefinition/sp-unique");
+		sp.setName("MEDICATIONADMINISTRATION-INGREDIENT-MEDICATION");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setCode("medicationadministration-ingredient-medication");
+		sp.addBase("MedicationAdministration");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("MedicationAdministration.medication.resolve().ingredient.item.as(Reference).resolve().code");
+		mySearchParameterDao.create(sp);
 		mySearchParamRegistry.forceRefresh();
 
 		Medication ingredient = new Medication();

@@ -67,32 +67,57 @@ public class SearchParamExtractorService {
 	@Autowired
 	private IResourceLinkResolver myResourceLinkResolver;
 
+	/**
+	 * This method is responsible for scanning a resource for all of the search parameter instances. I.e. for all search parameters defined for
+	 * a given resource type, it extracts the associated indexes and populates {@literal theParams}.
+	 */
 	public void extractFromResource(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, Date theUpdateTime, boolean theFailOnInvalidReference) {
 		IBaseResource resource = normalizeResource(theResource);
 
-		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> strings = extractSearchParamStrings(resource);
-		handleWarnings(theRequestDetails, myInterceptorBroadcaster, strings);
-		theParams.myStringParams.addAll(strings);
+		// All search parameter types except Reference
+		extractSearchIndexParameters(theRequestDetails, theParams, resource, theEntity);
 
-		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamNumber> numbers = extractSearchParamNumber(resource);
-		handleWarnings(theRequestDetails, myInterceptorBroadcaster, numbers);
-		theParams.myNumberParams.addAll(numbers);
-
-		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantity> quantities = extractSearchParamQuantity(resource);
-		handleWarnings(theRequestDetails, myInterceptorBroadcaster, quantities);
-		theParams.myQuantityParams.addAll(quantities);
-
-		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractSearchParamDates(resource);
-		handleWarnings(theRequestDetails, myInterceptorBroadcaster, dates);
-		theParams.myDateParams.addAll(dates);
-
-		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> uris = extractSearchParamUri(resource);
-		handleWarnings(theRequestDetails, myInterceptorBroadcaster, uris);
-		theParams.myUriParams.addAll(uris);
-
+		// Reference search parameters
 		extractResourceLinks(theParams, theEntity, resource, theUpdateTime, myResourceLinkResolver, theFailOnInvalidReference, theRequestDetails);
 
-		for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(resource)) {
+		theParams.setUpdatedTime(theUpdateTime);
+	}
+
+	private void extractSearchIndexParameters(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity) {
+
+		// Strings
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> strings = extractSearchParamStrings(theResource);
+		handleWarnings(theRequestDetails, myInterceptorBroadcaster, strings);
+		theParams.myStringParams.addAll(strings);
+		populateResourceTable(theParams.myStringParams, theEntity);
+
+		// Numbers
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamNumber> numbers = extractSearchParamNumber(theResource);
+		handleWarnings(theRequestDetails, myInterceptorBroadcaster, numbers);
+		theParams.myNumberParams.addAll(numbers);
+		populateResourceTable(theParams.myNumberParams, theEntity);
+
+		// Quantities
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantity> quantities = extractSearchParamQuantity(theResource);
+		handleWarnings(theRequestDetails, myInterceptorBroadcaster, quantities);
+		theParams.myQuantityParams.addAll(quantities);
+		populateResourceTable(theParams.myQuantityParams, theEntity);
+
+		// Dates
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractSearchParamDates(theResource);
+		handleWarnings(theRequestDetails, myInterceptorBroadcaster, dates);
+		theParams.myDateParams.addAll(dates);
+		populateResourceTable(theParams.myDateParams, theEntity);
+
+		// URIs
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> uris = extractSearchParamUri(theResource);
+		handleWarnings(theRequestDetails, myInterceptorBroadcaster, uris);
+		theParams.myUriParams.addAll(uris);
+		populateResourceTable(theParams.myUriParams, theEntity);
+
+		// Tokens (can result in both Token and String, as we index the display name for
+		// the types: Coding, CodeableConcept)
+		for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theResource)) {
 			if (next instanceof ResourceIndexedSearchParamToken) {
 				theParams.myTokenParams.add((ResourceIndexedSearchParamToken) next);
 			} else if (next instanceof ResourceIndexedSearchParamCoords) {
@@ -101,22 +126,16 @@ public class SearchParamExtractorService {
 				theParams.myStringParams.add((ResourceIndexedSearchParamString) next);
 			}
 		}
+		populateResourceTable(theParams.myTokenParams, theEntity);
 
-		for (BaseResourceIndexedSearchParam next : extractSearchParamSpecial(resource)) {
+		// Specials
+		for (BaseResourceIndexedSearchParam next : extractSearchParamSpecial(theResource)) {
 			if (next instanceof ResourceIndexedSearchParamCoords) {
 				theParams.myCoordsParams.add((ResourceIndexedSearchParamCoords) next);
 			}
 		}
-
-		populateResourceTable(theParams.myStringParams, theEntity);
-		populateResourceTable(theParams.myNumberParams, theEntity);
-		populateResourceTable(theParams.myQuantityParams, theEntity);
-		populateResourceTable(theParams.myDateParams, theEntity);
-		populateResourceTable(theParams.myUriParams, theEntity);
 		populateResourceTable(theParams.myCoordsParams, theEntity);
-		populateResourceTable(theParams.myTokenParams, theEntity);
 
-		theParams.setUpdatedTime(theUpdateTime);
 	}
 
 	/**

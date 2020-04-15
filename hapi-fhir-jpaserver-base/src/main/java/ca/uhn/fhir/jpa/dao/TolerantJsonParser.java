@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.util;
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -12,15 +12,11 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-public class TolerantJsonParser extends JsonParser {
+class TolerantJsonParser extends JsonParser {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TolerantJsonParser.class);
 
-	/**
-	 * Do not use this constructor, the recommended way to obtain a new instance of the JSON parser is to invoke
-	 * {@link FhirContext#newJsonParser()}.
-	 */
-	public TolerantJsonParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
+	TolerantJsonParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
 		super(theContext, theParserErrorHandler);
 	}
 
