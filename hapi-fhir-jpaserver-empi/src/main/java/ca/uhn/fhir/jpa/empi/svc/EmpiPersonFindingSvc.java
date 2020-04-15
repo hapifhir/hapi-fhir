@@ -153,7 +153,7 @@ public class EmpiPersonFindingSvc {
 		// The data flow is as follows ->
 		// MatchedTargetCandidate -> Person -> EmpiLink -> MatchedPersonCandidate
 		List<MatchedPersonCandidate> matchedPersons = matchedCandidates.stream()
-			.filter(mc -> mc.getMatchResult().equals(EmpiMatchResultEnum.MATCH))
+			.filter(mc -> mc.getMatchResult().equals(EmpiMatchResultEnum.MATCH))//FIXME EMPI GGG WE WANT TO INCLUDE POSSIBLE_MATCH HERE TOO!
 			.map(MatchedTargetCandidate::getCandidate)
 			.map(candidate -> myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTableHelper.getPidOrNull(candidate)))
 			.filter(Optional::isPresent)

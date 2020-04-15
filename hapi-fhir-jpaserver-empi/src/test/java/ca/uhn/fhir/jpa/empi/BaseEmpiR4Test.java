@@ -103,6 +103,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected Patient createPatient(Patient thePatient) {
+		//Note that since our empi-rules block on active=true, all patients must be active.
+		thePatient.setActive(true);
 		DaoMethodOutcome outcome = myPatientDao.create(thePatient);
 		Patient patient = (Patient) outcome.getResource();
 		patient.setId(outcome.getId());
@@ -332,10 +334,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	protected Patient createPatientAndUpdateLinks(Patient thePatient) {
-		//Note that since our empi-rules block on active=true, all patients must be active.
-		thePatient.setActive(true);
-		DaoMethodOutcome daoMethodOutcome = myPatientDao.create(thePatient);
-		thePatient.setId(daoMethodOutcome.getId());
+		thePatient = createPatient(thePatient);
 		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient);
 		return thePatient;
 	}

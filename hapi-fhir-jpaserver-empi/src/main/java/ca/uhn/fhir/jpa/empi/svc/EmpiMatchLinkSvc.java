@@ -46,34 +46,37 @@ public class EmpiMatchLinkSvc {
 
 	private void doEmpiUpdate(IBaseResource theResource) {
 		List<MatchedPersonCandidate> personCandidates = myEmpiPersonFindingSvc.findPersonCandidates(theResource);
-
 		if (personCandidates.isEmpty()) {
-			handleNoCandidates(theResource);
+			handleEmpiWithNoCandidates(theResource);
 		} else if (personCandidates.size() == 1) {
-			handleSingleCandidate(theResource, personCandidates);
+			handleEmpiWithSingleCandidate(theResource, personCandidates);
 		} else {
-			handleMultipleCandidates(theResource, personCandidates);
+			handleEmpiWithMultipleCandidates(theResource, personCandidates);
 		}
 	}
 
-	private void handleMultipleCandidates(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates) {
+	private void handleEmpiWithMultipleCandidates(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates) {
 		Long samplePersonPid = thePersonCandidates.get(0).getCandidatePersonPid().getIdAsLong();
 		boolean allSamePerson = thePersonCandidates.stream()
 			.allMatch(candidate -> candidate.getCandidatePersonPid().getIdAsLong().equals(samplePersonPid));
 
 		if (allSamePerson) {
-			handleSingleCandidate(theResource, thePersonCandidates);
+			handleEmpiWithSingleCandidate(theResource, thePersonCandidates);
 		} else {
+			thePersonCandidates.stream().forEach();
+
+			myEmpiLinkSvc.updateLink(person, theResource, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO);
+
 			throw new InternalErrorException("Error during EMPI matching, more than 1 full match occurred.");
 		}
 	}
 
-	private void handleNoCandidates(IBaseResource theResource) {
+	private void handleEmpiWithNoCandidates(IBaseResource theResource) {
 		IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
 		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
 	}
 
-	private void handleSingleCandidate(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates) {
+	private void handleEmpiWithSingleCandidate(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates) {
 		MatchedPersonCandidate matchedPersonCandidate = thePersonCandidates.get(0);
 		ResourcePersistentId personPid = matchedPersonCandidate.getCandidatePersonPid();
 		IBaseResource person = myEmpiResourceDaoSvc.readPersonByPid(personPid);
