@@ -1,16 +1,15 @@
-package ca.uhn.fhir.jpa.empi.provider;
+package ca.uhn.fhir.empi.provider;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
-import ca.uhn.fhir.jpa.api.rp.ResourceProviderFactory;
+import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 @Lazy
 @Service
-// FIXME KHS move these up to hapi-fhir-empi
 public class EmpiProviderLoader {
 	@Autowired
 	private FhirContext myFhirContext;

@@ -1,19 +1,20 @@
-package ca.uhn.fhir.jpa.empi.provider;
+package ca.uhn.fhir.empi.provider;
 
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.InstantType;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.InstantType;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Resource;
 
 import java.util.Collection;
 import java.util.UUID;
 
-public class EmpiProviderR4 {
+// FIXME EMPI test
+public class EmpiProviderDstu3 {
 	private final IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
 
 	/**
@@ -22,7 +23,7 @@ public class EmpiProviderR4 {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public EmpiProviderR4(IEmpiMatchFinderSvc theEmpiMatchFinderSvc) {
+	public EmpiProviderDstu3(IEmpiMatchFinderSvc theEmpiMatchFinderSvc) {
 		myEmpiMatchFinderSvc = theEmpiMatchFinderSvc;
 	}
 
@@ -31,7 +32,6 @@ public class EmpiProviderR4 {
 		if (thePatient == null) {
 			throw new InvalidRequestException("resource may not be null");
 		}
-
 		Collection<IBaseResource> matches = myEmpiMatchFinderSvc.findMatches("Patient", thePatient);
 
 		Bundle retVal = new Bundle();

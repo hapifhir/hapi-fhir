@@ -2,9 +2,9 @@ package ca.uhn.fhir.jpa.empi.broker;
 
 import ca.uhn.fhir.empi.api.IEmpiConfig;
 import ca.uhn.fhir.empi.api.IEmpiRuleValidator;
+import ca.uhn.fhir.empi.provider.EmpiProviderLoader;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiInterceptor;
-import ca.uhn.fhir.jpa.empi.provider.EmpiProviderLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
