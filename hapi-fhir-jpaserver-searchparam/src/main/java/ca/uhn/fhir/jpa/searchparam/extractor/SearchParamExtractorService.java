@@ -255,7 +255,7 @@ public class SearchParamExtractorService {
 		if (theFailOnInvalidReference) {
 
 			myResourceLinkResolver.validateTypeOrThrowException(type);
-			resourceLink = createResourceLink(theEntity, theUpdateTime, theRuntimeSearchParam, path, thePathAndRef, nextId, typeString, type, nextReference, theRequest, theResourceIdToResolvedTarget);
+			resourceLink = resolveTargetAndCreateResourceLinkOrReturnNull(theEntity, theUpdateTime, theRuntimeSearchParam, path, thePathAndRef, nextId, typeString, type, nextReference, theRequest, theResourceIdToResolvedTarget);
 			if (resourceLink == null) {
 				return;
 			}
@@ -272,7 +272,7 @@ public class SearchParamExtractorService {
 		theParams.myLinks.add(resourceLink);
 	}
 
-	private ResourceLink createResourceLink(ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, Map<String, IResourceLookup> theResourceIdToResolvedTarget) {
+	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, Map<String, IResourceLookup> theResourceIdToResolvedTarget) {
 		/*
 		 * We keep a cache of resolved target resources. This is good since for some resource types, there
 		 * are multiple search parameters that map to the same element path within a resource (e.g.
@@ -282,7 +282,7 @@ public class SearchParamExtractorService {
 
 		IResourceLookup targetResource = theResourceIdToResolvedTarget.get(theNextId.getValue());
 		if (targetResource == null) {
-			myResourceLinkResolver.findTargetResource(nextSpDef, theNextPathsUnsplit, theNextId, theTypeString, theType, theReference, theRequest);
+			targetResource = myResourceLinkResolver.findTargetResource(nextSpDef, theNextPathsUnsplit, theNextId, theTypeString, theType, theReference, theRequest);
 		}
 
 		if (targetResource == null) {
