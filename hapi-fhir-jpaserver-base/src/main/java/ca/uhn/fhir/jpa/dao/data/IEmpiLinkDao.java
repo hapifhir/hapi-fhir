@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.empi.dao;
+package ca.uhn.fhir.jpa.dao.data;
 
 /*-
  * #%L
@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.empi.dao;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
+import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

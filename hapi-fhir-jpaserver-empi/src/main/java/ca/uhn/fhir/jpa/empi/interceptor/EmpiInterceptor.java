@@ -5,7 +5,7 @@ import ca.uhn.fhir.empi.api.Constants;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
-import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
+import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;

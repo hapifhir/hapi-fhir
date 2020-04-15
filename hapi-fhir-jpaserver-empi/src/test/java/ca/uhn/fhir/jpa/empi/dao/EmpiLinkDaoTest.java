@@ -2,9 +2,10 @@ package ca.uhn.fhir.jpa.empi.dao;
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
-import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
 import ca.uhn.fhir.jpa.empi.svc.ResourceTableHelper;
+import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.Test;
