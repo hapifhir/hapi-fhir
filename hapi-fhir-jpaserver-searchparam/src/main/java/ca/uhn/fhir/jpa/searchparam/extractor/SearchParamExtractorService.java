@@ -89,31 +89,26 @@ public class SearchParamExtractorService {
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> strings = extractSearchParamStrings(theResource);
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, strings);
 		theParams.myStringParams.addAll(strings);
-		populateResourceTable(theParams.myStringParams, theEntity);
 
 		// Numbers
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamNumber> numbers = extractSearchParamNumber(theResource);
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, numbers);
 		theParams.myNumberParams.addAll(numbers);
-		populateResourceTable(theParams.myNumberParams, theEntity);
 
 		// Quantities
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantity> quantities = extractSearchParamQuantity(theResource);
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, quantities);
 		theParams.myQuantityParams.addAll(quantities);
-		populateResourceTable(theParams.myQuantityParams, theEntity);
 
 		// Dates
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractSearchParamDates(theResource);
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, dates);
 		theParams.myDateParams.addAll(dates);
-		populateResourceTable(theParams.myDateParams, theEntity);
 
 		// URIs
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> uris = extractSearchParamUri(theResource);
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, uris);
 		theParams.myUriParams.addAll(uris);
-		populateResourceTable(theParams.myUriParams, theEntity);
 
 		// Tokens (can result in both Token and String, as we index the display name for
 		// the types: Coding, CodeableConcept)
@@ -126,7 +121,6 @@ public class SearchParamExtractorService {
 				theParams.myStringParams.add((ResourceIndexedSearchParamString) next);
 			}
 		}
-		populateResourceTable(theParams.myTokenParams, theEntity);
 
 		// Specials
 		for (BaseResourceIndexedSearchParam next : extractSearchParamSpecial(theResource)) {
@@ -134,6 +128,14 @@ public class SearchParamExtractorService {
 				theParams.myCoordsParams.add((ResourceIndexedSearchParamCoords) next);
 			}
 		}
+
+		// Do this after, because we add to strings during both string and token processing
+		populateResourceTable(theParams.myNumberParams, theEntity);
+		populateResourceTable(theParams.myQuantityParams, theEntity);
+		populateResourceTable(theParams.myDateParams, theEntity);
+		populateResourceTable(theParams.myUriParams, theEntity);
+		populateResourceTable(theParams.myTokenParams, theEntity);
+		populateResourceTable(theParams.myStringParams, theEntity);
 		populateResourceTable(theParams.myCoordsParams, theEntity);
 
 	}
