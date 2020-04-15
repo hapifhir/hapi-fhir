@@ -12,7 +12,6 @@ import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Lazy
 @Service
 public class EmpiPersonFindingSvc {
 
