@@ -20,9 +20,13 @@ package ca.uhn.fhir.jpa.empi.config;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+
+import javax.annotation.PostConstruct;
 
 @Configuration
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.empi.dao")
@@ -31,4 +35,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 	"ca.uhn.fhir.empi",
 })
 public class EmpiCtxConfig {
+	@Autowired
+	DaoConfig myDaoConfig;
+
+	@PostConstruct
+	public void init() {
+		myDaoConfig.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.MESSAGE);
+	}
 }

@@ -5,8 +5,10 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
+import ca.uhn.fhir.jpa.empi.broker.EmpiSubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -56,6 +58,10 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 	EmpiQueueConsumerLoader myEmpiQueueConsumerLoader;
 	@Autowired
 	SubscriptionRegistry mySubscriptionRegistry;
+	@Autowired
+	SubscriptionLoader mySubscriptionLoader;
+	@Autowired
+	EmpiSubscriptionLoader myEmpiSubscriptionLoader;
 
 	protected PointcutLatch myAfterEmpiLatch = new PointcutLatch(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED);
 
@@ -72,18 +78,18 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 
 		//This sets up our basic interceptor, and also attached the latch so we can await the hook calls.
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, myAfterEmpiLatch);
+
+		myEmpiSubscriptionLoader.daoUpdateEmpiSubscriptions();
+		mySubscriptionLoader.syncSubscriptions();
 		waitForActivatedSubscriptionCount(2);
 	}
 
-	protected void waitForActivatedSubscriptionCount(int theSize) throws Exception {
+	protected void waitForActivatedSubscriptionCount(int theSize) {
 		await("Active Subscription Count has reached " + theSize).until(() -> mySubscriptionRegistry.size() >= theSize);
 	}
 
 	@Override
 	protected void after() {
-		// FIXME KHS
-//		myInterceptorService.unregisterInterceptor(myEmpiInterceptor);
-//		myEmpiInterceptor.stopForUnitTest();
 		myInterceptorService.unregisterInterceptor(myAfterEmpiLatch);
 		myAfterEmpiLatch.clear();
 

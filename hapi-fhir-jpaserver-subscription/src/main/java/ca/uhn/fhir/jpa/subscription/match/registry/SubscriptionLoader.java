@@ -39,12 +39,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
-import java.util.function.Supplier;
 
 
 public class SubscriptionLoader {
@@ -60,7 +58,6 @@ public class SubscriptionLoader {
 	private Semaphore mySyncSubscriptionsSemaphore = new Semaphore(1);
 	@Autowired
 	private ISchedulerService mySchedulerService;
-	private Set<Supplier<Collection<IBaseResource>>> myInternalSubscriptionSuppliers = new HashSet<>();
 
 	/**
 	 * Constructor
@@ -140,7 +137,7 @@ public class SubscriptionLoader {
 			}
 
 			List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionCount);
-			addInternalSubscriptions(resourceList);
+
 			Set<String> allIds = new HashSet<>();
 			int changesCount = 0;
 			for (IBaseResource resource : resourceList) {
@@ -157,20 +154,6 @@ public class SubscriptionLoader {
 
 			return changesCount;
 		}
-	}
-
-	private void addInternalSubscriptions(List<IBaseResource> theResourceList) {
-		for (Supplier<Collection<IBaseResource>> supplier : myInternalSubscriptionSuppliers) {
-			theResourceList.addAll(supplier.get());
-		}
-	}
-
-	public void addInternalSubscriptionSupplier(Supplier<Collection<IBaseResource>> theInternalSubscriptionSupplier) {
-		myInternalSubscriptionSuppliers.add(theInternalSubscriptionSupplier);
-	}
-
-	public void removeInternalSubscriptionSupplier(Supplier<Collection<IBaseResource>> theInternalSubscriptionSupplier) {
-		myInternalSubscriptionSuppliers.remove(theInternalSubscriptionSupplier);
 	}
 
 	public static class Job implements HapiJob {

@@ -39,7 +39,7 @@ public class SubscriptionChannelConfig {
 	}
 
 	@Bean
-	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelNamer theChannelNamer, IChannelFactory theQueueChannelFactory) {
+	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelFactory theQueueChannelFactory ,IChannelNamer theChannelNamer) {
 		return new SubscriptionChannelFactory(theQueueChannelFactory, theChannelNamer);
 	}
 
