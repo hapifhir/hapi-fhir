@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
 import ca.uhn.fhir.jpa.empi.config.EmpiConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
+import ca.uhn.fhir.jpa.empi.matcher.IsSamePersonAs;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.empi.svc.ResourceTableHelper;
@@ -123,6 +124,9 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Nonnull
 	protected Person buildPersonWithNameAndId(String theGivenName, String theId) {
 		return buildPersonWithNameIdAndBirthday(theGivenName, theId, null);
+	}
+	protected Matcher<IBaseResource> samePersonAs(IBaseResource theBaseResource) {
+		return IsSamePersonAs.samePersonAs(myResourceTableHelper, myEmpiLinkDaoSvc, theBaseResource);
 	}
 
 	@Nonnull
@@ -285,9 +289,6 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		};
 	}
 
-	public Matcher<IBaseResource> possibleDuplicateOf(IBaseResource theBaseResource) {
-		return customMatchers.possibleDuplicateOf()
-	}
 	/**
 	 * Matcher with tells us if there is an EmpiLink with between these two resources that are considered POSSIBLE DUPLICATE.
 	 * For use only on persons.
@@ -356,7 +357,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	public Matcher<IBaseResource> samePersonAs(IBaseResource theBaseResource) {
+	public Matcher<IBaseResource> samePersonAsOld(IBaseResource theBaseResource) {
 		return new TypeSafeMatcher<IBaseResource>() {
 			private Long personPidToMatch;
 			private Long incomingPersonPid;

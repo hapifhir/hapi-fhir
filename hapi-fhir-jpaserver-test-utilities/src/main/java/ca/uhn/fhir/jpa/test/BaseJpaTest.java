@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -38,6 +39,9 @@ public abstract class BaseJpaTest {
 
 	@Autowired
 	PlatformTransactionManager myPlatformTransactionManager;
+
+	@Autowired
+	ApplicationContext myApplicationContext;
 
 	@After
 	public void after() {
