@@ -45,7 +45,6 @@ public class EmpiQueueConsumerLoader {
 
 	protected IChannelReceiver myEmpiChannel;
 
-	// FIXME KHS add this back to the subscription one
 	@PostConstruct
 	public void init() {
 		if (myEmpiChannel == null) {

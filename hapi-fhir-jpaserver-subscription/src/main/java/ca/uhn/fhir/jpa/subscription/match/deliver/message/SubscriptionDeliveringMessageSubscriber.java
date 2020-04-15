@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
@@ -56,7 +57,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
-// FIXME KHS fair amount of copy/paste from rest-hook
+// FIXME KHS subs fair amount of copy/paste from rest-hook
 @Scope("prototype")
 public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDeliverySubscriber {
 
@@ -64,6 +65,8 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IChannelFactory myChannelFactory;
+	@Autowired
+	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
 
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringMessageSubscriber.class);
 
@@ -137,7 +140,6 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 
 		String queueName = extractQueueNameFromEndpoint(endpointUrl);
 
-		// FIXME KHS why are we sending consumer settings to a producer?
 		ChannelConsumerSettings config = new ChannelConsumerSettings();
 		config.setConcurrentConsumers(SubscriptionConstants.DELIVERY_CHANNEL_CONCURRENT_CONSUMERS);
 		IChannelProducer channelProducer = myChannelFactory.getOrCreateProducer(queueName, ResourceDeliveryMessage.class, config);
@@ -153,7 +155,6 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 			throw new UnsupportedOperationException("Only JSON payload type is currently supported for Message Subscriptions");
 		}
 
-		// FIXME KHS
 		deliverPayload(theMessage, subscription, channelProducer);
 
 		// Interceptor call: SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY
@@ -167,16 +168,10 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 
 	}
 
-	static String extractQueueNameFromEndpoint(String theEndpointUrl) throws URISyntaxException {
+	private String extractQueueNameFromEndpoint(String theEndpointUrl) throws URISyntaxException {
+		mySubscriptionValidatingInterceptor.validateMessageSubscriptionEndpoint(theEndpointUrl);
 		URI uri = new URI(theEndpointUrl);
-		// FIXME KHS this should happen way earlier in pre-revistry validation
-		if (!"jms".equals(uri.getScheme())) {
-			throw new UnsupportedOperationException("Only 'jms' protocol is currently supported for Subscriptions with channel type 'message'");
-		}
 		String jmsPath = uri.getSchemeSpecificPart();
-		if (!jmsPath.startsWith("queue:")) {
-			throw new UnsupportedOperationException("Message Subscription endpoint '" + theEndpointUrl + "' does not start with 'jms:queue:'");
-		}
 		return jmsPath.substring("queue:".length());
 	}
 

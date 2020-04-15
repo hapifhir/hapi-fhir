@@ -48,7 +48,7 @@ public class SubscriptionChannelFactory {
 		myChannelNamer = theChannelNamer;
 	}
 
-	// FIXME KHS rename these methods
+	// FIXME KHS subs rename these methods
 	public IChannelProducer newDeliverySendingChannel(String theChannelName, ChannelConsumerSettings theOptions) {
 		ChannelConsumerSettings config = newConfigForDeliveryChannel(theOptions);
 		return myQueueChannelFactory.getOrCreateProducer(myChannelNamer.getChannelName(theChannelName), ResourceDeliveryJsonMessage.class, config);

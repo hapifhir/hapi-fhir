@@ -63,9 +63,9 @@ public class EmpiMatchLinkSvc {
 		if (allSamePerson) {
 			handleEmpiWithSingleCandidate(theResource, thePersonCandidates);
 		} else {
-			thePersonCandidates.stream().forEach();
-
-			myEmpiLinkSvc.updateLink(person, theResource, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO);
+			// FIXME GGG this didn't compile:
+//			thePersonCandidates.stream().forEach();
+//			myEmpiLinkSvc.updateLink(person, theResource, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO);
 
 			throw new InternalErrorException("Error during EMPI matching, more than 1 full match occurred.");
 		}

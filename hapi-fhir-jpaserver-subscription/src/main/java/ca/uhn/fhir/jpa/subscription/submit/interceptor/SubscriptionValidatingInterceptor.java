@@ -25,11 +25,11 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -37,6 +37,9 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -123,8 +126,34 @@ public class SubscriptionValidatingInterceptor {
 
 			if (subscription.getChannelType() == null) {
 				throw new UnprocessableEntityException("Subscription.channel.type must be populated on this server");
+			} else if (subscription.getChannelType() == CanonicalSubscriptionChannelType.MESSAGE) {
+				validateMessageSubscriptionEndpoint(subscription.getEndpointUrl());
 			}
+		}
+	}
 
+	// FIXME test
+	public void validateMessageSubscriptionEndpoint(String theEndpointUrl) {
+		if (theEndpointUrl == null) {
+			throw new UnprocessableEntityException("No endpoint defined for message subscription");
+		}
+
+		try {
+			URI uri = new URI(theEndpointUrl);
+
+			if (!"jms".equals(uri.getScheme())) {
+				throw new UnprocessableEntityException("Only 'jms' protocol is supported for Subscriptions with channel type 'message'");
+			}
+			String jmsPath = uri.getSchemeSpecificPart();
+			if (!jmsPath.startsWith("queue:")) {
+				throw new UnprocessableEntityException("Message Subscription endpoint '" + theEndpointUrl + "' does not start with 'jms:queue:'");
+			}
+			String queueName = jmsPath.substring("queue:".length());
+			if (isBlank(queueName)) {
+				throw new UnprocessableEntityException("A queue name must appear after jms:queue: in a message Subscription endpoint");
+			}
+		} catch (URISyntaxException e) {
+			throw new UnprocessableEntityException("Invalid subscription endpoint uri " + theEndpointUrl, e);
 		}
 	}
 

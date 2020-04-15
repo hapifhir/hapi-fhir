@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
-// FIXME KHS use this for subscriptions
 public interface IChannelNamer {
 	/**
 	 * Channel factories call this service to qualify the channel name before sending it to the channel factory.
