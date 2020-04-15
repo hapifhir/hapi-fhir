@@ -152,7 +152,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (theRequest.getRequestType() == RequestTypeEnum.OPTIONS) {
 			if (theRequest.getOperation() == null && theRequest.getResourceName() == null) {
 				return true;
