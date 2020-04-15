@@ -6,7 +6,6 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,7 +14,7 @@ public class IsSamePersonAs extends BasePersonMatcher {
 	private List<Long> personPidsToMatch;
 	private Long incomingPersonPid;
 
-	public IsSamePersonAs(ResourceTableHelper theResourceTableHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource theBaseResource) {
+	public IsSamePersonAs(ResourceTableHelper theResourceTableHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
 		super(theResourceTableHelper, theEmpiLinkDaoSvc, theBaseResource);
 	}
 
@@ -41,7 +40,7 @@ public class IsSamePersonAs extends BasePersonMatcher {
 		mismatchDescription.appendText(" was actually linked to Person/" + incomingPersonPid);
 	}
 
-	public static Matcher<IBaseResource> samePersonAs(ResourceTableHelper theResourceTableHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource theBaseResource) {
+	public static Matcher<IBaseResource> samePersonAs(ResourceTableHelper theResourceTableHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
 		return new IsSamePersonAs(theResourceTableHelper, theEmpiLinkDaoSvc, theBaseResource);
 	}
 }

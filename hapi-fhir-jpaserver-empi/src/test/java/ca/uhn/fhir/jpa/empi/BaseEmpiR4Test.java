@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.empi;
 
-import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiProperties;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -9,6 +8,9 @@ import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
 import ca.uhn.fhir.jpa.empi.config.EmpiConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
+import ca.uhn.fhir.jpa.empi.matcher.IsLinkedTo;
+import ca.uhn.fhir.jpa.empi.matcher.IsPossibleDuplicateOf;
+import ca.uhn.fhir.jpa.empi.matcher.IsPossibleMatchWith;
 import ca.uhn.fhir.jpa.empi.matcher.IsSamePersonAs;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
@@ -19,22 +21,20 @@ import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.junit.After;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Nonnull;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -125,9 +125,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected Person buildPersonWithNameAndId(String theGivenName, String theId) {
 		return buildPersonWithNameIdAndBirthday(theGivenName, theId, null);
 	}
-	protected Matcher<IBaseResource> samePersonAs(IBaseResource theBaseResource) {
-		return IsSamePersonAs.samePersonAs(myResourceTableHelper, myEmpiLinkDaoSvc, theBaseResource);
-	}
+
 
 	@Nonnull
 	protected Patient buildPatientWithNameIdAndBirthday(String theGivenName, String theId, Date theBirthday) {
@@ -199,52 +197,6 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		assertEquals(theExpectedCount, myEmpiLinkDao.count());
 	}
 
-
-	/**
-	 * A Matcher which allows us to check that a target patient/practitioner
-	 * is linked to a set of patients/practitioners via a person.
-	 */
-	public Matcher<IBaseResource> linkedTo(IBaseResource... theBaseResource) {
-
-		return new TypeSafeMatcher<IBaseResource>() {
-			private List<Long> baseResourcePersonPids;
-			private Long incomingResourcePersonPid;
-
-			@Override
-			protected boolean matchesSafely(IBaseResource theIncomingResource) {
-				EmpiLink link = new EmpiLink();
-				link.setTargetPid(theIncomingResource.getIdElement().getIdPartAsLong());
-				link.setMatchResult(EmpiMatchResultEnum.MATCH);
-				Example<EmpiLink> exampleLink = Example.of(link);
-				Optional<EmpiLink> one = myEmpiLinkDao.findOne(exampleLink);
-				//There is no person for this patient, so obviously they are not linked to anybody.
-				if (!one.isPresent()){
-					return false;
-				} else {
-					incomingResourcePersonPid = one.get().getPersonPid();
-				}
-
-				//OK, lets grab all the person pids of the resources passed in via the constructor.
-				baseResourcePersonPids = Arrays.stream(theBaseResource)
-					.map(base -> getMatchedPersonPidFromResource(base))
-					.collect(Collectors.toList());
-
-				//The resources are linked if all person pids match the incoming person pid.
-				return baseResourcePersonPids.stream()
-					.allMatch(pid -> pid.equals(incomingResourcePersonPid));
-			}
-
-			@Override
-			public void describeTo(Description theDescription) {
-			}
-		};
-	}
-
-	/**
-	 * Helper function which will fetch you the matched Person based on the IBaseResource.
-	 * @param theBaseResource
-	 * @return
-	 */
 	protected Person getPersonFromResource(IBaseResource theBaseResource) {
 		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTableHelper.getPidOrNull(theBaseResource));
 		if (matchedLinkForTargetPid.isPresent()) {
@@ -253,138 +205,6 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		} else {
 			return null;
 		}
-	}
-
-	/**
-	 * Matcher with tells us if there is an EmpiLink with between these two resources that are considered POSSIBLE_MATCH
-	 */
-	public Matcher<IBaseResource> possibleMatchWith(IBaseResource... theBaseResource) {
-		return new TypeSafeMatcher<IBaseResource>() {
-			private List<Long> personPidsToMatch;
-			private Long incomingResourcePid;
-
-			@Override
-			protected boolean matchesSafely(IBaseResource theIncomingResource) {
-				List<EmpiLink> empiLinks = getEmpiLinks(theIncomingResource, EmpiMatchResultEnum.POSSIBLE_MATCH);
-
-				personPidsToMatch = Arrays.stream(theBaseResource)
-					.map(iBaseResource -> getMatchedPersonPidFromResource(iBaseResource))
-					.collect(Collectors.toList());
-
-				List<Long> empiLinkSourcePersonPids = empiLinks.stream().map(EmpiLink::getPersonPid).collect(Collectors.toList());
-
-				return empiLinkSourcePersonPids.containsAll(personPidsToMatch);
-			}
-
-			@Override
-			public void describeTo(Description theDescription) {
-				theDescription.appendText(" no link found with POSSIBLE_MATCH to the requested PIDS");
-			}
-
-			@Override
-			protected void describeMismatchSafely(IBaseResource item, Description mismatchDescription) {
-				super.describeMismatchSafely(item, mismatchDescription);
-				mismatchDescription.appendText("No Empi Link With POSSIBLE_DUPLICATE was found");
-			}
-		};
-	}
-
-	/**
-	 * Matcher with tells us if there is an EmpiLink with between these two resources that are considered POSSIBLE DUPLICATE.
-	 * For use only on persons.
-	 */
-	public Matcher<IBaseResource> possibleDuplicateOf(IBaseResource theBaseResource) {
-		return new TypeSafeMatcher<IBaseResource>() {
-			private Long personPidToMatch;
-			private Long incomingPersonPid;
-
-			@Override
-			protected boolean matchesSafely(IBaseResource theIncomingResource) {
-
-				incomingPersonPid = getMatchedPersonPidFromResource(theIncomingResource);
-				personPidToMatch = getMatchedPersonPidFromResource(theBaseResource);
-
-				Optional<EmpiLink> duplicateLink = myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(personPidToMatch, incomingPersonPid, EmpiMatchResultEnum.POSSIBLE_DUPLICATE);
-				if (!duplicateLink.isPresent()) {
-					duplicateLink = myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(incomingPersonPid, personPidToMatch, EmpiMatchResultEnum.POSSIBLE_DUPLICATE);
-				}
-				return duplicateLink.isPresent();
-			}
-
-			@Override
-			public void describeTo(Description theDescription) {
-				theDescription.appendText("patient/practitioner linked to Person/" + personPidToMatch);
-			}
-
-			@Override
-			protected void describeMismatchSafely(IBaseResource item, Description mismatchDescription) {
-				super.describeMismatchSafely(item, mismatchDescription);
-				mismatchDescription.appendText("No Empi Link With POSSIBLE_DUPLICATE was found");
-			}
-		};
-	}
-
-	private boolean isPerson(IBaseResource theIncomingResource) {
-		return (theIncomingResource.getIdElement().getResourceType().equalsIgnoreCase("Person"));
-	}
-
-	private List<EmpiLink> getEmpiLinks(IBaseResource thePatientOrPractitionerResource, EmpiMatchResultEnum theMatchResult) {
-		Long pidOrNull = myResourceTableHelper.getPidOrNull(thePatientOrPractitionerResource);
-		List<EmpiLink> matchLinkForTarget = myEmpiLinkDaoSvc.getEmpiLinksByTargetPidAndMatchResult(pidOrNull, theMatchResult);
-		if (!matchLinkForTarget.isEmpty()) {
-			return matchLinkForTarget;
-		} else {
-			throw new IllegalStateException("We didn't find a related Person for resource with pid: " + thePatientOrPractitionerResource.getIdElement());
-		}
-	}
-	private EmpiLink getMatchedEmpiLink(IBaseResource thePatientOrPractitionerResource) {
-		List<EmpiLink> empiLinks = getEmpiLinks(thePatientOrPractitionerResource, EmpiMatchResultEnum.MATCH);
-		if (empiLinks.size() == 0) {
-			throw new IllegalStateException("We didn't find a matched Person for resource with pid: " + thePatientOrPractitionerResource.getIdElement());
-		} else if (empiLinks.size() == 1) {
-			return empiLinks.get(0);
-		} else {
-			throw new IllegalStateException("Its illegal to have more than 1 match! we found " + empiLinks.size() + " for resource with pid: " + thePatientOrPractitionerResource.getIdElement());
-		}
-	}
-	private Long getMatchedPersonPidFromResource(IBaseResource theResource) {
-		if (isPatientOrPractitioner(theResource)) {
-			return getMatchedEmpiLink(theResource).getPersonPid();
-		} else if (isPerson(theResource)) {
-			return myResourceTableHelper.getPidOrNull(theResource);
-		} else {
-			throw new IllegalArgumentException("Resources of type " + theResource.getIdElement().getResourceType()+" cannot be persons!");
-		}
-	}
-
-	public Matcher<IBaseResource> samePersonAsOld(IBaseResource theBaseResource) {
-		return new TypeSafeMatcher<IBaseResource>() {
-			private Long personPidToMatch;
-			private Long incomingPersonPid;
-
-			@Override
-			protected boolean matchesSafely(IBaseResource theIncomingResource) {
-				incomingPersonPid = getMatchedPersonPidFromResource(theIncomingResource);
-				personPidToMatch = getMatchedPersonPidFromResource(theBaseResource);
-				return incomingPersonPid.equals(personPidToMatch);
-			}
-			@Override
-			public void describeTo(Description theDescription) {
-				theDescription.appendText("patient/practitioner linked to Person/" + personPidToMatch);
-			}
-
-			@Override
-			protected void describeMismatchSafely(IBaseResource item, Description mismatchDescription) {
-				super.describeMismatchSafely(item, mismatchDescription);
-				mismatchDescription.appendText(" was actually linked to Person/" + incomingPersonPid);
-			}
-		};
-	}
-
-
-	private boolean isPatientOrPractitioner(IBaseResource theResource) {
-		String resourceType = theResource.getIdElement().getResourceType();
-		return (resourceType.equalsIgnoreCase("Patient") || resourceType.equalsIgnoreCase("Practitioner"));
 	}
 
 	protected Person getPersonFromEmpiLink(EmpiLink theEmpiLink) {
@@ -409,4 +229,21 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePractitioner);
 		return thePractitioner;
 	}
+
+	protected Matcher<IBaseResource> samePersonAs(IBaseResource... theBaseResource) {
+		return IsSamePersonAs.samePersonAs(myResourceTableHelper, myEmpiLinkDaoSvc, theBaseResource);
+	}
+
+	protected Matcher<IBaseResource> linkedTo(IBaseResource... theBaseResource) {
+		return IsLinkedTo.linkedTo(myResourceTableHelper, myEmpiLinkDaoSvc, theBaseResource);
+	}
+
+	protected Matcher<IBaseResource> possibleMatchWith(IBaseResource... theBaseResource) {
+		return IsPossibleMatchWith.possibleMatchWith(myResourceTableHelper, myEmpiLinkDaoSvc, theBaseResource);
+	}
+
+	protected Matcher<IBaseResource> possibleDuplicateOf(IBaseResource...theBaseResource) {
+		return IsPossibleDuplicateOf.possibleDuplicateOf(myResourceTableHelper, myEmpiLinkDaoSvc, theBaseResource);
+	}
+
 }

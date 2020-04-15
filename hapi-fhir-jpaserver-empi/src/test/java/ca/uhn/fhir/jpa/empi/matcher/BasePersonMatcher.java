@@ -56,7 +56,7 @@ public abstract class BasePersonMatcher extends TypeSafeMatcher<IBaseResource> {
         return (theIncomingResource.getIdElement().getResourceType().equalsIgnoreCase("Person"));
     }
 
-    private List<EmpiLink> getEmpiLinks(IBaseResource thePatientOrPractitionerResource, EmpiMatchResultEnum theMatchResult) {
+    protected List<EmpiLink> getEmpiLinks(IBaseResource thePatientOrPractitionerResource, EmpiMatchResultEnum theMatchResult) {
         Long pidOrNull = myResourceTableHelper.getPidOrNull(thePatientOrPractitionerResource);
         List<EmpiLink> matchLinkForTarget = myEmpiLinkDaoSvc.getEmpiLinksByTargetPidAndMatchResult(pidOrNull, theMatchResult);
         if (!matchLinkForTarget.isEmpty()) {
