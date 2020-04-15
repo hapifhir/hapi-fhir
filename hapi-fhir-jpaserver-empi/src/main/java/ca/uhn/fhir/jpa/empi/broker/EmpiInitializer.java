@@ -33,7 +33,8 @@ public class EmpiInitializer {
 	EmpiInterceptor myEmpiInterceptor;
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
-	// FIXME KHS make the dependency on subscriptions explicit
+	// This @Order is here to ensure that MatchingQueueSubscriberLoader has initialized before we initialize this.
+	// Otherwise the EMPI subscriptions won't get loaded into the SubscriptionRegistry
 	@Order
 	public void init() {
 		if (!myEmpiConfig.isEnabled()) {
@@ -47,8 +48,6 @@ public class EmpiInitializer {
 		EmpiProviderLoader empiProviderLoader = myApplicationContext.getBean(EmpiProviderLoader.class);
 		empiProviderLoader.loadProvider();
 
-		// FIXME KHS we have to wait until MatchingQueueSubscriberLoader has initialized before calling this
-		// the subscriptions else they won't get loaded into the subscriber registry
 		myEmpiSubscriptionLoader.daoUpdateEmpiSubscriptions();
 	}
 }
