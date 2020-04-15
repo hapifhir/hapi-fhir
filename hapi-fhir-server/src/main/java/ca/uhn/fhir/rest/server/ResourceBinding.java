@@ -27,7 +27,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 
 /**
- * Created by dsotnikov on 2/25/2014.
+ * Holds all method bindings for an individual resource type
  */
 public class ResourceBinding {
 
