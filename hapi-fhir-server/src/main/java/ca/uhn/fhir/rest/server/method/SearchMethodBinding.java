@@ -167,6 +167,26 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			return MethodMatchEnum.NONE;
 		}
 
+		if (myQueryName != null) {
+			String[] queryNameValues = theRequest.getParameters().get(Constants.PARAM_QUERY);
+			if (queryNameValues != null && StringUtils.isNotBlank(queryNameValues[0])) {
+				String queryName = queryNameValues[0];
+				if (!myQueryName.equals(queryName)) {
+					ourLog.trace("Query name does not match {}", myQueryName);
+					return MethodMatchEnum.NONE;
+				}
+			} else {
+				ourLog.trace("Query name does not match {}", myQueryName);
+				return MethodMatchEnum.NONE;
+			}
+		} else {
+			String[] queryNameValues = theRequest.getParameters().get(Constants.PARAM_QUERY);
+			if (queryNameValues != null && StringUtils.isNotBlank(queryNameValues[0])) {
+				ourLog.trace("Query has name");
+				return MethodMatchEnum.NONE;
+			}
+		}
+
 		Set<String> unqualifiedNames = theRequest.getUnqualifiedToQualifiedNames().keySet();
 		Set<String> qualifiedParamNames = theRequest.getParameters().keySet();
 
@@ -231,15 +251,12 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 		}
 
-		if (retVal != MethodMatchEnum.APPROXIMATE && retVal != MethodMatchEnum.NONE) {
+		if (retVal != MethodMatchEnum.NONE) {
 			for (String nextRequiredParamName : myRequiredParamNames) {
 				if (!qualifiedParamNames.contains(nextRequiredParamName)) {
 					if (!unqualifiedNames.contains(nextRequiredParamName)) {
-						if (myAllowUnknownParams) {
-							retVal = retVal.weakerOf(MethodMatchEnum.APPROXIMATE);
-						} else {
-							retVal = retVal.weakerOf(MethodMatchEnum.NONE);
-						}
+						retVal = MethodMatchEnum.NONE;
+						break;
 					}
 				}
 			}
