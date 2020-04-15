@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.empi.entity;
+package ca.uhn.fhir.jpa.entity;
 
 /*-
  * #%L

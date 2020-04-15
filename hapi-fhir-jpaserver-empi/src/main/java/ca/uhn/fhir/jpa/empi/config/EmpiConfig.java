@@ -25,12 +25,10 @@ import org.hl7.fhir.dstu2.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import javax.annotation.PostConstruct;
 
 @Configuration
-@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.empi.dao")
 @ComponentScan(basePackages = {
 	"ca.uhn.fhir.jpa.empi",
 	"ca.uhn.fhir.empi",

@@ -41,6 +41,7 @@ import java.util.List;
  * field comparators that matched.
  */
 
+// FIXME KHS remove all the @Lazy tags
 @Lazy
 @Service
 public class EmpiResourceComparatorSvc {
