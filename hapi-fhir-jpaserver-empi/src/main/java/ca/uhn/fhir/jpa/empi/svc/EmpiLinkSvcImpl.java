@@ -59,7 +59,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 			case POSSIBLE_MATCH:
 				// FIXME EMPI use assurance 2 for possible and assurance 4 for no match
 				if (!myPersonHelper.containsLinkTo(thePerson, resourceId)) {
-					myPersonHelper.addLink( thePerson, resourceId);
+					myPersonHelper.addLink(thePerson, resourceId);
 					myEmpiResourceDaoSvc.updatePerson(thePerson);
 				}
 				break;

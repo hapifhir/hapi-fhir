@@ -6,6 +6,7 @@ import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.util.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
+import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
@@ -39,6 +40,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	IEmpiLinkSvc myEmpiLinkSvc;
 	@Autowired
 	private EIDHelper myEidHelper;
+	@Autowired
+	private PersonHelper myPersonHelper;
 
 	@Test
 	public void testAddPatientLinksToNewPersonIfNoneFound() {
@@ -272,8 +275,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(janePatient, is(samePersonAs(janePatient2)));
 
 		Patient incomingJanePatient = createPatientAndUpdateLinks(buildJanePatient());
-		Person personFromResource = getPersonFromResource(incomingJanePatient);
-		assertThat(personFromResource, is(notNullValue()));
 		assertThat(incomingJanePatient, is(samePersonAs(janePatient)));
 		assertThat(incomingJanePatient, is(samePersonAs(janePatient2)));
 	}
@@ -286,6 +287,19 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		 * These duplicates are manually reviewed later and either merged or marked as NO_MATCH
 		 * and the system will no longer consider them as a POSSIBLE_DUPLICATE going forward.
 		 */
+		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
+
+		Patient janePatient2 = createPatient(buildJanePatient());
+
+		//In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are their
+		//own individual Persons for the purpose of this test.
+		IBaseResource person = myPersonHelper.createPersonFromEmpiTarget(janePatient2);
+		person.getMeta().addTag().setSystem("ASDASDASD").setCode("ASDASDASD");
+		myEmpiLinkSvc.updateLink(person, janePatient2, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
+		assertThat(janePatient, is(not(samePersonAs(janePatient2))));
+
+		//In theory, this will match both Persons!
+		Patient incomingJanePatient = createPatientAndUpdateLinks(buildJanePatient());
 
 	}
 	@Test
