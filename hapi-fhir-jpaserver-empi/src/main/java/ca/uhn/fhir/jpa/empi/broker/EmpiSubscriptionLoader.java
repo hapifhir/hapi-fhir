@@ -5,21 +5,15 @@ import ca.uhn.fhir.empi.api.IEmpiConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-
 @Service
-// FIXME KHS use this to load empi subscriptions
 public class EmpiSubscriptionLoader {
 	@Autowired
 	public DaoRegistry myDaoRegistry;
-	@Autowired
-	SubscriptionLoader mySubscriptionLoader;
 	@Autowired
 	IChannelNamer myChannelNamer;
 
@@ -29,14 +23,6 @@ public class EmpiSubscriptionLoader {
 		IFhirResourceDao<IBaseResource> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
 		subscriptionDao.update(patientSub);
 		subscriptionDao.update(practitionerSub);
-
-		// FIXME KHS remove these?
-		mySubscriptionLoader.addInternalSubscriptionSupplier(() -> Arrays.asList(patientSub, practitionerSub));
-		mySubscriptionLoader.syncSubscriptions();
-
-// FIXME KHS
-//		mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(patientSub);
-//		mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(practitionerSub);
 	}
 
 	private Subscription buildEmpiSubscription(String theId, String theCriteria) {
