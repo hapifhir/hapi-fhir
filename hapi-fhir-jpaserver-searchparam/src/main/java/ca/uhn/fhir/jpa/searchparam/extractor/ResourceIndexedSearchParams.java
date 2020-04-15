@@ -26,18 +26,22 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.annotation.DependsOn;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import static org.apache.commons.lang3.StringUtils.compare;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class ResourceIndexedSearchParams {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceIndexedSearchParams.class);
-
 	final public Collection<ResourceIndexedSearchParamString> myStringParams = new ArrayList<>();
 	final public Collection<ResourceIndexedSearchParamToken> myTokenParams = new HashSet<>();
 	final public Collection<ResourceIndexedSearchParamNumber> myNumberParams = new ArrayList<>();
@@ -110,7 +114,7 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setHasLinks(myLinks.isEmpty() == false);
 	}
 
-	public void setUpdatedTime(Date theUpdateTime) {
+	void setUpdatedTime(Date theUpdateTime) {
 		setUpdatedTime(myStringParams, theUpdateTime);
 		setUpdatedTime(myNumberParams, theUpdateTime);
 		setUpdatedTime(myQuantityParams, theUpdateTime);

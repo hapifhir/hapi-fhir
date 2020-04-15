@@ -5,10 +5,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
-import com.google.common.io.Resources;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullWriter;
 import org.apache.commons.lang.StringUtils;
@@ -21,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,8 +26,10 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class JsonParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserR4Test.class);
@@ -156,10 +154,12 @@ public class JsonParserR4Test extends BaseTest {
 
 	@Test
 	public void testParseBundleWithMultipleNestedContainedResources() throws Exception {
-		URL url = Resources.getResource("bundle-with-two-patient-resources.json");
-		String text = Resources.toString(url, Charsets.UTF_8);
+		String text = loadResource("/bundle-with-two-patient-resources.json");
 
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, text);
+		assertEquals(Boolean.TRUE, bundle.getUserData(BaseParser.RESOURCE_CREATED_BY_PARSER));
+		assertEquals(Boolean.TRUE, bundle.getEntry().get(0).getResource().getUserData(BaseParser.RESOURCE_CREATED_BY_PARSER));
+		assertEquals(Boolean.TRUE, bundle.getEntry().get(1).getResource().getUserData(BaseParser.RESOURCE_CREATED_BY_PARSER));
 
 		assertEquals("12346", getPatientIdValue(bundle, 0));
 		assertEquals("12345", getPatientIdValue(bundle, 1));

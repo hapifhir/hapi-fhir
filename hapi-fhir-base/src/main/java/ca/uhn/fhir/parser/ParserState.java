@@ -43,6 +43,7 @@ import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.XmlUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.*;
 
@@ -456,7 +457,7 @@ class ParserState<T> {
 					RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
 					IPrimitiveType<?> newChildInstance = newPrimitiveInstance(myDefinition, primitiveTarget);
 					myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
-					PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance, theLocalPart);
+					PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance, theLocalPart, primitiveTarget.getName());
 					push(newState);
 					return;
 				}
@@ -495,10 +496,10 @@ class ParserState<T> {
 
 	private class ElementCompositeState extends BaseState {
 
-		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
-		private IBase myInstance;
-		private Set<String> myParsedNonRepeatableNames = new HashSet<>();
-		private String myElementName;
+		private final BaseRuntimeElementCompositeDefinition<?> myDefinition;
+		private final IBase myInstance;
+		private final Set<String> myParsedNonRepeatableNames = new HashSet<>();
+		private final String myElementName;
 
 		ElementCompositeState(PreResourceState thePreResourceState, String theElementName, BaseRuntimeElementCompositeDefinition<?> theDef, IBase theInstance) {
 			super(thePreResourceState);
@@ -585,7 +586,7 @@ class ParserState<T> {
 					IPrimitiveType<?> newChildInstance;
 					newChildInstance = getPrimitiveInstance(child, primitiveTarget, theChildName);
 					child.getMutator().addValue(myInstance, newChildInstance);
-					PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance, theChildName);
+					PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance, theChildName, primitiveTarget.getName());
 					push(newState);
 					return;
 				}
@@ -668,7 +669,7 @@ class ParserState<T> {
 
 	public class ElementIdState extends BaseState {
 
-		private IBaseElement myElement;
+		private final IBaseElement myElement;
 
 		ElementIdState(ParserState<T>.PreResourceState thePreResourceState, IBaseElement theElement) {
 			super(thePreResourceState);
@@ -689,7 +690,7 @@ class ParserState<T> {
 
 	private class ExtensionState extends BaseState {
 
-		private IBaseExtension<?, ?> myExtension;
+		private final IBaseExtension<?, ?> myExtension;
 
 		ExtensionState(PreResourceState thePreResourceState, IBaseExtension<?, ?> theExtension) {
 			super(thePreResourceState);
@@ -752,7 +753,7 @@ class ParserState<T> {
 						RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
 						IPrimitiveType<?> newChildInstance = newInstance(primitiveTarget);
 						myExtension.setValue(newChildInstance);
-						PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance, theLocalPart);
+						PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance, theLocalPart, primitiveTarget.getName());
 						push(newState);
 						return;
 					}
@@ -782,7 +783,7 @@ class ParserState<T> {
 
 	public class IdentifiableElementIdState extends BaseState {
 
-		private IIdentifiableElement myElement;
+		private final IIdentifiableElement myElement;
 
 		public IdentifiableElementIdState(ParserState<T>.PreResourceState thePreResourceState, IIdentifiableElement theElement) {
 			super(thePreResourceState);
@@ -802,7 +803,7 @@ class ParserState<T> {
 	}
 
 	private class MetaElementState extends BaseState {
-		private ResourceMetadataMap myMap;
+		private final ResourceMetadataMap myMap;
 
 		public MetaElementState(ParserState<T>.PreResourceState thePreResourceState, ResourceMetadataMap theMap) {
 			super(thePreResourceState);
@@ -824,7 +825,7 @@ class ParserState<T> {
 					break;
 				case "lastUpdated":
 					InstantDt updated = new InstantDt();
-					push(new PrimitiveState(getPreResourceState(), updated, theLocalPart));
+					push(new PrimitiveState(getPreResourceState(), updated, theLocalPart, "instant"));
 					myMap.put(ResourceMetadataKeyEnum.UPDATED, updated);
 					break;
 				case "security":
@@ -850,7 +851,7 @@ class ParserState<T> {
 						newProfiles = new ArrayList<>(1);
 					}
 					IdDt profile = new IdDt();
-					push(new PrimitiveState(getPreResourceState(), profile, theLocalPart));
+					push(new PrimitiveState(getPreResourceState(), profile, theLocalPart, "id"));
 					newProfiles.add(profile);
 					myMap.put(ResourceMetadataKeyEnum.PROFILES, Collections.unmodifiableList(newProfiles));
 					break;
@@ -1047,6 +1048,8 @@ class ParserState<T> {
 					}
 				}
 			}
+
+			myInstance.setUserData(BaseParser.RESOURCE_CREATED_BY_PARSER, Boolean.TRUE);
 
 			populateTarget();
 		}
@@ -1269,41 +1272,50 @@ class ParserState<T> {
 
 	private class PrimitiveState extends BaseState {
 		private final String myChildName;
+		private final String myTypeName;
 		private IPrimitiveType<?> myInstance;
 
-		PrimitiveState(PreResourceState thePreResourceState, IPrimitiveType<?> theInstance, String theChildName) {
+		PrimitiveState(PreResourceState thePreResourceState, IPrimitiveType<?> theInstance, String theChildName, String theTypeName) {
 			super(thePreResourceState);
 			myInstance = theInstance;
 			myChildName = theChildName;
+			myTypeName = theTypeName;
 		}
 
 		@Override
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			String value = theValue;
 			if ("value".equals(theName)) {
-				if ("".equals(theValue)) {
+				if ("".equals(value)) {
 					ParseLocation location = ParseLocation.fromElementName(myChildName);
-					myErrorHandler.invalidValue(location, theValue, "Attribute value must not be empty (\"\")");
+					myErrorHandler.invalidValue(location, value, "Attribute value must not be empty (\"\")");
 				} else {
+					if ("decimal".equals(myTypeName)) {
+						if (value != null && value.startsWith(".") && NumberUtils.isDigits(value.substring(1))) {
+							value = "0" + value;
+						}
+					}
+
 					try {
-						myInstance.setValueAsString(theValue);
+						myInstance.setValueAsString(value);
 					} catch (DataFormatException | IllegalArgumentException e) {
 						ParseLocation location = ParseLocation.fromElementName(myChildName);
-						myErrorHandler.invalidValue(location, theValue, e.getMessage());
+						myErrorHandler.invalidValue(location, value, e.getMessage());
 					}
 				}
 			} else if ("id".equals(theName)) {
 				if (myInstance instanceof IIdentifiableElement) {
-					((IIdentifiableElement) myInstance).setElementSpecificId(theValue);
+					((IIdentifiableElement) myInstance).setElementSpecificId(value);
 				} else if (myInstance instanceof IBaseElement) {
-					((IBaseElement) myInstance).setId(theValue);
+					((IBaseElement) myInstance).setId(value);
 				} else if (myInstance instanceof IBaseResource) {
-					new IdDt(theValue).applyTo((org.hl7.fhir.instance.model.api.IBaseResource) myInstance);
+					new IdDt(value).applyTo((org.hl7.fhir.instance.model.api.IBaseResource) myInstance);
 				} else {
 					ParseLocation location = ParseLocation.fromElementName(myChildName);
 					myErrorHandler.unknownAttribute(location, theName);
 				}
 			} else {
-				super.attributeValue(theName, theValue);
+				super.attributeValue(theName, value);
 			}
 		}
 
@@ -1348,7 +1360,7 @@ class ParserState<T> {
 		@Override
 		public void enteringNewElement(String theNamespace, String theChildName) throws DataFormatException {
 			if ("id".equals(theChildName)) {
-				push(new PrimitiveState(getPreResourceState(), myInstance.getId(), theChildName));
+				push(new PrimitiveState(getPreResourceState(), myInstance.getId(), theChildName, "id"));
 			} else if ("meta".equals(theChildName)) {
 				push(new MetaElementState(getPreResourceState(), myInstance.getResourceMetadata()));
 			} else {
