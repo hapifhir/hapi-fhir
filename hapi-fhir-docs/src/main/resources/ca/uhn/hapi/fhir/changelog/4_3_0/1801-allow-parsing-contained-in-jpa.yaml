@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 1801
+title: "When invoking JPA DAO methods programatically to store a resource (as opposed to using the FHIR REST API), if
+  the resource being stored had any contained resources, these would sometimes not be visible to the search parameter
+  indexer, leading to missing search params. This is a very fringe use case, but a workaround has been put in place to
+  solve it."

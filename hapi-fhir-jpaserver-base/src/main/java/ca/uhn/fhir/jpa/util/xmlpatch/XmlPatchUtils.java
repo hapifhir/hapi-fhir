@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jpa.util.xmlpatch;
 
-import java.io.*;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.github.dnault.xmlpatch.Patcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import com.github.dnault.xmlpatch.Patcher;
-
-import ca.uhn.fhir.context.FhirContext;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /*
  * #%L
@@ -27,9 +29,6 @@ import ca.uhn.fhir.context.FhirContext;
  * limitations under the License.
  * #L%
  */
-
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class XmlPatchUtils {
 
