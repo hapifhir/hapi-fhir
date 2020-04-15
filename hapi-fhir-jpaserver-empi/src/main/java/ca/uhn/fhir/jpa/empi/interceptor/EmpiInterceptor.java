@@ -13,12 +13,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Lazy
 @Service
 public class EmpiInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiInterceptor.class);

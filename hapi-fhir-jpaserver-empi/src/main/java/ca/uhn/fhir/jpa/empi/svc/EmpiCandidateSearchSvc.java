@@ -17,7 +17,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.empi.api.Constants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 import static org.slf4j.LoggerFactory.getLogger;
 
-@Lazy
 @Service
 public class EmpiCandidateSearchSvc {
 

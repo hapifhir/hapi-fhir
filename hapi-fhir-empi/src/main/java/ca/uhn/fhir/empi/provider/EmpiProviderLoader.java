@@ -5,10 +5,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-@Lazy
 @Service
 public class EmpiProviderLoader {
 	@Autowired

@@ -80,5 +80,11 @@
 			<artifactId>spring-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-test</artifactId>
+			<version>${spring_boot_version}</version>
+			<scope>test</scope>
+		</dependency>
+    </dependencies>
 </project>

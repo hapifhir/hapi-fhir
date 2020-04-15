@@ -5,21 +5,16 @@ import ca.uhn.fhir.empi.api.IEmpiRuleValidator;
 import ca.uhn.fhir.empi.config.TestEmpiConfig;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
-@RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {TestEmpiConfig.class})
 public class EmpiRuleValidatorImplTest {
-
-	@Autowired
-	private IEmpiRuleValidator myEmpiRuleValidator;
+	private IEmpiRuleValidator myEmpiRuleValidator = new EmpiRuleValidatorImpl();
 
    @Test
    public void testValidate() {

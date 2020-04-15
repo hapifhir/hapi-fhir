@@ -6,13 +6,11 @@ import ca.uhn.fhir.empi.api.IEmpiProperties;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
 
-@Lazy
 @Service
 public final class EIDHelper {
 	@Autowired

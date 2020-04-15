@@ -6,7 +6,6 @@ import ca.uhn.fhir.empi.api.MatchedTargetCandidate;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -14,7 +13,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Lazy
 @Service
 public class EmpiMatchFinderSvc implements IEmpiMatchFinderSvc {
 	@Autowired
