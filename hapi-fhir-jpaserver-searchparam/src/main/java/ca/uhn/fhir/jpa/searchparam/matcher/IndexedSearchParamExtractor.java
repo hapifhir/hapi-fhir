@@ -33,8 +33,6 @@ public class IndexedSearchParamExtractor {
 	private FhirContext myContext;
 	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
-	@Autowired
-	private InlineResourceLinkResolver myInlineResourceLinkResolver;
 
 	public ResourceIndexedSearchParams extractIndexedSearchParams(IBaseResource theResource, RequestDetails theRequest) {
 		ResourceTable entity = new ResourceTable();

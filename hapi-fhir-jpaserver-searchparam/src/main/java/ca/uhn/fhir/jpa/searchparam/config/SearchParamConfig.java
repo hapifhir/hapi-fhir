@@ -30,7 +30,6 @@ import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR5;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.IndexedSearchParamExtractor;
-import ca.uhn.fhir.jpa.searchparam.matcher.InlineResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
@@ -85,11 +84,6 @@ public class SearchParamConfig {
 	@Bean
 	public IndexedSearchParamExtractor indexedSearchParamExtractor() {
 		return new IndexedSearchParamExtractor();
-	}
-
-	@Bean
-	public InlineResourceLinkResolver inlineResourceLinkResolver() {
-		return new InlineResourceLinkResolver();
 	}
 
 	@Bean
