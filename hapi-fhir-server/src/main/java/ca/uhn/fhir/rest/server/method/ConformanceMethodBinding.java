@@ -155,22 +155,22 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (theRequest.getRequestType() == RequestTypeEnum.OPTIONS) {
 			if (theRequest.getOperation() == null && theRequest.getResourceName() == null) {
-				return true;
+				return MethodMatchEnum.PERFECT;
 			}
 		}
 
 		if (theRequest.getResourceName() != null) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 
 		if ("metadata".equals(theRequest.getOperation())) {
 			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
-				return true;
+				return MethodMatchEnum.PERFECT;
 			}
 			throw new MethodNotAllowedException("/metadata request must use HTTP GET", RequestTypeEnum.GET);
 		}
 
-		return false;
+		return MethodMatchEnum.NONE;
 	}
 
 	@Nonnull

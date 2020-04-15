@@ -107,28 +107,34 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	@Override
 	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (!Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (theRequest.getResourceName() == null) {
-			return myResourceOperationType == RestOperationTypeEnum.HISTORY_SYSTEM;
+			if (myResourceOperationType == RestOperationTypeEnum.HISTORY_SYSTEM) {
+				return MethodMatchEnum.PERFECT;
+			} else {
+				return MethodMatchEnum.NONE;
+			}
 		}
 		if (!StringUtils.equals(theRequest.getResourceName(), myResourceName)) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 
 		boolean haveIdParam = theRequest.getId() != null && !theRequest.getId().isEmpty();
 		boolean wantIdParam = myIdParamIndex != null;
 		if (haveIdParam != wantIdParam) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 
 		if (theRequest.getId() == null) {
-			return myResourceOperationType == RestOperationTypeEnum.HISTORY_TYPE;
+			if (myResourceOperationType != RestOperationTypeEnum.HISTORY_TYPE) {
+				return MethodMatchEnum.NONE;
+			}
 		} else if (theRequest.getId().hasVersionIdPart()) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 
-		return true;
+		return MethodMatchEnum.PERFECT;
 	}
 
 

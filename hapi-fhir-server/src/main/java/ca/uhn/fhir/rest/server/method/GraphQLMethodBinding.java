@@ -69,10 +69,10 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 	@Override
 	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (Constants.OPERATION_NAME_GRAPHQL.equals(theRequest.getOperation())) {
-			return true;
+			return MethodMatchEnum.PERFECT;
 		}
 
-		return false;
+		return MethodMatchEnum.NONE;
 	}
 
 	@Override

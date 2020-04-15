@@ -115,16 +115,16 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		Set<RequestTypeEnum> allowableRequestTypes = provideAllowableRequestTypes();
 		RequestTypeEnum requestType = theRequest.getRequestType();
 		if (!allowableRequestTypes.contains(requestType)) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (!getResourceName().equals(theRequest.getResourceName())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (getMatchingOperation() == null && StringUtils.isNotBlank(theRequest.getOperation())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (getMatchingOperation() != null && !getMatchingOperation().equals(theRequest.getOperation())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 
 		/*
@@ -137,7 +137,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		 * It's also needed for conditional update..
 		 */
 
-		return true;
+		return MethodMatchEnum.PERFECT;
 	}
 
 	@Override

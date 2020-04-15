@@ -25,6 +25,7 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
 
 /**
  * Holds all method bindings for an individual resource type
@@ -51,14 +52,28 @@ public class ResourceBinding {
 		}
 
 		ourLog.debug("Looking for a handler for {}", theRequest);
+
+		/*
+		 * Look for the method with the highest match strength
+		 */
+
+		BaseMethodBinding<?> matchedMethod = null;
+		MethodMatchEnum matchedMethodStrength = null;
+
 		for (BaseMethodBinding<?> rm : myMethodBindings) {
-			if (rm.incomingServerRequestMatchesMethod(theRequest)) {
-				ourLog.debug("Handler {} matches", rm);
-				return rm;
+			MethodMatchEnum nextMethodMatch = rm.incomingServerRequestMatchesMethod(theRequest);
+			if (nextMethodMatch != MethodMatchEnum.NONE) {
+				if (matchedMethodStrength == null || matchedMethodStrength.ordinal() < nextMethodMatch.ordinal()) {
+					matchedMethod = rm;
+					matchedMethodStrength = nextMethodMatch;
+				}
+				if (matchedMethodStrength == MethodMatchEnum.PERFECT) {
+					break;
+				}
 			}
-			ourLog.trace("Handler {} does not match", rm);
 		}
-		return null;
+
+		return matchedMethod;
 	}
 
 	public String getResourceName() {

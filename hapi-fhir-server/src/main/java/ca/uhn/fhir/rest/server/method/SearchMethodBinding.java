@@ -185,45 +185,53 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 				}
 			}
 
+			boolean parameterMatches = false;
+			boolean approx = false;
 			for (BaseQueryParameter nextMethodParam : getQueryParameters()) {
 
-				boolean parameterMatches;
 				if (nextRequestParam.equals(nextMethodParam.getName())) {
 					QualifierDetails qualifiers = extractQualifiersFromParameterName(nextRequestParam);
 					if (qualifiers.passes(nextMethodParam.getQualifierWhitelist(), nextMethodParam.getQualifierBlacklist())) {
 						parameterMatches = true;
-					} else {
-						parameterMatches = false;
 					}
 				} else if (nextUnqualifiedRequestParam.equals(nextMethodParam.getName())) {
 					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(nextUnqualifiedRequestParam);
-					parameterMatches = passesWhitelistAndBlacklist(qualifiedNames, nextMethodParam.getQualifierWhitelist(), nextMethodParam.getQualifierBlacklist());
-				} else {
-					parameterMatches = false;
+					if (passesWhitelistAndBlacklist(qualifiedNames, nextMethodParam.getQualifierWhitelist(), nextMethodParam.getQualifierBlacklist())) {
+						parameterMatches = true;
+					}
 				}
 
-				if (!parameterMatches) {
+				// Repetitions supplied by URL but not supported by this parameter
+				if (theRequest.getParameters().get(nextRequestParam).length > 1 != nextMethodParam.supportsRepetition()) {
+					approx = true;
+				}
+
+			}
+
+
+			if (parameterMatches) {
+
+				if (approx) {
 					retVal = retVal.weakerOf(MethodMatchEnum.APPROXIMATE);
-					if (nextMethodParam.isRequired()) {
-						retVal = retVal.weakerOf(MethodMatchEnum.NONE);
-					}
+				}
+
+			} else {
+
+				if (myAllowUnknownParams) {
+					retVal = retVal.weakerOf(MethodMatchEnum.APPROXIMATE);
 				} else {
-
-					// Repetitions supplied by URL but not supported by this parameter
-					if (theRequest.getParameters().get(nextRequestParam).length > 1 && !nextMethodParam.supportsRepetition()) {
-						retVal = retVal.weakerOf(MethodMatchEnum.NONE);
-					}
-
+					retVal = retVal.weakerOf(MethodMatchEnum.NONE);
 				}
 
-				if (retVal == MethodMatchEnum.NONE) {
-					break;
-				}
+			}
+
+			if (retVal == MethodMatchEnum.NONE) {
+				break;
 			}
 
 		}
 
-		if (retVal != MethodMatchEnum.APPROXIMATE) {
+		if (retVal != MethodMatchEnum.APPROXIMATE && retVal != MethodMatchEnum.NONE) {
 			for (String nextRequiredParamName : myRequiredParamNames) {
 				if (!qualifiedParamNames.contains(nextRequiredParamName)) {
 					if (!unqualifiedNames.contains(nextRequiredParamName)) {

@@ -257,12 +257,12 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		boolean requestHasId = theRequest.getId() != null;
 		if (requestHasId) {
-			return myCanOperateAtInstanceLevel;
+			return myCanOperateAtInstanceLevel ? MethodMatchEnum.PERFECT : MethodMatchEnum.NONE;
 		}
 		if (isNotBlank(theRequest.getResourceName())) {
-			return myCanOperateAtTypeLevel;
+			return myCanOperateAtTypeLevel ? MethodMatchEnum.PERFECT : MethodMatchEnum.NONE;
 		}
-		return myCanOperateAtServerLevel;
+		return myCanOperateAtServerLevel ? MethodMatchEnum.PERFECT : MethodMatchEnum.NONE;
 	}
 
 	@Override
