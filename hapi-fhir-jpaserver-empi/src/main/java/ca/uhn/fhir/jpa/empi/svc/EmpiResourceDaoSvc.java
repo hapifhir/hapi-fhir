@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
-import ca.uhn.fhir.empi.api.IEmpiConfig;
+import ca.uhn.fhir.empi.api.IEmpiProperties;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -22,7 +22,7 @@ public class EmpiResourceDaoSvc {
 	@Autowired
 	DaoRegistry myDaoRegistry;
 	@Autowired
-	IEmpiConfig myEmpiConfig;
+    IEmpiProperties myEmpiConfig;
 
 	private IFhirResourceDao myPatientDao;
 	private IFhirResourceDao myPersonDao;

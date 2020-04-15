@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.empi.broker;
 
-import ca.uhn.fhir.empi.api.IEmpiConfig;
+import ca.uhn.fhir.empi.api.IEmpiProperties;
 import ca.uhn.fhir.empi.api.IEmpiRuleValidator;
 import ca.uhn.fhir.empi.provider.EmpiProviderLoader;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -24,7 +24,7 @@ public class EmpiInitializer {
 	@Autowired
 	IInterceptorService myInterceptorService;
 	@Autowired
-	IEmpiConfig myEmpiConfig;
+	IEmpiProperties myEmpiConfig;
 	@Autowired
 	IEmpiRuleValidator myEmpiRuleValidator;
 	@Autowired

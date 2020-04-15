@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.empi.config;
  */
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import org.hl7.fhir.dstu2.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -34,12 +35,12 @@ import javax.annotation.PostConstruct;
 	"ca.uhn.fhir.jpa.empi",
 	"ca.uhn.fhir.empi",
 })
-public class EmpiCtxConfig {
+public class EmpiConfig {
 	@Autowired
 	DaoConfig myDaoConfig;
 
 	@PostConstruct
 	public void init() {
-		myDaoConfig.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.MESSAGE);
+		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
 	}
 }

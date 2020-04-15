@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
-import ca.uhn.fhir.empi.api.IEmpiConfig;
+import ca.uhn.fhir.empi.api.IEmpiProperties;
 import ca.uhn.fhir.empi.util.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
@@ -20,7 +20,7 @@ public class EIDHelperTest extends BaseEmpiR4Test {
 	@Autowired
 	private EIDHelper myEIDHelper;
 	@Autowired
-	private IEmpiConfig myEmpiConfig;
+	private IEmpiProperties myEmpiConfig;
 
 	@Test
 	public void testExtractionOfInternalEID() {

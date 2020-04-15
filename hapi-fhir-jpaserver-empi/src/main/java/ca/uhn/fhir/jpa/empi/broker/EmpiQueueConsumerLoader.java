@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.empi.broker;
 
-import ca.uhn.fhir.empi.api.IEmpiConfig;
+import ca.uhn.fhir.empi.api.IEmpiProperties;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import com.google.common.annotations.VisibleForTesting;
@@ -48,11 +48,11 @@ public class EmpiQueueConsumerLoader {
 	@PostConstruct
 	public void init() {
 		if (myEmpiChannel == null) {
-			myEmpiChannel = mySubscriptionChannelFactory.newDeliveryReceivingChannel(IEmpiConfig.EMPI_MATCHING_CHANNEL_NAME, null);
+			myEmpiChannel = mySubscriptionChannelFactory.newDeliveryReceivingChannel(IEmpiProperties.EMPI_MATCHING_CHANNEL_NAME, null);
 		}
 		if (myEmpiChannel != null) {
 			myEmpiChannel.subscribe(myEmpiConsumer);
-			ourLog.info("EMPI Matching Subscriber subscribed to Matching Channel {} with name {}", myEmpiChannel.getClass().getName(), IEmpiConfig.EMPI_MATCHING_CHANNEL_NAME);
+			ourLog.info("EMPI Matching Subscriber subscribed to Matching Channel {} with name {}", myEmpiChannel.getClass().getName(), IEmpiProperties.EMPI_MATCHING_CHANNEL_NAME);
 		}
 	}
 

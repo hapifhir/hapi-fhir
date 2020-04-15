@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.helper;
 
-import ca.uhn.fhir.empi.api.IEmpiConfig;
-import ca.uhn.fhir.empi.rules.config.EmpiConfigImpl;
+import ca.uhn.fhir.empi.api.IEmpiProperties;
+import ca.uhn.fhir.empi.rules.config.EmpiPropertiesImpl;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.springframework.context.annotation.Bean;
@@ -19,11 +19,11 @@ public class EmpiHelperConfig {
 
 	@Primary
 	@Bean
-	IEmpiConfig empiConfig() throws IOException {
+    IEmpiProperties empiConfig() throws IOException {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		Resource resource = resourceLoader.getResource("empi/empi-rules.json");
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		// Set Enabled to true
-		return new EmpiConfigImpl().setEnabled(true).setScriptText(json);
+		return new EmpiPropertiesImpl().setEnabled(true).setScriptText(json);
 	}
 }

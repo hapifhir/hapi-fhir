@@ -2,7 +2,7 @@ package ca.uhn.fhir.empi.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.Constants;
-import ca.uhn.fhir.empi.api.IEmpiConfig;
+import ca.uhn.fhir.empi.api.IEmpiProperties;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -28,7 +28,7 @@ public final class PersonHelper {
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private IEmpiConfig myEmpiConfig;
+	private IEmpiProperties myEmpiConfig;
 	@Autowired
 	private EIDHelper myEIDHelper;
 

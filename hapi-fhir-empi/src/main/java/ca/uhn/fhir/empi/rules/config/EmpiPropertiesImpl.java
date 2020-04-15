@@ -1,12 +1,12 @@
 package ca.uhn.fhir.empi.rules.config;
 
-import ca.uhn.fhir.empi.api.IEmpiConfig;
+import ca.uhn.fhir.empi.api.IEmpiProperties;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.util.JsonUtil;
 
 import java.io.IOException;
 
-public class EmpiConfigImpl implements IEmpiConfig {
+public class EmpiPropertiesImpl implements IEmpiProperties {
 	private boolean myEnabled;
 	private int myConcurrentConsumers = EMPI_DEFAULT_CONCURRENT_CONSUMERS;
 	private String myScriptText;
@@ -18,7 +18,7 @@ public class EmpiConfigImpl implements IEmpiConfig {
 	}
 
 	@Override
-	public EmpiConfigImpl setEnabled(boolean theEnabled) {
+	public EmpiPropertiesImpl setEnabled(boolean theEnabled) {
 		myEnabled = theEnabled;
 		return this;
 	}
@@ -28,7 +28,7 @@ public class EmpiConfigImpl implements IEmpiConfig {
 		return myConcurrentConsumers;
 	}
 
-	public EmpiConfigImpl setConcurrentConsumers(int theConcurrentConsumers) {
+	public EmpiPropertiesImpl setConcurrentConsumers(int theConcurrentConsumers) {
 		myConcurrentConsumers = theConcurrentConsumers;
 		return this;
 	}
@@ -37,7 +37,7 @@ public class EmpiConfigImpl implements IEmpiConfig {
 		return myScriptText;
 	}
 
-	public EmpiConfigImpl setScriptText(String theScriptText) throws IOException {
+	public EmpiPropertiesImpl setScriptText(String theScriptText) throws IOException {
 		myScriptText = theScriptText;
 		myEmpiRules = JsonUtil.deserialize(theScriptText, EmpiRulesJson.class);
 		return this;
@@ -48,7 +48,7 @@ public class EmpiConfigImpl implements IEmpiConfig {
 		return myEmpiRules;
 	}
 
-	public EmpiConfigImpl setEmpiRules(EmpiRulesJson theEmpiRules) {
+	public EmpiPropertiesImpl setEmpiRules(EmpiRulesJson theEmpiRules) {
 		myEmpiRules = theEmpiRules;
 		return this;
 	}

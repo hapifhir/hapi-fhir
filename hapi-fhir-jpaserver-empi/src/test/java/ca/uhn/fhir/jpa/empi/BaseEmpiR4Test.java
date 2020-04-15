@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.empi;
 
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.api.IEmpiConfig;
+import ca.uhn.fhir.empi.api.IEmpiProperties;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
-import ca.uhn.fhir.jpa.empi.config.EmpiCtxConfig;
+import ca.uhn.fhir.jpa.empi.config.EmpiConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
 import ca.uhn.fhir.jpa.empi.dao.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.entity.EmpiLink;
@@ -40,7 +40,7 @@ import static org.junit.Assert.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {EmpiCtxConfig.class, TestEmpiConfigR4.class, SubscriptionProcessorConfig.class})
+@ContextConfiguration(classes = {EmpiConfig.class, TestEmpiConfigR4.class, SubscriptionProcessorConfig.class})
 abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = getLogger(BaseEmpiR4Test.class);
 
@@ -69,7 +69,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected ResourceTableHelper myResourceTableHelper;
 	@Autowired
-	protected IEmpiConfig myEmpiConfig;
+	protected IEmpiProperties myEmpiConfig;
 	@Autowired
 	protected EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired

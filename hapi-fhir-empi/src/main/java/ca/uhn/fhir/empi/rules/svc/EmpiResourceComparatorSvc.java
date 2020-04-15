@@ -23,7 +23,7 @@ package ca.uhn.fhir.empi.rules.svc;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.api.IEmpiConfig;
+import ca.uhn.fhir.empi.api.IEmpiProperties;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -45,12 +45,12 @@ import java.util.List;
 @Service
 public class EmpiResourceComparatorSvc {
 	private final FhirContext myFhirContext;
-	private final IEmpiConfig myEmpiConfig;
+	private final IEmpiProperties myEmpiConfig;
 	private EmpiRulesJson myEmpiRulesJson;
 	private final List<EmpiResourceFieldComparator> myFieldComparators = new ArrayList<>();
 
 	@Autowired
-	public EmpiResourceComparatorSvc(FhirContext theFhirContext, IEmpiConfig theEmpiConfig) {
+	public EmpiResourceComparatorSvc(FhirContext theFhirContext, IEmpiProperties theEmpiConfig) {
 		myFhirContext = theFhirContext;
 		myEmpiConfig = theEmpiConfig;
 	}
