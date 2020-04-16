@@ -45,15 +45,13 @@ public class EIDHelperTest extends BaseEmpiR4Test {
 		Patient patient = new Patient();
 		patient.addIdentifier()
 			.setSystem(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())
-			.setValue(uniqueID)
-			.setUse(Identifier.IdentifierUse.OFFICIAL);
+			.setValue(uniqueID);
 
 		Optional<CanonicalEID> externalEid = myEIDHelper.getExternalEid(patient);
 
 		assertThat(externalEid.isPresent(), is(true));
 		assertThat(externalEid.get().getValue(), is(equalTo(uniqueID)));
 		assertThat(externalEid.get().getSystem(), is(equalTo(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())));
-		assertThat(externalEid.get().getUse(), is(nullValue()));
 	}
 
 	@Test

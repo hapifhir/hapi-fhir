@@ -250,7 +250,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testCase1(){
+	public void testWhenThereAreNoMATCHOrPOSSIBLE_MATCHOutcomesThatANewPersonIsCreated(){
 		/**
 		 * CASE 1: No MATCHED and no PROBABLE_MATCHED outcomes -> a new Person resource
 		 * is created and linked to that Pat/Prac. All fields are copied from the Pat/Prac to the Person.
@@ -263,7 +263,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testCase2(){
+	public void testWhenAllMATCHResultsAreToSamePersonThatTheyAreLinked(){
 		/**
 		 * CASE 2: All of the MATCHED Pat/Prac resources are already linked to the same Person ->
 		 * a new Link is created between the new Pat/Prac and that Person and is set to MATCHED.
@@ -282,7 +282,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testCase3(){
+	public void testMATCHResultWithMultipleCandidatesCreatesPOSSIBLE_DUPLICATELinksAndNoPersonIsCreated(){
 		/**
 		 * CASE 3: The MATCHED Pat/Prac resources link to more than one Person -> Mark all links as PROBABLE_MATCHED.
 		 * All other Person resources are marked as POSSIBLE_DUPLICATE of this first Person.
@@ -314,7 +314,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	}
 	@Test
-	public void testCase4(){
+	public void testWhenAllMatchResultsArePOSSIBLE_MATCHThattheyAreLinkedAndNoPersonIsCreated(){
 		/**
 		 * CASE 4: Only PROBABLE_MATCH outcomes -> In this case, empi-link records are created with PROBABLE_MATCH
 		 * outcome and await manual assignment to either NO_MATCH or MATCHED. Person resources are not changed.
@@ -342,8 +342,13 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		patient2.getNameFirstRep().setFamily("pleasedonotmatchatall");
 		patient2  = createPatientAndUpdateLinks(patient2);
 
+		Patient patient3 = buildJanePatient();
+		patient3.getNameFirstRep().setFamily("familyone");
+		patient3  = createPatientAndUpdateLinks(patient3);
+
 		assertThat(patient2, is(not(matchedToAPerson())));
 		assertThat(patient2, is(possibleMatchWith(patient)));
+		assertThat(patient3, is(samePersonAs(patient)));
 	}
 
 

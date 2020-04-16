@@ -28,7 +28,7 @@ public final class EIDHelper {
 		return new CanonicalEID(
 			Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM,
 			UUID.randomUUID().toString(),
-			"secondary"
+			null
 		);
 	}
 
