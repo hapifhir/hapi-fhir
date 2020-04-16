@@ -8,10 +8,7 @@ import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
 import ca.uhn.fhir.jpa.empi.config.EmpiConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
-import ca.uhn.fhir.jpa.empi.matcher.IsLinkedTo;
-import ca.uhn.fhir.jpa.empi.matcher.IsPossibleDuplicateOf;
-import ca.uhn.fhir.jpa.empi.matcher.IsPossibleMatchWith;
-import ca.uhn.fhir.jpa.empi.matcher.IsSamePersonAs;
+import ca.uhn.fhir.jpa.empi.matcher.*;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.empi.svc.ResourceTableHelper;
@@ -130,8 +127,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Nonnull
 	protected Patient buildPatientWithNameIdAndBirthday(String theGivenName, String theId, Date theBirthday) {
 		Patient patient = new Patient();
-		patient.addName().addGiven(theGivenName);
-		patient.addName().setFamily(TEST_NAME_FAMILY);
+		patient.getNameFirstRep().addGiven(theGivenName);
+		patient.getNameFirstRep().setFamily(TEST_NAME_FAMILY);
 		patient.addIdentifier().setSystem(TEST_ID_SYSTEM).setValue(theId);
 		patient.setBirthDate(theBirthday);
 		patient.setTelecom(Collections.singletonList(TEST_TELECOM));
@@ -244,6 +241,10 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	protected Matcher<IBaseResource> possibleDuplicateOf(IBaseResource...theBaseResource) {
 		return IsPossibleDuplicateOf.possibleDuplicateOf(myResourceTableHelper, myEmpiLinkDaoSvc, theBaseResource);
+	}
+
+	protected Matcher<IBaseResource> matchedToAPerson() {
+		return IsMatchedToAPerson.matchedToAPerson(myResourceTableHelper, myEmpiLinkDaoSvc);
 	}
 
 }

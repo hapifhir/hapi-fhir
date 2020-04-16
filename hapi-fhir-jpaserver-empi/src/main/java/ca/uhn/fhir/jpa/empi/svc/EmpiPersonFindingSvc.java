@@ -11,17 +11,22 @@ import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 @Service
 public class EmpiPersonFindingSvc {
+	private static final Logger ourLog = getLogger(EmpiPersonFindingSvc.class);
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -90,7 +95,7 @@ public class EmpiPersonFindingSvc {
 				EmpiLink fakeEmpiLink = new EmpiLink();
 				fakeEmpiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 				fakeEmpiLink.setPersonPid(pidOrNull);
-				MatchedPersonCandidate mpc = new MatchedPersonCandidate(new ResourcePersistentId(pidOrNull), fakeEmpiLink);
+				MatchedPersonCandidate mpc = new MatchedPersonCandidate(new ResourcePersistentId(pidOrNull), fakeEmpiLink.getMatchResult());
 				return Optional.of(Collections.singletonList(mpc));
 			}
 		}
@@ -108,7 +113,7 @@ public class EmpiPersonFindingSvc {
 		Optional<EmpiLink> oLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(targetPid);
 		if (oLink.isPresent()) {
 			ResourcePersistentId pid = new ResourcePersistentId(oLink.get().getPersonPid());
-			return Optional.of(Collections.singletonList(new MatchedPersonCandidate(pid, oLink.get())));
+			return Optional.of(Collections.singletonList(new MatchedPersonCandidate(pid, oLink.get().getMatchResult())));
 		} else {
 			return Optional.empty();
 		}
@@ -144,24 +149,44 @@ public class EmpiPersonFindingSvc {
 		List<Long> unmatchablePersonPids = getNoMatchPersonPids(theBaseResource);
 		List<MatchedTargetCandidate> matchedCandidates = myEmpiMatchFinderSvc.getMatchedTargetCandidates(myFhirContext.getResourceDefinition(theBaseResource).getName(), theBaseResource);
 
-		//Convert all possible match targets to their equivalent Persons by looking up in the EmpiLink table,
-		//while ensuring that the matches aren't in our NO_MATCH list.
-		// The data flow is as follows ->
-		// MatchedTargetCandidate -> Person -> EmpiLink -> MatchedPersonCandidate
+		/** FIXME remove.
 		List<MatchedPersonCandidate> matchedPersons = matchedCandidates.stream()
-			.filter(mc -> mc.getMatchResult().equals(EmpiMatchResultEnum.MATCH))//FIXME EMPI GGG WE WANT TO INCLUDE POSSIBLE_MATCH HERE TOO!
+			.filter(mc -> mc.getMatchResult().equals(EmpiMatchResultEnum.MATCH) || mc.getMatchResult().equals(EmpiMatchResultEnum.POSSIBLE_MATCH))//FIXME EMPI GGG START HERE WE WANT TO INCLUDE POSSIBLE_MATCH HERE TOO!
 			.map(MatchedTargetCandidate::getCandidate)
 			.map(candidate -> myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTableHelper.getPidOrNull(candidate)))
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.filter(candidateLink -> !unmatchablePersonPids.contains(candidateLink.getPersonPid()))
-			.map(link -> new MatchedPersonCandidate(getResourcePersistentId(link.getPersonPid()), link))
+			.map(link -> new MatchedPersonCandidate(getResourcePersistentId(link.getPersonPid()), link.getMatchResult()))
 			.collect(Collectors.toList());
+*/
 
-		if (matchedPersons.isEmpty()) {
+		//Convert all possible match targets to their equivalent Persons by looking up in the EmpiLink table,
+		//while ensuring that the matches aren't in our NO_MATCH list.
+		// The data flow is as follows ->
+		// MatchedTargetCandidate -> Person -> EmpiLink -> MatchedPersonCandidate
+		List<MatchedPersonCandidate> matchedPersonCandidates = new ArrayList<>();
+		matchedCandidates = matchedCandidates.stream().filter(mc -> mc.getMatchResult().equals(EmpiMatchResultEnum.MATCH) || mc.getMatchResult().equals(EmpiMatchResultEnum.POSSIBLE_MATCH)).collect(Collectors.toList());
+		for (MatchedTargetCandidate match: matchedCandidates) {
+			Optional<EmpiLink> optMatchEmpiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTableHelper.getPidOrNull(match.getCandidate()));
+			if (!optMatchEmpiLink.isPresent()) {
+				continue;
+			}
+
+			EmpiLink matchEmpiLink = optMatchEmpiLink.get();
+			if (unmatchablePersonPids.contains(matchEmpiLink.getPersonPid())) {
+				ourLog.info("Skipping EMPI on candidate person with PID {} due to manual NO_MATCH", matchEmpiLink.getPersonPid());
+				continue;
+			}
+
+			MatchedPersonCandidate candidate = new MatchedPersonCandidate(getResourcePersistentId(matchEmpiLink.getPersonPid()), match.getMatchResult());
+			matchedPersonCandidates.add(candidate);
+		}
+
+		if (matchedPersonCandidates.isEmpty()) {
 			return Optional.empty();
 		} else {
-			return Optional.of(matchedPersons);
+			return Optional.of(matchedPersonCandidates);
 		}
 	}
 

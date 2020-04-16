@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -307,6 +308,10 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//There should now be 2 POSSIBLE_MATCH links with this person.
 		assertThat(incomingJanePatient, is(possibleMatchWith(janePatient, janePatient2)));
 
+		//Ensure there is no successful MATCH links for incomingJanePatient
+		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTableHelper.getPidOrNull(incomingJanePatient));
+		assertThat(matchedLinkForTargetPid.isPresent(), is(false));
+
 	}
 	@Test
 	public void testCase4(){
@@ -314,7 +319,34 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		 * CASE 4: Only PROBABLE_MATCH outcomes -> In this case, empi-link records are created with PROBABLE_MATCH
 		 * outcome and await manual assignment to either NO_MATCH or MATCHED. Person resources are not changed.
 		 */
+		Patient patient = buildJanePatient();
+		patient.getNameFirstRep().setFamily("familyone");
+		patient  = createPatientAndUpdateLinks(patient);
+		assertThat(patient, is(samePersonAs(patient)));
+
+		Patient patient2 = buildJanePatient();
+		patient2.getNameFirstRep().setFamily("pleasedonotmatchatall");
+		patient2  = createPatientAndUpdateLinks(patient2);
+
+		assertThat(patient2, is(possibleMatchWith(patient)));
 	}
+
+	@Test
+	public void testWhenAnIncomingResourceHasMatchesAndPossibleMatchesThatItLinksToMatch() {
+		Patient patient = buildJanePatient();
+		patient.getNameFirstRep().setFamily("familyone");
+		patient  = createPatientAndUpdateLinks(patient);
+		assertThat(patient, is(samePersonAs(patient)));
+
+		Patient patient2 = buildJanePatient();
+		patient2.getNameFirstRep().setFamily("pleasedonotmatchatall");
+		patient2  = createPatientAndUpdateLinks(patient2);
+
+		assertThat(patient2, is(not(matchedToAPerson())));
+		assertThat(patient2, is(possibleMatchWith(patient)));
+	}
+
+
 
 
 }
