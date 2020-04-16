@@ -290,10 +290,6 @@ public class SearchParameter extends BaseQueryParameter {
 			throw new ConfigurationException("Unsupported data type for parameter: " + theType.getCanonicalName());
 		}
 
-		if (DateRangeParam.class.isAssignableFrom(theType)) {
-			mySupportsRepetition = true;
-		}
-
 		RestSearchParameterTypeEnum typeEnum = ourParamTypes.get(theType);
 		if (typeEnum != null) {
 			Set<String> builtInQualifiers = ourParamQualifiers.get(typeEnum);
