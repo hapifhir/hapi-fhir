@@ -17,8 +17,8 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EmpiConsumer implements MessageHandler {
-	private Logger ourLog = LoggerFactory.getLogger(EmpiConsumer.class);
+public class EmpiMessageHandler implements MessageHandler {
+	private Logger ourLog = LoggerFactory.getLogger(EmpiMessageHandler.class);
 	@Autowired
 	private EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired

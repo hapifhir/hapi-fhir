@@ -126,5 +126,9 @@ public class SubscriptionChannelFactory {
 		}
 
 
+		@Override
+		public String getName() {
+			return myWrappedChannel.getName();
+		}
 	}
 }

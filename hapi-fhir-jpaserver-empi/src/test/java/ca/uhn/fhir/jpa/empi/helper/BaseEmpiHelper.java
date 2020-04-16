@@ -82,6 +82,7 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 		myEmpiSubscriptionLoader.daoUpdateEmpiSubscriptions();
 		mySubscriptionLoader.syncSubscriptions();
 		waitForActivatedSubscriptionCount(2);
+		myEmpiQueueConsumerLoader.init();
 	}
 
 	protected void waitForActivatedSubscriptionCount(int theSize) {

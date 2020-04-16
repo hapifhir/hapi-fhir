@@ -33,6 +33,7 @@ public class EmpiInitializer {
 	EmpiInterceptor myEmpiInterceptor;
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
+	// FIXME KHS this can probably go now
 	// This @Order is here to ensure that MatchingQueueSubscriberLoader has initialized before we initialize this.
 	// Otherwise the EMPI subscriptions won't get loaded into the SubscriptionRegistry
 	@Order
@@ -44,7 +45,6 @@ public class EmpiInitializer {
 		myInterceptorService.registerInterceptor(myEmpiInterceptor);
 		ourLog.info("EMPI interceptor registered");
 
-		myApplicationContext.getBean(EmpiQueueConsumerLoader.class);
 		EmpiProviderLoader empiProviderLoader = myApplicationContext.getBean(EmpiProviderLoader.class);
 		empiProviderLoader.loadProvider();
 

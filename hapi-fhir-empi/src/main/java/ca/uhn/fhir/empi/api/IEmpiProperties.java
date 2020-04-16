@@ -8,8 +8,6 @@ public interface IEmpiProperties {
 
 	boolean isEnabled();
 
-	IEmpiProperties setEnabled(boolean theEnabled);
-
 	int getConcurrentConsumers();
 
 	EmpiRulesJson getEmpiRules();
