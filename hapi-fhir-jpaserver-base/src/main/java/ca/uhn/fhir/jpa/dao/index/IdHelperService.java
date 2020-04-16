@@ -63,7 +63,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -146,7 +145,7 @@ public class IdHelperService {
 			if (myDaoConfig.isDeleteEnabled()) {
 				retVal = resolveResourceIdentity(thePartitionId, theResourceType, theId);
 			} else {
-				String key = stringifyForKey(thePartitionId) + "/" + theResourceType + "/" + theId;
+				String key = PartitionId.stringifyForKey(thePartitionId) + "/" + theResourceType + "/" + theId;
 				retVal = myPersistentIdCache.get(key, t -> resolveResourceIdentity(thePartitionId, theResourceType, theId));
 			}
 
@@ -196,7 +195,7 @@ public class IdHelperService {
 
 				for (Iterator<String> idIterator = nextIds.iterator(); idIterator.hasNext(); ) {
 					String nextId = idIterator.next();
-					String key = stringifyForKey(thePartitionId) + "/" + nextResourceType + "/" + nextId;
+					String key = PartitionId.stringifyForKey(thePartitionId) + "/" + nextResourceType + "/" + nextId;
 					Long nextCachedPid = myPersistentIdCache.getIfPresent(key);
 					if (nextCachedPid != null) {
 						idIterator.remove();
@@ -221,7 +220,7 @@ public class IdHelperService {
 						Long pid = (Long) nextView[1];
 						retVal.add(new ResourcePersistentId(pid));
 
-						String key = stringifyForKey(thePartitionId) + "/" + nextResourceType + "/" + forcedId;
+						String key = PartitionId.stringifyForKey(thePartitionId) + "/" + nextResourceType + "/" + forcedId;
 						myPersistentIdCache.put(key, pid);
 					}
 				}
@@ -405,14 +404,6 @@ public class IdHelperService {
 			.maximumSize(10000)
 			.expireAfterWrite(10, TimeUnit.MINUTES)
 			.build();
-	}
-
-	private static String stringifyForKey(PartitionId thePartitionId) {
-		String retVal = "(null)";
-		if (thePartitionId != null) {
-			retVal = thePartitionId.getPartitionIdStringOrNullString();
-		}
-		return retVal;
 	}
 
 	public static boolean isValidPid(IIdType theId) {

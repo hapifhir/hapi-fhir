@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.entity.*;
@@ -81,7 +80,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 		myPartitionConfig.setIncludePartitionInSearchHashes(new PartitionConfig().isIncludePartitionInSearchHashes());
 		myPartitionConfig.setPartitioningEnabled(new PartitionConfig().isPartitioningEnabled());
-		myPartitionConfig.setAllowReferencesAcrossPartitions(new PartitionConfig().isAllowReferencesAcrossPartitions());
+		myPartitionConfig.setAllowReferencesAcrossPartitions(new PartitionConfig().getAllowReferencesAcrossPartitions());
 
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyInterceptor);
 		myInterceptor = null;
@@ -140,7 +139,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testCreate_CrossPartitionReference_ByPid_Allowed() {
-		myPartitionConfig.setAllowReferencesAcrossPartitions(true);
+		myPartitionConfig.setAllowReferencesAcrossPartitions(PartitionConfig.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
 		// Create patient in partition 1
 		addCreatePartition(myPartitionId, myPartitionDate);
@@ -188,7 +187,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testCreate_CrossPartitionReference_ByForcedId_Allowed() {
-		myPartitionConfig.setAllowReferencesAcrossPartitions(true);
+		myPartitionConfig.setAllowReferencesAcrossPartitions(PartitionConfig.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
 		// Create patient in partition 1
 		addCreatePartition(myPartitionId, myPartitionDate);
@@ -238,8 +237,6 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testCreate_SamePartitionReference_DefaultPartition_ByPid() {
-		myPartitionConfig.setAllowReferencesAcrossPartitions(true);
-
 		// Create patient in partition NULL
 		addCreateNoPartitionId(myPartitionDate);
 		Patient patient = new Patient();
@@ -263,8 +260,6 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testCreate_SamePartitionReference_DefaultPartition_ByForcedId() {
-		myPartitionConfig.setAllowReferencesAcrossPartitions(true);
-
 		// Create patient in partition NULL
 		addCreateNoPartitionId(myPartitionDate);
 		Patient patient = new Patient();

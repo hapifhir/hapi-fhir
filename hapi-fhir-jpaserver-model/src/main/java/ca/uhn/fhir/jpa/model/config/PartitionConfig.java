@@ -6,7 +6,7 @@ package ca.uhn.fhir.jpa.model.config;
 public class PartitionConfig {
 
 	private boolean myPartitioningEnabled = false;
-	private boolean myAllowReferencesAcrossPartitions = false;
+	private CrossPartitionReferenceMode myAllowReferencesAcrossPartitions = CrossPartitionReferenceMode.NOT_ALLOWED;
 	private boolean myIncludePartitionInSearchHashes = true;
 
 	/**
@@ -54,20 +54,36 @@ public class PartitionConfig {
 	}
 
 	/**
-	 * Should resources references be permitted to cross partition boundaries. Default is <code>false</code>.
+	 * Should resources references be permitted to cross partition boundaries. Default is {@link CrossPartitionReferenceMode#NOT_ALLOWED}.
 	 *
 	 * @since 5.0.0
 	 */
-	public boolean isAllowReferencesAcrossPartitions() {
+	public CrossPartitionReferenceMode getAllowReferencesAcrossPartitions() {
 		return myAllowReferencesAcrossPartitions;
 	}
 
 	/**
-	 * Should resources references be permitted to cross partition boundaries. Default is <code>false</code>.
+	 * Should resources references be permitted to cross partition boundaries. Default is {@link CrossPartitionReferenceMode#NOT_ALLOWED}.
 	 *
 	 * @since 5.0.0
 	 */
-	public void setAllowReferencesAcrossPartitions(boolean theAllowReferencesAcrossPartitions) {
+	public void setAllowReferencesAcrossPartitions(CrossPartitionReferenceMode theAllowReferencesAcrossPartitions) {
 		myAllowReferencesAcrossPartitions = theAllowReferencesAcrossPartitions;
 	}
+
+
+	public enum CrossPartitionReferenceMode {
+
+		/**
+		 * References between resources are not allowed to cross partition boundaries
+		 */
+		NOT_ALLOWED,
+
+		/**
+		 * References can cross partition boundaries, in a way that hides the existence of partitions to the end user
+		 */
+		ALLOWED_UNQUALIFIED
+
+	}
+
 }

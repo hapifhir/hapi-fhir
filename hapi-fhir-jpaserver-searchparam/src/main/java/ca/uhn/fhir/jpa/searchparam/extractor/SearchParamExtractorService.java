@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
@@ -64,6 +65,8 @@ public class SearchParamExtractorService {
 	private FhirContext myContext;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private PartitionConfig myPartitionConfig;
 	@Autowired(required = false)
 	private IResourceLinkResolver myResourceLinkResolver;
 
@@ -71,14 +74,14 @@ public class SearchParamExtractorService {
 	 * This method is responsible for scanning a resource for all of the search parameter instances. I.e. for all search parameters defined for
 	 * a given resource type, it extracts the associated indexes and populates {@literal theParams}.
 	 */
-	public void extractFromResource(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, Date theUpdateTime, boolean theFailOnInvalidReference) {
+	public void extractFromResource(PartitionId thePartitionId, RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, Date theUpdateTime, boolean theFailOnInvalidReference) {
 		IBaseResource resource = normalizeResource(theResource);
 
 		// All search parameter types except Reference
 		extractSearchIndexParameters(theRequestDetails, theParams, resource, theEntity);
 
 		// Reference search parameters
-		extractResourceLinks(theParams, theEntity, resource, theUpdateTime, theFailOnInvalidReference, theRequestDetails);
+		extractResourceLinks(thePartitionId, theParams, theEntity, resource, theUpdateTime, theFailOnInvalidReference, theRequestDetails);
 
 		theParams.setUpdatedTime(theUpdateTime);
 	}
@@ -155,7 +158,7 @@ public class SearchParamExtractorService {
 		return theResource;
 	}
 
-	private void extractResourceLinks(ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, Date theUpdateTime, boolean theFailOnInvalidReference, RequestDetails theRequest) {
+	private void extractResourceLinks(PartitionId thePartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, Date theUpdateTime, boolean theFailOnInvalidReference, RequestDetails theRequest) {
 		String resourceName = myContext.getResourceDefinition(theResource).getName();
 
 		ISearchParamExtractor.SearchParamSet<PathAndRef> refs = mySearchParamExtractor.extractResourceLinks(theResource);
@@ -164,13 +167,13 @@ public class SearchParamExtractorService {
 		Map<String, IResourceLookup> resourceIdToResolvedTarget = new HashMap<>();
 		for (PathAndRef nextPathAndRef : refs) {
 			RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(resourceName, nextPathAndRef.getSearchParamName());
-			extractResourceLinks(theParams, theEntity, theUpdateTime, searchParam, nextPathAndRef, theFailOnInvalidReference, theRequest, resourceIdToResolvedTarget);
+			extractResourceLinks(thePartitionId, theParams, theEntity, theUpdateTime, searchParam, nextPathAndRef, theFailOnInvalidReference, theRequest, resourceIdToResolvedTarget);
 		}
 
 		theEntity.setHasLinks(theParams.myLinks.size() > 0);
 	}
 
-	private void extractResourceLinks(ResourceIndexedSearchParams theParams, ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam theRuntimeSearchParam, PathAndRef thePathAndRef, boolean theFailOnInvalidReference, RequestDetails theRequest, Map<String, IResourceLookup> theResourceIdToResolvedTarget) {
+	private void extractResourceLinks(PartitionId thePartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam theRuntimeSearchParam, PathAndRef thePathAndRef, boolean theFailOnInvalidReference, RequestDetails theRequest, Map<String, IResourceLookup> theResourceIdToResolvedTarget) {
 		IBaseReference nextReference = thePathAndRef.getRef();
 		IIdType nextId = nextReference.getReferenceElement();
 		String path = thePathAndRef.getPath();
@@ -255,7 +258,7 @@ public class SearchParamExtractorService {
 		if (theFailOnInvalidReference) {
 
 			myResourceLinkResolver.validateTypeOrThrowException(type);
-			resourceLink = resolveTargetAndCreateResourceLinkOrReturnNull(theEntity, theUpdateTime, theRuntimeSearchParam, path, thePathAndRef, nextId, typeString, type, nextReference, theRequest, theResourceIdToResolvedTarget);
+			resourceLink = resolveTargetAndCreateResourceLinkOrReturnNull(thePartitionId, theEntity, theUpdateTime, theRuntimeSearchParam, path, thePathAndRef, nextId, typeString, type, nextReference, theRequest, theResourceIdToResolvedTarget);
 			if (resourceLink == null) {
 				return;
 			}
@@ -272,7 +275,7 @@ public class SearchParamExtractorService {
 		theParams.myLinks.add(resourceLink);
 	}
 
-	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, Map<String, IResourceLookup> theResourceIdToResolvedTarget) {
+	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(PartitionId thePartitionId, ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, Map<String, IResourceLookup> theResourceIdToResolvedTarget) {
 		/*
 		 * We keep a cache of resolved target resources. This is good since for some resource types, there
 		 * are multiple search parameters that map to the same element path within a resource (e.g.
@@ -280,16 +283,22 @@ public class SearchParamExtractorService {
 		 * target any more times than we have to.
 		 */
 
-		IResourceLookup targetResource = theResourceIdToResolvedTarget.get(theNextId.getValue());
+		PartitionId targetPartitionId = thePartitionId;
+		if (myPartitionConfig.isPartitioningEnabled() && myPartitionConfig.getAllowReferencesAcrossPartitions() == PartitionConfig.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED) {
+			targetPartitionId = null;
+		}
+
+		String key = PartitionId.stringifyForKey(targetPartitionId) + "/" + theNextId.getValue();
+		IResourceLookup targetResource = theResourceIdToResolvedTarget.get(key);
 		if (targetResource == null) {
-			targetResource = myResourceLinkResolver.findTargetResource(nextSpDef, theNextPathsUnsplit, theNextId, theTypeString, theType, theReference, theRequest);
+			targetResource = myResourceLinkResolver.findTargetResource(targetPartitionId, nextSpDef, theNextPathsUnsplit, theNextId, theTypeString, theType, theReference, theRequest);
 		}
 
 		if (targetResource == null) {
 			return null;
 		}
 
-		theResourceIdToResolvedTarget.put(theNextId.getValue(), targetResource);
+		theResourceIdToResolvedTarget.put(key, targetResource);
 
 		String targetResourceType = targetResource.getResourceType();
 		Long targetResourcePid = targetResource.getResourceId();

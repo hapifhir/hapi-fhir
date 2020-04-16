@@ -1,0 +1,76 @@
+Merge branch 'master' into ja_20200206_multitenancy
+
+# Conflicts:
+#	hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/config/BaseConfig.java
+#	hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/dao/index/SearchParamWithInlineReferencesExtractor.java
+#	hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/extractor/ResourceLinkExtractor.java
+#	hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/matcher/InlineResourceLinkResolver.java
+#
+# It looks like you may be committing a merge.
+# If this is not correct, please remove the file
+#	.git/MERGE_HEAD
+# and try again.
+
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch ja_20200206_multitenancy
+# Your branch is up to date with 'origin/ja_20200206_multitenancy'.
+#
+# All conflicts fixed but you are still merging.
+#
+# Changes to be committed:
+#	new file:   hapi-fhir-base/src/main/java/ca/uhn/fhir/parser/BaseErrorHandler.java
+#	modified:   hapi-fhir-base/src/main/java/ca/uhn/fhir/parser/BaseParser.java
+#	modified:   hapi-fhir-base/src/main/java/ca/uhn/fhir/parser/JsonParser.java
+#	modified:   hapi-fhir-base/src/main/java/ca/uhn/fhir/parser/LenientErrorHandler.java
+#	modified:   hapi-fhir-base/src/main/java/ca/uhn/fhir/parser/ParseLocation.java
+#	modified:   hapi-fhir-base/src/main/java/ca/uhn/fhir/parser/ParserState.java
+#	modified:   hapi-fhir-base/src/main/java/ca/uhn/fhir/parser/StrictErrorHandler.java
+#	modified:   hapi-fhir-base/src/main/java/ca/uhn/fhir/parser/json/jackson/JacksonStructure.java
+#	new file:   hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/4_3_0/1793-report-attr-name-in-json-parse-errors.yaml
+#	new file:   hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/4_3_0/1801-allow-parsing-contained-in-jpa.yaml
+#	new file:   hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/4_3_0/1801-handle-persisted-leading-decimals.yaml
+#	modified:   hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/config/BaseConfig.java
+#	modified:   hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/dao/BaseHapiFhirDao.java
+#	new file:   hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/dao/TolerantJsonParser.java
+#	modified:   hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/dao/index/DaoResourceLinkResolver.java
+#	modified:   hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/dao/index/SearchParamWithInlineReferencesExtractor.java
+#	modified:   hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/util/xmlpatch/XmlPatchUtils.java
+#	new file:   hapi-fhir-jpaserver-base/src/test/java/ca/uhn/fhir/jpa/dao/TolerantJsonParserR4Test.java
+#	modified:   hapi-fhir-jpaserver-base/src/test/java/ca/uhn/fhir/jpa/dao/dstu3/BaseJpaDstu3Test.java
+#	modified:   hapi-fhir-jpaserver-base/src/test/java/ca/uhn/fhir/jpa/dao/dstu3/FhirResourceDaoDstu3SearchCustomSearchParamTest.java
+#	modified:   hapi-fhir-jpaserver-base/src/test/java/ca/uhn/fhir/jpa/dao/r4/FhirResourceDaoR4SearchCustomSearchParamTest.java
+#	modified:   hapi-fhir-jpaserver-base/src/test/java/ca/uhn/fhir/jpa/subscription/resthook/SubscriptionTriggeringDstu3Test.java
+#	modified:   hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/config/SearchParamConfig.java
+#	modified:   hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/extractor/BaseSearchParamExtractor.java
+#	modified:   hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/extractor/ResourceIndexedSearchParams.java
+#	deleted:    hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/extractor/ResourceLinkExtractor.java
+#	modified:   hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/extractor/SearchParamExtractorService.java
+#	modified:   hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/matcher/IndexedSearchParamExtractor.java
+#	deleted:    hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/matcher/InlineResourceLinkResolver.java
+#	modified:   hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/matcher/SearchParamMatcher.java
+#	modified:   hapi-fhir-structures-dstu2.1/src/test/java/ca/uhn/fhir/parser/JsonParserDstu2_1Test.java
+#	modified:   hapi-fhir-structures-dstu2.1/src/test/java/ca/uhn/fhir/parser/XmlParserDstu2_1Test.java
+#	modified:   hapi-fhir-structures-dstu2/src/test/java/ca/uhn/fhir/validation/ResourceValidatorDstu2Test.java
+#	modified:   hapi-fhir-structures-dstu3/src/test/java/ca/uhn/fhir/parser/JsonParserDstu3Test.java
+#	modified:   hapi-fhir-structures-dstu3/src/test/java/ca/uhn/fhir/parser/XmlParserDstu3Test.java
+#	modified:   hapi-fhir-structures-hl7org-dstu2/src/test/java/ca/uhn/fhir/rest/client/ClientServerValidationTestHl7OrgDstu2.java
+#	modified:   hapi-fhir-structures-r4/src/test/java/ca/uhn/fhir/parser/JsonParserR4Test.java
+#	modified:   hapi-fhir-structures-r4/src/test/java/ca/uhn/fhir/rest/server/interceptor/ResponseSizeCapturingInterceptorTest.java
+#	new file:   hapi-fhir-test-utilities/src/main/java/ca/uhn/fhir/test/utilities/ProxyUtil.java
+#	modified:   hapi-fhir-validation/src/test/java/org/hl7/fhir/dstu2016may/hapi/validation/ResourceValidatorDstu2_1Test.java
+#	modified:   hapi-fhir-validation/src/test/java/org/hl7/fhir/dstu3/hapi/validation/ResourceValidatorDstu3Test.java
+#
+# Changes not staged for commit:
+#	modified:   hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/dao/BaseHapiFhirDao.java
+#	modified:   hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/dao/index/IdHelperService.java
+#	modified:   hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/dao/index/SearchParamWithInlineReferencesExtractor.java
+#	modified:   hapi-fhir-jpaserver-base/src/test/java/ca/uhn/fhir/jpa/dao/r4/PartitioningR4Test.java
+#	modified:   hapi-fhir-jpaserver-model/src/main/java/ca/uhn/fhir/jpa/model/config/PartitionConfig.java
+#	modified:   hapi-fhir-jpaserver-model/src/main/java/ca/uhn/fhir/jpa/model/entity/PartitionId.java
+#	modified:   hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/extractor/SearchParamExtractorService.java
+#	modified:   hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/matcher/IndexedSearchParamExtractor.java
+#	modified:   hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/matcher/SearchParamMatcher.java
+#

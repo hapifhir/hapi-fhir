@@ -71,4 +71,15 @@ public class PartitionId implements Cloneable {
 	public String getPartitionIdStringOrNullString() {
 		return defaultIfNull(myPartitionId, "null").toString();
 	}
+
+	/**
+	 * Create a string representation suitable for use as a cache key. Null aware.
+	 */
+	public static String stringifyForKey(PartitionId thePartitionId) {
+		String retVal = "(null)";
+		if (thePartitionId != null) {
+			retVal = thePartitionId.getPartitionIdStringOrNullString();
+		}
+		return retVal;
+	}
 }
