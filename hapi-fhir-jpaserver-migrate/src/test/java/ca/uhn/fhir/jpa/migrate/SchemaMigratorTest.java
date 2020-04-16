@@ -95,7 +95,7 @@ public class SchemaMigratorTest extends BaseTest {
 
 		ImmutableList<BaseTask> taskList = ImmutableList.of(taskA, taskB, taskC, taskD);
 		MigrationTaskSkipper.setDoNothingOnSkippedTasks(taskList, "4_1_0.20191214.2, 4_1_0.20191214.4");
-		SchemaMigrator schemaMigrator = new SchemaMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), taskList);
+		SchemaMigrator schemaMigrator = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), taskList);
 		schemaMigrator.setDriverType(getDriverType());
 
 		schemaMigrator.migrate();
@@ -134,7 +134,7 @@ public class SchemaMigratorTest extends BaseTest {
 		AddTableRawSqlTask task = new AddTableRawSqlTask("1", theSchemaVersion);
 		task.setTableName(theTableName);
 		task.addSql(getDriverType(), theSql);
-		SchemaMigrator retval = new SchemaMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), ImmutableList.of(task));
+		SchemaMigrator retval = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), ImmutableList.of(task));
 		retval.setDriverType(getDriverType());
 		return retval;
 	}

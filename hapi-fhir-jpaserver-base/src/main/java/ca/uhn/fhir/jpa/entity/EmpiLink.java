@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.entity;
 
 /*-
  * #%L
- * hapi-fhir-empi-jpalink
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%

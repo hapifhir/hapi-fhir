@@ -2,7 +2,7 @@ package ca.uhn.fhir.util;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%

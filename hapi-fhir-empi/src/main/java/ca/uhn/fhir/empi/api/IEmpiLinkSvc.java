@@ -2,7 +2,7 @@ package ca.uhn.fhir.empi.api;
 
 /*-
  * #%L
- * hapi-fhir-empi-api
+ * HAPI FHIR - Enterprise Master Patient Index
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%

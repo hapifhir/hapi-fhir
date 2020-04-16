@@ -2,7 +2,7 @@ package ca.uhn.fhir.empi.rules.json;
 
 /*-
  * #%L
- * hapi-fhir-empi-rules
+ * HAPI FHIR - Enterprise Master Patient Index
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -22,7 +22,6 @@ package ca.uhn.fhir.empi.rules.json;
 
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.api.Constants;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 
