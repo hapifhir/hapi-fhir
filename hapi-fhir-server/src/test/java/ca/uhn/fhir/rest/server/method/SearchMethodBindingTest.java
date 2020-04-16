@@ -68,13 +68,13 @@ public class SearchMethodBindingTest {
 	public void methodMatchesOwnParams() throws NoSuchMethodException {
 		Assert.assertThat(getBinding("param", String.class).incomingServerRequestMatchesMethod(
 			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}))),
-			Matchers.is(MethodMatchEnum.PERFECT));
+			Matchers.is(MethodMatchEnum.EXACT));
 		Assert.assertThat(getBinding("paramAndTest", String.class, String.class).incomingServerRequestMatchesMethod(
 			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "test", new String[]{"test"}))),
-			Matchers.is(MethodMatchEnum.PERFECT));
+			Matchers.is(MethodMatchEnum.EXACT));
 		Assert.assertThat(getBinding("paramAndUnderscoreTest", String.class, String.class).incomingServerRequestMatchesMethod(
 			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "_test", new String[]{"test"}))),
-			Matchers.is(MethodMatchEnum.PERFECT));
+			Matchers.is(MethodMatchEnum.EXACT));
 	}
 
 	@Test
@@ -86,7 +86,7 @@ public class SearchMethodBindingTest {
 			Matchers.is(MethodMatchEnum.NONE));
 		Assert.assertThat(binding.incomingServerRequestMatchesMethod(
 			mockSearchRequest(ImmutableMap.of("refChainBlacklist.goodChain", new String[]{"foo"}))),
-			Matchers.is(MethodMatchEnum.PERFECT));
+			Matchers.is(MethodMatchEnum.EXACT));
 	}
 
 	private SearchMethodBinding getBinding(String name, Class<?>... parameters) throws NoSuchMethodException {
