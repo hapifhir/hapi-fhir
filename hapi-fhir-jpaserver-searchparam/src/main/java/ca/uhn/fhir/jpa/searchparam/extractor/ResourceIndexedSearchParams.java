@@ -114,7 +114,7 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setHasLinks(myLinks.isEmpty() == false);
 	}
 
-	public void setUpdatedTime(Date theUpdateTime) {
+	void setUpdatedTime(Date theUpdateTime) {
 		setUpdatedTime(myStringParams, theUpdateTime);
 		setUpdatedTime(myNumberParams, theUpdateTime);
 		setUpdatedTime(myQuantityParams, theUpdateTime);

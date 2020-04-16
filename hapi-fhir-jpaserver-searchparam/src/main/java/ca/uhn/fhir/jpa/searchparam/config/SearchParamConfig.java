@@ -22,9 +22,7 @@ package ca.uhn.fhir.jpa.searchparam.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
-import ca.uhn.fhir.jpa.searchparam.extractor.ResourceLinkExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
@@ -32,13 +30,11 @@ import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR5;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.IndexedSearchParamExtractor;
-import ca.uhn.fhir.jpa.searchparam.matcher.InlineResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -80,11 +76,6 @@ public class SearchParamConfig {
 	}
 
 	@Bean
-	public ResourceLinkExtractor resourceLinkExtractor() {
-		return new ResourceLinkExtractor();
-	}
-
-	@Bean
 	@Lazy
 	public SearchParamExtractorService searchParamExtractorService(){
 		return new SearchParamExtractorService();
@@ -93,11 +84,6 @@ public class SearchParamConfig {
 	@Bean
 	public IndexedSearchParamExtractor indexedSearchParamExtractor() {
 		return new IndexedSearchParamExtractor();
-	}
-
-	@Bean
-	public InlineResourceLinkResolver inlineResourceLinkResolver() {
-		return new InlineResourceLinkResolver();
 	}
 
 	@Bean

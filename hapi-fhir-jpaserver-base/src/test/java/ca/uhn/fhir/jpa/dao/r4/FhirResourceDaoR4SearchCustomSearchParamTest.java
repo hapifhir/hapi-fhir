@@ -253,6 +253,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 		MessageHeader messageHeader = new MessageHeader();
 		messageHeader.setId("123");
+		messageHeader.setDefinition("Hello");
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.MESSAGE);
 		bundle.addEntry()
