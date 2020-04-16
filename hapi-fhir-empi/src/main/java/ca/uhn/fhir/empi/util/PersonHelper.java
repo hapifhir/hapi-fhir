@@ -21,6 +21,7 @@ package ca.uhn.fhir.empi.util;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.Constants;
 import ca.uhn.fhir.empi.api.IEmpiProperties;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseReference;
