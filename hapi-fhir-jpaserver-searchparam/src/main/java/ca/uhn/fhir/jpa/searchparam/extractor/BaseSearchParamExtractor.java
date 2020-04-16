@@ -1015,6 +1015,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					systemAsString = myUseSystem;
 				}
 
+				if (value instanceof IIdType) {
+					valueAsString = ((IIdType) value).getIdPart();
+				}
+
 				BaseSearchParamExtractor.this.createTokenIndexIfNotBlank(myResourceTypeName, params, searchParam, systemAsString, valueAsString);
 				return;
 			}

@@ -58,6 +58,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @SuppressWarnings("WeakerAccess")
 public abstract class BaseParser implements IParser {
 
+	/**
+	 * Any resources that were created by the parser (i.e. by parsing a serialized resource) will have
+	 * a {@link IBaseResource#getUserData(String) user data} property with this key.
+	 *
+	 * @since 5.0.0
+	 */
+	public static final String RESOURCE_CREATED_BY_PARSER = BaseParser.class.getName() + "_" + "RESOURCE_CREATED_BY_PARSER";
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParser.class);
 
 	private static final Set<String> notEncodeForContainedResource = new HashSet<>(Arrays.asList("security", "versionId", "lastUpdated"));
