@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.PartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -28,9 +29,14 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.annotations.*;
+import org.hibernate.search.annotations.Analyze;
+import org.hibernate.search.annotations.Analyzer;
+import org.hibernate.search.annotations.ContainedIn;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Fields;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.Store;
 
-import javax.persistence.Index;
 import javax.persistence.*;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -128,11 +134,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		myHashNormalizedPrefix = source.myHashNormalizedPrefix;
 	}
 
-
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
-	}
-
 	@Override
 	@PrePersist
 	@PreUpdate
@@ -182,6 +183,10 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return myHashIdentity;
 	}
 
+	public void setHashIdentity(Long theHashIdentity) {
+		myHashIdentity = theHashIdentity;
+	}
+
 	public Long getHashExact() {
 		calculateHashes();
 		return myHashExact;
@@ -207,7 +212,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	@Override
 	public void setId(Long theId) {
-		myId =theId;
+		myId = theId;
 	}
 
 
@@ -264,6 +269,16 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return b.build();
 	}
 
+	@Override
+	public boolean matches(IQueryParameterType theParam) {
+		if (!(theParam instanceof StringParam)) {
+			return false;
+		}
+		StringParam string = (StringParam) theParam;
+		String normalizedString = StringNormalizer.normalizeString(defaultString(string.getValue()));
+		return defaultString(getValueNormalized()).startsWith(normalizedString);
+	}
+
 	public static long calculateHashExact(PartitionConfig thePartitionConfig, PartitionId thePartitionId, String theResourceType, String theParamName, String theValueExact) {
 		return hash(thePartitionConfig, thePartitionId, theResourceType, theParamName, theValueExact);
 	}
@@ -281,15 +296,5 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		}
 
 		return hash(thePartitionConfig, thePartitionId, theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
-	}
-
-	@Override
-	public boolean matches(IQueryParameterType theParam) {
-		if (!(theParam instanceof StringParam)) {
-			return false;
-		}
-		StringParam string = (StringParam)theParam;
-		String normalizedString = StringNormalizer.normalizeString(defaultString(string.getValue()));
-		return defaultString(getValueNormalized()).startsWith(normalizedString);
 	}
 }

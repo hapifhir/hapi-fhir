@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.PartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -157,13 +158,13 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		throw new UnsupportedOperationException("No parameter matcher for " + theParam);
 	}
 
+	public PartitionConfig getPartitionConfig() {
+		return myPartitionConfig;
+	}
+
 	public BaseResourceIndexedSearchParam setPartitionConfig(PartitionConfig thePartitionConfig) {
 		myPartitionConfig = thePartitionConfig;
 		return this;
-	}
-
-	public PartitionConfig getPartitionConfig() {
-		return myPartitionConfig;
 	}
 
 	public static long calculateHashIdentity(PartitionConfig thePartitionConfig, PartitionId thePartitionId, String theResourceType, String theParamName) {

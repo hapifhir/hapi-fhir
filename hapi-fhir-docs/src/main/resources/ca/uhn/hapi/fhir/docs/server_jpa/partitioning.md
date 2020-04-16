@@ -16,17 +16,49 @@ These examples each have different properties in terms of security rules, and ho
 
 # Architecture
 
-Partitioning involves the addition of two new columns to many tables within the HAPI FHIR JPA database schema:
+Partitioning involves the use of two dedicated columns to many tables within the HAPI FHIR JPA database schema:
 
 * **PARTITION_ID** &ndash; This is an integer indicating the specific partition that a given resource is placed in. This column can also be *NULL*, meaning that the given resource is in the **Default Partition**.
-* **PARTITION_DATE** &ndash; This is a date/time column that can be assigned an arbitrary value depending on your use case.
+* **PARTITION_DATE** &ndash; This is a date/time column that can be assigned an arbitrary value depending on your use case. Typically, this would be used for use cases where data should be automatically dropped after a certain time period using native database partition drops. 
 
+When partitioning is used, these two columns will be populated with the same value on all resource-specific tables (this includes [HFJ_RESOURCE](./schema.html#HFJ_RESOURCE) and all tables that have a foreign key relationship to it including [HFJ_RES_VER](./schema.html#HFJ_RES_VER), [HFJ_RESLINK](./schema.html#HFJ_RES_LINK), [HFJ_SPIDX_*](./schema.html#indexes), etc.)
 
-# Enabling Partitioning
+At the time that a resource is being **created**, an [interceptor hook](#partition-iInterceptors) is invoked in order to request the partition ID and date, and these will be written to the resource.
+
+At the time that a resource is being **updated**, the partition ID and date from the previous version will be used.
+
+When a **read operation** is being performed (e.g. a read, search, history, etc.), a separate [interceptor hook](#partition-iInterceptors) is invoked in order to determine whether the operation should target a specific partition. The outcome of this hook determines how the partitioning manifests itself to the end user: 
+
+* If all read operations are scoped by the interceptor to only apply to a single partition, then the partitioning behaves as a **multitenant** solution.
+* If read operations are scopes to all partitions, then the partitioning is simply partitioning the data into logical segments.
+
+# Enabling Partitioning in HAPI FHIR
 
 Enabling partitioning on the server involves a set of steps.
 
-The [PartitionConfig](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionConfig.html) bean contains configuration settings related to partitioning within the server. To enable partitioning, the  
+The [PartitionConfig](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionConfig.html) bean contains configuration settings related to partitioning within the server. To enable partitioning, the [PartitioningEnabled](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionConfig.html#PartitioningEnabled(boolean)) property should be enabled.
+
+# Partition Interceptors
+
+In order to implement partitioning, an interceptor must be registered against the interceptor registry (either the REST Server registry, or the JPA Server registry will work).
+
+This interceptor can implement the hooks shown below.
+
+## Identify Partition for Create (Required)
+
+A hook against the [Pointcut#STORAGE_PARTITION_IDENTIFY_CREATE](/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_CREATE) pointcut must be registered, and this hook method will be invoked every time a resource is being created in order to determine the partition to create the resource in.
+
+The criteria for determining the partition will depend on your use case. For example:
+ 
+* If you are implementing multi-tenancy the partition might be determined by using the [Request Tenant ID](/docs/server_plain/multitenancy.html). It could also be determined by looking at request headers, or the authorized user/session context, etc.
+
+* If you are implementing segmented data partitioning, the partition might be determined by examining the actual resource being created, by the identity of the sending system, etc.    
+
+## Identify Partition for Read (Optional)
+
+A hook against the [Pointcut#STORAGE_PARTITION_IDENTIFY_CREATE](/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_CREATE) pointcut must be registered, and this hook method will be invoked every time a resource is being created in order to determine the partition to create the resource in.
+
+
 
 
 # Limitations

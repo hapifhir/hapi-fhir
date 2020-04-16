@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.PartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.util.BigDecimalNumericFieldBridge;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -191,7 +192,7 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 
 	@Override
 	public void setId(Long theId) {
-		myId =theId;
+		myId = theId;
 	}
 
 	public String getSystem() {
@@ -262,25 +263,25 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		// Only match on system if it wasn't specified
 		String quantityUnitsString = defaultString(quantity.getUnits());
 		if (quantity.getSystem() == null && isBlank(quantityUnitsString)) {
-			if (Objects.equals(getValue(),quantity.getValue())) {
+			if (Objects.equals(getValue(), quantity.getValue())) {
 				retval = true;
 			}
 		} else {
 			String unitsString = defaultString(getUnits());
 			if (quantity.getSystem() == null) {
 				if (unitsString.equalsIgnoreCase(quantityUnitsString) &&
-					Objects.equals(getValue(),quantity.getValue())) {
+					Objects.equals(getValue(), quantity.getValue())) {
 					retval = true;
 				}
 			} else if (isBlank(quantityUnitsString)) {
 				if (getSystem().equalsIgnoreCase(quantity.getSystem()) &&
-					Objects.equals(getValue(),quantity.getValue())) {
+					Objects.equals(getValue(), quantity.getValue())) {
 					retval = true;
 				}
 			} else {
 				if (getSystem().equalsIgnoreCase(quantity.getSystem()) &&
 					unitsString.equalsIgnoreCase(quantityUnitsString) &&
-					Objects.equals(getValue(),quantity.getValue())) {
+					Objects.equals(getValue(), quantity.getValue())) {
 					retval = true;
 				}
 			}

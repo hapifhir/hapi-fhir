@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.PartitionId;
+import ca.uhn.fhir.interceptor.model.PartitionId;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 
 import javax.annotation.Nullable;

@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.PartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.entity.*;
@@ -153,7 +154,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		obs.getSubject().setReference(patientId.getValue());
 		IIdType obsId = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
 			ourLog.info("Resource links:\n{}", resLinks.toString());
 			assertEquals(2, resLinks.size());
@@ -202,7 +203,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		obs.getSubject().setReference(patientId.getValue());
 		IIdType obsId = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
 			ourLog.info("Resource links:\n{}", resLinks.toString());
 			assertEquals(2, resLinks.size());
@@ -249,7 +250,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		obs.getSubject().setReference(patientId.getValue());
 		IIdType obsId = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
 			ourLog.info("Resource links:\n{}", resLinks.toString());
 			assertEquals(2, resLinks.size());
@@ -273,7 +274,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		obs.getSubject().setReference(patientId.getValue());
 		IIdType obsId = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
 			ourLog.info("Resource links:\n{}", resLinks.toString());
 			assertEquals(2, resLinks.size());
@@ -1493,7 +1494,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		IIdType patientId = createPatient(null, withBirthdate("2020-01-01"));
 		IIdType observationId = createObservation(null, withSubject(patientId));
 
-		addDefaultReadPartition();;
+		addDefaultReadPartition();
+		;
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));
@@ -1566,7 +1568,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		IIdType patientId = createPatient(null, withId("ONE"), withBirthdate("2020-01-01"));
 		IIdType observationId = createObservation(null, withSubject(patientId));
 
-		addDefaultReadPartition();;
+		addDefaultReadPartition();
+		;
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));

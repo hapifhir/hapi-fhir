@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.PartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
@@ -33,13 +34,12 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
-import ca.uhn.fhir.jpa.partition.RequestPartitionHelperService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
-import ca.uhn.fhir.jpa.model.entity.PartitionId;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
@@ -630,8 +630,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		private boolean myAdditionalPrefetchThresholdsRemaining;
 		private List<ResourcePersistentId> myPreviouslyAddedResourcePids;
 		private Integer myMaxResultsToFetch;
-		private SearchRuntimeDetails mySearchRuntimeDetails;
-		private Transaction myParentTransaction;
+		private final SearchRuntimeDetails mySearchRuntimeDetails;
+		private final Transaction myParentTransaction;
 
 		/**
 		 * Constructor
@@ -970,11 +970,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 		private void doSaveSearch() {
-
-			// This is an attempt to track down an intermittent test
-			// failure in testAsyncSearchLargeResultSetBigCountSameCoordinator
-			Object searchObj = mySearchCacheSvc.save(mySearch);
-			Search newSearch = (Search) searchObj;
+			Search newSearch = mySearchCacheSvc.save(mySearch);
 
 			// mySearchDao.save is not supposed to return null, but in unit tests
 			// it can if the mock search dao isn't set up to handle that

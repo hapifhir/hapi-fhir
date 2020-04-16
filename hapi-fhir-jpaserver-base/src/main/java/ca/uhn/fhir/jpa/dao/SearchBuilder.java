@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.PartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
@@ -42,7 +43,6 @@ import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -92,7 +92,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -136,10 +135,11 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private static final List<ResourcePersistentId> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
-	private static ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
+	private static final ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
 	private final QueryRoot myQueryRoot = new QueryRoot();
 	private final String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
+	private final IDao myCallingDao;
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
@@ -162,7 +162,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private PredicateBuilderFactory myPredicateBuilderFactory;
 	private List<ResourcePersistentId> myAlsoIncludePids;
 	private CriteriaBuilder myCriteriaBuilder;
-	private IDao myCallingDao;
 	private SearchParameterMap myParams;
 	private String mySearchUuid;
 	private int myFetchSize;
@@ -237,7 +236,7 @@ public class SearchBuilder implements ISearchBuilder {
 	 * @param thePidSet May be null
 	 */
 	@Override
-	public void setPreviouslyAddedResourcePids(@Nullable List<ResourcePersistentId> thePidSet) {
+	public void setPreviouslyAddedResourcePids(@Nonnull List<ResourcePersistentId> thePidSet) {
 		myPidSet = new HashSet<>(thePidSet);
 	}
 
@@ -259,7 +258,6 @@ public class SearchBuilder implements ISearchBuilder {
 		myPredicateBuilder = new PredicateBuilder(this, myPredicateBuilderFactory);
 		myPartitionId = thePartitionId;
 	}
-
 
 
 	private TypedQuery<Long> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest) {
@@ -940,10 +938,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 	public String getResourceName() {
 		return myResourceName;
-	}
-
-	public IDao getCallingDao() {
-		return myCallingDao;
 	}
 
 	@VisibleForTesting

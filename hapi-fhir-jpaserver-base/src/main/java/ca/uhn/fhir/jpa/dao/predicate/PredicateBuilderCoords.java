@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.PartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
-import ca.uhn.fhir.jpa.model.entity.PartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.CoordCalculator;
@@ -59,7 +59,8 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 														 String theResourceName,
 														 String theParamName,
 														 CriteriaBuilder theBuilder,
-														 From<?, ResourceIndexedSearchParamCoords> theFrom, PartitionId thePartitionId) {
+														 From<?, ResourceIndexedSearchParamCoords> theFrom,
+														 PartitionId thePartitionId) {
 		String latitudeValue;
 		String longitudeValue;
 		Double distanceKm = 0.0;
