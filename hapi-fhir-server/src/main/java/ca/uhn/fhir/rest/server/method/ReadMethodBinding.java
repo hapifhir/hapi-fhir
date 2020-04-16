@@ -147,7 +147,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		} else if (!StringUtils.isBlank(theRequest.getOperation())) {
 			return MethodMatchEnum.NONE;
 		}
-		return MethodMatchEnum.PERFECT;
+		return MethodMatchEnum.EXACT;
 	}
 
 

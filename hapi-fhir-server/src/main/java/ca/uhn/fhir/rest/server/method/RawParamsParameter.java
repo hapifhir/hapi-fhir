@@ -35,11 +35,11 @@ import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class RawParamsParmeter implements IParameter {
+public class RawParamsParameter implements IParameter {
 
 	private final List<IParameter> myAllMethodParameters;
 
-	public RawParamsParmeter(List<IParameter> theParameters) {
+	public RawParamsParameter(List<IParameter> theParameters) {
 		myAllMethodParameters = theParameters;
 	}
 
@@ -53,7 +53,7 @@ public class RawParamsParmeter implements IParameter {
 				continue;
 			}
 			
-			QualifierDetails qualifiers = SearchMethodBinding.extractQualifiersFromParameterName(nextName);
+			QualifierDetails qualifiers = QualifierDetails.extractQualifiersFromParameterName(nextName);
 			
 			boolean alreadyCaptured = false;
 			for (IParameter nextParameter : myAllMethodParameters) {
@@ -70,7 +70,7 @@ public class RawParamsParmeter implements IParameter {
 			
 			if (!alreadyCaptured) {
 				if (retVal == null) {
-					retVal = new HashMap<String, List<String>>();
+					retVal = new HashMap<>();
 				}
 				retVal.put(nextName, Arrays.asList(theRequest.getParameters().get(nextName)));
 			}

@@ -98,7 +98,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		if (isNotBlank(theRequest.getResourceName())) {
 			return MethodMatchEnum.NONE;
 		}
-		return MethodMatchEnum.PERFECT;
+		return MethodMatchEnum.EXACT;
 	}
 
 	@SuppressWarnings("unchecked")

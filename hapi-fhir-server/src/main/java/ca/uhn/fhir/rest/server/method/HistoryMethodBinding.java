@@ -51,7 +51,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 
 	private final Integer myIdParamIndex;
 	private final RestOperationTypeEnum myResourceOperationType;
-	private String myResourceName;
+	private final String myResourceName;
 
 	public HistoryMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(toReturnType(theMethod, theProvider), theMethod, theContext, theProvider);
@@ -111,7 +111,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 		if (theRequest.getResourceName() == null) {
 			if (myResourceOperationType == RestOperationTypeEnum.HISTORY_SYSTEM) {
-				return MethodMatchEnum.PERFECT;
+				return MethodMatchEnum.EXACT;
 			} else {
 				return MethodMatchEnum.NONE;
 			}
@@ -134,7 +134,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			return MethodMatchEnum.NONE;
 		}
 
-		return MethodMatchEnum.PERFECT;
+		return MethodMatchEnum.EXACT;
 	}
 
 
@@ -185,7 +185,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 					}
 					if (isBlank(nextResource.getIdElement().getVersionIdPart()) && nextResource instanceof IResource) {
 						//TODO: Use of a deprecated method should be resolved.
-						IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get((IResource) nextResource);
+						IdDt versionId = ResourceMetadataKeyEnum.VERSION_ID.get((IResource) nextResource);
 						if (versionId == null || versionId.isEmpty()) {
 							throw new InternalErrorException("Server provided resource at index " + index + " with no Version ID set (using IResource#setId(IdDt))");
 						}

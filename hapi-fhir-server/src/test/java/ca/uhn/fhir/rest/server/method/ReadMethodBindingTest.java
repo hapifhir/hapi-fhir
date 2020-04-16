@@ -57,7 +57,7 @@ public class ReadMethodBindingTest {
 		// Read
 		ReadMethodBinding binding = createBinding(new MyProvider());
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
-		assertEquals(MethodMatchEnum.PERFECT, binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(myRequestDetails));
 
 		// VRead
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123/_history/123"));
@@ -95,12 +95,12 @@ public class ReadMethodBindingTest {
 		// Read
 		when(myRequestDetails.getResourceName()).thenReturn("Patient");
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
-		assertEquals(MethodMatchEnum.PERFECT, binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(myRequestDetails));
 
 		// VRead
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123/_history/123"));
 		when(myRequestDetails.getOperation()).thenReturn("_history");
-		assertEquals(MethodMatchEnum.PERFECT, binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(myRequestDetails));
 
 		// Some other operation
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123/_history/123"));

@@ -137,7 +137,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		 * It's also needed for conditional update..
 		 */
 
-		return MethodMatchEnum.PERFECT;
+		return MethodMatchEnum.EXACT;
 	}
 
 	@Override

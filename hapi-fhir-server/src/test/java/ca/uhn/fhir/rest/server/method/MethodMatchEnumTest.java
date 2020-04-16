@@ -10,7 +10,7 @@ public class MethodMatchEnumTest {
 	public void testOrder() {
 		assertEquals(0, MethodMatchEnum.NONE.ordinal());
 		assertEquals(1, MethodMatchEnum.APPROXIMATE.ordinal());
-		assertEquals(2, MethodMatchEnum.PERFECT.ordinal());
+		assertEquals(2, MethodMatchEnum.EXACT.ordinal());
 	}
 
 }

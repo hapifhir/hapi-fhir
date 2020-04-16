@@ -42,8 +42,8 @@ import ca.uhn.fhir.util.ReflectionUtil;
 public class SearchParameter extends BaseQueryParameter {
 
 	private static final String EMPTY_STRING = "";
-	private static HashMap<RestSearchParameterTypeEnum, Set<String>> ourParamQualifiers;
-	private static HashMap<Class<?>, RestSearchParameterTypeEnum> ourParamTypes;
+	private static final HashMap<RestSearchParameterTypeEnum, Set<String>> ourParamQualifiers;
+	private static final HashMap<Class<?>, RestSearchParameterTypeEnum> ourParamTypes;
 	static final String QUALIFIER_ANY_TYPE = ":*";
 
 	static {
@@ -203,17 +203,17 @@ public class SearchParameter extends BaseQueryParameter {
 		return myParamBinder.parse(theContext, getName(), theString);
 	}
 
-	public void setChainlists(String[] theChainWhitelist, String[] theChainBlacklist) {
+	public void setChainLists(String[] theChainWhitelist, String[] theChainBlacklist) {
 		myQualifierWhitelist = new HashSet<>(theChainWhitelist.length);
 		myQualifierWhitelist.add(QUALIFIER_ANY_TYPE);
 
-		for (int i = 0; i < theChainWhitelist.length; i++) {
-			if (theChainWhitelist[i].equals(OptionalParam.ALLOW_CHAIN_ANY)) {
+		for (String nextChain : theChainWhitelist) {
+			if (nextChain.equals(OptionalParam.ALLOW_CHAIN_ANY)) {
 				myQualifierWhitelist.add('.' + OptionalParam.ALLOW_CHAIN_ANY);
-			} else if (theChainWhitelist[i].equals(EMPTY_STRING)) {
+			} else if (nextChain.equals(EMPTY_STRING)) {
 				myQualifierWhitelist.add(".");
 			} else {
-				myQualifierWhitelist.add('.' + theChainWhitelist[i]);
+				myQualifierWhitelist.add('.' + nextChain);
 			}
 		}
 
@@ -287,7 +287,7 @@ public class SearchParameter extends BaseQueryParameter {
 				}
 			}
 		} else {
-			throw new ConfigurationException("Unsupported data theType for parameter: " + theType.getCanonicalName());
+			throw new ConfigurationException("Unsupported data type for parameter: " + theType.getCanonicalName());
 		}
 
 		if (DateRangeParam.class.isAssignableFrom(theType)) {

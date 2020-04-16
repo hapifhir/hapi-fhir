@@ -67,7 +67,7 @@ public class ResourceBinding {
 					matchedMethod = rm;
 					matchedMethodStrength = nextMethodMatch;
 				}
-				if (matchedMethodStrength == MethodMatchEnum.PERFECT) {
+				if (matchedMethodStrength == MethodMatchEnum.EXACT) {
 					break;
 				}
 			}

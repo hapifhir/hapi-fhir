@@ -6,7 +6,7 @@ public enum MethodMatchEnum {
 
 	NONE,
 	APPROXIMATE,
-	PERFECT;
+    EXACT;
 
 	public MethodMatchEnum weakerOf(MethodMatchEnum theOther) {
 		if (this.ordinal() < theOther.ordinal()) {

@@ -1786,6 +1786,21 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 	}
 
+	/**
+	 * Unregisters all plain and resource providers (but not the conformance provider).
+	 */
+	public void unregisterAllProviders() {
+		unregisterAllProviders(myPlainProviders);
+		unregisterAllProviders(myResourceProviders);
+	}
+
+	private void unregisterAllProviders(List<?> theProviders) {
+		while (theProviders.size() > 0) {
+			unregisterProvider(theProviders.get(0));
+		}
+	}
+
+
 	private void writeExceptionToResponse(HttpServletResponse theResponse, BaseServerResponseException theException) throws IOException {
 		theResponse.setStatus(theException.getStatusCode());
 		addHeadersToResponse(theResponse);

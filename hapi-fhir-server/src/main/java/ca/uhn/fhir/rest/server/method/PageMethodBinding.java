@@ -183,7 +183,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			return MethodMatchEnum.NONE;
 		}
 
-		return MethodMatchEnum.PERFECT;
+		return MethodMatchEnum.EXACT;
 	}
 
 
