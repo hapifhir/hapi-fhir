@@ -142,7 +142,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 
 		ChannelConsumerSettings config = new ChannelConsumerSettings();
 		config.setConcurrentConsumers(SubscriptionConstants.DELIVERY_CHANNEL_CONCURRENT_CONSUMERS);
-		IChannelProducer channelProducer = myChannelFactory.getOrCreateProducer(queueName, ResourceDeliveryMessage.class, config);
+		IChannelProducer channelProducer = myChannelFactory.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, config);
 
 		// Grab the payload type (encoding mimetype) from the subscription
 		String payloadString = subscription.getPayloadString();

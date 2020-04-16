@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 /*-
@@ -37,20 +36,20 @@ public class EmpiQueueConsumerLoader {
 	private Logger ourLog = LoggerFactory.getLogger(EmpiQueueConsumerLoader.class);
 
 	@Autowired
-	private EmpiConsumer myEmpiConsumer;
+	private EmpiMessageHandler myEmpiMessageHandler;
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 
 	protected IChannelReceiver myEmpiChannel;
 
-	@PostConstruct
+	// FIXME KHS rename method
 	public void init() {
 		if (myEmpiChannel == null) {
-			myEmpiChannel = mySubscriptionChannelFactory.newDeliveryReceivingChannel(IEmpiProperties.EMPI_MATCHING_CHANNEL_NAME, null);
+			myEmpiChannel = mySubscriptionChannelFactory.newMatchingReceivingChannel(IEmpiProperties.EMPI_MATCHING_CHANNEL_NAME, null);
 		}
 		if (myEmpiChannel != null) {
-			myEmpiChannel.subscribe(myEmpiConsumer);
-			ourLog.info("EMPI Matching Subscriber subscribed to Matching Channel {} with name {}", myEmpiChannel.getClass().getName(), IEmpiProperties.EMPI_MATCHING_CHANNEL_NAME);
+			myEmpiChannel.subscribe(myEmpiMessageHandler);
+			ourLog.info("EMPI Matching Consumer subscribed to Matching Channel {} with name {}", myEmpiChannel.getClass().getName(), myEmpiChannel.getName());
 		}
 	}
 
@@ -58,7 +57,7 @@ public class EmpiQueueConsumerLoader {
 	@PreDestroy
 	public void stop() {
 		if (myEmpiChannel != null) {
-			myEmpiChannel.unsubscribe(myEmpiConsumer);
+			myEmpiChannel.unsubscribe(myEmpiMessageHandler);
 		}
 	}
 

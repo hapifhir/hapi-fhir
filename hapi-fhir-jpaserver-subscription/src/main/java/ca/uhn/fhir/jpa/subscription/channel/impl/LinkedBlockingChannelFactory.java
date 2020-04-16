@@ -34,12 +34,7 @@ import javax.annotation.PreDestroy;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class LinkedBlockingChannelFactory implements IChannelFactory {
 
@@ -95,7 +90,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 				queue,
 				threadFactory,
 				rejectedExecutionHandler);
-			return new LinkedBlockingChannel(executor, queue);
+			return new LinkedBlockingChannel(theChannelName, executor, queue);
 
 		});
 	}

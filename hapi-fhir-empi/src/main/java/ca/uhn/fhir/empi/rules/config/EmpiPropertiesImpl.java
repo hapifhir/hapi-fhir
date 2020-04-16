@@ -17,7 +17,6 @@ public class EmpiPropertiesImpl implements IEmpiProperties {
 		return myEnabled;
 	}
 
-	@Override
 	public EmpiPropertiesImpl setEnabled(boolean theEnabled) {
 		myEnabled = theEnabled;
 		return this;
