@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -249,7 +250,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testCase1(){
+	public void testWhenThereAreNoMATCHOrPOSSIBLE_MATCHOutcomesThatANewPersonIsCreated(){
 		/**
 		 * CASE 1: No MATCHED and no PROBABLE_MATCHED outcomes -> a new Person resource
 		 * is created and linked to that Pat/Prac. All fields are copied from the Pat/Prac to the Person.
@@ -262,7 +263,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testCase2(){
+	public void testWhenAllMATCHResultsAreToSamePersonThatTheyAreLinked(){
 		/**
 		 * CASE 2: All of the MATCHED Pat/Prac resources are already linked to the same Person ->
 		 * a new Link is created between the new Pat/Prac and that Person and is set to MATCHED.
@@ -281,7 +282,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testCase3(){
+	public void testMATCHResultWithMultipleCandidatesCreatesPOSSIBLE_DUPLICATELinksAndNoPersonIsCreated(){
 		/**
 		 * CASE 3: The MATCHED Pat/Prac resources link to more than one Person -> Mark all links as PROBABLE_MATCHED.
 		 * All other Person resources are marked as POSSIBLE_DUPLICATE of this first Person.
@@ -307,14 +308,50 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//There should now be 2 POSSIBLE_MATCH links with this person.
 		assertThat(incomingJanePatient, is(possibleMatchWith(janePatient, janePatient2)));
 
+		//Ensure there is no successful MATCH links for incomingJanePatient
+		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTableHelper.getPidOrNull(incomingJanePatient));
+		assertThat(matchedLinkForTargetPid.isPresent(), is(false));
+
 	}
 	@Test
-	public void testCase4(){
+	public void testWhenAllMatchResultsArePOSSIBLE_MATCHThattheyAreLinkedAndNoPersonIsCreated(){
 		/**
 		 * CASE 4: Only PROBABLE_MATCH outcomes -> In this case, empi-link records are created with PROBABLE_MATCH
 		 * outcome and await manual assignment to either NO_MATCH or MATCHED. Person resources are not changed.
 		 */
+		Patient patient = buildJanePatient();
+		patient.getNameFirstRep().setFamily("familyone");
+		patient  = createPatientAndUpdateLinks(patient);
+		assertThat(patient, is(samePersonAs(patient)));
+
+		Patient patient2 = buildJanePatient();
+		patient2.getNameFirstRep().setFamily("pleasedonotmatchatall");
+		patient2  = createPatientAndUpdateLinks(patient2);
+
+		assertThat(patient2, is(possibleMatchWith(patient)));
 	}
+
+	@Test
+	public void testWhenAnIncomingResourceHasMatchesAndPossibleMatchesThatItLinksToMatch() {
+		Patient patient = buildJanePatient();
+		patient.getNameFirstRep().setFamily("familyone");
+		patient  = createPatientAndUpdateLinks(patient);
+		assertThat(patient, is(samePersonAs(patient)));
+
+		Patient patient2 = buildJanePatient();
+		patient2.getNameFirstRep().setFamily("pleasedonotmatchatall");
+		patient2  = createPatientAndUpdateLinks(patient2);
+
+		Patient patient3 = buildJanePatient();
+		patient3.getNameFirstRep().setFamily("familyone");
+		patient3  = createPatientAndUpdateLinks(patient3);
+
+		assertThat(patient2, is(not(matchedToAPerson())));
+		assertThat(patient2, is(possibleMatchWith(patient)));
+		assertThat(patient3, is(samePersonAs(patient)));
+	}
+
+
 
 
 }

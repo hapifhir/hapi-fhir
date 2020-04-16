@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
+import ca.uhn.fhir.empi.api.IEmpiProperties;
+import ca.uhn.fhir.empi.rules.config.EmpiPropertiesImpl;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.helper.EmpiHelperConfig;
@@ -10,6 +12,8 @@ import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -20,9 +24,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.io.IOException;
 import java.util.List;
 
 import static ca.uhn.fhir.empi.api.Constants.CODE_HAPI_EMPI_MANAGED;
@@ -126,5 +136,4 @@ public class EmpiInterceptorTest extends BaseEmpiR4Test {
 			assertEquals("Cannot create or modify Persons who are managed by EMPI.", e.getMessage());
 		}
 	}
-
 }

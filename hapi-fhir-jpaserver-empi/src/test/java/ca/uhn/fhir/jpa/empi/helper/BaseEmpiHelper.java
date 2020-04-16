@@ -1,11 +1,14 @@
 package ca.uhn.fhir.jpa.empi.helper;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.IEmpiProperties;
+import ca.uhn.fhir.empi.rules.config.EmpiPropertiesImpl;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
 import ca.uhn.fhir.jpa.empi.broker.EmpiSubscriptionLoader;
+import ca.uhn.fhir.jpa.empi.interceptor.EmpiInterceptor;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
@@ -13,12 +16,21 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.junit.rules.ExternalResource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 
 import javax.servlet.http.HttpServletRequest;
+
+import java.io.IOException;
 
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.when;
@@ -93,7 +105,6 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 	protected void after() {
 		myInterceptorService.unregisterInterceptor(myAfterEmpiLatch);
 		myAfterEmpiLatch.clear();
-
 		waitUntilEmpiQueueIsEmpty();
 	}
 
@@ -106,5 +117,6 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 		LinkedBlockingChannel channel = (LinkedBlockingChannel) wrapper.getWrappedChannel();
 		return channel.getQueueSizeForUnitTest();
 	}
+
 
 }

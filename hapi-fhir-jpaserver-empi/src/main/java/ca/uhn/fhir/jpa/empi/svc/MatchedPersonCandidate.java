@@ -20,29 +20,31 @@ package ca.uhn.fhir.jpa.empi.svc;
  * #L%
  */
 
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 
 public class MatchedPersonCandidate {
 
 	private final ResourcePersistentId myCandidatePersonPid;
-	private final EmpiLink myEmpiLink;
+	private final EmpiMatchResultEnum myEmpiMatchResultEnum;
 
-	public MatchedPersonCandidate(ResourcePersistentId theCandidate, EmpiLink theEmpiLink) {
+	public MatchedPersonCandidate(ResourcePersistentId theCandidate, EmpiMatchResultEnum theEmpiMatchResultEnum) {
 		myCandidatePersonPid = theCandidate;
-		myEmpiLink = theEmpiLink;
+		myEmpiMatchResultEnum = theEmpiMatchResultEnum;
 	}
 
 	private MatchedPersonCandidate(ResourcePersistentId theCandidate) {
 		myCandidatePersonPid = theCandidate;
-		myEmpiLink = null;
+		myEmpiMatchResultEnum = null;
 	}
 
 	public ResourcePersistentId getCandidatePersonPid() {
 		return myCandidatePersonPid;
 	}
 
-	public EmpiLink getEmpiLink() {
-		return myEmpiLink;
+	public EmpiMatchResultEnum getMatchResult() {
+		return myEmpiMatchResultEnum;
 	}
+
 }

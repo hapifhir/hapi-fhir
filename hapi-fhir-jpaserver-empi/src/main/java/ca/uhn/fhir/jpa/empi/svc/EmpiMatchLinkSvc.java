@@ -69,6 +69,7 @@ public class EmpiMatchLinkSvc {
 		} else if (personCandidates.size() == 1) {
 			handleEmpiWithSingleCandidate(theResource, personCandidates);
 		} else {
+			//TODO have to inside this function, handle both MATCH and POSSIBLE_MATCH results.
 			handleEmpiWithMultipleCandidates(theResource, personCandidates);
 		}
 	}
@@ -110,8 +111,10 @@ public class EmpiMatchLinkSvc {
 			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO);
 			myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO);
 		} else {
-			handleEidOverwrite(person, theResource);
-			myEmpiLinkSvc.updateLink(person, theResource, matchedPersonCandidate.getEmpiLink().getMatchResult(), EmpiLinkSourceEnum.AUTO);
+			if (matchedPersonCandidate.getMatchResult().equals(EmpiMatchResultEnum.MATCH)) {
+				handleEidOverwrite(person, theResource);
+			}
+			myEmpiLinkSvc.updateLink(person, theResource, matchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO);
 		}
 	}
 

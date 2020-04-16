@@ -62,7 +62,7 @@ public abstract class BasePersonMatcher extends TypeSafeMatcher<IBaseResource> {
         if (!matchLinkForTarget.isEmpty()) {
             return matchLinkForTarget;
         } else {
-            throw new IllegalStateException("We didn't find a related Person for resource with pid: " + thePatientOrPractitionerResource.getIdElement());
+            throw new IllegalStateException("We didn't find an EmpiLink for target with pid: " + thePatientOrPractitionerResource.getIdElement() +" and match result: " + theMatchResult);
         }
     }
 }
