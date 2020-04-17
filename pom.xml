@@ -1965,12 +1965,33 @@
 									<version>3.3.9</version>
 								</requireMavenVersion>
 								<requireJavaVersion>
-									<version>1.8</version>
+									<version>11</version>
 									<message>
-										The hapi-fhir Maven build requires JDK version 1.8.x.
+										HAPI FHIR is still targeting JDK 8 for published binaries, but we require JDK 11
+										to build and test this library.
 									</message>
 								</requireJavaVersion>
 							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce-property</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireJavaVersion>
+									<version>11</version>
+								</requireJavaVersion>
+							</rules>
+							<fail>true</fail>
 						</configuration>
 					</execution>
 				</executions>
