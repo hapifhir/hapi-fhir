@@ -124,6 +124,19 @@ public class SearchMethodPriorityTest {
 		assertEquals("find", myLastMethod);
 	}
 
+	@Test
+	public void testEmptyStringSearchProvidedWithNoParameters2() {
+		ourServerRule.getRestfulServer().registerProviders(new StringStrengthsWithOptionalResourceProviderReverseOrder());
+
+		myClient
+			.search()
+			.forResource("Patient")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals("find", myLastMethod);
+	}
+
 	public class DateStrengthsWithRequiredResourceProvider implements IResourceProvider {
 
 		@Override
@@ -181,4 +194,28 @@ public class SearchMethodPriorityTest {
 		}
 
 	}
+
+
+	public class StringStrengthsWithOptionalResourceProviderReverseOrder implements IResourceProvider {
+
+		@Override
+		public Class<Patient> getResourceType() {
+			return Patient.class;
+		}
+
+		@Search()
+		public List<Patient> findA(
+			@OptionalParam(name = Patient.SP_NAME) String theDate) {
+			myLastMethod = "findString";
+			return Lists.newArrayList();
+		}
+
+		@Search
+		public List<Patient> findB() {
+			myLastMethod = "find";
+			return Lists.newArrayList();
+		}
+
+	}
+
 }

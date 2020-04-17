@@ -66,6 +66,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	private final String myResourceProviderResourceName;
 	private final List<String> myRequiredParamNames;
+	private final List<String> myOptionalParamNames;
 	private final String myCompartmentName;
 	private String myDescription;
 	private final Integer myIdParamIndex;
@@ -106,6 +107,11 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		myRequiredParamNames = getQueryParameters()
 			.stream()
 			.filter(t -> t.isRequired())
+			.map(t -> t.getName())
+			.collect(Collectors.toList());
+		myOptionalParamNames = getQueryParameters()
+			.stream()
+			.filter(t -> !t.isRequired())
 			.map(t -> t.getName())
 			.collect(Collectors.toList());
 
@@ -248,6 +254,15 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 					if (!unqualifiedNames.contains(nextRequiredParamName)) {
 						retVal = MethodMatchEnum.NONE;
 						break;
+					}
+				}
+			}
+		}
+		if (retVal != MethodMatchEnum.NONE) {
+			for (String nextRequiredParamName : myOptionalParamNames) {
+				if (!qualifiedParamNames.contains(nextRequiredParamName)) {
+					if (!unqualifiedNames.contains(nextRequiredParamName)) {
+						retVal = retVal.weakerOf(MethodMatchEnum.APPROXIMATE);
 					}
 				}
 			}

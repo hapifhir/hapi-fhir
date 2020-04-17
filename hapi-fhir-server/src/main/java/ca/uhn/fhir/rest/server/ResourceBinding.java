@@ -37,9 +37,16 @@ public class ResourceBinding {
 	private String resourceName;
 	private List<BaseMethodBinding<?>> myMethodBindings = new ArrayList<>();
 
+	/**
+	 * Constructor
+	 */
 	public ResourceBinding() {
+		super();
 	}
 
+	/**
+	 * Constructor
+	 */
 	public ResourceBinding(String resourceName, List<BaseMethodBinding<?>> methods) {
 		this.resourceName = resourceName;
 		this.myMethodBindings = methods;
