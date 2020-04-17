@@ -37,7 +37,7 @@ public class EmpiSubscriptionLoader {
 	@Autowired
 	IChannelNamer myChannelNamer;
 
-	public void daoUpdateEmpiSubscriptions() {
+	synchronized public void daoUpdateEmpiSubscriptions() {
 		IBaseResource patientSub = buildEmpiSubscription("empi-patient", "Patient?");
 		IBaseResource practitionerSub = buildEmpiSubscription("empi-practitioner", "Practitioner?");
 		IFhirResourceDao<IBaseResource> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");

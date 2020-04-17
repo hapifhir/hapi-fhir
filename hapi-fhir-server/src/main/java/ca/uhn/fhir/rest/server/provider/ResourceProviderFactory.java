@@ -21,16 +21,16 @@ package ca.uhn.fhir.rest.server.provider;
  */
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class ResourceProviderFactory {
-
+	private Set<IResourceProviderFactoryObserver> myObservers = Collections.synchronizedSet(new HashSet<>());
 	private List<Supplier<Object>> mySuppliers = new ArrayList<>();
 
 	public void addSupplier(@Nonnull Supplier<Object> theSupplier) {
 		mySuppliers.add(theSupplier);
+		myObservers.forEach(observer -> observer.update(theSupplier));
 	}
 
 	public List<Object> createProviders() {
@@ -44,4 +44,11 @@ public class ResourceProviderFactory {
 		return retVal;
 	}
 
+	public void attach(IResourceProviderFactoryObserver theObserver) {
+		myObservers.add(theObserver);
+	}
+
+	public void detach(IResourceProviderFactoryObserver theObserver) {
+		myObservers.remove(theObserver);
+	}
 }
