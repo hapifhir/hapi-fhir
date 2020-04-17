@@ -80,10 +80,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.toColumn("PERSON_PID")
 			.references("HFJ_RESOURCE", "RES_ID");
 
-		empiLink.addColumn("RESOURCE_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		empiLink.addColumn("TARGET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 		empiLink
-			.addForeignKey("20200324.4", "FK_EMPI_LINK_RESOURCE")
-			.toColumn("RESOURCE_PID")
+			.addForeignKey("20200324.4", "FK_EMPI_LINK_TARGET")
+			.toColumn("TARGET_PID")
 			.references("HFJ_RESOURCE", "RES_ID");
 
 		empiLink.addColumn("MATCH_RESULT").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
