@@ -23,7 +23,6 @@ package ca.uhn.fhir.empi.api;
 public class Constants {
 	/**
 	 * TAG system for Person resources which are managed by HAPI EMPI.
-	 * FIXME EMPI move these into the HAPI (non-jpa) module
 	 */
 
 	public static final String SYSTEM_EMPI_MANAGED = "https://hapifhir.org/NamingSystem/managing-empi-system";
