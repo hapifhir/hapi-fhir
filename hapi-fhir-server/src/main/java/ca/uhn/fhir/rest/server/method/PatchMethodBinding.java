@@ -80,9 +80,9 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		boolean retVal = super.incomingServerRequestMatchesMethod(theRequest);
-		if (retVal) {
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+		MethodMatchEnum retVal = super.incomingServerRequestMatchesMethod(theRequest);
+		if (retVal.ordinal() > MethodMatchEnum.NONE.ordinal()) {
 			PatchTypeParameter.getTypeForRequestOrThrowInvalidRequestException(theRequest);
 		}
 		return retVal;

@@ -107,6 +107,11 @@ class IncludeParameter extends BaseQueryParameter {
 	}
 
 	@Override
+	protected boolean supportsRepetition() {
+		return myInstantiableCollectionType != null;
+	}
+
+	@Override
 	public boolean handlesMissing() {
 		return true;
 	}

@@ -174,12 +174,16 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		String[] pageId = theRequest.getParameters().get(Constants.PARAM_PAGINGACTION);
 		if (pageId == null || pageId.length == 0 || isBlank(pageId[0])) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
-		return theRequest.getRequestType() == RequestTypeEnum.GET;
+		if (theRequest.getRequestType() != RequestTypeEnum.GET) {
+			return MethodMatchEnum.NONE;
+		}
+
+		return MethodMatchEnum.EXACT;
 	}
 
 

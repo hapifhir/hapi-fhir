@@ -45,6 +45,7 @@ import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
+import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
 import ca.uhn.fhir.util.*;
@@ -298,7 +299,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		ResourceBinding resourceBinding = null;
 		BaseMethodBinding<?> resourceMethod = null;
 		String resourceName = requestDetails.getResourceName();
-		if (myServerConformanceMethod.incomingServerRequestMatchesMethod(requestDetails)) {
+		if (myServerConformanceMethod.incomingServerRequestMatchesMethod(requestDetails) != MethodMatchEnum.NONE) {
 			resourceMethod = myServerConformanceMethod;
 		} else if (resourceName == null) {
 			resourceBinding = myServerBinding;
@@ -1784,6 +1785,21 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			}
 		}
 	}
+
+	/**
+	 * Unregisters all plain and resource providers (but not the conformance provider).
+	 */
+	public void unregisterAllProviders() {
+		unregisterAllProviders(myPlainProviders);
+		unregisterAllProviders(myResourceProviders);
+	}
+
+	private void unregisterAllProviders(List<?> theProviders) {
+		while (theProviders.size() > 0) {
+			unregisterProvider(theProviders.get(0));
+		}
+	}
+
 
 	private void writeExceptionToResponse(HttpServletResponse theResponse, BaseServerResponseException theException) throws IOException {
 		theResponse.setStatus(theException.getStatusCode());
