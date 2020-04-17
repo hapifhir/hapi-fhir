@@ -12,7 +12,6 @@ import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -162,7 +161,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		// Existing Person with system-assigned EID found linked from matched Patient.  incoming Patient has EID.  Replace Person system-assigned EID with Patient EID.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 
-		Person janePerson = getPersonFromResource(patient);
+		Person janePerson = getPersonFromTarget(patient);
 		Optional<CanonicalEID> hapiEid = myEidHelper.getHapiEid(janePerson);
 		String foundHapiEid = hapiEid.get().getValue();
 
@@ -172,7 +171,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//We want to make sure the patients were linked to the same person.
 		assertThat(patient, is(samePersonAs(janePatient)));
 
-		Person person = getPersonFromResource(patient);
+		Person person = getPersonFromTarget(patient);
 
 		List<Identifier> identifier = person.getIdentifier();
 
@@ -212,7 +211,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 
 		List<Long> duplicatePids = Stream.of(patient1, patient2)
-			.map(this::getPersonFromResource)
+			.map(this::getPersonFromTarget)
 			.map(myResourceTableHelper::getPidOrNull)
 			.collect(Collectors.toList());
 
@@ -253,13 +252,12 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	public void testWhenThereAreNoMATCHOrPOSSIBLE_MATCHOutcomesThatANewPersonIsCreated(){
 		/**
 		 * CASE 1: No MATCHED and no PROBABLE_MATCHED outcomes -> a new Person resource
-		 * is created and linked to that Pat/Prac. All fields are copied from the Pat/Prac to the Person.
-		 * If the incoming resource has an EID, it is copied to the Person. Otherwise a new unique uuid is created and used as the EID.
+		 * is created and linked to that Pat/Prac.
 		 */
+		assertLinkCount(0);
 		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
 		assertLinkCount(1);
-		Person person = getPersonFromResource(janePatient);
-		assertThat(janePatient, is(linkedTo(person)));
+		assertThat(janePatient, is(matchedToAPerson()));
 	}
 
 	@Test
@@ -275,19 +273,15 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(janePatient, is(samePersonAs(janePatient2)));
 
 		Patient incomingJanePatient = createPatientAndUpdateLinks(buildJanePatient());
-		assertThat(incomingJanePatient, is(samePersonAs(janePatient)));
-		assertThat(incomingJanePatient, is(samePersonAs(janePatient2)));
-
+		assertThat(incomingJanePatient, is(samePersonAs(janePatient, janePatient2)));
 		assertThat(incomingJanePatient, is(linkedTo(janePatient, janePatient2)));
 	}
 
 	@Test
 	public void testMATCHResultWithMultipleCandidatesCreatesPOSSIBLE_DUPLICATELinksAndNoPersonIsCreated(){
 		/**
-		 * CASE 3: The MATCHED Pat/Prac resources link to more than one Person -> Mark all links as PROBABLE_MATCHED.
+		 * CASE 3: The MATCHED Pat/Prac resources link to more than one Person -> Mark all links as POSSIBLE_MATCH.
 		 * All other Person resources are marked as POSSIBLE_DUPLICATE of this first Person.
-		 * These duplicates are manually reviewed later and either merged or marked as NO_MATCH
-		 * and the system will no longer consider them as a POSSIBLE_DUPLICATE going forward.
 		 */
 		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
 
@@ -311,12 +305,12 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//Ensure there is no successful MATCH links for incomingJanePatient
 		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTableHelper.getPidOrNull(incomingJanePatient));
 		assertThat(matchedLinkForTargetPid.isPresent(), is(false));
-
 	}
+
 	@Test
 	public void testWhenAllMatchResultsArePOSSIBLE_MATCHThattheyAreLinkedAndNoPersonIsCreated(){
 		/**
-		 * CASE 4: Only PROBABLE_MATCH outcomes -> In this case, empi-link records are created with PROBABLE_MATCH
+		 * CASE 4: Only POSSIBLE_MATCH outcomes -> In this case, empi-link records are created with POSSIBLE_MATCH
 		 * outcome and await manual assignment to either NO_MATCH or MATCHED. Person resources are not changed.
 		 */
 		Patient patient = buildJanePatient();
@@ -329,6 +323,13 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		patient2  = createPatientAndUpdateLinks(patient2);
 
 		assertThat(patient2, is(possibleMatchWith(patient)));
+
+		Patient patient3 = buildJanePatient();
+		patient3.getNameFirstRep().setFamily("pleasedonotmatchatall");
+		patient3  = createPatientAndUpdateLinks(patient3);
+
+		assertThat(patient3, is(possibleMatchWith(patient2)));
+		assertThat(patient3, is(possibleMatchWith(patient)));
 	}
 
 	@Test
@@ -349,6 +350,26 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(patient2, is(not(matchedToAPerson())));
 		assertThat(patient2, is(possibleMatchWith(patient)));
 		assertThat(patient3, is(samePersonAs(patient)));
+	}
+
+	@Test
+	public void testAutoMatchesGenerateAssuranceLevel3() {
+		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
+		Person janePerson = getPersonFromTarget(patient);
+		Person.PersonLinkComponent linkFirstRep = janePerson.getLinkFirstRep();
+
+		assertThat(linkFirstRep.getTarget().getReference(), is(equalTo(patient.getId())));
+		assertThat(linkFirstRep.getAssurance(), is(equalTo(Person.IdentityAssuranceLevel.LEVEL3);
+	}
+
+	@Test
+	public void testManualMatchesGenerateAssuranceLevel4() {
+		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
+		Person janePerson = getPersonFromTarget(patient);
+		Person.PersonLinkComponent linkFirstRep = janePerson.getLinkFirstRep();
+
+		assertThat(linkFirstRep.getTarget().getReference(), is(equalTo(patient.getId())));
+		assertThat(linkFirstRep.getAssurance(), is(equalTo(Person.IdentityAssuranceLevel.LEVEL3);
 	}
 
 }

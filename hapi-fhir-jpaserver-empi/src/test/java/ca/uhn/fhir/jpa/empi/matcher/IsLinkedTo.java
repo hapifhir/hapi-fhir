@@ -10,8 +10,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * A Matcher which allows us to check that a target patient/practitioner
+ * A Matcher which allows us to check that a target patient/practitioner at a given link level.
  * is linked to a set of patients/practitioners via a person.
+ *
+ * FIXME EMPI GGG modify the functionality to actually check links on a person.
+ *
  */
 public class IsLinkedTo extends BasePersonMatcher {
 

@@ -16,7 +16,9 @@ public enum CanonicalIdentityAssuranceLevel {
 	public Person.IdentityAssuranceLevel toR4() {
 		return Person.IdentityAssuranceLevel.fromCode(myCanonicalLevel);
 	}
+
 	public org.hl7.fhir.dstu3.model.Person.IdentityAssuranceLevel toDstu3() {
 		return org.hl7.fhir.dstu3.model.Person.IdentityAssuranceLevel.fromCode(myCanonicalLevel);
 	}
+
 }

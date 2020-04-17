@@ -76,19 +76,27 @@ public final class PersonHelper {
 	public void addOrUpdateLink(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				Person person = (Person) thePerson;
-				if (!containsLinkTo(thePerson, theResourceId)) {
-					person.addLink().setTarget(new Reference(theResourceId)).setAssurance(canonicalAssuranceLevel.toR4());
-				} else {
-					person.getLink().stream()
-						.filter(link -> link.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()))
-						.findFirst()
-						.ifPresent(link -> link.setAssurance(Person.IdentityAssuranceLevel.fromCode(canonicalAssuranceLevel)));
-				}
+				handleLinkUpdateR4(thePerson, theResourceId, canonicalAssuranceLevel);
 				break;
 			default:
 				// FIXME EMPI moar versions
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+		}
+	}
+
+	private void handleLinkUpdateR4(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel) {
+		if (canonicalAssuranceLevel == null) {
+			return;
+		}
+
+		Person person = (Person) thePerson;
+		if (!containsLinkTo(thePerson, theResourceId)) {
+			person.addLink().setTarget(new Reference(theResourceId)).setAssurance(canonicalAssuranceLevel.toR4());
+		} else {
+			person.getLink().stream()
+				.filter(link -> link.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()))
+				.findFirst()
+				.ifPresent(link -> link.setAssurance(canonicalAssuranceLevel.toR4()));
 		}
 	}
 
@@ -204,9 +212,8 @@ public final class PersonHelper {
 	 * @return
 	 */
 	public boolean isPotentialDuplicate(IBaseResource theExistingPerson, IBaseResource theComparingPerson) {
-		String enterpriseEIDSystem = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
-		Optional<CanonicalEID> firstEid = CanonicalEID.extractFromResource(myFhirContext, enterpriseEIDSystem, theExistingPerson);
-		Optional<CanonicalEID> secondEid = CanonicalEID.extractFromResource(myFhirContext, enterpriseEIDSystem, theComparingPerson);
+		Optional<CanonicalEID> firstEid = myEIDHelper.getExternalEid(theExistingPerson);
+		Optional<CanonicalEID> secondEid = myEIDHelper.getExternalEid(theComparingPerson);
 		return firstEid.isPresent() && secondEid.isPresent() && !Objects.equals(firstEid.get().getValue(), secondEid.get().getValue());
 	}
 

@@ -23,7 +23,8 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
-import ca.uhn.fhir.empi.util.AssuranceLevelHelper;
+import ca.uhn.fhir.empi.util.AssuranceLevelUtil;
+import ca.uhn.fhir.empi.util.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -59,11 +60,11 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		IIdType resourceId = theResource.getIdElement().toUnqualifiedVersionless();
 
 		validateRequestIsLegal(thePerson, theResource, theMatchResult, theLinkSource);
-
+		CanonicalIdentityAssuranceLevel assuranceLevel = AssuranceLevelUtil.getAssuranceLevel(theMatchResult, theLinkSource);
 		switch (theMatchResult) {
 			case MATCH:
 			case POSSIBLE_MATCH:
-				myPersonHelper.addOrUpdateLink(thePerson, resourceId, AssuranceLevelHelper.getAssuranceLevel(theMatchResult, theLinkSource));
+				myPersonHelper.addOrUpdateLink(thePerson, resourceId, assuranceLevel);
 				break;
 			case NO_MATCH:
 				myPersonHelper.removeLink(thePerson, resourceId);

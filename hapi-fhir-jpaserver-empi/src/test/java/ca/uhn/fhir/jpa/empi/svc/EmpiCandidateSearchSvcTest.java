@@ -16,7 +16,7 @@ public class EmpiCandidateSearchSvcTest extends BaseEmpiR4Test {
 	EmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
 
 	@Test
-	public void findCandidates() {
+	public void testFindCandidates() {
 		Patient jane = buildJanePatient();
 		jane.setActive(true);
 		Patient createdJane = createPatient(jane);

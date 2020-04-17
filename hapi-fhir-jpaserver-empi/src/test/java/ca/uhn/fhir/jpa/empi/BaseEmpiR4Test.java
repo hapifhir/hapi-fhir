@@ -195,7 +195,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		assertEquals(theExpectedCount, myEmpiLinkDao.count());
 	}
 
-	protected Person getPersonFromResource(IBaseResource theBaseResource) {
+	protected Person getPersonFromTarget(IBaseResource theBaseResource) {
 		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTableHelper.getPidOrNull(theBaseResource));
 		if (matchedLinkForTargetPid.isPresent()) {
 			Long personPid = matchedLinkForTargetPid.get().getPersonPid();

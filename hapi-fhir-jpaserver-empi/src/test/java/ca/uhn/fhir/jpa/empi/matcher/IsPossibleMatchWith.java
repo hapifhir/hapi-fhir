@@ -9,6 +9,7 @@ import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -22,11 +23,18 @@ public class IsPossibleMatchWith extends BasePersonMatcher {
 
 	@Override
 	protected boolean matchesSafely(IBaseResource theIncomingResource) {
-		List<EmpiLink> empiLinks = getEmpiLinks(theIncomingResource, EmpiMatchResultEnum.POSSIBLE_MATCH);
+		List<EmpiLink> empiLinks = getEmpiLinksForTarget(theIncomingResource, EmpiMatchResultEnum.POSSIBLE_MATCH);
 
 		List<Long> personPidsToMatch = myBaseResources.stream()
-			.map(iBaseResource -> getMatchedPersonPidFromResource(iBaseResource))
+			.map(this::getMatchedPersonPidFromResource)
+			.filter(Objects::nonNull)
 			.collect(Collectors.toList());
+
+		if (personPidsToMatch.isEmpty()) {
+			personPidsToMatch = myBaseResources.stream()
+				.flatMap(iBaseResource -> getPossibleMatchedPersonPidsFromResource(iBaseResource).stream())
+				.collect(Collectors.toList());
+		}
 
 		List<Long> empiLinkSourcePersonPids = empiLinks.stream().map(EmpiLink::getPersonPid).collect(Collectors.toList());
 

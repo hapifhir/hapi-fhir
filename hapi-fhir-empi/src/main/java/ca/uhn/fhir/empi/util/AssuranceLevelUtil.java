@@ -20,49 +20,51 @@ package ca.uhn.fhir.empi.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.api.Constants;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.api.IEmpiProperties;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.annotations.VisibleForTesting;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Helper class to determine assurance level based on Link Source and Match Result.
+ * This is strictly for use in populating Person links.
  */
-public final static class AssuranceLevelHelper {
+public final class AssuranceLevelUtil {
+
+	private AssuranceLevelUtil() {
+	}
+
 	public static CanonicalIdentityAssuranceLevel getAssuranceLevel(EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theSource) {
 		switch (theSource) {
 			case MANUAL:
-				switch (theMatchResult) {
-					case MATCH:
-					case NO_MATCH:
-						return CanonicalIdentityAssuranceLevel.LEVEL4; //FIXME EMPI QUESTION the docs say no_match should be level 1 but i feel a manual no_match should be 4.
-					case POSSIBLE_DUPLICATE:
-					case POSSIBLE_MATCH:
-						throw new InvalidRequestException("You cannot manually set a possible match!");
-				}
-				break;
+				return getAssuranceFromManualResult(theMatchResult);
 			case AUTO:
-				switch (theMatchResult) {
-					case MATCH:
-						return CanonicalIdentityAssuranceLevel.LEVEL3;
-					case NO_MATCH:
-						return CanonicalIdentityAssuranceLevel.LEVEL1;
-					case POSSIBLE_MATCH:
-						return CanonicalIdentityAssuranceLevel.LEVEL2;
-					case POSSIBLE_DUPLICATE: //FIXME EMPI QUESTION PoSSIBLE_DUPLICATE doesnt result in an actual link being made, so is this valid??
-						return CanonicalIdentityAssuranceLevel.LEVEL2;
-				}
+				return getAssuranceFromAutoResult(theMatchResult);
 		}
 		throw new InvalidRequestException("Couldn't figure out an assurance level for result: " + theMatchResult + " and source " + theSource);
+	}
+
+	private static CanonicalIdentityAssuranceLevel getAssuranceFromAutoResult(EmpiMatchResultEnum theMatchResult) {
+		switch (theMatchResult) {
+			case MATCH:
+				return CanonicalIdentityAssuranceLevel.LEVEL3;
+			case POSSIBLE_MATCH:
+				return CanonicalIdentityAssuranceLevel.LEVEL2;
+			case POSSIBLE_DUPLICATE:
+			case NO_MATCH:
+			default:
+				return null;
+		}
+	}
+
+	private static CanonicalIdentityAssuranceLevel getAssuranceFromManualResult(EmpiMatchResultEnum theMatchResult) {
+		switch (theMatchResult) {
+			case MATCH:
+				return CanonicalIdentityAssuranceLevel.LEVEL4;
+			case NO_MATCH:
+			case POSSIBLE_DUPLICATE:
+			case POSSIBLE_MATCH:
+			default:
+				return null;
+		}
 	}
 }

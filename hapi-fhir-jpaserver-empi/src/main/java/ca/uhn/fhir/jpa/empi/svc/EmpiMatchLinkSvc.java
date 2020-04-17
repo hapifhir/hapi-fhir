@@ -69,7 +69,6 @@ public class EmpiMatchLinkSvc {
 		} else if (personCandidates.size() == 1) {
 			handleEmpiWithSingleCandidate(theResource, personCandidates);
 		} else {
-			//TODO have to inside this function, handle both MATCH and POSSIBLE_MATCH results.
 			handleEmpiWithMultipleCandidates(theResource, personCandidates);
 		}
 	}

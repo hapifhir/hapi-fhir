@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -25,7 +26,8 @@ public abstract class BasePersonMatcher extends TypeSafeMatcher<IBaseResource> {
 
     protected Long getMatchedPersonPidFromResource(IBaseResource theResource) {
         if (isPatientOrPractitioner(theResource)) {
-            return getMatchedEmpiLink(theResource).getPersonPid();
+			  EmpiLink matchLink = getMatchedEmpiLink(theResource);
+			  return matchLink == null ? null : matchLink.getPersonPid();
         } else if (isPerson(theResource)) {
             return myResourceTableHelper.getPidOrNull(theResource);
         } else {
@@ -33,7 +35,7 @@ public abstract class BasePersonMatcher extends TypeSafeMatcher<IBaseResource> {
         }
     }
     protected List<Long> getPossibleMatchedPersonPidsFromResource(IBaseResource theBaseResource) {
-    	return getEmpiLinks(theBaseResource, EmpiMatchResultEnum.POSSIBLE_MATCH).stream().map(link -> link.getPersonPid()).collect(Collectors.toList());
+    	return getEmpiLinksForTarget(theBaseResource, EmpiMatchResultEnum.POSSIBLE_MATCH).stream().map(EmpiLink::getPersonPid).collect(Collectors.toList());
 	 }
 
     protected boolean isPatientOrPractitioner(IBaseResource theResource) {
@@ -42,9 +44,9 @@ public abstract class BasePersonMatcher extends TypeSafeMatcher<IBaseResource> {
     }
 
     protected EmpiLink getMatchedEmpiLink(IBaseResource thePatientOrPractitionerResource) {
-        List<EmpiLink> empiLinks = getEmpiLinks(thePatientOrPractitionerResource, EmpiMatchResultEnum.MATCH);
+        List<EmpiLink> empiLinks = getEmpiLinksForTarget(thePatientOrPractitionerResource, EmpiMatchResultEnum.MATCH);
         if (empiLinks.size() == 0) {
-            throw new IllegalStateException("We didn't find a matched Person for resource with pid: " + thePatientOrPractitionerResource.getIdElement());
+        	return null;
         } else if (empiLinks.size() == 1) {
             return empiLinks.get(0);
         } else {
@@ -56,13 +58,13 @@ public abstract class BasePersonMatcher extends TypeSafeMatcher<IBaseResource> {
         return (theIncomingResource.getIdElement().getResourceType().equalsIgnoreCase("Person"));
     }
 
-    protected List<EmpiLink> getEmpiLinks(IBaseResource thePatientOrPractitionerResource, EmpiMatchResultEnum theMatchResult) {
+    protected List<EmpiLink> getEmpiLinksForTarget(IBaseResource thePatientOrPractitionerResource, EmpiMatchResultEnum theMatchResult) {
         Long pidOrNull = myResourceTableHelper.getPidOrNull(thePatientOrPractitionerResource);
         List<EmpiLink> matchLinkForTarget = myEmpiLinkDaoSvc.getEmpiLinksByTargetPidAndMatchResult(pidOrNull, theMatchResult);
         if (!matchLinkForTarget.isEmpty()) {
             return matchLinkForTarget;
         } else {
-            throw new IllegalStateException("We didn't find an EmpiLink for target with pid: " + thePatientOrPractitionerResource.getIdElement() +" and match result: " + theMatchResult);
-        }
+        	return new ArrayList<>();
+		  }
     }
 }
