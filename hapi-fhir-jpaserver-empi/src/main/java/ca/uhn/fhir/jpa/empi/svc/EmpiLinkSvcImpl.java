@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
+import ca.uhn.fhir.empi.util.AssuranceLevelHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -32,6 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
@@ -44,6 +47,11 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	private PersonHelper myPersonHelper;
 	@Autowired
 	private ResourceTableHelper myResourceTableHelper;
+	private static Map<EmpiMatchResultEnum, String> matchToCanonicalAssuranceLevel = new HashMap<EmpiMatchResultEnum, String>(){{
+		put(EmpiMatchResultEnum.NO_MATCH, "level1");
+		put(EmpiMatchResultEnum.POSSIBLE_MATCH, "level2");
+		put(EmpiMatchResultEnum.MATCH, "level3");
+	}};
 
 	@Override
 	@Transactional
@@ -55,20 +63,14 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		switch (theMatchResult) {
 			case MATCH:
 			case POSSIBLE_MATCH:
-				// FIXME EMPI use assurance 2 for possible and assurance 4 for no match
-				if (!myPersonHelper.containsLinkTo(thePerson, resourceId)) {
-					myPersonHelper.addLink(thePerson, resourceId);
-					myEmpiResourceDaoSvc.updatePerson(thePerson);
-				}
+				myPersonHelper.addOrUpdateLink(thePerson, resourceId, AssuranceLevelHelper.getAssuranceLevel(theMatchResult, theLinkSource));
 				break;
 			case NO_MATCH:
-				if (myPersonHelper.containsLinkTo(thePerson, resourceId)) {
-					myPersonHelper.removeLink(thePerson, resourceId);
-					myEmpiResourceDaoSvc.updatePerson(thePerson);
-				}
+				myPersonHelper.removeLink(thePerson, resourceId);
 			case POSSIBLE_DUPLICATE:
 				break;
 		}
+		myEmpiResourceDaoSvc.updatePerson(thePerson);
 		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource);
 	}
 

@@ -28,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -44,7 +45,7 @@ public final class EIDHelper {
 		myEmpiConfig = theEmpiConfig;
 	}
 
-	public CanonicalEID createInternalEid() {
+	public CanonicalEID createHapiEid() {
 		return new CanonicalEID(
 			Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM,
 			UUID.randomUUID().toString(),
@@ -59,5 +60,10 @@ public final class EIDHelper {
 	public Optional<CanonicalEID> getHapiEid(IBaseResource theResource) {
 		return CanonicalEID.extractFromResource(myFhirContext, Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, theResource);
 	}
+
+    boolean eidsMatch(CanonicalEID theFirstEid, CanonicalEID theSecondEid) {
+        return Objects.equals(theFirstEid.getValue(), theSecondEid.getValue()) && Objects.equals(theFirstEid.getSystem(), theSecondEid.getSystem());
+    }
+
 
 }

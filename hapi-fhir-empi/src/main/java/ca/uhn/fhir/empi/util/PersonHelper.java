@@ -76,11 +76,18 @@ public final class PersonHelper {
 		 return links.anyMatch(link -> link.getValue().equals(theResourceId.getValue()));
     }
 
-	public void addLink(IBaseResource thePerson, IIdType theResourceId) {
+	public void addOrUpdateLink(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person person = (Person) thePerson;
-				person.addLink().setTarget(new Reference(theResourceId));
+				if (!containsLinkTo(thePerson, theResourceId)) {
+					person.addLink().setTarget(new Reference(theResourceId)).setAssurance(canonicalAssuranceLevel.toR4());
+				} else {
+					person.getLink().stream()
+						.filter(link -> link.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()))
+						.findFirst()
+						.ifPresent(link -> link.setAssurance(Person.IdentityAssuranceLevel.fromCode(canonicalAssuranceLevel)));
+				}
 				break;
 			default:
 				// FIXME EMPI moar versions
@@ -89,6 +96,10 @@ public final class PersonHelper {
 	}
 
 	public void removeLink(IBaseResource thePerson, IIdType theResourceId) {
+		if (!containsLinkTo(thePerson, theResourceId)) {
+			return;
+		}
+
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person person = (Person) thePerson;
@@ -113,17 +124,10 @@ public final class PersonHelper {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person person = new Person();
-				CanonicalEID eidToApply;
-				Optional<CanonicalEID> officialEID = CanonicalEID.extractFromResource(myFhirContext, eidSystem, theSourceResource);
-
-				if (officialEID.isPresent()) {
-					eidToApply = officialEID.get();
-				} else {
-					eidToApply =  myEIDHelper.createInternalEid();
-				}
+				CanonicalEID  eidToApply = myEIDHelper.getExternalEid(theSourceResource).orElse(myEIDHelper.createHapiEid());
 				person.addIdentifier(eidToApply.toR4());
 				person.getMeta().addTag(buildEmpiManagedTag());
-				copyPatientDataIntoPerson(theSourceResource, person);
+				copyEmpiTargetDataIntoPerson(theSourceResource, person);
 				return person;
 			default:
 				// FIXME EMPI moar versions
@@ -137,7 +141,7 @@ public final class PersonHelper {
 	 * @param theBaseResource The incoming {@link Patient} or {@link Practitioner} who's data we want to copy into Person.
 	 * @param thePerson The incoming {@link Person} who needs to have their data updated.
 	 */
-	private void copyPatientDataIntoPerson(IBaseResource theBaseResource, Person thePerson) {
+	private void copyEmpiTargetDataIntoPerson(IBaseResource theBaseResource, Person thePerson) {
 		switch (myFhirContext.getResourceDefinition(theBaseResource).getName()) {
 			case "Patient":
 				Patient patient = (Patient)theBaseResource;
@@ -181,7 +185,7 @@ public final class PersonHelper {
 					if (!personOfficialEid.isPresent()) {
 						ourLog.debug("Incoming resource:{} with EID {} is applying this EID to its related Person, as this person does not yet have an external EID", theEmpiTarget.getIdElement().getValueAsString(), incomingTargetEid.get().getValue());
 						person.addIdentifier(incomingTargetEid.get().toR4());
-					} else if (personOfficialEid.isPresent() && eidsMatch(personOfficialEid, incomingTargetEid)){
+					} else if (personOfficialEid.isPresent() && myEIDHelper.eidsMatch(personOfficialEid.get(), incomingTargetEid.get())){
 						ourLog.debug("incoming resource:{} with EID {} does not need to overwrite person, as this EID is already present", theEmpiTarget.getIdElement().getValueAsString(), incomingTargetEid.get().getValue());
 					} else {
 						throw new IllegalArgumentException("This would create a duplicate person!");
@@ -192,12 +196,6 @@ public final class PersonHelper {
 				break;
 		}
 		return thePerson;
-	}
-
-	private boolean eidsMatch(Optional<CanonicalEID> thePersonOfficialEid, Optional<CanonicalEID> theIncomingPatientEid) {
-		return thePersonOfficialEid.isPresent()
-			&& theIncomingPatientEid.isPresent()
-			&& Objects.equals(thePersonOfficialEid.get().getValue(), theIncomingPatientEid.get().getValue());
 	}
 
 	/**

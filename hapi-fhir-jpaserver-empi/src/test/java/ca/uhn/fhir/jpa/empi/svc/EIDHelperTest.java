@@ -57,7 +57,7 @@ public class EIDHelperTest extends BaseEmpiR4Test {
 	@Test
 	public void testCreationOfInternalEIDGeneratesUuidEID() {
 
-		CanonicalEID internalEid = myEIDHelper.createInternalEid();
+		CanonicalEID internalEid = myEIDHelper.createHapiEid();
 
 		assertThat(internalEid.getSystem(), is(equalTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
 		assertThat(internalEid.getValue().length(), is(equalTo(36)));
