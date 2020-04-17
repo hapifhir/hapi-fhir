@@ -76,14 +76,14 @@
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
-					<artifactId>hamcrest-core</artifactId>
 					<groupId>org.hamcrest</groupId>
+					<artifactId>hamcrest-core</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
-			<artifactId>java-hamcrest</artifactId>
+			<artifactId>hamcrest</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -1278,10 +1278,16 @@
 				<artifactId>jscience</artifactId>
 				<version>4.3.1</version>
 			</dependency>
+			<!-- TODO: remove this once we're fully switched over to hamcrest 2.2 -->
 			<dependency>
 				<groupId>org.hamcrest</groupId>
 				<artifactId>java-hamcrest</artifactId>
 				<version>2.0.0.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest</artifactId>
+				<version>2.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
