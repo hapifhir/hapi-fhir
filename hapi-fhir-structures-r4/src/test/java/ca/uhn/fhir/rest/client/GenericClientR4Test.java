@@ -9,8 +9,13 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.CustomTypeR4Test;
 import ca.uhn.fhir.parser.CustomTypeR4Test.MyCustomPatient;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
@@ -39,6 +44,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
@@ -56,13 +62,24 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -93,7 +110,7 @@ public class GenericClientR4Test {
 	}
 
 	private String extractBodyAsString(ArgumentCaptor<HttpUriRequest> capt) throws IOException {
-		String body = IOUtils.toString(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0)).getEntity().getContent(), "UTF-8");
+		String body = IOUtils.toString(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0)).getEntity().getContent(), StandardCharsets.UTF_8);
 		return body;
 	}
 
@@ -107,7 +124,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8);
 			}
 		});
 		return capt;
@@ -124,7 +141,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -183,7 +200,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -193,7 +210,7 @@ public class GenericClientR4Test {
 		pt.getText().setDivAsString("A PATIENT");
 
 		Binary bin = new Binary();
-		bin.setContent(ourCtx.newJsonParser().encodeResourceToString(pt).getBytes("UTF-8"));
+		bin.setContent(ourCtx.newJsonParser().encodeResourceToString(pt).getBytes(StandardCharsets.UTF_8));
 		bin.setContentType(Constants.CT_FHIR_JSON);
 		client.create().resource(bin).execute();
 
@@ -207,7 +224,7 @@ public class GenericClientR4Test {
 		Binary output = ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt));
 		assertEquals(Constants.CT_FHIR_JSON, output.getContentType());
 
-		Patient outputPt = (Patient) ourCtx.newJsonParser().parseResource(new String(output.getContent(), "UTF-8"));
+		Patient outputPt = (Patient) ourCtx.newJsonParser().parseResource(new String(output.getContent(), StandardCharsets.UTF_8));
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div>", outputPt.getText().getDivAsString());
 	}
 
@@ -226,7 +243,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -290,7 +307,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -330,9 +347,9 @@ public class GenericClientR4Test {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				if (myAnswerCount++ == 0) {
-					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp0)), Charset.forName("UTF-8"));
+					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp0)), StandardCharsets.UTF_8);
 				} else {
-					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), Charset.forName("UTF-8"));
+					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), StandardCharsets.UTF_8);
 				}
 			}
 		});
@@ -379,7 +396,7 @@ public class GenericClientR4Test {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				myAnswerCount++;
-				return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -401,6 +418,78 @@ public class GenericClientR4Test {
 	}
 
 	@Test
+	public void testDeleteCascade() throws Exception {
+		final IParser p = ourCtx.newXmlParser();
+
+		OperationOutcome oo = new OperationOutcome();
+		oo.getText().setDivAsString("FINAL VALUE");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
+			@Override
+			public Header[] answer(InvocationOnMock theInvocation) {
+				return new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")};
+			}
+		});
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
+				myAnswerCount++;
+				return new ReaderInputStream(new StringReader(p.encodeResourceToString(oo)), StandardCharsets.UTF_8);
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		IBaseOperationOutcome outcome;
+
+		// Regular delete
+		outcome = client
+			.delete()
+			.resourceById(new IdType("Patient/222"))
+			.execute();
+		assertNotNull(outcome);
+		assertEquals(1, capt.getAllValues().size());
+		assertEquals("http://example.com/fhir/Patient/222", capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString());
+		assertEquals("DELETE", capt.getAllValues().get(myAnswerCount - 1).getMethod());
+
+		// NONE Cascading delete
+		outcome = client
+			.delete()
+			.resourceById(new IdType("Patient/222"))
+			.cascade(DeleteCascadeModeEnum.NONE)
+			.execute();
+		assertNotNull(outcome);
+		assertEquals(2, capt.getAllValues().size());
+		assertEquals("http://example.com/fhir/Patient/222", capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString());
+		assertEquals("DELETE", capt.getAllValues().get(myAnswerCount - 1).getMethod());
+
+		// DELETE Cascading delete
+		outcome = client
+			.delete()
+			.resourceById(new IdType("Patient/222"))
+			.cascade(DeleteCascadeModeEnum.DELETE)
+			.execute();
+		assertNotNull(outcome);
+		assertEquals(myAnswerCount, capt.getAllValues().size());
+		assertEquals("http://example.com/fhir/Patient/222?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE, capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString());
+		assertEquals("DELETE", capt.getAllValues().get(myAnswerCount - 1).getMethod());
+
+		// DELETE Cascading delete on search URL
+		outcome = client
+			.delete()
+			.resourceConditionalByUrl("Patient?identifier=sys|val")
+			.cascade(DeleteCascadeModeEnum.DELETE)
+			.execute();
+		assertNotNull(outcome);
+		assertEquals(myAnswerCount, capt.getAllValues().size());
+		assertEquals("http://example.com/fhir/Patient?identifier=sys%7Cval&" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE, capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString());
+		assertEquals("DELETE", capt.getAllValues().get(myAnswerCount - 1).getMethod());
+	}
+
+	@Test
 	public void testExplicitCustomTypeHistoryType() throws Exception {
 		final String respString = CustomTypeR4Test.createBundle(CustomTypeR4Test.createResource(false));
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -410,7 +499,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -437,7 +526,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -482,7 +571,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -522,7 +611,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -567,7 +656,7 @@ public class GenericClientR4Test {
 					respString = p.encodeResourceToString(conf);
 				}
 				myCount++;
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -615,7 +704,7 @@ public class GenericClientR4Test {
 					respString = p.encodeResourceToString(conf);
 				}
 				myAnswerCount++;
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -655,7 +744,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(t -> {
 			IParser p = ourCtx.newXmlParser();
-			return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), Charset.forName("UTF-8"));
+			return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), StandardCharsets.UTF_8);
 		});
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
@@ -816,7 +905,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -860,7 +949,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -904,7 +993,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -947,7 +1036,7 @@ public class GenericClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", "text/html"));
-		when(myHttpResponse.getEntity().getContent()).thenAnswer(t -> new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(t -> new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8));
 		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{
 			new BasicHeader("content-type", "text/html")
 		});
@@ -982,7 +1071,7 @@ public class GenericClientR4Test {
 		Parameters inputParams = new Parameters();
 		inputParams.addParameter().setName("name").setValue(new BooleanType(true));
 
-		final byte[] respBytes = new byte[]{0,1,2,3,4,5,6,7,8,9,100};
+		final byte[] respBytes = new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 100};
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
@@ -1027,7 +1116,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1081,7 +1170,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1120,7 +1209,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1159,7 +1248,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1197,7 +1286,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1235,7 +1324,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1273,7 +1362,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1320,7 +1409,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(encoded), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(encoded), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1365,7 +1454,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(encoded), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(encoded), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1394,7 +1483,7 @@ public class GenericClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
@@ -1423,7 +1512,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1454,7 +1543,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1502,7 +1591,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1609,7 +1698,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1719,7 +1808,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1811,7 +1900,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1847,12 +1936,12 @@ public class GenericClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		HashMap<String, List<IQueryParameterType>> params = new HashMap<String, List<IQueryParameterType>>();
-		params.put("foo", Arrays.asList((IQueryParameterType) new DateParam("2001")));
+		params.put("foo", Arrays.asList(new DateParam("2001")));
 		Bundle response = client
 			.search()
 			.forResource(Patient.class)
@@ -1895,7 +1984,7 @@ public class GenericClientR4Test {
 
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		// httpResponse = new BasicHttpResponse(statusline, catalog, locale)
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -1920,7 +2009,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -1957,7 +2046,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(t -> {
 			IParser p = ourCtx.newXmlParser();
-			return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), Charset.forName("UTF-8"));
+			return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), StandardCharsets.UTF_8);
 		});
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
@@ -1995,7 +2084,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -2048,7 +2137,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(t -> {
 			IParser p = ourCtx.newXmlParser();
-			return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), Charset.forName("UTF-8"));
+			return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), StandardCharsets.UTF_8);
 		});
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
@@ -2127,7 +2216,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -2174,9 +2263,9 @@ public class GenericClientR4Test {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				if (myAnswerCount++ == 0) {
-					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp0)), Charset.forName("UTF-8"));
+					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp0)), StandardCharsets.UTF_8);
 				} else {
-					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), Charset.forName("UTF-8"));
+					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), StandardCharsets.UTF_8);
 				}
 			}
 		});
@@ -2222,7 +2311,7 @@ public class GenericClientR4Test {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				myAnswerCount++;
-				return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -2259,7 +2348,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -2296,7 +2385,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -2317,7 +2406,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -2352,7 +2441,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp0)), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp0)), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -2385,7 +2474,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -2423,7 +2512,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(respString), StandardCharsets.UTF_8);
 			}
 		});
 
