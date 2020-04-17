@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class EmpiMatchFinderSvc implements IEmpiMatchFinderSvc {
+public class EmpiMatchFinderSvcImpl implements IEmpiMatchFinderSvc {
 	@Autowired
 	private EmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
 	@Autowired

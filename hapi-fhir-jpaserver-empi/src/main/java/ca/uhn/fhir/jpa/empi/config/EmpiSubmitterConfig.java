@@ -20,25 +20,48 @@ package ca.uhn.fhir.jpa.empi.config;
  * #L%
  */
 
+import ca.uhn.fhir.empi.provider.EmpiProviderLoader;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.empi.broker.EmpiSubscriptionLoader;
+import ca.uhn.fhir.jpa.empi.interceptor.EmpiDaoInterceptor;
 import org.hl7.fhir.dstu2.model.Subscription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
 @Configuration
-@ComponentScan(basePackages = {
-	"ca.uhn.fhir.jpa.empi",
-	"ca.uhn.fhir.empi",
-})
-public class EmpiConfig {
+public class EmpiSubmitterConfig {
+	private static final Logger ourLog = LoggerFactory.getLogger(EmpiSubmitterConfig.class);
+
 	@Autowired
 	DaoConfig myDaoConfig;
 
+	@Bean
+	EmpiSubscriptionLoader empiSubscriptionLoader() {
+		return new EmpiSubscriptionLoader();
+	}
+
+	@Bean
+	EmpiDaoInterceptor empiDaoInterceptor() {
+		return new EmpiDaoInterceptor();
+	}
+
+	@Bean
+	EmpiProviderLoader empiProviderLoader() {
+		return new EmpiProviderLoader();
+	}
+
+	@Bean
+	EmpiSubmitterInitializer empiSubmitterInitializer() {
+		return new EmpiSubmitterInitializer();
+	}
+
 	@PostConstruct
-	public void init() {
+	public void enableMessageSubscriptions() {
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
 	}
 }

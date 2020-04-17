@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 /*-
@@ -42,8 +43,8 @@ public class EmpiQueueConsumerLoader {
 
 	protected IChannelReceiver myEmpiChannel;
 
-	// FIXME KHS rename method
-	public void init() {
+	@PostConstruct
+	public void startListeningToEmpiChannel() {
 		if (myEmpiChannel == null) {
 			myEmpiChannel = mySubscriptionChannelFactory.newMatchingReceivingChannel(IEmpiProperties.EMPI_MATCHING_CHANNEL_NAME, null);
 		}

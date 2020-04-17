@@ -23,7 +23,6 @@ package ca.uhn.fhir.empi.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.Constants;
 import ca.uhn.fhir.empi.api.IEmpiProperties;
-import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -44,16 +43,14 @@ public final class PersonHelper {
 	private static final Logger ourLog = getLogger(PersonHelper.class);
 
 	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
 	private IEmpiProperties myEmpiConfig;
 	@Autowired
 	private EIDHelper myEIDHelper;
 
-	private PersonHelper(){}
+	private final FhirContext myFhirContext;
 
-	@VisibleForTesting
-	PersonHelper(FhirContext theFhirContext) {
+	@Autowired
+	public PersonHelper(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
 	}
 

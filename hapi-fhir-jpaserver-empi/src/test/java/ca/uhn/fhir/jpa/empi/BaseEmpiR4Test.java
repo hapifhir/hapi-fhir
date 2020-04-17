@@ -6,7 +6,8 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
-import ca.uhn.fhir.jpa.empi.config.EmpiConfig;
+import ca.uhn.fhir.jpa.empi.config.EmpiConsumerConfig;
+import ca.uhn.fhir.jpa.empi.config.EmpiSubmitterConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
 import ca.uhn.fhir.jpa.empi.matcher.*;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkDaoSvc;
@@ -37,7 +38,7 @@ import static org.junit.Assert.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {EmpiConfig.class, TestEmpiConfigR4.class, SubscriptionProcessorConfig.class})
+@ContextConfiguration(classes = {EmpiSubmitterConfig.class, EmpiConsumerConfig.class, TestEmpiConfigR4.class, SubscriptionProcessorConfig.class})
 abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = getLogger(BaseEmpiR4Test.class);
 
