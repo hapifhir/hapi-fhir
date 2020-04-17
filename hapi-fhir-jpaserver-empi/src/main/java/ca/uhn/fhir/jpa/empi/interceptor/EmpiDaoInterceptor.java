@@ -38,8 +38,8 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class EmpiInterceptor {
-	private static final Logger ourLog = LoggerFactory.getLogger(EmpiInterceptor.class);
+public class EmpiDaoInterceptor {
+	private static final Logger ourLog = LoggerFactory.getLogger(EmpiDaoInterceptor.class);
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 	@Autowired

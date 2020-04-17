@@ -10,13 +10,7 @@ import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.IParserErrorHandler;
-import ca.uhn.fhir.parser.JsonParser;
-import ca.uhn.fhir.parser.LenientErrorHandler;
-import ca.uhn.fhir.parser.RDFParser;
-import ca.uhn.fhir.parser.XmlParser;
+import ca.uhn.fhir.parser.*;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -27,6 +21,7 @@ import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.VersionUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.riot.Lang;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -177,7 +172,12 @@ public class FhirContext {
 			ourLog.info("Creating new FhirContext with auto-detected version [{}]. It is recommended to explicitly select a version for future compatibility by invoking FhirContext.forDstuX()",
 				myVersion.getVersion().name());
 		} else {
-			ourLog.info("Creating new FHIR context for FHIR version [{}]", myVersion.getVersion().name());
+			if ("true".equals(System.getProperty("unit_test_mode"))) {
+				String calledAt = ExceptionUtils.getStackFrames(new Throwable())[4];
+				ourLog.info("Creating new FHIR context for FHIR version [{}]\nCalled{}", myVersion.getVersion().name(), calledAt);
+			} else {
+				ourLog.info("Creating new FHIR context for FHIR version [{}]", myVersion.getVersion().name());
+			}
 		}
 
 		myResourceTypesToScan = theResourceTypes;
