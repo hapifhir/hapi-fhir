@@ -37,7 +37,6 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		System.setProperty("test", "true");
 	}
 
-	// TODO INTERMITTENT This just failed for me on CI with a BadSqlGrammarException
 	@Test
 	public void testMigrateFrom340() throws IOException, SQLException {
 
