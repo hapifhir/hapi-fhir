@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistR4Svc;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -38,16 +39,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
-public class FhirResourceDaoObservationR4 extends BaseHapiFhirResourceDao<Observation> implements IFhirResourceDaoObservation<Observation> {
+public class FhirResourceDaoObservationR4 extends BaseHapiFhirResourceDaoObservation<Observation> {
 
 	@Autowired
 	ObservationLastNIndexPersistR4Svc myObservationLastNIndexPersistR4Svc;
 
 	@Override
 	public IBundleProvider observationsLastN(SearchParameterMap theSearchParameterMap,  RequestDetails theRequestDetails, HttpServletResponse theServletResponse) {
-		if (!isPagingProviderDatabaseBacked(theRequestDetails)) {
-			theSearchParameterMap.setLoadSynchronous(true);
-		}
+
+		updateSearchParamsForLastn(theSearchParameterMap, theRequestDetails);
 
 		return mySearchCoordinatorSvc.registerSearch(this, theSearchParameterMap, getResourceName(), new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)), theRequestDetails);
 	}

@@ -129,7 +129,7 @@ public class BaseJpaResourceProviderObservationR4 extends JpaResourceProviderR4<
 			paramMap.setRevIncludes(theRevIncludes);
 			paramMap.setLastUpdated(theLastUpdated);
 			paramMap.setIncludes(theIncludes);
-			paramMap.setLastN(true);
+/*			paramMap.setLastN(true);
 			if (theSort == null) {
 				SortSpec effectiveDtm = new SortSpec("date").setOrder(SortOrderEnum.DESC);
 				SortSpec observationCode = new SortSpec("code").setOrder(SortOrderEnum.ASC).setChain(effectiveDtm);
@@ -138,7 +138,7 @@ public class BaseJpaResourceProviderObservationR4 extends JpaResourceProviderR4<
 				} else {
 					theSort = new SortSpec("subject").setChain(observationCode);
 				}
-			}
+			} */
 			paramMap.setSort(theSort);
 			paramMap.setCount(theCount);
 			paramMap.setSummaryMode(theSummaryMode);

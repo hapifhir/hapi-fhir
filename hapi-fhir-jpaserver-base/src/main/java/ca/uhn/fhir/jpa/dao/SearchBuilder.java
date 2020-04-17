@@ -323,34 +323,44 @@ public class SearchBuilder implements ISearchBuilder {
 		 * Fulltext search and lastn
 		 */
 		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
-			List<ResourcePersistentId> lastnPids = new ArrayList<>();
-			List<ResourcePersistentId> fullTextSearchPids = new ArrayList<>();
+		List<ResourcePersistentId> lastnPids = new ArrayList<>();
+		List<ResourcePersistentId> fullTextSearchPids = new ArrayList<>();
 
-			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-				if (myFulltextSearchSvc == null) {
-					if (myParams.containsKey(Constants.PARAM_TEXT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-					}
-				}
-
-				if (myParams.getEverythingMode() != null) {
-					fullTextSearchPids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
-				} else {
-					fullTextSearchPids = myFulltextSearchSvc.search(myResourceName, myParams);
-				}
-			} else {
-				if (myIElasticsearchSvc == null) {
-					if (myParams.isLastN()) {
-						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
-					}
-				}
-
-				if (myParams.isLastN()) {
-					lastnPids = myIElasticsearchSvc.executeLastN(myParams, theRequest, myIdHelperService);
+		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
+			if (myFulltextSearchSvc == null) {
+				if (myParams.containsKey(Constants.PARAM_TEXT)) {
+					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+				} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
+					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
 				}
 			}
+
+			if (myParams.getEverythingMode() != null) {
+				fullTextSearchPids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
+			} else {
+				fullTextSearchPids = myFulltextSearchSvc.search(myResourceName, myParams);
+			}
+			} else {
+			if (myIElasticsearchSvc == null) {
+				if (myParams.isLastN()) {
+					throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
+				}
+			}
+
+			if (myParams.isLastN()) {
+				Integer myMaxObservationsPerCode = null;
+				String[] maxCountParams = theRequest.getParameters().get("max");
+				if (maxCountParams != null && maxCountParams.length > 0) {
+					myMaxObservationsPerCode = Integer.valueOf(maxCountParams[0]);
+				} else {
+					throw new InvalidRequestException("Max parameter is required for $lastn operation");
+				}
+				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myMaxObservationsPerCode);
+				for (String lastnResourceId : lastnResourceIds) {
+					lastnPids.add(myIdHelperService.resolveResourcePersistentIds(myResourceName, lastnResourceId));
+				}
+			}
+		}
 
 			//
 			List<ResourcePersistentId> pids;

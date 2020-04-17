@@ -2,20 +2,16 @@ package ca.uhn.fhir.jpa.dao.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.lastn.config.TestIntegratedObservationIndexSearchConfig;
+import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticsearchClient;
 import ca.uhn.fhir.jpa.dao.data.IObservationIndexedCodeCodeableConceptSearchParamDao;
 import ca.uhn.fhir.jpa.dao.data.IObservationIndexedSearchParamLastNDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
-import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.shadehapi.elasticsearch.action.search.SearchRequest;
-import org.shadehapi.elasticsearch.action.search.SearchResponse;
 import org.hl7.fhir.r4.model.*;
 import org.junit.After;
 import org.junit.Before;
@@ -34,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { TestIntegratedObservationIndexSearchConfig.class })
+@ContextConfiguration(classes = { TestR4ConfigWithElasticsearchClient.class })
 public class IntegratedObservationIndexedSearchParamLastNTest {
 
     @Autowired
@@ -128,29 +124,16 @@ public class IntegratedObservationIndexedSearchParamLastNTest {
 
         SearchParameterMap searchParameterMap = new SearchParameterMap();
         ReferenceParam subjectParam = new ReferenceParam("Patient", "", SUBJECTID);
-        searchParameterMap.add("subject", subjectParam);
+        searchParameterMap.add(Observation.SP_SUBJECT, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().addOr(subjectParam)));
         TokenParam categoryParam = new TokenParam(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE);
-        searchParameterMap.add("category", categoryParam);
+		  searchParameterMap.add(Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
         TokenParam codeParam = new TokenParam(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE);
-        searchParameterMap.add("code", codeParam);
+        searchParameterMap.add(Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
 
-        // execute Observation ID search - Terms Aggregation
-        SearchRequest searchRequestIdsOnly = elasticsearchSvc.buildObservationAllFieldsTermsSearchRequest(1000, searchParameterMap, 3);
-        SearchResponse responseIds = elasticsearchSvc.executeSearchRequest(searchRequestIdsOnly);
-        List<ObservationJson> observationIdsOnly = elasticsearchSvc.buildObservationTermsResults(responseIds);
+		  List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 3);
 
         assertEquals(1, observationIdsOnly.size());
-        ObservationJson observationIdOnly = observationIdsOnly.get(0);
-        assertEquals(RESOURCEPID, observationIdOnly.getIdentifier());
-
-        // execute Observation ID search - Composite Aggregation
-        searchRequestIdsOnly = elasticsearchSvc.buildObservationAllFieldsCompositeSearchRequest(1000, searchParameterMap, 3);
-        responseIds = elasticsearchSvc.executeSearchRequest(searchRequestIdsOnly);
-        observationIdsOnly = elasticsearchSvc.buildObservationCompositeResults(responseIds);
-
-        assertEquals(1, observationIdsOnly.size());
-        observationIdOnly = observationIdsOnly.get(0);
-        assertEquals(RESOURCEPID, observationIdOnly.getIdentifier());
+        assertEquals(RESOURCEPID, observationIdsOnly.get(0));
 
     }
 
@@ -278,19 +261,13 @@ public class IntegratedObservationIndexedSearchParamLastNTest {
 		 SearchParameterMap searchParameterMap = new SearchParameterMap();
 
 		 // execute Observation ID search - Composite Aggregation
-		 SearchRequest searchRequestIdsOnly = elasticsearchSvc.buildObservationAllFieldsCompositeSearchRequest(1000, searchParameterMap, 1);
-		 SearchResponse responseIds = elasticsearchSvc.executeSearchRequest(searchRequestIdsOnly);
-		 List<ObservationJson>  observationIdsOnly = elasticsearchSvc.buildObservationCompositeResults(responseIds);
+		 List<String>  observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap,1);
 
 		 assertEquals(20, observationIdsOnly.size());
-		 ObservationJson observationIdOnly = observationIdsOnly.get(0);
 
-		 searchRequestIdsOnly = elasticsearchSvc.buildObservationAllFieldsCompositeSearchRequest(1000, searchParameterMap, 3);
-		 responseIds = elasticsearchSvc.executeSearchRequest(searchRequestIdsOnly);
-		 observationIdsOnly = elasticsearchSvc.buildObservationCompositeResults(responseIds);
+		 observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 3);
 
 		 assertEquals(38, observationIdsOnly.size());
-		 observationIdOnly = observationIdsOnly.get(0);
 
 	 }
 

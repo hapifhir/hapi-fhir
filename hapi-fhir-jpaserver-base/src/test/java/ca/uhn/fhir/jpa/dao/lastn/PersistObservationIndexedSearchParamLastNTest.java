@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.lastn;
 
-import ca.uhn.fhir.jpa.dao.lastn.config.TestObservationIndexSearchConfig;
+import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticSearch;
 import ca.uhn.fhir.jpa.dao.data.IObservationIndexedCodeCodeableConceptSearchParamDao;
 import ca.uhn.fhir.jpa.dao.lastn.entity.ObservationIndexedCodeCodeableConceptEntity;
 import ca.uhn.fhir.jpa.dao.lastn.entity.ObservationIndexedSearchParamLastNEntity;
@@ -19,7 +19,7 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { TestObservationIndexSearchConfig.class })
+@ContextConfiguration(classes = { TestR4ConfigWithElasticSearch.class })
 public class PersistObservationIndexedSearchParamLastNTest {
 
     @Autowired

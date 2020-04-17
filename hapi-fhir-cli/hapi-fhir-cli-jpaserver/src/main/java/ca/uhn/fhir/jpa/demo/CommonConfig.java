@@ -46,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @SuppressWarnings("Duplicates")
-// TODO: Merge this with new CommonPostgreSQLConfig or find way to avoid conflicts with it.
 @Configuration
 public class CommonConfig {
 
@@ -76,42 +75,6 @@ public class CommonConfig {
 	 */
 	@Bean(destroyMethod = "close")
 	public DataSource dataSource() {
-		if (ContextHolder.isPostGreSql()) {
-			return getPostgreSqlDataSource();
-		} else {
-			return getH2DataSource();
-		}
-	}
-
-	/**
-	 * The following method creates a PostgreSQL database connection. The 'url' property value of "jdbc:postgresql://localhost:5432/hapi" indicates that the server should save resources in a
-	 * PostgreSQL database named "hapi".
-	 *
-	 * A URL to a remote database could also be placed here, along with login credentials and other properties supported by BasicDataSource.
-	 */
-	private DataSource getPostgreSqlDataSource() {
-		String dbUrl = "jdbc:postgresql://localhost:5432/hapi";
-		String dbUsername = "hapi";
-		String dbPassword = "HapiFHIR";
-		if (isNotBlank(ContextHolder.getDatabaseUrl())) {
-			dbUrl = ContextHolder.getDatabaseUrl();
-		}
-
-		BasicDataSource retVal = new BasicDataSource();
-		retVal.setDriverClassName("org.postgresql.Driver");
-		retVal.setUrl(dbUrl);
-		retVal.setUsername(dbUsername);
-		retVal.setPassword(dbPassword);
-		return retVal;
-	}
-
-	/**
-	 * The following method creates an H2 database connection. The 'url' property value of "jdbc:h2:file:target./jpaserver_h2_files" indicates that the server should save resources in a
-	 * directory called "jpaserver_h2_files".
-	 *
-	 * A URL to a remote database could also be placed here, along with login credentials and other properties supported by BasicDataSource.
-	 */
-	private DataSource getH2DataSource() {
 		String url = "jdbc:h2:file:./target/jpaserver_h2_files";
 		if (isNotBlank(ContextHolder.getDatabaseUrl())) {
 			url = ContextHolder.getDatabaseUrl();
@@ -127,14 +90,6 @@ public class CommonConfig {
 
 	@Bean
 	public Properties jpaProperties() {
-		if (ContextHolder.isPostGreSql()) {
-			return getPostGreSqlJpaProperties();
-		} else {
-			return getH2JpaProperties();
-		}
-	}
-
-	private Properties getH2JpaProperties() {
 		Properties extraProperties = new Properties();
 		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
 		extraProperties.put("hibernate.format_sql", "true");
@@ -158,44 +113,12 @@ public class CommonConfig {
 		return configureElasticearch(extraProperties);
 	}
 
-	private Properties getPostGreSqlJpaProperties() {
-
-		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.dialect", org.hibernate.dialect.PostgreSQL94Dialect.class.getName());
-		extraProperties.put("hibernate.format_sql", "false");
-		extraProperties.put("hibernate.show_sql", "false");
-		extraProperties.put("hibernate.hbm2ddl.auto", "update");
-		extraProperties.put("hibernate.jdbc.batch_size", "20");
-		extraProperties.put("hibernate.cache.use_query_cache", "false");
-		extraProperties.put("hibernate.cache.use_second_level_cache", "false");
-		extraProperties.put("hibernate.cache.use_structured_entries", "false");
-		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
-		extraProperties.put("hibernate.search.model_mapping", LuceneSearchMappingFactory.class.getName());
-		extraProperties.put("hibernate.search.default.directory_provider", "local-heap");
-		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
-		extraProperties.put("hibernate.search.default.worker.execution", "sync");
-
-		if (System.getProperty("lowmem") != null) {
-			extraProperties.put("hibernate.search.autoregister_listeners", "false");
-		}
-
-		return configureElasticearch(extraProperties);
-	}
-
 	private Properties configureElasticearch(Properties theExtraProperties) {
 
 		String elasticsearchHost = "localhost";
 		String elasticsearchUserId = "";
 		String elasticsearchPassword = "";
-		Integer elasticsearchPort;
-
-		if(ContextHolder.isExternalElasticsearch()) {
-			elasticsearchUserId = "elastic";
-			elasticsearchPassword = "changeme";
-			elasticsearchPort = 9301;
-		} else {
-			elasticsearchPort = embeddedElasticSearch().getHttpPort();
-		}
+		int elasticsearchPort = embeddedElasticSearch().getHttpPort();
 
 		new ElasticsearchHibernatePropertiesBuilder()
 			.setDebugRefreshAfterWrite(true)
@@ -212,41 +135,22 @@ public class CommonConfig {
 
 	}
 
-	@Bean()
-	public ElasticsearchSvcImpl myElasticsearchSvc() throws IOException {
-		String elasticsearchHost = "localhost";
-		String elasticsearchUserId = "";
-		String elasticsearchPassword = "";
-		Integer elasticsearchPort;
-
-		if(ContextHolder.isExternalElasticsearch()) {
-			elasticsearchUserId = "elastic";
-			elasticsearchPassword = "changeme";
-			elasticsearchPort = 9301;
-		} else {
-			elasticsearchPort = embeddedElasticSearch().getHttpPort();
-		}
-		return new ElasticsearchSvcImpl(elasticsearchHost, elasticsearchPort, elasticsearchUserId, elasticsearchPassword);
-	}
-
 	@Bean
 	public EmbeddedElastic embeddedElasticSearch() {
 		String ELASTIC_VERSION = "6.5.4";
 
 		EmbeddedElastic embeddedElastic = null;
-		if(!ContextHolder.isExternalElasticsearch()) {
-			try {
-				embeddedElastic = EmbeddedElastic.builder()
-					.withElasticVersion(ELASTIC_VERSION)
-					.withSetting(PopularProperties.TRANSPORT_TCP_PORT, 0)
-					.withSetting(PopularProperties.HTTP_PORT, 0)
-					.withSetting(PopularProperties.CLUSTER_NAME, UUID.randomUUID())
-					.withStartTimeout(60, TimeUnit.SECONDS)
-					.build()
-					.start();
-			} catch (IOException | InterruptedException e) {
-				throw new ConfigurationException(e);
-			}
+		try {
+			embeddedElastic = EmbeddedElastic.builder()
+				.withElasticVersion(ELASTIC_VERSION)
+				.withSetting(PopularProperties.TRANSPORT_TCP_PORT, 0)
+				.withSetting(PopularProperties.HTTP_PORT, 0)
+				.withSetting(PopularProperties.CLUSTER_NAME, UUID.randomUUID())
+				.withStartTimeout(60, TimeUnit.SECONDS)
+				.build()
+				.start();
+		} catch (IOException | InterruptedException e) {
+			throw new ConfigurationException(e);
 		}
 
 		return embeddedElastic;

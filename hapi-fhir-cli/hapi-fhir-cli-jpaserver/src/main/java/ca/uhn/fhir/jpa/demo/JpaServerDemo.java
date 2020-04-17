@@ -122,7 +122,6 @@ public class JpaServerDemo extends RestfulServer {
 					myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
-
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
 			IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, org.hl7.fhir.dstu3.model.Meta> systemDao = myAppCtx
 					.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
@@ -161,7 +160,6 @@ public class JpaServerDemo extends RestfulServer {
 		/*
 		 * This is a simple paging strategy that keeps the last 10 searches in memory
 		 */
-		// TODO: Make this configurable via the ContextHolder
 		setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(ContextHolder.getDefaultPageSize()).setMaximumPageSize(ContextHolder.getMaxPageSize()));
 
 		// Register a CORS filter

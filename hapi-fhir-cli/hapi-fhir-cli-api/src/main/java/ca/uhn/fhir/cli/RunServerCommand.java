@@ -20,7 +20,6 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.demo.*;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.demo.ContextHolder;
 import ca.uhn.fhir.jpa.demo.FhirServerConfig;
@@ -48,10 +47,8 @@ public class RunServerCommand extends BaseCommand {
 	private static final String OPTION_LOWMEM = "lowmem";
 	private static final String OPTION_ALLOW_EXTERNAL_REFS = "allow-external-refs";
 	private static final String OPTION_REUSE_SEARCH_RESULTS_MILLIS = "reuse-search-results-milliseconds";
-	private static final String OPTION_EXTERNAL_ELASTICSEARCH = "external-elasticsearch";
 	private static final int DEFAULT_PORT = 8080;
 	private static final String OPTION_P = "p";
-	private static final String OPTION_POSTGRES = "postgresql";
 
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RunServerCommand.class);
@@ -73,8 +70,6 @@ public class RunServerCommand extends BaseCommand {
 		options.addOption(null, OPTION_LOWMEM, false, "If this flag is set, the server will operate in low memory mode (some features disabled)");
 		options.addOption(null, OPTION_ALLOW_EXTERNAL_REFS, false, "If this flag is set, the server will allow resources to be persisted contaning external resource references");
 		options.addOption(null, OPTION_DISABLE_REFERENTIAL_INTEGRITY, false, "If this flag is set, the server will not enforce referential integrity");
-		options.addOption(null, OPTION_EXTERNAL_ELASTICSEARCH, false, "If this flag is set, the server will attempt to use a local elasticsearch server listening on port 9301");
-		options.addOption(null, OPTION_POSTGRES, false, "If this flag is set, the server will attempt to use a local postgresql DB instance listening on port 5432");
 
 		addOptionalOption(options, "u", "url", "Url", "If this option is set, specifies the JDBC URL to use for the database connection");
 		addOptionalOption(options, "d", "default-size", "PageSize", "If this option is set, specifies the default page size for number of query results");
@@ -115,17 +110,7 @@ public class RunServerCommand extends BaseCommand {
 			ContextHolder.setDisableReferentialIntegrity(true);
 		}
 
-		if (theCommandLine.hasOption(OPTION_EXTERNAL_ELASTICSEARCH)) {
-			ourLog.info("Server is configured to use external elasticsearch");
-			ContextHolder.setExternalElasticsearch(true);
-		}
-
 		ContextHolder.setDatabaseUrl(theCommandLine.getOptionValue("u"));
-
-		if (theCommandLine.hasOption(OPTION_POSTGRES)) {
-			ourLog.info("Server is configured to use PostgreSQL database");
-			ContextHolder.setPostgreSql(true);
-		}
 
 		String defaultPageSize = theCommandLine.getOptionValue("d");
 		String maxPageSize = theCommandLine.getOptionValue("m");

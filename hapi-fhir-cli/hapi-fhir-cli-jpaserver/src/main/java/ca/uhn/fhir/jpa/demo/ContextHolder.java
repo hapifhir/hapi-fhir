@@ -33,8 +33,6 @@ public class ContextHolder {
 	private static String ourPath;
 	private static Long ourReuseSearchResultsMillis;
 	private static String ourDatabaseUrl;
-	private static boolean myExternalElasticsearch = false;
-	private static boolean myPostGreSql = false;
 	private static Integer myDefaultPageSize = 10;
 	private static Integer myMaxPageSize = 50;
 
@@ -103,22 +101,6 @@ public class ContextHolder {
 
 	public static void setDatabaseUrl(String theDatabaseUrl) {
 		ourDatabaseUrl = theDatabaseUrl;
-	}
-
-	public static void setExternalElasticsearch(Boolean theExternalElasticsearch) {
-		myExternalElasticsearch = theExternalElasticsearch;
-	}
-
-	public static Boolean isExternalElasticsearch() {
-		return myExternalElasticsearch;
-	}
-
-	public static void setPostgreSql(boolean thePostGreSql) {
-		myPostGreSql = thePostGreSql;
-	}
-
-	public static boolean isPostGreSql() {
-		return myPostGreSql;
 	}
 
 	public static void setDefaultPageSize(Integer theDefaultPageSize) {

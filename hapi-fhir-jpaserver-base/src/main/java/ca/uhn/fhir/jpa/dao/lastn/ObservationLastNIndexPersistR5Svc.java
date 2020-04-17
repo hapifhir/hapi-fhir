@@ -70,6 +70,7 @@ public class ObservationLastNIndexPersistR5Svc {
 			codeableConceptField.addCoding(new ObservationIndexedCodeCodingEntity(codeCoding.getSystem(), codeCoding.getCode(), codeCoding.getDisplay(), observationCodeNormalizedId));
 		}
 		myObservationIndexedCodeableConceptSearchParamDao.save(codeableConceptField);
+		codeableConceptField = myObservationIndexedCodeableConceptSearchParamDao.findByCodeableConceptId(observationCodeNormalizedId);
 
 		indexedObservation.setObservationCode(codeableConceptField);
 		indexedObservation.setCodeNormalizedId(observationCodeNormalizedId);
