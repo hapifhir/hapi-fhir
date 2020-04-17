@@ -359,7 +359,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Person.PersonLinkComponent linkFirstRep = janePerson.getLinkFirstRep();
 
 		assertThat(linkFirstRep.getTarget().getReference(), is(equalTo(patient.getId())));
-		assertThat(linkFirstRep.getAssurance(), is(equalTo(Person.IdentityAssuranceLevel.LEVEL3);
+		assertThat(linkFirstRep.getAssurance(), is(equalTo(Person.IdentityAssuranceLevel.LEVEL3)));
 	}
 
 	@Test
@@ -369,7 +369,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Person.PersonLinkComponent linkFirstRep = janePerson.getLinkFirstRep();
 
 		assertThat(linkFirstRep.getTarget().getReference(), is(equalTo(patient.getId())));
-		assertThat(linkFirstRep.getAssurance(), is(equalTo(Person.IdentityAssuranceLevel.LEVEL3);
+		assertThat(linkFirstRep.getAssurance(), is(equalTo(Person.IdentityAssuranceLevel.LEVEL4)));
 	}
 
 }
