@@ -1,8 +1,8 @@
-package ca.uhn.fhir.test.utilities;
+package ca.uhn.fhir.rest.server.method;
 
 /*-
  * #%L
- * HAPI FHIR Test Utilities
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -20,18 +20,20 @@ package ca.uhn.fhir.test.utilities;
  * #L%
  */
 
-import org.apache.commons.lang3.Validate;
-import org.springframework.aop.framework.AopProxyUtils;
+public enum MethodMatchEnum {
 
-public class ProxyUtil {
+	// Order these from worst to best!
 
-	@SuppressWarnings("unchecked")
-	public static <T> T getSingletonTarget(Object theSource, Class<T> theSubscriptionTriggeringSvcClass) {
-		Validate.notNull(theSource);
-		if (theSubscriptionTriggeringSvcClass.isAssignableFrom(theSource.getClass())) {
-			return (T) theSource;
+	NONE,
+	APPROXIMATE,
+    EXACT;
+
+	public MethodMatchEnum weakerOf(MethodMatchEnum theOther) {
+		if (this.ordinal() < theOther.ordinal()) {
+			return this;
+		} else {
+			return theOther;
 		}
-		return (T) AopProxyUtils.getSingletonTarget(theSource);
 	}
 
 }

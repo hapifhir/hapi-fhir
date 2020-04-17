@@ -31,29 +31,61 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ReflectionUtil {
 
-	private static final ConcurrentHashMap<String, Object> ourFhirServerVersions = new ConcurrentHashMap<>();
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReflectionUtil.class);
 	public static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 	public static final Class<?>[] EMPTY_CLASS_ARRAY = new Class[0];
+	private static final ConcurrentHashMap<String, Object> ourFhirServerVersions = new ConcurrentHashMap<>();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReflectionUtil.class);
 
-	public static LinkedHashSet<Method> getDeclaredMethods(Class<?> theClazz) {
-		LinkedHashSet<Method> retVal = new LinkedHashSet<>();
-		for (Method next : theClazz.getDeclaredMethods()) {
+	/**
+	 * Returns all methods declared against {@literal theClazz}. This method returns a predictable order, which is
+	 * sorted by method name and then by parameters.
+	 */
+	public static List<Method> getDeclaredMethods(Class<?> theClazz) {
+		HashSet<Method> foundMethods = new LinkedHashSet<>();
+		Method[] declaredMethods = theClazz.getDeclaredMethods();
+		for (Method next : declaredMethods) {
 			try {
 				Method method = theClazz.getMethod(next.getName(), next.getParameterTypes());
-				retVal.add(method);
+				foundMethods.add(method);
 			} catch (NoSuchMethodException | SecurityException e) {
-				retVal.add(next);
+				foundMethods.add(next);
 			}
 		}
+
+		List<Method> retVal = new ArrayList<>(foundMethods);
+		retVal.sort((Comparator.comparing(ReflectionUtil::describeMethodInSortFriendlyWay)));
 		return retVal;
+	}
+
+	/**
+	 * Returns a description like <code>startsWith params(java.lang.String, int) returns(boolean)</code>.
+	 * The format is chosen in order to provide a predictable and useful sorting order.
+	 */
+	public static String describeMethodInSortFriendlyWay(Method theMethod) {
+		StringBuilder b = new StringBuilder();
+		b.append(theMethod.getName());
+		b.append(" returns(");
+		b.append(theMethod.getReturnType().getName());
+		b.append(") params(");
+		Class<?>[] parameterTypes = theMethod.getParameterTypes();
+		for (int i = 0, parameterTypesLength = parameterTypes.length; i < parameterTypesLength; i++) {
+			if (i > 0) {
+				b.append(", ");
+			}
+			Class<?> next = parameterTypes[i];
+			b.append(next.getName());
+		}
+		b.append(")");
+		return b.toString();
 	}
 
 	public static Class<?> getGenericCollectionTypeOfField(Field next) {
