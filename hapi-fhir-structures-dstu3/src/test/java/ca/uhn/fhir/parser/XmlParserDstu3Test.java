@@ -91,7 +91,7 @@ public class XmlParserDstu3Test {
 	}
 
 	/**
-	 * We specifically include extensions on CapabilityStatment even in
+	 * We specifically include extensions on CapabilityStatement even in
 	 * summary mode, since this is behaviour that people depend on
 	 */
 	@Test
@@ -840,7 +840,6 @@ public class XmlParserDstu3Test {
 
 		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<meta>",
-			"<meta>",
 			"<profile value=\"http://foo/Profile1\"/>",
 			"<profile value=\"http://foo/Profile2\"/>",
 			"<tag>",
@@ -853,7 +852,6 @@ public class XmlParserDstu3Test {
 			"<code value=\"term2\"/>",
 			"<display value=\"label2\"/>",
 			"</tag>",
-			"</meta>",
 			"</meta>",
 			"<name>",
 			"<family value=\"FAMILY\"/>",
@@ -900,7 +898,6 @@ public class XmlParserDstu3Test {
 
 		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<meta>",
-			"<meta>",
 			"<tag>",
 			"<system value=\"scheme1\"/>",
 			"<code value=\"term1\"/>",
@@ -911,7 +908,6 @@ public class XmlParserDstu3Test {
 			"<code value=\"term2\"/>",
 			"<display value=\"label2\"/>",
 			"</tag>",
-			"</meta>",
 			"</meta>",
 			"<name>",
 			"<family value=\"FAMILY\"/>",
@@ -1935,7 +1931,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testEncodeUndeclaredBlock() throws Exception {
+	public void testEncodeUndeclaredBlock() {
 		FooMessageHeader.FooMessageSourceComponent source = new FooMessageHeader.FooMessageSourceComponent();
 		source.getMessageHeaderApplicationId().setValue("APPID");
 		source.setName("NAME");
@@ -1965,7 +1961,7 @@ public class XmlParserDstu3Test {
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUse.HOME);
 		EnumFactory<AddressUse> fact = new AddressUseEnumFactory();
-		PrimitiveType<AddressUse> enumeration = new Enumeration<AddressUse>(fact).setValue(AddressUse.HOME);
+		PrimitiveType<AddressUse> enumeration = new Enumeration<>(fact).setValue(AddressUse.HOME);
 		patient.addExtension().setUrl("urn:foo").setValue(enumeration);
 
 		String val = parser.encodeResourceToString(patient);
@@ -1981,7 +1977,7 @@ public class XmlParserDstu3Test {
 
 	@Test
 	public void testEncodeWithContained() {
-		List<Resource> contained = new ArrayList<Resource>();
+		List<Resource> contained = new ArrayList<>();
 
 		// Will be added by reference
 		Patient p = new Patient();
@@ -2037,7 +2033,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testEncodeWithDontEncodeElements() throws Exception {
+	public void testEncodeWithDontEncodeElements() {
 		Patient patient = new Patient();
 		patient.setId("123");
 		patient.getMeta().addProfile("http://profile");
@@ -2092,7 +2088,7 @@ public class XmlParserDstu3Test {
 		{
 			IParser p = ourCtx.newXmlParser();
 			p.setDontEncodeElements(Sets.newHashSet("Patient.meta"));
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient.name")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(patient);
 			ourLog.info(out);
@@ -2106,7 +2102,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testEncodeWithEncodeElements() throws Exception {
+	public void testEncodeWithEncodeElements() {
 		Patient patient = new Patient();
 		patient.getMeta().addProfile("http://profile");
 		patient.addName().setFamily("FAMILY");
@@ -2129,7 +2125,7 @@ public class XmlParserDstu3Test {
 		}
 		{
 			IParser p = ourCtx.newXmlParser();
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient.name")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -2140,7 +2136,7 @@ public class XmlParserDstu3Test {
 		}
 		{
 			IParser p = ourCtx.newXmlParser();
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -2153,7 +2149,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testEncodeWithEncodeElementsAppliesToChildResourcesOnly() throws Exception {
+	public void testEncodeWithEncodeElementsAppliesToChildResourcesOnly() {
 		Patient patient = new Patient();
 		patient.getMeta().addProfile("http://profile");
 		patient.addName().setFamily("FAMILY");
@@ -2208,7 +2204,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testMoreExtensions() throws Exception {
+	public void testMoreExtensions() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");

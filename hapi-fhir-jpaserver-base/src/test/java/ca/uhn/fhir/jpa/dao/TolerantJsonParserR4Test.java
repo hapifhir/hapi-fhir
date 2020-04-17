@@ -6,7 +6,9 @@ import ca.uhn.fhir.parser.LenientErrorHandler;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.Test;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class TolerantJsonParserR4Test {
 
@@ -42,7 +44,7 @@ public class TolerantJsonParserR4Test {
 		try {
 			parser.parseResource(Observation.class, input);
 		} catch (DataFormatException e) {
-			assertEquals("[element=\"value\"] Invalid attribute value \".\": No digits found.", e.getMessage());
+			assertThat(e.getMessage(), containsString("[element=\"value\"] Invalid attribute value \".\""));
 		}
 
 	}
