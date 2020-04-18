@@ -4,7 +4,7 @@
 
 It contains a description of the tables within the HAPI FHIR JPA database. Note that columns are shown using Java datatypes as opposed to SQL datatypes, because the exact SQL datatype used will vary depending on the underlying database platform. 
 
-# Concepts: PID
+# Background: Persistent IDs (PIDs)
 
 The HAPI FHIR JPA schema relies heavily on the concept of internal persistent IDs on tables, using a Java type of Long (8-byte integer, which translates to an *int8* or *number(19)* on various database platforms).
 
@@ -12,15 +12,117 @@ Many tables use an internal persistent ID as their primary key, allowing the fle
 
 The persistent ID column is generally called `PID` in the database schema, although there are exceptions.
 
-# Individual Resources: HFJ_RESOURCE, HFJ_RES_VER, HFJ_FORCED_ID
-
-<img src="/hapi-fhir/docs/images/jpa_erd_resources.png" alt="Resources" align="right"/>
-
 <a name="HFJ_RESOURCE"/>
 
 # HFJ_RESOURCE: Resource Master Table
 
+<img src="/hapi-fhir/docs/images/jpa_erd_resources.svg" alt="Resources" style="width: 100%; max-width: 500px;"/>
+
 The HFJ_RESOURCE table indicates a single resource of any type in the database. For example, the resource `Patient/1` will have exactly one row in this table, representing all versions of the resource.
+
+## Columns
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>PARTITION_ID</td>
+            <td></td>
+            <td>Integer</td>
+            <td>Nullable</td>
+            <td>
+                This is the optional partition ID, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+            </td>        
+        </tr>
+        <tr>
+            <td>PARTITION_DATE</td>
+            <td></td>
+            <td>Timestamp</td>
+            <td>Nullable</td>
+            <td>
+                This is the optional partition date, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+            </td>        
+        </tr>
+        <tr>
+            <td>RES_VER</td>
+            <td></td>
+            <td>Long</td>
+            <td>
+                This is the current version ID of the resource. Will contain <code>1</code> when the resource is first
+                created, <code>2</code> the first time it is updated, etc.  
+                This column is equivalent to the <b>HFJ_RES_VER.RES_VER</b>
+                column, although it does not have a foreign-key dependency in order to allow selective expunge of versions
+                when necessary. Not to be confused with <b>RES_VERSION</b> below.   
+            </td>
+        </tr>
+        <tr>
+            <td>RES_VERSION</td>
+            <td></td>
+            <td>String</td>
+            <td>
+                This column contains the FHIR version associated with this resource, using a constant drawn
+                from <a href="/apidocs/hapi-fhir-base/ca/uhn/fhir/context/FhirVersionEnum.html">FhirVersionEnum</a>.
+                Not to be confused with <b>RES_VER</b> above.
+            </td>
+        </tr>
+        <tr>
+            <td>RES_TYPE</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                Contains the resource type (e.g. <code>Patient</code>) 
+            </td>        
+        </tr>
+        <tr>
+            <td>HASH_SHA256</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                This column contains a SHA-256 hash of the current resource contents, exclusive of resource metadata.
+                This is used in order to detect NO-OP writes to the resource. 
+            </td>        
+        </tr>
+        <tr>
+            <td>RES_PUBLISHED</td>
+            <td></td>
+            <td>Timestamp</td>
+            <td></td>
+            <td>
+                Contains the date that the first version of the resource was created. 
+            </td>        
+        </tr>
+        <tr>
+            <td>RES_UPDATED</td>
+            <td></td>
+            <td>Timestamp</td>
+            <td></td>
+            <td>
+                Contains the date that the most recent version of the resource was created. 
+            </td>        
+        </tr>
+        <tr>
+            <td>RES_DELETED_AT</td>
+            <td></td>
+            <td>Timestamp</td>
+            <td>Nullable</td>
+            <td>
+                If the most recent version of the resource is a delete, this contains the timestamp at which 
+                the resource was deleted. Otherwise, contains <i>NULL</i>. 
+            </td>        
+        </tr>
+    </tbody>
+</table>
+
 
 
 <a name="HFJ_RES_VER"/>
@@ -30,6 +132,86 @@ The HFJ_RESOURCE table indicates a single resource of any type in the database. 
 The HFJ_RES_VER table contains individual versions of a resource. If the resource `Patient/1` has 3 versions, there will be 3 rows in this table.
 
 The complete raw contents of the resource is stored in the `RES_TEXT` column, using the encoding specified in the `RES_ENCODING` column.
+
+## Columns
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>PARTITION_ID</td>
+            <td></td>
+            <td>Integer</td>
+            <td>Nullable</td>
+            <td>
+                This is the optional partition ID, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+            </td>        
+        </tr>
+        <tr>
+            <td>PARTITION_DATE</td>
+            <td></td>
+            <td>Timestamp</td>
+            <td>Nullable</td>
+            <td>
+                This is the optional partition date, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+            </td>        
+        </tr>
+        <tr>
+            <td>PID</td>
+            <td>PK</td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                This is the row persistent ID.  
+            </td>        
+        </tr>
+        <tr>
+            <td>RES_ID</td>
+            <td>FK to <a href="#HFJ_RESOURCE">HFJ_RESOURCE</a></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                This is the persistent ID of the resource being versioned.
+            </td>        
+        </tr>
+        <tr>
+            <td>RES_VER</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                Contains the specific version (starting with 1) of the resource that this row corresponds to. 
+            </td>        
+        </tr>
+        <tr>
+            <td>RES_ENCODING</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                Describes the encoding of the resource being used to store this resource in <b>RES_TEXT</b>. See
+                <i>Encodings</i> below for allowable values. 
+            </td>        
+        </tr>
+        <tr>
+            <td>RES_TEXT</td>
+            <td></td>
+            <td>byte[]</td>
+            <td></td>
+            <td>
+                Contains the actual full text of the resource being stored. 
+            </td>        
+        </tr>
+    </tbody>
+</table>
 
 ## Encodings
 
@@ -60,12 +242,72 @@ However, when client-assigned IDs are used, these may contain text values in ord
 
 If the server has been configured with a [Resource Server ID Strategy](/apidocs/hapi-fhir-jpaserver-api/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.IdStrategyEnum)) of [UUID](/apidocs/hapi-fhir-jpaserver-api/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.IdStrategyEnum.html#UUID), or the server has been configured with a [Resource Client ID Strategy](/apidocs/hapi-fhir-jpaserver-api/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceClientIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum)) of [ANY](/apidocs/hapi-fhir-jpaserver-api/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.ClientIdStrategyEnum.html#ANY) the server will create a Forced ID for all resources (not only resources having textual IDs).
 
+## Columns
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>PARTITION_ID</td>
+            <td></td>
+            <td>Integer</td>
+            <td>Nullable</td>
+            <td>
+                This is the optional partition ID, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+            </td>        
+        </tr>
+        <tr>
+            <td>PARTITION_DATE</td>
+            <td></td>
+            <td>Timestamp</td>
+            <td>Nullable</td>
+            <td>
+                This is the optional partition date, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+            </td>        
+        </tr>
+        <tr>
+            <td>PID</td>
+            <td>PK</td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                This is the row persistent ID.  
+            </td>        
+        </tr>
+        <tr>
+            <td>RESOURCE_PID</td>
+            <td>FK to <a href="#HFJ_RESOURCE">HFJ_RESOURCE</a></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                This is the persistent ID of the resource being versioned.
+            </td>        
+        </tr>
+        <tr>
+            <td>FORCED_ID</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                Contains the specific version (starting with 1) of the resource that this row corresponds to. 
+            </td>        
+        </tr>
+    </tbody>
+</table>
 
 <a name="HFJ_RES_LINK"/>
 
 # HFJ_RES_LINK: Search Links
 
-<img src="/hapi-fhir/docs/images/jpa_erd_resources.png" alt="Resources" align="right"/>
+<img src="/hapi-fhir/docs/images/jpa_erd_resource_links.svg" alt="Resources" style="width: 100%; max-width: 500px;"/>
 
 When a resource is created or updated, it is indexed for searching. Any search parameters of type [Reference](http://hl7.org/fhir/search.html#reference) are resolved, and one or more rows may be created in the **HFJ_RES_LINK** table.
 
@@ -75,37 +317,89 @@ When a resource is created or updated, it is indexed for searching. Any search p
     <thead>
         <tr>
             <th>Name</th>
+            <th>Relationships</th>
             <th>Datatype</th>
+            <th>Nullable</th>
             <th>Description</th>
         </tr>
     </thead>
     <tbody>
         <tr>
+            <td>PARTITION_ID</td>
+            <td></td>
+            <td>Integer</td>
+            <td>Nullable</td>
+            <td>
+                This is the optional partition ID, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.
+                Note that the partition indicated by the <b>PARTITION_ID</b> and <b>PARTITION_DATE</b> columns refers to the partition
+                of the <i>SOURCE</i> resource, and not necessarily the <i>TARGET</i>.  
+            </td>
+        </tr>
+        <tr>
+            <td>PARTITION_DATE</td>
+            <td></td>
+            <td>Timestamp</td>
+            <td>Nullable</td>
+            <td>
+                This is the optional partition date, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+                Note that the partition indicated by the <b>PARTITION_ID</b> and <b>PARTITION_DATE</b> columns refers to the partition
+                of the <i>SOURCE</i> resource, and not necessarily the <i>TARGET</i>.  
+            </td>        
+        </tr>
+        <tr>
             <td>PID</td>
+            <td></td>
             <td>Long</td>
+            <td></td>
             <td>
                 Holds the persistent ID 
             </td>        
         </tr>
         <tr>
             <td>SRC_PATH</td>
+            <td></td>
             <td>String</td>
+            <td></td>
             <td>
                 Contains the FHIRPath expression within the source resource containing the path to the target resource, as supplied by the SearchParameter resource that defined the link.  
             </td>        
         </tr>
         <tr>
             <td>SRC_RESOURCE_ID</td>
+            <td></td>
             <td>Long</td>
+            <td></td>
             <td>
                 Contains a FK reference to the resource containing the link to the target resource. 
             </td>        
         </tr>
         <tr>
             <td>TARGET_RESOURCE_ID</td>
+            <td></td>
             <td>Long</td>
+            <td>Nullable</td>
             <td>
-                Contains a FK reference to the resource that is the target resource. 
+                Contains a FK reference to the resource that is the target resource. Will not be populated if the link contains
+                a reference to an external resource, or a canonical reference.
+            </td>        
+        </tr>
+        <tr>
+            <td>TARGET_RESOURCE_URL</td>
+            <td></td>
+            <td>String</td>
+            <td>Nullable</td>
+            <td>
+                If this row contains a reference to an external resource or a canonical reference, this column will contain
+                the absolute URL.  
+            </td>        
+        </tr>
+        <tr>
+            <td>SP_UPDATED</td>
+            <td></td>
+            <td>Timestamp</td>
+            <td></td>
+            <td>
+                Contains the last updated timestamp for this row.  
             </td>        
         </tr>
     </tbody>
@@ -113,6 +407,7 @@ When a resource is created or updated, it is indexed for searching. Any search p
 
 <a name="indexes"/>
 
-# HFJ_SPIDX_xxx: Search Indexes
+# Background: Search Indexes
 
 The HFJ_SPIDX (Search Parameter Index) tables are used to index resources for searching. When a resource is created or updated, a set of rows in these tables will be added. These are used for finding appropriate rows to return when performing FHIR searches.
+
