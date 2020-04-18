@@ -70,6 +70,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
@@ -443,7 +444,7 @@ public class GenericClientR4Test {
 		});
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-		IBaseOperationOutcome outcome;
+		MethodOutcome outcome;
 
 		// Regular delete
 		outcome = client
@@ -1686,7 +1687,6 @@ public class GenericClientR4Test {
 		idx++;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void testSearchByQuantity() throws Exception {
 		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
