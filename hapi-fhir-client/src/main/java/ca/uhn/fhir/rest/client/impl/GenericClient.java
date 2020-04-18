@@ -610,20 +610,34 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private IIdType myId;
 		private String myResourceType;
 		private String mySearchUrl;
+		private DeleteCascadeModeEnum myCascadeMode;
 
 		@Override
 		public IBaseOperationOutcome execute() {
+
+			Map<String, List<String>> additionalParams = new HashMap<>();
+			if (myCascadeMode != null) {
+				switch (myCascadeMode) {
+					case DELETE:
+						addParam(getParamMap(), Constants.PARAMETER_CASCADE_DELETE, Constants.CASCADE_DELETE);
+						break;
+					default:
+					case NONE:
+						break;
+				}
+			}
+
 			HttpDeleteClientInvocation invocation;
 			if (myId != null) {
-				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myId);
+				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myId, getParamMap());
 			} else if (myConditional) {
 				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myResourceType, getParamMap());
 			} else {
-				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), mySearchUrl);
+				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), mySearchUrl, getParamMap());
 			}
 			OperationOutcomeResponseHandler binding = new OperationOutcomeResponseHandler();
-			Map<String, List<String>> params = new HashMap<String, List<String>>();
-			return invoke(params, binding, invocation);
+
+			return invoke(additionalParams, binding, invocation);
 		}
 
 		@Override
@@ -687,6 +701,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		@Override
+		public IDeleteTyped cascade(DeleteCascadeModeEnum theDelete) {
+			myCascadeMode = theDelete;
+			return this;
+		}
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})

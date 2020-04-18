@@ -23,6 +23,7 @@ package ca.uhn.hapi.fhir.docs;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -262,6 +263,19 @@ public class GenericClientExample {
                    .execute();
            // END SNIPPET: deleteConditional
       }
+		{
+			// START SNIPPET: deleteCascade
+			client.delete()
+				.resourceById(new IdType("Patient/123"))
+				.cascade(DeleteCascadeModeEnum.DELETE)
+				.execute();
+
+			client.delete()
+				.resourceConditionalByType("Patient")
+				.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("system", "00001"))
+				.execute();
+			// END SNIPPET: deleteCascade
+		}
       {
          // START SNIPPET: search
          Bundle response = client.search()
