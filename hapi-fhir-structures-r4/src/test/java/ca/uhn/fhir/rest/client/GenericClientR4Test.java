@@ -1602,6 +1602,8 @@ public class GenericClientR4Test {
 		DateTimeDt now = DateTimeDt.withCurrentTime();
 		String dateString = now.getValueAsString().substring(0, 10);
 
+		DateTimeDt nowWithMillis = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI, TimeZone.getDefault());
+
 		client.search()
 			.forResource("Patient")
 			.where(Patient.BIRTHDATE.after().day(dateString))
@@ -1672,6 +1674,24 @@ public class GenericClientR4Test {
 			.execute();
 
 		assertEquals("http://example.com/fhir/Patient?birthdate=gt" + now.getValueAsString(), UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		client.search()
+			.forResource("Patient")
+			.where(Patient.BIRTHDATE.after().millis("2011-01-02T22:33:01.123Z"))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals("http://example.com/fhir/Patient?birthdate=gt2011-01-02T22:33:01.123Z", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+
+		client.search()
+			.forResource("Patient")
+			.where(Patient.BIRTHDATE.after().millis(nowWithMillis.getValue()))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals("http://example.com/fhir/Patient?birthdate=gt" + nowWithMillis.getValueAsString(), UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
