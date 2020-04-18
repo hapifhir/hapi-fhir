@@ -358,7 +358,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Person janePerson = getPersonFromTarget(patient);
 		Person.PersonLinkComponent linkFirstRep = janePerson.getLinkFirstRep();
 
-		assertThat(linkFirstRep.getTarget().getReference(), is(equalTo(patient.getId())));
+		assertThat(linkFirstRep.getTarget().getReference(), is(equalTo(patient.getIdElement().toVersionless().toString())));
 		assertThat(linkFirstRep.getAssurance(), is(equalTo(Person.IdentityAssuranceLevel.LEVEL3)));
 	}
 
@@ -366,9 +366,12 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	public void testManualMatchesGenerateAssuranceLevel4() {
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 		Person janePerson = getPersonFromTarget(patient);
-		Person.PersonLinkComponent linkFirstRep = janePerson.getLinkFirstRep();
+		myEmpiLinkSvc.updateLink(janePerson, patient, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL);
 
-		assertThat(linkFirstRep.getTarget().getReference(), is(equalTo(patient.getId())));
+		janePerson = getPersonFromTarget(patient);
+		Person.PersonLinkComponent linkFirstRep = janePerson.getLink();
+
+		assertThat(linkFirstRep.getTarget().getReference(), is(equalTo(patient.getIdElement().toVersionless().toString())));
 		assertThat(linkFirstRep.getAssurance(), is(equalTo(Person.IdentityAssuranceLevel.LEVEL4)));
 	}
 
