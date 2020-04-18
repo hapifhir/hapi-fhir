@@ -599,6 +599,10 @@
 			<id>augla</id>
 			<name>August Langhout</name>
 		</developer>
+		<developer>
+			<id>dgileadi</id>
+			<name>David Gileadi</name>
+		</developer>
 	</developers>
 
 	<licenses>
