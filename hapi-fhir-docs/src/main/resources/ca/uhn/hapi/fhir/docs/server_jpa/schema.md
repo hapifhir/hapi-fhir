@@ -16,7 +16,7 @@ The persistent ID column is generally called `PID` in the database schema, altho
 
 # HFJ_RESOURCE: Resource Master Table
 
-<img src="/hapi-fhir/docs/images/jpa_erd_resources.svg" alt="Resources" style="width: 100%; max-width: 500px;"/>
+<img src="/hapi-fhir/docs/images/jpa_erd_resources.svg" alt="Resources" style="width: 100%; max-width: 600px;"/>
 
 The HFJ_RESOURCE table indicates a single resource of any type in the database. For example, the resource `Patient/1` will have exactly one row in this table, representing all versions of the resource.
 
@@ -55,6 +55,7 @@ The HFJ_RESOURCE table indicates a single resource of any type in the database. 
             <td>RES_VER</td>
             <td></td>
             <td>Long</td>
+            <td></td>
             <td>
                 This is the current version ID of the resource. Will contain <code>1</code> when the resource is first
                 created, <code>2</code> the first time it is updated, etc.  
@@ -67,6 +68,7 @@ The HFJ_RESOURCE table indicates a single resource of any type in the database. 
             <td>RES_VERSION</td>
             <td></td>
             <td>String</td>
+            <td></td>
             <td>
                 This column contains the FHIR version associated with this resource, using a constant drawn
                 from <a href="/apidocs/hapi-fhir-base/ca/uhn/fhir/context/FhirVersionEnum.html">FhirVersionEnum</a>.
@@ -307,7 +309,7 @@ If the server has been configured with a [Resource Server ID Strategy](/apidocs/
 
 # HFJ_RES_LINK: Search Links
 
-<img src="/hapi-fhir/docs/images/jpa_erd_resource_links.svg" alt="Resources" style="width: 100%; max-width: 500px;"/>
+<img src="/hapi-fhir/docs/images/jpa_erd_resource_links.svg" alt="Resources" style="width: 100%; max-width: 600px;"/>
 
 When a resource is created or updated, it is indexed for searching. Any search parameters of type [Reference](http://hl7.org/fhir/search.html#reference) are resolved, and one or more rows may be created in the **HFJ_RES_LINK** table.
 
