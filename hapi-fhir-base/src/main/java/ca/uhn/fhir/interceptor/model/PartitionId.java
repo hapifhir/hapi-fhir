@@ -20,6 +20,7 @@ package ca.uhn.fhir.interceptor.model;
  * #L%
  */
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDate;
 
@@ -27,15 +28,21 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class PartitionId {
 
-	private Integer myPartitionId;
-	private LocalDate myPartitionDate;
+	private final Integer myPartitionId;
+	private final LocalDate myPartitionDate;
+	private final String myPartitionName;
 
 	/**
 	 * Constructor
 	 */
-	public PartitionId(@Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
+	private PartitionId(@Nullable String thePartitionName, @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
+		myPartitionName = thePartitionName;
 		myPartitionId = thePartitionId;
 		myPartitionDate = thePartitionDate;
+	}
+
+	public String getPartitionName() {
+		return myPartitionName;
 	}
 
 	@Nullable
@@ -69,6 +76,31 @@ public class PartitionId {
 			retVal = thePartitionId.getPartitionIdStringOrNullString();
 		}
 		return retVal;
+	}
+
+	@Nonnull
+	public static PartitionId forPartitionId(@Nullable Integer thePartitionId) {
+		return forPartitionId(thePartitionId, null);
+	}
+
+	@Nonnull
+	public static PartitionId forPartitionId(@Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
+		return new PartitionId(null, thePartitionId, thePartitionDate);
+	}
+
+	@Nonnull
+	public static PartitionId forPartitionName(@Nullable String thePartitionName) {
+		return forPartitionName(thePartitionName, null);
+	}
+
+	@Nonnull
+	public static PartitionId forPartitionName(@Nullable String thePartitionName, @Nullable LocalDate thePartitionDate) {
+		return new PartitionId(thePartitionName, null, thePartitionDate);
+	}
+
+	@Nonnull
+	public static PartitionId forPartitionNameAndId(@Nullable String thePartitionName, @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
+		return new PartitionId(thePartitionName, thePartitionId, thePartitionDate);
 	}
 
 }

@@ -1695,7 +1695,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	private void addCreatePartition(Integer thePartitionId, LocalDate thePartitionDate) {
 		Validate.notNull(thePartitionId);
-		PartitionId partitionId = new PartitionId(thePartitionId, thePartitionDate);
+		PartitionId partitionId = PartitionId.forPartitionId(thePartitionId, thePartitionDate);
 		myPartitionInterceptor.addCreatePartition(partitionId);
 	}
 
@@ -1704,20 +1704,20 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	private void addCreateNoPartitionId(LocalDate thePartitionDate) {
-		PartitionId partitionId = new PartitionId(null, thePartitionDate);
+		PartitionId partitionId = PartitionId.forPartitionId(null, thePartitionDate);
 		myPartitionInterceptor.addCreatePartition(partitionId);
 	}
 
 	private void addReadPartition(Integer thePartitionId) {
 		PartitionId partitionId = null;
 		if (thePartitionId != null) {
-			partitionId = new PartitionId(thePartitionId, null);
+			partitionId = PartitionId.forPartitionId(thePartitionId, null);
 		}
 		myPartitionInterceptor.addReadPartition(partitionId);
 	}
 
 	private void addDefaultReadPartition() {
-		PartitionId partitionId = new PartitionId(null, null);
+		PartitionId partitionId = PartitionId.forPartitionId(null, null);
 		myPartitionInterceptor.addReadPartition(partitionId);
 	}
 

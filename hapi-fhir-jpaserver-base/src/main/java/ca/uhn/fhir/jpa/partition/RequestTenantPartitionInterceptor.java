@@ -20,49 +20,43 @@ package ca.uhn.fhir.jpa.partition;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.entity.PartitionEntity;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+/**
+ *
+ */
+@Interceptor
 public class RequestTenantPartitionInterceptor {
 
-	@Autowired
-	private IPartitionConfigSvc myPartitionConfigSvc;
-	@Autowired
-	private FhirContext myFhirContext;
-
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-	public PartitionablePartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+	public PartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
 		return extractPartitionIdFromRequest(theRequestDetails);
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-	public PartitionablePartitionId PartitionIdentifyRead(ServletRequestDetails theRequestDetails) {
+	public PartitionId PartitionIdentifyRead(ServletRequestDetails theRequestDetails) {
 		return extractPartitionIdFromRequest(theRequestDetails);
 	}
 
 	@NotNull
-	private PartitionablePartitionId extractPartitionIdFromRequest(ServletRequestDetails theRequestDetails) {
-		String tenantId = theRequestDetails.getTenantId();
+	private PartitionId extractPartitionIdFromRequest(ServletRequestDetails theRequestDetails) {
 
-		PartitionEntity partition;
-		try {
-			partition = myPartitionConfigSvc.getPartitionByName(tenantId);
-		} catch (IllegalArgumentException e) {
-			String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestTenantPartitionInterceptor.class, "unknownTenantName", tenantId);
-			throw new ResourceNotFoundException(msg);
+		// We will use the tenant ID that came from the request as the partition name
+		String tenantId = theRequestDetails.getTenantId();
+		if (isBlank(tenantId)) {
+			throw new InternalErrorException("No tenant ID has been specified");
 		}
 
-		PartitionablePartitionId retVal = new PartitionablePartitionId();
-		retVal.setPartitionId(partition.getId());
-		return retVal;
+		return PartitionId.forPartitionName(tenantId);
 	}
 
 

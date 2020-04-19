@@ -26,11 +26,14 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -94,7 +97,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 			validatePartition(partitionId, theResourceType);
 		}
 
-		return partitionId;
+		return normalize(partitionId);
 	}
 
 	/**
@@ -117,7 +120,51 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 			validatePartition(partitionId, resourceName);
 		}
 
-		return partitionId;
+		return normalize(partitionId);
+	}
+
+	/**
+	 * If the partition only has a name but not an ID, this method resolves the ID
+	 * @param thePartitionId
+	 * @return
+	 */
+	private PartitionId normalize(PartitionId thePartitionId) {
+		if (thePartitionId != null) {
+			if (thePartitionId.getPartitionName() != null) {
+
+				PartitionEntity partition;
+				try {
+					partition = myPartitionConfigSvc.getPartitionByName(thePartitionId.getPartitionName());
+				} catch (IllegalArgumentException e) {
+					String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperService.class, "unknownPartitionName", thePartitionId.getPartitionName());
+					throw new ResourceNotFoundException(msg);
+				}
+
+				if (thePartitionId.getPartitionId() != null) {
+					Validate.isTrue(thePartitionId.getPartitionId().equals(partition.getId()), "Partition name %s does not match ID %n", thePartitionId.getPartitionName(), thePartitionId.getPartitionId());
+					return thePartitionId;
+				} else {
+					return PartitionId.forPartitionNameAndId(thePartitionId.getPartitionName(), partition.getId(), thePartitionId.getPartitionDate());
+				}
+			}
+
+			if (thePartitionId.getPartitionId() != null) {
+				PartitionEntity partition;
+				try {
+					partition = myPartitionConfigSvc.getPartitionById(thePartitionId.getPartitionId());
+				} catch (IllegalArgumentException e) {
+					String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperService.class, "unknownPartitionId", thePartitionId.getPartitionId());
+					throw new ResourceNotFoundException(msg);
+				}
+				return PartitionId.forPartitionNameAndId(partition.getName(), partition.getId(), thePartitionId.getPartitionDate());
+			}
+
+		}
+
+		// It's still possible that the partition only has a date but no name/id,
+		// or it could just be null
+		return thePartitionId;
+
 	}
 
 	private void validatePartition(@Nullable PartitionId thePartitionId, @Nonnull String theResourceName) {
