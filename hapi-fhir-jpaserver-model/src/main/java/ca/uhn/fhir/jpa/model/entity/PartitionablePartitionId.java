@@ -81,6 +81,6 @@ public class PartitionablePartitionId implements Cloneable {
 	}
 
 	public PartitionId toPartitionId() {
-		return new PartitionId(getPartitionId(), getPartitionDate());
+		return PartitionId.forPartitionId(getPartitionId(), getPartitionDate());
 	}
 }
