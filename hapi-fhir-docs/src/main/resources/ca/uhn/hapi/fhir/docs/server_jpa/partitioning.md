@@ -38,6 +38,11 @@ Enabling partitioning on the server involves a set of steps.
 
 The [PartitionConfig](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionConfig.html) bean contains configuration settings related to partitioning within the server. To enable partitioning, the [setPartitioningEnabled(boolean)](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionConfig.html#setPartitioningEnabled(boolean)) property should be enabled.
 
+The following settings can be enabled:
+
+* Include Partition in Search Hashes:  
+
+
 # Partition Interceptors
 
 In order to implement partitioning, an interceptor must be registered against the interceptor registry (either the REST Server registry, or the JPA Server registry will work).
