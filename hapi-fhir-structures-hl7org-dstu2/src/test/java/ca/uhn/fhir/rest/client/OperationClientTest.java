@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -19,8 +19,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hl7.fhir.dstu2.model.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
@@ -40,7 +40,7 @@ public class OperationClientTest {
 
 	private HttpResponse ourHttpResponse;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourCtx = FhirContext.forDstu2Hl7Org();
 

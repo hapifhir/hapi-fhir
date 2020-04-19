@@ -13,15 +13,15 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3UpdateTest.class);
@@ -110,7 +110,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 	}
 
-	@After
+	@AfterEach
 	public void afterResetDao() {
 		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
 	}
@@ -418,7 +418,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testUpdateIgnoresIdenticalVersions() {
 		String methodName = "testUpdateIgnoresIdenticalVersions";
 
@@ -808,7 +808,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

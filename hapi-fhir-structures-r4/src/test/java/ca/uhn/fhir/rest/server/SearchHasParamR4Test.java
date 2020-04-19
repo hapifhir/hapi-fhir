@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ public class SearchHasParamR4Test {
 	private static String ourLastMethod;
 	private static HasAndListParam ourLastParam;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastMethod = null;
 		ourLastParam = null;
@@ -62,13 +62,13 @@ public class SearchHasParamR4Test {
 		assertEquals("SURG", param.getParameterValue());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

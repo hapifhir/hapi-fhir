@@ -34,7 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test the rest-hook subscriptions
@@ -53,7 +53,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
-	@After
+	@AfterEach
 	public void afterUnregisterRestHookListener() {
 		ourLog.info("** AFTER **");
 		myDaoConfig.setAllowMultipleDelete(true);
@@ -65,12 +65,12 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerRestHookInterceptor();
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeReset() {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
@@ -307,7 +307,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void startListenerServer() throws Exception {
 		ourListenerRestServer = new RestfulServer(FhirContext.forDstu2());
 
@@ -329,7 +329,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopListenerServer() throws Exception {
 		JettyUtil.closeServer(ourListenerServer);
 	}

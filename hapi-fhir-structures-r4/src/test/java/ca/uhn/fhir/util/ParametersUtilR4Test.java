@@ -6,11 +6,11 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ParametersUtilR4Test {
 

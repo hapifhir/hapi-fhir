@@ -2,10 +2,10 @@ package ca.uhn.fhir.rest.server;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -51,7 +51,7 @@ public class SearchDstu3Test {
 
 	private static Server ourServer;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastMethod = null;
 		ourIdentifiers = null;
@@ -308,13 +308,13 @@ public class SearchDstu3Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

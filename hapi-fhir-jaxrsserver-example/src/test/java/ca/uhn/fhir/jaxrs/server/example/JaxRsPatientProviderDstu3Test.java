@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.example;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,13 +31,13 @@ public class JaxRsPatientProviderDstu3Test {
 	private static int ourPort;
 	private static Server jettyServer;
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
         JettyUtil.closeServer(jettyServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUpClass()
 			throws Exception {
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);

@@ -14,8 +14,8 @@ import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResource
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -23,9 +23,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ServerR4Test extends BaseResourceProviderR4Test {
 
@@ -143,7 +143,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

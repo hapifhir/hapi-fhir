@@ -1,7 +1,7 @@
 package ca.uhn.fhir.testmindeps;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.concurrent.TimeUnit;
 
@@ -112,12 +112,12 @@ public class ReadTest {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() throws Exception {
 		ourServer.stop();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

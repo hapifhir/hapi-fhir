@@ -6,9 +6,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -61,7 +61,7 @@ public class OperationServerDstu2Test {
 	private static Server ourServer;
 	private IGenericClient myFhirClient;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastParam1 = null;
 		ourLastParam2 = null;
@@ -528,13 +528,13 @@ public class OperationServerDstu2Test {
 		assertEquals("read", ourLastMethod);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forDstu2();
 		ourServer = new Server(0);

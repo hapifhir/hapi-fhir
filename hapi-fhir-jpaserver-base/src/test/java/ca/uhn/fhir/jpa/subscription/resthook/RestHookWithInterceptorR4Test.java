@@ -17,10 +17,10 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Subscription;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +41,8 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -65,14 +65,14 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
 
-	@After
+	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		ourNextModifyResourceId = false;

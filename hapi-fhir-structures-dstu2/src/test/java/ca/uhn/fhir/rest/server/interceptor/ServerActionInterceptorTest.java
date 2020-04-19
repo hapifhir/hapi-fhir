@@ -27,10 +27,10 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,7 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
@@ -55,7 +55,7 @@ public class ServerActionInterceptorTest {
 	private static IServerInterceptor ourInterceptor;
 	private static IGenericClient ourFhirClient;
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
         JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
@@ -179,7 +179,7 @@ public class ServerActionInterceptorTest {
 		assertEquals("Patient/123", detailsCapt.getValue().getId().getValue());
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 
@@ -211,7 +211,7 @@ public class ServerActionInterceptorTest {
 
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		reset(ourInterceptor);
 

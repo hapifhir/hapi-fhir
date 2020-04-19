@@ -22,10 +22,10 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hl7.fhir.r4.model.*;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
@@ -36,7 +36,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -47,7 +47,7 @@ public class ThreadLocalCapturingInterceptorR4Test {
 	private HttpClient myHttpClient;
 	private HttpResponse myHttpResponse;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
@@ -160,12 +160,12 @@ public class ThreadLocalCapturingInterceptorR4Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ourCtx = FhirContext.forR4();
 	}

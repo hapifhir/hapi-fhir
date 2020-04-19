@@ -1,9 +1,9 @@
 package ca.uhn.fhir.parser.i391;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
@@ -77,7 +77,7 @@ public class TestOutcomeTest {
 		assertEquals(outcome.getElement(), operationOutcome.getElement());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test the rest-hook subscriptions
@@ -56,7 +56,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
-	@After
+	@AfterEach
 	public void afterUnregisterRestHookListener() {
 		ourLog.info("** AFTER **");
 		for (IIdType next : mySubscriptionIds) {
@@ -74,7 +74,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeRegisterRestHookListener() {
 		ourLog.info("Before re-registering interceptors");
 		logAllInterceptors(myInterceptorRegistry);
@@ -83,7 +83,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		logAllInterceptors(myInterceptorRegistry);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeReset() {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
@@ -319,7 +319,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		mySubscriptionTestUtil.waitForQueueToDrain();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void startListenerServer() throws Exception {
 		ourListenerRestServer = new RestfulServer(FhirContext.forDstu2());
 
@@ -341,7 +341,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
         ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopListenerServer() throws Exception {
 		JettyUtil.closeServer(ourListenerServer);
 	}

@@ -1,8 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +38,7 @@ public class CreateBinaryDstu2_1Test {
 	private static int ourPort;
 	private static Server ourServer;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastBinary = null;
 		ourLastBinaryBytes = null;
@@ -121,13 +121,13 @@ public class CreateBinaryDstu2_1Test {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

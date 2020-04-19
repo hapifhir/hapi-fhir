@@ -2,8 +2,8 @@ package ca.uhn.fhir.rest.server;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.oneOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -23,10 +23,10 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -47,7 +47,7 @@ public class SearchDefaultMethodDstu3Test {
 	private static StringAndListParam ourLastParam1;
 	private static StringAndListParam ourLastParam2;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastMethod = null;
 		ourLastParam1 = null;
@@ -180,13 +180,13 @@ public class SearchDefaultMethodDstu3Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

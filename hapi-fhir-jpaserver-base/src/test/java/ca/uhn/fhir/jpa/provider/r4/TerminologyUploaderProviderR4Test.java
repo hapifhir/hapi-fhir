@@ -13,8 +13,8 @@ import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.*;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 
@@ -33,7 +33,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -469,7 +469,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		assertThat(encoded, containsString("\"valueInteger\": 5"));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

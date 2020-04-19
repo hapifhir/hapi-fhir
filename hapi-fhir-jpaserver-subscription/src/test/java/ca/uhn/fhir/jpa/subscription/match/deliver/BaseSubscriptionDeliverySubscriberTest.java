@@ -15,8 +15,8 @@ import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
@@ -25,11 +25,11 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.GenericMessage;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BaseSubscriptionDeliverySubscriberTest {
 
 	private SubscriptionDeliveringRestHookSubscriber mySubscriber;
@@ -44,7 +44,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private IGenericClient myGenericClient;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		mySubscriber = new SubscriptionDeliveringRestHookSubscriber();
 		mySubscriber.setFhirContextForUnitTest(myCtx);

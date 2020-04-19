@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,13 +41,13 @@ public class ClientWithProfileDstu2Test {
 	private HttpClient ourHttpClient;
 	private HttpResponse ourHttpResponse;
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourCtx = FhirContext.forDstu2();
 

@@ -30,11 +30,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -60,10 +60,10 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.anyString;
@@ -101,7 +101,7 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Before
+	@BeforeEach
 	public void before() {
 		myVal = ourCtx.newValidator();
 		myVal.setValidateAgainstStandardSchema(false);
@@ -1182,7 +1182,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport = null;
 		ourCtx = null;

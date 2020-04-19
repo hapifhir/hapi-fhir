@@ -60,9 +60,9 @@ import org.hl7.fhir.r5.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r5.model.ConceptMap.SourceElementComponent;
 import org.hl7.fhir.r5.model.ConceptMap.TargetElementComponent;
 import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -80,7 +80,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -337,7 +337,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	@Autowired
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
-	@After()
+	@AfterEach()
 	public void afterCleanupDao() {
 		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
 		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
@@ -350,12 +350,12 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
 	}
 
-	@After
+	@AfterEach
 	public void afterResetInterceptors() {
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
-	@After
+	@AfterEach
 	public void afterClearTerminologyCaches() {
 		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
 		baseHapiTerminologySvc.clearTranslationCache();
@@ -366,13 +366,13 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		deferredStorageSvc.clearDeferred();
 	}
 
-	@After()
+	@AfterEach()
 	public void afterGrabCaches() {
 		ourValueSetDao = myValueSetDao;
 		ourJpaValidationSupportChainR5 = myJpaValidationSupportChain;
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeCreateInterceptor() {
 		mySystemInterceptors = myInterceptorRegistry.getAllRegisteredInterceptors();
 
@@ -382,7 +382,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeFlushFT() {
 		runInTransaction(() -> {
 			FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
@@ -395,13 +395,13 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
 
-	@Before
+	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeResetConfig() {
 		myDaoConfig.setHardTagListLimit(1000);
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
@@ -447,7 +447,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		dao.update(resourceParsed);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContextBaseJpaR5Test() {
 		ourValueSetDao.purgeCaches();
 		ourJpaValidationSupportChainR5.invalidateCaches();

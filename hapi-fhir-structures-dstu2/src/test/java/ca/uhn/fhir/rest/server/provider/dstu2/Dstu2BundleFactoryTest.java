@@ -1,12 +1,12 @@
 package ca.uhn.fhir.rest.server.provider.dstu2;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.*;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
@@ -23,17 +23,17 @@ public class Dstu2BundleFactoryTest {
 	private List<IBaseResource> myResourceList;
 	private Dstu2BundleFactory myBundleFactory;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forDstu2();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		// DiagnosticReport
 		// Performer(practitioner)

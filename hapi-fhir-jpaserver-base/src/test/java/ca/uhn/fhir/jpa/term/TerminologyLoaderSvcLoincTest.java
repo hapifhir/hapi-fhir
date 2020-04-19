@@ -14,10 +14,10 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -29,7 +29,7 @@ import java.util.Map;
 
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,7 +47,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 
-	@Before
+	@BeforeEach
 	public void before() {
 		mySvc = new TermLoaderSvcImpl();
 		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermCodeSystemStorageSvc);
@@ -328,7 +328,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testLoadLoincMandatoryFilesOnly() throws IOException {
 		addLoincMandatoryFilesToZip(myFiles);
 
@@ -494,7 +494,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("LP52960-9", doublyNestedChildCode.getChildren().get(2).getChild().getCode());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

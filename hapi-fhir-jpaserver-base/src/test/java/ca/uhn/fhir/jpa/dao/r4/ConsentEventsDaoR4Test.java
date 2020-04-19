@@ -20,9 +20,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 import static junit.framework.TestCase.assertTrue;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
@@ -56,13 +56,13 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	private List<String> myObservationIdsWithVersions;
 	private List<String> myPatientIdsEvenOnly;
 
-	@After
+	@AfterEach
 	public void after() {
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws ServletException {
 		super.before();
 

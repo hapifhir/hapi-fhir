@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.TimeUnit;
 
@@ -45,7 +45,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 
 	private static Server ourServer;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourReturnOperationOutcome = false;
 	}
@@ -212,12 +212,12 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		assertEquals( "Patient/3/_history/93", entry2.getResponse().getLocation());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

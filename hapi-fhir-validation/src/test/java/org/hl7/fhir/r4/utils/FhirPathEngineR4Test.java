@@ -8,13 +8,13 @@ import org.hl7.fhir.exceptions.FHIRException;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.*;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FhirPathEngineR4Test {
 
@@ -157,12 +157,12 @@ public class FhirPathEngineR4Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ourEngine = new FHIRPathEngine(new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport(ourCtx)));
 	}

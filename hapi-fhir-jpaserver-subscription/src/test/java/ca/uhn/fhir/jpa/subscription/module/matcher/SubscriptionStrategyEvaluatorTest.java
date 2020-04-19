@@ -5,11 +5,11 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyE
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.matchers.JUnitMatchers.containsString;
 
 public class SubscriptionStrategyEvaluatorTest extends BaseSubscriptionDstu3Test {

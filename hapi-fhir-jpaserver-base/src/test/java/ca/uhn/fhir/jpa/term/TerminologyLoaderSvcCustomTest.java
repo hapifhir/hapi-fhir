@@ -8,9 +8,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.IdType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -20,13 +20,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 	private TermLoaderSvcImpl mySvc;
 
@@ -38,7 +38,7 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 	@Mock
 	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		mySvc = new TermLoaderSvcImpl();
 		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermCodeSystemStorageSvc);
@@ -179,7 +179,7 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

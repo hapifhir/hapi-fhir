@@ -1,8 +1,8 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -39,13 +39,13 @@ public class BaseResourceReferenceDtTest {
 	private HttpClient myHttpClient;
 	private HttpResponse myHttpResponse;
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourCtx = FhirContext.forDstu2();
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());

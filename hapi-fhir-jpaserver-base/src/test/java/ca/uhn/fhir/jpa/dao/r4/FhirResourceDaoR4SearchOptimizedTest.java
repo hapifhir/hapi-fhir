@@ -23,10 +23,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
@@ -53,7 +53,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		mySearchCoordinatorSvcImpl = (SearchCoordinatorSvcImpl) AopProxyUtils.getSingletonTarget(mySearchCoordinatorSvc);
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
@@ -61,7 +61,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
 	}
 
-	@After
+	@AfterEach
 	public final void after() {
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
@@ -744,7 +744,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 
-	@After
+	@AfterEach
 	public void afterResetDao() {
 		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
@@ -1125,7 +1125,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

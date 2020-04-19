@@ -5,8 +5,8 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class JaxRsRequestTest {
@@ -29,7 +29,7 @@ public class JaxRsRequestTest {
 	private ResteasyHttpHeaders headers;
 	private TestJaxRsDummyPatientProvider provider;
 	
-	@Before
+	@BeforeEach
 	public void setUp() throws URISyntaxException {
 		details = createRequestDetails();
 	}

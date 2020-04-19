@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.test.utilities.server.ResourceProviderRule;
-import ca.uhn.fhir.test.utilities.server.RestfulServerRule;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -20,7 +20,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.ClassRule;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ public class BlockingContentR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BlockingContentR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
 	@ClassRule
-	public static RestfulServerRule ourServerRule = new RestfulServerRule(ourCtx);
+	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(ourCtx);
 	@Rule
 	public ResourceProviderRule myPatientProviderRule = new ResourceProviderRule(ourServerRule, new SystemProvider());
 

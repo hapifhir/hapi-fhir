@@ -34,16 +34,16 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
-public class RestfulServerRule implements TestRule {
-	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerRule.class);
+public class RestfulServerExtension implements BeforeEachCallback, AfterEachCallback {
+	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerExtension.class);
 
 	private FhirContext myFhirContext;
 	private Object[] myProviders;
@@ -57,7 +57,7 @@ public class RestfulServerRule implements TestRule {
 	/**
 	 * Constructor
 	 */
-	public RestfulServerRule(FhirContext theFhirContext, Object... theProviders) {
+	public RestfulServerExtension(FhirContext theFhirContext, Object... theProviders) {
 		Validate.notNull(theFhirContext);
 		myFhirContext = theFhirContext;
 		myProviders = theProviders;
@@ -66,23 +66,9 @@ public class RestfulServerRule implements TestRule {
 	/**
 	 * Constructor: If this is used, it will create and tear down a FhirContext which is good for memory
 	 */
-	public RestfulServerRule(FhirVersionEnum theFhirVersionEnum) {
+	public RestfulServerExtension(FhirVersionEnum theFhirVersionEnum) {
 		Validate.notNull(theFhirVersionEnum);
 		myFhirVersion = theFhirVersionEnum;
-	}
-
-	@Override
-	public Statement apply(Statement theBase, Description theDescription) {
-		return new Statement() {
-			@Override
-			public void evaluate() throws Throwable {
-				createContextIfNeeded();
-				startServer();
-				theBase.evaluate();
-				stopServer();
-				destroyContextIfWeCreatedIt();
-			}
-		};
 	}
 
 	private void createContextIfNeeded() {
@@ -148,5 +134,17 @@ public class RestfulServerRule implements TestRule {
 
 	public int getPort() {
 		return myPort;
+	}
+
+	@Override
+	public void afterEach(ExtensionContext context) throws Exception {
+		stopServer();
+		destroyContextIfWeCreatedIt();
+	}
+
+	@Override
+	public void beforeEach(ExtensionContext context) throws Exception {
+		createContextIfNeeded();
+		startServer();
 	}
 }

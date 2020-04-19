@@ -37,18 +37,18 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JsonParserHl7OrgDstu2Test {
   private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserHl7OrgDstu2Test.class);
 
-  @After
+  @AfterEach
   public void after() {
     ourCtx.setNarrativeGenerator(null);
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClassClearContext() {
     TestUtil.clearAllStaticFieldsForUnitTest();
   }
@@ -1101,7 +1101,7 @@ public class JsonParserHl7OrgDstu2Test {
    * HAPI FHIR < 0.6 incorrectly used "resource" instead of "reference"
    */
   @Test
-  @Ignore
+  @Disabled
   public void testParseWithIncorrectReference() throws IOException {
     String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"));
     jsonString = jsonString.replace("\"reference\"", "\"resource\"");

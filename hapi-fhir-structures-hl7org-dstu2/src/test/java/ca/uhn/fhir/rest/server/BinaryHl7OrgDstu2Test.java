@@ -21,17 +21,17 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu2.model.Binary;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -46,7 +46,7 @@ public class BinaryHl7OrgDstu2Test {
 
   private static Server ourServer;
 
-  @Before
+  @BeforeEach
   public void before() {
     ourLast = null;
   }
@@ -183,12 +183,12 @@ public class BinaryHl7OrgDstu2Test {
 
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClass() throws Exception {
     JettyUtil.closeServer(ourServer);
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws Exception {
     ourServer = new Server(0);
 

@@ -9,10 +9,10 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.hl7.fhir.r4.model.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -20,11 +20,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 
 // This is currently disabled as the criteria mechanism was a non-standard experiment
-@Ignore
+@Disabled
 public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithCriteriaR4Test.class);
@@ -35,13 +35,13 @@ public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 	private SocketImplementation mySocketImplementation;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 	}
 	
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		
@@ -87,7 +87,7 @@ public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Connected to WS: {}", session.isOpen());
 	}
 
-	@After
+	@AfterEach
 	public void afterCloseWebsocket() throws Exception {
 		ourLog.info("Shutting down websocket client");
 		myWebSocketClient.stop();

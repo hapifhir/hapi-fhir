@@ -16,8 +16,8 @@ import org.hl7.fhir.r5.model.BaseDateTimeType;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Observation;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,7 +29,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -75,7 +75,7 @@ public class InMemoryResourceMatcherR5Test {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		RuntimeSearchParam dateSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.effective", RestSearchParameterTypeEnum.DATE, null, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
 		when(mySearchParamRegistry.getSearchParamByName(any(), eq("date"))).thenReturn(dateSearchParam);

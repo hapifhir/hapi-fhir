@@ -21,8 +21,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AuthorizationInterceptorResourceProviderR4Test extends BaseResourceProviderR4Test {
 
@@ -1012,7 +1012,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -14,12 +14,12 @@ import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Practitioner;
 import org.hl7.fhir.r5.model.PractitionerRole;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
 public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
@@ -137,7 +137,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -12,15 +12,15 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
@@ -35,7 +35,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 	private IBinaryStorageSvc myBinaryStorageSvc;
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		myStorageSvc.setMinimumBinarySize(10);
@@ -44,7 +44,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 		myStorageSvc.setMinimumBinarySize(0);

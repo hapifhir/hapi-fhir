@@ -19,16 +19,16 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu2.model.Bundle;
 import org.hl7.fhir.dstu2.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SearchHl7OrgDstu2Test {
 
@@ -154,12 +154,12 @@ public class SearchHl7OrgDstu2Test {
 
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClass() throws Exception {
     JettyUtil.closeServer(ourServer);
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws Exception {
     ourServer = new Server(0);
 

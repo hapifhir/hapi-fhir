@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test the rest-hook subscriptions
@@ -63,9 +63,9 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
-	@After
+	@AfterEach
 	public void afterUnregisterRestHookListener() {
-		ourLog.info("**** Starting @After *****");
+		ourLog.info("**** Starting @AfterEach *****");
 
 		for (IIdType next : mySubscriptionIds) {
 			ourClient.delete().resourceById(next).execute();
@@ -83,7 +83,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		myInterceptorRegistry.unregisterInterceptor(ourSubscriptionDebugLogInterceptor);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeRegisterRestHookListener() {
 		ourLog.info("Before re-registering interceptors");
 		logAllInterceptors(myInterceptorRegistry);
@@ -93,7 +93,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		logAllInterceptors(myInterceptorRegistry);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeReset() {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
@@ -635,7 +635,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info("Registered interceptors:\n * {}", interceptorList);
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void startListenerServer() throws Exception {
 		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3());
 
@@ -663,7 +663,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		ourNotificationListenerServer = "http://localhost:" + ourListenerPort + "/fhir/subscription";
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopListenerServer() throws Exception {
 		JettyUtil.closeServer(ourListenerServer);
 	}

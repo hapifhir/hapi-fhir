@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,12 +34,12 @@ public class ExceptionHandlingTest {
 	private HttpClient myHttpClient;
 	private HttpResponse myHttpResponse;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ourCtx = FhirContext.forR4();
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
@@ -180,7 +180,7 @@ public class ExceptionHandlingTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

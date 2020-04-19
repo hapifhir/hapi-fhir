@@ -1,8 +1,8 @@
 package ca.uhn.fhir.narrative;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -28,10 +28,10 @@ import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.thymeleaf.messageresolver.StandardMessageResolver;
 import org.thymeleaf.templateresource.ITemplateResource;
 
@@ -44,7 +44,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorDstu3Test.class);
 	private DefaultThymeleafNarrativeGenerator myGen;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myGen = new DefaultThymeleafNarrativeGenerator();
 		myGen.setUseHapiServerConformanceNarrative(true);
@@ -53,7 +53,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

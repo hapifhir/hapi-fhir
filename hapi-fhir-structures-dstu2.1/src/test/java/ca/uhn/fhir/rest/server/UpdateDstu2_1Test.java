@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +39,7 @@ public class UpdateDstu2_1Test {
 	private static int ourPort;
 	private static Server ourServer;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourConditionalUrl = null;
 		ourId = null;
@@ -136,13 +136,13 @@ public class UpdateDstu2_1Test {
 		assertThat(responseContent, containsString("Resource body ID of &quot;3&quot; does not match"));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

@@ -40,7 +40,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 
@@ -48,13 +48,13 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu3Test.class);
 
-	@After
+	@AfterEach
 	public void after() {
 		myDaoConfig.setAllowInlineMatchUrlReferences(false);
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
@@ -340,7 +340,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testProcessCollectionAsBatch() throws IOException {
 		byte[] inputBytes = IOUtils.toByteArray(getClass().getResourceAsStream("/dstu3/Reilly_Libby_73.json.gz"));
 		String input = GZipUtil.decompress(inputBytes);
@@ -2233,7 +2233,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	 * Format changed, source isn't valid
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testTransactionWithBundledValidationSourceAndTarget() throws Exception {
 
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/questionnaire-sdc-profile-example-ussg-fht.xml");
@@ -3097,7 +3097,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

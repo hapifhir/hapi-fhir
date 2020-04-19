@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
@@ -112,7 +112,7 @@ public class HttpProxyTest {
 
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forR4();
 	}
@@ -141,7 +141,7 @@ public class HttpProxyTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -14,10 +14,10 @@ import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,12 +26,12 @@ import java.io.IOException;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 
@@ -41,7 +41,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 	@Autowired
 	private IValidationSupport myValidationSupport;
 
-	@Before
+	@BeforeEach
 	@Transactional
 	public void before02() throws IOException {
 		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
@@ -53,7 +53,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testBuiltInValueSetFetchAndExpand() {
 
 		try {
@@ -111,7 +111,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testExpandByIdentifier() {
 		ValueSet expanded = myValueSetDao.expandByIdentifier("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "11378");
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -129,7 +129,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 	 * This type of expansion doesn't really make sense..
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testExpandByValueSet() throws IOException {
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 		ValueSet expanded = myValueSetDao.expand(toExpand, "11378");
@@ -256,7 +256,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		assertTrue(result.getMessage(), result.isResult());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

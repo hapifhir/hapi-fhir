@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,7 +38,7 @@ public class IncludedResourceStitchingClientTest {
 
 	// atom-document-large.xml
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ctx = FhirContext.forR4();
 
@@ -295,7 +295,7 @@ public class IncludedResourceStitchingClientTest {
 		
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

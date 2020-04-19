@@ -4,17 +4,17 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import java.io.IOException;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
 	private TermLoaderSvcImpl mySvc;
@@ -25,7 +25,7 @@ public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
 	private ZipCollectionBuilder myFiles;
 
 
-	@Before
+	@BeforeEach
 	public void before() {
 		mySvc = new TermLoaderSvcImpl();
 		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermStorageSvc);
@@ -50,7 +50,7 @@ public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testLoadImgthlaMandatoryFilesOnly() throws IOException {
 		addImgthlaMandatoryFilesToZip(myFiles);
 
@@ -83,7 +83,7 @@ public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
 		theFiles.addFileZip("/imgthla/", TermLoaderSvcImpl.IMGTHLA_HLA_XML);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

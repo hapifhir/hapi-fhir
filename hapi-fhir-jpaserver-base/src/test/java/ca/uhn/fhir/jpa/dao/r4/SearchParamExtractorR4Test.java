@@ -26,10 +26,10 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +42,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SearchParamExtractorR4Test {
 
@@ -52,7 +52,7 @@ public class SearchParamExtractorR4Test {
 	private static IValidationSupport ourValidationSupport;
 	private MySearchParamRegistry mySearchParamRegistry;
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 		mySearchParamRegistry = new MySearchParamRegistry();
@@ -237,12 +237,12 @@ public class SearchParamExtractorR4Test {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ourValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	}

@@ -26,10 +26,10 @@ import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
@@ -44,8 +44,17 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -58,7 +67,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private List<String> myMessages = new ArrayList<>();
 
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
 		myDaoConfig.setUniqueIndexesCheckedBeforeSave(new DaoConfig().isUniqueIndexesCheckedBeforeSave());
@@ -70,7 +79,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		svc.initExecutor();
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
 		myDaoConfig.setSchedulingDisabled(true);
@@ -693,7 +702,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		runInTransaction(()->{
 			List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-			assertEquals(uniques.toString(), 1, uniques.size());
+			assertEquals(1, uniques.size(), uniques.toString());
 			assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue(), either(equalTo("Observation/" + id2.getIdPart())).or(equalTo("Observation/" + id3.getIdPart())));
 			assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
 
@@ -710,7 +719,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		runInTransaction(()->{
 			List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-			assertEquals(uniques.toString(), 1, uniques.size());
+			assertEquals(1, uniques.size(), uniques.toString());
 			assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue(), either(equalTo("Observation/" + id2.getIdPart())).or(equalTo("Observation/" + id3.getIdPart())));
 			assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
 		});
@@ -813,7 +822,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 			List<ResourceTable> tables = myResourceTableDao.findAll();
 			String resourceIds = tables.stream().map(t -> t.getIdDt().getValue()).collect(Collectors.joining(", "));
 			// 1 patient, 1 coverage, 3 search parameters
-			assertEquals(resourceIds, 5, tables.size());
+			assertEquals(5, tables.size(), resourceIds);
 			for (int i = 0; i < tables.size(); i++) {
 				assertEquals(INDEX_STATUS_INDEXED, tables.get(i).getIndexStatus().intValue());
 			}
@@ -822,7 +831,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 			ourLog.info("** Uniques: {}", uniques);
-			assertEquals(uniques.toString(), 1, uniques.size());
+			assertEquals(1, uniques.size(), uniques.toString());
 			assertEquals("Coverage/" + id3.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Coverage?beneficiary=Patient%2F" + id2.getIdPart() + "&identifier=urn%3Afoo%3Abar%7C123", uniques.get(0).getIndexString());
 		});
@@ -990,7 +999,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
 				List<ResourceIndexedCompositeStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
-				assertEquals(all.toString(), 1, all.size());
+				assertEquals(1, all.size(), all.toString());
 			}
 		});
 
@@ -1099,7 +1108,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 
 		List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-		assertEquals(uniques.toString(), 1, uniques.size());
+		assertEquals(1, uniques.size(), uniques.toString());
 		assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 		assertEquals("Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale", uniques.get(0).getIndexString());
 	}
@@ -1110,7 +1119,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		List<ResourceIndexedCompositeStringUnique> uniques;
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-		assertEquals(uniques.toString(), 0, uniques.size());
+		assertEquals(0, uniques.size(), uniques.toString());
 
 		Patient pt1 = new Patient();
 		pt1.setActive(true);
@@ -1129,7 +1138,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		ourLog.info("ID1: {}  -  ID2: {}   - ID3:  {}", id1, id2, id3);
 
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-		assertEquals(uniques.toString(), 1, uniques.size());
+		assertEquals(1, uniques.size(), uniques.toString());
 		assertEquals("Observation/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 		assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
 	}
@@ -1338,19 +1347,19 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		pt.setGender(Enumerations.AdministrativeGender.MALE);
 		myPatientDao.create(pt).getId().toUnqualifiedVersionless();
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-		assertEquals(uniques.toString(), 0, uniques.size());
+		assertEquals(0, uniques.size(), uniques.toString());
 
 		pt = new Patient();
 		myPatientDao.create(pt).getId().toUnqualifiedVersionless();
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-		assertEquals(uniques.toString(), 0, uniques.size());
+		assertEquals(0, uniques.size(), uniques.toString());
 
 		pt = new Patient();
 		pt.setBirthDateElement(new DateType());
 		pt.setGender(Enumerations.AdministrativeGender.MALE);
 		myPatientDao.create(pt).getId().toUnqualifiedVersionless();
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-		assertEquals(uniques.toString(), 0, uniques.size());
+		assertEquals(0, uniques.size(), uniques.toString());
 
 	}
 
@@ -1370,7 +1379,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		pt.setManagingOrganization(new Reference("Organization/ORG"));
 		myPatientDao.create(pt).getId().toUnqualifiedVersionless();
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-		assertEquals(uniques.toString(), 0, uniques.size());
+		assertEquals(0, uniques.size(), uniques.toString());
 
 		pt = new Patient();
 		pt.addName()
@@ -1380,13 +1389,13 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 			.addGiven("GIVEN2"); // GIVEN2 happens twice
 		myPatientDao.create(pt).getId().toUnqualifiedVersionless();
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-		assertEquals(uniques.toString(), 0, uniques.size());
+		assertEquals(0, uniques.size(), uniques.toString());
 
 		pt = new Patient();
 		pt.setActive(true);
 		myPatientDao.create(pt).getId().toUnqualifiedVersionless();
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-		assertEquals(uniques.toString(), 0, uniques.size());
+		assertEquals(0, uniques.size(), uniques.toString());
 	}
 
 	@Test
@@ -1412,7 +1421,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		myResourceReindexingSvc.forceReindexingPass();
 
 		List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-		assertEquals(uniques.toString(), 1, uniques.size());
+		assertEquals(1, uniques.size(), uniques.toString());
 		assertEquals("Observation/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 		assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
 
@@ -1423,7 +1432,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		myResourceReindexingSvc.forceReindexingPass();
 
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-		assertEquals(uniques.toString(), 1, uniques.size());
+		assertEquals(1, uniques.size(), uniques.toString());
 		assertEquals("Observation/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 		assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
 
@@ -1516,7 +1525,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

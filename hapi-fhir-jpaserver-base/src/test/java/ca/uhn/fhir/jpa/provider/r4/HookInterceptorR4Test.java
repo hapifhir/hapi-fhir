@@ -7,20 +7,20 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HookInterceptorR4Test.class);
 
 //	@Override
-//	@After
+//	@AfterEach
 //	public void after( ) throws Exception {
 //		super.after();
 //
@@ -151,7 +151,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.util.TestUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class JpaEntityTest {
 

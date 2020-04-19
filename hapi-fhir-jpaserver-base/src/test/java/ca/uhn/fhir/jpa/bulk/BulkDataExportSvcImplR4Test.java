@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 

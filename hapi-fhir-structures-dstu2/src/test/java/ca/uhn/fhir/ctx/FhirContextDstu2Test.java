@@ -1,14 +1,14 @@
 package ca.uhn.fhir.ctx;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -33,7 +33,7 @@ public class FhirContextDstu2Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
@@ -92,7 +92,7 @@ public class FhirContextDstu2Test {
 		assertConcurrent("Unable to encode resources multithreaded", runnables, 1000);
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void testPossibleToUseModelWhileScanIsRunning2() throws InterruptedException {
 		FhirContext fhirContext = FhirContext.forDstu2();

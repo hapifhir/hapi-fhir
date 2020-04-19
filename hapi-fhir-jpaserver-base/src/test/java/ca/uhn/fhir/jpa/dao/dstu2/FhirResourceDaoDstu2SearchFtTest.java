@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;
@@ -10,9 +10,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 
@@ -29,12 +29,12 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchFtTest.class);
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

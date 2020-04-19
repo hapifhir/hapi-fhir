@@ -1,8 +1,8 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -18,9 +18,9 @@ import org.hl7.fhir.dstu2016may.model.Patient;
 import org.hl7.fhir.dstu2016may.model.Practitioner;
 import org.hl7.fhir.dstu2016may.model.Practitioner.PractitionerPractitionerRoleComponent;
 import org.hl7.fhir.instance.model.api.IBaseElement;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -49,7 +49,7 @@ public class ModelDstu2_1Test {
 		assertEquals(CodeableConcept.class, roleField.getClass());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -20,16 +20,16 @@ import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
 
@@ -45,19 +45,19 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 
 
 	@SuppressWarnings("deprecation")
-	@After
+	@AfterEach
 	public void after() {
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 		myDaoConfig.setMaximumSearchResultCountInTransaction(new DaoConfig().getMaximumSearchResultCountInTransaction());
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
 		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeStartServer() throws Exception {
 		if (myRestServer == null) {
 			PatientResourceProvider patientRp = new PatientResourceProvider();
@@ -295,7 +295,7 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 		return retVal;
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();

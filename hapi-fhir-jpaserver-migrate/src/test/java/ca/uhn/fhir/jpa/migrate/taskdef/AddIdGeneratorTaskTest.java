@@ -4,14 +4,14 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.util.VersionEnum;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AddIdGeneratorTaskTest extends BaseTest {
 

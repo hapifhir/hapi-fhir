@@ -38,19 +38,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoR4Test.class);
 
-	@After
+	@AfterEach
 	public void after() {
 		myDaoConfig.setAllowInlineMatchUrlReferences(false);
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myInterceptorRegistry.registerInterceptor(myInterceptor);
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
@@ -3865,7 +3865,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

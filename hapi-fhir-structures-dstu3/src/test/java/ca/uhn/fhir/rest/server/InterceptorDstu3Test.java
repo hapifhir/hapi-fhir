@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
@@ -60,12 +60,12 @@ public class InterceptorDstu3Test {
 	private IServerInterceptor myInterceptor1;
 	private IServerInterceptor myInterceptor2;
 
-	@After
+	@AfterEach
 	public void after() {
 		ourServlet.getInterceptorService().unregisterAllInterceptors();
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myInterceptor1 = mock(IServerInterceptor.class);
 		myInterceptor2 = mock(IServerInterceptor.class);
@@ -328,13 +328,13 @@ public class InterceptorDstu3Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.parser;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -31,11 +31,11 @@ import org.hl7.fhir.dstu2.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.builder.Input;
@@ -57,7 +57,7 @@ public class XmlParserHl7OrgDstu2Test {
   private static FhirContext ourCtx;
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserHl7OrgDstu2Test.class);
 
-  @After
+  @AfterEach
   public void after() {
     ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
   }
@@ -343,7 +343,7 @@ public class XmlParserHl7OrgDstu2Test {
    * Disabled after conversation with Grahame
    */
   @Test
-  @Ignore
+  @Disabled
   public void testEncodeAndParseProfiledDatatypeChoice() throws Exception {
     IParser xmlParser = ourCtx.newXmlParser();
 
@@ -1011,7 +1011,7 @@ public class XmlParserHl7OrgDstu2Test {
   }
 
   @Test
-  @Ignore
+  @Disabled
   public void testEncodeNarrativeBlockInBundle() throws Exception {
     Patient p = new Patient();
     p.addIdentifier().setSystem("foo").setValue("bar");
@@ -1610,7 +1610,7 @@ public class XmlParserHl7OrgDstu2Test {
   }
 
   @Test
-  @Ignore
+  @Disabled
   public void testParseNarrative() throws Exception {
     // @formatter:off
     String htmlNoNs = "<div>AAA<b>BBB</b>CCC</div>";
@@ -1739,12 +1739,12 @@ public class XmlParserHl7OrgDstu2Test {
 		Assert.assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
 	}
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() {
     ourCtx = FhirContext.forDstu2Hl7Org();
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass2() {
     System.setProperty("file.encoding", "ISO-8859-1");
   }

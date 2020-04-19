@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OperationGenericServer2R4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationGenericServer2R4Test.class);
@@ -48,7 +48,7 @@ public class OperationGenericServer2R4Test {
 	private int myPort;
 	private Server myServer;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastParam1 = null;
 		ourLastParam2 = null;
@@ -285,17 +285,17 @@ public class OperationGenericServer2R4Test {
 	}
 
 
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		JettyUtil.closeServer(myServer);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ourCtx = FhirContext.forR4();
 

@@ -37,9 +37,9 @@ import org.hl7.fhir.r5.model.CapabilityStatement.TypeRestfulInteraction;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.r5.model.OperationDefinition.OperationKind;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
@@ -55,10 +55,10 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -638,7 +638,7 @@ public class ServerCapabilityStatementProviderR5Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateGeneratedStatement() throws Exception {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
@@ -819,7 +819,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		ourLog.info("Def: {}", conf);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

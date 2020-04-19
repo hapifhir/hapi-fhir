@@ -48,7 +48,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -60,7 +60,7 @@ public class GenericClientTest {
 
 	private HttpResponse myHttpResponse;
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
@@ -460,7 +460,7 @@ public class GenericClientTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testInvalidCalls() {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
@@ -1759,12 +1759,12 @@ public class GenericClientTest {
 		return ourCtx.newXmlParser().encodeResourceToString(retVal);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ourCtx = FhirContext.forR5();
 	}

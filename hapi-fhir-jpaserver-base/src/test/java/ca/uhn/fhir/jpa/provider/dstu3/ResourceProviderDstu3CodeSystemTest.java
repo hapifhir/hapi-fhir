@@ -9,22 +9,22 @@ import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3CodeSystemTest.class);
 	public static FhirContext ourCtx = FhirContext.forDstu3();
 
-	@Before
+	@BeforeEach
 	@Transactional
 	public void before02() throws IOException {
 		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
@@ -328,7 +328,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		return ourCtx.newJsonParser().parseResource(theType, loadResource(theFilename));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

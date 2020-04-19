@@ -37,7 +37,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -70,7 +70,7 @@ public class AbstractJaxRsResourceProviderTest {
 		assertEquals(url, resource.getId().getValueAsString().substring(serverBase.length() - 1));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
         JettyUtil.closeServer(jettyServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
@@ -110,7 +110,7 @@ public class AbstractJaxRsResourceProviderTest {
 		compareResultUrl("/Patient/1", result);
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.mock = TestJaxRsMockPatientRestProvider.mock;
 		idCaptor = ArgumentCaptor.forClass(IdDt.class);
@@ -308,7 +308,7 @@ public class AbstractJaxRsResourceProviderTest {
 
 	/** Search - Subsetting (_summary and _elements) */
 	@Test
-	@Ignore
+	@Disabled
 	public void testSummary() {
 		Object response = client.search().forResource(Patient.class)
 				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class).execute();
@@ -332,7 +332,7 @@ public class AbstractJaxRsResourceProviderTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Ignore
+	@Disabled
 	@Test
 	public void testResourceNotFound() throws Exception {
 		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenThrow(ResourceNotFoundException.class);
@@ -417,7 +417,7 @@ public class AbstractJaxRsResourceProviderTest {
 		});
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUpClass() throws Exception {
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		context.setContextPath("/");

@@ -22,9 +22,9 @@ import net.sf.json.JsonConfig;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterEachClass;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.internal.stubbing.answers.ThrowsException;
@@ -38,7 +38,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class JsonParserDstu2Test {
@@ -2118,7 +2118,7 @@ public class JsonParserDstu2Test {
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String message = parser.encodeResourceToString(report);
 		ourLog.info(message);
-		Assert.assertThat(message, containsString("contained"));
+		assertThat(message, containsString("contained"));
 	}
 
 	/**
@@ -2142,7 +2142,7 @@ public class JsonParserDstu2Test {
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String message = parser.encodeResourceToString(report);
 		ourLog.info(message);
-		Assert.assertThat(message, containsString("contained"));
+		assertThat(message, containsString("contained"));
 	}
 
 
@@ -2158,7 +2158,7 @@ public class JsonParserDstu2Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

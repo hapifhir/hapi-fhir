@@ -6,7 +6,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.test.utilities.server.RestfulServerRule;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IdType;
@@ -14,16 +14,16 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServletRequest;
 
 import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class RemoteTerminologyServiceValidationSupportTest {
 
@@ -35,23 +35,23 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	private static FhirContext ourCtx = FhirContext.forR4();
 
 	@Rule
-	public RestfulServerRule myRestfulServerRule = new RestfulServerRule(ourCtx);
+	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
 
 	private MyMockTerminologyServiceProvider myProvider;
 	private RemoteTerminologyServiceValidationSupport mySvc;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myProvider = new MyMockTerminologyServiceProvider();
-		myRestfulServerRule.getRestfulServer().registerProvider(myProvider);
-		String baseUrl = "http://localhost:" + myRestfulServerRule.getPort();
+		myRestfulServerExtension.getRestfulServer().registerProvider(myProvider);
+		String baseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
 
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
 		mySvc.setBaseUrl(baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(false));
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		assertThat(myProvider.myInvocationCount, lessThan(2));
 	}

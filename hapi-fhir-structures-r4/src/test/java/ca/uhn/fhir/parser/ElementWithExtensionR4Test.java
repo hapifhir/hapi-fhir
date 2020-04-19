@@ -3,11 +3,11 @@ package ca.uhn.fhir.parser;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.*;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created by Sébastien Rivière 12/04/2017
@@ -17,7 +17,7 @@ public class ElementWithExtensionR4Test {
     private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ElementWithExtensionR4Test.class);
     private static FhirContext ourCtx = FhirContext.forR4();
 
-    @AfterClass
+    @AfterAll
     public static void afterClassClearContext() {
         TestUtil.clearAllStaticFieldsForUnitTest();
     }

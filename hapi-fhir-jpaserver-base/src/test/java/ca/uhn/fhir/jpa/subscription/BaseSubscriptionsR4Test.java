@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
-@Ignore
+@Disabled
 public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR4Test.class);
 
@@ -59,7 +59,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	protected List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 
 
-	@After
+	@AfterEach
 	public void afterUnregisterRestHookListener() {
 		for (IIdType next : mySubscriptionIds) {
 			IIdType nextId = next.toUnqualifiedVersionless();
@@ -78,12 +78,12 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerRestHookInterceptor();
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeReset() throws Exception {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
@@ -202,7 +202,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void reportTotalSelects() {
 		ourLog.info("Total database select queries: {}", getQueryCount().getSelect());
 	}
@@ -211,7 +211,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		return ourCountHolder.getQueryCountMap().get("");
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void startListenerServer() throws Exception {
 		RestfulServer ourListenerRestServer = new RestfulServer(FhirContext.forR4());
 		
@@ -233,7 +233,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
         ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopListenerServer() throws Exception {
 		JettyUtil.closeServer(ourListenerServer);
 	}

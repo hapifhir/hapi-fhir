@@ -12,9 +12,9 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteConflictServiceR4Test.class);
@@ -31,14 +31,14 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	private DeleteConflictInterceptor myDeleteInterceptor = new DeleteConflictInterceptor();
 	private int myInterceptorDeleteCount;
 
-	@Before
+	@BeforeEach
 	public void beforeRegisterInterceptor() {
 		myInterceptorRegistry.registerInterceptor(myDeleteInterceptor);
 		myInterceptorDeleteCount = 0;
 		myDeleteInterceptor.clear();
 	}
 
-	@After
+	@AfterEach
 	public void afterUnregisterInterceptor() {
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}

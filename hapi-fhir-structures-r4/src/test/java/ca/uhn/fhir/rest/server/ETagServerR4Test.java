@@ -34,8 +34,8 @@ import org.junit.*;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ETagServerR4Test {
 
@@ -49,7 +49,7 @@ public class ETagServerR4Test {
   private static boolean ourPutVersionInPatientId;
   private static boolean ourPutVersionInPatientMeta;
 
-  @Before
+  @BeforeEach
   public void before() {
     ourLastId = null;
     ourPutVersionInPatientId = true;
@@ -183,12 +183,12 @@ public class ETagServerR4Test {
 
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClass() throws Exception {
     JettyUtil.closeServer(ourServer);
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws Exception {
     ourServer = new Server(0);
 

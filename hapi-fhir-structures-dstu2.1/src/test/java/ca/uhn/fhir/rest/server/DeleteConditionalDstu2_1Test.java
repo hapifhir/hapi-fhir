@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +36,7 @@ public class DeleteConditionalDstu2_1Test {
 	private static Server ourServer;
 	
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastConditionalUrl = null;
 		ourLastIdParam = null;
@@ -76,14 +76,14 @@ public class DeleteConditionalDstu2_1Test {
 
 
 	
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 		
 	
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

@@ -35,7 +35,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("Duplicates")
 public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
@@ -45,14 +45,14 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4TerminologyTest.class);
 
 
-	@After
+	@AfterEach
 	public void after() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
 
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myDaoConfig.setMaximumExpansionSize(5000);
 		myCachingValidationSupport.invalidateCaches();
@@ -566,7 +566,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testExpandWithNoResultsInLocalValueSet1() {
 		createLocalCsAndVs();
 
@@ -1295,7 +1295,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		return retVal;
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

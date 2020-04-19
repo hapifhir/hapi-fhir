@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -44,12 +44,12 @@ public class SearchClientDstu3Test {
 	private HttpClient ourHttpClient;
 	private HttpResponse ourHttpResponse;
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourCtx = FhirContext.forDstu3();
 

@@ -11,9 +11,9 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterEachClass;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,7 +173,7 @@ public class ParserWithValidationDstu3Test {
 		Assert.assertEquals(origContent, content);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -3,17 +3,17 @@ package ca.uhn.fhir.jpa.provider;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -31,13 +31,13 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	private IIdType myExtensionalVsId;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu2ValueSetTest.class);
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 
-	@Before
+	@BeforeEach
 	@Transactional
 	public void before02() throws IOException {
 		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
@@ -99,7 +99,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	}
 	
 	@Test
-	@Ignore
+	@Disabled
 	public void testLookupOperationForBuiltInCode() {
 		Parameters respParam = ourClient
 			.operation()

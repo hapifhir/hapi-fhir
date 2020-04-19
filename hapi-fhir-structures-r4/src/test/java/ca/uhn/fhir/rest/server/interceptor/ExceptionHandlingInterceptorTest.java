@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +45,7 @@ public class ExceptionHandlingInterceptorTest {
 	private static Server ourServer;
 	private static RestfulServer servlet;
 	
-	@Before
+	@BeforeEach
 	public void before() {
 		ourGenerateOperationOutcome = false;
 		ourExceptionType=null;
@@ -87,12 +87,12 @@ public class ExceptionHandlingInterceptorTest {
 
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

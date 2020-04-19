@@ -66,8 +66,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -109,7 +109,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected ISearchCacheSvc mySearchCacheSvc;
 
-	@After
+	@AfterEach
 	public void afterPerformCleanup() {
 		BaseHapiFhirDao.setDisableIncrementOnUpdateForUnitTest(false);
 		if (myCaptureQueriesListener != null) {
@@ -117,7 +117,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 	}
 
-	@After
+	@AfterEach
 	public void afterValidateNoTransaction() {
 		PlatformTransactionManager txManager = getTxManager();
 		if (txManager instanceof JpaTransactionManager) {
@@ -144,7 +144,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeInitMocks() {
 		myRequestOperationCallback = new InterceptorService();
 
@@ -371,18 +371,18 @@ public abstract class BaseJpaTest extends BaseTest {
 		return retVal.toArray(new String[0]);
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClassRandomizeLocale() {
 		randomizeLocale();
 	}
 
 	@SuppressWarnings("RedundantThrows")
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassShutdownDerby() {
 		// DriverManager.getConnection("jdbc:derby:;shutdown=true");
 		// try {

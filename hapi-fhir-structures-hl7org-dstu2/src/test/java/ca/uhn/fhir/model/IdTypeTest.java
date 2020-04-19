@@ -1,17 +1,17 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.dstu2.model.Patient;
 import org.hl7.fhir.dstu2.model.Reference;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -272,7 +272,7 @@ public class IdTypeTest {
 		return ourCtx.newXmlParser().parseResource(Patient.class, encoded);
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ourCtx = FhirContext.forDstu2Hl7Org();
 	}

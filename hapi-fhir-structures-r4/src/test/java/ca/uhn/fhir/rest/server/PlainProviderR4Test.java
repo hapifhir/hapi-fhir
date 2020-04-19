@@ -20,10 +20,10 @@ import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringStartsWith;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
 
@@ -44,12 +44,12 @@ public class PlainProviderR4Test {
 	private RestfulServer myRestfulServer;
 	private Server myServer;
 
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		JettyUtil.closeServer(myServer);
 	}
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		myServer = new Server(0);
 
@@ -155,7 +155,7 @@ public class PlainProviderR4Test {
 
 	}
 	
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

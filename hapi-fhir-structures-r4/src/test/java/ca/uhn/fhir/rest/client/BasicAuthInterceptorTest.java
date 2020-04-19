@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -30,7 +30,7 @@ public class BasicAuthInterceptorTest {
 	private HttpClient myHttpClient;
 	private HttpResponse myHttpResponse;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
@@ -90,13 +90,13 @@ public class BasicAuthInterceptorTest {
 
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ourCtx = FhirContext.forR4();
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

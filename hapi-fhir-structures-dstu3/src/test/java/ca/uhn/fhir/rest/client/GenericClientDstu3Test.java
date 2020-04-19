@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.client;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -59,7 +59,7 @@ public class GenericClientDstu3Test {
 	private HttpClient myHttpClient;
 	private HttpResponse myHttpResponse;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
@@ -1937,12 +1937,12 @@ public class GenericClientDstu3Test {
 		assertEquals(expectedUserAgent(), capt.getAllValues().get(0).getHeaders("User-Agent")[0].getValue());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ourCtx = FhirContext.forDstu3();
 	}

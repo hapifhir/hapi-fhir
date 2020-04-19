@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.util.Date;
@@ -49,7 +49,7 @@ public class ETagServerTest {
 	private static Server ourServer;
 
 
-	@Before
+	@BeforeEach
 	public void before() throws IOException {
 		ourLastId = null;
 	}
@@ -182,13 +182,13 @@ public class ETagServerTest {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

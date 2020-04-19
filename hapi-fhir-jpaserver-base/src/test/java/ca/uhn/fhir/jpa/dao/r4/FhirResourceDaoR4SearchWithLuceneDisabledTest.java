@@ -28,10 +28,10 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -47,8 +47,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4WithLuceneDisabledConfig.class})
@@ -127,13 +127,13 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	@Autowired
 	private ITermReadSvc myTermSvc;
 
-	@Before
+	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeResetConfig() {
 		myDaoConfig.setHardSearchLimit(1000);
 		myDaoConfig.setHardTagListLimit(1000);
@@ -231,7 +231,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testExpandValueSetWithFilter() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://fooCS");
@@ -323,7 +323,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

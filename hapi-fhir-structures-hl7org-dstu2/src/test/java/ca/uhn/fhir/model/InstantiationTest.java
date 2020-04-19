@@ -1,6 +1,6 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -9,7 +9,7 @@ import java.util.Properties;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;

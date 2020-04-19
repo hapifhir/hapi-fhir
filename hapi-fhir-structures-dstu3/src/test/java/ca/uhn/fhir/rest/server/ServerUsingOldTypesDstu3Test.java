@@ -1,15 +1,15 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import javax.servlet.ServletException;
 
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -23,7 +23,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class ServerUsingOldTypesDstu3Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

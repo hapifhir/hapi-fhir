@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HapiWorkerContextTest extends BaseTest {
 	FhirContext myCtx = FhirContext.forR4();

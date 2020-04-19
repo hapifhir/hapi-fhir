@@ -20,9 +20,9 @@ import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,8 +32,8 @@ import java.util.List;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -54,7 +54,7 @@ public class QuestionnaireResponseValidatorR5Test {
 	private IValidationSupport myValSupport;
 	private HapiWorkerContext myWorkerCtx;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myValSupport = mock(IValidationSupport.class);
 		when(myValSupport.getFhirContext()).thenReturn(ourCtx);
@@ -684,7 +684,7 @@ public class QuestionnaireResponseValidatorR5Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport.flush();
 		myDefaultValidationSupport = null;

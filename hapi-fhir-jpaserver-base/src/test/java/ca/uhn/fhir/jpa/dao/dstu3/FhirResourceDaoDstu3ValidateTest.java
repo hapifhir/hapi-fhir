@@ -18,10 +18,10 @@ import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 
@@ -29,8 +29,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3ValidateTest.class);
@@ -116,7 +116,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	}
 
 
-	@After
+	@AfterEach
 	public void after() {
 		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
 		val.setBestPracticeWarningLevel(org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel.Warning);
@@ -230,7 +230,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateResourceContainingProfileDeclarationJson() throws Exception {
 		String methodName = "testValidateResourceContainingProfileDeclarationJson";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.JSON);
@@ -243,7 +243,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateResourceContainingProfileDeclarationXml() throws Exception {
 		String methodName = "testValidateResourceContainingProfileDeclarationXml";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.XML);
@@ -452,7 +452,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	 * Format has changed, this is out of date
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateNewQuestionnaireFormat() throws Exception {
 		String input = IOUtils.toString(FhirResourceDaoDstu3ValidateTest.class.getResourceAsStream("/questionnaire_dstu3.xml"));
 		try {
@@ -489,7 +489,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

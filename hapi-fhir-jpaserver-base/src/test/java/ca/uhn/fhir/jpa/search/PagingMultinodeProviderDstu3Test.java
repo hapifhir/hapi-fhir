@@ -1,27 +1,26 @@
 package ca.uhn.fhir.jpa.search;
 
-import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
-
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
-import org.springframework.test.util.AopTestUtils;
-
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.util.AopTestUtils;
+
+import static org.apache.commons.lang3.StringUtils.leftPad;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 
 public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
@@ -90,7 +89,7 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A030", "Patient/A031", "Patient/A032", "Patient/A033", "Patient/A034", "Patient/A035", "Patient/A036", "Patient/A037", "Patient/A038", "Patient/A039"));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

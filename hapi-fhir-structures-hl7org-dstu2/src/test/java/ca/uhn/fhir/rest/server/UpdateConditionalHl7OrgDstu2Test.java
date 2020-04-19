@@ -1,8 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +45,7 @@ public class UpdateConditionalHl7OrgDstu2Test {
 	
 	
 	
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastId = null;
 		ourLastConditionalUrl = null;
@@ -129,13 +129,13 @@ public class UpdateConditionalHl7OrgDstu2Test {
 	}
 
 	
-	@AfterClass
+	@AfterAll
 	public static void afterClass() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
 		
 	
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

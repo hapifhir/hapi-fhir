@@ -44,7 +44,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
@@ -53,7 +53,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	@Autowired
 	private ISearchDao mySearchEntityDao;
 
-	@After
+	@AfterEach
 	public void afterResetSearchSize() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
@@ -61,7 +61,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		myDaoConfig.setDisableHashBasedSearches(false);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeInitialize() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 		myDaoConfig.setDisableHashBasedSearches(true);
@@ -307,7 +307,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	 * Per message from David Hay on Skype
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testEverythingWithLargeSet() throws Exception {
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
@@ -2374,7 +2374,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testSearchUnknownContentParam() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Constants.PARAM_CONTENT, new StringParam("fulltext"));
@@ -2387,7 +2387,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testSearchUnknownTextParam() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Constants.PARAM_TEXT, new StringParam("fulltext"));
@@ -3395,7 +3395,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		return b.toString();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

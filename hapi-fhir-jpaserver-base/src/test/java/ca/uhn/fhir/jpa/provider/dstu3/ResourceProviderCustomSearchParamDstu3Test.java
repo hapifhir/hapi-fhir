@@ -22,10 +22,10 @@ import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -37,14 +37,14 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderCustomSearchParamDstu3Test.class);
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
@@ -57,7 +57,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void beforeResetConfig() {
 		super.beforeResetConfig();
 
@@ -430,7 +430,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

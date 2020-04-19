@@ -2,8 +2,8 @@ package ca.uhn.fhir.rest.server;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +42,7 @@ public class IncludeAndRevincludeParameterTest {
 	private static Set<Include> ourReverseIncludes;
 	private static Server ourServer;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourIncludes = null;
 		ourReverseIncludes = null;
@@ -76,13 +76,13 @@ public class IncludeAndRevincludeParameterTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 
 		ourCtx = FhirContext.forDstu2();

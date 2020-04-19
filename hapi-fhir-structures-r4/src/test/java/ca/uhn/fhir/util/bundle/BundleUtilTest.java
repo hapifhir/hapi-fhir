@@ -5,13 +5,13 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BundleUtilTest {
 
@@ -65,7 +65,7 @@ public class BundleUtilTest {
 		assertEquals("Observation?foo=bar", bundle.getEntryFirstRep().getRequest().getUrl());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class CustomTypeServerR4 {
 	private static int ourPort;
 	private static Server ourServer;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastId = null;
 		ourLastConditionalUrl = null;
@@ -117,13 +117,13 @@ public class CustomTypeServerR4 {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

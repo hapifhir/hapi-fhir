@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.util;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -12,21 +12,21 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ResourceCountCacheTest {
 
 	@Mock
 	private Callable<Map<String, Long>> myFetcher;
 
-	@After
+	@AfterEach
 	public void after() {
 		ResourceCountCache.setNowForUnitTest(null);
 	}
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		AtomicLong id = new AtomicLong();
 		when(myFetcher.call()).thenAnswer(t->{

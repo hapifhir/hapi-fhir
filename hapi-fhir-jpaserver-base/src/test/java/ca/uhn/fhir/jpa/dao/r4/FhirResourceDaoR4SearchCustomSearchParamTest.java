@@ -32,18 +32,18 @@ import java.util.List;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchCustomSearchParamTest.class);
 
-	@After
+	@AfterEach
 	public void after() {
 		myDaoConfig.setValidateSearchParameterExpressionsOnSave(new DaoConfig().isValidateSearchParameterExpressionsOnSave());
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
@@ -109,7 +109,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testCreateInvalidParamInvalidResourceName() {
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
@@ -145,7 +145,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testCreateInvalidParamNoResourceName() {
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
@@ -1411,7 +1411,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

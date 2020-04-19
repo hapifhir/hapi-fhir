@@ -11,9 +11,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +25,9 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
@@ -37,7 +37,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 	private ISearchDao mySearchEntityDao;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
@@ -226,7 +226,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		assertEquals(1, resp2.getEntry().size());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

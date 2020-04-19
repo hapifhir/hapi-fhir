@@ -36,10 +36,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationParameterUse;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OperationServerR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationServerR4Test.class);
@@ -70,7 +70,7 @@ public class OperationServerR4Test {
 	private static IBaseResource ourNextResponse;
 	private IGenericClient myFhirClient;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastParam1 = null;
 		ourLastParam2 = null;
@@ -990,13 +990,13 @@ public class OperationServerR4Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forR4();
 		ourServer = new Server(0);

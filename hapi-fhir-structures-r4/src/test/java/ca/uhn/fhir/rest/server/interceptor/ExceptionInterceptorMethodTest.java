@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -43,13 +43,13 @@ public class ExceptionInterceptorMethodTest {
 	private static RestfulServer servlet;
 	private IServerInterceptor myInterceptor;
 	
-	@Before
+	@BeforeEach
 	public void before() {
 		myInterceptor = mock(IServerInterceptor.class);
 		servlet.getInterceptorService().registerInterceptor(myInterceptor);
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		servlet.getInterceptorService().unregisterInterceptor(myInterceptor);
 	}
@@ -98,13 +98,13 @@ public class ExceptionInterceptorMethodTest {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

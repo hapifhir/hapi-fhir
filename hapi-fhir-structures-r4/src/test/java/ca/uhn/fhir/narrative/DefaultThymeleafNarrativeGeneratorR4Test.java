@@ -10,10 +10,10 @@ import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.DiagnosticReport.DiagnosticReportStatus;
 import org.hl7.fhir.r4.model.MedicationRequest.MedicationRequestStatus;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.thymeleaf.messageresolver.StandardMessageResolver;
 import org.thymeleaf.templateresource.ITemplateResource;
 
@@ -23,15 +23,15 @@ import java.util.Locale;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefaultThymeleafNarrativeGeneratorR4Test {
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorR4Test.class);
 	private DefaultThymeleafNarrativeGenerator myGen;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myGen = new DefaultThymeleafNarrativeGenerator();
 		myGen.setUseHapiServerConformanceNarrative(true);
@@ -40,7 +40,7 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
@@ -215,7 +215,7 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testGenerateMedicationPrescription() {
 		MedicationRequest mp = new MedicationRequest();
 		mp.setId("12345");

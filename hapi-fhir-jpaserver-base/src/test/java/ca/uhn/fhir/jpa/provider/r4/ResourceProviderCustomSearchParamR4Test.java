@@ -30,10 +30,10 @@ import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResource
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.SearchParameter.XPathUsageType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -47,11 +47,11 @@ import java.util.stream.Collectors;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.in;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProviderR4Test {
 
@@ -59,7 +59,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
@@ -73,7 +73,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void beforeResetConfig() {
 		super.beforeResetConfig();
 
@@ -556,7 +556,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

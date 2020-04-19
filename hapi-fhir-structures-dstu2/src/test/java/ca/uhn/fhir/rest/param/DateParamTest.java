@@ -3,7 +3,7 @@ package ca.uhn.fhir.rest.param;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import com.google.common.testing.EqualsTester;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.TimeZone;
@@ -15,8 +15,8 @@ import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class DateParamTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateParamTest.class);

@@ -27,9 +27,9 @@ import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -70,7 +70,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	private Object myGraphQlProvider;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 		Validate.notNull(myConsentInterceptor);
@@ -80,7 +80,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));

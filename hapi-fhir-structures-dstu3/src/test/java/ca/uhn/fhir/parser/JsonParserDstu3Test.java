@@ -43,7 +43,7 @@ import java.util.*;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.nullable;
@@ -53,7 +53,7 @@ public class JsonParserDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu3Test.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 
-	@After
+	@AfterEach
 	public void after() {
 		ourCtx.setNarrativeGenerator(null);
 	}
@@ -2341,7 +2341,7 @@ public class JsonParserDstu3Test {
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String message = parser.encodeResourceToString(report);
 		ourLog.info(message);
-		Assert.assertThat(message, containsString("contained"));
+		assertThat(message, containsString("contained"));
 	}
 
 	/**
@@ -2365,7 +2365,7 @@ public class JsonParserDstu3Test {
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String message = parser.encodeResourceToString(report);
 		ourLog.info(message);
-		Assert.assertThat(message, containsString("contained"));
+		assertThat(message, containsString("contained"));
 	}
 
 	/**
@@ -2470,7 +2470,7 @@ public class JsonParserDstu3Test {
 		assertEquals(1, containedResource.getMeta().getTag().size());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

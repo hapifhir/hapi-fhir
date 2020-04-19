@@ -7,14 +7,14 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ModelScannerDstu3Test {
 
@@ -391,7 +391,7 @@ public class ModelScannerDstu3Test {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

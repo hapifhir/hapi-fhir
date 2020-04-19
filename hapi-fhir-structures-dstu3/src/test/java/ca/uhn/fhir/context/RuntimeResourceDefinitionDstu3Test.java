@@ -1,11 +1,11 @@
 package ca.uhn.fhir.context;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.util.TestUtil;
 
@@ -23,7 +23,7 @@ public class RuntimeResourceDefinitionDstu3Test {
 		ourCtx.getResourceDefinition("Bundle").getImplementingClass(Patient.class);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

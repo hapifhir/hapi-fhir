@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.util.VersionEnum;
 import org.flywaydb.core.internal.command.DbMigrate;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.Set;
@@ -13,9 +13,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class AddColumnTest extends BaseTest {
 

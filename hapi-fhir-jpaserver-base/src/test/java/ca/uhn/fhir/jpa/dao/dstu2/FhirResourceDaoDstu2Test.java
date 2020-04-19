@@ -36,14 +36,14 @@ import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("unchecked")
 public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2Test.class);
 
-	@After
+	@AfterEach
 	public final void after() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
@@ -72,7 +72,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
@@ -2311,7 +2311,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testSortByQuantity() {
 		Observation res;
 
@@ -2576,7 +2576,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testSortByUri() {
 		ConceptMap res = new ConceptMap();
 		res.addElement().addTarget().addDependsOn().setElement("http://foo2");
@@ -2867,7 +2867,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

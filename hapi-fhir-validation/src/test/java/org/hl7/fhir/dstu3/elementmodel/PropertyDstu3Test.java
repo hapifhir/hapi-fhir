@@ -8,15 +8,15 @@ import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.exceptions.DefinitionException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * Created by axemj on 14/07/2017.
@@ -28,7 +28,7 @@ public class PropertyDstu3Test {
     private StructureDefinition sd;
     private HapiWorkerContext workerContext;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         final String sdString = IOUtils.toString(getClass().getResourceAsStream("/customPatientSd.xml"), StandardCharsets.UTF_8);
         final IParser parser = ourCtx.newXmlParser();

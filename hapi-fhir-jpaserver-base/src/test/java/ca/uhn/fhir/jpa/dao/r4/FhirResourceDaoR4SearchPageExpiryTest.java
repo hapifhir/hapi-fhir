@@ -16,9 +16,9 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLEANUP_JOB_INTERVAL_MILLIS;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("Duplicates")
 public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
@@ -44,21 +44,21 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 	@Autowired
 	private ISearchDao mySearchEntityDao;
 
-	@After()
+	@AfterEach()
 	public void after() {
 		DatabaseSearchCacheSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(mySearchCacheSvc);
 		staleSearchDeletingSvc.setCutoffSlackForUnitTest(SEARCH_CLEANUP_JOB_INTERVAL_MILLIS);
 		DatabaseSearchCacheSvcImpl.setNowForUnitTests(null);
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		DatabaseSearchCacheSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(mySearchCacheSvc);
 		staleSearchDeletingSvc.setCutoffSlackForUnitTest(0);
 		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 		myDaoConfig.setCountSearchResultsUpTo(10000);

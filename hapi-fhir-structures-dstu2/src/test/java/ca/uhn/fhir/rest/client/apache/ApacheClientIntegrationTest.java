@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client.apache;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ public class ApacheClientIntegrationTest {
 	private static Server ourServer;
 	private static String ourBase;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastMethod = null;
 		ourLastName = null;
@@ -52,13 +52,13 @@ public class ApacheClientIntegrationTest {
 		assertEquals("123", response.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
 	
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

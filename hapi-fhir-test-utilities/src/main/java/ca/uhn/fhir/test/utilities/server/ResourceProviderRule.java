@@ -26,14 +26,14 @@ import org.junit.runners.model.Statement;
 
 public class ResourceProviderRule implements TestRule {
 
-	private final RestfulServerRule myRestfulServerRule;
+	private final RestfulServerExtension myRestfulServerExtension;
 	private Object myProvider;
 
 	/**
 	 * Constructor
 	 */
-	public ResourceProviderRule(RestfulServerRule theRestfulServerRule, Object theProvider) {
-		myRestfulServerRule = theRestfulServerRule;
+	public ResourceProviderRule(RestfulServerExtension theRestfulServerExtension, Object theProvider) {
+		myRestfulServerExtension = theRestfulServerExtension;
 		myProvider = theProvider;
 	}
 
@@ -42,11 +42,11 @@ public class ResourceProviderRule implements TestRule {
 		return new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
-				myRestfulServerRule.getRestfulServer().registerProvider(myProvider);
+				myRestfulServerExtension.getRestfulServer().registerProvider(myProvider);
 				try {
 					base.evaluate();
 				} finally {
-					myRestfulServerRule.getRestfulServer().unregisterProvider(myProvider);
+					myRestfulServerExtension.getRestfulServer().unregisterProvider(myProvider);
 				}
 			}
 		};

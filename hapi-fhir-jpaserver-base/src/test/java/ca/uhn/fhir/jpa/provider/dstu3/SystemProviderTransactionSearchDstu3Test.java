@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -53,19 +53,19 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 
 	
 	@SuppressWarnings("deprecation")
-	@After
+	@AfterEach
 	public void after() {
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 		myDaoConfig.setMaximumSearchResultCountInTransaction(new DaoConfig().getMaximumSearchResultCountInTransaction());
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
 		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
 	}
 	
-	@Before
+	@BeforeEach
 	public void beforeStartServer() throws Exception {
 		if (myRestServer == null) {
 			PatientResourceProvider patientRp = new PatientResourceProvider();
@@ -340,7 +340,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		return retVal;
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();

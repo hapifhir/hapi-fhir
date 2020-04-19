@@ -23,9 +23,9 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterEachClass;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,12 +37,12 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplR4Test.class);
@@ -1893,7 +1893,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -23,7 +23,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.Properties;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
 @Import(TestJPAConfig.class)

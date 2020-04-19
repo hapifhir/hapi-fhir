@@ -10,9 +10,9 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterEachClass;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -85,7 +85,7 @@ public class JsonLikeParserDstu3Test {
 	
 	}
 	
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

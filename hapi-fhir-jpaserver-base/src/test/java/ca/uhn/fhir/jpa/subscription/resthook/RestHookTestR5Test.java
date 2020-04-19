@@ -9,9 +9,9 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r5.model.*;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test the rest-hook subscriptions
@@ -32,9 +32,9 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
 
-	@After
+	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
-		ourLog.info("@After");
+		ourLog.info("@AfterEach");
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 	}

@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
 
@@ -47,12 +47,12 @@ public class CreateR4Test {
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
 
-	@After
+	@AfterEach
 	public void after() {
 		ourServlet.setDefaultPreferReturn(RestfulServer.DEFAULT_PREFER_RETURN);
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourReturnOo = null;
 	}
@@ -393,13 +393,13 @@ public class CreateR4Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

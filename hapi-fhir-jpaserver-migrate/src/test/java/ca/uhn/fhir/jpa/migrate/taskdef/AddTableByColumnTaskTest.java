@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.util.VersionEnum;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.Set;
@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AddTableByColumnTaskTest extends BaseTest {
 	public AddTableByColumnTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {

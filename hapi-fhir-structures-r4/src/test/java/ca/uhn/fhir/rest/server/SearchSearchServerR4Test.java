@@ -5,10 +5,10 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -53,7 +53,7 @@ public class SearchSearchServerR4Test {
   private static Server ourServer;
   private static RestfulServer ourServlet;
 
-  @Before
+  @BeforeEach
   public void before() {
     ourServlet.setServerAddressStrategy(ourDefaultAddressStrategy);
     ourLastIncludes = null;
@@ -462,13 +462,13 @@ public class SearchSearchServerR4Test {
     assertEquals("AAANamed", p.getIdentifierFirstRep().getValue());
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClassClearContext() throws Exception {
     JettyUtil.closeServer(ourServer);
     TestUtil.clearAllStaticFieldsForUnitTest();
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws Exception {
     ourServer = new Server(0);
 

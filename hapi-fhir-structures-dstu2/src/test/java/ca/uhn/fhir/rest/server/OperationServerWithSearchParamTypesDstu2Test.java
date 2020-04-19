@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,7 +31,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.*;
@@ -55,7 +55,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 	private static int ourPort;
 	private static Server ourServer;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastMethod = "";
 		ourLastParamValStr = null;
@@ -316,13 +316,13 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		assertEquals("type $orlist", ourLastMethod);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forDstu2();
 		ourServer = new Server(0);

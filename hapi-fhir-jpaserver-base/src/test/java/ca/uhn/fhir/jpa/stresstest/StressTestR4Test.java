@@ -45,14 +45,14 @@ import static org.apache.commons.lang3.StringUtils.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @TestPropertySource(properties = {
 	"max_db_connections=10"
 })
 @DirtiesContext
-@Ignore
+@Disabled
 public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 	static {
@@ -66,7 +66,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	private int myPreviousMaxPageSize;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
@@ -82,7 +82,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
@@ -331,7 +331,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(1202, resultsAndIncludes.size());
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void testUpdateListWithLargeNumberOfEntries() {
 		int numPatients = 3000;
@@ -639,7 +639,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

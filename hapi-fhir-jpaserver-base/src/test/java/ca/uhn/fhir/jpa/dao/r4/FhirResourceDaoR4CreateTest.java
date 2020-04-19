@@ -9,9 +9,9 @@ import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -20,12 +20,12 @@ import java.io.IOException;
 import java.util.Date;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4CreateTest.class);
 
-	@After
+	@AfterEach
 	public void afterResetDao() {
 		myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
 		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
@@ -295,7 +295,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

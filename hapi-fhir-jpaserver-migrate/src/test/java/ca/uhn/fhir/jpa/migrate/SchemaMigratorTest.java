@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.BaseTest;
 import com.google.common.collect.ImmutableList;
 import org.flywaydb.core.api.FlywayException;
 import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nonnull;
 import java.sql.SQLException;
@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.endsWith;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SchemaMigratorTest extends BaseTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaMigratorTest.class);

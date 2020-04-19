@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.TimeUnit;
 
@@ -16,9 +16,9 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu2.model.Bundle;
 import org.hl7.fhir.dstu2.model.Patient;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -60,12 +60,12 @@ public class SearchWithHl7OrgDstu2BundleTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

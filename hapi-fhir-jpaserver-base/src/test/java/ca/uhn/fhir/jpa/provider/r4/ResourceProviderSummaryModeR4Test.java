@@ -9,12 +9,12 @@ import com.google.common.collect.Lists;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.util.AopTestUtils;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Test {
@@ -23,7 +23,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 		myDaoConfig.setCountSearchResultsUpTo(null);
@@ -146,7 +146,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 		assertEquals(10, outcome.getEntry().size());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

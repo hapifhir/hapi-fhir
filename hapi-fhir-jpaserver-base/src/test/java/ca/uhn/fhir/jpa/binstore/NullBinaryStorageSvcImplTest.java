@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.binstore;
 
 import org.hl7.fhir.r4.model.IdType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class NullBinaryStorageSvcImplTest {
 

@@ -23,12 +23,12 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.After;
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
@@ -55,7 +55,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 		return false;
 	}
 
-	@After
+	@AfterEach
 	public void afterUnregisterRestHookListener() {
 		myDaoConfig.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
@@ -66,12 +66,12 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerRestHookInterceptor();
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeReset() {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
@@ -261,7 +261,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 		Assert.assertFalse(observation2.getId().isEmpty());
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void startListenerServer() throws Exception {
 		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3());
 
@@ -283,7 +283,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
         ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopListenerServer() throws Exception {
 		JettyUtil.closeServer(ourListenerServer);
 	}

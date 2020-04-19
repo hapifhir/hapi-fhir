@@ -4,10 +4,10 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSubscriptionProvider;
 import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
 import org.hl7.fhir.dstu3.model.Subscription;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -15,19 +15,19 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SubscriptionLoaderTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
 	private static final int MOCK_FHIR_CLIENT_FAILURES = 3;
 	@Autowired
 	private MockFhirClientSubscriptionProvider myMockFhirClientSubscriptionProvider;
 
-	@Before
+	@BeforeEach
 	public void setFailCount() {
 		myMockFhirClientSubscriptionProvider.setFailCount(MOCK_FHIR_CLIENT_FAILURES);
 	}
 
-	@After
+	@AfterEach
 	public void restoreFailCount() {
 		myMockFhirClientSubscriptionProvider.setFailCount(0);
 	}

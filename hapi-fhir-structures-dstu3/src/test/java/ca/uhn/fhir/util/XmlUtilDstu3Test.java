@@ -1,7 +1,7 @@
 package ca.uhn.fhir.util;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.FactoryConfigurationError;
@@ -23,12 +23,12 @@ public class XmlUtilDstu3Test {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private Patient myPatient;
 	
-	@After
+	@AfterEach
 	public void after() {
 		XmlUtil.setThrowExceptionForUnitTest(null);
 	}
 	
-	@Before
+	@BeforeEach
 	public void before() {
 		myPatient = new Patient();
 		myPatient.setId("1");
@@ -82,7 +82,7 @@ public class XmlUtilDstu3Test {
 		assertNotNull(XmlUtil.parseDocument("<document></document>"));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

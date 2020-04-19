@@ -4,8 +4,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class ResponseValidatingInterceptorR4Test {
 	private static RestfulServer ourServlet;
 	private ResponseValidatingInterceptor myInterceptor;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myReturnResource = null;
 		ourServlet.getInterceptorService().unregisterAllInterceptors();
@@ -402,7 +402,7 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		Assert.assertThat(responseContent, Matchers.containsString("<severity value=\"error\"/>"));
+		assertThat(responseContent, Matchers.containsString("<severity value=\"error\"/>"));
 	}
 
 	@Test
@@ -468,13 +468,13 @@ public class ResponseValidatingInterceptorR4Test {
 		assertThat(status.toString(), (containsString("X-FHIR-Response-Validation")));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

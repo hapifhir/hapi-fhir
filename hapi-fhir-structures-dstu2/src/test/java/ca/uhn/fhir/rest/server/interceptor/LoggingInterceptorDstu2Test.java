@@ -30,10 +30,10 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.core.StringContains;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 
@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
@@ -60,7 +60,7 @@ public class LoggingInterceptorDstu2Test {
 	private static int ourDelayMs;
 	private static Exception ourThrowException;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		servlet.getInterceptorService().unregisterAllInterceptors();
 		ourThrowException = null;
@@ -377,13 +377,13 @@ public class LoggingInterceptorDstu2Test {
 		assertThat(captor.getValue(), StringContains.containsString("search-type - Patient - ?_id=1"));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

@@ -11,8 +11,8 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Claim.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.Practitioner.PractitionerQualificationComponent;
 import org.hl7.fhir.instance.model.api.IBaseElement;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -20,7 +20,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.TestUtil;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ModelDstu3Test {
 
@@ -68,7 +68,7 @@ public class ModelDstu3Test {
 		assertEquals(CodeableConcept.class, roleField.getClass());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

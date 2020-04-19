@@ -2,9 +2,9 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,10 +12,10 @@ import java.util.Set;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -25,18 +25,18 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 	
-	@Before
-	@After
+	@BeforeEach
+	@AfterEach
 	public void resetDefaultBehaviour() {
 		// Reset to default
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());

@@ -1,10 +1,10 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.hl7.fhir.dstu2.model.DecimalType;
 import org.hl7.fhir.dstu2.model.StringType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.thymeleaf.standard.expression.NumberTokenExpression;
 
 public class PrimititeTest {

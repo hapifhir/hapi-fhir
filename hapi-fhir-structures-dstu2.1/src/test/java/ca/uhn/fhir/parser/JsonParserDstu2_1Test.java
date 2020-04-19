@@ -5,14 +5,14 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
@@ -57,7 +57,7 @@ public class JsonParserDstu2_1Test {
 	private static FhirContext ourCtx = FhirContext.forDstu2_1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu2_1Test.class);
 
-	@After
+	@AfterEach
 	public void after() {
 		ourCtx.setNarrativeGenerator(null);
 	}
@@ -1791,7 +1791,7 @@ public class JsonParserDstu2_1Test {
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String message = parser.encodeResourceToString(report);
 		ourLog.info(message);
-		Assert.assertThat(message, containsString("contained"));
+		assertThat(message, containsString("contained"));
 	}
 
 	/**
@@ -1815,7 +1815,7 @@ public class JsonParserDstu2_1Test {
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String message = parser.encodeResourceToString(report);
 		ourLog.info(message);
-		Assert.assertThat(message, containsString("contained"));
+		assertThat(message, containsString("contained"));
 	}
 
 	@Test
@@ -1840,7 +1840,7 @@ public class JsonParserDstu2_1Test {
 
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

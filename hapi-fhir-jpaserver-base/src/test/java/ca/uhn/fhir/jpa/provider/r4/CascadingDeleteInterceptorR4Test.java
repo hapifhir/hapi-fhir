@@ -13,16 +13,16 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test {
 
@@ -41,7 +41,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 	private IIdType myEncounterId;
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
@@ -49,7 +49,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 	}
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 		ourRestServer.getInterceptorService().unregisterInterceptor(myDeleteInterceptor);
@@ -207,7 +207,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

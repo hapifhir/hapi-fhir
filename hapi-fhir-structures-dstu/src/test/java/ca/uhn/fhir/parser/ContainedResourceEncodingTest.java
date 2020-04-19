@@ -1,16 +1,16 @@
 package ca.uhn.fhir.parser;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterEachClass;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +53,7 @@ public class ContainedResourceEncodingTest {
 
 	private final String patGivName1 = "FirstGivenName";
 
-	@Before
+	@BeforeEach
 	public void initTest() {
 		ourLog.info("[initTest]");
 
@@ -252,7 +252,7 @@ public class ContainedResourceEncodingTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -3,13 +3,13 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.util.VersionEnum;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CalculateHashesTest extends BaseTest {
 

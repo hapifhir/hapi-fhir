@@ -30,10 +30,10 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +43,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
 
@@ -57,7 +57,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	private static Server ourServer;
 	private static String ourServerBase;
 
-	@Before
+	@BeforeEach
 	public void beforeStartServer() throws Exception {
 		if (myRestServer == null) {
 			PatientResourceProvider patientRp = new PatientResourceProvider();
@@ -293,7 +293,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testTransactionReSavesPreviouslyDeletedResources() throws IOException {
 
 		for (int i = 0; i < 10; i++) {
@@ -380,7 +380,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	 * This is Gramahe's test transaction - it requires some set up in order to work
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testTransactionFromBundle3() throws Exception {
 
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/grahame-transaction.xml");
@@ -490,7 +490,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();

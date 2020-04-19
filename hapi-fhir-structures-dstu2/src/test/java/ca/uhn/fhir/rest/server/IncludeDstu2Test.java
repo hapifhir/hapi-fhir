@@ -29,17 +29,17 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class IncludeDstu2Test {
 
@@ -165,7 +165,7 @@ public class IncludeDstu2Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testMixedContainedAndNonContained() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?_query=stitchedInclude&_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
@@ -439,13 +439,13 @@ public class IncludeDstu2Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 
 		ourCtx = FhirContext.forDstu2();

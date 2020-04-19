@@ -18,10 +18,10 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 
@@ -30,7 +30,7 @@ import java.util.UUID;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
@@ -43,7 +43,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 	private ISearchIncludeDao mySearchIncludeDao;
 
 	@Override
-	@After()
+	@AfterEach()
 	public void after() throws Exception {
 		super.after();
 		DatabaseSearchCacheSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(mySearchCacheSvc);
@@ -53,7 +53,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		DatabaseSearchCacheSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(mySearchCacheSvc);
@@ -202,7 +202,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

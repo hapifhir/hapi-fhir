@@ -7,8 +7,8 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -17,10 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirResourceDaoSearchParameterR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoSearchParameterR4Test.class);
@@ -29,7 +29,7 @@ public class FhirResourceDaoSearchParameterR4Test {
 	@Mock
 	private ApplicationContext myApplicationContext;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myCtx = FhirContext.forR4();
 

@@ -25,10 +25,10 @@ import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 
@@ -40,7 +40,7 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ValidateTest.class);
@@ -490,7 +490,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
 		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
@@ -843,7 +843,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

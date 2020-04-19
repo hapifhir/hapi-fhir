@@ -7,26 +7,26 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
 
-	@After
+	@AfterEach
 	public void afterResetDao() {
 		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myInterceptorRegistry.registerInterceptor(myInterceptor);
 	}
@@ -328,7 +328,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

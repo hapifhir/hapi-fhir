@@ -25,10 +25,10 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +45,8 @@ import java.util.concurrent.TimeUnit;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.*;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
 
@@ -75,7 +75,7 @@ public class DateRangeParamR4Test {
 		ourFmtUpperForTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS");
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastDateRange = null;
 	}
@@ -435,13 +435,13 @@ public class DateRangeParamR4Test {
 		return new Date(ourFmtUpperForTime.parse(theString).getTime() - 1L);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

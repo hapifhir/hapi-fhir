@@ -10,25 +10,25 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"Duplicates"})
 public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
-	@After
+	@AfterEach
 	public void after() {
 		myDaoConfig.setFilterParameterEnabled(new DaoConfig().isFilterParameterEnabled());
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myDaoConfig.setFilterParameterEnabled(true);
 	}
@@ -1164,7 +1164,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

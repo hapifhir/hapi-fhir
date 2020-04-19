@@ -9,10 +9,10 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import org.hl7.fhir.dstu2.model.*;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.endsWith;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ModelInheritanceTest {
   /*

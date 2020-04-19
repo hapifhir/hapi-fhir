@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
@@ -40,13 +40,13 @@ public class LoggingInterceptorTest {
 	private Logger myLoggerRoot;
 	private Appender<ILoggingEvent> myMockAppender;
 
-	@After
+	@AfterEach
 	public void after() {
 		myLoggerRoot.detachAppender(myMockAppender);
 	}
 
 	@SuppressWarnings("unchecked")
-	@Before
+	@BeforeEach
 	public void before() {
 
 		/*
@@ -123,13 +123,13 @@ public class LoggingInterceptorTest {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 
 		URL conf = LoggingInterceptor.class.getResource("/logback-test-dstuforce.xml");

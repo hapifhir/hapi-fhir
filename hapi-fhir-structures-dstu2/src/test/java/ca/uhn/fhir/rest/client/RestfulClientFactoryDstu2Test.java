@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -8,8 +8,8 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -67,7 +67,7 @@ public class RestfulClientFactoryDstu2Test {
 		
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

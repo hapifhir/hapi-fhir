@@ -19,8 +19,8 @@ import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.WebsocketValidationR
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import org.hl7.fhir.r4.model.IdType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -30,9 +30,9 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -66,7 +66,7 @@ public class WebsocketConnectionValidatorTest {
 	@Autowired
 	WebsocketConnectionValidator myWebsocketConnectionValidator;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		CanonicalSubscription resthookSubscription = new CanonicalSubscription();
 		resthookSubscription.setChannelType(CanonicalSubscriptionChannelType.RESTHOOK);

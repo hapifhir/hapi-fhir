@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.concurrent.TimeUnit;
 
@@ -15,10 +15,10 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.dstu2.model.Patient;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
@@ -40,7 +40,7 @@ public class DeleteConditionalHl7OrgTest {
 	
 	
 	
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastConditionalUrl = null;
 		ourLastIdParam = null;
@@ -77,13 +77,13 @@ public class DeleteConditionalHl7OrgTest {
 		assertNull(ourLastConditionalUrl);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
 		
 	
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

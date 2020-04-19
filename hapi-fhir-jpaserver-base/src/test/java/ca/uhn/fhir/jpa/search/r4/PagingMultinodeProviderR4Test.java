@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.search.r4;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
@@ -20,7 +20,7 @@ public class PagingMultinodeProviderR4Test extends BaseResourceProviderR4Test {
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
@@ -89,7 +89,7 @@ public class PagingMultinodeProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A030", "Patient/A031", "Patient/A032", "Patient/A033", "Patient/A034", "Patient/A035", "Patient/A036", "Patient/A037", "Patient/A038", "Patient/A039"));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

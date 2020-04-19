@@ -11,9 +11,9 @@ import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.time.DateUtils;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -21,12 +21,12 @@ import java.util.UUID;
 
 import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
@@ -44,7 +44,7 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 	@Autowired
 	private ISearchCacheSvc myDataaseCacheSvc;
 
-	@After
+	@AfterEach
 	public void after() {
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(DatabaseSearchCacheSvcImpl.DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS);
 		DatabaseSearchCacheSvcImpl.setMaximumSearchesToCheckForDeletionCandidacyForUnitTest(DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND);

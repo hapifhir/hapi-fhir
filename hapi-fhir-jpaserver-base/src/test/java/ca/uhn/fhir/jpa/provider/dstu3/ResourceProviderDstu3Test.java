@@ -49,10 +49,10 @@ import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
@@ -70,7 +70,7 @@ import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -80,7 +80,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	private ISearchDao mySearchEntityDao;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
@@ -550,7 +550,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testCreateQuestionnaireResponseWithValidation() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://urn/system");
@@ -3674,7 +3674,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 * This does not currently cause an error, so this test is disabled
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testUpdateNoIdInBody() throws Exception {
 		String methodName = "testUpdateNoIdInBody";
 
@@ -4282,7 +4282,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		return new InstantDt(theDate).getValueAsString();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

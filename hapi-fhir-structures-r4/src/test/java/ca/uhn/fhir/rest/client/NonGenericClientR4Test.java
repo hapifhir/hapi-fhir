@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -42,7 +42,7 @@ public class NonGenericClientR4Test {
 	private HttpClient myHttpClient;
 	private HttpResponse myHttpResponse;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
@@ -156,12 +156,12 @@ public class NonGenericClientR4Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 	
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ourCtx = FhirContext.forR4();
 	}

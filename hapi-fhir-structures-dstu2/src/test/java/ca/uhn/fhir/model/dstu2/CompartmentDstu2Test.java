@@ -1,9 +1,9 @@
 package ca.uhn.fhir.model.dstu2;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -15,7 +15,7 @@ public class CompartmentDstu2Test {
 	
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

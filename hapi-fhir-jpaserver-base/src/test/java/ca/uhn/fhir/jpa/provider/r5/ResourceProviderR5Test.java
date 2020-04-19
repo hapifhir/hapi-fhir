@@ -20,9 +20,9 @@ import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +32,9 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
@@ -43,7 +43,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 	private CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
@@ -243,7 +243,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(0, output.getEntry().size());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

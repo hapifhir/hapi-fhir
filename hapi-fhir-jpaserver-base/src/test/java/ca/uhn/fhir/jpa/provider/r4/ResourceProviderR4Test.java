@@ -76,7 +76,7 @@ import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
@@ -89,7 +89,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	private ISearchDao mySearchEntityDao;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
@@ -576,7 +576,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
@@ -648,7 +648,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void test() throws IOException {
 		HttpGet get = new HttpGet(ourServerBase + "/QuestionnaireResponse?_count=50&status=completed&questionnaire=ARIncenterAbsRecord&_lastUpdated=%3E" + UrlUtil.escapeUrlParam("=2018-01-01") + "&context.organization=O3435");
 		ourLog.info("*** MAKING QUERY");
@@ -919,7 +919,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testCreateQuestionnaireResponseWithValidation() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://urn/system");
@@ -1333,7 +1333,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testQuery() throws IOException {
 		ourLog.info("** Performing Search");
 		HttpGet read = new HttpGet(ourServerBase + "/MedicationRequest?category=community&identifier=urn:oid:2.16.840.1.113883.3.7418.12.3%7C&intent=order&medication.code:text=calcitriol,hectorol,Zemplar,rocaltrol,vectical,vitamin%20D,doxercalciferol,paricalcitol&status=active,completed");
@@ -2043,7 +2043,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	 * Per message from David Hay on Skype
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testEverythingWithLargeSet() throws Exception {
 
 		String inputString = IOUtils.toString(getClass().getResourceAsStream("/david_big_bundle.json"), StandardCharsets.UTF_8);
@@ -4904,7 +4904,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	 * This does not currently cause an error, so this test is disabled
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testUpdateNoIdInBody() throws Exception {
 		String methodName = "testUpdateNoIdInBody";
 
@@ -5580,7 +5580,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		return new InstantDt(theDate).getValueAsString();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

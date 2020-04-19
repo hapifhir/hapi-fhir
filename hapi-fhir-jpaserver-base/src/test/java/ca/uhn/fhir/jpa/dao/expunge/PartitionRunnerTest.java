@@ -6,8 +6,8 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +24,8 @@ import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.isOneOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {TestDstu3Config.class})
@@ -41,7 +41,7 @@ public class PartitionRunnerTest {
 	private DaoConfig myDaoConfig;
 	private PointcutLatch myLatch = new PointcutLatch("partition call");
 
-	@After
+	@AfterEach
 	public void before() {
 		myDaoConfig.setExpungeThreadCount(new DaoConfig().getExpungeThreadCount());
 		myDaoConfig.setExpungeBatchSize(new DaoConfig().getExpungeBatchSize());

@@ -30,10 +30,10 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.utilities.graphql.Argument;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -41,8 +41,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class JpaGraphQLR4ProviderTest {
 
@@ -54,7 +54,7 @@ public class JpaGraphQLR4ProviderTest {
 	private static int ourPort;
 	private static Server ourServer;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		//nothing
 	}
@@ -169,13 +169,13 @@ public class JpaGraphQLR4ProviderTest {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

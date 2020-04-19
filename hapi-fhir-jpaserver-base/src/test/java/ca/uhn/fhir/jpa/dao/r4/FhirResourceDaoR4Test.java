@@ -61,11 +61,11 @@ import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.Quantity.QuantityComparator;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -95,14 +95,14 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.reset;
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
@@ -110,7 +110,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4Test.class);
 
-	@After
+	@AfterEach
 	public final void after() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
@@ -118,7 +118,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myInterceptorRegistry.registerInterceptor(myInterceptor);
 	}
@@ -148,7 +148,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
@@ -613,7 +613,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testCreateBuiltInProfiles() throws Exception {
 		org.hl7.fhir.r4.model.Bundle bundle;
 		String name = "profiles-resources";
@@ -3099,7 +3099,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testSortByEncounterLength() {
 		String methodName = "testSortByNumber";
 
@@ -3272,7 +3272,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testSortByQuantity() {
 		Observation res;
 
@@ -3538,7 +3538,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testSortByUri() {
 		ConceptMap res = new ConceptMap();
 		res.addGroup().setSource("http://foo2");
@@ -3914,7 +3914,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertNotEquals(uuid, results.getUuid());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

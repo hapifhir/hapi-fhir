@@ -9,22 +9,22 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test {
 
 	private static final String SYSTEM_PARENTCHILD = "http://parentchild";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4CodeSystemTest.class);
 
-	@Before
+	@BeforeEach
 	@Transactional
 	public void before02() throws IOException {
 		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
@@ -422,7 +422,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

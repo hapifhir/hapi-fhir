@@ -30,8 +30,8 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class IncludeHl7OrgDstu2Test {
 
@@ -419,12 +419,12 @@ public class IncludeHl7OrgDstu2Test {
 
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClass() throws Exception {
     JettyUtil.closeServer(ourServer);
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws Exception {
 
     ourCtx = FhirContext.forDstu2Hl7Org();

@@ -1,8 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.concurrent.TimeUnit;
 
@@ -42,7 +42,7 @@ public class ValidateHl7OrgDstu2Test {
 	private static String ourLastProfile;
 	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	
-	@Before()
+	@BeforeEach()
 	public void before() {
 		ourLastResourceBody = null;
 		ourLastEncoding = null;
@@ -145,12 +145,12 @@ public class ValidateHl7OrgDstu2Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

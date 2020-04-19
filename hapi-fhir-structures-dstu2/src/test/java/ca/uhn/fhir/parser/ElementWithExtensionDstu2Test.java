@@ -6,10 +6,10 @@ import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.TestUtil;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by Sébastien Rivière 12/04/2017
@@ -19,7 +19,7 @@ public class ElementWithExtensionDstu2Test {
     private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ca.uhn.fhir.parser.ElementWithExtensionDstu2Test.class);
     private final FhirContext ctx = FhirContext.forDstu2();
 
-    @AfterClass
+    @AfterAll
     public static void afterClassClearContext() {
         TestUtil.clearAllStaticFieldsForUnitTest();
     }

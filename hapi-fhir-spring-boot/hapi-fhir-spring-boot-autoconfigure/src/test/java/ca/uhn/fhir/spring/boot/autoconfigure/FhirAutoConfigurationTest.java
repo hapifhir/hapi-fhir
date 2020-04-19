@@ -10,10 +10,10 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.spring.boot.autoconfigure.FhirAutoConfiguration.FhirJpaServerConfiguration.Dstu3;
 import org.assertj.core.util.Arrays;
-import org.junit.After;
-import org.junit.Ignore;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -40,7 +40,7 @@ public class FhirAutoConfigurationTest {
 
 	private AnnotationConfigApplicationContext context;
 
-	@After
+	@AfterEach
 	public void close() {
 		if (this.context != null) {
 			this.context.close();

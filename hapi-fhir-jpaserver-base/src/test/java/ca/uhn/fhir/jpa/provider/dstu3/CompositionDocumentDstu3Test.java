@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -31,13 +31,13 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 	private String listId;
 	private String compId;
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
@@ -127,7 +127,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 		return bundle;
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -33,9 +33,9 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
@@ -78,14 +78,14 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		super();
 	}
 
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		ourRestServer.getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
@@ -205,7 +205,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		Thread.sleep(500);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContextBaseResourceProviderR4Test() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		ourHttpClient.close();

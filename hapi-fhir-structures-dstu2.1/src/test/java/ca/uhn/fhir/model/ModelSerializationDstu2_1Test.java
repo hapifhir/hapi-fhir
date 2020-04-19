@@ -1,7 +1,7 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
 
@@ -11,8 +11,8 @@ import org.hl7.fhir.dstu2016may.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu2016may.model.HumanName;
 import org.hl7.fhir.dstu2016may.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -35,7 +35,7 @@ public class ModelSerializationDstu2_1Test {
 		assertEquals(AdministrativeGender.MALE, deserialized);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

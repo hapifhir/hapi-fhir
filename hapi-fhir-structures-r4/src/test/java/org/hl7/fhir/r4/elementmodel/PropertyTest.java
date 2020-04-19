@@ -7,15 +7,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * Created by axemj on 14/07/2017.
@@ -54,7 +54,7 @@ public class PropertyTest {
         assertEquals("id.id", result.get(0).getDefinition().getPath());
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         final String sdString = IOUtils.toString(PropertyTest.class.getResourceAsStream("/customPatientSd.xml"), StandardCharsets.UTF_8);
         final IParser parser = ourCtx.newXmlParser();

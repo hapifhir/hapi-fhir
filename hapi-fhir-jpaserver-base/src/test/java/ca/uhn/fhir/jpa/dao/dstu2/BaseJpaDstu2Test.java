@@ -38,9 +38,9 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -56,7 +56,7 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestDstu2Config.class})
@@ -196,7 +196,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
 
-	@Before
+	@BeforeEach
 	public void beforeFlushFT() {
 		runInTransaction(() -> {
 			FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
@@ -209,13 +209,13 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
 
-	@Before
+	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeResetConfig() {
 		myDaoConfig.setHardSearchLimit(1000);
 		myDaoConfig.setHardTagListLimit(1000);
@@ -223,7 +223,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 	}
 
-	@After
+	@AfterEach
 	public void afterResetInterceptors() {
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
@@ -257,7 +257,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	}
 
 	@SuppressWarnings("RedundantThrows")
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

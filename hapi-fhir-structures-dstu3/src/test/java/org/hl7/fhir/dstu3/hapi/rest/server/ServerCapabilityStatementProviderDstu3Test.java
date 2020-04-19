@@ -31,16 +31,16 @@ import org.hl7.fhir.dstu3.model.OperationDefinition.OperationDefinitionParameter
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -1175,7 +1175,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -22,7 +22,7 @@ import org.junit.*;
 import java.util.*;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4UpdateTest.class);
 
-	@After
+	@AfterEach
 	public void afterResetDao() {
 		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
@@ -38,7 +38,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myInterceptorRegistry.registerInterceptor(myInterceptor);
 	}
@@ -945,7 +945,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -3,13 +3,13 @@ package org.hl7.fhir.dstu3.model;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.endsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -33,7 +33,7 @@ public class BaseDateTimeTypeDstu3Test {
 	private SimpleDateFormat myDateInstantParser;
 	private FastDateFormat myDateInstantZoneParser;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myDateInstantParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		myDateInstantZoneParser = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss.SSSZ", TimeZone.getTimeZone("GMT-02:00"));
@@ -189,7 +189,7 @@ public class BaseDateTimeTypeDstu3Test {
 		assertEquals(TemporalPrecisionEnum.SECOND, c.getStatusDateElement().getPrecision());
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(c);
-		Assert.assertThat(encoded, Matchers.containsString("value=\"2001-01-02T11:13:33\""));
+		assertThat(encoded, Matchers.containsString("value=\"2001-01-02T11:13:33\""));
 
 		c = ourCtx.newXmlParser().parseResource(Goal.class, encoded);
 
@@ -908,12 +908,12 @@ public class BaseDateTimeTypeDstu3Test {
 		Locale.setDefault(ourDefaultLocale);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		/*
 		 * We cache the default locale, but temporarily set it to a random value during this test. This helps ensure that

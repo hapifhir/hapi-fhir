@@ -4,16 +4,16 @@ import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);

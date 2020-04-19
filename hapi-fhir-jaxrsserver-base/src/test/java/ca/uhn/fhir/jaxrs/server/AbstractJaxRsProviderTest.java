@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jaxrs.server;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -10,8 +10,8 @@ import java.util.HashMap;
 
 import javax.ws.rs.core.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -26,14 +26,14 @@ import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 @SuppressWarnings("javadoc")
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AbstractJaxRsProviderTest {
 
     private AbstractJaxRsProviderMock provider;
     @Mock
     private JaxRsRequest theRequest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         provider = new AbstractJaxRsProviderMock();
         final IRestfulResponse response = new JaxRsResponse(theRequest);

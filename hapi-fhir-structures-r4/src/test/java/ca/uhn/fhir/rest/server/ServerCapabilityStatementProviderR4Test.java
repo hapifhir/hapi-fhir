@@ -27,15 +27,15 @@ import org.hl7.fhir.r4.model.OperationDefinition.OperationDefinitionParameterCom
 import org.hl7.fhir.r4.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -789,7 +789,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertTrue(outcome, result.isSuccessful());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

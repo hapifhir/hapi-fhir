@@ -1,10 +1,10 @@
 package ca.uhn.fhir.narrative;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
@@ -16,7 +16,7 @@ public class CustomThymeleafNarrativeGeneratorDstu2Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

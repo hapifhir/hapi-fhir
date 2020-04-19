@@ -1,7 +1,7 @@
 package ca.uhn.fhir.okhttp;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -17,7 +17,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.hl7.fhir.instance.model.api.*;
 import org.junit.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.*;
 
@@ -60,7 +60,7 @@ public class GenericOkHttpClientDstu2Test {
 	private static List<ArrayListMultimap<String, Header>> ourRequestHeadersAll;
 	private static Map<String, Header> ourRequestFirstHeaders;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forDstu2();
 
@@ -110,7 +110,7 @@ public class GenericOkHttpClientDstu2Test {
         ourPort = JettyUtil.getPortForStartedServer(ourServer);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
@@ -131,7 +131,7 @@ public class GenericOkHttpClientDstu2Test {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		RestfulClientFactory clientFactory = createNewClientFactoryForTesting(ourCtx);
 		clientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
@@ -1809,7 +1809,7 @@ public class GenericOkHttpClientDstu2Test {
 		return (OperationOutcome) theOperationOutcome;
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeReset() {
 		ourRequestUri = null;
 		ourRequestUriAll = Lists.newArrayList();

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -45,13 +45,13 @@ public class OperationClientDstu3Test {
 	private IGenericClient ourGenClient;
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		ourCtx = FhirContext.forDstu3();
 

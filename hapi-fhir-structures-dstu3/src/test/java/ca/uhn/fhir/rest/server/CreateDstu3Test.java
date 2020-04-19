@@ -3,8 +3,8 @@ package ca.uhn.fhir.rest.server;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -30,10 +30,10 @@ import org.hl7.fhir.dstu3.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -55,7 +55,7 @@ public class CreateDstu3Test {
 	private static Server ourServer;
 	public static IBaseOperationOutcome ourReturnOo;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourReturnOo = null;
 	}
@@ -209,13 +209,13 @@ public class CreateDstu3Test {
 		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

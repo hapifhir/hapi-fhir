@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -35,13 +35,13 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	private String myWrongPatId;
 	private String myWrongEnc1;
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
@@ -202,7 +202,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		return bundle;
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

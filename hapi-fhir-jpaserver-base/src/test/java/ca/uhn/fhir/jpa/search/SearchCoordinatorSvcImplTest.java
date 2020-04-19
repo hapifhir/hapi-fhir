@@ -26,10 +26,10 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -57,11 +57,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -79,7 +79,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"unchecked"})
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SearchCoordinatorSvcImplTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchCoordinatorSvcImplTest.class);
@@ -108,14 +108,14 @@ public class SearchCoordinatorSvcImplTest {
 	@Mock
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 
-	@After
+	@AfterEach
 	public void after() {
 		System.clearProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK);
 
 		verify(mySearchBuilderFactory, atMost(myExpectedNumberOfSearchBuildersCreated)).newSearchBuilder(any(), any(), any());
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		System.setProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK, "true");
 
@@ -752,7 +752,7 @@ public class SearchCoordinatorSvcImplTest {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -1,12 +1,12 @@
 package ca.uhn.fhir.parser;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -18,7 +18,7 @@ public class ExtensionsDstu2Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

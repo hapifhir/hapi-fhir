@@ -12,13 +12,13 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -49,11 +49,11 @@ import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.util.AopTestUtils;
 
 import com.google.common.base.Charsets;
@@ -133,7 +133,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
@@ -154,7 +154,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		myDaoConfig.setAllowMultipleDelete(true);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
@@ -2633,7 +2633,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 * From example from david hay - moved to the hl7org_dstu2 project
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateDavidsAllergyIntolerance() throws Exception {
 		myDaoConfig.setAllowExternalReferences(true);
 
@@ -2895,7 +2895,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

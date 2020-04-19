@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -144,13 +144,13 @@ public class CorsInterceptorDstu3Test {
 		ourClient.close();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 	
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

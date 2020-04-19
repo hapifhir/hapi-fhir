@@ -4,9 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.test.BaseTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchParameterMapTest extends BaseTest {
 

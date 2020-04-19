@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -42,7 +42,7 @@ public class SearchClientR4Test {
   private HttpClient ourHttpClient;
   private HttpResponse ourHttpResponse;
 
-  @Before
+  @BeforeEach
   public void before() {
     ourCtx = FhirContext.forR4();
 
@@ -233,7 +233,7 @@ public class SearchClientR4Test {
     assertEquals("http://localhost/fhir/Bundle?_sort=param1%2C-param2", ((HttpGet) capt.getAllValues().get(idx++)).getURI().toString());
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClassClearContext() {
     TestUtil.clearAllStaticFieldsForUnitTest();
   }

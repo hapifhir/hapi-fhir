@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AuthorizationInterceptorR4Test {
 
@@ -66,7 +66,7 @@ public class AuthorizationInterceptorR4Test {
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.NEVER);
 		ourServlet.getInterceptorService().unregisterAllInterceptors();
@@ -3870,13 +3870,13 @@ public class AuthorizationInterceptorR4Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

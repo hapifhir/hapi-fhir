@@ -1,13 +1,13 @@
 package ca.uhn.fhir.parser;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.hl7.fhir.dstu2016may.model.Coding;
 import org.hl7.fhir.dstu2016may.model.Extension;
 import org.hl7.fhir.dstu2016may.model.Observation;
 import org.hl7.fhir.dstu2016may.model.StringType;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
@@ -21,7 +21,7 @@ public class EmptyElementWithExtensionDstu3Test {
 	private static FhirContext ctx = FhirContext.forDstu2_1();
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

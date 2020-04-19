@@ -23,9 +23,9 @@ import org.apache.http.message.BasicStatusLine;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
@@ -36,8 +36,8 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -52,7 +52,7 @@ public class OperationClientR4Test {
 	private ArgumentCaptor<HttpUriRequest> capt;
 	private IGenericClient ourGenClient;
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		ourCtx = FhirContext.forR4();
 
@@ -218,7 +218,7 @@ public class OperationClientR4Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

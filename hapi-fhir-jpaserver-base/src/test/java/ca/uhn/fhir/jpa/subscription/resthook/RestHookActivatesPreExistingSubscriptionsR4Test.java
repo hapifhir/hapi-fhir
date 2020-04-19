@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
 
@@ -44,12 +44,12 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
-	@After
+	@AfterEach
 	public void afterUnregisterRestHookListener() {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeSetSubscriptionActivatingInterceptor() {
 		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 	}
@@ -148,7 +148,7 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void startListenerServer() throws Exception {
 		ourListenerRestServer = new RestfulServer(FhirContext.forR4());
 		
@@ -170,7 +170,7 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
         ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopListenerServer() throws Exception {
 		JettyUtil.closeServer(ourListenerServer);
 	}

@@ -44,7 +44,7 @@ import java.util.*;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -52,7 +52,7 @@ public class XmlParserDstu2_1Test {
 	private static FhirContext ourCtx = FhirContext.forDstu2_1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserDstu2_1Test.class);
 
-	@After
+	@AfterEach
 	public void after() {
 		if (ourCtx == null) {
 			ourCtx = FhirContext.forDstu2_1();
@@ -2552,7 +2552,7 @@ public class XmlParserDstu2_1Test {
 		Assert.assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

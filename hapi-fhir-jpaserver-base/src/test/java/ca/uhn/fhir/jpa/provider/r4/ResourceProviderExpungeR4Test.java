@@ -13,13 +13,13 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
@@ -31,7 +31,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 	private IIdType myTwoVersionObservationId;
 	private IIdType myDeletedObservationId;
 
-	@After
+	@AfterEach
 	public void afterDisableExpunge() {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 	}
@@ -59,7 +59,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
@@ -108,7 +108,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeEnableExpunge() {
 		myDaoConfig.setExpungeEnabled(true);
 	}
@@ -326,7 +326,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

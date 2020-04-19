@@ -13,15 +13,15 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 
@@ -36,12 +36,12 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		myInterceptorRegistry.registerInterceptor(interceptor);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeEnableScheduling() {
 		myDaoConfig.setSchedulingDisabled(false);
 	}
@@ -162,7 +162,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		ourClient.update().resource(subs).execute();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -2,13 +2,13 @@ package ca.uhn.fhir.jpa.dao.dstu2;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.List;
 
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -21,7 +21,7 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -10,13 +10,13 @@ import ca.uhn.fhir.model.dstu2.valueset.ParticipantTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ParticipationStatusEnum;
 import ca.uhn.fhir.util.TestUtil;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterEachClass;
 
 /**
  * @author Bill de Beaubien on 11/30/2015.
@@ -40,14 +40,14 @@ public class BundleValidationTest {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 
 
-	@Ignore
+	@Disabled
 	@Test
 	public void testBundleIsInvalid() throws Exception {
 		Appointment appointment = createAppointment();

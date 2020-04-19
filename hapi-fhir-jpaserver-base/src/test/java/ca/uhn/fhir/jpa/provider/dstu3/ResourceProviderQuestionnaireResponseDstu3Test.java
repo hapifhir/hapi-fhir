@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -28,7 +28,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderQuestionnaireResponseDstu3Test.class);
 	private static RequestValidatingInterceptor ourValidatingInterceptor;
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		ourRestServer.unregisterInterceptor(ourValidatingInterceptor);
 		ourValidatingInterceptor = null;
@@ -37,7 +37,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 

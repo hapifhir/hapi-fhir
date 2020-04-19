@@ -21,11 +21,11 @@ import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Ignore;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Disabled;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,11 +43,11 @@ import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplDstu3Test.class);
@@ -56,7 +56,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	@Rule
 	public final ExpectedException expectedException = ExpectedException.none();
 
-	@After
+	@AfterEach
 	public void after() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
@@ -1946,7 +1946,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateCodeWithProperties() {
 		createCodeSystem();
 		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(myValidationSupport, new ConceptValidationOptions(), CS_URL, "childAAB", null, null);
@@ -1965,7 +1965,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		return retVal;
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -7,7 +7,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 
 import static ca.uhn.fhir.jpa.provider.JpaGraphQLR4ProviderTest.DATA_PREFIX;
 import static ca.uhn.fhir.jpa.provider.JpaGraphQLR4ProviderTest.DATA_SUFFIX;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 	private Logger ourLog = LoggerFactory.getLogger(GraphQLProviderR4Test.class);

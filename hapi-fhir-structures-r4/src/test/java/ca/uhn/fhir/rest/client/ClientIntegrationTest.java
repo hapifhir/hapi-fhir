@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +33,7 @@ public class ClientIntegrationTest {
 	private MyPatientResourceProvider myPatientProvider;
 	private static FhirContext ourCtx = FhirContext.forR4();
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myServer = new Server(0);
 
@@ -74,7 +74,7 @@ public class ClientIntegrationTest {
 		assertEquals("Basic Zm9vYmFyOmJvb2JlYXI=", myPatientProvider.getAuthorizationHeader());
 	}
 
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		JettyUtil.closeServer(myServer);
 	}
@@ -114,7 +114,7 @@ public class ClientIntegrationTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -23,8 +23,8 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -33,7 +33,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ResourceValidatorDstu2Test {
 
@@ -367,7 +367,7 @@ public class ResourceValidatorDstu2Test {
 		assertThat(messageString, not(containsString("valueResource")));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

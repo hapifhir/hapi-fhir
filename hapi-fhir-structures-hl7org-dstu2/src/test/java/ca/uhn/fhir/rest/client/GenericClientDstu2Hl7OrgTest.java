@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.client;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -42,12 +42,12 @@ public class GenericClientDstu2Hl7OrgTest {
   private HttpClient myHttpClient;
   private HttpResponse myHttpResponse;
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() {
     ourCtx = FhirContext.forDstu2Hl7Org();
   }
 
-  @Before
+  @BeforeEach
   public void before() {
     myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
     ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);

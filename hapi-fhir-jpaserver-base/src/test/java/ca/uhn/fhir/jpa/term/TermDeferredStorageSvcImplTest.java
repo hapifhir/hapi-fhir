@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -14,7 +14,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class TermDeferredStorageSvcImplTest {
 
 

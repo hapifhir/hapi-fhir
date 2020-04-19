@@ -1,20 +1,20 @@
 package ca.uhn.fhir.jpa.model.entity;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ResourceIndexedSearchParamDateTest {
 
 	private Date date1A, date1B, date2A, date2B;
 	private Timestamp timestamp1A, timestamp1B, timestamp2A, timestamp2B;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		Calendar cal1 = Calendar.getInstance();
 		cal1.set(1970, 01, 01, 10, 23, 33);

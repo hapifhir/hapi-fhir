@@ -23,10 +23,10 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("unchecked")
@@ -46,7 +46,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	@Autowired
 	private ISearchParamPresentDao mySearchParamPresentDao;
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
@@ -890,7 +890,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	 * See #310
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testSearchMultiMatches() {
 
 		for (int i = 0; i < 100; i++) {
@@ -1508,7 +1508,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testSearchUnknownContentParam() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Constants.PARAM_CONTENT, new StringDt("fulltext"));
@@ -1521,7 +1521,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testSearchUnknownTextParam() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Constants.PARAM_TEXT, new StringDt("fulltext"));
@@ -2317,7 +2317,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		return b.toString();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

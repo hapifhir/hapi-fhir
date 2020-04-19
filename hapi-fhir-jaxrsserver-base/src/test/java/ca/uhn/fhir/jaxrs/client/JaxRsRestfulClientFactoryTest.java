@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jaxrs.client;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created by Sebastien Riviere on 31/07/2017.
@@ -51,7 +51,7 @@ public class JaxRsRestfulClientFactoryTest {
 		assertThat(result.getConfiguration().getClasses(), hasItem(ca.uhn.fhir.jaxrs.client.MyFilter.class));
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		factory = new JaxRsRestfulClientFactory(context);
 	}

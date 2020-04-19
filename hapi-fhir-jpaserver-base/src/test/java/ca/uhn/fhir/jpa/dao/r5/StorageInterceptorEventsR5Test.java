@@ -12,15 +12,15 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
@@ -120,13 +120,13 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		assertEquals(2, showedCounter.get());
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

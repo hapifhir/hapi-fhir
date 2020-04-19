@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,7 +51,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationServerWithSearchParamTypesDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastMethod = "";
 		ourLastParamValStr = null;
@@ -371,12 +371,12 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		assertEquals("type $orlist", ourLastMethod);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forDstu3();
 		ourServer = new Server(0);

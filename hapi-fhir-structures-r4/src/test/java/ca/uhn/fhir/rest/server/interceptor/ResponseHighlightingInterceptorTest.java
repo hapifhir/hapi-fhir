@@ -32,10 +32,10 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 import org.springframework.web.cors.CorsConfiguration;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,7 +47,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -61,7 +61,7 @@ public class ResponseHighlightingInterceptorTest {
 	private static int ourPort;
 	private static RestfulServer ourServlet;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourInterceptor.setShowRequestHeaders(new ResponseHighlighterInterceptor().isShowRequestHeaders());
 		ourInterceptor.setShowResponseHeaders(new ResponseHighlighterInterceptor().isShowResponseHeaders());
@@ -824,7 +824,7 @@ public class ResponseHighlightingInterceptorTest {
 		assertThat(responseContent, (containsStringIgnoringCase("Content-Type")));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
         JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
@@ -838,7 +838,7 @@ public class ResponseHighlightingInterceptorTest {
 		}
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

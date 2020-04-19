@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,7 +37,7 @@ public class BinaryClientTest {
 
 	// atom-document-large.xml
 
-	@Before
+	@BeforeEach
 	public void before() {
 		mtCtx = FhirContext.forR4();
 
@@ -125,7 +125,7 @@ public class BinaryClientTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

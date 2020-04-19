@@ -5,9 +5,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.PractitionerRole;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 	@Override

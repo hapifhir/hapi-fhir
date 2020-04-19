@@ -52,7 +52,7 @@ public class InterceptorTest {
 	private IServerInterceptor myInterceptor1;
 	private IServerInterceptor myInterceptor2;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myInterceptor1 = mock(IServerInterceptor.class);
 		myInterceptor2 = mock(IServerInterceptor.class);
@@ -92,13 +92,13 @@ public class InterceptorTest {
 	}
 
 	
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);

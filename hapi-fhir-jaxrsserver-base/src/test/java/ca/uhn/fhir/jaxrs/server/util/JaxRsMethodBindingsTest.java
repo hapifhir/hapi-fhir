@@ -1,14 +1,14 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.FixMethodOrder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runners.MethodSorters;
 
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 @FixMethodOrder(MethodSorters.DEFAULT)
 public class JaxRsMethodBindingsTest {
 	
-	 @Before
+	 @BeforeEach
 	 public void setUp() {
 		 JaxRsMethodBindings.getClassBindings().clear();
 	 }

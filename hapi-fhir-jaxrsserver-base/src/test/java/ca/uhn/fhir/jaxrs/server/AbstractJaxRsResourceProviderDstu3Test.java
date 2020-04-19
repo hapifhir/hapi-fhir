@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -65,7 +65,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		assertEquals(id, Integer.parseInt(resource.getIdElement().getIdPart()));
 	}
 	
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
         JettyUtil.closeServer(jettyServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
@@ -114,7 +114,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		return result;
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.mock = TestJaxRsMockPatientRestProviderDstu3.mock;
 		idCaptor = ArgumentCaptor.forClass(IdType.class);
@@ -329,14 +329,14 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 
 	/** Search - Subsetting (_summary and _elements) */
 	@Test
-	@Ignore
+	@Disabled
 	public void testSummary() {
 		Object response = client.search().forResource(Patient.class)
 				.returnBundle(org.hl7.fhir.dstu3.model.Bundle.class).execute();
 	}
 
 	/** Transaction - Server */
-//	@Ignore
+//	@Disabled
 //	@Test
 //	public void testTransaction() {
 //		ca.uhn.fhir.model.api.Bundle bundle = new ca.uhn.fhir.model.api.Bundle();
@@ -370,7 +370,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
     }	
 	
 	@SuppressWarnings("unchecked")
-	@Ignore
+	@Disabled
 	@Test
 	public void testResourceNotFound() throws Exception {
 		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenThrow(ResourceNotFoundException.class);
@@ -420,7 +420,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		assertNotNull(mO.getOperationOutcome());
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUpClass() throws Exception {
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		context.setContextPath("/");

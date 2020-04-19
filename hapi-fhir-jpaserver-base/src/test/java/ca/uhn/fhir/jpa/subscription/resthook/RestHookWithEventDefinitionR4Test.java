@@ -8,10 +8,10 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -51,12 +51,12 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 	}
 
-	@After
+	@AfterEach
 	public void afterUnregisterRestHookListener() {
 		for (IIdType next : mySubscriptionIds) {
 			ourClient.delete().resourceById(next).execute();
@@ -74,7 +74,7 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
@@ -86,7 +86,7 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 	 * Ignored because this feature isn't implemented yet
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testSubscriptionAddedTrigger() {
 		/*
 		 * Create patient
@@ -129,12 +129,12 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerRestHookInterceptor();
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeReset() {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();

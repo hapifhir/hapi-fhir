@@ -16,9 +16,9 @@ import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +26,8 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,7 +38,7 @@ public class QuestionnaireValidatorDstu3Test {
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 
@@ -149,7 +149,7 @@ public class QuestionnaireValidatorDstu3Test {
 		assertThat(errors.getMessages(), Matchers.empty());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport.flush();
 		myDefaultValidationSupport = null;

@@ -2,9 +2,9 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.util.TestUtil;
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterEachClass;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SearchFilterSyntaxTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchFilterSyntaxTest.class);
@@ -72,7 +72,7 @@ public class SearchFilterSyntaxTest {
 		testParse("this eq that and this1 eq that1");
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

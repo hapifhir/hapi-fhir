@@ -23,7 +23,7 @@ import org.junit.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
 
@@ -37,20 +37,20 @@ public class EmptyIndexesR4Test extends BaseJpaR4Test {
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
 	@SuppressWarnings("deprecation")
-	@After
+	@AfterEach
 	public void after() {
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 	
-	@Before
+	@BeforeEach
 	public void before() {
 		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
 		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeStartServer() throws Exception {
 		if (myRestServer == null) {
 			PatientResourceProvider patientRp = new PatientResourceProvider();
@@ -130,7 +130,7 @@ public class EmptyIndexesR4Test extends BaseJpaR4Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();

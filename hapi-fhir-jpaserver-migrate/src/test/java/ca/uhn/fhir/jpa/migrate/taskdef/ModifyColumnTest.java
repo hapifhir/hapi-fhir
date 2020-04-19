@@ -3,13 +3,13 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.flywaydb.core.internal.command.DbMigrate;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ModifyColumnTest extends BaseTest {
 	public ModifyColumnTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {

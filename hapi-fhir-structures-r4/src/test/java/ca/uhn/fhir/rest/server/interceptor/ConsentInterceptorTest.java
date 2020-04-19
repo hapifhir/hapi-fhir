@@ -47,13 +47,13 @@ import java.util.concurrent.TimeUnit;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 //import static org.hamcrest.Matchers.any;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ConsentInterceptorTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ConsentInterceptorTest.class);
@@ -71,12 +71,12 @@ public class ConsentInterceptorTest {
 	@Captor
 	private ArgumentCaptor<BaseServerResponseException> myExceptionCaptor;
 
-	@After
+	@AfterEach
 	public void after() {
 		ourServlet.unregisterInterceptor(myInterceptor);
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myInterceptor = new ConsentInterceptor(myConsentSvc);
 		ourServlet.registerInterceptor(myInterceptor);
@@ -391,13 +391,13 @@ public class ConsentInterceptorTest {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		ourClient.close();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

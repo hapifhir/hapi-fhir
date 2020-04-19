@@ -25,18 +25,18 @@ import org.mockito.internal.util.collections.ListUtil;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchCustomSearchParamTest.class);
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		myDaoConfig.setValidateSearchParameterExpressionsOnSave(new DaoConfig().isValidateSearchParameterExpressionsOnSave());
 	}
@@ -899,7 +899,7 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testSearchForStringOnIdentifierWithSpecificSystem() {
 
 		SearchParameter fooSp = new SearchParameter();
@@ -1049,7 +1049,7 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

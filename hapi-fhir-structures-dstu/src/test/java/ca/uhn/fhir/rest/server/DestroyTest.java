@@ -6,8 +6,8 @@ import java.util.Arrays;
 
 import javax.servlet.ServletException;
 
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -24,7 +24,7 @@ import ca.uhn.fhir.util.TestUtil;
  * Created by Bill de Beaubien on 11/10/2014.
  */
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DestroyTest {
 
 	private static FhirContext ourCtx = FhirContext.forDstu1();
@@ -96,7 +96,7 @@ public class DestroyTest {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

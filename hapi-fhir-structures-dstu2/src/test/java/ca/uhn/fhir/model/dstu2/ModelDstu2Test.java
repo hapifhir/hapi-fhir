@@ -1,7 +1,7 @@
 package ca.uhn.fhir.model.dstu2;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,8 +9,8 @@ import java.util.List;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -99,7 +99,7 @@ public class ModelDstu2Test {
 		claim.setIdentifier(new ArrayList<IdentifierDt>()).setCondition(new ArrayList<CodingDt>());
 	}
 	
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.hl7.fhir.dstu3.model.IdType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.ParameterUtil;

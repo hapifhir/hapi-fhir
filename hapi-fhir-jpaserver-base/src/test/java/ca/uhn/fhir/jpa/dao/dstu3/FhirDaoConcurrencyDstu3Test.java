@@ -12,10 +12,10 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.comparator.ComparableComparator;
 
@@ -29,7 +29,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 
@@ -39,12 +39,12 @@ public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 	public BasicDataSource myBasicDataSource;
 	private int myMaxTotal;
 
-	@After
+	@AfterEach
 	public void afterResetConnectionPool() {
 		myBasicDataSource.setMaxTotal(myMaxTotal);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeSetUpConnectionPool() {
 		myMaxTotal = myBasicDataSource.getMaxTotal();
 		myBasicDataSource.setMaxTotal(5);
@@ -144,7 +144,7 @@ public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

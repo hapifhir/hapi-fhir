@@ -2,7 +2,7 @@ package ca.uhn.fhir.parser;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -17,10 +17,10 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterEachClass;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.internal.stubbing.answers.ThrowsException;
@@ -51,7 +51,7 @@ public class XmlParserDstu2Test {
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserDstu2Test.class);
 
-	@Before
+	@BeforeEach
 	public void before() {
 		if (ourCtx == null) {
 			ourCtx = FhirContext.forDstu2();
@@ -2848,7 +2848,7 @@ public class XmlParserDstu2Test {
 		Assert.assertEquals(refVal, ((ResourceReferenceDt) extlst.get(0).getValue()).getReference().getValue());
 	}
   
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

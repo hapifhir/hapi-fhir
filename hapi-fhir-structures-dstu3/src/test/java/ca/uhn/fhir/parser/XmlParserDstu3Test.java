@@ -55,7 +55,7 @@ import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.text.StringContainsInOrder.stringContainsInOrder;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -63,7 +63,7 @@ public class XmlParserDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserDstu3Test.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 
-	@After
+	@AfterEach
 	public void after() {
 		if (ourCtx == null) {
 			ourCtx = FhirContext.forDstu3();
@@ -3532,7 +3532,7 @@ public class XmlParserDstu3Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

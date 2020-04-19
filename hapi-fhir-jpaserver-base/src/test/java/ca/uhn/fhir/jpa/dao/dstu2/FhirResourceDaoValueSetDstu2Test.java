@@ -3,18 +3,18 @@ package ca.uhn.fhir.jpa.dao.dstu2;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
@@ -32,14 +32,14 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 
 	private IIdType myExtensionalVsId;
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 
 
-	@Before
+	@BeforeEach
 	@Transactional
 	public void before02() throws IOException {
 		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");

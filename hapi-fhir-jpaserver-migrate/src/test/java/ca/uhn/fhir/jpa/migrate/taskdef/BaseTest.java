@@ -6,8 +6,8 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.intellij.lang.annotations.Language;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public abstract class BaseTest {
 		myTestDatabaseDetails = theTestDatabaseDetails;
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		TestDatabaseDetails testDatabaseDetails = myTestDatabaseDetails.get();
 
@@ -61,7 +61,7 @@ public abstract class BaseTest {
 		return myDataSource;
 	}
 
-	@After
+	@AfterEach
 	public void resetMigrationVersion() throws SQLException {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		if (tableNames.contains(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME)) {
@@ -86,7 +86,7 @@ public abstract class BaseTest {
 		return myMigrator;
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		myConnectionProperties.close();
 	}

@@ -47,7 +47,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 		return false;
 	}
 
-	@After
+	@AfterEach
 	public void afterUnregisterRestHookListener() {
 		myDaoConfig.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
@@ -58,12 +58,12 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerRestHookInterceptor();
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeReset() {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
@@ -264,7 +264,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 		Assert.assertFalse(observation2.getId().isEmpty());
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void startListenerServer() throws Exception {
 		ourListenerRestServer = new RestfulServer(FhirContext.forR4());	
 
@@ -286,7 +286,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
         ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopListenerServer() throws Exception {
 		JettyUtil.closeServer(ourListenerServer);
 	}

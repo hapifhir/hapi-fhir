@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
 
@@ -46,13 +46,13 @@ public class ServeMediaResourceRawInterceptorTest {
 	private static String ourReadUrl;
 	private ServeMediaResourceRawInterceptor myInterceptor;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myInterceptor = new ServeMediaResourceRawInterceptor();
 		ourServlet.getInterceptorService().registerInterceptor(myInterceptor);
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		ourNextResponse = null;
 		ourServlet.getInterceptorService().unregisterInterceptor(myInterceptor);
@@ -128,14 +128,14 @@ public class ServeMediaResourceRawInterceptorTest {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
         JettyUtil.closeServer(ourServer);
 		ourClient.close();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		// Create server
 		ourServer = new Server(0);

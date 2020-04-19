@@ -4,7 +4,7 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.Collections;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class InitializeSchemaTaskTest extends BaseTest {
 

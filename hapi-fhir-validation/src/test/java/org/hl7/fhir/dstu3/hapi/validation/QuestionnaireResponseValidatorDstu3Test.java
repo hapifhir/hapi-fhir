@@ -25,10 +25,10 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatu
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,9 +41,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.BOOLEAN;
 import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.CHOICE;
 import static org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyString;
@@ -65,7 +65,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	private FhirValidator myVal;
 	private IValidationSupport myValSupport;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myValSupport = mock(IValidationSupport.class);
 		when(myValSupport.getFhirContext()).thenReturn(ourCtx);
@@ -1153,12 +1153,12 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		assertThat(errors.toString(), containsString("LinkId \"link1\" not found in questionnaire"));
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ourCtx = FhirContext.forDstu3();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport.flush();
 		myDefaultValidationSupport = null;

@@ -54,7 +54,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SystemProviderR4Test extends BaseJpaR4Test {
 
@@ -68,18 +68,18 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
 	@SuppressWarnings("deprecation")
-	@After
+	@AfterEach
 	public void after() {
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
 		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeStartServer() throws Exception {
 		if (ourRestServer == null) {
 			PatientResourceProvider patientRp = new PatientResourceProvider();
@@ -569,7 +569,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	 * This is Gramahe's test transaction - it requires some set up in order to work
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testTransactionFromBundle3() throws Exception {
 
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/grahame-transaction.xml");
@@ -724,7 +724,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	 * FOrmat has changed, source is no longer valid
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateUsingIncomingResources() throws Exception {
 		FhirInstanceValidator val = new FhirInstanceValidator(myValidationSupport);
 		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
@@ -800,7 +800,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();

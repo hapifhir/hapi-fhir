@@ -25,9 +25,9 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -42,12 +42,12 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BulkDataExportProviderTest {
 
 	private static final String A_JOB_ID = "0000000-AAAAAA";
@@ -67,13 +67,13 @@ public class BulkDataExportProviderTest {
 	@Captor
 	private ArgumentCaptor<Set<String>> myFiltersCaptor;
 
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		JettyUtil.closeServer(myServer);
 		myClient.close();
 	}
 
-	@Before
+	@BeforeEach
 	public void start() throws Exception {
 		myServer = new Server(0);
 
