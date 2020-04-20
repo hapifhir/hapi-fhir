@@ -20,12 +20,13 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.IDaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -50,14 +51,14 @@ public class SubscriptionLoader {
 	private static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
 	private final Object mySyncSubscriptionsLock = new Object();
 	@Autowired
-	private ISubscriptionProvider mySubscriptionProvider;
-	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired(required = false)
-	private IDaoRegistry myDaoRegistry;
+	@Autowired
+	DaoRegistry myDaoRegistry;
 	private Semaphore mySyncSubscriptionsSemaphore = new Semaphore(1);
 	@Autowired
 	private ISchedulerService mySchedulerService;
+	@Autowired
+	private SubscriptionActivatingSubscriber mySubscriptionActivatingInterceptor;
 
 	/**
 	 * Constructor
@@ -128,7 +129,7 @@ public class SubscriptionLoader {
 				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
 			map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
 
-			IBundleProvider subscriptionBundleList = mySubscriptionProvider.search(map);
+			IBundleProvider subscriptionBundleList =  myDaoRegistry.getSubscriptionDao().search(map);
 
 			Integer subscriptionCount = subscriptionBundleList.size();
 			assert subscriptionCount != null;
@@ -143,7 +144,7 @@ public class SubscriptionLoader {
 			for (IBaseResource resource : resourceList) {
 				String nextId = resource.getIdElement().getIdPart();
 				allIds.add(nextId);
-				boolean changed = mySubscriptionProvider.loadSubscription(resource);
+				boolean changed = mySubscriptionActivatingInterceptor.activateOrRegisterSubscriptionIfRequired(resource);
 				if (changed) {
 					changesCount++;
 				}

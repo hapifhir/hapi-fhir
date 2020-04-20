@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
-import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSubscriptionProvider;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriberTest;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -24,7 +23,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
@@ -32,11 +30,7 @@ import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Subscription;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -80,8 +74,6 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	IInterceptorService myInterceptorRegistry;
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired
-	private MockFhirClientSubscriptionProvider myMockFhirClientSubscriptionProvider;
 	@Autowired
 	private SubscriptionLoader mySubscriptionLoader;
 	@Autowired
@@ -133,11 +125,6 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		ourSubscribableChannel.send(message);
 		mySubscriptionMatchingPost.awaitExpected();
 		return theResource;
-	}
-
-	protected void initSubscriptionLoader(List<Subscription> subscriptions, String uuid) throws InterruptedException {
-		myMockFhirClientSubscriptionProvider.setBundleProvider(new SimpleBundleProvider(new ArrayList<>(subscriptions), uuid));
-		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 	}
 
 	protected Subscription sendSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
