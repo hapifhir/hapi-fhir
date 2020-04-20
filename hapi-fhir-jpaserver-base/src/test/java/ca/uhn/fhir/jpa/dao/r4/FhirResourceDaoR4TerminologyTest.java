@@ -602,7 +602,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	}
 
 	// TODO: get this working
-	@Ignore
+	@Disabled
 	@Test
 	public void testExpandWithOpEquals() {
 
@@ -817,7 +817,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	 * Can't currently abort costly
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testRefuseCostlyExpansionFhirCodesystem() {
 		createLocalCsAndVs();
 		myDaoConfig.setMaximumExpansionSize(1);
@@ -1252,7 +1252,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	 * Todo: not yet implemented
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testSearchCodeNotInBuiltInValueSet() {
 		AllergyIntolerance ai1 = new AllergyIntolerance();
 		ai1.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("active");

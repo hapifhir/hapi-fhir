@@ -556,7 +556,7 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
-	// @Ignore
+	// @Disabled
 	public void testValidateBuiltInProfiles() throws Exception {
 		org.hl7.fhir.dstu3.model.Bundle bundle;
 		String name = "profiles-resources";
@@ -600,7 +600,7 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateBundleWithObservations() throws Exception {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
@@ -1145,7 +1145,7 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateStructureDefinition() throws IOException {
 		String input = loadResource("/sdc-questionnaire.profile.xml");
 

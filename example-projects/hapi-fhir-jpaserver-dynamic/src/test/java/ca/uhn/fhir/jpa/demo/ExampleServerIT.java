@@ -35,7 +35,7 @@ public class ExampleServerIT {
 	private static String ourServerBase;
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testCreateAndRead() throws IOException {
 		ourLog.info("Base URL is: http://localhost:" + ourPort + "/baseDstu2");
 		String methodName = "testCreateResourceConditional";

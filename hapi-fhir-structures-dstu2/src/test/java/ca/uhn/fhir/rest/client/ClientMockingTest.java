@@ -1,21 +1,20 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.junit.jupiter.api.AfterEachClass;
-import org.junit.jupiter.api.Test;
-import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
-
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
+import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
+
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ClientMockingTest {
 

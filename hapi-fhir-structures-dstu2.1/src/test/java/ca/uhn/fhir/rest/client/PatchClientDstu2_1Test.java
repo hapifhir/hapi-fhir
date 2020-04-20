@@ -73,7 +73,7 @@ public class PatchClientDstu2_1Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testJsonPatchFluent() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = prepareResponse();
 

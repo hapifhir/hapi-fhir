@@ -21,7 +21,7 @@ public class StressTestParserTest extends BaseTest {
 	 * @throws IOException
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void test() throws IOException {
 		FhirContext ctx = FhirContext.forR4();
 		String input = loadResource("/org/hl7/fhir/r4/model/valueset/valuesets.xml");

@@ -268,7 +268,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateResourceContainingProfileDeclarationJson() throws Exception {
 		String methodName = "testValidateResourceContainingProfileDeclarationJson";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.JSON);
@@ -281,7 +281,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateResourceContainingProfileDeclarationXml() throws Exception {
 		String methodName = "testValidateResourceContainingProfileDeclarationXml";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.XML);
@@ -809,7 +809,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 * Format has changed, this is out of date
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateNewQuestionnaireFormat() throws Exception {
 		String input = IOUtils.toString(FhirResourceDaoR4ValidateTest.class.getResourceAsStream("/questionnaire_r4.xml"));
 		try {

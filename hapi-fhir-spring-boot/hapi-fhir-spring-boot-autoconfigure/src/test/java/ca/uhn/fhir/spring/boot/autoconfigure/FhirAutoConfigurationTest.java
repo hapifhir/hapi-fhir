@@ -102,21 +102,21 @@ public class FhirAutoConfigurationTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void withValidation() {
 		load();
 		assertThat(this.context.getBeansOfType(IServerInterceptor.class)).hasSize(1);
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void withValidations() {
 		load("hapi.fhir.validation.request-only:false");
 		assertThat(this.context.getBeansOfType(IServerInterceptor.class)).hasSize(2);
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void withCustomValidationSchemaLocation() {
 		load("hapi.fhir.validation.schema-location:custom-schema-location");
 		assertThat(this.context.getBeansOfType(IServerInterceptor.class)).hasSize(1);

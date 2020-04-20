@@ -14,7 +14,7 @@ import org.hl7.fhir.utilities.graphql.EGraphQLException;
 import org.hl7.fhir.utilities.graphql.GraphQLResponse;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.graphql.Parser;
-import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;

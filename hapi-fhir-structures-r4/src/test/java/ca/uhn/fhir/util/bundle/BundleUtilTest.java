@@ -1,11 +1,11 @@
 package ca.uhn.fhir.util.bundle;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

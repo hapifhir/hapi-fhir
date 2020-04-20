@@ -29,7 +29,11 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;

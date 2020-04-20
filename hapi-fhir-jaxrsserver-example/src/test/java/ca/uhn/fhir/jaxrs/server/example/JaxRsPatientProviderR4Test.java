@@ -135,7 +135,7 @@ public class JaxRsPatientProviderR4Test {
 
 	/** Search - Subsetting (_summary and _elements) */
 	@Test
-	@Ignore
+	@Disabled
 	public void testSummary() {
 		client.search()
 				.forResource(Patient.class)
@@ -209,7 +209,7 @@ public class JaxRsPatientProviderR4Test {
 	}
 
 	/** Transaction - Server */
-	@Ignore
+	@Disabled
 	@Test
 	public void testTransaction() {
 		Bundle bundle = new Bundle();
@@ -226,7 +226,7 @@ public class JaxRsPatientProviderR4Test {
 
 	/** Conformance - Server */
 	@Test
-	@Ignore
+	@Disabled
 	public void testConformance() {
 		final CapabilityStatement caps = client.capabilities().ofType(CapabilityStatement.class).execute();
 		System.out.println(caps.getRest().get(0).getResource().get(0).getType());

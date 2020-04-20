@@ -27,7 +27,7 @@ public class ValidateCommandTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateUsingIgPackSucceedingDstu2() {
 		String resourcePath = ValidateCommandTest.class.getResource("/argo-dstu2-observation-good.json").getFile();
 		ourLog.info(resourcePath);

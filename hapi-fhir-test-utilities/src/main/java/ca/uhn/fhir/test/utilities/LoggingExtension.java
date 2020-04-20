@@ -39,9 +39,6 @@ package ca.uhn.fhir.test.utilities;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,16 +51,16 @@ import java.text.MessageFormat;
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @version 1.0.0
  */
-public class LoggingRule implements BeforeEachCallback, AfterEachCallback {
-	
+public class LoggingExtension implements BeforeEachCallback, AfterEachCallback {
+
 	@Override
-	public void afterEach(ExtensionContext context) throws Exception {
+	public void afterEach(ExtensionContext context) {
 		final Logger logger = LoggerFactory.getLogger(context.getTestClass().get());
 		logger.info(MessageFormat.format("Finished test case [{0}]", context.getTestMethod().get().getName()));
 	}
 
 	@Override
-	public void beforeEach(ExtensionContext context) throws Exception {
+	public void beforeEach(ExtensionContext context) {
 		final Logger logger = LoggerFactory.getLogger(context.getTestClass().get());
 		logger.info(MessageFormat.format("Starting test case [{0}]", context.getTestMethod().get().getName()));
 	}

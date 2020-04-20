@@ -173,7 +173,7 @@ public class FhirInstanceValidatorDstu2Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testParametersWithParameterNoValue() {
 		Parameters input = new Parameters();
 		input.addParameter().setName("resource");
@@ -192,7 +192,7 @@ public class FhirInstanceValidatorDstu2Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testParametersWithParameterTwoValues() {
 		Patient patient = new Patient();
 		patient.addName().addGiven("James");

@@ -3,7 +3,7 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
-import ca.uhn.fhir.test.utilities.server.ResourceProviderRule;
+import ca.uhn.fhir.test.utilities.server.ResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -37,7 +37,7 @@ public class BlockingContentR4Test {
 	@ClassRule
 	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(ourCtx);
 	@Rule
-	public ResourceProviderRule myPatientProviderRule = new ResourceProviderRule(ourServerRule, new SystemProvider());
+	public ResourceProviderExtension myPatientProviderRule = new ResourceProviderExtension(ourServerRule, new SystemProvider());
 
 	@Test
 	public void testCreateWith100Continue() throws Exception {

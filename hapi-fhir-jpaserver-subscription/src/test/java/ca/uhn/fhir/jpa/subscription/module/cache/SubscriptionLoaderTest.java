@@ -33,7 +33,7 @@ public class SubscriptionLoaderTest extends BaseBlockingQueueSubscribableChannel
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testSubscriptionLoaderFhirClientDown() throws Exception {
 		String payload = "application/fhir+json";
 

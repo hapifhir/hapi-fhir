@@ -22,20 +22,28 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.dstu2.model.Bundle;
+import org.hl7.fhir.dstu2.model.IdType;
+import org.hl7.fhir.dstu2.model.IntegerType;
+import org.hl7.fhir.dstu2.model.Parameters;
+import org.hl7.fhir.dstu2.model.Patient;
+import org.hl7.fhir.dstu2.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeEachClass;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class OperationServerHl7OrgTest {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationServerHl7OrgTest.class);

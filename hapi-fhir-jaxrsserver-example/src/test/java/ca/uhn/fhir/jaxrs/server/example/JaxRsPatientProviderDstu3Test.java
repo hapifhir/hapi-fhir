@@ -124,7 +124,7 @@ public class JaxRsPatientProviderDstu3Test {
     
     /** Search - Subsetting (_summary and _elements) */
     @Test
-    @Ignore
+    @Disabled
     public void testSummary() {
     client.search()
             .forResource(Patient.class)
@@ -202,7 +202,7 @@ public class JaxRsPatientProviderDstu3Test {
 
     /** Conformance - Server */
     @Test
-    @Ignore
+    @Disabled
     public void testConformance() {
         final CapabilityStatement conf = client.fetchConformance().ofType(CapabilityStatement.class).execute();
         System.out.println(conf.getRest().get(0).getResource().get(0).getType());

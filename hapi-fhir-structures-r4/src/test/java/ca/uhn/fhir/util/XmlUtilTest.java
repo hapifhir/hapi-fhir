@@ -1,15 +1,14 @@
 package ca.uhn.fhir.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import javax.xml.stream.FactoryConfigurationError;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterEachClass;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class XmlUtilTest {
 

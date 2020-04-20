@@ -1,10 +1,10 @@
 package ca.uhn.fhir.parser;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 import org.junit.jupiter.api.Test;
 
-import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /*
  * #%L
@@ -15,9 +15,9 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,39 +58,74 @@ public class ErrorHandlerTest {
 		}
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testStrictMethods1() {
-		new StrictErrorHandler().unexpectedRepeatingElement(null, null);
+		try {
+			new StrictErrorHandler().unexpectedRepeatingElement(null, null);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testStrictMethods2() {
-		new StrictErrorHandler().unknownAttribute(null, null);
+		try {
+			new StrictErrorHandler().unknownAttribute(null, null);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testStrictMethods3() {
-		new StrictErrorHandler().unknownElement(null, null);
+		try {
+			new StrictErrorHandler().unknownElement(null, null);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testStrictMethods4() {
-		new StrictErrorHandler().containedResourceWithNoId(null);
+		try {
+			new StrictErrorHandler().containedResourceWithNoId(null);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testStrictMethods5() {
-		new StrictErrorHandler().unknownReference(null, null);
+		try {
+			new StrictErrorHandler().unknownReference(null, null);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testStrictMethods6() {
-		new StrictErrorHandler().incorrectJsonType(null, null, ValueType.ARRAY, null, ValueType.SCALAR, null);
+		try {
+			new StrictErrorHandler().incorrectJsonType(null, null, ValueType.ARRAY, null, ValueType.SCALAR, null);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testStrictMethods7() {
-		new StrictErrorHandler().invalidValue(null, null, null);
+		try {
+			new StrictErrorHandler().invalidValue(null, null, null);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
 }

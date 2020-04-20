@@ -489,7 +489,7 @@ public class FhirInstanceValidatorR5Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateRawJsonResourceFromExamples() throws Exception {
 		// @formatter:off
 		String input = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream("/testscript-search.json"), Charsets.UTF_8);
@@ -997,7 +997,7 @@ public class FhirInstanceValidatorR5Test {
 
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateStructureDefinition() throws IOException {
 		String input = IOUtils.toString(FhirInstanceValidatorR5Test.class.getResourceAsStream("/sdc-questionnaire.profile.xml"));
 

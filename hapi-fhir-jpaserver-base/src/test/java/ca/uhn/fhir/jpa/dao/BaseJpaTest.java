@@ -27,7 +27,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.LoggingRule;
+import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -94,7 +94,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	@Rule
-	public LoggingRule myLoggingRule = new LoggingRule();
+	public LoggingExtension myLoggingExtension = new LoggingExtension();
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
 	protected InterceptorService myRequestOperationCallback;

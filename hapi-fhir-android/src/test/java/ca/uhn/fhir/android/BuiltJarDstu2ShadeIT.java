@@ -22,7 +22,7 @@ public class BuiltJarDstu2ShadeIT {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BuiltJarDstu2ShadeIT.class);
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testParserXml() throws Exception {
 
 		FhirContext ctx = FhirContext.forDstu2();

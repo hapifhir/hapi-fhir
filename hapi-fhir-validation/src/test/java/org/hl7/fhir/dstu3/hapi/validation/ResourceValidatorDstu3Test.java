@@ -103,7 +103,7 @@ public class ResourceValidatorDstu3Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateCareTeamProfile() {
 
 		CareTeam careTeam = new CareTeam();
@@ -186,7 +186,7 @@ public class ResourceValidatorDstu3Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateProfileWithExtension() throws IOException, FHIRException {
 		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport(ourCtx);
 		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ourCtx);
@@ -223,7 +223,7 @@ public class ResourceValidatorDstu3Test {
 
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateDifferentPropertyButSameStartsWithPath() throws Exception {
 
 		EligibilityResponse fhirObj = new EligibilityResponse();
@@ -280,7 +280,7 @@ public class ResourceValidatorDstu3Test {
 	 * Per email from Jon Zammit
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateQuestionnaire() throws IOException {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/questionnaire_jon_z_20160506.xml"), StandardCharsets.UTF_8);
 

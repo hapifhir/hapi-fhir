@@ -27,11 +27,15 @@ public class PropertyTest {
     private StructureDefinition sd;
     private HapiWorkerContext workerContext;
 
-    @Test(expected = Error.class)
+    @Test
     public void getChildPropertiesErrorTest() throws FHIRException {
-        final ElementDefinition ed = sd.getSnapshot().getElement().get(7);
-        property = new Property(workerContext, ed, sd);
-        property.getChildProperties("birthdate", null);
+    	try {
+			final ElementDefinition ed = sd.getSnapshot().getElement().get(7);
+			property = new Property(workerContext, ed, sd);
+			property.getChildProperties("birthdate", null);
+		} catch (Error e) {
+    		assertEquals("", e.getMessage());
+		}
     }
 
     @Test

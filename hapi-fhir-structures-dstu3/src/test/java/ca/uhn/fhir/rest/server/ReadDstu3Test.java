@@ -1,14 +1,14 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.DateUtils;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -19,16 +19,20 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.*;
-import org.junit.*;
+import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
-import ca.uhn.fhir.util.*;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReadDstu3Test {
 	private static CloseableHttpClient ourClient;

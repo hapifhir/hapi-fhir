@@ -24,7 +24,7 @@ import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-public class ResourceProviderRule implements BeforeEachCallback, AfterEachCallback {
+public class ResourceProviderExtension implements BeforeEachCallback, AfterEachCallback {
 
 	private final RestfulServerExtension myRestfulServerExtension;
 	private Object myProvider;
@@ -32,7 +32,7 @@ public class ResourceProviderRule implements BeforeEachCallback, AfterEachCallba
 	/**
 	 * Constructor
 	 */
-	public ResourceProviderRule(RestfulServerExtension theRestfulServerExtension, Object theProvider) {
+	public ResourceProviderExtension(RestfulServerExtension theRestfulServerExtension, Object theProvider) {
 		myRestfulServerExtension = theRestfulServerExtension;
 		myProvider = theProvider;
 	}

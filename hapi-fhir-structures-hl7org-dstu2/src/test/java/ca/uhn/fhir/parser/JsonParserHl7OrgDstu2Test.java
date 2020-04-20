@@ -11,7 +11,6 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.dstu2.model.*;
 import org.hl7.fhir.dstu2.model.Address.AddressUse;
 import org.hl7.fhir.dstu2.model.Address.AddressUseEnumFactory;
@@ -23,21 +22,34 @@ import org.hl7.fhir.dstu2.model.Patient.ContactComponent;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse.QuestionAnswerComponent;
 import org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu2.model.ValueSet.ValueSetCodeSystemComponent;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JsonParserHl7OrgDstu2Test {
   private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();

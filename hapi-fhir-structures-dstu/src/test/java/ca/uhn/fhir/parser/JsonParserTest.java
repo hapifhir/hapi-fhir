@@ -1262,7 +1262,7 @@ public class JsonParserTest {
 	 * HAPI FHIR < 0.6 incorrectly used "resource" instead of "reference"
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testParseWithIncorrectReference() throws IOException {
 		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"));
 		jsonString = jsonString.replace("\"reference\"", "\"resource\"");

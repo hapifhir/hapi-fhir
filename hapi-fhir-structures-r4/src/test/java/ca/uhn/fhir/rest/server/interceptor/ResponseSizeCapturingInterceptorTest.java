@@ -8,28 +8,23 @@ import ca.uhn.test.concurrency.PointcutLatch;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static org.awaitility.Awaitility.await;
-import static org.awaitility.Awaitility.waitAtMost;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.timeout;
@@ -89,7 +84,7 @@ public class ResponseSizeCapturingInterceptorTest {
 		resource = ourServerRule.getFhirClient().read().resource(Patient.class).withId(id).execute();
 		assertEquals(true, resource.getActive());
 
-		verify(myConsumer, timeout(Duration.ofSeconds(10)).times(1)).accept(myResultCaptor.capture());
+		verify(myConsumer, timeout(10000).times(1)).accept(myResultCaptor.capture());
 		assertEquals(100, myResultCaptor.getValue().getWrittenChars());
 	}
 

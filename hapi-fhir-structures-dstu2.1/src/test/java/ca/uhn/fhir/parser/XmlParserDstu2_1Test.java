@@ -1655,7 +1655,7 @@ public class XmlParserDstu2_1Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testParseAndEncodeBundle() throws Exception {
 		String content = IOUtils.toString(XmlParserDstu2_1Test.class.getResourceAsStream("/bundle-example.xml"), StandardCharsets.UTF_8);
 
@@ -1690,7 +1690,7 @@ public class XmlParserDstu2_1Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testParseAndEncodeBundleNewStyle() throws Exception {
 		String content = IOUtils.toString(XmlParserDstu2_1Test.class.getResourceAsStream("/bundle-example.xml"), StandardCharsets.UTF_8);
 
@@ -2114,7 +2114,7 @@ public class XmlParserDstu2_1Test {
 	 * see #144 and #146
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testParseContained() {
 
 		FhirContext c = FhirContext.forDstu2_1();
@@ -2394,7 +2394,7 @@ public class XmlParserDstu2_1Test {
 
 	// TODO: this should work
 	@Test
-	@Ignore
+	@Disabled
 	public void testParseNarrative() throws Exception {
 		//@formatter:off
 		String htmlNoNs = "<div>AAA<b>BBB</b>CCC</div>";

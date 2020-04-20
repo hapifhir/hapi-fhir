@@ -82,7 +82,7 @@ public class ModelDstu2_1Test {
 	 * See #325
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testEqualsDeep() throws Exception {
 		
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");

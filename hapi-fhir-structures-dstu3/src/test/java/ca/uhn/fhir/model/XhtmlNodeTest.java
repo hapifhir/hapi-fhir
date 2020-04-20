@@ -1,15 +1,14 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.XhtmlDt;
-import ca.uhn.fhir.util.TestUtil;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class XhtmlNodeTest {
 

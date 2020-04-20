@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ServerMethodSelectionR4Test extends BaseR4ServerTest {

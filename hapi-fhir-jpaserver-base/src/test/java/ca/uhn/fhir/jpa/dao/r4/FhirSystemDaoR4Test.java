@@ -2873,7 +2873,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	 * Format changed, source isn't valid
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testTransactionWithBundledValidationSourceAndTarget() throws Exception {
 
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/questionnaire-sdc-profile-example-ussg-fht.xml");
@@ -3214,7 +3214,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	 * See #801
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testTransactionWithMatchUrlToReferenceInSameBundle() throws IOException {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/bug801.json"), StandardCharsets.UTF_8);
 		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);

@@ -1183,7 +1183,7 @@ public class JsonParserDstu2_1Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testParseAndEncodeBundle() throws Exception {
 		String content = IOUtils.toString(JsonParserDstu2_1Test.class.getResourceAsStream("/bundle-example.json"), StandardCharsets.UTF_8);
 
@@ -1232,7 +1232,7 @@ public class JsonParserDstu2_1Test {
 	 * Test for #146
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testParseAndEncodeBundleFromXmlToJson() throws Exception {
 		String content = IOUtils.toString(JsonParserDstu2_1Test.class.getResourceAsStream("/bundle-example2.xml"), StandardCharsets.UTF_8);
 
@@ -1257,7 +1257,7 @@ public class JsonParserDstu2_1Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testParseAndEncodeBundleNewStyle() throws Exception {
 		String content = IOUtils.toString(JsonParserDstu2_1Test.class.getResourceAsStream("/bundle-example.json"), StandardCharsets.UTF_8);
 
@@ -1475,7 +1475,7 @@ public class JsonParserDstu2_1Test {
 	 * see #144 and #146
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testParseContained() {
 
 		FhirContext c = FhirContext.forDstu2();
@@ -1761,7 +1761,7 @@ public class JsonParserDstu2_1Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testParseWithWrongTypeObjectShouldBeArray() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/invalid_metadata.json"));
 		try {

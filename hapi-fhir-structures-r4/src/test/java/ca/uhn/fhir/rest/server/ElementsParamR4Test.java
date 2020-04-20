@@ -30,6 +30,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 
 public class ElementsParamR4Test {
 
@@ -79,7 +83,7 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testElementsOnChoiceWithSpecificNameNotMatching() throws IOException {
 		createObservationWithQuantity();
 		verifyXmlAndJson(

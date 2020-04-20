@@ -135,7 +135,7 @@ public class JaxRsPatientProviderTest {
 
 	/** Search - Subsetting (_summary and _elements) */
 	@Test
-	@Ignore
+	@Disabled
 	public void testSummary() {
 		client.search()
 				.forResource(Patient.class)
@@ -209,7 +209,7 @@ public class JaxRsPatientProviderTest {
 	}
 
 	/** Transaction - Server */
-	@Ignore
+	@Disabled
 	@Test
 	public void testTransaction() {
 		Bundle bundle = new Bundle();
@@ -226,7 +226,7 @@ public class JaxRsPatientProviderTest {
 
 	/** Conformance - Server */
 	@Test
-	@Ignore
+	@Disabled
 	public void testConformance() {
 		final Conformance conf = client.fetchConformance().ofType(Conformance.class).execute();
 		System.out.println(conf.getRest().get(0).getResource().get(0).getType());

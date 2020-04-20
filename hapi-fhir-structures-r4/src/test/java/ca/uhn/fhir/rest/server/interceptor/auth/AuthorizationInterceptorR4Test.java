@@ -8,7 +8,11 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -27,7 +31,13 @@ import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -39,18 +49,30 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
-import org.junit.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class AuthorizationInterceptorR4Test {
 
@@ -637,7 +659,7 @@ public class AuthorizationInterceptorR4Test {
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
 		status = ourClient.execute(httpPost);
 		responseString = extractResponseAndClose(status);
-		assertEquals(responseString, 403, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode(), responseString);
 		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
@@ -649,7 +671,7 @@ public class AuthorizationInterceptorR4Test {
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
 		status = ourClient.execute(httpPost);
 		responseString = extractResponseAndClose(status);
-		assertEquals(responseString, 200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode(), responseString);
 		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
@@ -661,7 +683,7 @@ public class AuthorizationInterceptorR4Test {
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
 		status = ourClient.execute(httpPost);
 		responseString = extractResponseAndClose(status);
-		assertEquals(responseString, 403, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode(), responseString);
 		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
@@ -673,7 +695,7 @@ public class AuthorizationInterceptorR4Test {
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
 		status = ourClient.execute(httpPost);
 		responseString = extractResponseAndClose(status);
-		assertEquals(responseString, 200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode(), responseString);
 		assertTrue(ourHitMethod);
 	}
 
@@ -697,7 +719,7 @@ public class AuthorizationInterceptorR4Test {
 		httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient/1");
 		status = ourClient.execute(httpDelete);
 		responseString = extractResponseAndClose(status);
-		assertEquals(responseString, 204, status.getStatusLine().getStatusCode());
+		assertEquals(204, status.getStatusLine().getStatusCode(), responseString);
 		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
@@ -705,7 +727,7 @@ public class AuthorizationInterceptorR4Test {
 		httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Observation/1");
 		status = ourClient.execute(httpDelete);
 		responseString = extractResponseAndClose(status);
-		assertEquals(responseString, 403, status.getStatusLine().getStatusCode());
+		assertEquals(403, status.getStatusLine().getStatusCode(), responseString);
 		assertFalse(ourHitMethod);
 
 

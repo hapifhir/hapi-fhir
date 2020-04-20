@@ -537,7 +537,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testUpdateIgnoresIdenticalVersions() {
 		String methodName = "testUpdateIgnoresIdenticalVersions";
 

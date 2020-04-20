@@ -533,7 +533,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateBigRawJsonResource() throws Exception {
 		String input = super.loadCompressedResource("/conformance.json.gz");
 
@@ -554,7 +554,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateBuiltInProfiles() throws Exception {
 		org.hl7.fhir.r4.model.Bundle bundle;
 		String name = "profiles-resources";
@@ -630,7 +630,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateBundleWithObservations() throws Exception {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
@@ -659,7 +659,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateDocument() throws Exception {
 		String vsContents = loadResource("/sample-document.xml");
 
@@ -711,7 +711,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateQuestionnaireResponse() throws IOException {
 		String input = loadResource("/qr_jon.xml");
 
@@ -764,7 +764,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateRawJsonResourceFromExamples() throws Exception {
 		String input = loadResource("/testscript-search.json");
 
@@ -1107,7 +1107,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateDecimalWithTrailingDot() {
 		String input = "{" +
 			" \"resourceType\": \"Observation\"," +
@@ -1289,7 +1289,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateStructureDefinition() throws IOException {
 		String input = loadResource("/sdc-questionnaire.profile.xml");
 

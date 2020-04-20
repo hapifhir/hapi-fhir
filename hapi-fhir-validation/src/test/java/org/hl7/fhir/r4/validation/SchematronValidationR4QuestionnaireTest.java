@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Added for #870 - Can be enabled when the FHIR sources are fixed
  */
-@Ignore("Requires a valid schematron file, e.g. bei merging pull request #869")
+@Disabled("Requires a valid schematron file, e.g. bei merging pull request #869")
 public class SchematronValidationR4QuestionnaireTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SchematronValidationR4QuestionnaireTest.class);
 

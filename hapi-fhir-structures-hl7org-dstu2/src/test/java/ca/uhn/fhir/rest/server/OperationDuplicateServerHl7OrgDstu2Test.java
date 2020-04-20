@@ -14,10 +14,15 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.dstu2.model.Conformance;
+import org.hl7.fhir.dstu2.model.OperationDefinition;
+import org.hl7.fhir.dstu2.model.Organization;
+import org.hl7.fhir.dstu2.model.Parameters;
+import org.hl7.fhir.dstu2.model.Patient;
+import org.hl7.fhir.dstu2.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.AfterEachClass;
-import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;

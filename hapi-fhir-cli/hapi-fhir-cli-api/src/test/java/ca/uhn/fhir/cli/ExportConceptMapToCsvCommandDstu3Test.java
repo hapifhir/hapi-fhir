@@ -5,7 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.VerboseLoggingInterceptor;
 import ca.uhn.fhir.test.utilities.JettyUtil;
-import ca.uhn.fhir.test.utilities.LoggingRule;
+import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
@@ -50,7 +50,7 @@ public class ExportConceptMapToCsvCommandDstu3Test {
 	}
 
 	@Rule
-	public LoggingRule myLoggingRule = new LoggingRule();
+	public LoggingExtension myLoggingExtension = new LoggingExtension();
 
 	@Test
 	public void testExportConceptMapToCsvCommand() throws IOException {

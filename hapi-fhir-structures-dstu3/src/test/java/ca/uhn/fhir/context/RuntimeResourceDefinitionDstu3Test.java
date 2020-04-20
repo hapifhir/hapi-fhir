@@ -1,13 +1,13 @@
 package ca.uhn.fhir.context;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import ca.uhn.fhir.util.TestUtil;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class RuntimeResourceDefinitionDstu3Test {
 
@@ -18,9 +18,14 @@ public class RuntimeResourceDefinitionDstu3Test {
 		assertEquals(Bundle.class, ourCtx.getResourceDefinition("Bundle").getImplementingClass(Bundle.class));
 	}
 	
-	@Test(expected=ConfigurationException.class)
+	@Test()
 	public void testAsClassWrong() {
-		ourCtx.getResourceDefinition("Bundle").getImplementingClass(Patient.class);
+		try {
+			ourCtx.getResourceDefinition("Bundle").getImplementingClass(Patient.class);
+			fail();
+		} catch (ConfigurationException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
 	@AfterAll

@@ -639,7 +639,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	 * Per message from David Hay on Skype
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testEverythingWithLargeSet() throws Exception {
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
@@ -2967,7 +2967,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(searchQuery, 2, StringUtils.countMatches(searchQuery.toUpperCase(), "AND RESOURCETA0_.RES_UPDATED"));
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void testSearchWithContext() {
 
@@ -3238,7 +3238,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testSearchUnknownContentParam() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Constants.PARAM_CONTENT, new StringParam("fulltext"));
@@ -3251,7 +3251,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testSearchUnknownTextParam() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Constants.PARAM_TEXT, new StringParam("fulltext"));

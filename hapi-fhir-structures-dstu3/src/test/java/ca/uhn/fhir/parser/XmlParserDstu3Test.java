@@ -25,7 +25,6 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.DiagnosticReport.DiagnosticReportStatus;
 import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionBindingComponent;
-import org.hl7.fhir.dstu3.model.Enumeration;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.dstu3.model.HumanName.NameUse;
@@ -34,7 +33,11 @@ import org.hl7.fhir.dstu3.model.Observation.ObservationRelationshipType;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.mockito.ArgumentCaptor;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.builder.Input;
@@ -48,16 +51,32 @@ import java.io.StringReader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.text.StringContainsInOrder.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class XmlParserDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserDstu3Test.class);
@@ -170,7 +189,7 @@ public class XmlParserDstu3Test {
 	 * See #544
 	 */
 	@Test
-	public void testBundleStitchReferencesByUuid() throws Exception {
+	public void testBundleStitchReferencesByUuid() {
 		Bundle bundle = new Bundle();
 
 		DocumentManifest dm = new DocumentManifest();
@@ -531,7 +550,7 @@ public class XmlParserDstu3Test {
 
 		// And re-encode once more, with the references cleared
 		patient.getContained().clear();
-		patient.getManagingOrganization().setReference((String) null);
+		patient.getManagingOrganization().setReference(null);
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>")));
@@ -540,7 +559,7 @@ public class XmlParserDstu3Test {
 
 		// And re-encode once more, with the references cleared and a manually set local ID
 		patient.getContained().clear();
-		patient.getManagingOrganization().setReference((String) null);
+		patient.getManagingOrganization().setReference(null);
 		patient.getManagingOrganization().getResource().setId(("#333"));
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
@@ -692,7 +711,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testEncodeAndParseExtensions() throws Exception {
+	public void testEncodeAndParseExtensions() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
@@ -1002,7 +1021,7 @@ public class XmlParserDstu3Test {
 	 * See #216 - Profiled datatypes should use their unprofiled parent type as the choice[x] name
 	 */
 	@Test
-	public void testEncodeAndParseProfiledDatatypeChoice() throws Exception {
+	public void testEncodeAndParseProfiledDatatypeChoice() {
 		IParser xmlParser = ourCtx.newXmlParser();
 
 		MedicationStatement ms = new MedicationStatement();
@@ -1017,7 +1036,7 @@ public class XmlParserDstu3Test {
 		Patient p = new Patient();
 		p.addName().setFamily("FAMILY");
 
-		List<Coding> labels = new ArrayList<Coding>();
+		List<Coding> labels = new ArrayList<>();
 		labels.add(new Coding().setSystem("SYSTEM1").setCode("CODE1").setDisplay("DISPLAY1").setVersion("VERSION1"));
 		labels.add(new Coding().setSystem("SYSTEM2").setCode("CODE2").setDisplay("DISPLAY2").setVersion("VERSION2"));
 		p.getMeta().getSecurity().addAll(labels);
@@ -1252,7 +1271,7 @@ public class XmlParserDstu3Test {
 		// Adding medication to Contained.
 		Medication medResource = new Medication();
 		medResource.setCode(codeDt);
-		medResource.setId("#" + String.valueOf(medId));
+		medResource.setId("#" + medId);
 		medicationPrescript.getContained().add(medResource);
 
 		// Medication reference. This should point to the contained resource.
@@ -1319,7 +1338,7 @@ public class XmlParserDstu3Test {
 		// Adding medication to Contained.
 		Medication medResource = new Medication();
 		medResource.setCode(codeDt);
-		medResource.setId(String.valueOf(medId)); // ID does not start with '#'
+		medResource.setId(medId); // ID does not start with '#'
 		medicationPrescript.getContained().add(medResource);
 
 		// Medication reference. This should point to the contained resource.
@@ -2310,7 +2329,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testParseAndEncodeBundle() throws Exception {
 		String content = IOUtils.toString(XmlParserDstu3Test.class.getResourceAsStream("/bundle-example.xml"), StandardCharsets.UTF_8);
 
@@ -2345,7 +2364,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testParseAndEncodeBundleNewStyle() throws Exception {
 		String content = IOUtils.toString(XmlParserDstu3Test.class.getResourceAsStream("/bundle-example.xml"), StandardCharsets.UTF_8);
 
@@ -2992,7 +3011,7 @@ public class XmlParserDstu3Test {
 	 * see #144 and #146
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testParseContained() {
 
 		FhirContext c = FhirContext.forDstu3();
@@ -3263,7 +3282,7 @@ public class XmlParserDstu3Test {
 
 	// TODO: this should work
 	@Test
-	@Ignore
+	@Disabled
 	public void testParseNarrative() throws Exception {
 
 		String htmlNoNs = "<div>AAA<b>BBB</b>CCC</div>";
@@ -3547,7 +3566,7 @@ public class XmlParserDstu3Test {
 			.withComparisonController(ComparisonControllers.Default)
 			.build();
 
-		assertTrue(d.toString(), !d.hasDifferences());
+		assertTrue(d.hasDifferences(), d.toString());
 	}
 
 	@ResourceDef(name = "Patient")
