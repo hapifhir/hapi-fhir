@@ -21,10 +21,12 @@ package ca.uhn.fhir.test.utilities.server;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -43,17 +45,30 @@ import java.util.concurrent.TimeUnit;
 public class RestfulServerRule implements TestRule {
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerRule.class);
 
-	private final FhirContext myFhirContext;
-	private final Object[] myProviders;
+	private FhirContext myFhirContext;
+	private Object[] myProviders;
+	private FhirVersionEnum myFhirVersion;
 	private Server myServer;
 	private RestfulServer myServlet;
 	private int myPort;
 	private CloseableHttpClient myHttpClient;
 	private IGenericClient myFhirClient;
 
+	/**
+	 * Constructor
+	 */
 	public RestfulServerRule(FhirContext theFhirContext, Object... theProviders) {
+		Validate.notNull(theFhirContext);
 		myFhirContext = theFhirContext;
 		myProviders = theProviders;
+	}
+
+	/**
+	 * Constructor: If this is used, it will create and tear down a FhirContext which is good for memory
+	 */
+	public RestfulServerRule(FhirVersionEnum theFhirVersionEnum) {
+		Validate.notNull(theFhirVersionEnum);
+		myFhirVersion = theFhirVersionEnum;
 	}
 
 	@Override
@@ -61,17 +76,35 @@ public class RestfulServerRule implements TestRule {
 		return new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
+				createContextIfNeeded();
 				startServer();
 				theBase.evaluate();
 				stopServer();
+				destroyContextIfWeCreatedIt();
 			}
 		};
+	}
+
+	private void createContextIfNeeded() {
+		if (myFhirVersion != null) {
+			myFhirContext = new FhirContext(myFhirVersion);
+		}
+	}
+
+	private void destroyContextIfWeCreatedIt() {
+		if (myFhirVersion != null) {
+			myFhirContext = null;
+		}
 	}
 
 
 	private void stopServer() throws Exception {
 		JettyUtil.closeServer(myServer);
+		myServer = null;
+		myFhirClient = null;
+
 		myHttpClient.close();
+		myHttpClient = null;
 	}
 
 	private void startServer() throws Exception {
@@ -80,7 +113,9 @@ public class RestfulServerRule implements TestRule {
 		ServletHandler servletHandler = new ServletHandler();
 		myServlet = new RestfulServer(myFhirContext);
 		myServlet.setDefaultPrettyPrint(true);
-		myServlet.registerProviders(myProviders);
+		if (myProviders != null) {
+			myServlet.registerProviders(myProviders);
+		}
 		ServletHolder servletHolder = new ServletHolder(myServlet);
 		servletHandler.addServletWithMapping(servletHolder, "/*");
 

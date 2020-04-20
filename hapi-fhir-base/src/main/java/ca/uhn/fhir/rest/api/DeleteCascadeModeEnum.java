@@ -1,6 +1,6 @@
-package ca.uhn.fhir.rest.gclient;
+package ca.uhn.fhir.rest.api;
 
-/*
+/*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
@@ -20,14 +20,16 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+/**
+ * Used by the client to indicate the cascade mode associated with a delete operation.
+ * <p>
+ * Note that this is a HAPI FHIR specific feature, and may not work on other platforms.
+ * </p>
+ */
+public enum DeleteCascadeModeEnum {
 
-public interface IDeleteTyped extends IClientExecutable<IDeleteTyped, IBaseOperationOutcome> {
+	NONE,
 
-	/**
-	 * Delete cascade mode - Note that this is a HAPI FHIR specific feature and is not supported on all servers.
-	 */
-	IDeleteTyped cascade(DeleteCascadeModeEnum theDelete);
+	DELETE
 
 }

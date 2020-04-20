@@ -114,40 +114,40 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (!theRequest.getResourceName().equals(getResourceName())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		for (String next : theRequest.getParameters().keySet()) {
 			if (!next.startsWith("_")) {
-				return false;
+				return MethodMatchEnum.NONE;
 			}
 		}
 		if (theRequest.getId() == null) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (mySupportsVersion == false) {
 			if (theRequest.getId().hasVersionIdPart()) {
-				return false;
+				return MethodMatchEnum.NONE;
 			}
 		}
 		if (isNotBlank(theRequest.getCompartmentName())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (theRequest.getRequestType() != RequestTypeEnum.GET && theRequest.getRequestType() != RequestTypeEnum.HEAD ) {
 			ourLog.trace("Method {} doesn't match because request type is not GET or HEAD: {}", theRequest.getId(), theRequest.getRequestType());
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
 			if (mySupportsVersion == false) {
-				return false;
+				return MethodMatchEnum.NONE;
 			} else if (theRequest.getId().hasVersionIdPart() == false) {
-				return false;
+				return MethodMatchEnum.NONE;
 			}
 		} else if (!StringUtils.isBlank(theRequest.getOperation())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
-		return true;
+		return MethodMatchEnum.EXACT;
 	}
 
 

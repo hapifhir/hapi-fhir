@@ -36,19 +36,15 @@ public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 	private String myUrlPath;
 	private Map<String, List<String>> myParams;
 
-	public HttpDeleteClientInvocation(FhirContext theContext, IIdType theId) {
+	public HttpDeleteClientInvocation(FhirContext theContext, IIdType theId, Map<String, List<String>> theAdditionalParams) {
 		super(theContext);
 		myUrlPath = theId.toUnqualifiedVersionless().getValue();
+		myParams = theAdditionalParams;
 	}
 
-	public HttpDeleteClientInvocation(FhirContext theContext, String theSearchUrl) {
+	public HttpDeleteClientInvocation(FhirContext theContext, String theSearchUrl, Map<String, List<String>> theParams) {
 		super(theContext);
 		myUrlPath = theSearchUrl;
-	}
-
-	public HttpDeleteClientInvocation(FhirContext theContext, String theResourceType, Map<String, List<String>> theParams) {
-		super(theContext);
-		myUrlPath = theResourceType;
 		myParams = theParams;
 	}
 
@@ -65,12 +61,6 @@ public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
 
 		return createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.DELETE);
-	}
-
-	@Override
-	protected IHttpRequest createHttpRequest(String theUrl, EncodingEnum theEncoding, RequestTypeEnum theRequestType) {
-		// TODO Auto-generated method stub
-		return super.createHttpRequest(theUrl, theEncoding, theRequestType);
 	}
 
 }

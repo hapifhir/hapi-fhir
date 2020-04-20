@@ -1,8 +1,8 @@
-package ca.uhn.fhir.rest.gclient;
+package ca.uhn.fhir.rest.server.method;
 
-/*
+/*-
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -20,14 +20,20 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+public enum MethodMatchEnum {
 
-public interface IDeleteTyped extends IClientExecutable<IDeleteTyped, IBaseOperationOutcome> {
+	// Order these from worst to best!
 
-	/**
-	 * Delete cascade mode - Note that this is a HAPI FHIR specific feature and is not supported on all servers.
-	 */
-	IDeleteTyped cascade(DeleteCascadeModeEnum theDelete);
+	NONE,
+	APPROXIMATE,
+    EXACT;
+
+	public MethodMatchEnum weakerOf(MethodMatchEnum theOther) {
+		if (this.ordinal() < theOther.ordinal()) {
+			return this;
+		} else {
+			return theOther;
+		}
+	}
 
 }

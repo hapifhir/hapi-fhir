@@ -119,6 +119,19 @@ public class ParameterUtil {
 	}
 
 	/**
+	 * Removes :modifiers and .chains from URL parameter names
+	 */
+	public static String stripModifierPart(String theParam) {
+		for (int i = 0; i < theParam.length(); i++) {
+			char nextChar = theParam.charAt(i);
+			if (nextChar == ':' || nextChar == '.') {
+				return theParam.substring(0, i);
+			}
+		}
+		return theParam;
+	}
+
+	/**
 	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
 	 * Section</a>
 	 */
