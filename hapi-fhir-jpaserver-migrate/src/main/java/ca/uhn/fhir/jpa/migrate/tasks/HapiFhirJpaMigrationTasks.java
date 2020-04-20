@@ -76,8 +76,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.3", "HASH_EXACT").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 
 		// Drop unused column
-		version.onTable("HFJ_RESOURCE").dropIndex("20200419.1", "IDX_RES_PROFILE");
-		version.onTable("HFJ_RESOURCE").dropColumn("2020419.2", "RES_PROFILE");
+		version.onTable("HFJ_RESOURCE").dropIndex("202000419.1", "IDX_RES_PROFILE");
+		version.onTable("HFJ_RESOURCE").dropColumn("20200419.2", "RES_PROFILE");
 
 		// Add Partitioning
 		Builder.BuilderAddTableByColumns partition = version.addTableByColumns("20200420.1", "HFJ_PARTITION", "PART_ID");
