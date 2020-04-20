@@ -11,7 +11,7 @@ import ca.uhn.fhir.jpa.bulk.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IPartitionConfigSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
 import ca.uhn.fhir.jpa.partition.PartitionConfigSvcImpl;
@@ -241,8 +241,8 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public PartitionConfig partitionConfig() {
-		return new PartitionConfig();
+	public PartitionSettings partitionConfig() {
+		return new PartitionSettings();
 	}
 
 	@Bean

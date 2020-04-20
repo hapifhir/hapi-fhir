@@ -24,7 +24,7 @@ import ca.uhn.fhir.interceptor.model.PartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
@@ -285,7 +285,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private IRequestPartitionHelperService myRequestPartitionHelperService;
 
 	@Autowired
-	private PartitionConfig myPartitionConfig;
+	private PartitionSettings myPartitionSettings;
 
 	@Transactional()
 	@Override
@@ -302,7 +302,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		}
 
 		// Partitioning is not supported for this operation
-		Validate.isTrue(myPartitionConfig.isPartitioningEnabled() == false, "Suggest keywords not supported for partitioned system");
+		Validate.isTrue(myPartitionSettings.isPartitioningEnabled() == false, "Suggest keywords not supported for partitioned system");
 		PartitionId partitionId = null;
 
 		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(partitionId, contextParts[0], contextParts[1]);

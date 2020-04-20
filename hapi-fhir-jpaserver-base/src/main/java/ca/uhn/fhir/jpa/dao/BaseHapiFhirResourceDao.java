@@ -34,7 +34,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
@@ -147,7 +147,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired
 	private IRequestPartitionHelperService myRequestPartitionHelperService;
 	@Autowired
-	private PartitionConfig myPartitionConfig;
+	private PartitionSettings myPartitionSettings;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel, RequestDetails theRequest) {
@@ -685,7 +685,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails) {
-		if (myPartitionConfig.isPartitioningEnabled()) {
+		if (myPartitionSettings.isPartitioningEnabled()) {
 			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "noSystemOrTypeHistoryForPartitionAwareServer");
 			throw new MethodNotAllowedException(msg);
 		}

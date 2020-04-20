@@ -5,7 +5,7 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.PartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.partition.IPartitionConfigSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
@@ -82,9 +82,9 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	public void after() {
 		myPartitionInterceptor.assertNoRemainingIds();
 
-		myPartitionConfig.setIncludePartitionInSearchHashes(new PartitionConfig().isIncludePartitionInSearchHashes());
-		myPartitionConfig.setPartitioningEnabled(new PartitionConfig().isPartitioningEnabled());
-		myPartitionConfig.setAllowReferencesAcrossPartitions(new PartitionConfig().getAllowReferencesAcrossPartitions());
+		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
+		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
+		myPartitionSettings.setAllowReferencesAcrossPartitions(new PartitionSettings().getAllowReferencesAcrossPartitions());
 
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyInterceptor);
 		myInterceptor = null;
@@ -102,8 +102,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	public void before() throws ServletException {
 		super.before();
 
-		myPartitionConfig.setPartitioningEnabled(true);
-		myPartitionConfig.setIncludePartitionInSearchHashes(new PartitionConfig().isIncludePartitionInSearchHashes());
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 
 		myDaoConfig.setUniqueIndexesEnabled(true);
 
@@ -143,7 +143,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testCreate_CrossPartitionReference_ByPid_Allowed() {
-		myPartitionConfig.setAllowReferencesAcrossPartitions(PartitionConfig.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
 		// Create patient in partition 1
 		addCreatePartition(myPartitionId, myPartitionDate);
@@ -191,7 +191,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testCreate_CrossPartitionReference_ByForcedId_Allowed() {
-		myPartitionConfig.setAllowReferencesAcrossPartitions(PartitionConfig.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
 		// Create patient in partition 1
 		addCreatePartition(myPartitionId, myPartitionDate);
@@ -885,7 +885,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_MissingParamString_SearchAllPartitions() {
-		myPartitionConfig.setIncludePartitionInSearchHashes(false);
+		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
 		IIdType patientIdNull = createPatient(null, withFamily("FAMILY"));
 		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
@@ -1011,7 +1011,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_MissingParamReference_SearchAllPartitions() {
-		myPartitionConfig.setIncludePartitionInSearchHashes(false);
+		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
 		IIdType patientIdNull = createPatient(null, withFamily("FAMILY"));
 		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
@@ -1038,7 +1038,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_MissingParamReference_SearchOnePartition_IncludePartitionInHashes() {
-		myPartitionConfig.setIncludePartitionInSearchHashes(true);
+		myPartitionSettings.setIncludePartitionInSearchHashes(true);
 
 		createPatient(null, withFamily("FAMILY"));
 		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
@@ -1066,7 +1066,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_MissingParamReference_SearchOnePartition_DontIncludePartitionInHashes() {
-		myPartitionConfig.setIncludePartitionInSearchHashes(false);
+		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
 		createPatient(null, withFamily("FAMILY"));
 		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
@@ -1161,7 +1161,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_DateParam_SearchAllPartitions() {
-		myPartitionConfig.setIncludePartitionInSearchHashes(false);
+		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
 		IIdType patientIdNull = createPatient(null, withBirthdate("2020-04-20"));
 		IIdType patientId1 = createPatient(1, withBirthdate("2020-04-20"));
@@ -1239,7 +1239,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_DateParam_SearchSpecificPartitions() {
-		myPartitionConfig.setIncludePartitionInSearchHashes(false);
+		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
 		IIdType patientIdNull = createPatient(null, withBirthdate("2020-04-20"));
 		IIdType patientId1 = createPatient(1, withBirthdate("2020-04-20"));
@@ -1317,7 +1317,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_DateParam_SearchDefaultPartitions() {
-		myPartitionConfig.setIncludePartitionInSearchHashes(false);
+		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
 		IIdType patientIdNull = createPatient(null, withBirthdate("2020-04-20"));
 		IIdType patientId1 = createPatient(1, withBirthdate("2020-04-20"));
@@ -1395,7 +1395,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_StringParam_SearchAllPartitions() {
-		myPartitionConfig.setIncludePartitionInSearchHashes(false);
+		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
 		IIdType patientIdNull = createPatient(null, withFamily("FAMILY"));
 		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
@@ -1466,7 +1466,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_StringParam_SearchAllPartitions_IncludePartitionInHashes() {
-		myPartitionConfig.setIncludePartitionInSearchHashes(true);
+		myPartitionSettings.setIncludePartitionInSearchHashes(true);
 
 		addReadPartition(null);
 
@@ -1484,7 +1484,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_StringParam_SearchDefaultPartition_IncludePartitionInHashes() {
-		myPartitionConfig.setIncludePartitionInSearchHashes(true);
+		myPartitionSettings.setIncludePartitionInSearchHashes(true);
 
 		IIdType patientIdNull = createPatient(null, withFamily("FAMILY"));
 		createPatient(1, withFamily("FAMILY"));
@@ -1510,7 +1510,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_StringParam_SearchOnePartition_IncludePartitionInHashes() {
-		myPartitionConfig.setIncludePartitionInSearchHashes(true);
+		myPartitionSettings.setIncludePartitionInSearchHashes(true);
 
 		createPatient(null, withFamily("FAMILY"));
 		IIdType patientId1 = createPatient(1, withFamily("FAMILY"));
@@ -2004,7 +2004,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	private void addCreatePartition(Integer thePartitionId, LocalDate thePartitionDate) {
 		Validate.notNull(thePartitionId);
-		PartitionId partitionId = PartitionId.forPartitionId(thePartitionId, thePartitionDate);
+		PartitionId partitionId = PartitionId.fromPartitionId(thePartitionId, thePartitionDate);
 		myPartitionInterceptor.addCreatePartition(partitionId);
 	}
 
@@ -2013,20 +2013,20 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	private void addCreateNoPartitionId(LocalDate thePartitionDate) {
-		PartitionId partitionId = PartitionId.forPartitionId(null, thePartitionDate);
+		PartitionId partitionId = PartitionId.fromPartitionId(null, thePartitionDate);
 		myPartitionInterceptor.addCreatePartition(partitionId);
 	}
 
 	private void addReadPartition(Integer thePartitionId) {
 		PartitionId partitionId = null;
 		if (thePartitionId != null) {
-			partitionId = PartitionId.forPartitionId(thePartitionId, null);
+			partitionId = PartitionId.fromPartitionId(thePartitionId, null);
 		}
 		myPartitionInterceptor.addReadPartition(partitionId);
 	}
 
 	private void addDefaultReadPartition() {
-		PartitionId partitionId = PartitionId.forPartitionId(null, null);
+		PartitionId partitionId = PartitionId.fromPartitionId(null, null);
 		myPartitionInterceptor.addReadPartition(partitionId);
 	}
 

@@ -27,7 +27,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.PartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
@@ -67,7 +67,7 @@ public class SearchParamExtractorService {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	private PartitionConfig myPartitionConfig;
+	private PartitionSettings myPartitionSettings;
 	@Autowired(required = false)
 	private IResourceLinkResolver myResourceLinkResolver;
 
@@ -285,7 +285,7 @@ public class SearchParamExtractorService {
 		 */
 
 		PartitionId targetPartitionId = thePartitionId;
-		if (myPartitionConfig.isPartitioningEnabled() && myPartitionConfig.getAllowReferencesAcrossPartitions() == PartitionConfig.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED) {
+		if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.getAllowReferencesAcrossPartitions() == PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED) {
 			targetPartitionId = null;
 		}
 

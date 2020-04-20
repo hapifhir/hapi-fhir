@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.interceptor.model.PartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.UrlUtil;
@@ -83,7 +83,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	private Date myUpdated;
 
 	@Transient
-	private transient PartitionConfig myPartitionConfig;
+	private transient PartitionSettings myPartitionSettings;
 
 	/**
 	 * Subclasses may override
@@ -158,26 +158,26 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		throw new UnsupportedOperationException("No parameter matcher for " + theParam);
 	}
 
-	public PartitionConfig getPartitionConfig() {
-		return myPartitionConfig;
+	public PartitionSettings getPartitionSettings() {
+		return myPartitionSettings;
 	}
 
-	public BaseResourceIndexedSearchParam setPartitionConfig(PartitionConfig thePartitionConfig) {
-		myPartitionConfig = thePartitionConfig;
+	public BaseResourceIndexedSearchParam setPartitionSettings(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
 		return this;
 	}
 
-	public static long calculateHashIdentity(PartitionConfig thePartitionConfig, PartitionId thePartitionId, String theResourceType, String theParamName) {
-		return hash(thePartitionConfig, thePartitionId, theResourceType, theParamName);
+	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String theResourceType, String theParamName) {
+		return hash(thePartitionSettings, thePartitionId, theResourceType, theParamName);
 	}
 
 	/**
 	 * Applies a fast and consistent hashing algorithm to a set of strings
 	 */
-	static long hash(PartitionConfig thePartitionConfig, PartitionId thePartitionId, String... theValues) {
+	static long hash(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String... theValues) {
 		Hasher hasher = HASH_FUNCTION.newHasher();
 
-		if (thePartitionConfig.isPartitioningEnabled() && thePartitionConfig.isIncludePartitionInSearchHashes() && thePartitionId != null) {
+		if (thePartitionSettings.isPartitioningEnabled() && thePartitionSettings.isIncludePartitionInSearchHashes() && thePartitionId != null) {
 			if (thePartitionId.getPartitionId() != null) {
 				hasher.putInt(thePartitionId.getPartitionId());
 			}

@@ -1,10 +1,9 @@
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -51,7 +50,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	@Qualifier("myResourceCountsCache")
 	public ResourceCountCache myResourceCountsCache;
 	@Autowired
-	private PartitionConfig myPartitionConfig;
+	private PartitionSettings myPartitionSettings;
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
@@ -81,7 +80,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails) {
-		if (myPartitionConfig.isPartitioningEnabled()) {
+		if (myPartitionSettings.isPartitioningEnabled()) {
 			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "noSystemOrTypeHistoryForPartitionAwareServer");
 			throw new MethodNotAllowedException(msg);
 		}

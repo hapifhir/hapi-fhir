@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.interceptor.model.PartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.UriParam;
 import org.apache.commons.lang3.StringUtils;
@@ -82,8 +82,8 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamUri(PartitionConfig thePartitionConfig, String theResourceType, String theParamName, String theUri) {
-		setPartitionConfig(thePartitionConfig);
+	public ResourceIndexedSearchParamUri(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, String theUri) {
+		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setUri(theUri);
@@ -106,8 +106,8 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 			String resourceType = getResourceType();
 			String paramName = getParamName();
 			String uri = getUri();
-			setHashIdentity(calculateHashIdentity(getPartitionConfig(), getPartitionId(), resourceType, paramName));
-			setHashUri(calculateHashUri(getPartitionConfig(), getPartitionId(), resourceType, paramName, uri));
+			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
+			setHashUri(calculateHashUri(getPartitionSettings(), getPartitionId(), resourceType, paramName, uri));
 		}
 	}
 
@@ -209,8 +209,8 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		return defaultString(getUri()).equalsIgnoreCase(uri.getValueNotNull());
 	}
 
-	public static long calculateHashUri(PartitionConfig thePartitionConfig, PartitionId thePartitionId, String theResourceType, String theParamName, String theUri) {
-		return hash(thePartitionConfig, thePartitionId, theResourceType, theParamName, theUri);
+	public static long calculateHashUri(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String theResourceType, String theParamName, String theUri) {
+		return hash(thePartitionSettings, thePartitionId, theResourceType, theParamName, theUri);
 	}
 
 

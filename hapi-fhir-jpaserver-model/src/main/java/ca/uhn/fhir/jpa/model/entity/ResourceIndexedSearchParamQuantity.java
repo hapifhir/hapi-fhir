@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.interceptor.model.PartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.BigDecimalNumericFieldBridge;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -93,9 +93,9 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	}
 
 
-	public ResourceIndexedSearchParamQuantity(PartitionConfig thePartitionConfig, String theResourceType, String theParamName, BigDecimal theValue, String theSystem, String theUnits) {
+	public ResourceIndexedSearchParamQuantity(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, BigDecimal theValue, String theSystem, String theUnits) {
 		this();
-		setPartitionConfig(thePartitionConfig);
+		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setSystem(theSystem);
@@ -124,9 +124,9 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 			String paramName = getParamName();
 			String units = getUnits();
 			String system = getSystem();
-			setHashIdentity(calculateHashIdentity(getPartitionConfig(), getPartitionId(), resourceType, paramName));
-			setHashIdentityAndUnits(calculateHashUnits(getPartitionConfig(), getPartitionId(), resourceType, paramName, units));
-			setHashIdentitySystemAndUnits(calculateHashSystemAndUnits(getPartitionConfig(), getPartitionId(), resourceType, paramName, system, units));
+			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
+			setHashIdentityAndUnits(calculateHashUnits(getPartitionSettings(), getPartitionId(), resourceType, paramName, units));
+			setHashIdentitySystemAndUnits(calculateHashSystemAndUnits(getPartitionSettings(), getPartitionId(), resourceType, paramName, system, units));
 		}
 	}
 
@@ -289,12 +289,12 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		return retval;
 	}
 
-	public static long calculateHashSystemAndUnits(PartitionConfig thePartitionConfig, PartitionId thePartitionId, String theResourceType, String theParamName, String theSystem, String theUnits) {
-		return hash(thePartitionConfig, thePartitionId, theResourceType, theParamName, theSystem, theUnits);
+	public static long calculateHashSystemAndUnits(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String theResourceType, String theParamName, String theSystem, String theUnits) {
+		return hash(thePartitionSettings, thePartitionId, theResourceType, theParamName, theSystem, theUnits);
 	}
 
-	public static long calculateHashUnits(PartitionConfig thePartitionConfig, PartitionId thePartitionId, String theResourceType, String theParamName, String theUnits) {
-		return hash(thePartitionConfig, thePartitionId, theResourceType, theParamName, theUnits);
+	public static long calculateHashUnits(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String theResourceType, String theParamName, String theUnits) {
+		return hash(thePartitionSettings, thePartitionId, theResourceType, theParamName, theUnits);
 	}
 
 

@@ -176,13 +176,13 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 
 		Predicate hashPredicate;
 		if (!isBlank(systemValue) && !isBlank(unitsValue)) {
-			long hash = ResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(getPartitionConfig(), thePartitionId, theResourceName, theParamName, systemValue, unitsValue);
+			long hash = ResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(getPartitionSettings(), thePartitionId, theResourceName, theParamName, systemValue, unitsValue);
 			hashPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentitySystemAndUnits"), hash);
 		} else if (!isBlank(unitsValue)) {
-			long hash = ResourceIndexedSearchParamQuantity.calculateHashUnits(getPartitionConfig(), thePartitionId, theResourceName, theParamName, unitsValue);
+			long hash = ResourceIndexedSearchParamQuantity.calculateHashUnits(getPartitionSettings(), thePartitionId, theResourceName, theParamName, unitsValue);
 			hashPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentityAndUnits"), hash);
 		} else {
-			long hash = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionConfig(), thePartitionId, theResourceName, theParamName);
+			long hash = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), thePartitionId, theResourceName, theParamName);
 			hashPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentity"), hash);
 		}
 

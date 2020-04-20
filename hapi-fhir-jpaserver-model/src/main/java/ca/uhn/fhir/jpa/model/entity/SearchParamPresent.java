@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.interceptor.model.PartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -55,7 +55,7 @@ public class SearchParamPresent extends BasePartitionable implements Serializabl
 	@Column(name = "HASH_PRESENCE")
 	private Long myHashPresence;
 	@Transient
-	private transient PartitionConfig myPartitionConfig;
+	private transient PartitionSettings myPartitionSettings;
 
 	/**
 	 * Constructor
@@ -71,7 +71,7 @@ public class SearchParamPresent extends BasePartitionable implements Serializabl
 			String resourceType = getResource().getResourceType();
 			String paramName = getParamName();
 			boolean present = myPresent;
-			setHashPresence(calculateHashPresence(getPartitionConfig(), getPartitionId(), resourceType, paramName, present));
+			setHashPresence(calculateHashPresence(getPartitionSettings(), getPartitionId(), resourceType, paramName, present));
 		}
 	}
 
@@ -118,17 +118,17 @@ public class SearchParamPresent extends BasePartitionable implements Serializabl
 		return b.build();
 	}
 
-	public PartitionConfig getPartitionConfig() {
-		return myPartitionConfig;
+	public PartitionSettings getPartitionSettings() {
+		return myPartitionSettings;
 	}
 
-	public void setPartitionConfig(PartitionConfig thePartitionConfig) {
-		myPartitionConfig = thePartitionConfig;
+	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
 	}
 
-	public static long calculateHashPresence(PartitionConfig thePartitionConfig, PartitionId thePartitionId, String theResourceType, String theParamName, Boolean thePresent) {
+	public static long calculateHashPresence(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String theResourceType, String theParamName, Boolean thePresent) {
 		String string = thePresent != null ? Boolean.toString(thePresent) : Boolean.toString(false);
-		return BaseResourceIndexedSearchParam.hash(thePartitionConfig, thePartitionId, theResourceType, theParamName, string);
+		return BaseResourceIndexedSearchParam.hash(thePartitionSettings, thePartitionId, theResourceType, theParamName, string);
 	}
 
 }

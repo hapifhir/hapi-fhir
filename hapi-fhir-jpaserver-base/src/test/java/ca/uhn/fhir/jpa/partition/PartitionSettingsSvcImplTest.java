@@ -8,7 +8,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class PartitionConfigSvcImplTest extends BaseJpaR4Test {
+public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateAndFetchPartition() {

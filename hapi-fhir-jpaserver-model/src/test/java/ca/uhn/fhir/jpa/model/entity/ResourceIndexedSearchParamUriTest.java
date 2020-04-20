@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -10,7 +10,7 @@ public class ResourceIndexedSearchParamUriTest {
 
 	@Test
 	public void testHashFunctions() {
-		ResourceIndexedSearchParamUri token = new ResourceIndexedSearchParamUri(new PartitionConfig(), "Patient", "NAME", "http://example.com");
+		ResourceIndexedSearchParamUri token = new ResourceIndexedSearchParamUri(new PartitionSettings(), "Patient", "NAME", "http://example.com");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
 
 		// Make sure our hashing function gives consistent results
@@ -21,11 +21,11 @@ public class ResourceIndexedSearchParamUriTest {
 	public void testEquals() {
 		ResourceIndexedSearchParamUri val1 = new ResourceIndexedSearchParamUri()
 			.setUri("http://foo");
-		val1.setPartitionConfig(new PartitionConfig());
+		val1.setPartitionSettings(new PartitionSettings());
 		val1.calculateHashes();
 		ResourceIndexedSearchParamUri val2 = new ResourceIndexedSearchParamUri()
 			.setUri("http://foo");
-		val2.setPartitionConfig(new PartitionConfig());
+		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);

@@ -336,14 +336,14 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 				hashField = theFrom.get("myHashSystem").as(Long.class);
 				values = theTokens
 					.stream()
-					.map(t -> ResourceIndexedSearchParamToken.calculateHashSystem(getPartitionConfig(), thePartitionId, theResourceName, theParamName, t.getSystem()))
+					.map(t -> ResourceIndexedSearchParamToken.calculateHashSystem(getPartitionSettings(), thePartitionId, theResourceName, theParamName, t.getSystem()))
 					.collect(Collectors.toList());
 				break;
 			case VALUE_ONLY:
 				hashField = theFrom.get("myHashValue").as(Long.class);
 				values = theTokens
 					.stream()
-					.map(t -> ResourceIndexedSearchParamToken.calculateHashValue(getPartitionConfig(), thePartitionId, theResourceName, theParamName, t.getCode()))
+					.map(t -> ResourceIndexedSearchParamToken.calculateHashValue(getPartitionSettings(), thePartitionId, theResourceName, theParamName, t.getCode()))
 					.collect(Collectors.toList());
 				break;
 			case SYSTEM_AND_VALUE:
@@ -351,14 +351,14 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 				hashField = theFrom.get("myHashSystemAndValue").as(Long.class);
 				values = theTokens
 					.stream()
-					.map(t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(getPartitionConfig(), thePartitionId, theResourceName, theParamName, t.getSystem(), t.getCode()))
+					.map(t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(getPartitionSettings(), thePartitionId, theResourceName, theParamName, t.getSystem(), t.getCode()))
 					.collect(Collectors.toList());
 				break;
 		}
 
 		Predicate predicate = hashField.in(values);
 		if (theModifier == TokenParamModifier.NOT) {
-			Predicate identityPredicate = theBuilder.equal(theFrom.get("myHashIdentity").as(Long.class), BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionConfig(), thePartitionId, theResourceName, theParamName));
+			Predicate identityPredicate = theBuilder.equal(theFrom.get("myHashIdentity").as(Long.class), BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), thePartitionId, theResourceName, theParamName));
 			Predicate disjunctionPredicate = theBuilder.not(predicate);
 			predicate = theBuilder.and(identityPredicate, disjunctionPredicate);
 		}
