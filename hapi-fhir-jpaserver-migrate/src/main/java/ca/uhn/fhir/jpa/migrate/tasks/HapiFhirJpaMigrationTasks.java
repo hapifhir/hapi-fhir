@@ -76,14 +76,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.3", "HASH_EXACT").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 
 		// Drop unused column
-		version.onTable("HFJ_RESOURCE").dropIndex("202000419.1", "IDX_RES_PROFILE");
+		version.onTable("HFJ_RESOURCE").dropIndex("20200419.1", "IDX_RES_PROFILE");
 		version.onTable("HFJ_RESOURCE").dropColumn("20200419.2", "RES_PROFILE");
 
 		// Add Partitioning
-		Builder.BuilderAddTableByColumns partition = version.addTableByColumns("20200420.1", "HFJ_PARTITION", "PART_ID");
+		Builder.BuilderAddTableByColumns partition = version.addTableByColumns("20200420.0", "HFJ_PARTITION", "PART_ID");
 		partition.addColumn("PART_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 		partition.addColumn("PART_NAME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 		partition.addColumn("PART_DESC").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		partition.addIndex("20200420.1", "IDX_PART_NAME").unique(true).withColumns("PART_NAME");
 
 		// Partition columns on individual tables
 		version.onTable("HFJ_RESOURCE").addColumn("20200420.2", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
@@ -120,6 +121,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RES_VER_PROV").addColumn("20200420.33", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
 		version.onTable("HFJ_RES_PARAM_PRESENT").addColumn("20200420.34", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 		version.onTable("HFJ_RES_PARAM_PRESENT").addColumn("20200420.35", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200420.36", "SP_MISSING").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("20200420.37", "SP_MISSING").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_NUMBER").modifyColumn("20200420.38", "SP_MISSING").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_TOKEN").modifyColumn("20200420.39", "SP_MISSING").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_DATE").modifyColumn("20200420.40", "SP_MISSING").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_URI").modifyColumn("20200420.41", "SP_MISSING").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("20200420.42", "SP_MISSING").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+
+
 	}
 
 	protected void init420() { // 20191015 - 20200217
