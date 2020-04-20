@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.util.ProviderConstants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.test.utilities.server.RestfulServerRule;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -51,6 +52,7 @@ public class PartitionManagementProviderTest {
 	public void before() {
 		ourServerRule.getRestfulServer().registerProvider(myPartitionManagementProvider);
 		myClient = ourServerRule.getFhirClient();
+		myClient.registerInterceptor(new LoggingInterceptor(false));
 	}
 
 	@After
@@ -65,7 +67,8 @@ public class PartitionManagementProviderTest {
 		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(123));
 		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType("PARTITION-123"));
-		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, new CodeType("a description"));
+		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, new StringType("a description"));
+		ourLog.info("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters response = myClient
 			.operation()
@@ -91,7 +94,8 @@ public class PartitionManagementProviderTest {
 		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(123));
 		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType("PARTITION-123"));
-		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, new CodeType("a description"));
+		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, new StringType("a description"));
+		ourLog.info("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters response = myClient
 			.operation()
@@ -114,6 +118,8 @@ public class PartitionManagementProviderTest {
 	public void testDeletePartition() {
 		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(123));
+		ourLog.info("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
 		Parameters response = myClient
 			.operation()
 			.onServer()

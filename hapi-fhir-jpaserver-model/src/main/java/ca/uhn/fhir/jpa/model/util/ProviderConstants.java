@@ -39,8 +39,8 @@ public class ProviderConstants {
 	 */
 	public static final String PARTITION_MANAGEMENT_DELETE_PARTITION = "partition-management-delete-partition";
 
-	public static final String PARTITION_MANAGEMENT_PARTITION_ID = "partitionId";
-	public static final String PARTITION_MANAGEMENT_PARTITION_NAME = "partitionName";
+	public static final String PARTITION_MANAGEMENT_PARTITION_ID = "id";
+	public static final String PARTITION_MANAGEMENT_PARTITION_NAME = "name";
 	public static final String PARTITION_MANAGEMENT_PARTITION_DESC = "description";
 
 }

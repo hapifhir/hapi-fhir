@@ -34,6 +34,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * This HAPI FHIR Server Plain Provider class provides the following operations:
+ * <ul>
+ *    <li><code>partition-management-add-partition</code></li>
+ *    <li><code>partition-management-update-partition</code></li>
+ *    <li><code>partition-management-delete-partition</code></li>
+ * </ul>
+ */
 public class PartitionManagementProvider {
 
 	@Autowired
@@ -50,9 +58,9 @@ public class PartitionManagementProvider {
 	@Operation(name = ProviderConstants.PARTITION_MANAGEMENT_ADD_PARTITION)
 	public IBaseParameters addPartition(
 		@ResourceParam IBaseParameters theRequest,
-		@OperationParam(name=ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, min = 1, max = 1, typeName = "integer") IPrimitiveType<Integer> thePartitionId,
-		@OperationParam(name=ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, min = 1, max = 1, typeName = "code") IPrimitiveType<String> thePartitionName,
-		@OperationParam(name=ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, min = 0, max = 1, typeName = "string") IPrimitiveType<String> thePartitionDescription
+		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, min = 1, max = 1, typeName = "integer") IPrimitiveType<Integer> thePartitionId,
+		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, min = 1, max = 1, typeName = "code") IPrimitiveType<String> thePartitionName,
+		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, min = 0, max = 1, typeName = "string") IPrimitiveType<String> thePartitionDescription
 	) {
 
 		PartitionEntity input = parseInput(thePartitionId, thePartitionName, thePartitionDescription);
@@ -71,9 +79,9 @@ public class PartitionManagementProvider {
 	@Operation(name = ProviderConstants.PARTITION_MANAGEMENT_UPDATE_PARTITION)
 	public IBaseParameters updatePartition(
 		@ResourceParam IBaseParameters theRequest,
-		@OperationParam(name=ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, min = 1, max = 1, typeName = "integer") IPrimitiveType<Integer> thePartitionId,
-		@OperationParam(name=ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, min = 1, max = 1, typeName = "code") IPrimitiveType<String> thePartitionName,
-		@OperationParam(name=ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, min = 0, max = 1, typeName = "string") IPrimitiveType<String> thePartitionDescription
+		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, min = 1, max = 1, typeName = "integer") IPrimitiveType<Integer> thePartitionId,
+		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, min = 1, max = 1, typeName = "code") IPrimitiveType<String> thePartitionName,
+		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, min = 0, max = 1, typeName = "string") IPrimitiveType<String> thePartitionDescription
 	) {
 
 		PartitionEntity input = parseInput(thePartitionId, thePartitionName, thePartitionDescription);
@@ -92,7 +100,7 @@ public class PartitionManagementProvider {
 	@Operation(name = ProviderConstants.PARTITION_MANAGEMENT_DELETE_PARTITION)
 	public IBaseParameters updatePartition(
 		@ResourceParam IBaseParameters theRequest,
-		@OperationParam(name=ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, min = 1, max = 1, typeName = "integer") IPrimitiveType<Integer> thePartitionId
+		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, min = 1, max = 1, typeName = "integer") IPrimitiveType<Integer> thePartitionId
 	) {
 
 		myPartitionConfigSvc.deletePartition(thePartitionId.getValue());

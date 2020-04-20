@@ -70,18 +70,56 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RES_VER").addForeignKey("20200218.3", "FK_RESOURCE_HISTORY_RESOURCE").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 		version.onTable("HFJ_RES_VER").modifyColumn("20200220.1", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 
-		// Add multiitenancy
-		version.onTable("HFJ_RESOURCE").dropIndex("20200327.1", "IDX_RES_PROFILE");
-		version.onTable("HFJ_RESOURCE").dropColumn("20200327.2", "RES_PROFILE");
+		// These should have been non-nullable a long time ago
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.1", "HASH_NORM_PREFIX").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.1", "HASH_IDENTITY").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.1", "HASH_EXACT").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 
+		// Drop unused column
+		version.onTable("HFJ_RESOURCE").dropIndex("20200419.1", "IDX_RES_PROFILE");
+		version.onTable("HFJ_RESOURCE").dropColumn("2020419.2", "RES_PROFILE");
+
+		// Add Partitioning
 		Builder.BuilderAddTableByColumns partition = version.addTableByColumns("20200410.1", "HFJ_PARTITION", "PART_ID");
 		partition.addColumn("PART_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 		partition.addColumn("PART_NAME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 		partition.addColumn("PART_DESC").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 
-		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.1", "HASH_NORM_PREFIX").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.1", "HASH_IDENTITY").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.1", "HASH_EXACT").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		// Partition columns on individual tables
+		version.onTable("HFJ_RESOURCE").addColumn("20200420.2", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_RESOURCE").addColumn("20200420.3", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_RES_VER").addColumn("20200420.4", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_RES_VER").addColumn("20200420.5", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.6", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.7", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.8", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.9", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_HISTORY_TAG").addColumn("20200420.10", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_HISTORY_TAG").addColumn("20200420.11", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_RES_TAG").addColumn("20200420.12", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_RES_TAG").addColumn("20200420.13", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_FORCED_ID").addColumn("20200420.14", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_FORCED_ID").addColumn("20200420.15", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_RES_LINK").addColumn("20200420.16", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_RES_LINK").addColumn("20200420.17", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_STRING").addColumn("20200420.18", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_STRING").addColumn("20200420.19", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_COORDS").addColumn("20200420.20", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_COORDS").addColumn("20200420.21", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_NUMBER").addColumn("20200420.22", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_NUMBER").addColumn("20200420.23", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_TOKEN").addColumn("20200420.24", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_TOKEN").addColumn("20200420.25", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_DATE").addColumn("20200420.26", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_DATE").addColumn("20200420.27", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_URI").addColumn("20200420.28", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_URI").addColumn("20200420.29", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_QUANTITY").addColumn("20200420.30", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_QUANTITY").addColumn("20200420.31", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_RES_VER_PROV").addColumn("20200420.32", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_RES_VER_PROV").addColumn("20200420.33", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_RES_PARAM_PRESENT").addColumn("20200420.34", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_RES_PARAM_PRESENT").addColumn("20200420.35", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
 	}
 
 	protected void init420() { // 20191015 - 20200217
