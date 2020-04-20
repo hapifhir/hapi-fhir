@@ -27,7 +27,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.interceptor.model.PartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -56,7 +56,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private PartitionConfig myPartitionConfig;
+	private PartitionSettings myPartitionSettings;
 
 	public RequestPartitionHelperService() {
 		myPartitioningBlacklist = new HashSet<>();
@@ -87,7 +87,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 
 		PartitionId partitionId = null;
 
-		if (myPartitionConfig.isPartitioningEnabled()) {
+		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
 			HookParams params = new HookParams()
 				.add(RequestDetails.class, theRequest)
@@ -108,7 +108,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 	public PartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource) {
 
 		PartitionId partitionId = null;
-		if (myPartitionConfig.isPartitioningEnabled()) {
+		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
 			HookParams params = new HookParams()
 				.add(IBaseResource.class, theResource)

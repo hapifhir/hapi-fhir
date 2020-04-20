@@ -37,7 +37,7 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
@@ -111,7 +111,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	@Autowired
 	DaoRegistry myDaoRegistry;
 	@Autowired
-	PartitionConfig myPartitionConfig;
+    PartitionSettings myPartitionSettings;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
@@ -564,7 +564,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 				if (nextParamDef != null) {
 
-					if (myPartitionConfig.isPartitioningEnabled() && myPartitionConfig.isIncludePartitionInSearchHashes()) {
+					if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
 						if (thePartitionId == null) {
 							throw new PreconditionFailedException("This server is not configured to support search against all partitions");
 						}

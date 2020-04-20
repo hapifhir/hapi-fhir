@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
@@ -91,7 +91,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 	@Autowired
-	private PartitionConfig myPartitionConfig;
+	private PartitionSettings myPartitionSettings;
 
 	public void populateFromResource(ResourceIndexedSearchParams theParams, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
 		extractInlineReferences(theResource, theRequest);
@@ -100,7 +100,7 @@ public class SearchParamWithInlineReferencesExtractor {
 
 		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
-			theParams.findMissingSearchParams(myPartitionConfig, myDaoConfig.getModelConfig(), theEntity, activeSearchParams);
+			theParams.findMissingSearchParams(myPartitionSettings, myDaoConfig.getModelConfig(), theEntity, activeSearchParams);
 		}
 
 		/*

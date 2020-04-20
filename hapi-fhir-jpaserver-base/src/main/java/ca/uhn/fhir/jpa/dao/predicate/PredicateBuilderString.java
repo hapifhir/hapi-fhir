@@ -159,7 +159,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 		boolean exactMatch = theParameter instanceof StringParam && ((StringParam) theParameter).isExact();
 		if (exactMatch) {
 			// Exact match
-			Long hash = ResourceIndexedSearchParamString.calculateHashExact(getPartitionConfig(), thePartitionId, theResourceName, theParamName, rawSearchTerm);
+			Long hash = ResourceIndexedSearchParamString.calculateHashExact(getPartitionSettings(), thePartitionId, theResourceName, theParamName, rawSearchTerm);
 			return theBuilder.equal(theFrom.get("myHashExact").as(Long.class), hash);
 		} else {
 			// Normalized Match
@@ -187,7 +187,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 			Predicate predicate;
 			if ((operation == null) ||
 				(operation == SearchFilterParser.CompareOperation.sw)) {
-				Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionConfig(), thePartitionId, myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
+				Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), thePartitionId, myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
 				Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
 				Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
 				predicate = theBuilder.and(hashCode, singleCode);
@@ -196,7 +196,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 				Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
 				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, thePartitionId);
 			} else if (operation == SearchFilterParser.CompareOperation.eq) {
-				Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionConfig(), thePartitionId, myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
+				Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), thePartitionId, myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
 				Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
 				Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), normalizedString);
 				predicate = theBuilder.and(hashCode, singleCode);

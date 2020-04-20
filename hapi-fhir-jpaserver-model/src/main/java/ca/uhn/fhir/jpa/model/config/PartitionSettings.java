@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.model.config;
 /**
  * @since 5.0.0
  */
-public class PartitionConfig {
+public class PartitionSettings {
 
 	private boolean myPartitioningEnabled = false;
 	private CrossPartitionReferenceMode myAllowReferencesAcrossPartitions = CrossPartitionReferenceMode.NOT_ALLOWED;

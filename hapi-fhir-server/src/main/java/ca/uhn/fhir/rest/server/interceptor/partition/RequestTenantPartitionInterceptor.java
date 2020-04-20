@@ -65,7 +65,7 @@ public class RequestTenantPartitionInterceptor {
 			throw new InternalErrorException("No tenant ID has been specified");
 		}
 
-		return PartitionId.forPartitionName(tenantId);
+		return PartitionId.fromPartitionName(tenantId);
 	}
 
 

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -11,7 +11,7 @@ public class ResourceIndexedSearchParamStringTest {
 
 	@Test
 	public void testHashFunctions() {
-		ResourceIndexedSearchParamString token = new ResourceIndexedSearchParamString(new PartitionConfig(), new ModelConfig(), "Patient", "NAME", "value", "VALUE");
+		ResourceIndexedSearchParamString token = new ResourceIndexedSearchParamString(new PartitionSettings(), new ModelConfig(), "Patient", "NAME", "value", "VALUE");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
 
 		// Make sure our hashing function gives consistent results
@@ -21,7 +21,7 @@ public class ResourceIndexedSearchParamStringTest {
 
 	@Test
 	public void testHashFunctionsPrefixOnly() {
-		ResourceIndexedSearchParamString token = new ResourceIndexedSearchParamString(new PartitionConfig(), new ModelConfig(), "Patient", "NAME", "vZZZZZZZZZZZZZZZZ", "VZZZZZZzzzZzzzZ");
+		ResourceIndexedSearchParamString token = new ResourceIndexedSearchParamString(new PartitionSettings(), new ModelConfig(), "Patient", "NAME", "vZZZZZZZZZZZZZZZZ", "VZZZZZZzzzZzzzZ");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
 
 		// Should be the same as in testHashFunctions()
@@ -37,12 +37,12 @@ public class ResourceIndexedSearchParamStringTest {
 		ResourceIndexedSearchParamString val1 = new ResourceIndexedSearchParamString()
 			.setValueExact("aaa")
 			.setValueNormalized("AAA");
-		val1.setPartitionConfig(new PartitionConfig());
+		val1.setPartitionSettings(new PartitionSettings());
 		val1.calculateHashes();
 		ResourceIndexedSearchParamString val2 = new ResourceIndexedSearchParamString()
 			.setValueExact("aaa")
 			.setValueNormalized("AAA");
-		val2.setPartitionConfig(new PartitionConfig());
+		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);

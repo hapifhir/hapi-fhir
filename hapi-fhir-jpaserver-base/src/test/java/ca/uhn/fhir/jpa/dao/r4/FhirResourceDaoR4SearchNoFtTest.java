@@ -6,7 +6,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -992,10 +992,10 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 				List<ResourceIndexedSearchParamNumber> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
 				ourLog.info(toStringMultiline(results));
 
-				ResourceIndexedSearchParamNumber expect0 = new ResourceIndexedSearchParamNumber(new PartitionConfig(), "RiskAssessment", RiskAssessment.SP_PROBABILITY, new BigDecimal("1.00"));
+				ResourceIndexedSearchParamNumber expect0 = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "RiskAssessment", RiskAssessment.SP_PROBABILITY, new BigDecimal("1.00"));
 				expect0.setResource(resource);
 				expect0.calculateHashes();
-				ResourceIndexedSearchParamNumber expect1 = new ResourceIndexedSearchParamNumber(new PartitionConfig(), "RiskAssessment", RiskAssessment.SP_PROBABILITY, new BigDecimal("2.00"));
+				ResourceIndexedSearchParamNumber expect1 = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "RiskAssessment", RiskAssessment.SP_PROBABILITY, new BigDecimal("2.00"));
 				expect1.setResource(resource);
 				expect1.calculateHashes();
 

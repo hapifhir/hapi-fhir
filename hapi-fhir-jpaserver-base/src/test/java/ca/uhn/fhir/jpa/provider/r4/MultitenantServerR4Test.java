@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.ProviderConstants;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
@@ -44,7 +44,7 @@ public class MultitenantServerR4Test extends BaseResourceProviderR4Test {
 	public void before() throws Exception {
 		super.before();
 
-		myPartitionConfig.setPartitioningEnabled(true);
+		myPartitionSettings.setPartitioningEnabled(true);
 		ourRestServer.registerInterceptor(myRequestTenantPartitionInterceptor);
 		ourRestServer.registerProvider(myPartitionManagementProvider);
 		ourRestServer.setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
@@ -63,7 +63,7 @@ public class MultitenantServerR4Test extends BaseResourceProviderR4Test {
 	public void after() throws Exception {
 		super.after();
 
-		myPartitionConfig.setPartitioningEnabled(new PartitionConfig().isPartitioningEnabled());
+		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
 		ourRestServer.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 		ourRestServer.unregisterProvider(myPartitionManagementProvider);
 		ourRestServer.setTenantIdentificationStrategy(null);

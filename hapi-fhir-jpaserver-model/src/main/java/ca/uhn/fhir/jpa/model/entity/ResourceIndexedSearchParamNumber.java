@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.BigDecimalNumericFieldBridge;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.NumberParam;
@@ -66,8 +66,8 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	public ResourceIndexedSearchParamNumber() {
 	}
 
-	public ResourceIndexedSearchParamNumber(PartitionConfig thePartitionConfig, String theResourceType, String theParamName, BigDecimal theValue) {
-		setPartitionConfig(thePartitionConfig);
+	public ResourceIndexedSearchParamNumber(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, BigDecimal theValue) {
+		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValue(theValue);
@@ -88,7 +88,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		if (myHashIdentity == null && getParamName() != null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
-			setHashIdentity(calculateHashIdentity(getPartitionConfig(), getPartitionId(), resourceType, paramName));
+			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 		}
 	}
 

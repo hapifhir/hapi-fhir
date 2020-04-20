@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -39,19 +39,19 @@ public class SearchParamExtractorMegaTest {
 
 		FhirContext ctx = FhirContext.forDstu2();
 		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorDstu2(ctx, searchParamRegistry).setPartitionConfigForUnitTest(new PartitionConfig()));
+		process(ctx, new SearchParamExtractorDstu2(ctx, searchParamRegistry).setPartitionConfigForUnitTest(new PartitionSettings()));
 
 		ctx = FhirContext.forDstu3();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorDstu3(null, ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry).setPartitionConfigForUnitTest(new PartitionConfig()));
+		process(ctx, new SearchParamExtractorDstu3(null, ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry).setPartitionConfigForUnitTest(new PartitionSettings()));
 
 		ctx = FhirContext.forR4();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorR4(null, ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry).setPartitionConfigForUnitTest(new PartitionConfig()));
+		process(ctx, new SearchParamExtractorR4(null, ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry).setPartitionConfigForUnitTest(new PartitionSettings()));
 
 		ctx = FhirContext.forR5();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorR5(ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry).setPartitionConfigForUnitTest(new PartitionConfig()));
+		process(ctx, new SearchParamExtractorR5(ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry).setPartitionConfigForUnitTest(new PartitionSettings()));
 	}
 
 	private void process(FhirContext theCtx, BaseSearchParamExtractor theExtractor) throws Exception {

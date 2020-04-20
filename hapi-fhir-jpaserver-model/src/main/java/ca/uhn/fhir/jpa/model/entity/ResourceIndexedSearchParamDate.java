@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -78,8 +78,8 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamDate(PartitionConfig thePartitionConfig, String theResourceType, String theParamName, Date theLow, Date theHigh, String theOriginalValue) {
-		setPartitionConfig(thePartitionConfig);
+	public ResourceIndexedSearchParamDate(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, Date theLow, Date theHigh, String theOriginalValue) {
+		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValueLow(theLow);
@@ -102,7 +102,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		if (myHashIdentity == null && getParamName() != null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
-			setHashIdentity(calculateHashIdentity(getPartitionConfig(), getPartitionId(), resourceType, paramName));
+			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 		}
 	}
 

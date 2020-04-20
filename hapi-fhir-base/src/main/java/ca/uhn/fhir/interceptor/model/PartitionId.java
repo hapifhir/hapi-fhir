@@ -79,22 +79,22 @@ public class PartitionId {
 	}
 
 	@Nonnull
-	public static PartitionId forPartitionId(@Nullable Integer thePartitionId) {
-		return forPartitionId(thePartitionId, null);
+	public static PartitionId fromPartitionId(@Nullable Integer thePartitionId) {
+		return fromPartitionId(thePartitionId, null);
 	}
 
 	@Nonnull
-	public static PartitionId forPartitionId(@Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
+	public static PartitionId fromPartitionId(@Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
 		return new PartitionId(null, thePartitionId, thePartitionDate);
 	}
 
 	@Nonnull
-	public static PartitionId forPartitionName(@Nullable String thePartitionName) {
-		return forPartitionName(thePartitionName, null);
+	public static PartitionId fromPartitionName(@Nullable String thePartitionName) {
+		return fromPartitionName(thePartitionName, null);
 	}
 
 	@Nonnull
-	public static PartitionId forPartitionName(@Nullable String thePartitionName, @Nullable LocalDate thePartitionDate) {
+	public static PartitionId fromPartitionName(@Nullable String thePartitionName, @Nullable LocalDate thePartitionDate) {
 		return new PartitionId(thePartitionName, null, thePartitionDate);
 	}
 

@@ -56,7 +56,7 @@ The following settings can be enabled:
 
 * **Include Partition in Search Hashes** ([JavaDoc](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionConfig.html#setIncludePartitionInSearchHashes(boolean))): If this feature is enabled, partition IDs will be factored into [Search Hashes](./schema.html#search-hashes). When this flag is not set (as is the default), when a search requests a specific partition, an additional SQL WHERE predicate is added to the query to explicitly request the given partition ID. When this flag is set, this additional WHERE predicate is not necessary since the partition is factored into the hash value being searched on. Setting this flag avoids the need to manually adjust indexes against the HFJ_SPIDX tables. Note that this flag should **not be used in environments where partitioning is being used for security purposes**, since it is possible for a user to reverse engineer false hash collisions.
 
-* **Cross-Partition Reference Mode**: ([JavaDoc](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionConfig.html#setAllowReferencesAcrossPartitions(ca.uhn.fhir.jpa.model.config.PartitionConfig.CrossPartitionReferenceMode))): This setting controls whether resources in one partition should be allowed to create references to resources in other partitions.
+* **Cross-Partition Reference Mode**: ([JavaDoc](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionConfig.html#setAllowReferencesAcrossPartitions(ca.uhn.fhir.jpa.model.config.PartitionSettings.CrossPartitionReferenceMode))): This setting controls whether resources in one partition should be allowed to create references to resources in other partitions.
 
 
 # Partition Interceptors
@@ -84,7 +84,7 @@ A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE`](/apidocs/hapi-
 The [RequestTenantPartitionInterceptor](/docs/interceptors/built_in_server_interceptors.html#request-tenant-partition-interceptor) uses the request tenant ID to determine the partition name. A simplified version of its source is shown below:
 
 ```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/PartitionExamples.java|partitionInterceptorHeaders}}
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/PartitionExamples.java|partitionInterceptorRequestPartition}}
 ```
 
 ## Example: Partitioning based on headers

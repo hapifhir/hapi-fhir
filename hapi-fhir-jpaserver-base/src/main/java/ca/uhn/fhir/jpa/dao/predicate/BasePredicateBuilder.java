@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.PartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
@@ -64,7 +64,7 @@ abstract class BasePredicateBuilder {
 	DaoConfig myDaoConfig;
 	boolean myDontUseHashesForSearch;
 	@Autowired
-	private PartitionConfig myPartitionConfig;
+	private PartitionSettings myPartitionSettings;
 
 	BasePredicateBuilder(SearchBuilder theSearchBuilder) {
 		myCriteriaBuilder = theSearchBuilder.getBuilder();
@@ -119,7 +119,7 @@ abstract class BasePredicateBuilder {
 		Join<ResourceTable, SearchParamPresent> paramPresentJoin = myQueryRoot.join("mySearchParamPresents", JoinType.LEFT);
 
 		Expression<Long> hashPresence = paramPresentJoin.get("myHashPresence").as(Long.class);
-		Long hash = SearchParamPresent.calculateHashPresence(myPartitionConfig, thePartitionId, theResourceName, theParamName, !theMissing);
+		Long hash = SearchParamPresent.calculateHashPresence(myPartitionSettings, thePartitionId, theResourceName, theParamName, !theMissing);
 
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(myCriteriaBuilder.equal(hashPresence, hash));
@@ -155,7 +155,7 @@ abstract class BasePredicateBuilder {
 			andPredicates.add(paramNamePredicate);
 			andPredicates.add(thePredicate);
 		} else {
-			long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionConfig, thePartitionId, theResourceName, theParamName);
+			long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionSettings, thePartitionId, theResourceName, theParamName);
 			Predicate hashIdentityPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentity"), hashIdentity);
 			andPredicates.add(hashIdentityPredicate);
 			andPredicates.add(thePredicate);
@@ -164,8 +164,8 @@ abstract class BasePredicateBuilder {
 		return myCriteriaBuilder.and(toArray(andPredicates));
 	}
 
-	public PartitionConfig getPartitionConfig() {
-		return myPartitionConfig;
+	public PartitionSettings getPartitionSettings() {
+		return myPartitionSettings;
 	}
 
 	Predicate createPredicateNumeric(String theResourceName,

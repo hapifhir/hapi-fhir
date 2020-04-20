@@ -125,7 +125,7 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 
 						Predicate uriPredicate = null;
 						if (operation == null || operation == SearchFilterParser.CompareOperation.eq) {
-							long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(getPartitionConfig(), thePartitionId, theResourceName, theParamName, value);
+							long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(getPartitionSettings(), thePartitionId, theResourceName, theParamName, value);
 							Predicate hashPredicate = myCriteriaBuilder.equal(join.get("myHashUri"), hashUri);
 							codePredicates.add(hashPredicate);
 						} else if (operation == SearchFilterParser.CompareOperation.ne) {
@@ -150,7 +150,7 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 						}
 
 						if (uriPredicate != null) {
-							long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionConfig(), thePartitionId, theResourceName, theParamName);
+							long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), thePartitionId, theResourceName, theParamName);
 							Predicate hashIdentityPredicate = myCriteriaBuilder.equal(join.get("myHashIdentity"), hashIdentity);
 							codePredicates.add(myCriteriaBuilder.and(hashIdentityPredicate, uriPredicate));
 						}

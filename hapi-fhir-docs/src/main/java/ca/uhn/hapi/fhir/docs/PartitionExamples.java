@@ -24,7 +24,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.PartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
@@ -58,7 +58,7 @@ public class PartitionExamples {
 		private PartitionId extractPartitionIdFromRequest(ServletRequestDetails theRequestDetails) {
 			// We will use the tenant ID that came from the request as the partition name
 			String tenantId = theRequestDetails.getTenantId();
-			return PartitionId.forPartitionName(tenantId);
+			return PartitionId.fromPartitionName(tenantId);
 		}
 
 	}
@@ -72,13 +72,13 @@ public class PartitionExamples {
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 		public PartitionId PartitionIdentifyCreate(ServletRequestDetails theRequestDetails) {
 			String partitionName = theRequestDetails.getHeader("X-Partition-Name");
-			return PartitionId.forPartitionName(partitionName);
+			return PartitionId.fromPartitionName(partitionName);
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 		public PartitionId PartitionIdentifyRead(ServletRequestDetails theRequestDetails) {
 			String partitionName = theRequestDetails.getHeader("X-Partition-Name");
-			return PartitionId.forPartitionName(partitionName);
+			return PartitionId.fromPartitionName(partitionName);
 		}
 
 	}
@@ -92,11 +92,11 @@ public class PartitionExamples {
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 		public PartitionId PartitionIdentifyCreate(IBaseResource theResource) {
 			if (theResource instanceof Patient) {
-				return PartitionId.forPartitionName("PATIENT");
+				return PartitionId.fromPartitionName("PATIENT");
 			} else if (theResource instanceof Observation) {
-					return PartitionId.forPartitionName("OBSERVATION");
+					return PartitionId.fromPartitionName("OBSERVATION");
 			} else {
-				return PartitionId.forPartitionName("OTHER");
+				return PartitionId.fromPartitionName("OTHER");
 			}
 		}
 
@@ -108,13 +108,13 @@ public class PartitionExamples {
 	public class MultitenantServer extends RestfulServer {
 
 		@Autowired
-		private PartitionConfig myPartitionConfig;
+		private PartitionSettings myPartitionSettings;
 
 		@Override
 		protected void initialize() {
 
 			// Enable partitioning
-			myPartitionConfig.setPartitioningEnabled(true);
+			myPartitionSettings.setPartitioningEnabled(true);
 
 			// Set the tenant identification strategy
 			setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());

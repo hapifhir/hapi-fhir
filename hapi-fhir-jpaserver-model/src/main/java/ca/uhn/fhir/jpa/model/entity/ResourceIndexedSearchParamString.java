@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.interceptor.model.PartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -114,8 +114,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		super();
 	}
 
-	public ResourceIndexedSearchParamString(PartitionConfig thePartitionConfig, ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized, String theValueExact) {
-		setPartitionConfig(thePartitionConfig);
+	public ResourceIndexedSearchParamString(PartitionSettings thePartitionSettings, ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized, String theValueExact) {
+		setPartitionSettings(thePartitionSettings);
 		setModelConfig(theModelConfig);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
@@ -143,9 +143,9 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			String paramName = getParamName();
 			String valueNormalized = getValueNormalized();
 			String valueExact = getValueExact();
-			setHashNormalizedPrefix(calculateHashNormalized(getPartitionConfig(), getPartitionId(), myModelConfig, resourceType, paramName, valueNormalized));
-			setHashExact(calculateHashExact(getPartitionConfig(), getPartitionId(), resourceType, paramName, valueExact));
-			setHashIdentity(calculateHashIdentity(getPartitionConfig(), getPartitionId(), resourceType, paramName));
+			setHashNormalizedPrefix(calculateHashNormalized(getPartitionSettings(), getPartitionId(), myModelConfig, resourceType, paramName, valueNormalized));
+			setHashExact(calculateHashExact(getPartitionSettings(), getPartitionId(), resourceType, paramName, valueExact));
+			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 		}
 	}
 
@@ -279,11 +279,11 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return defaultString(getValueNormalized()).startsWith(normalizedString);
 	}
 
-	public static long calculateHashExact(PartitionConfig thePartitionConfig, PartitionId thePartitionId, String theResourceType, String theParamName, String theValueExact) {
-		return hash(thePartitionConfig, thePartitionId, theResourceType, theParamName, theValueExact);
+	public static long calculateHashExact(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String theResourceType, String theParamName, String theValueExact) {
+		return hash(thePartitionSettings, thePartitionId, theResourceType, theParamName, theValueExact);
 	}
 
-	public static long calculateHashNormalized(PartitionConfig thePartitionConfig, PartitionId thePartitionId, ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized) {
+	public static long calculateHashNormalized(PartitionSettings thePartitionSettings, PartitionId thePartitionId, ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized) {
 		/*
 		 * If we're not allowing contained searches, we'll add the first
 		 * bit of the normalized value to the hash. This helps to
@@ -295,6 +295,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			hashPrefixLength = 0;
 		}
 
-		return hash(thePartitionConfig, thePartitionId, theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
+		return hash(thePartitionSettings, thePartitionId, theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
 	}
 }
