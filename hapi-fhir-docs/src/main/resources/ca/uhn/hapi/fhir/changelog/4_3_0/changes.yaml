@@ -4,7 +4,7 @@
     title: "The version of a few dependencies have been bumped to the latest versions
     (dependent HAPI modules listed in brackets):
     <ul>
-    <li>Hibernate ORM (JPA): 5.4.6 -&gt; 5.4.12</li>
+    <li>Hibernate ORM (JPA): 5.4.6 -&gt; 5.4.14</li>
     <li>Hibernate Search (JPA): 5.11.3 -&gt; 5.11.5</li>
     <li>Hibernate Validator (JPA): 5.4.2.Final -&gt; 6.1.3.Final</li>
     <li>Guava (JPA): 28.0 -&gt; 28.2</li>
@@ -34,4 +34,12 @@
     Several classes in the JPA server have been moved to new packages, including the DaoConfig and IDao interfaces.
     These classes have not changed in terms of functionality, but existing projects may need to adjust some
     package import statements.
+    "
+- item:
+     issue: "1807"
+     type: "change"
+     title: "**New Feature**:
+    A new feature has been added to the JPA server called **[Partitioning](/hapi-fhir/docs/server_jpa/partitioning.html). This
+    feature allows data to be segregated using a user defined partitioning strategy. This can be leveraged to take
+    advantags of native RDBMS partition strategies, and also to implement **multitenant servers**.
     "
