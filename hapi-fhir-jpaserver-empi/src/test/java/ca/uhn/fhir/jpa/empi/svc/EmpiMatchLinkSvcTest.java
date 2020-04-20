@@ -369,7 +369,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		myEmpiLinkSvc.updateLink(janePerson, patient, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL);
 
 		janePerson = getPersonFromTarget(patient);
-		Person.PersonLinkComponent linkFirstRep = janePerson.getLink();
+		Person.PersonLinkComponent linkFirstRep = janePerson.getLinkFirstRep();
 
 		assertThat(linkFirstRep.getTarget().getReference(), is(equalTo(patient.getIdElement().toVersionless().toString())));
 		assertThat(linkFirstRep.getAssurance(), is(equalTo(Person.IdentityAssuranceLevel.LEVEL4)));
