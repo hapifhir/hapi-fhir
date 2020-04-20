@@ -7,7 +7,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
 import ca.uhn.fhir.jpa.empi.broker.EmpiSubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -101,8 +100,7 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 	}
 
 	public int getExecutorQueueSize() {
-		SubscriptionChannelFactory.BroadcastingSubscribableChannelWrapper wrapper = (SubscriptionChannelFactory.BroadcastingSubscribableChannelWrapper) myEmpiQueueConsumerLoader.getEmpiChannelForUnitTest();
-		LinkedBlockingChannel channel = (LinkedBlockingChannel) wrapper.getWrappedChannel();
+		LinkedBlockingChannel channel = (LinkedBlockingChannel) myEmpiQueueConsumerLoader.getEmpiChannelForUnitTest();
 		return channel.getQueueSizeForUnitTest();
 	}
 

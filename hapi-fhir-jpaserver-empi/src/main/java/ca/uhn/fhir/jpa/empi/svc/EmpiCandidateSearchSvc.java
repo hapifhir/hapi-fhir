@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.empi.api.IEmpiProperties;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.rules.json.EmpiFilterSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -53,7 +53,7 @@ public class EmpiCandidateSearchSvc {
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private IEmpiProperties myEmpiConfig;
+	private IEmpiSettings myEmpiConfig;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired

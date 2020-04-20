@@ -34,13 +34,13 @@ public class SubscriptionChannelConfig {
 	 * Create a @Primary @Bean if you need a different implementation
 	 */
 	@Bean
-	public IChannelFactory queueChannelFactory() {
-		return new LinkedBlockingChannelFactory();
+	public IChannelFactory queueChannelFactory(IChannelNamer theChannelNamer) {
+		return new LinkedBlockingChannelFactory(theChannelNamer);
 	}
 
 	@Bean
-	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelFactory theQueueChannelFactory ,IChannelNamer theChannelNamer) {
-		return new SubscriptionChannelFactory(theQueueChannelFactory, theChannelNamer);
+	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelFactory theQueueChannelFactory) {
+		return new SubscriptionChannelFactory(theQueueChannelFactory);
 	}
 
 	/**

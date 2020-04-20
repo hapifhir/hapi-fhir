@@ -37,7 +37,7 @@ public class SubscriptionChannelFactoryTest {
 	@Before
 	public void before() {
 		when(myChannelNamer.getChannelName(any())).thenReturn("CHANNEL_NAME");
-		mySvc = new SubscriptionChannelFactory(new LinkedBlockingChannelFactory(), myChannelNamer);
+		mySvc = new SubscriptionChannelFactory(new LinkedBlockingChannelFactory(myChannelNamer));
 	}
 
 	/**

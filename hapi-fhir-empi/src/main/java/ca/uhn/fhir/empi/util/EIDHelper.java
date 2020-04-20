@@ -22,7 +22,7 @@ package ca.uhn.fhir.empi.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.Constants;
-import ca.uhn.fhir.empi.api.IEmpiProperties;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,10 +34,10 @@ import java.util.UUID;
 @Service
 public final class EIDHelper {
 	private final FhirContext myFhirContext;
-	private final IEmpiProperties myEmpiConfig;
+	private final IEmpiSettings myEmpiConfig;
 
 	@Autowired
-	public EIDHelper(FhirContext theFhirContext, IEmpiProperties theEmpiConfig) {
+	public EIDHelper(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
 		myFhirContext = theFhirContext;
 		myEmpiConfig = theEmpiConfig;
 	}

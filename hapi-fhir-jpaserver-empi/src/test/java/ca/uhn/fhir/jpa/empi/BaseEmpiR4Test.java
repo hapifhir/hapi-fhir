@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.empi;
 
-import ca.uhn.fhir.empi.api.IEmpiProperties;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -67,7 +67,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected ResourceTableHelper myResourceTableHelper;
 	@Autowired
-	protected IEmpiProperties myEmpiConfig;
+	protected IEmpiSettings myEmpiConfig;
 	@Autowired
 	protected EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired

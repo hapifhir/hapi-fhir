@@ -36,38 +36,35 @@ import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 
 public class SubscriptionChannelFactory {
-	private final IChannelNamer myChannelNamer;
-	private final IChannelFactory myQueueChannelFactory;
+	private final IChannelFactory myChannelFactory;
 
 	/**
 	 * Constructor
 	 */
-	public SubscriptionChannelFactory(IChannelFactory theQueueChannelFactory, IChannelNamer theChannelNamer) {
-		Validate.notNull(theQueueChannelFactory);
-		myQueueChannelFactory = theQueueChannelFactory;
-		myChannelNamer = theChannelNamer;
+	public SubscriptionChannelFactory(IChannelFactory theChannelFactory) {
+		Validate.notNull(theChannelFactory);
+		myChannelFactory = theChannelFactory;
 	}
 
-	// FIXME KHS subs rename these methods
 	public IChannelProducer newDeliverySendingChannel(String theChannelName, ChannelConsumerSettings theOptions) {
 		ChannelConsumerSettings config = newConfigForDeliveryChannel(theOptions);
-		return myQueueChannelFactory.getOrCreateProducer(myChannelNamer.getChannelName(theChannelName), ResourceDeliveryJsonMessage.class, config);
+		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceDeliveryJsonMessage.class, config);
 	}
 
 	public IChannelReceiver newDeliveryReceivingChannel(String theChannelName, ChannelConsumerSettings theOptions) {
 		ChannelConsumerSettings config = newConfigForDeliveryChannel(theOptions);
-		IChannelReceiver channel = myQueueChannelFactory.getOrCreateReceiver(myChannelNamer.getChannelName(theChannelName), ResourceDeliveryJsonMessage.class, config);
+		IChannelReceiver channel = myChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryJsonMessage.class, config);
 		return new BroadcastingSubscribableChannelWrapper(channel);
 	}
 
 	public IChannelProducer newMatchingSendingChannel(String theChannelName, ChannelConsumerSettings theOptions) {
 		ChannelConsumerSettings config = newConfigForMatchingChannel(theOptions);
-		return myQueueChannelFactory.getOrCreateProducer(myChannelNamer.getChannelName(theChannelName), ResourceModifiedJsonMessage.class, config);
+		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceModifiedJsonMessage.class, config);
 	}
 
 	public IChannelReceiver newMatchingReceivingChannel(String theChannelName, ChannelConsumerSettings theOptions) {
 		ChannelConsumerSettings config = newConfigForMatchingChannel(theOptions);
-		IChannelReceiver channel = myQueueChannelFactory.getOrCreateReceiver(myChannelNamer.getChannelName(theChannelName), ResourceModifiedJsonMessage.class, config);
+		IChannelReceiver channel = myChannelFactory.getOrCreateReceiver(theChannelName, ResourceModifiedJsonMessage.class, config);
 		return new BroadcastingSubscribableChannelWrapper(channel);
 	}
 

@@ -58,7 +58,7 @@ public abstract class BaseSubscriptionTest {
 
 		@Bean
 		public SubscriptionChannelFactory mySubscriptionChannelFactory(IChannelNamer theChannelNamer) {
-			return new SubscriptionChannelFactory(new LinkedBlockingChannelFactory(), theChannelNamer);
+			return new SubscriptionChannelFactory(new LinkedBlockingChannelFactory(theChannelNamer));
 		}
 
 		@Bean

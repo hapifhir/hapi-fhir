@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.empi.interceptor;
  * #L%
  */
 
-import ca.uhn.fhir.empi.api.IEmpiProperties;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import org.hl7.fhir.dstu2.model.Subscription;
@@ -34,7 +34,7 @@ public class EmpiSubmitterInterceptorLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiSubmitterInterceptorLoader.class);
 
 	@Autowired
-	private IEmpiProperties myEmpiProperties;
+	private IEmpiSettings myEmpiProperties;
 	@Autowired
 	DaoConfig myDaoConfig;
 	@Autowired

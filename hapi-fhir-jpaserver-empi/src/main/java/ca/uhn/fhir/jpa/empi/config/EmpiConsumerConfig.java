@@ -3,8 +3,8 @@ package ca.uhn.fhir.jpa.empi.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
-import ca.uhn.fhir.empi.api.IEmpiProperties;
 import ca.uhn.fhir.empi.api.IEmpiRuleValidator;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.provider.EmpiProviderLoader;
 import ca.uhn.fhir.empi.rules.config.EmpiRuleValidatorImpl;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
@@ -32,7 +32,7 @@ public class EmpiConsumerConfig {
 	public static final String EMPI_CONSUMER_COUNT_DEFAULT = "5";
 
 	@Autowired
-	IEmpiProperties myEmpiProperties;
+    IEmpiSettings myEmpiProperties;
 	@Autowired
 	IEmpiRuleValidator myEmpiRuleValidator;
 	@Autowired
@@ -76,7 +76,7 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	EIDHelper eidHelper(FhirContext theFhirContext, IEmpiProperties theEmpiConfig) {
+	EIDHelper eidHelper(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
 		return new EIDHelper(theFhirContext, theEmpiConfig);
 	}
 
@@ -111,7 +111,7 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	EmpiResourceComparatorSvc empiResourceComparatorSvc(FhirContext theFhirContext, IEmpiProperties theEmpiConfig) {
+	EmpiResourceComparatorSvc empiResourceComparatorSvc(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
 		return new EmpiResourceComparatorSvc(theFhirContext, theEmpiConfig);
 	}
 

@@ -22,7 +22,7 @@ package ca.uhn.fhir.empi.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.Constants;
-import ca.uhn.fhir.empi.api.IEmpiProperties;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -43,7 +43,7 @@ public final class PersonHelper {
 	private static final Logger ourLog = getLogger(PersonHelper.class);
 
 	@Autowired
-	private IEmpiProperties myEmpiConfig;
+	private IEmpiSettings myEmpiConfig;
 	@Autowired
 	private EIDHelper myEIDHelper;
 

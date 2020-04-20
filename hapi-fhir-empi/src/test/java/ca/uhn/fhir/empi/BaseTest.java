@@ -2,7 +2,7 @@ package ca.uhn.fhir.empi;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.rules.config.EmpiPropertiesImpl;
+import ca.uhn.fhir.empi.rules.config.EmpiSettingsImpl;
 import ca.uhn.fhir.empi.rules.json.*;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import org.hl7.fhir.r4.model.Patient;
@@ -75,7 +75,7 @@ public abstract class BaseTest {
 	}
 
 	protected EmpiResourceComparatorSvc buildComparator(EmpiRulesJson theEmpiRulesJson) {
-		EmpiResourceComparatorSvc retval = new EmpiResourceComparatorSvc(ourFhirContext, new EmpiPropertiesImpl().setEmpiRules(theEmpiRulesJson));
+		EmpiResourceComparatorSvc retval = new EmpiResourceComparatorSvc(ourFhirContext, new EmpiSettingsImpl().setEmpiRules(theEmpiRulesJson));
 		retval.init();
 		return retval;
 	}

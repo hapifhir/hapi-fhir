@@ -42,6 +42,8 @@ public class SubscriptionTestConfig {
 
 	@Autowired
 	private FhirContext myFhirContext;
+	@Autowired
+	private IChannelNamer myChannelNamer;
 
 	@Primary
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChain")
@@ -51,12 +53,12 @@ public class SubscriptionTestConfig {
 
 	@Bean
 	public IChannelFactory subscribableChannelFactory() {
-		return new LinkedBlockingChannelFactory();
+		return new LinkedBlockingChannelFactory(myChannelNamer);
 	}
 
 	@Bean
 	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelNamer theChannelNamer, IChannelFactory theQueueChannelFactory) {
-		return new SubscriptionChannelFactory(theQueueChannelFactory, theChannelNamer);
+		return new SubscriptionChannelFactory(theQueueChannelFactory);
 	}
 
 

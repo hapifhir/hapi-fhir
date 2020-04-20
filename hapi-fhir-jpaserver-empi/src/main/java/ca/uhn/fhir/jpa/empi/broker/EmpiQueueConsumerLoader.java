@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.empi.broker;
 
-import ca.uhn.fhir.empi.api.IEmpiProperties;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,15 +41,20 @@ public class EmpiQueueConsumerLoader {
 	@Autowired
 	private EmpiMessageHandler myEmpiMessageHandler;
 	@Autowired
-	private SubscriptionChannelFactory mySubscriptionChannelFactory;
+	private IChannelFactory myChannelFactory;
+	@Autowired
+	private IEmpiSettings myEmpiSettings;
 
 	protected IChannelReceiver myEmpiChannel;
 
 	@PostConstruct
 	public void startListeningToEmpiChannel() {
 		if (myEmpiChannel == null) {
-			myEmpiChannel = mySubscriptionChannelFactory.newMatchingReceivingChannel(IEmpiProperties.EMPI_MATCHING_CHANNEL_NAME, null);
+			ChannelConsumerSettings config = new ChannelConsumerSettings();
+			config.setConcurrentConsumers(myEmpiSettings.getConcurrentConsumers());
+			myEmpiChannel = myChannelFactory.getOrCreateReceiver(IEmpiSettings.EMPI_MATCHING_CHANNEL_NAME, ResourceModifiedJsonMessage.class, config);
 		}
+
 		if (myEmpiChannel != null) {
 			myEmpiChannel.subscribe(myEmpiMessageHandler);
 			ourLog.info("EMPI Matching Consumer subscribed to Matching Channel {} with name {}", myEmpiChannel.getClass().getName(), myEmpiChannel.getName());
