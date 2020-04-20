@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.partition;
+package ca.uhn.fhir.rest.server.interceptor.partition;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -26,19 +26,28 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.PartitionId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.NotNull;
+import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
+
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
+ * This interceptor uses the request tenant ID (as supplied to the server using
+ * {@link ca.uhn.fhir.rest.server.RestfulServer#setTenantIdentificationStrategy(ITenantIdentificationStrategy)}
+ * to indicate the partition ID. With this interceptor registered, The server treats the tenant name
+ * supplied by the {@link ITenantIdentificationStrategy tenant identification strategy} as a partition name.
+ * <p>
+ * Partition names (aka tenant IDs) must be registered in advance using the partition management operations.
+ * </p>
  *
+ * @since 5.0.0
  */
 @Interceptor
 public class RequestTenantPartitionInterceptor {
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-	public PartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+	public PartitionId PartitionIdentifyCreate(ServletRequestDetails theRequestDetails) {
 		return extractPartitionIdFromRequest(theRequestDetails);
 	}
 
@@ -47,7 +56,7 @@ public class RequestTenantPartitionInterceptor {
 		return extractPartitionIdFromRequest(theRequestDetails);
 	}
 
-	@NotNull
+	@Nonnull
 	private PartitionId extractPartitionIdFromRequest(ServletRequestDetails theRequestDetails) {
 
 		// We will use the tenant ID that came from the request as the partition name

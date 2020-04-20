@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
@@ -146,16 +145,23 @@ abstract class BasePredicateBuilder {
 	}
 
 	Predicate combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, Predicate thePredicate, PartitionId thePartitionId) {
+		List<Predicate> andPredicates = new ArrayList<>();
+		addPartitionIdPredicate(thePartitionId, theFrom, andPredicates);
+
 		if (myDontUseHashesForSearch) {
 			Predicate resourceTypePredicate = myCriteriaBuilder.equal(theFrom.get("myResourceType"), theResourceName);
 			Predicate paramNamePredicate = myCriteriaBuilder.equal(theFrom.get("myParamName"), theParamName);
-			Predicate outerPredicate = myCriteriaBuilder.and(resourceTypePredicate, paramNamePredicate, thePredicate);
-			return outerPredicate;
+			andPredicates.add(resourceTypePredicate);
+			andPredicates.add(paramNamePredicate);
+			andPredicates.add(thePredicate);
+		} else {
+			long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionConfig, thePartitionId, theResourceName, theParamName);
+			Predicate hashIdentityPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentity"), hashIdentity);
+			andPredicates.add(hashIdentityPredicate);
+			andPredicates.add(thePredicate);
 		}
 
-		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionConfig, thePartitionId, theResourceName, theParamName);
-		Predicate hashIdentityPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentity"), hashIdentity);
-		return myCriteriaBuilder.and(hashIdentityPredicate, thePredicate);
+		return myCriteriaBuilder.and(toArray(andPredicates));
 	}
 
 	public PartitionConfig getPartitionConfig() {
@@ -217,7 +223,7 @@ abstract class BasePredicateBuilder {
 		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, num, thePartitionId);
 	}
 
-	void addPartitionIdPredicate(PartitionId thePartitionId, Join<ResourceTable, ? extends BasePartitionable> theJoin, List<Predicate> theCodePredicates) {
+	void addPartitionIdPredicate(PartitionId thePartitionId, From<?, ? extends BasePartitionable> theJoin, List<Predicate> theCodePredicates) {
 		if (thePartitionId != null) {
 			Integer partitionId = thePartitionId.getPartitionId();
 			Predicate partitionPredicate;

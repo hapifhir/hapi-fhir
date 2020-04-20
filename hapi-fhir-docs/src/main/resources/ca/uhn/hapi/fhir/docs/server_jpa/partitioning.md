@@ -21,13 +21,13 @@ Partitioning involves the use of two dedicated columns to many tables within the
 * **PARTITION_ID** &ndash; This is an integer indicating the specific partition that a given resource is placed in. This column can also be *NULL*, meaning that the given resource is in the **Default Partition**.
 * **PARTITION_DATE** &ndash; This is a date/time column that can be assigned an arbitrary value depending on your use case. Typically, this would be used for use cases where data should be automatically dropped after a certain time period using native database partition drops. 
 
-When partitioning is used, these two columns will be populated with the same value on all resource-specific tables (this includes [HFJ_RESOURCE](./schema.html#HFJ_RESOURCE) and all tables that have a foreign key relationship to it including [HFJ_RES_VER](./schema.html#HFJ_RES_VER), [HFJ_RESLINK](./schema.html#HFJ_RES_LINK), [HFJ_SPIDX_*](./schema.html#indexes), etc.)
+When partitioning is used, these two columns will be populated with the same value on all resource-specific tables (this includes [HFJ_RESOURCE](./schema.html#HFJ_RESOURCE) and all tables that have a foreign key relationship to it including [HFJ_RES_VER](./schema.html#HFJ_RES_VER), [HFJ_RESLINK](./schema.html#HFJ_RES_LINK), [HFJ_SPIDX_*](./schema.html#search-indexes), etc.)
 
-At the time that a resource is being **created**, an [interceptor hook](#partition-iInterceptors) is invoked in order to request the partition ID and date, and these will be written to the resource.
+At the time that a resource is being **created**, an [interceptor hook](#partition-interceptors) is invoked in order to request the partition ID and date, and these will be written to the resource.
 
 At the time that a resource is being **updated**, the partition ID and date from the previous version will be used.
 
-When a **read operation** is being performed (e.g. a read, search, history, etc.), a separate [interceptor hook](#partition-iInterceptors) is invoked in order to determine whether the operation should target a specific partition. The outcome of this hook determines how the partitioning manifests itself to the end user: 
+When a **read operation** is being performed (e.g. a read, search, history, etc.), a separate [interceptor hook](#partition-interceptors) is invoked in order to determine whether the operation should target a specific partition. The outcome of this hook determines how the partitioning manifests itself to the end user: 
 
 * If all read operations are scoped by the interceptor to only apply to a single partition, then the partitioning behaves as a **multitenant** solution.
 * If read operations are scopes to all partitions, then the partitioning is simply partitioning the data into logical segments.
@@ -40,7 +40,9 @@ The [PartitionConfig](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/c
 
 The following settings can be enabled:
 
-* Include Partition in Search Hashes:  
+* **Include Partition in Search Hashes** ([JavaDoc](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionConfig.html#setIncludePartitionInSearchHashes(boolean))): If this feature is enabled, partition IDs will be factored into [Search Hashes](./schema.html#search-hashes). When this flag is not set (as is the default), when a search requests a specific partition, an additional SQL WHERE predicate is added to the query to explicitly request the given partition ID. When this flag is set, this additional WHERE predicate is not necessary since the partition is factored into the hash value being searched on. Setting this flag avoids the need to manually adjust indexes against the HFJ_SPIDX tables. Note that this flag should **not be used in environments where partitioning is being used for security purposes**, since it is possible for a user to reverse engineer false hash collisions.
+
+* **Cross-Partition Reference Mode**: ([JavaDoc](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionConfig.html#setAllowReferencesAcrossPartitions(ca.uhn.fhir.jpa.model.config.PartitionConfig.CrossPartitionReferenceMode))): This setting controls whether resources in one partition should be allowed to create references to resources in other partitions.
 
 
 # Partition Interceptors
@@ -57,14 +59,54 @@ The criteria for determining the partition will depend on your use case. For exa
  
 * If you are implementing multi-tenancy the partition might be determined by using the [Request Tenant ID](/docs/server_plain/multitenancy.html). It could also be determined by looking at request headers, or the authorized user/session context, etc.
 
-* If you are implementing segmented data partitioning, the partition might be determined by examining the actual resource being created, by the identity of the sending system, etc.    
+* If you are implementing segmented data partitioning, the partition might be determined by examining the actpartitionInterceptorHeadersual resource being created, by the identity of the sending system, etc.    
 
 ## Identify Partition for Read (Optional)
 
 A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE`](/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_CREATE) pointcut must be registered, and this hook method will be invoked every time a resource is being created in order to determine the partition to create the resource in.
 
-## Example: Using Request Tenants
+## Example: Partitioning based on Tenant ID
 
+The [RequestTenantPartitionInterceptor](/docs/interceptors/built_in_server_interceptors.html#request-tenant-partition-interceptor) uses the request tenant ID to determine the partition name. A simplified version of its source is shown below:
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/PartitionExamples.java|partitionInterceptorHeaders}}
+```
+
+## Example: Partitioning based on headers
+
+If requests are coming from a trusted system, that system might be relied on to determine the partition for reads and writes.
+
+The following example shows a simple partition interceptor that determines the partition name by looking at a custom HTTP header:
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/PartitionExamples.java|partitionInterceptorHeaders}}
+```
+
+## Example: Using Resource Contents
+
+When creating resources, the contents of the resource can also be factored into the decision on which tenant to use. The following example shows a very simple algorithm, placing resources into one of three partitions based on the resource type. Other contents in the resource could also be used instead.
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/PartitionExamples.java|partitionInterceptorResourceContents}}
+```
+
+
+# Complete Example: Using Request Tenants
+
+In order to achieve a multitenant configuration, the following configuration steps must be taken:
+
+* Partitioning must be enabled.
+* A [Tenant Identification Strategy](/docs/server_plain/multitenancy.html) must be enabled on the RestfulServer.
+* A [RequestTenantPartitionInterceptor](/docs/interceptors/built_in_server_interceptors.html#request-tenant-partition-interceptor) instance must be registered as an interceptor.
+
+Additionally, indexes will likely need to be tuned in order to support the partition-aware queries.
+
+The following snippet shows a server with this configuration.
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/PartitionExamples.java|multitenantServer}}
+```
 
 
 

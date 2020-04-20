@@ -688,9 +688,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			"                    <system value=\"http://healthcare.example.org/identifiers/encounter\"/>\n" +
 			"                    <value value=\"845962.8975469\"/>\n" +
 			"                </identifier>\n" +
-			// FIXME: restore
-//			"                <status value=\"in-progress\"/>\n" +
-//			"                <class value=\"inpatient\"/>\n" +
+			"                <status value=\"in-progress\"/>\n" +
+			"                <class value=\"inpatient\"/>\n" +
 			"                <patient>\n" +
 			"                    <reference value=\"Patient?family=van%20de%20Heuvelcx85ioqWJbI&amp;given=Pietercx85ioqWJbI\"/>\n" +
 			"                </patient>\n" +
@@ -709,9 +708,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		HttpPost req = new HttpPost(ourServerBase);
 		req.setEntity(new StringEntity(input, ContentType.parse(Constants.CT_FHIR_XML + "; charset=utf-8")));
-
-		// FIXME: remove
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 
 		CloseableHttpResponse resp = ourHttpClient.execute(req);
 		try {

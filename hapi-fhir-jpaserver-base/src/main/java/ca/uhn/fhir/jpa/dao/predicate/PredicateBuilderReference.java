@@ -77,6 +77,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
@@ -192,6 +193,12 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 		List<Predicate> codePredicates = new ArrayList<>();
 		addPartitionIdPredicate(thePartitionId, join, codePredicates);
+
+		for (IIdType next : targetIds) {
+			if (!next.hasResourceType()) {
+				warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, null);
+			}
+		}
 
 		// Resources by ID
 		List<ResourcePersistentId> targetPids = myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId, targetIds, theRequest);
@@ -419,13 +426,20 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		return predicate;
 	}
 
-	private void warnAboutPerformanceOnUnqualifiedResources(String theParamName, RequestDetails theRequest, List<Class<? extends IBaseResource>> theCandidateTargetTypes) {
-		String message = new StringBuilder()
-			.append("This search uses an unqualified resource(a parameter in a chain without a resource type). ")
-			.append("This is less efficient than using a qualified type. ")
-			.append("[" + theParamName + "] resolves to [" + theCandidateTargetTypes.stream().map(Class::getSimpleName).collect(Collectors.joining(",")) + "].")
-			.append("If you know what you're looking for, try qualifying it like this: ")
-			.append(theCandidateTargetTypes.stream().map(cls -> "[" + cls.getSimpleName() + ":" + theParamName + "]").collect(Collectors.joining(" or ")))
+	private void warnAboutPerformanceOnUnqualifiedResources(String theParamName, RequestDetails theRequest, @Nullable List<Class<? extends IBaseResource>> theCandidateTargetTypes) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("This search uses an unqualified resource(a parameter in a chain without a resource type). ");
+		builder.append("This is less efficient than using a qualified type. ");
+		if (theCandidateTargetTypes != null) {
+			builder.append("[" + theParamName + "] resolves to [" + theCandidateTargetTypes.stream().map(Class::getSimpleName).collect(Collectors.joining(",")) + "].");
+			builder.append("If you know what you're looking for, try qualifying it using the form ");
+			builder.append(theCandidateTargetTypes.stream().map(cls -> "[" + cls.getSimpleName() + ":" + theParamName + "]").collect(Collectors.joining(" or ")));
+		} else {
+			builder.append("If you know what you're looking for, try qualifying it using the form: '");
+			builder.append(theParamName).append(":[resourceType]");
+			builder.append("'");
+		}
+		String message = builder
 			.toString();
 		StorageProcessingMessage msg = new StorageProcessingMessage()
 			.setMessage(message);

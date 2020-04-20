@@ -24,6 +24,16 @@ This interceptor will then produce output similar to the following:
 2014-09-04 03:30:00.443 Source[127.0.0.1] Operation[search-type Organization] UA[Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)] Params[]
 ```
 
+<a name="request-tenant-partition-interceptor"/>
+
+# Partitioning: Multitenant Request Partition
+
+If the JPA server has [partitioning](/docs/server_jpa/partitioning.html) enabled, the RequestTenantPartitionInterceptor can be used in combination with a [Tenant Identification Strategy](/docs/server_plain/multitenancy.html) in order to achieve a multitenant solution. See [JPA Server Partitioning](/docs/server_jpa/partitioning.html) for more information on partitioning.
+
+* [RequestTenantPartitionInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/partition/RequestTenantPartitionInterceptor.html)
+* [RequestTenantPartitionInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/partition/RequestTenantPartitionInterceptor.java)
+
+
 # Response Customizing: Syntax Highlighting
 
 The ResponseHighlighterInterceptor detects when a request is coming from a browser and returns HTML with syntax highlighted XML/JSON instead of just the raw text. In other words, if a user uses a browser to request `http://foo/Patient/1` by typing this address into their URL bar, they will get a nicely formatted HTML back with a human readable version of the content. This is particularly helpful for testers and public/development APIs where users are likely to invoke the API directly to see how it works.
@@ -150,8 +160,8 @@ Some security audit tools require that servers return an HTTP 405 if an unsuppor
 
 When using Subscriptions, the debug log interceptor can be used to add a number of additional lines to the server logs showing the internals of the subscription processing pipeline.
 
-* [SubscriptionDebugLogInterceptor JavaDoc](/apidocs/hapi-fhir-jpaserver-base/ca/uhn/fhir/jpa/subscription/util/SubscriptionDebugLogInterceptor.html)
-* [SubscriptionDebugLogInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master//hapi-fhir-jpaserver-base/ca/uhn/fhir/jpa/subscription/util/SubscriptionDebugLogInterceptor.java)
+* [SubscriptionDebugLogInterceptor JavaDoc](/apidocs/hapi-fhir-jpaserver-subscription/ca/uhn/fhir/jpa/subscription/util/SubscriptionDebugLogInterceptor.html)
+* [SubscriptionDebugLogInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-subscription/src/main/java/ca/uhn/fhir/jpa/subscription/util/SubscriptionDebugLogInterceptor.java)
 
 
 # Request Pre-Processing: Override Meta.source

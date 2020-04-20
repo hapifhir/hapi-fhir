@@ -360,7 +360,11 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 			myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myDeleted")));
 			if (myPartitionId != null) {
-				myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myPartitionIdValue"), myPartitionId.getPartitionId()));
+				if (myPartitionId.getPartitionId() != null) {
+					myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myPartitionIdValue").as(Integer.class), myPartitionId.getPartitionId()));
+				} else {
+					myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myPartitionIdValue").as(Integer.class)));
+				}
 			}
 		}
 

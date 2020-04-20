@@ -201,6 +201,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		return b.build();
 	}
 
+	@SuppressWarnings("ConstantConditions")
 	@Override
 	public boolean matches(IQueryParameterType theParam) {
 		if (!(theParam instanceof DateParam)) {
@@ -216,7 +217,6 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 			return false;
 		}
 
-		// FIXME: below is always true
 		boolean result = true;
 		if (lowerBound != null) {
 			result &= (myValueLow.after(lowerBound) || myValueLow.equals(lowerBound));

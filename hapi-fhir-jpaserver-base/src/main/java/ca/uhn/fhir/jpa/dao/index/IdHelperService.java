@@ -21,9 +21,7 @@ package ca.uhn.fhir.jpa.dao.index;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.PartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
@@ -32,13 +30,10 @@ import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
-import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.ListMultimap;
@@ -68,6 +63,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This class is used to convert between PIDs (the internal primary key for a particular resource as
@@ -122,9 +118,9 @@ public class IdHelperService {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	public IResourceLookup resolveResourceIdentity(PartitionId thePartitionId, String theResourceName, String theResourceId, RequestDetails theRequestDetails) throws ResourceNotFoundException {
+	public IResourceLookup resolveResourceIdentity(PartitionId thePartitionId, String theResourceType, String theResourceId, RequestDetails theRequestDetails) throws ResourceNotFoundException {
 		// We only pass 1 input in so only 0..1 will come back
-		IdDt id = new IdDt(theResourceName, theResourceId);
+		IdDt id = new IdDt(theResourceType, theResourceId);
 		Collection<IResourceLookup> matches = translateForcedIdToPids(thePartitionId, theRequestDetails, Collections.singletonList(id));
 		assert matches.size() <= 1;
 		if (matches.isEmpty()) {
@@ -344,22 +340,16 @@ public class IdHelperService {
 
 			if (nextIds.size() > 0) {
 				Collection<Object[]> views;
-				if (isBlank(nextResourceType)) {
-					warnAboutUnqualifiedForcedIdResolution(theRequest);
+				assert isNotBlank(nextResourceType);
 
-					// FIXME: deal with partition here
-					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextIds);
-
-				} else {
-					if (thePartitionId != null) {
-						if (thePartitionId.getPartitionId() != null) {
-							views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, thePartitionId.getPartitionId());
-						} else {
-							views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(nextResourceType, nextIds);
-						}
+				if (thePartitionId != null) {
+					if (thePartitionId.getPartitionId() != null) {
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, thePartitionId.getPartitionId());
 					} else {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds);
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(nextResourceType, nextIds);
 					}
+				} else {
+					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds);
 				}
 
 				for (Object[] next : views) {
@@ -380,17 +370,6 @@ public class IdHelperService {
 		}
 
 		return retVal;
-	}
-
-	private void warnAboutUnqualifiedForcedIdResolution(RequestDetails theRequest) {
-		StorageProcessingMessage msg = new StorageProcessingMessage()
-			.setMessage("This search uses unqualified resource IDs (an ID without a resource type). This is less efficient than using a qualified type.");
-		ourLog.debug(msg.getMessage());
-		HookParams params = new HookParams()
-			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest)
-			.add(StorageProcessingMessage.class, msg);
-		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 	}
 
 	public void clearCache() {

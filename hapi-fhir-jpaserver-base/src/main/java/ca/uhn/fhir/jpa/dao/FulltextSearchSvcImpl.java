@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.model.PartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.model.config.PartitionConfig;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
@@ -283,6 +284,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Autowired
 	private IRequestPartitionHelperService myRequestPartitionHelperService;
 
+	@Autowired
+	private PartitionConfig myPartitionConfig;
+
 	@Transactional()
 	@Override
 	public List<Suggestion> suggestKeywords(String theContext, String theSearchParam, String theText, RequestDetails theRequest) {
@@ -297,8 +301,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			throw new InvalidRequestException("Invalid context: " + theContext);
 		}
 
-		// FIXME: this method should require a resource type
-		PartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, null);
+		// Partitioning is not supported for this operation
+		Validate.isTrue(myPartitionConfig.isPartitioningEnabled() == false, "Suggest keywords not supported for partitioned system");
+		PartitionId partitionId = null;
+
 		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(partitionId, contextParts[0], contextParts[1]);
 
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
@@ -315,7 +321,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			.sentence(theText.toLowerCase()).createQuery();
 
 		Query query = qb.bool()
-//			.must(qb.keyword().onField("myResourceLinks.myTargetResourcePid").matching(pid).createQuery())
 			.must(qb.keyword().onField("myResourceLinksField").matching(pid.toString()).createQuery())
 			.must(textQuery)
 			.createQuery();

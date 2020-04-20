@@ -134,7 +134,6 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 				continue;
 			}
 
-			// FIXME: add test for :missing
 			if (paramInverted) {
 				ourLog.debug("Searching for _tag:not");
 
@@ -160,6 +159,11 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 				defJoin.where(tagListPredicate);
 
 				continue;
+
+			} else {
+
+				myQueryRoot.setHasIndexJoins();
+
 			}
 
 			Join<ResourceTable, ResourceTag> tagJoin = myQueryRoot.join("myTags", JoinType.LEFT);
@@ -172,7 +176,6 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 				addPartitionIdPredicate(thePartitionId, tagJoin, predicates);
 			}
 
-			myQueryRoot.setHasIndexJoins();
 			myQueryRoot.addPredicates(predicates);
 
 		}

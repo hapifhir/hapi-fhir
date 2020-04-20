@@ -71,7 +71,7 @@ The HFJ_RESOURCE table indicates a single resource of any type in the database. 
             <td></td>
             <td>
                 This column contains the FHIR version associated with this resource, using a constant drawn
-                from <a href="/apidocs/hapi-fhir-base/ca/uhn/fhir/context/FhirVersionEnum.html">FhirVersionEnum</a>.
+                from <a href="/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/FhirVersionEnum.html">FhirVersionEnum</a>.
                 Not to be confused with <b>RES_VER</b> above.
             </td>
         </tr>
@@ -407,9 +407,119 @@ When a resource is created or updated, it is indexed for searching. Any search p
     </tbody>
 </table>     
 
-<a name="indexes"/>
+<a name="search-indexes"/>
 
 # Background: Search Indexes
 
-The HFJ_SPIDX (Search Parameter Index) tables are used to index resources for searching. When a resource is created or updated, a set of rows in these tables will be added. These are used for finding appropriate rows to return when performing FHIR searches.
+The HFJ_SPIDX (Search Parameter Index) tables are used to index resources for searching. When a resource is created or updated, a set of rows in these tables will be added. These are used for finding appropriate rows to return when performing FHIR searches. There are dedicated tables for supporting each of the non-reference [FHIR Search Datatypes](http://hl7.org/fhir/search.html): Date, Number, Quantity, String, Token, and URI. Note that Reference search parameters are implemented using the [HFJ_RES_LINK](#HFJ_RES_LINK) table above.
+
+<a name="search-hashes"/>
+
+## Search Hashes
+
+The SPIDX tables leverage "hash columns", which contain a hash of multiple columns in order to reduce index size and improve search performance. Hashes currently use the [MurmurHash3_x64_128](https://en.wikipedia.org/wiki/MurmurHash) hash algorithm, keeping only the first 64 bits in order to produce a LongInt value.
+
+For example, all search index tables have columns for storing the search parameter name (**SP_NAME**) and resource type (**RES_TYPE**). An additional column which hashes these two values is provided, called **HASH_IDENTITY**.
+
+In some configurations, the partition ID is also factored into the hashes.
+
+## Tables
+
+<img src="/hapi-fhir/docs/images/jpa_erd_search_indexes.svg" alt="Search Indexes" style="width: 100%; max-width: 900px;"/>
+
+## Columns
+
+The following columns are common to **all HFJ_SPIDX_xxx tables**.
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>PARTITION_ID</td>
+            <td></td>
+            <td>Integer</td>
+            <td>Nullable</td>
+            <td>
+                This is the optional partition ID, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.
+                Note that the partition indicated by the <b>PARTITION_ID</b> and <b>PARTITION_DATE</b> columns refers to the partition
+                of the <i>SOURCE</i> resource, and not necessarily the <i>TARGET</i>.  
+            </td>
+        </tr>
+        <tr>
+            <td>PARTITION_DATE</td>
+            <td></td>
+            <td>Timestamp</td>
+            <td>Nullable</td>
+            <td>
+                This is the optional partition date, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+                Note that the partition indicated by the <b>PARTITION_ID</b> and <b>PARTITION_DATE</b> columns refers to the partition
+                of the <i>SOURCE</i> resource, and not necessarily the <i>TARGET</i>.  
+            </td>        
+        </tr>
+        <tr>
+            <td>SP_ID</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                Holds the persistent ID 
+            </td>        
+        </tr>
+        <tr>
+            <td>RES_ID</td>
+            <td>FK to <a href="#HFJ_RESOURCE">HFJ_RESOURCE</a></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                Contains the PID of the resource being indexed.  
+            </td>        
+        </tr>
+        <tr>
+            <td>SP_NAME</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                This is the name of the search parameter being indexed. 
+            </td>        
+        </tr>
+        <tr>
+            <td>RES_TYPE</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                This is the name of the resource being indexed.
+            </td>        
+        </tr>
+        <tr>
+            <td>SP_UPDATED</td>
+            <td></td>
+            <td>Timestamp</td>
+            <td></td>
+            <td>
+                This is the time that this row was last updated.
+            </td>        
+        </tr>
+        <tr>
+            <td>SP_MISSING</td>
+            <td></td>
+            <td>boolean</td>
+            <td></td>
+            <td>
+                If this row represents a search parameter that is **not** populated at all in the resource being indexed,
+                this will be populated with the value `true`. Otherwise it will be populated with `false`.
+            </td>        
+        </tr>
+    </tbody>
+</table>
+
 

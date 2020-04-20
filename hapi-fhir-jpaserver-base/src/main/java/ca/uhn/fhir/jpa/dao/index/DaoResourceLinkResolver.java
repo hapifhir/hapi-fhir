@@ -64,11 +64,11 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	private DaoRegistry myDaoRegistry;
 
 	@Override
-	public IResourceLookup findTargetResource(PartitionId thePartitionId, RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
+	public IResourceLookup findTargetResource(PartitionId thePartitionId, RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theResourceType, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
 		IResourceLookup resolvedResource;
 		String idPart = theSourceResourceId.getIdPart();
 		try {
-			resolvedResource = myIdHelperService.resolveResourceIdentity(thePartitionId, theTypeString, idPart, theRequest);
+			resolvedResource = myIdHelperService.resolveResourceIdentity(thePartitionId, theResourceType, idPart, theRequest);
 			ourLog.trace("Translated {}/{} to resource PID {}", theType, idPart, resolvedResource);
 		} catch (ResourceNotFoundException e) {
 
@@ -89,8 +89,8 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		}
 
 		ourLog.trace("Resolved resource of type {} as PID: {}", resolvedResource.getResourceType(), resolvedResource.getResourceId());
-		if (!theTypeString.equals(resolvedResource.getResourceType())) {
-			ourLog.error("Resource with PID {} was of type {} and wanted {}", resolvedResource.getResourceId(), theTypeString, resolvedResource.getResourceType());
+		if (!theResourceType.equals(resolvedResource.getResourceType())) {
+			ourLog.error("Resource with PID {} was of type {} and wanted {}", resolvedResource.getResourceId(), theResourceType, resolvedResource.getResourceType());
 			throw new UnprocessableEntityException("Resource contains reference to unknown resource ID " + theSourceResourceId.getValue());
 		}
 
@@ -99,7 +99,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			throw new InvalidRequestException("Resource " + resName + "/" + idPart + " is deleted, specified in path: " + theSourcePath);
 		}
 
-		if (!theSearchParam.hasTargets() && theSearchParam.getTargets().contains(theTypeString)) {
+		if (!theSearchParam.hasTargets() && theSearchParam.getTargets().contains(theResourceType)) {
 			return null;
 		}
 

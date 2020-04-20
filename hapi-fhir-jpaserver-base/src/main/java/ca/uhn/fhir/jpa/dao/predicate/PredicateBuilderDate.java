@@ -82,17 +82,13 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
-		addPartitionIdPredicate(thePartitionId, join, codePredicates);
 
 		for (IQueryParameterType nextOr : theList) {
-			IQueryParameterType params = nextOr;
-			Predicate p = createPredicateDate(params,
-				theResourceName,
-				theParamName,
+			Predicate p = createPredicateDate(nextOr,
 				myCriteriaBuilder,
 				join,
-				operation,
-				thePartitionId);
+				operation
+			);
 			codePredicates.add(p);
 		}
 
@@ -116,22 +112,17 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 													 From<?, ResourceIndexedSearchParamDate> theFrom,
 													 PartitionId thePartitionId) {
 		Predicate predicateDate = createPredicateDate(theParam,
-			theResourceName,
-			theParamName,
 			theBuilder,
 			theFrom,
-			null,
-			thePartitionId);
+			null
+		);
 		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, predicateDate, thePartitionId);
 	}
 
 	private Predicate createPredicateDate(IQueryParameterType theParam,
-													  String theResourceName,
-													  String theParamName,
 													  CriteriaBuilder theBuilder,
 													  From<?, ResourceIndexedSearchParamDate> theFrom,
-													  SearchFilterParser.CompareOperation theOperation,
-													  PartitionId thePartitionId) {
+													  SearchFilterParser.CompareOperation theOperation) {
 
 		Predicate p;
 		if (theParam instanceof DateParam) {
@@ -159,15 +150,14 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		return p;
 	}
 
-	// FIXME: does this need a partition ID?
 	private Predicate createPredicateDateFromRange(CriteriaBuilder theBuilder,
 																  From<?, ResourceIndexedSearchParamDate> theFrom,
 																  DateRangeParam theRange,
 																  SearchFilterParser.CompareOperation operation) {
 		Date lowerBound = theRange.getLowerBoundAsInstant();
 		Date upperBound = theRange.getUpperBoundAsInstant();
-		Predicate lt = null;
-		Predicate gt = null;
+		Predicate lt;
+		Predicate gt;
 		Predicate lb = null;
 		Predicate ub = null;
 

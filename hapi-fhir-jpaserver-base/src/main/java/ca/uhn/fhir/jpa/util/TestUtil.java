@@ -104,10 +104,6 @@ public class TestUtil {
 		Subselect subselect = theClazz.getAnnotation(Subselect.class);
 		boolean isView = (subselect != null);
 
-		// FIXME: remove?
-		Embeddable embeddable = theClazz.getAnnotation(Embeddable.class);
-		boolean isEmbeddable = (embeddable != null);
-
 		scan(theClazz, theNames, theIsSuperClass, isView);
 
 		for (Field nextField : theClazz.getDeclaredFields()) {
