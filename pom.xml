@@ -638,7 +638,8 @@
 		<derby_version>10.14.2.0</derby_version>
 		<!--<derby_version>10.15.1.3</derby_version>-->
 		<error_prone_annotations_version>2.3.4</error_prone_annotations_version>
-		<error_prone_core_version>2.3.3</error_prone_core_version>
+		<error_prone_core_version>2.3.4</error_prone_core_version>
+		<nullaway_version>0.7.9</nullaway_version>
 		<guava_version>28.0-jre</guava_version>
 		<gson_version>2.8.5</gson_version>
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
@@ -811,6 +812,11 @@
 				<groupId>com.sun.mail</groupId>
 				<artifactId>javax.mail</artifactId>
 				<version>1.6.1</version>
+			</dependency>
+			<dependency>
+				<groupId>com.uber.nullaway</groupId>
+				<artifactId>nullaway</artifactId>
+				<version>${nullaway_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-cli</groupId>
@@ -1621,33 +1627,6 @@
 						<maxmem>2000m</maxmem>
 					</configuration>
 					<dependencies>
-						<!--
-						<dependency>
-							<groupId>com.google.errorprone</groupId>
-							<artifactId>error_prone_core</artifactId>
-							<version>2.3.2</version>
-						</dependency>
-						<dependency>
-							<groupId>org.codehaus.plexus</groupId>
-							<artifactId>plexus-compiler-api</artifactId>
-							<version>${plexus_compiler_api_version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.codehaus.plexus</groupId>
-							<artifactId>plexus-compiler-javac</artifactId>
-							<version>${plexus_compiler_api_version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.codehaus.plexus</groupId>
-							<artifactId>plexus-compiler-javac-errorprone</artifactId>
-							<version>${plexus_compiler_api_version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.codehaus.plexus</groupId>
-							<artifactId>plexus-utils</artifactId>
-							<version>3.1.0</version>
-						</dependency>
-						-->
 					</dependencies>
 				</plugin>
 				<plugin>
