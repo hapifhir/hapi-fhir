@@ -80,7 +80,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RESOURCE").dropColumn("2020419.2", "RES_PROFILE");
 
 		// Add Partitioning
-		Builder.BuilderAddTableByColumns partition = version.addTableByColumns("20200410.1", "HFJ_PARTITION", "PART_ID");
+		Builder.BuilderAddTableByColumns partition = version.addTableByColumns("20200420.1", "HFJ_PARTITION", "PART_ID");
 		partition.addColumn("PART_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 		partition.addColumn("PART_NAME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 		partition.addColumn("PART_DESC").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
