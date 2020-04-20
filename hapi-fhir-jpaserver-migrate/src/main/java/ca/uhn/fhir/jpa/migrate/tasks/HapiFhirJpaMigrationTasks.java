@@ -72,8 +72,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// These should have been non-nullable a long time ago
 		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.1", "HASH_NORM_PREFIX").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.1", "HASH_IDENTITY").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.1", "HASH_EXACT").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.2", "HASH_IDENTITY").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200413.3", "HASH_EXACT").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 
 		// Drop unused column
 		version.onTable("HFJ_RESOURCE").dropIndex("20200419.1", "IDX_RES_PROFILE");
