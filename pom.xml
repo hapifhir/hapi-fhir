@@ -607,6 +607,10 @@
 			<id>ibrohimislam</id>
 			<name>Ibrohim Kholilul Islam</name>
 		</developer>
+		<developer>
+			<id>mkucharek</id>
+			<name>Maciej Kucharek</name>
+		</developer>
 	</developers>
 
 	<licenses>
