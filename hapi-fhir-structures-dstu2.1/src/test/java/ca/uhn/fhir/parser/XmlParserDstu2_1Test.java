@@ -8,7 +8,6 @@ import ca.uhn.fhir.parser.FooMessageHeaderWithExplicitField.FooMessageSourceComp
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.parser.PatientWithCustomCompositeExtension.FooParentExtension;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
@@ -29,7 +28,11 @@ import org.hl7.fhir.dstu2016may.model.Observation.ObservationRelationshipType;
 import org.hl7.fhir.dstu2016may.model.Observation.ObservationStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.mockito.ArgumentCaptor;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.builder.Input;
@@ -40,13 +43,29 @@ import org.xmlunit.diff.ElementSelectors;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class XmlParserDstu2_1Test {
 	private static FhirContext ourCtx = FhirContext.forDstu2_1();
@@ -373,7 +392,7 @@ public class XmlParserDstu2_1Test {
 
 		// And re-encode once more, with the references cleared
 		patient.getContained().clear();
-		patient.getManagingOrganization().setReference((String) null);
+		patient.getManagingOrganization().setReference(null);
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>")));
@@ -382,7 +401,7 @@ public class XmlParserDstu2_1Test {
 
 		// And re-encode once more, with the references cleared and a manually set local ID
 		patient.getContained().clear();
-		patient.getManagingOrganization().setReference((String) null);
+		patient.getManagingOrganization().setReference(null);
 		patient.getManagingOrganization().getResource().setId(("#333"));
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
@@ -830,7 +849,7 @@ public class XmlParserDstu2_1Test {
 		// Adding medication to Contained.
 		Medication medResource = new Medication();
 		medResource.setCode(codeDt);
-		medResource.setId("#" + String.valueOf(medId));
+		medResource.setId("#" + medId);
 		medicationPrescript.getContained().add(medResource);
 
 		// Medication reference. This should point to the contained resource.
@@ -899,7 +918,7 @@ public class XmlParserDstu2_1Test {
 		// Adding medication to Contained.
 		Medication medResource = new Medication();
 		medResource.setCode(codeDt);
-		medResource.setId(String.valueOf(medId)); // ID does not start with '#'
+		medResource.setId(medId); // ID does not start with '#'
 		medicationPrescript.getContained().add(medResource);
 
 		// Medication reference. This should point to the contained resource.
@@ -2548,8 +2567,8 @@ public class XmlParserDstu2_1Test {
 		fhirPat = parser.parseResource(Patient.class, output);
 
 		List<Extension> extlst = fhirPat.getExtensionsByUrl("x1");
-		Assert.assertEquals(1, extlst.size());
-		Assert.assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
+		assertEquals(1, extlst.size());
+		assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
 	}
 
 	@AfterAll

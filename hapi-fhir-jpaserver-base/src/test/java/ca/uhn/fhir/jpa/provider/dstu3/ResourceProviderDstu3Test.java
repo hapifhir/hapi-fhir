@@ -18,8 +18,17 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
-import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.server.exceptions.*;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -30,14 +39,22 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.Bundle.*;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
+import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterLocationComponent;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
@@ -49,8 +66,8 @@ import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterEachClass;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,11 +83,24 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -522,7 +552,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 
 			@Override
-			public void interceptResponse(IHttpResponse theResponse) throws IOException {               // TODO Auto-generated method stu
+			public void interceptResponse(IHttpResponse theResponse) {               // TODO Auto-generated method stu
 			}
 
 		});
@@ -1304,7 +1334,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 			ourLog.info("$everything: " + ids.toString());
 
-			assertFalse(ids.toString(), dupes);
+			assertFalse(dupes, ids.toString());
 		}
 
 		/*
@@ -1325,7 +1355,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 			ourLog.info("$everything: " + ids.toString());
 
-			assertFalse(ids.toString(), dupes);
+			assertFalse(dupes, ids.toString());
 			assertThat(ids.toString(), containsString("Condition"));
 			assertThat(ids.size(), greaterThan(10));
 		}
@@ -2649,7 +2679,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		for (BundleEntryComponent ele : actual.getEntry()) {
 			actualIds.add(ele.getResource().getIdElement().getIdPart());
 		}
-		assertEquals("Expects to retrieve the 2 patients which reference the two different organizations", expectedIds, actualIds);
+		assertEquals(expectedIds, actualIds, "Expects to retrieve the 2 patients which reference the two different organizations");
 	}
 
 	@Test
@@ -2904,7 +2934,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info(value.getTime() + "");
 		ourLog.info(before.getTime() + "");
 		assertTrue(value.after(before));
-		assertTrue(new InstantDt(value) + " should be before " + new InstantDt(after), value.before(after));
+		assertTrue(value.before(after), new InstantDt(value) + " should be before " + new InstantDt(after));
 	}
 
 	@Test
@@ -3275,20 +3305,23 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	}
 
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void testSearchWithInvalidSort() {
-		Observation o = new Observation();
-		o.getCode().setText("testSearchWithInvalidSort");
-		myObservationDao.create(o, mySrd);
-		//@formatter:off
-		ourClient
-			.search()
-			.forResource(Observation.class)
-			.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
-			.prettyPrint()
-			.returnBundle(Bundle.class)
-			.execute();
-		//@formatter:on
+		try {
+			Observation o = new Observation();
+			o.getCode().setText("testSearchWithInvalidSort");
+			myObservationDao.create(o, mySrd);
+			ourClient
+				.search()
+				.forResource(Observation.class)
+				.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
 	@Test
@@ -3306,7 +3339,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType deletedIdMissingFalse = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
 		ourClient.delete().resourceById(deletedIdMissingFalse).execute();
 
-		List<IBaseResource> resources = new ArrayList<IBaseResource>();
+		List<IBaseResource> resources = new ArrayList<>();
 		for (int i = 0; i < 20; i++) {
 			org = new Organization();
 			org.setName(methodName + "_0" + i);

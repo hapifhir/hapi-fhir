@@ -2,15 +2,14 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterEachClass;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SuppressWarnings({"unchecked", "deprecation"})
 public class FhirResourceDaoDstu3StructureDefinitionTest extends BaseJpaDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3StructureDefinitionTest.class);

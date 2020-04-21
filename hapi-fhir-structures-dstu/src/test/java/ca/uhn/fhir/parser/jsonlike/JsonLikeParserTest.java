@@ -10,7 +10,7 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEachClass;
 import org.junit.jupiter.api.Test;
 

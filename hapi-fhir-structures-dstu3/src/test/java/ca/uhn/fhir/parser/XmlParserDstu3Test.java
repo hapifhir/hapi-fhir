@@ -34,7 +34,7 @@ import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
@@ -181,8 +181,8 @@ public class XmlParserDstu3Test {
 		fhirPat = parser.parseResource(Patient.class, output);
 
 		List<Extension> extlst = fhirPat.getExtensionsByUrl("x1");
-		Assert.assertEquals(1, extlst.size());
-		Assert.assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
+		assertEquals(1, extlst.size());
+		assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
 	}
 
 	/**
@@ -326,13 +326,18 @@ public class XmlParserDstu3Test {
 		assertEquals("ORG", o.getName());
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testContainedResourceWithNoId() throws IOException {
-		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_contained_with_no_id.xml"), StandardCharsets.UTF_8);
+		try {
+			String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_contained_with_no_id.xml"), StandardCharsets.UTF_8);
 
-		IParser parser = ourCtx.newXmlParser();
-		parser.setParserErrorHandler(new StrictErrorHandler());
-		parser.parseResource(Bundle.class, string);
+			IParser parser = ourCtx.newXmlParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(Bundle.class, string);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
 	@Test
@@ -3133,9 +3138,14 @@ public class XmlParserDstu3Test {
 	/**
 	 * See #342
 	 */
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testParseInvalid() {
-		ourCtx.newXmlParser().parseResource("FOO");
+		try {
+			ourCtx.newXmlParser().parseResource("FOO");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
 	/**
@@ -3350,13 +3360,18 @@ public class XmlParserDstu3Test {
 		assertEquals("Patient", reincarnatedPatient.getIdElement().getResourceType());
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testParseWithInvalidLocalRef() throws IOException {
-		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_invalid_contained_ref.xml"), StandardCharsets.UTF_8);
+		try {
+			String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_invalid_contained_ref.xml"), StandardCharsets.UTF_8);
 
-		IParser parser = ourCtx.newXmlParser();
-		parser.setParserErrorHandler(new StrictErrorHandler());
-		parser.parseResource(Bundle.class, string);
+			IParser parser = ourCtx.newXmlParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(Bundle.class, string);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
 	@Test()

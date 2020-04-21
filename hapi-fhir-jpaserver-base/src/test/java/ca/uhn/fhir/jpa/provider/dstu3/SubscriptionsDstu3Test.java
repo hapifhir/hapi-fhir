@@ -13,16 +13,18 @@ import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterEachClass;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -124,7 +126,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 		try {
-			subs.setStatus((SubscriptionStatus) null);
+			subs.setStatus(null);
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -155,7 +157,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 		try {
-			subs.setStatus((SubscriptionStatus) null);
+			subs.setStatus(null);
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {

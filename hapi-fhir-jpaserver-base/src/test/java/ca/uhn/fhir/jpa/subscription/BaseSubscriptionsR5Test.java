@@ -31,10 +31,10 @@ import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.Topic;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeEachClass;
 import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;
 

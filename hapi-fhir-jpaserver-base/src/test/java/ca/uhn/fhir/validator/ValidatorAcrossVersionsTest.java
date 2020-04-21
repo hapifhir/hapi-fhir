@@ -3,7 +3,7 @@ package ca.uhn.fhir.validator;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.ConfigurationException;

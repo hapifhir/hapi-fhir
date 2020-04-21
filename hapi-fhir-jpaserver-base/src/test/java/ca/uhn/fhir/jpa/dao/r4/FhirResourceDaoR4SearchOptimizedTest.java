@@ -24,7 +24,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -144,7 +145,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertThat(ids, hasSize(10));
 		PersistedJpaBundleProvider bundleProvider = (PersistedJpaBundleProvider) myDatabaseBackedPagingProvider.retrieveResultList(null, uuid);
 		Integer bundleSize = bundleProvider.size();
-		assertNotNull("Null size from provider of type " + bundleProvider.getClass() + " - Cache hit: " + bundleProvider.isCacheHit(), bundleSize);
+		assertNotNull(bundleSize, "Null size from provider of type " + bundleProvider.getClass() + " - Cache hit: " + bundleProvider.isCacheHit());
 		assertEquals(201, bundleSize.intValue());
 
 		// Search with count only
@@ -735,7 +736,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			.collect(Collectors.toList());
 
 		String resultingQueryNotFormatted = queries.get(0);
-		assertEquals(resultingQueryNotFormatted, 1, StringUtils.countMatches(resultingQueryNotFormatted, "Patient.managingOrganization"));
+		assertEquals(1, StringUtils.countMatches(resultingQueryNotFormatted, "Patient.managingOrganization"), resultingQueryNotFormatted);
 		assertThat(resultingQueryNotFormatted, containsString("TARGET_RESOURCE_ID in ('" + ids.get(0) + "' , '" + ids.get(1) + "' , '" + ids.get(2) + "' , '" + ids.get(3) + "' , '" + ids.get(4) + "')"));
 
 		// Ensure that the search actually worked
@@ -1117,7 +1118,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		// The search itself
 		resultingQueryNotFormatted = queries.get(1);
-		assertEquals(resultingQueryNotFormatted, 1, StringUtils.countMatches(resultingQueryNotFormatted, "Patient.managingOrganization"));
+		assertEquals(1, StringUtils.countMatches(resultingQueryNotFormatted, "Patient.managingOrganization"), resultingQueryNotFormatted);
 		assertThat(resultingQueryNotFormatted, matchesPattern(".*TARGET_RESOURCE_ID in \\('[0-9]+' , '[0-9]+' , '[0-9]+' , '[0-9]+' , '[0-9]+'\\).*"));
 
 		// Ensure that the search actually worked

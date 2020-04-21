@@ -1,5 +1,46 @@
 package ca.uhn.fhir.parser;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
+import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
+import ca.uhn.fhir.parser.PatientWithExtendedContactDstu3.CustomContactComponent;
+import ca.uhn.fhir.parser.XmlParserDstu2_1Test.TestPatientFor327;
+import ca.uhn.fhir.util.TestUtil;
+import com.google.common.collect.Sets;
+import net.sf.json.JSON;
+import net.sf.json.JSONSerializer;
+import net.sf.json.JsonConfig;
+import org.apache.commons.io.IOUtils;
+import org.hamcrest.Matchers;
+import org.hamcrest.core.StringContains;
+import org.hl7.fhir.dstu2016may.model.Address.AddressUse;
+import org.hl7.fhir.dstu2016may.model.Address.AddressUseEnumFactory;
+import org.hl7.fhir.dstu2016may.model.*;
+import org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu2016may.model.Bundle.BundleType;
+import org.hl7.fhir.dstu2016may.model.Condition.ConditionVerificationStatus;
+import org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode;
+import org.hl7.fhir.dstu2016may.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu2016may.model.Identifier.IdentifierUse;
+import org.hl7.fhir.dstu2016may.model.Observation.ObservationStatus;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.mockito.ArgumentCaptor;
+
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -10,48 +51,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
-import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
-import org.apache.commons.io.IOUtils;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.StringContains;
-import org.hl7.fhir.dstu2016may.model.*;
-import org.hl7.fhir.dstu2016may.model.Address.AddressUse;
-import org.hl7.fhir.dstu2016may.model.Address.AddressUseEnumFactory;
-import org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu2016may.model.Bundle.BundleType;
-import org.hl7.fhir.dstu2016may.model.Condition.ConditionVerificationStatus;
-import org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode;
-import org.hl7.fhir.dstu2016may.model.Enumeration;
-import org.hl7.fhir.dstu2016may.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu2016may.model.Identifier.IdentifierUse;
-import org.hl7.fhir.dstu2016may.model.Observation.ObservationStatus;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.*;
-import org.mockito.ArgumentCaptor;
-
-import com.google.common.collect.Sets;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
-import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
-import ca.uhn.fhir.parser.PatientWithExtendedContactDstu3.CustomContactComponent;
-import ca.uhn.fhir.parser.XmlParserDstu2_1Test.TestPatientFor327;
-import ca.uhn.fhir.util.TestUtil;
-import net.sf.json.*;
 
 public class JsonParserDstu2_1Test {
 	private static FhirContext ourCtx = FhirContext.forDstu2_1();
@@ -126,7 +132,7 @@ public class JsonParserDstu2_1Test {
 	
 
 	@Test
-	public void testEncodeAndParseExtensions() throws Exception {
+	public void testEncodeAndParseExtensions() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
@@ -424,7 +430,7 @@ public class JsonParserDstu2_1Test {
 	 */
 	@Test
 	public void testEncodeEmptyTag() {
-		ArrayList<Coding> tagList = new ArrayList<Coding>();
+		ArrayList<Coding> tagList = new ArrayList<>();
 		tagList.add(new Coding());
 		tagList.add(new Coding().setDisplay("Label"));
 
@@ -440,7 +446,7 @@ public class JsonParserDstu2_1Test {
 	 */
 	@Test
 	public void testEncodeEmptyTag2() {
-		ArrayList<Coding> tagList = new ArrayList<Coding>();
+		ArrayList<Coding> tagList = new ArrayList<>();
 		tagList.add(new Coding().setSystem("scheme").setCode("code"));
 		tagList.add(new Coding().setDisplay("Label"));
 
@@ -597,7 +603,7 @@ public class JsonParserDstu2_1Test {
 		TestPatientFor327 patient = new TestPatientFor327();
 		patient.setBirthDateElement(new DateType("2016-04-14"));
 
-		List<Reference> conditions = new ArrayList<Reference>();
+		List<Reference> conditions = new ArrayList<>();
 		Condition condition = new Condition();
 		condition.addBodySite().setText("BODY SITE");
 		conditions.add(new Reference(condition));
@@ -675,7 +681,7 @@ public class JsonParserDstu2_1Test {
 		ourLog.info(enc);
 		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
 
-		parser.setDontStripVersionsFromReferencesAtPaths(new ArrayList<String>());
+		parser.setDontStripVersionsFromReferencesAtPaths(new ArrayList<>());
 		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
 		ourLog.info(enc);
 		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
@@ -709,12 +715,12 @@ public class JsonParserDstu2_1Test {
 		ourLog.info(enc);
 		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
 
-		ourCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths(Arrays.asList("Patient.managingOrganization"));
+		ourCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths(Collections.singletonList("Patient.managingOrganization"));
 		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
 		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
 
-		ourCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths(new HashSet<String>(Arrays.asList("Patient.managingOrganization")));
+		ourCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths(new HashSet<>(Collections.singletonList("Patient.managingOrganization")));
 		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
 		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
@@ -792,7 +798,7 @@ public class JsonParserDstu2_1Test {
 	}
 
 	@Test
-	public void testEncodeNarrativeSuppressed() throws Exception {
+	public void testEncodeNarrativeSuppressed() {
 		Patient patient = new Patient();
 		patient.setId("Patient/1/_history/1");
 		patient.getText().setDivAsString("<div>THE DIV</div>");
@@ -1834,8 +1840,8 @@ public class JsonParserDstu2_1Test {
 		fhirPat = parser.parseResource(Patient.class, output);
 
 		List<Extension> extlst = fhirPat.getExtensionsByUrl("x1");
-		Assert.assertEquals(1, extlst.size());
-		Assert.assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
+		assertEquals(1, extlst.size());
+		assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
 	}
 
 

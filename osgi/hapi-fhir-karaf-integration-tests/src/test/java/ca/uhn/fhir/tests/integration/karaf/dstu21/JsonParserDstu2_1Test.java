@@ -20,7 +20,7 @@ import org.hl7.fhir.dstu2016may.model.PrimitiveType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -1426,8 +1426,8 @@ public class JsonParserDstu2_1Test {
 		fhirPat = parser.parseResource(org.hl7.fhir.dstu2016may.model.Patient.class, output);
 
 		List<org.hl7.fhir.dstu2016may.model.Extension> extlst = fhirPat.getExtensionsByUrl("x1");
-		Assert.assertEquals(1, extlst.size());
-		Assert.assertEquals(refVal, ((org.hl7.fhir.dstu2016may.model.Reference) extlst.get(0).getValue()).getReference());
+		assertEquals(1, extlst.size());
+		assertEquals(refVal, ((org.hl7.fhir.dstu2016may.model.Reference) extlst.get(0).getValue()).getReference());
 	}
 
 

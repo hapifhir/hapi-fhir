@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,7 +15,7 @@ import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
-import org.junit.*;
+import org.junit.jupiter.api.*;
 
 import com.google.common.base.Charsets;
 
@@ -22,6 +23,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.TestUtil;
+import org.junit.jupiter.api.BeforeEach;
 
 @SuppressWarnings("Duplicates")
 public class PatientEverythingR4Test extends BaseResourceProviderR4Test {

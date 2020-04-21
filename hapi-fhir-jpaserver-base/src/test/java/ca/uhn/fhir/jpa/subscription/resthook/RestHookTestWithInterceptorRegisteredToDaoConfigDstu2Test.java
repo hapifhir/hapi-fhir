@@ -28,12 +28,18 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -157,7 +163,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForSize(1, ourUpdatedObservations);
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-		Assert.assertNotNull(subscriptionTemp);
+		assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
@@ -206,9 +212,9 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
-		Assert.assertFalse(observation1.getId().isEmpty());
-		Assert.assertFalse(observation2.getId().isEmpty());
+		assertFalse(subscription1.getId().equals(subscription2.getId()));
+		assertFalse(observation1.getId().isEmpty());
+		assertFalse(observation2.getId().isEmpty());
 	}
 
 	@Test
@@ -230,7 +236,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForSize(1, ourUpdatedObservations);
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-		Assert.assertNotNull(subscriptionTemp);
+		assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
@@ -279,9 +285,9 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
-		Assert.assertFalse(observation1.getId().isEmpty());
-		Assert.assertFalse(observation2.getId().isEmpty());
+		assertFalse(subscription1.getId().equals(subscription2.getId()));
+		assertFalse(observation1.getId().isEmpty());
+		assertFalse(observation2.getId().isEmpty());
 	}
 
 	public static class ObservationListener implements IResourceProvider {

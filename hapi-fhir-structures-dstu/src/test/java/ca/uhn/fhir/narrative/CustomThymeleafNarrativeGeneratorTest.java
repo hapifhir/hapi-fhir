@@ -3,7 +3,7 @@ package ca.uhn.fhir.narrative;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;

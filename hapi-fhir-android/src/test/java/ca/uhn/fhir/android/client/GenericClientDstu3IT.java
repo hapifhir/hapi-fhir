@@ -10,7 +10,7 @@ import java.util.Date;
 
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import org.hl7.fhir.dstu3.model.*;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;

@@ -26,8 +26,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
@@ -133,7 +132,7 @@ public class JsonParserHl7OrgDstu2Test {
     Patient patient = new Patient();
     patient.addAddress().setUse(AddressUse.HOME);
     EnumFactory<AddressUse> fact = new AddressUseEnumFactory();
-    PrimitiveType<AddressUse> enumeration = new Enumeration<AddressUse>(fact).setValue(AddressUse.HOME);
+    PrimitiveType<AddressUse> enumeration = new Enumeration<>(fact).setValue(AddressUse.HOME);
     patient.addExtension().setUrl("urn:foo").setValue(enumeration);
 
     String val = parser.encodeResourceToString(patient);
@@ -1262,8 +1261,8 @@ public class JsonParserHl7OrgDstu2Test {
 		fhirPat = parser.parseResource(Patient.class, output);
 
 		List<Extension> extlst = fhirPat.getExtension();
-		Assert.assertEquals(1, extlst.size());
-		Assert.assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
+		assertEquals(1, extlst.size());
+		assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
 	}
 
   @Test

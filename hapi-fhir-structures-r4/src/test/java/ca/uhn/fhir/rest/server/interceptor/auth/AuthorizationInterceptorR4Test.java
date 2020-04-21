@@ -50,7 +50,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -2806,9 +2806,9 @@ public class AuthorizationInterceptorR4Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
-		Assert.assertEquals(5, respBundle.getEntry().size());
-		Assert.assertEquals(10, respBundle.getTotal());
-		Assert.assertEquals("Observation/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(5, respBundle.getEntry().size());
+		assertEquals(10, respBundle.getTotal());
+		assertEquals("Observation/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		assertNotNull(respBundle.getLink("next"));
 
 		// Load next page
@@ -2820,9 +2820,9 @@ public class AuthorizationInterceptorR4Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
-		Assert.assertEquals(5, respBundle.getEntry().size());
-		Assert.assertEquals(10, respBundle.getTotal());
-		Assert.assertEquals("Observation/5", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(5, respBundle.getEntry().size());
+		assertEquals(10, respBundle.getTotal());
+		assertEquals("Observation/5", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		assertNull(respBundle.getLink("next"));
 
 	}
@@ -2858,9 +2858,9 @@ public class AuthorizationInterceptorR4Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
-		Assert.assertEquals(5, respBundle.getEntry().size());
-		Assert.assertEquals(10, respBundle.getTotal());
-		Assert.assertEquals("Observation/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(5, respBundle.getEntry().size());
+		assertEquals(10, respBundle.getTotal());
+		assertEquals("Observation/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		assertNotNull(respBundle.getLink("next"));
 
 		// Load next page

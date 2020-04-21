@@ -3,7 +3,7 @@ package ca.uhn.fhir.parser;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.ConfigurationException;

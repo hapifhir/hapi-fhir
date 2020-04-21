@@ -6,7 +6,7 @@ import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.TestUtil;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,7 +25,7 @@ public class ElementWithExtensionDstu2Test {
     }
 
     @Test
-    public void testExtensionOnPrimitiveExtensionJson() throws Exception {
+    public void testExtensionOnPrimitiveExtensionJson() {
         MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
         patient.setId("1");
         final HumanNameDt name = patient.getNameFirstRep();
@@ -56,7 +56,7 @@ public class ElementWithExtensionDstu2Test {
     }
 
     @Test
-    public void testExtensionOnPrimitiveExtensionWithNullValueJson() throws Exception {
+    public void testExtensionOnPrimitiveExtensionWithNullValueJson() {
         MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
         patient.setId("1");
         patient.getPetName().addUndeclaredExtension(false, "http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringDt("UNK"));
@@ -71,7 +71,7 @@ public class ElementWithExtensionDstu2Test {
 
 
     @Test
-    public void testExtensionOnPrimitiveExtensionXml() throws Exception {
+    public void testExtensionOnPrimitiveExtensionXml() {
         MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
         patient.setId("1");
 
@@ -102,7 +102,7 @@ public class ElementWithExtensionDstu2Test {
     }
 
     @Test
-    public void testExtensionOnPrimitiveExtensionWithNullValueXml() throws Exception {
+    public void testExtensionOnPrimitiveExtensionWithNullValueXml() {
         MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
         patient.setId("1");
         patient.getPetName().addUndeclaredExtension(false, "http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringDt("UNK"));
@@ -116,7 +116,7 @@ public class ElementWithExtensionDstu2Test {
     }
 
     @Test
-    public void testExtensionOnIDDatatypeJson() throws Exception {
+    public void testExtensionOnIDDatatypeJson() {
         MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
         patient.setId("1");
         patient.getId().addUndeclaredExtension(false, "http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringDt("UNK"));
@@ -132,7 +132,7 @@ public class ElementWithExtensionDstu2Test {
 
 
     @Test
-    public void testExtensionOnIDDatatypeXml() throws Exception {
+    public void testExtensionOnIDDatatypeXml() {
         MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
         patient.setId("1");
         patient.getId().addUndeclaredExtension(false, "http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringDt("UNK"));
@@ -146,7 +146,7 @@ public class ElementWithExtensionDstu2Test {
     }
 
     @Test
-    public void testExtensionOnIDDatatypeExtensionJson() throws Exception {
+    public void testExtensionOnIDDatatypeExtensionJson() {
         MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
         patient.setId("1");
         patient.setCustomId(new IdDt("3"));
@@ -161,7 +161,7 @@ public class ElementWithExtensionDstu2Test {
     }
 
     @Test
-    public void testExtensionOnIDDatatypeExtensionNullValueJson() throws Exception {
+    public void testExtensionOnIDDatatypeExtensionNullValueJson() {
         MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
         patient.setId("1");
         patient.getCustomId().addUndeclaredExtension(false, "http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringDt("UNK"));
@@ -175,7 +175,7 @@ public class ElementWithExtensionDstu2Test {
     }
 
     @Test
-    public void testExtensionOnIDDatatypeExtensionXml() throws Exception {
+    public void testExtensionOnIDDatatypeExtensionXml() {
         MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
         patient.setId("1");
         patient.setCustomId(new IdDt("4"));
@@ -190,7 +190,7 @@ public class ElementWithExtensionDstu2Test {
     }
 
     @Test
-    public void testExtensionOnIDDatatypeExtensionNullValueXml() throws Exception {
+    public void testExtensionOnIDDatatypeExtensionNullValueXml() {
         MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
         patient.setId("1");
         patient.getCustomId().addUndeclaredExtension(false, "http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringDt("UNK"));

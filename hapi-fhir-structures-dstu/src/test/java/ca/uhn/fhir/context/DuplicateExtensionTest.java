@@ -2,7 +2,7 @@ package ca.uhn.fhir.context;
 
 import junit.framework.TestCase;
 
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.model.api.IResource;

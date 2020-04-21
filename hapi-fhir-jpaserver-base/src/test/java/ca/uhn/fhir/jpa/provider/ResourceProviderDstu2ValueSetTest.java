@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

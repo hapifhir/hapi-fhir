@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.util.TestUtil;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -10,7 +10,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

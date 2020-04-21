@@ -12,8 +12,8 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterEachClass;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 
@@ -55,7 +55,7 @@ public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 
 		ThreadPoolExecutor exec = new ThreadPoolExecutor(10, 10,
 			0L, TimeUnit.MILLISECONDS,
-			new LinkedBlockingQueue<Runnable>());
+			new LinkedBlockingQueue<>());
 
 		final AtomicInteger errors = new AtomicInteger();
 
@@ -139,7 +139,7 @@ public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 		ourLog.info("Last version: {}", lastVersion);
 
 		//assertEquals(message, currentVersion.intValue(), versions.size());
-		assertEquals(message, currentVersion, lastVersion);
+		assertEquals(currentVersion, lastVersion, message);
 
 	}
 

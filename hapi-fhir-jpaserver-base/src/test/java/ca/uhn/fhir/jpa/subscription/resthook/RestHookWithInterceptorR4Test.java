@@ -249,7 +249,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 			assertEquals("1", ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
 
 			Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-			Assert.assertNotNull(subscriptionTemp);
+			assertNotNull(subscriptionTemp);
 
 			subscriptionTemp.setCriteria(criteria1);
 			ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();

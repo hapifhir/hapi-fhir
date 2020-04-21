@@ -18,7 +18,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +52,7 @@ public class CompressOutgoingContentInterceptorTest {
 
 		ourClient.create().resource(p).execute();
 
-		Assert.assertEquals("FAMILY", p.getName().get(0).getFamily());
+		assertEquals("FAMILY", p.getName().get(0).getFamily());
 		assertEquals("gzip", ourLastReq);
 		assertEquals("gzip", ourLastResponseEncoding);
 	}

@@ -12,7 +12,7 @@ import java.io.IOException;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;

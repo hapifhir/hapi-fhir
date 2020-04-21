@@ -18,7 +18,7 @@ import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Observation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +29,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -159,17 +161,17 @@ public class InMemoryResourceMatcherR5Test {
 		String equation = "date=" + theOperator.getValue();
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + EARLY_DATE, myObservation, mySearchParams);
-			assertTrue(result.getUnsupportedReason(), result.supported());
+			assertTrue(result.supported(), result.getUnsupportedReason());
 			assertEquals(result.matched(), theEarly);
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + OBSERVATION_DATE, myObservation, mySearchParams);
-			assertTrue(result.getUnsupportedReason(), result.supported());
+			assertTrue(result.supported(), result.getUnsupportedReason());
 			assertEquals(result.matched(), theSame);
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + LATE_DATE, myObservation, mySearchParams);
-			assertTrue(result.getUnsupportedReason(), result.supported());
+			assertTrue(result.supported(), result.getUnsupportedReason());
 			assertEquals(result.matched(), theLater);
 		}
 	}
@@ -177,7 +179,7 @@ public class InMemoryResourceMatcherR5Test {
 	@Test
 	public void testNowPast() {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=lt" + BaseDateTimeDt.NOW_DATE_CONSTANT, myObservation, mySearchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertTrue(result.matched());
 	}
 
@@ -189,7 +191,7 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.NOW_DATE_CONSTANT, futureObservation, searchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertTrue(result.matched());
 	}
 
@@ -201,7 +203,7 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.NOW_DATE_CONSTANT, futureObservation, searchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue( result.supported(), result.getUnsupportedReason());
 		assertTrue(result.matched());
 	}
 

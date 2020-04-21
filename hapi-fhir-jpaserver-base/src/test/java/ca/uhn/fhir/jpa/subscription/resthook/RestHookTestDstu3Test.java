@@ -26,7 +26,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
@@ -188,24 +188,24 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Should see 1 subscription notification with authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
-		Assert.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
-		Assert.assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 
 		sendObservation(code, "SNOMED-CT");
 
 		// Should see 1 subscription notification with authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
-		Assert.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
-		Assert.assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
 		/// Should see 1 subscription notification with authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
-		Assert.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
-		Assert.assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 
 		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
@@ -218,8 +218,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Should see 2 subscription notifications with and without authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
-		Assert.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
-		Assert.assertNull(ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		assertNull(ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 	}
 
@@ -291,7 +291,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Modify subscription 2 to also match
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-		Assert.assertNotNull(subscriptionTemp);
+		assertNotNull(subscriptionTemp);
 		subscriptionTemp.setCriteria(criteria1);
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
@@ -341,9 +341,9 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
-		Assert.assertFalse(observation1.getId().isEmpty());
-		Assert.assertFalse(observation2.getId().isEmpty());
+		assertFalse(subscription1.getId().equals(subscription2.getId()));
+		assertFalse(observation1.getId().isEmpty());
+		assertFalse(observation2.getId().isEmpty());
 	}
 
 	@Test
@@ -368,7 +368,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Modify subscription 2 to also match
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-		Assert.assertNotNull(subscriptionTemp);
+		assertNotNull(subscriptionTemp);
 		subscriptionTemp.setCriteria(criteria1);
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
@@ -421,9 +421,9 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		Assert.assertNotEquals(subscription1.getId(), subscription2.getId());
-		Assert.assertFalse(observation1.getId().isEmpty());
-		Assert.assertFalse(observation2.getId().isEmpty());
+		assertNotEquals(subscription1.getId(), subscription2.getId());
+		assertFalse(observation1.getId().isEmpty());
+		assertFalse(observation2.getId().isEmpty());
 	}
 
 	@Test
@@ -562,7 +562,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		cr.setOccurrence(new DateTimeType("2019-02-08T00:01:00-05:00"));
 		communicationRequestListenerLatch = new CountDownLatch(1);
 		ourClient.create().resource(cr).execute();
-		assertTrue("Timed out waiting for subscription to match", communicationRequestListenerLatch.await(10, TimeUnit.SECONDS));
+		assertTrue(communicationRequestListenerLatch.await(10, TimeUnit.SECONDS), "Timed out waiting for subscription to match");
 	}
 
 	@Test
@@ -585,7 +585,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		public MethodOutcome create(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourLog.info("Received Listener Create");
 			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
-			ourCreatedObservations.add((Observation) theObservation);
+			ourCreatedObservations.add(theObservation);
 			return new MethodOutcome(new IdType("Observation/1"), true);
 		}
 

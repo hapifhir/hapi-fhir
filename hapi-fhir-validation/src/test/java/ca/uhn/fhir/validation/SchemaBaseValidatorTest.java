@@ -7,7 +7,9 @@ import org.junit.jupiter.api.Test;
 import javax.xml.transform.Source;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SchemaBaseValidatorTest {
 

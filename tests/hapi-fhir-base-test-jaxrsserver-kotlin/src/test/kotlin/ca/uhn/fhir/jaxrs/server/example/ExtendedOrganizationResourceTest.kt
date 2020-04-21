@@ -9,7 +9,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler
 import org.hamcrest.CoreMatchers.`is`
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher
-import org.junit.jupiter.api.AfterEachClass
+import org.junit.jupiter.api.AfterAll
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.BeforeEachClass
 import org.junit.jupiter.api.Test

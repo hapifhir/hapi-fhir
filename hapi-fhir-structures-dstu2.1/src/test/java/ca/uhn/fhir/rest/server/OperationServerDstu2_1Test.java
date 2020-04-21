@@ -29,7 +29,7 @@ import org.hl7.fhir.dstu2016may.model.*;
 import org.hl7.fhir.dstu2016may.model.Conformance.ConformanceRestOperationComponent;
 import org.hl7.fhir.dstu2016may.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.*;
@@ -39,6 +39,9 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 
 public class OperationServerDstu2_1Test {
 	private static CloseableHttpClient ourClient;
@@ -71,7 +74,7 @@ public class OperationServerDstu2_1Test {
 
 
 	@Test
-	public void testConformance() throws Exception {
+	public void testConformance() {
 		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 		loggingInterceptor.setLogResponseBody(true);
 		myFhirClient.registerInterceptor(loggingInterceptor);
@@ -719,7 +722,7 @@ public class OperationServerDstu2_1Test {
 		public IBundleProvider opInstanceReturnsBundleProvider() {
 			ourLastMethod = "$OP_INSTANCE_BUNDLE_PROVIDER";
 
-			List<IBaseResource> resources = new ArrayList<IBaseResource>();
+			List<IBaseResource> resources = new ArrayList<>();
 			for (int i =0; i < 100;i++) {
 				Patient p = new Patient();
 				p.setId("Patient/" + i);

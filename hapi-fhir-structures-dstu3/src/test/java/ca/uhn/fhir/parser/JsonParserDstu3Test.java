@@ -30,7 +30,7 @@ import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
@@ -149,8 +149,8 @@ public class JsonParserDstu3Test {
 		fhirPat = parser.parseResource(Patient.class, output);
 
 		List<Extension> extensions = fhirPat.getExtensionsByUrl("x1");
-		Assert.assertEquals(1, extensions.size());
-		Assert.assertEquals(refVal, ((Reference) extensions.get(0).getValue()).getReference());
+		assertEquals(1, extensions.size());
+		assertEquals(refVal, ((Reference) extensions.get(0).getValue()).getReference());
 	}
 
 	/**

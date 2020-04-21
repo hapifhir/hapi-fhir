@@ -6,9 +6,9 @@ import java.util.Arrays;
 
 import javax.servlet.ServletException;
 
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import ca.uhn.fhir.context.FhirContext;

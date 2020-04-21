@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -1411,8 +1411,8 @@ public class XmlParserHl7OrgDstu2Test {
 		fhirPat = parser.parseResource(org.hl7.fhir.dstu2.model.Patient.class, output);
 
 		List<org.hl7.fhir.dstu2.model.Extension> extlst = fhirPat.getExtension();
-		Assert.assertEquals(1, extlst.size());
-		Assert.assertEquals(refVal, ((org.hl7.fhir.dstu2.model.Reference) extlst.get(0).getValue()).getReference());
+		assertEquals(1, extlst.size());
+		assertEquals(refVal, ((org.hl7.fhir.dstu2.model.Reference) extlst.get(0).getValue()).getReference());
 	}
 
 	@ResourceDef(name = "Patient")

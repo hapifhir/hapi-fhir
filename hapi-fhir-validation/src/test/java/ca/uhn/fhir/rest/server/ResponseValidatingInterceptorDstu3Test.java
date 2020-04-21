@@ -28,21 +28,22 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.junit.jupiter.api.AfterEachClass;
 import org.junit.Assert;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeEachClass;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
 public class ResponseValidatingInterceptorDstu3Test {
@@ -96,7 +97,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", status);
 		ourLog.info("Response was:\n{}", responseContent);
 
-		Assert.assertEquals(500, status.getStatusLine().getStatusCode());
+		assertEquals(500, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, Matchers.containsString("<diagnostics value=\"SOME MESSAGE\"/>"));
 	}
 
@@ -126,7 +127,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", status);
 		ourLog.info("Response was:\n{}", responseContent);
 
-		Assert.assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Response-Validation")));
 	}
 
@@ -156,7 +157,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", status);
 		ourLog.info("Response was:\n{}", responseContent);
 
-		Assert.assertEquals(500, status.getStatusLine().getStatusCode());
+		assertEquals(500, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, Matchers.containsString("<diagnostics value=\"FOO\"/>"));
 	}
 
@@ -186,7 +187,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", status);
 		ourLog.info("Response was:\n{}", responseContent);
 
-		Assert.assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Response-Validation")));
 	}
 
@@ -205,7 +206,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		try {
 			ourLog.info("Response was:\n{}", status);
 
-			Assert.assertEquals(204, status.getStatusLine().getStatusCode());
+			assertEquals(204, status.getStatusLine().getStatusCode());
 			assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Response-Validation")));
 		} finally {
 			IOUtils.closeQuietly(status);
@@ -238,7 +239,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 			ourLog.info("Response was:\n{}", status);
 			ourLog.trace("Response was:\n{}", responseContent);
 
-			Assert.assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), Matchers.endsWith("..."));
 			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), Matchers.startsWith("{\"resourceType\":\"OperationOutcome\""));
 		}
@@ -252,7 +253,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 			ourLog.info("Response was:\n{}", status);
 			ourLog.trace("Response was:\n{}", responseContent);
 
-			Assert.assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), Matchers.endsWith("..."));
 			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), Matchers.startsWith("{\"resourceType\":\"OperationOutcome\""));
 		}
@@ -276,7 +277,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", status);
 		ourLog.trace("Response was:\n{}", responseContent);
 
-		Assert.assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), (Matchers.containsString(
 				"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}")));
 	}
@@ -302,7 +303,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", status);
 		ourLog.info("Response was:\n{}", responseContent);
 
-		Assert.assertEquals(422, status.getStatusLine().getStatusCode());
+		assertEquals(422, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, Matchers.containsString("<severity value=\"error\"/>"));
 	}
 
@@ -323,7 +324,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", status);
 		ourLog.trace("Response was:\n{}", responseContent);
 
-		Assert.assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Response-Validation")));
 	}
 
@@ -347,7 +348,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", status);
 		ourLog.trace("Response was:\n{}", responseContent);
 
-		Assert.assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), (Matchers.containsString("X-FHIR-Response-Validation: NO ISSUES")));
 	}
 
@@ -373,7 +374,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", status);
 		ourLog.info("Response was:\n{}", responseContent);
 
-		Assert.assertEquals(422, status.getStatusLine().getStatusCode());
+		assertEquals(422, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), Matchers.containsString("X-FHIR-Response-Validation"));
 	}
 
@@ -398,7 +399,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", status);
 		ourLog.info("Response was:\n{}", responseContent);
 
-		Assert.assertEquals(422, status.getStatusLine().getStatusCode());
+		assertEquals(422, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, Matchers.containsString("<severity value=\"error\"/>"));
 	}
 
@@ -419,7 +420,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", status);
 		ourLog.trace("Response was:\n{}", responseContent);
 
-		Assert.assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Response-Validation")));
 	}
 
@@ -439,7 +440,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", status);
 		ourLog.info("Response was:\n{}", responseContent);
 
-		Assert.assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Response-Validation")));
 	}
 
@@ -460,7 +461,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", status);
 		ourLog.info("Response was:\n{}", responseContent);
 
-		Assert.assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), (Matchers.containsString("X-FHIR-Response-Validation")));
 	}
 
@@ -508,7 +509,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 
 		@Search
 		public ArrayList<IBaseResource> search(@OptionalParam(name = "foo") StringParam theString) {
-			ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
+			ArrayList<IBaseResource> retVal = new ArrayList<>();
 			myReturnResource.setId("1");
 			retVal.add(myReturnResource);
 			return retVal;

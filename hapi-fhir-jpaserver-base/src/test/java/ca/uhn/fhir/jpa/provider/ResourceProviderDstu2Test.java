@@ -50,7 +50,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -1067,7 +1067,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			}
 			ourLog.info("$everything: " + ids.toString());
 
-			assertFalse(ids.toString(), dupes);
+			assertFalse(dupes, ids.toString());
 		}
 
 		/*
@@ -1088,7 +1088,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			}
 			ourLog.info("$everything: " + ids.toString());
 
-			assertFalse(ids.toString(), dupes);
+			assertFalse(dupes, ids.toString());
 			assertThat(ids.toString(), containsString("Condition"));
 			assertThat(ids.size(), greaterThan(10));
 		}
@@ -1354,7 +1354,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("nothing matches profile x", Collections.emptyList(), actual.getEntry());
+		assertEquals(Collections.emptyList(), actual.getEntry(), "nothing matches profile x");
 
 		actual = ourClient.search()
 			.forResource(Organization.class)
@@ -1371,7 +1371,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		for (Entry ele : actual.getEntry()) {
 			actualIds.add(ele.getResource().getId().getIdPart());
 		}
-		assertEquals("Expects to retrieve the 1 orgination matching on Org1's profiles", expectedIds, actualIds);
+		assertEquals(expectedIds, actualIds, "Expects to retrieve the 1 orgination matching on Org1's profiles");
 
 		actual = ourClient.search()
 			.forResource(Organization.class)
@@ -1389,7 +1389,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		for (Entry ele : actual.getEntry()) {
 			actualIds.add(ele.getResource().getId().getIdPart());
 		}
-		assertEquals("Expects to retrieve the 2 orginations, since we match on (the common profile AND (Org1's second profile OR org2's second profile))", expectedIds, actualIds);
+		assertEquals(expectedIds, actualIds, "Expects to retrieve the 2 orginations, since we match on (the common profile AND (Org1's second profile OR org2's second profile))");
 	}
 
 	@Test
@@ -1890,7 +1890,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		for (Entry ele : actual.getEntry()) {
 			actualIds.add(ele.getResource().getId().getIdPart());
 		}
-		assertEquals("Expects to retrieve the 2 patients which reference the two different organizations", expectedIds, actualIds);
+		assertEquals(expectedIds, actualIds, "Expects to retrieve the 2 patients which reference the two different organizations");
 	}
 
 	@Test
@@ -2118,17 +2118,22 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals(SearchEntryModeEnum.INCLUDE, found.getEntry().get(1).getSearch().getModeElement().getValueAsEnum());
 	}
 
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void testSearchWithInvalidSort() {
-		Observation o = new Observation();
-		o.getCode().setText("testSearchWithInvalidSort");
-		myObservationDao.create(o, mySrd);
-		IBaseBundle bundle = ourClient
-			.search()
-			.forResource(Observation.class)
-			.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
-			.prettyPrint()
-			.execute();
+		try {
+			Observation o = new Observation();
+			o.getCode().setText("testSearchWithInvalidSort");
+			myObservationDao.create(o, mySrd);
+			IBaseBundle bundle = ourClient
+				.search()
+				.forResource(Observation.class)
+				.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
+				.prettyPrint()
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
 	@Test
@@ -2146,7 +2151,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		IdDt deletedIdMissingFalse = (IdDt) ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
 		ourClient.delete().resourceById(deletedIdMissingFalse).execute();
 
-		List<IResource> resources = new ArrayList<IResource>();
+		List<IResource> resources = new ArrayList<>();
 		for (int i = 0; i < 20; i++) {
 			org = new Organization();
 			org.setName(methodName + "_0" + i);

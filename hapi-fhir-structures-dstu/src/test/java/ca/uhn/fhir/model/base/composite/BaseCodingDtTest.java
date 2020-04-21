@@ -2,7 +2,7 @@ package ca.uhn.fhir.model.base.composite;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.util.TestUtil;

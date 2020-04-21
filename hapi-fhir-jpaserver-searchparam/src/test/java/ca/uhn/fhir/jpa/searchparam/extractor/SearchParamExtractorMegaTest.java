@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -196,7 +196,7 @@ public class SearchParamExtractorMegaTest {
 		theIndexesCounter.addAndGet(set.size());
 
 		set = theExtractor.extractSearchParamQuantity(resource);
-		assertEquals(String.join("\n", set.getWarnings()), 0, set.getWarnings().size());
+		assertEquals(0, set.getWarnings().size(), String.join("\n", set.getWarnings()));
 		theIndexesCounter.addAndGet(set.size());
 
 		set = theExtractor.extractSearchParamTokens(resource);

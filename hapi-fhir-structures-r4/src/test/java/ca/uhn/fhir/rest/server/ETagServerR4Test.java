@@ -30,7 +30,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -92,8 +92,8 @@ public class ETagServerR4Test {
 
     assertEquals(200, status.getStatusLine().getStatusCode());
     Identifier dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifier().get(0);
-    Assert.assertEquals("2", dt.getSystemElement().getValueAsString());
-    Assert.assertEquals("3", dt.getValue());
+    assertEquals("2", dt.getSystemElement().getValueAsString());
+    assertEquals("3", dt.getValue());
 
     Header cl = status.getFirstHeader(Constants.HEADER_ETAG_LC);
     assertNotNull(cl);
@@ -128,8 +128,8 @@ public class ETagServerR4Test {
 
     assertEquals(200, status.getStatusLine().getStatusCode());
     Identifier dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifier().get(0);
-    Assert.assertEquals("2", dt.getSystemElement().getValueAsString());
-    Assert.assertEquals("3", dt.getValue());
+    assertEquals("2", dt.getSystemElement().getValueAsString());
+    assertEquals("3", dt.getValue());
 
     Header cl = status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
     assertNotNull(cl);
@@ -150,7 +150,7 @@ public class ETagServerR4Test {
     CloseableHttpResponse status = ourClient.execute(http);
     IOUtils.closeQuietly(status.getEntity().getContent());
     assertEquals(200, status.getStatusLine().getStatusCode());
-    Assert.assertEquals("Patient/2/_history/221", ourLastId.toUnqualified().getValue());
+    assertEquals("Patient/2/_history/221", ourLastId.toUnqualified().getValue());
 
   }
 
@@ -168,7 +168,7 @@ public class ETagServerR4Test {
     CloseableHttpResponse status = ourClient.execute(http);
     IOUtils.closeQuietly(status.getEntity().getContent());
     assertEquals(Constants.STATUS_HTTP_412_PRECONDITION_FAILED, status.getStatusLine().getStatusCode());
-    Assert.assertEquals("Patient/2/_history/222", ourLastId.toUnqualified().getValue());
+    assertEquals("Patient/2/_history/222", ourLastId.toUnqualified().getValue());
   }
 
   @Test

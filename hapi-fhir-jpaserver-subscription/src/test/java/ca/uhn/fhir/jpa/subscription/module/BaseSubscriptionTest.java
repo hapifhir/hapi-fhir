@@ -13,7 +13,7 @@ import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSubscriptionProv
 import ca.uhn.fhir.jpa.subscription.module.config.TestSubscriptionConfig;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;

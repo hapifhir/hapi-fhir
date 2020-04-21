@@ -18,7 +18,7 @@ import java.util.*;
 
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.hamcrest.Matchers;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;

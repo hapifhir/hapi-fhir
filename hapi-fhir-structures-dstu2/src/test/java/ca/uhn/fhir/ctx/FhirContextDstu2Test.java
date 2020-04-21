@@ -1,24 +1,20 @@
 package ca.uhn.fhir.ctx;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
-import ca.uhn.fhir.parser.IParser;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.AfterEachClass;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-
 import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +23,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirContextDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirContextDstu2Test.class);
@@ -38,10 +38,15 @@ public class FhirContextDstu2Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@Test(expected=DataFormatException.class)
+	@Test
 	public void testScanInvalid() {
-		FhirContext ctx = FhirContext.forDstu2();
-		ctx.getResourceDefinition("InvalidResource");
+		try {
+			FhirContext ctx = FhirContext.forDstu2();
+			ctx.getResourceDefinition("InvalidResource");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -158,13 +163,13 @@ public class FhirContextDstu2Test {
 				});
 			}
 			// wait until all threads are ready
-			assertTrue("Timeout initializing threads! Perform long lasting initializations before passing runnables to assertConcurrent", allExecutorThreadsReady.await(runnables.size() * 10, TimeUnit.MILLISECONDS));
+			assertTrue(allExecutorThreadsReady.await(runnables.size() * 10, TimeUnit.MILLISECONDS), "Timeout initializing threads! Perform long lasting initializations before passing runnables to assertConcurrent");
 			// start all test runners
 			afterInitBlocker.countDown();
-			assertTrue(message +" timeout! More than" + maxTimeoutSeconds + "seconds", allDone.await(maxTimeoutSeconds, TimeUnit.SECONDS));
+			assertTrue(allDone.await(maxTimeoutSeconds, TimeUnit.SECONDS), message +" timeout! More than" + maxTimeoutSeconds + "seconds");
 		} finally {
 			threadPool.shutdownNow();
 		}
-		assertTrue(message + "failed with exception(s)" + exceptions, exceptions.isEmpty());
+		assertTrue(exceptions.isEmpty(), message + "failed with exception(s)" + exceptions);
 	}
 }

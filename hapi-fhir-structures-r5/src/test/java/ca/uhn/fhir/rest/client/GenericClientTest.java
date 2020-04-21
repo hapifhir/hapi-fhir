@@ -38,7 +38,7 @@ import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.Bundle.BundleType;
 import org.hl7.fhir.r5.model.Bundle.HTTPVerb;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -402,7 +402,7 @@ public class GenericClientTest {
 
 		assertEquals("http://example.com/fhir/Patient/123", capt.getValue().getURI().toString());
 		assertEquals("DELETE", capt.getValue().getMethod());
-		Assert.assertEquals("testDelete01", outcome.getIssueFirstRep().getLocation().get(0).getValue());
+		assertEquals("testDelete01", outcome.getIssueFirstRep().getLocation().get(0).getValue());
 		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("LKJHLKJGLKJKLL"), StandardCharsets.UTF_8));
@@ -411,7 +411,7 @@ public class GenericClientTest {
 		assertEquals("http://example.com/fhir/Location/123?_pretty=true", capt.getAllValues().get(1).getURI().toString());
 		assertEquals("DELETE", capt.getValue().getMethod());
 
-		Assert.assertEquals(null, outcome);
+		assertEquals(null, outcome);
 
 	}
 
@@ -444,7 +444,7 @@ public class GenericClientTest {
 			.execute();
 		assertEquals("http://example.com/fhir/_history", capt.getAllValues().get(idx).getURI().toString());
 		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
-		Assert.assertEquals(1, response.getEntry().size());
+		assertEquals(1, response.getEntry().size());
 		idx++;
 
 		response = client
@@ -455,7 +455,7 @@ public class GenericClientTest {
 			.withAdditionalHeader("myHeaderName", "myHeaderValue2")
 			.execute();
 		assertEquals("http://example.com/fhir/Patient/_history", capt.getAllValues().get(idx).getURI().toString());
-		Assert.assertEquals(1, response.getEntry().size());
+		assertEquals(1, response.getEntry().size());
 		assertEquals("myHeaderValue1", capt.getValue().getHeaders("myHeaderName")[0].getValue());
 		assertEquals("myHeaderValue2", capt.getValue().getHeaders("myHeaderName")[1].getValue());
 		idx++;
@@ -466,7 +466,7 @@ public class GenericClientTest {
 			.andReturnBundle(Bundle.class)
 			.execute();
 		assertEquals("http://example.com/fhir/Patient/123/_history", capt.getAllValues().get(idx).getURI().toString());
-		Assert.assertEquals(1, response.getEntry().size());
+		assertEquals(1, response.getEntry().size());
 		idx++;
 	}
 
@@ -594,11 +594,11 @@ public class GenericClientTest {
 
 		assertThat(response.getNameFirstRep().getFamily(), StringContains.containsString("Cardinal"));
 
-		Assert.assertEquals("http://foo.com/Patient/123/_history/2333", response.getIdElement().getValue());
+		assertEquals("http://foo.com/Patient/123/_history/2333", response.getIdElement().getValue());
 
 		InstantType lm = response.getMeta().getLastUpdatedElement();
 		lm.setTimeZoneZulu(true);
-		Assert.assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
+		assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
 
 	}
 
@@ -765,7 +765,7 @@ public class GenericClientTest {
 
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
-		Assert.assertEquals("PRP1660", BundleUtil.toListOfResourcesOfType(ourCtx, response, Patient.class).get(0).getIdentifier().get(0).getValue());
+		assertEquals("PRP1660", BundleUtil.toListOfResourcesOfType(ourCtx, response, Patient.class).get(0).getIdentifier().get(0).getValue());
 
 		try {
 			client
@@ -804,7 +804,7 @@ public class GenericClientTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		Assert.assertEquals("http://foo/Observation?" + Observation.SP_CODE_VALUE_DATE + "=" + UrlUtil.escapeUrlParam("FOO\\$BAR$2001-01-01"), capt.getValue().getURI().toString());
+		assertEquals("http://foo/Observation?" + Observation.SP_CODE_VALUE_DATE + "=" + UrlUtil.escapeUrlParam("FOO\\$BAR$2001-01-01"), capt.getValue().getURI().toString());
 
 	}
 
@@ -1382,7 +1382,7 @@ public class GenericClientTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		Assert.assertEquals(1, response.getEntry().size());
+		assertEquals(1, response.getEntry().size());
 	}
 
 	@SuppressWarnings("unused")
@@ -1565,7 +1565,7 @@ public class GenericClientTest {
 			.execute();
 
 		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
-		Assert.assertEquals(input.getEntry().get(0).getResource().getId(), response.getEntry().get(0).getResource().getId());
+		assertEquals(input.getEntry().get(0).getResource().getId(), response.getEntry().get(0).getResource().getId());
 		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 
 	}
@@ -1591,7 +1591,7 @@ public class GenericClientTest {
 			.execute();
 
 		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
-		Assert.assertEquals(input.getEntry().get(0).getResource().getId(), response.getEntry().get(0).getResource().getId());
+		assertEquals(input.getEntry().get(0).getResource().getId(), response.getEntry().get(0).getResource().getId());
 		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 
 	}
@@ -1754,7 +1754,7 @@ public class GenericClientTest {
 		MethodOutcome resp = client.validate(p1);
 		assertEquals("http://example.com/fhir/Patient/$validate", capt.getValue().getURI().toString());
 		oo = (OperationOutcome) resp.getOperationOutcome();
-		Assert.assertEquals("OOOK", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals("OOOK", oo.getIssueFirstRep().getDiagnostics());
 
 	}
 

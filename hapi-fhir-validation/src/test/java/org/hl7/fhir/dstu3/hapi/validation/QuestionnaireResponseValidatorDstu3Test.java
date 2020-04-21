@@ -13,6 +13,7 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
@@ -23,11 +24,10 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemA
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeEachClass;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
@@ -42,7 +43,6 @@ import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.BOOLE
 import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.CHOICE;
 import static org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -243,7 +243,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
-		assertEquals(errors.toString(), 0, errors.getMessages().size());
+		assertEquals(0, errors.getMessages().size(), errors.toString());
 
 		// Bad code
 
@@ -693,9 +693,9 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ValidationResult errors = myVal.validateWithResult(qr);
 		assertThat(errors.toString(), Matchers.not(containsString("No issues")));
-		assertTrue("Must contain structural error about misplaced link1 item",
+		assertTrue(
 			errors.getMessages().stream().filter(vm -> vm.getMessage().contains("Structural Error"))
-				.anyMatch(vm -> vm.getMessage().contains("link1")));
+				.anyMatch(vm -> vm.getMessage().contains("link1")), "Must contain structural error about misplaced link1 item");
 	}
 
 	@Test
@@ -1040,7 +1040,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
-		assertEquals(errors.toString(), 0, errors.getMessages().size());
+		assertEquals(0, errors.getMessages().size(), errors.toString());
 
 		// Bad code
 

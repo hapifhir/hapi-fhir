@@ -54,7 +54,7 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
@@ -765,7 +765,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.setId(id);
 		p.setActive(true);
 		p.addIdentifier().setSystem("foo").setValue("bar");
-		ourClient.update().resource(p).execute().getId();
+		ourClient.update().resource(p).execute();
 
 		// Now conditional create
 		p = new Patient();
@@ -1770,7 +1770,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			}
 			ourLog.info("$everything: " + ids.toString());
 
-			assertFalse(ids.toString(), dupes);
+			assertFalse(dupes, ids.toString());
 		}
 
 		/*
@@ -1791,7 +1791,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			}
 			ourLog.info("$everything: " + ids.toString());
 
-			assertFalse(ids.toString(), dupes);
+			assertFalse(dupes, ids.toString());
 			assertThat(ids.toString(), containsString("Condition"));
 			assertThat(ids.size(), greaterThan(10));
 		}
@@ -3664,7 +3664,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		for (BundleEntryComponent ele : actual.getEntry()) {
 			actualIds.add(ele.getResource().getIdElement().getIdPart());
 		}
-		assertEquals("Expects to retrieve the 2 patients which reference the two different organizations", expectedIds, actualIds);
+		assertEquals(expectedIds, actualIds, "Expects to retrieve the 2 patients which reference the two different organizations");
 	}
 
 	@Test
@@ -3855,16 +3855,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String oid2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		HttpGet get = new HttpGet(ourServerBase + "/Observation?value-quantity=gt-15");
-		CloseableHttpResponse resp = ourHttpClient.execute(get);
-		try {
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(oid1));
 			assertThat(ids, not(contains(oid2)));
-		} finally {
-			resp.close();
 		}
 
 	}
@@ -3941,7 +3938,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourLog.info(value.getTime() + "");
 		ourLog.info(before.getTime() + "");
 		assertTrue(value.after(before));
-		assertTrue(new InstantDt(value) + " should be before " + new InstantDt(after), value.before(after));
+		assertTrue(value.before(after), new InstantDt(value) + " should be before " + new InstantDt(after));
 	}
 
 	@Test
@@ -3977,7 +3974,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchReusesBeforeExpiry() {
-		List<IBaseResource> resources = new ArrayList<IBaseResource>();
+		List<IBaseResource> resources = new ArrayList<>();
 		for (int i = 0; i < 50; i++) {
 			Organization org = new Organization();
 			org.setName("HELLO");
@@ -4426,20 +4423,23 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void testSearchWithInvalidSort() {
-		Observation o = new Observation();
-		o.getCode().setText("testSearchWithInvalidSort");
-		myObservationDao.create(o, mySrd);
-		//@formatter:off
-		ourClient
-			.search()
-			.forResource(Observation.class)
-			.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
-			.prettyPrint()
-			.returnBundle(Bundle.class)
-			.execute();
-		//@formatter:on
+		try {
+			Observation o = new Observation();
+			o.getCode().setText("testSearchWithInvalidSort");
+			myObservationDao.create(o, mySrd);
+			ourClient
+				.search()
+				.forResource(Observation.class)
+				.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
 	@Test
@@ -4533,16 +4533,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id2 = myMedicationRequestDao.create(mr2).getId().toUnqualifiedVersionless();
 
 		HttpGet get = new HttpGet(ourServerBase + "/MedicationRequest?date:missing=false");
-		CloseableHttpResponse resp = ourHttpClient.execute(get);
-		try {
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(id1.getValue()));
 			assertThat(ids, not(contains(id2.getValue())));
-		} finally {
-			resp.close();
 		}
 
 	}

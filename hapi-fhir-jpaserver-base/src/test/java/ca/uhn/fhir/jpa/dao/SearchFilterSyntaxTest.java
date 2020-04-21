@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.util.TestUtil;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -13,9 +13,9 @@ public class SearchFilterSyntaxTest {
 		SearchFilterParser.Filter filter = SearchFilterParser.parse(theExpression);
 		ourLog.info("Source: {}", theExpression);
 		ourLog.info("Parsed: {}", filter.toString());
-		Assert.assertNotNull("Parsing failed - returned null",
+		assertNotNull("Parsing failed - returned null",
 			filter);
-		Assert.assertEquals(String.format("Expression mismatch: found %s, expecting %s",
+		assertEquals(String.format("Expression mismatch: found %s, expecting %s",
 			filter.toString(),
 			theExpression),
 			theExpression,

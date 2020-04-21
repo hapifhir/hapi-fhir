@@ -22,17 +22,23 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu2016may.model.*;
-import org.junit.jupiter.api.AfterEachClass;
+import org.hl7.fhir.dstu2016may.model.CodeType;
+import org.hl7.fhir.dstu2016may.model.IdType;
+import org.hl7.fhir.dstu2016may.model.OperationOutcome;
+import org.hl7.fhir.dstu2016may.model.Organization;
+import org.hl7.fhir.dstu2016may.model.Parameters;
+import org.hl7.fhir.dstu2016may.model.Patient;
+import org.hl7.fhir.dstu2016may.model.StringType;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeEachClass;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ValidateDstu2_1Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateDstu2_1Test.class);

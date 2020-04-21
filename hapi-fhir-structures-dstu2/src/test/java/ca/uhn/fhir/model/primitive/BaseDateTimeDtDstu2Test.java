@@ -1,24 +1,5 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.endsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.*;
-
-import org.apache.commons.lang3.time.FastDateFormat;
-import org.hamcrest.Matchers;
-import org.junit.*;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
@@ -26,6 +7,31 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.apache.commons.lang3.time.FastDateFormat;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.endsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BaseDateTimeDtDstu2Test {
 	private static FhirContext ourCtx = FhirContext.forDstu2();
@@ -360,7 +366,7 @@ public class BaseDateTimeDtDstu2Test {
 	}
 
 	@Test
-	public void testEncodeOffset() throws Exception {
+	public void testEncodeOffset() {
 		String offset = InstantDt.withCurrentTime().setTimeZone(TimeZone.getTimeZone("America/Toronto")).getValueAsString();
 		assertThat(offset, either(endsWith("-05:00")).or(endsWith("-04:00")));
 	}
@@ -407,7 +413,7 @@ public class BaseDateTimeDtDstu2Test {
 	}
 
 	@Test
-	public void testMinutePrecisionEncode() throws Exception {
+	public void testMinutePrecisionEncode() {
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 		cal.set(1990, Calendar.JANUARY, 3, 3, 22, 11);

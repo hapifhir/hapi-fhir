@@ -7,11 +7,12 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
+import javax.xml.crypto.Data;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -498,9 +499,14 @@ public class BaseDateTimeTypeDstu3Test {
 		}
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testParseMalformatted() throws DataFormatException {
-		new DateTimeType("20120102");
+		try {
+			new DateTimeType("20120102");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
 	@Test
@@ -553,10 +559,15 @@ public class BaseDateTimeTypeDstu3Test {
 		assertEquals("2013-02", myDateInstantParser.format(dt.getValue()).substring(0, 7));
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testParseMonthNoDashes() throws DataFormatException {
 		DateTimeType dt = new DateTimeType();
+		try {
 		dt.setValueAsString("201302");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
 	@Test

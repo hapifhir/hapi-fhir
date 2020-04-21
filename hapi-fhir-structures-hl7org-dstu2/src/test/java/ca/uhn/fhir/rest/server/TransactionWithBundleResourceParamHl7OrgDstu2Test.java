@@ -26,7 +26,7 @@ import org.hl7.fhir.dstu2.model.Conformance.SystemRestfulInteraction;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.dstu2.model.OperationOutcome;
 import org.hl7.fhir.dstu2.model.Patient;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

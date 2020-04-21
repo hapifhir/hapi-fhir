@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r5.model.*;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +19,16 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test the rest-hook subscriptions
@@ -437,7 +444,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		assertEquals("1", ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-		Assert.assertNotNull(subscriptionTemp);
+		assertNotNull(subscriptionTemp);
 
 		Topic topic = (Topic) subscriptionTemp.getTopic().getResource();
 		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
@@ -519,7 +526,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		assertEquals("1", ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-		Assert.assertNotNull(subscriptionTemp);
+		assertNotNull(subscriptionTemp);
 
 		Topic topic = (Topic) subscriptionTemp.getTopic().getResource();
 		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
@@ -598,7 +605,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-		Assert.assertNotNull(subscriptionTemp);
+		assertNotNull(subscriptionTemp);
 		Topic topic = (Topic) subscriptionTemp.getTopic().getResource();
 		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
@@ -724,7 +731,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		assertEquals(0, ourUpdatedObservations.size());
 
 		Subscription subscriptionTemp = ourClient.read().resource(Subscription.class).withId(subscription2.getId()).execute();
-		Assert.assertNotNull(subscriptionTemp);
+		assertNotNull(subscriptionTemp);
 		String criteriaGood = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		Topic topic = (Topic) subscriptionTemp.getTopic().getResource();
@@ -846,28 +853,34 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	}
 
-	@Test(expected = UnprocessableEntityException.class)
+	@Test
 	public void testInvalidProvenanceParam() {
-		String payload = "application/fhir+json";
-		String criteriabad = "Provenance?foo=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
-		Subscription subscription = newSubscription(criteriabad, payload);
-		ourClient.create().resource(subscription).execute();
+		assertThrows(UnprocessableEntityException.class, () -> {
+			String payload = "application/fhir+json";
+			String criteriabad = "Provenance?foo=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
+			Subscription subscription = newSubscription(criteriabad, payload);
+			ourClient.create().resource(subscription).execute();
+		});
 	}
 
-	@Test(expected = UnprocessableEntityException.class)
+	@Test
 	public void testInvalidProcedureRequestParam() {
-		String payload = "application/fhir+json";
-		String criteriabad = "ProcedureRequest?intent=instance-order&category=Laboratory";
-		Subscription subscription = newSubscription(criteriabad, payload);
-		ourClient.create().resource(subscription).execute();
+		assertThrows(UnprocessableEntityException.class, () -> {
+			String payload = "application/fhir+json";
+			String criteriabad = "ProcedureRequest?intent=instance-order&category=Laboratory";
+			Subscription subscription = newSubscription(criteriabad, payload);
+			ourClient.create().resource(subscription).execute();
+		});
 	}
 
-	@Test(expected = UnprocessableEntityException.class)
+	@Test
 	public void testInvalidBodySiteParam() {
-		String payload = "application/fhir+json";
-		String criteriabad = "BodySite?accessType=Catheter";
-		Subscription subscription = newSubscription(criteriabad, payload);
-		ourClient.create().resource(subscription).execute();
+		assertThrows(UnprocessableEntityException.class, () -> {
+			String payload = "application/fhir+json";
+			String criteriabad = "BodySite?accessType=Catheter";
+			Subscription subscription = newSubscription(criteriabad, payload);
+			ourClient.create().resource(subscription).execute();
+		});
 	}
 
 	@Test

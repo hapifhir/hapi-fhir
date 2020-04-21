@@ -17,18 +17,17 @@ import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.Rule;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
@@ -44,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
@@ -53,7 +53,6 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -464,7 +463,7 @@ public class FhirInstanceValidatorR5Test {
 			"}";
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.toString(), 0, output.getMessages().size());
+		assertEquals(0, output.getMessages().size(), output.toString());
 	}
 
 	@Test
@@ -481,7 +480,7 @@ public class FhirInstanceValidatorR5Test {
 				"}";
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.toString(), 1, output.getMessages().size());
+		assertEquals(1, output.getMessages().size(), output.toString());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("Patient", output.getMessages().get(0).getLocationString());
@@ -532,7 +531,7 @@ public class FhirInstanceValidatorR5Test {
 		 */
 
 		ValidationResult output = myVal.validateWithResult(encoded);
-		assertEquals(output.toString(), 1, output.getMessages().size());
+		assertEquals(1, output.getMessages().size(), output.toString());
 
 		assertEquals("Unknown extension http://hl7.org/fhir/v3/ethnicity", output.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.INFORMATION, output.getMessages().get(0).getSeverity());
@@ -567,7 +566,7 @@ public class FhirInstanceValidatorR5Test {
 
 		myInstanceVal.setAnyExtensionsAllowed(false);
 		ValidationResult output = myVal.validateWithResult(encoded);
-		assertEquals(output.toString(), 1, output.getMessages().size());
+		assertEquals( 1, output.getMessages().size(), output.toString());
 
 		assertEquals("The extension http://hl7.org/fhir/v3/ethnicity is unknown, and not allowed here", output.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.ERROR, output.getMessages().get(0).getSeverity());
@@ -584,7 +583,7 @@ public class FhirInstanceValidatorR5Test {
 			"</Patient>";
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.toString(), 0, output.getMessages().size());
+		assertEquals(0, output.getMessages().size(), output.toString());
 	}
 
 	@Test
@@ -600,7 +599,7 @@ public class FhirInstanceValidatorR5Test {
 				"</Patient>";
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.toString(), 1, output.getMessages().size());
+		assertEquals( 1, output.getMessages().size(), output.toString());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("/f:Patient", output.getMessages().get(0).getLocationString());
@@ -619,7 +618,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> messages = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(output.toString(), 3, messages.size());
+		assertEquals( 3, messages.size(), output.toString());
 		assertThat(messages.get(0).getMessage(), containsString("Element must have some content"));
 		assertThat(messages.get(1).getMessage(), containsString("ele-1: All FHIR elements must have a @value or children [hasValue() or (children().count() > id.count())]"));
 		assertThat(messages.get(2).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
@@ -657,7 +656,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(output.toString(), 0, res.size());
+		assertEquals( 0, res.size(), output.toString());
 	}
 
 	@Test
@@ -678,7 +677,7 @@ public class FhirInstanceValidatorR5Test {
 			+ "</Patient>";
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.toString(), 1, output.getMessages().size());
+		assertEquals(1, output.getMessages().size(), output.toString());
 		assertEquals("This \"Patient\" cannot be parsed as a FHIR object (no namespace)", output.getMessages().get(0).getMessage());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 	}
@@ -865,7 +864,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(errors.toString(), 0, errors.size());
+		assertEquals( 0, errors.size(), errors.toString());
 
 	}
 
@@ -900,7 +899,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(errors.toString(), 0, errors.size());
+		assertEquals( 0, errors.size(),errors.toString());
 	}
 
 	@Test
@@ -937,7 +936,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
-		assertEquals(errors.toString(), 0, errors.size());
+		assertEquals( 0, errors.size(), errors.toString());
 	}
 
 	@Test
@@ -1004,7 +1003,7 @@ public class FhirInstanceValidatorR5Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
 
-		assertEquals(output.toString(), 3, output.getMessages().size());
+		assertEquals( 3, output.getMessages().size(), output.toString());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 	}

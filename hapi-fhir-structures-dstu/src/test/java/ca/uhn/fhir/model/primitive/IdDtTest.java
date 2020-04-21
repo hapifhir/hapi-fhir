@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.math.BigDecimal;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEachClass;
 import org.junit.jupiter.api.Test;
 

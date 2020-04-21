@@ -2,7 +2,7 @@ package ca.uhn.fhir.context;
 
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.IElement;

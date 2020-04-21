@@ -9,7 +9,7 @@ import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEachClass;
 import org.junit.jupiter.api.Test;
 

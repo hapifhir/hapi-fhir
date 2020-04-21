@@ -1,9 +1,9 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import org.junit.jupiter.api.AfterEachClass;
+import ca.uhn.fhir.util.TestUtil;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;

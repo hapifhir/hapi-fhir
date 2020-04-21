@@ -1,9 +1,9 @@
 package org.hl7.fhir.dstu3.elementmodel;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 import org.apache.commons.io.IOUtils;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
@@ -17,6 +17,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Created by axemj on 14/07/2017.
@@ -56,10 +57,15 @@ public class PropertyDstu3Test {
         assertEquals("date.id", result.get(0).getDefinition().getPath());
     }
 
-    @Test(expected = Error.class)
+    @Test
     public void getChildPropertiesErrorTest() throws DefinitionException {
-        final ElementDefinition ed = sd.getSnapshot().getElement().get(7);
-        property = new Property(workerContext, ed, sd);
-        property.getChildProperties("birthdate", null);
+    	try {
+			final ElementDefinition ed = sd.getSnapshot().getElement().get(7);
+			property = new Property(workerContext, ed, sd);
+			property.getChildProperties("birthdate", null);
+			fail();
+		} catch (Error e) {
+    		assertEquals("", e.getMessage());
+		}
     }
 }

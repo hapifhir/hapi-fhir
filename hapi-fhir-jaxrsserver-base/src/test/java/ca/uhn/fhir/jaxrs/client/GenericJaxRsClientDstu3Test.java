@@ -18,7 +18,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.*;
 import org.hl7.fhir.instance.model.api.*;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.google.common.collect.*;
 

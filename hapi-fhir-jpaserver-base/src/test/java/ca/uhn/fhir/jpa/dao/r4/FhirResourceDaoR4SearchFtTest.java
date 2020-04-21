@@ -10,7 +10,7 @@ import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -358,7 +359,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		obs4.getCode().addCoding().setCode("CODE1");
 		obs4.setValue(new StringType("obsvalue1"));
 		IIdType obsId4 = myObservationDao.create(obs4, mockSrd()).getId().toUnqualifiedVersionless();
-		assertNotEquals(obsId1.getIdPart(), obsId4.getIdPart(), devId1);
+		assertNotEquals(obsId4.getIdPart(), devId1, obsId1.getIdPart());
 
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
@@ -445,7 +446,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		obs4.getCode().addCoding().setCode("CODE1");
 		obs4.setValue(new StringType("obsvalue1"));
 		IIdType obsId4 = myObservationDao.create(obs4, mockSrd()).getId().toUnqualifiedVersionless();
-		assertNotEquals(obsId1.getIdPart(), obsId4.getIdPart(), devId1);
+		assertNotEquals(obsId4.getIdPart(), devId1, obsId1.getIdPart());
 
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));

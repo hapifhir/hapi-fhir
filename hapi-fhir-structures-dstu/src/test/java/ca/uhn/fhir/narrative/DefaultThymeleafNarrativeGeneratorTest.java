@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.util.Date;
 
 import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -1,15 +1,7 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import org.hl7.fhir.dstu2016may.model.Appointment;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu2016may.model.CodeableConcept;
 import org.hl7.fhir.dstu2016may.model.Element;
 import org.hl7.fhir.dstu2016may.model.Enumerations;
@@ -18,15 +10,18 @@ import org.hl7.fhir.dstu2016may.model.Patient;
 import org.hl7.fhir.dstu2016may.model.Practitioner;
 import org.hl7.fhir.dstu2016may.model.Practitioner.PractitionerPractitionerRoleComponent;
 import org.hl7.fhir.instance.model.api.IBaseElement;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.TestUtil;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ModelDstu2_1Test {
 

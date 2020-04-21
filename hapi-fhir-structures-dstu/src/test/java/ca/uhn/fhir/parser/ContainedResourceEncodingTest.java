@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.AfterEachClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -122,7 +122,7 @@ public class ContainedResourceEncodingTest {
 		// second encoding - xml is corrupt - i.e.: patient content 4 times! should be the same as after first encoding!
 		ourLog.debug("[xmlEncoding] second encoding: {}", actualPatientXml);
 
-		Assert.assertEquals(expectedPatientXml.length(), actualPatientXml.length());
+		assertEquals(expectedPatientXml.length(), actualPatientXml.length());
 		Assert.assertArrayEquals(expectedPatientXml.getBytes(), actualPatientXml.getBytes());
 
 	}
@@ -158,7 +158,7 @@ public class ContainedResourceEncodingTest {
 		// afterfirst encoding!
 		ourLog.debug("[xmlEncoding] third encoding: {}", thirdCompXml);
 
-		Assert.assertEquals(expectedCompXml.length(), actualCompXml.length());
+		assertEquals(expectedCompXml.length(), actualCompXml.length());
 		Assert.assertArrayEquals(expectedCompXml.getBytes(), actualCompXml.getBytes());
 
 	}

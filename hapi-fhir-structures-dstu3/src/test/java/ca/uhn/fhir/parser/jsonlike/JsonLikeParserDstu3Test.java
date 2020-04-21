@@ -68,20 +68,20 @@ public class JsonLikeParserDstu3Test {
 		
 		System.out.println("encoded map: " + jsonLikeMap.toString());
 
-		Assert.assertNotNull("Encoded resource missing 'resourceType' element", jsonLikeMap.get("resourceType"));
-		Assert.assertEquals("Expecting 'resourceType'='Patient'; found '"+jsonLikeMap.get("resourceType")+"'", jsonLikeMap.get("resourceType"), "Patient");
+		assertNotNull("Encoded resource missing 'resourceType' element", jsonLikeMap.get("resourceType"));
+		assertEquals("Expecting 'resourceType'='Patient'; found '"+jsonLikeMap.get("resourceType")+"'", jsonLikeMap.get("resourceType"), "Patient");
 
-		Assert.assertNotNull("Encoded resource missing 'extension' element", jsonLikeMap.get("extension"));
+		assertNotNull("Encoded resource missing 'extension' element", jsonLikeMap.get("extension"));
 		Assert.assertTrue("'extension' element is not a List", (jsonLikeMap.get("extension") instanceof List));
 		
 		List<Object> extensions = (List<Object>)jsonLikeMap.get("extension");
-		Assert.assertEquals("'extnesion' array has more than one entry", 1, extensions.size());
+		assertEquals("'extnesion' array has more than one entry", 1, extensions.size());
 		Assert.assertTrue("'extension' array entry is not a Map", (extensions.get(0) instanceof Map));
 		
 		Map<String, Object> extension = (Map<String,Object>)extensions.get(0);
-		Assert.assertNotNull("'extension' entry missing 'url' member", extension.get("url"));
+		assertNotNull("'extension' entry missing 'url' member", extension.get("url"));
 		Assert.assertTrue("'extension' entry 'url' member is not a String", (extension.get("url") instanceof String));
-		Assert.assertEquals("Expecting '/extension[]/url' = 'x1'; found '"+extension.get("url")+"'", "x1", (String)extension.get("url"));
+		assertEquals("Expecting '/extension[]/url' = 'x1'; found '"+extension.get("url")+"'", "x1", (String)extension.get("url"));
 	
 	}
 	
