@@ -243,7 +243,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 * to {@link DateParam}. This is useful if you are using reference parameters and want to handle
 	 * chained parameters of different types in a single method.
 	 * <p>
-	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
+	 * See <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/rest_operations_search.html#chained-resource-references">Dynamic Chains</a>
 	 * in the HAPI FHIR documentation for an example of how to use this method.
 	 * </p>
 	 */
@@ -258,7 +258,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 * to {@link NumberParam}. This is useful if you are using reference parameters and want to handle
 	 * chained parameters of different types in a single method.
 	 * <p>
-	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
+	 * See <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/rest_operations_search.html#chained-resource-references">Dynamic Chains</a>
 	 * in the HAPI FHIR documentation for an example of how to use this method.
 	 * </p>
 	 */
@@ -273,7 +273,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 * to {@link QuantityParam}. This is useful if you are using reference parameters and want to handle
 	 * chained parameters of different types in a single method.
 	 * <p>
-	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
+	 * See <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/rest_operations_search.html#chained-resource-references">Dynamic Chains</a>
 	 * in the HAPI FHIR documentation for an example of how to use this method.
 	 * </p>
 	 */
@@ -298,7 +298,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 * to {@link StringParam}. This is useful if you are using reference parameters and want to handle
 	 * chained parameters of different types in a single method.
 	 * <p>
-	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
+	 * See <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/rest_operations_search.html#chained-resource-references">Dynamic Chains</a>
 	 * in the HAPI FHIR documentation for an example of how to use this method.
 	 * </p>
 	 */
@@ -313,7 +313,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 * to {@link TokenParam}. This is useful if you are using reference parameters and want to handle
 	 * chained parameters of different types in a single method.
 	 * <p>
-	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
+	 * See <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/rest_operations_search.html#chained-resource-references">Dynamic Chains</a>
 	 * in the HAPI FHIR documentation for an example of how to use this method.
 	 * </p>
 	 */

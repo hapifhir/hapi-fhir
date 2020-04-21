@@ -56,7 +56,7 @@ The following settings can be enabled:
 
 * **Include Partition in Search Hashes** ([JavaDoc](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionConfig.html#setIncludePartitionInSearchHashes(boolean))): If this feature is enabled, partition IDs will be factored into [Search Hashes](./schema.html#search-hashes). When this flag is not set (as is the default), when a search requests a specific partition, an additional SQL WHERE predicate is added to the query to explicitly request the given partition ID. When this flag is set, this additional WHERE predicate is not necessary since the partition is factored into the hash value being searched on. Setting this flag avoids the need to manually adjust indexes against the HFJ_SPIDX tables. Note that this flag should **not be used in environments where partitioning is being used for security purposes**, since it is possible for a user to reverse engineer false hash collisions.
 
-* **Cross-Partition Reference Mode**: ([JavaDoc](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionConfig.html#setAllowReferencesAcrossPartitions(ca.uhn.fhir.jpa.model.config.PartitionSettings.CrossPartitionReferenceMode))): This setting controls whether resources in one partition should be allowed to create references to resources in other partitions.
+* **Cross-Partition Reference Mode**: ([JavaDoc](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionConfig.html#setAllowReferencesAcrossPartitions(ca.uhn.fhir.jpa.model.config.PartitionConfig.CrossPartitionReferenceMode))): This setting controls whether resources in one partition should be allowed to create references to resources in other partitions.
 
 
 # Partition Interceptors
@@ -126,7 +126,7 @@ The following snippet shows a server with this configuration.
 
 # Partition Mapping Operations
 
-Several operations exist that can be used to manage the existence of partitions. These operations are supplied by a [plain provider](/docs/server_plain/resource_providers.html#plain-providers) called [PartitionManagementProvider](/hapi-fhir/apidocs/hapi-fhir-jpaserver-base-javadoc/ca/uhn/fhir/jpa/partition/PartitionManagementProvider.html).
+Several operations exist that can be used to manage the existence of partitions. These operations are supplied by a [plain provider](/docs/server_plain/resource_providers.html#plain-providers) called [PartitionManagementProvider](/hapi-fhir/apidocs/hapi-fhir-jpaserver-base/ca/uhn/fhir/jpa/partition/PartitionManagementProvider.html).
 
 Before a partition can be used, it must be registered using these methods.
 
@@ -173,10 +173,10 @@ The `$partition-management-add-partition` operation can be used to create a new 
 
 ### Example
 
-The following URL would be used to invoke this operation:
+An HTTP POST to the following URL would be used to invoke this operation:
 
 ```url
-POST http://example.com/$partition-management-add-partition 
+http://example.com/$partition-management-add-partition 
 ```
 
 The following request body could be used:
@@ -240,10 +240,10 @@ The `$partition-management-update-partition` operation can be used to update an 
 
 ### Example
 
-The following URL would be used to invoke this operation:
+An HTTP POST to the following URL would be used to invoke this operation:
 
 ```url
-POST http://example.com/$partition-management-add-partition 
+http://example.com/$partition-management-add-partition 
 ```
 
 The following request body could be used:
@@ -291,10 +291,10 @@ The `$partition-management-delete-partition` operation can be used to delete an 
 
 ### Example
 
-The following URL would be used to invoke this operation:
+An HTTP POST to the following URL would be used to invoke this operation:
 
 ```url
-POST http://example.com/$partition-management-delete-partition 
+http://example.com/$partition-management-delete-partition 
 ```
 
 The following request body could be used:
