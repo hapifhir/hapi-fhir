@@ -11,18 +11,16 @@ import ca.uhn.fhir.jpa.bulk.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.partition.IPartitionConfigSvc;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
-import ca.uhn.fhir.jpa.partition.PartitionConfigSvcImpl;
-import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
-import ca.uhn.fhir.jpa.partition.RequestPartitionHelperService;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
+import ca.uhn.fhir.jpa.partition.IPartitionConfigSvc;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
+import ca.uhn.fhir.jpa.partition.PartitionConfigSvcImpl;
+import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
+import ca.uhn.fhir.jpa.partition.RequestPartitionHelperService;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
@@ -44,6 +42,7 @@ import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
+import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -238,11 +237,6 @@ public abstract class BaseConfig {
 	@Bean
 	public IConsentContextServices consentContextServices() {
 		return new JpaConsentContextServices();
-	}
-
-	@Bean
-	public PartitionSettings partitionConfig() {
-		return new PartitionSettings();
 	}
 
 	@Bean

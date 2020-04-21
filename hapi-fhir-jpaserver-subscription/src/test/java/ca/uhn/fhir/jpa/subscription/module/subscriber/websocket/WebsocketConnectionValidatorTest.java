@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -111,6 +112,9 @@ public class WebsocketConnectionValidatorTest {
 		public DaoConfig daoConfig() {
 			return new DaoConfig();
 		}
+
+		@Bean
+		public PartitionSettings partitionSettings() { return new PartitionSettings(); }
 
 		@Bean
 		public ModelConfig modelConfig() {
