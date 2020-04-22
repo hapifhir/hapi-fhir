@@ -6,11 +6,10 @@ import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -18,10 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class CaptureResourceSourceFromHeaderInterceptorTest {
 
 	private static FhirContext ourCtx = FhirContext.forR4();
-	@ClassRule
+	@RegisterExtension
 	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(ourCtx);
 	private CaptureResourceSourceFromHeaderInterceptor myInterceptor;
-	@Rule
+	@RegisterExtension
 	public HashMapResourceProviderExtension<Patient> myPatientProviderRule = new HashMapResourceProviderExtension<>(ourServerRule, Patient.class);
 
 	@BeforeEach

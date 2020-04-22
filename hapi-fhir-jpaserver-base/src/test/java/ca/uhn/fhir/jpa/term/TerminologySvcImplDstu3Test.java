@@ -53,7 +53,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplDstu3Test.class);
 	private static final String CS_URL = "http://example.com/my_code_system";
 	private static final String CS_URL_2 = "http://example.com/my_code_system2";
-	@Rule
+	@RegisterExtension
 	public final ExpectedException expectedException = ExpectedException.none();
 
 	@AfterEach

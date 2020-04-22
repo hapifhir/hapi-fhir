@@ -16,7 +16,7 @@ public class SubscriptionStrategyEvaluatorTest extends BaseSubscriptionDstu3Test
 	@Autowired
 	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
-	@Rule
+	@RegisterExtension
 	public ExpectedException exception = ExpectedException.none();
 
 	@Test

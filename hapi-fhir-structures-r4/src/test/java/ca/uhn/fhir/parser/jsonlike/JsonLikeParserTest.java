@@ -17,7 +17,6 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Assert;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
@@ -37,6 +36,7 @@ import java.util.Stack;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JsonLikeParserTest {
 	private static FhirContext ourCtx = FhirContext.forR4();
@@ -86,15 +86,15 @@ public class JsonLikeParserTest {
 		assertEquals(jsonLikeMap.get("resourceType"), "Patient", "Expecting 'resourceType'='Patient'; found '"+jsonLikeMap.get("resourceType")+"'");
 
 		assertNotNull(jsonLikeMap.get("extension"), "Encoded resource missing 'extension' element");
-		Assert.assertTrue("'extension' element is not a List", (jsonLikeMap.get("extension") instanceof List));
+		assertTrue((jsonLikeMap.get("extension") instanceof List), "'extension' element is not a List");
 		
 		List<Object> extensions = (List<Object>)jsonLikeMap.get("extension");
 		assertEquals( 1, extensions.size(), "'extnesion' array has more than one entry");
-		Assert.assertTrue("'extension' array entry is not a Map", (extensions.get(0) instanceof Map));
+		assertTrue((extensions.get(0) instanceof Map), "'extension' array entry is not a Map");
 		
 		Map<String, Object> extension = (Map<String,Object>)extensions.get(0);
 		assertNotNull(extension.get("url"), "'extension' entry missing 'url' member");
-		Assert.assertTrue("'extension' entry 'url' member is not a String", (extension.get("url") instanceof String));
+		assertTrue((extension.get("url") instanceof String), "'extension' entry 'url' member is not a String");
 		assertEquals("x1", extension.get("url"), "Expecting '/extension[]/url' = 'x1'; found '"+extension.get("url")+"'");
 	
 	}

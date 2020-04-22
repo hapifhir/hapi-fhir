@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -28,23 +27,15 @@ public class ServletRestfulResponseTest {
 	private RestfulServer server;
 
 	@Mock
-	private ServletOutputStream servletOutputStream;
-
-	@Mock
 	private HttpServletResponse servletResponse;
 
 	private ServletRequestDetails requestDetails;
 
-	private ServletRestfulResponse response;
-
 	@BeforeEach
-	public void init() throws IOException {
-		Mockito.when(servletResponse.getOutputStream()).thenReturn(servletOutputStream);
-
+	public void init() {
 		requestDetails = new ServletRequestDetails(mock(IInterceptorBroadcaster.class));
 		requestDetails.setServer(server);
 		requestDetails.setServletResponse(servletResponse);
-		response = new ServletRestfulResponse(requestDetails);
 	}
 
 	@Test

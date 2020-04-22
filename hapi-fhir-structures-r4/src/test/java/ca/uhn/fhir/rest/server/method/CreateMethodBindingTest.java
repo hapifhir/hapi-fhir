@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Method;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(MockitoExtension.class)

@@ -586,11 +586,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava-testlib</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
 			<version>16.0.3</version>

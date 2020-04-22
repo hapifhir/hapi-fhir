@@ -505,7 +505,7 @@ public class BaseDateTimeTypeDstu3Test {
 			new DateTimeType("20120102");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Invalid date/time format: \"20120102\": Expected character '-' at index 4 but found 0", e.getMessage());
 		}
 	}
 
@@ -566,7 +566,7 @@ public class BaseDateTimeTypeDstu3Test {
 		dt.setValueAsString("201302");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Invalid date/time format: \"201302\": Expected character '-' at index 4 but found 0", e.getMessage());
 		}
 	}
 

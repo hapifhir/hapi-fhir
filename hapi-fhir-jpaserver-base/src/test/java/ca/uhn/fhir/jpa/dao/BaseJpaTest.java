@@ -101,7 +101,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		TestUtil.setShouldRandomizeTimezones(false);
 	}
 
-	@Rule
+	@RegisterExtension
 	public LoggingExtension myLoggingExtension = new LoggingExtension();
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;

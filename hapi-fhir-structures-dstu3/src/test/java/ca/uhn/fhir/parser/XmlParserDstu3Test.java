@@ -33,11 +33,10 @@ import org.hl7.fhir.dstu3.model.Observation.ObservationRelationshipType;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.builder.Input;
@@ -336,7 +335,7 @@ public class XmlParserDstu3Test {
 			parser.parseResource(Bundle.class, string);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [49,11]]: Resource has contained child resource with no ID", e.getMessage());
 		}
 	}
 
@@ -400,7 +399,7 @@ public class XmlParserDstu3Test {
 
 		// Check no NPE if base server not configure
 		newPatient = ourCtx.newXmlParser().parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
-		assertNull("myName", newPatient.getPetName().getValue());
+		assertNull(newPatient.getPetName().getValue());
 		assertEquals("myName", ((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
 	}
 
@@ -3144,7 +3143,7 @@ public class XmlParserDstu3Test {
 			ourCtx.newXmlParser().parseResource("FOO");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertThat(e.getMessage(), containsString("Unexpected character 'F'"));
 		}
 	}
 
@@ -3370,7 +3369,7 @@ public class XmlParserDstu3Test {
 			parser.parseResource(Bundle.class, string);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [39,9]]: Unknown element 'encounter' found during parse", e.getMessage());
 		}
 	}
 
@@ -3581,7 +3580,7 @@ public class XmlParserDstu3Test {
 			.withComparisonController(ComparisonControllers.Default)
 			.build();
 
-		assertTrue(d.hasDifferences(), d.toString());
+		assertFalse(d.hasDifferences(), d.toString());
 	}
 
 	@ResourceDef(name = "Patient")

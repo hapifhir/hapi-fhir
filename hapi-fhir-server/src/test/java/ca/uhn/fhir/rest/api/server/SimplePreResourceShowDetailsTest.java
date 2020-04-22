@@ -25,7 +25,7 @@ public class SimplePreResourceShowDetailsTest {
 			details.setResource(-1, myResource2);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Invalid index -1 - theIndex must not be < 0", e.getMessage());
 		}
 	}
 
@@ -36,7 +36,7 @@ public class SimplePreResourceShowDetailsTest {
 			details.setResource(2, myResource2);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Invalid index {} - theIndex must be < 2", e.getMessage());
 		}
 	}
 

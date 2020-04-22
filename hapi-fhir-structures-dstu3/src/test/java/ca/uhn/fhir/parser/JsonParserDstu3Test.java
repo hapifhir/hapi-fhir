@@ -29,11 +29,10 @@ import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.io.IOException;
@@ -208,7 +207,7 @@ public class JsonParserDstu3Test {
 
 		// Check no NPE if base server not configure
 		newPatient = ourCtx.newJsonParser().parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
-		assertNull("myName", newPatient.getPetName().getValue());
+		assertNull(newPatient.getPetName().getValue());
 		assertEquals("myName", ((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
 	}
 
@@ -1553,13 +1552,17 @@ public class JsonParserDstu3Test {
 	/**
 	 * #516
 	 */
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testInvalidEnumValue() {
-		String res = "{ \"resourceType\": \"ValueSet\", \"url\": \"http://sample/ValueSet/education-levels\", \"version\": \"1\", \"name\": \"Education Levels\", \"status\": \"draft\", \"compose\": { \"include\": [ { \"filter\": [ { \"property\": \"n\", \"op\": \"n\", \"value\": \"365460000\" } ], \"system\": \"http://snomed.info/sct\" } ], \"exclude\": [ { \"concept\": [ { \"code\": \"224298008\" }, { \"code\": \"365460000\" }, { \"code\": \"473462005\" }, { \"code\": \"424587006\" } ], \"system\": \"http://snomed.info/sct\" } ] }, \"description\": \"A selection of Education Levels\", \"text\": { \"status\": \"generated\", \"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"><h2>Education Levels</h2><tt>http://csiro.au/ValueSet/education-levels</tt><p>A selection of Education Levels</p></div>\" }, \"experimental\": true, \"date\": \"2016-07-26\" }";
-		IParser parser = ourCtx.newJsonParser();
-		parser.setParserErrorHandler(new StrictErrorHandler());
-		parser.parseResource(ValueSet.class, res);
-		fail("DataFormat Invalid attribute exception should be thrown");
+		try {
+			String res = "{ \"resourceType\": \"ValueSet\", \"url\": \"http://sample/ValueSet/education-levels\", \"version\": \"1\", \"name\": \"Education Levels\", \"status\": \"draft\", \"compose\": { \"include\": [ { \"filter\": [ { \"property\": \"n\", \"op\": \"n\", \"value\": \"365460000\" } ], \"system\": \"http://snomed.info/sct\" } ], \"exclude\": [ { \"concept\": [ { \"code\": \"224298008\" }, { \"code\": \"365460000\" }, { \"code\": \"473462005\" }, { \"code\": \"424587006\" } ], \"system\": \"http://snomed.info/sct\" } ] }, \"description\": \"A selection of Education Levels\", \"text\": { \"status\": \"generated\", \"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"><h2>Education Levels</h2><tt>http://csiro.au/ValueSet/education-levels</tt><p>A selection of Education Levels</p></div>\" }, \"experimental\": true, \"date\": \"2016-07-26\" }";
+			IParser parser = ourCtx.newJsonParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(ValueSet.class, res);
+			fail("DataFormat Invalid attribute exception should be thrown");
+		} catch (DataFormatException e) {
+			assertEquals("[element=\"op\"] Invalid attribute value \"n\": Unknown FilterOperator code 'n'", e.getMessage());
+		}
 	}
 
 	@Test

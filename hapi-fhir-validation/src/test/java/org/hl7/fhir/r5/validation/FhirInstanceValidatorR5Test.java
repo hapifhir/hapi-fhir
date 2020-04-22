@@ -67,7 +67,7 @@ public class FhirInstanceValidatorR5Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorR5Test.class);
 	private static FhirContext ourCtx = FhirContext.forR5();
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
-	@Rule
+	@RegisterExtension
 	public TestRule watcher = new TestWatcher() {
 		@Override
 		protected void starting(Description description) {

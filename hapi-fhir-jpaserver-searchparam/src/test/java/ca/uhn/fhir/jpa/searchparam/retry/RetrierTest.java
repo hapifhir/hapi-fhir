@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RetrierTest {
 
-	@Rule
+	@RegisterExtension
 	public ExpectedException myExpectedException = ExpectedException.none();
 
 	@Test

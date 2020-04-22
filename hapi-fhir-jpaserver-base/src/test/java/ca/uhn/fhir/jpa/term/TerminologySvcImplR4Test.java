@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplR4Test.class);
-	@Rule
+	@RegisterExtension
 	public final ExpectedException expectedException = ExpectedException.none();
 	private IIdType myConceptMapId;
 

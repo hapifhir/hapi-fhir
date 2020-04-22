@@ -64,7 +64,7 @@ public class ErrorHandlerTest {
 			new StrictErrorHandler().unexpectedRepeatingElement(null, null);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Multiple repetitions of non-repeatable element 'null' found during parse", e.getMessage());
 		}
 	}
 
@@ -74,7 +74,7 @@ public class ErrorHandlerTest {
 			new StrictErrorHandler().unknownAttribute(null, null);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Unknown attribute 'null' found during parse", e.getMessage());
 		}
 	}
 
@@ -84,7 +84,7 @@ public class ErrorHandlerTest {
 			new StrictErrorHandler().unknownElement(null, null);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Unknown element 'null' found during parse", e.getMessage());
 		}
 	}
 
@@ -94,7 +94,7 @@ public class ErrorHandlerTest {
 			new StrictErrorHandler().containedResourceWithNoId(null);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Resource has contained child resource with no ID", e.getMessage());
 		}
 	}
 
@@ -104,7 +104,7 @@ public class ErrorHandlerTest {
 			new StrictErrorHandler().unknownReference(null, null);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Resource has invalid reference: null", e.getMessage());
 		}
 	}
 
@@ -114,7 +114,7 @@ public class ErrorHandlerTest {
 			new StrictErrorHandler().incorrectJsonType(null, null, ValueType.ARRAY, null, ValueType.SCALAR, null);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Found incorrect type for element null - Expected ARRAY and found SCALAR", e.getMessage());
 		}
 	}
 
@@ -124,7 +124,7 @@ public class ErrorHandlerTest {
 			new StrictErrorHandler().invalidValue(null, null, null);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Invalid attribute value \"null\": null", e.getMessage());
 		}
 	}
 

@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class FhirAutoConfigurationTest {
 
-	@Rule
+	@RegisterExtension
 	public final ExpectedException thrown = ExpectedException.none();
 
 	private AnnotationConfigApplicationContext context;

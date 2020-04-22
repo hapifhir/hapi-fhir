@@ -8,12 +8,11 @@ import ca.uhn.test.concurrency.PointcutLatch;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -34,10 +33,10 @@ import static org.mockito.Mockito.verify;
 public class ResponseSizeCapturingInterceptorTest {
 
 	private static FhirContext ourCtx = FhirContext.forR4();
-	@ClassRule
+	@RegisterExtension
 	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(ourCtx);
 	private ResponseSizeCapturingInterceptor myInterceptor;
-	@Rule
+	@RegisterExtension
 	public HashMapResourceProviderExtension<Patient> myPatientProviderRule = new HashMapResourceProviderExtension<>(ourServerRule, Patient.class);
 	@Mock
 	private Consumer<ResponseSizeCapturingInterceptor.Result> myConsumer;

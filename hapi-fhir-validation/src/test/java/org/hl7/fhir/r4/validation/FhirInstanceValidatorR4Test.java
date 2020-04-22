@@ -80,7 +80,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
-	@Rule
+	@RegisterExtension
 	public TestRule watcher = new TestWatcher() {
 		@Override
 		protected void starting(Description description) {

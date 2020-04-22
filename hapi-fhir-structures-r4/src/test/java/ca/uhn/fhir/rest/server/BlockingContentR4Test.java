@@ -18,9 +18,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +33,9 @@ public class BlockingContentR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BlockingContentR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
-	@ClassRule
+	@RegisterExtension
 	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(ourCtx);
-	@Rule
+	@RegisterExtension
 	public ResourceProviderExtension myPatientProviderRule = new ResourceProviderExtension(ourServerRule, new SystemProvider());
 
 	@Test

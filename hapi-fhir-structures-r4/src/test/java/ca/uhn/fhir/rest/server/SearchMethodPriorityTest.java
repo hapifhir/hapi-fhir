@@ -14,8 +14,8 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.ClassRule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchMethodPriorityTest {
 
-	@ClassRule
+	@RegisterExtension
 	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(FhirVersionEnum.R4);
 
 	private String myLastMethod;

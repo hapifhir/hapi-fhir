@@ -24,7 +24,7 @@ public class RuntimeResourceDefinitionDstu3Test {
 			ourCtx.getResourceDefinition("Bundle").getImplementingClass(Patient.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Unable to convert class org.hl7.fhir.dstu3.model.Bundle to class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
 		}
 	}
 

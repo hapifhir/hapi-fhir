@@ -34,7 +34,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	private static final String ERROR_MESSAGE = "This is an error message";
 	private static FhirContext ourCtx = FhirContext.forR4();
 
-	@Rule
+	@RegisterExtension
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
 
 	private MyMockTerminologyServiceProvider myProvider;

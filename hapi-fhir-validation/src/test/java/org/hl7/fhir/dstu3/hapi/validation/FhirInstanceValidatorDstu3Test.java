@@ -77,7 +77,7 @@ public class FhirInstanceValidatorDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu3Test.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static IValidationSupport myDefaultValidationSupport = ourCtx.getValidationSupport();
-	@Rule
+	@RegisterExtension
 	public TestRule watcher = new TestWatcher() {
 		@Override
 		protected void starting(Description description) {
