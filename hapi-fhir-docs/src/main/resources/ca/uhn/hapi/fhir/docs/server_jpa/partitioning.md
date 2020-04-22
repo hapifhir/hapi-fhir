@@ -37,7 +37,7 @@ At the database level, partitioning involves the use of two dedicated columns to
 
 When partitioning is used, these two columns will be populated with the same value for a given resource on all resource-specific tables (this includes [HFJ_RESOURCE](./schema.html#HFJ_RESOURCE) and all tables that have a foreign key relationship to it including [HFJ_RES_VER](./schema.html#HFJ_RES_VER), [HFJ_RESLINK](./schema.html#HFJ_RES_LINK), [HFJ_SPIDX_*](./schema.html#search-indexes), etc.)
 
-At the time that a resource is being **created**, an [interceptor hook](#partition-interceptors) is invoked in order to request the partition ID and date, and these will be written to the resource.
+When a new resource is **created**, an [interceptor hook](#partition-interceptors) is invoked to request the partition ID and date to be assigned to the resource.
 
 At the time that a resource is being **updated**, the partition ID and date from the previous version will be used.
 
