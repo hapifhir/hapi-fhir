@@ -1401,12 +1401,12 @@ public enum Pointcut {
 	 * </li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return an instance of <code>ca.uhn.fhir.jpa.api.model.PartitionId</code> or <code>null</code>.
+	 * Hooks should return an instance of <code>ca.uhn.fhir.jpa.api.model.RequestPartitionId</code> or <code>null</code>.
 	 * </p>
 	 */
 	STORAGE_PARTITION_IDENTIFY_CREATE(
 		// Return type
-		"ca.uhn.fhir.interceptor.model.PartitionId",
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
 		// Params
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
@@ -1440,12 +1440,12 @@ public enum Pointcut {
 	 * </li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return an instance of <code>ca.uhn.fhir.jpa.api.model.PartitionId</code> or <code>null</code>.
+	 * Hooks should return an instance of <code>ca.uhn.fhir.jpa.api.model.RequestPartitionId</code> or <code>null</code>.
 	 * </p>
 	 */
 	STORAGE_PARTITION_IDENTIFY_READ(
 		// Return type
-		"ca.uhn.fhir.interceptor.model.PartitionId",
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
 		// Params
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"

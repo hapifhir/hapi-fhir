@@ -282,7 +282,7 @@ public class IdHelperService {
 			}
 		}
 
-		if (pid.isEmpty()) {
+		if (!pid.isPresent()) {
 			throw new ResourceNotFoundException(new IdDt(theResourceType, theId));
 		}
 		return pid.get();
