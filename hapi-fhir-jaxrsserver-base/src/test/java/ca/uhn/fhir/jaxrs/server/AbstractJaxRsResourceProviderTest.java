@@ -164,7 +164,7 @@ public class AbstractJaxRsResourceProviderTest {
 	@Test
 	public void testDeletePatient() {
 		when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
-		final IBaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute();
+		final IBaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute().getOperationOutcome();
 		assertEquals("1", idCaptor.getValue().getIdPart());
 	}
 

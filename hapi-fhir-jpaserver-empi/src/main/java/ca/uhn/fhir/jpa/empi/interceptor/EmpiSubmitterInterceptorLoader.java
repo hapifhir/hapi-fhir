@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.empi.interceptor;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,8 @@ public class EmpiSubmitterInterceptorLoader {
 	private EmpiDaoInterceptor myEmpiDaoInterceptor;
 	@Autowired
 	private IInterceptorService myInterceptorService;
+	@Autowired
+	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 
 	@PostConstruct
 	public void start() {
@@ -51,5 +54,7 @@ public class EmpiSubmitterInterceptorLoader {
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
 		myInterceptorService.registerInterceptor(myEmpiDaoInterceptor);
 		ourLog.info("EMPI interceptor registered");
+		// We need to call SubscriptionSubmitInterceptorLoader.start() again in case there were no subscription types the first time it was called.
+		mySubscriptionSubmitInterceptorLoader.start();
 	}
 }

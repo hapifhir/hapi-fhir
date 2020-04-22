@@ -52,7 +52,7 @@ public class EmpiQueueConsumerLoader {
 		if (myEmpiChannel == null) {
 			ChannelConsumerSettings config = new ChannelConsumerSettings();
 			config.setConcurrentConsumers(myEmpiSettings.getConcurrentConsumers());
-			myEmpiChannel = myChannelFactory.getOrCreateReceiver(IEmpiSettings.EMPI_MATCHING_CHANNEL_NAME, ResourceModifiedJsonMessage.class, config);
+			myEmpiChannel = myChannelFactory.getOrCreateReceiver(IEmpiSettings.EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, config);
 		}
 
 		if (myEmpiChannel != null) {

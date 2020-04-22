@@ -745,6 +745,46 @@ public enum Pointcut {
 
 	/**
 	 * <b>Subscription Hook:</b>
+	 * Invoked immediately after the delivery of MESSAGE subscription.
+	 * <p>
+	 * When this hook is called, all processing is complete so this hook should not
+	 * make any changes to the parameters.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	SUBSCRIPTION_AFTER_MESSAGE_DELIVERY(void.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
+
+	/**
+	 * <b>Subscription Hook:</b>
+	 * Invoked immediately before the delivery of a MESSAGE subscription.
+	 * <p>
+	 * Hooks may make changes to the delivery payload, or make changes to the
+	 * canonical subscription such as adding headers, modifying the channel
+	 * endpoint, etc.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage</li>
+	 * </ul>
+	 * <p>
+	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>void</code> or <code>true</code>, processing will continue normally. If the method
+	 * returns <code>false</code>, processing will be aborted.
+	 * </p>
+	 */
+	SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
+
+
+	/**
+	 * <b>Subscription Hook:</b>
 	 * Invoked whenever a persisted resource (a resource that has just been stored in the
 	 * database via a create/update/patch/etc.) is about to be checked for whether any subscriptions
 	 * were triggered as a result of the operation.

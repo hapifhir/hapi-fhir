@@ -54,7 +54,7 @@ public class EmpiSubscriptionLoader {
 		retval.getMeta().addTag().setSystem(ca.uhn.fhir.empi.api.Constants.SYSTEM_EMPI_MANAGED).setCode(Constants.CODE_HAPI_EMPI_MANAGED);
 		Subscription.SubscriptionChannelComponent channel = retval.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
-		channel.setEndpoint("jms:queue:" + myChannelNamer.getChannelName(IEmpiSettings.EMPI_MATCHING_CHANNEL_NAME));
+		channel.setEndpoint("jms:queue:" + myChannelNamer.getChannelName(IEmpiSettings.EMPI_CHANNEL_NAME));
 		channel.setPayload("application/json");
 		return retval;
 	}
