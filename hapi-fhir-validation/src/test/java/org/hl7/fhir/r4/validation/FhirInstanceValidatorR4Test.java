@@ -1338,6 +1338,45 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	}
 
+	@Test
+	public void testValidateReferenceTargetType_Correct() {
+
+		AllergyIntolerance allergy = new AllergyIntolerance();
+		allergy.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("active").setDisplay("Active");
+		allergy.getVerificationStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-verification").setCode("confirmed").setDisplay("Confirmed");
+		allergy.setPatient(new Reference("Patient/123"));
+
+		allergy.addNote()
+			.setText("This is text")
+			.setAuthor(new Reference("Patient/123"));
+
+		ValidationResult output = myVal.validateWithResult(allergy);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(errors.toString(), 0, errors.size());
+		assertThat(errors.get(0).getMessage(), containsString("The value provided (\"BLAH\") is not in the value set http://hl7.org/fhir/ValueSet/currencies"));
+
+	}
+
+	@Test
+	@Ignore
+	public void testValidateReferenceTargetType_Incorrect() {
+
+		AllergyIntolerance allergy = new AllergyIntolerance();
+		allergy.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("active").setDisplay("Active");
+		allergy.getVerificationStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-verification").setCode("confirmed").setDisplay("Confirmed");
+		allergy.setPatient(new Reference("Patient/123"));
+
+		allergy.addNote()
+			.setText("This is text")
+			.setAuthor(new Reference("CodeSystems/123"));
+
+		ValidationResult output = myVal.validateWithResult(allergy);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(errors.toString(), 0, errors.size());
+		assertThat(errors.get(0).getMessage(), containsString("The value provided (\"BLAH\") is not in the value set http://hl7.org/fhir/ValueSet/currencies"));
+
+	}
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport.flush();
