@@ -39,7 +39,7 @@ When partitioning is used, these two columns will be populated with the same val
 
 When a new resource is **created**, an [interceptor hook](#partition-interceptors) is invoked to request the partition ID and date to be assigned to the resource.
 
-At the time that a resource is being **updated**, the partition ID and date from the previous version will be used.
+When a resource is **updated**, the partition ID and date from the previous version will be used.
 
 When a **read operation** is being performed (e.g. a read, search, history, etc.), a separate [interceptor hook](#partition-interceptors) is invoked in order to determine whether the operation should target a specific partition. The outcome of this hook determines how the partitioning manifests itself to the end user: 
 
