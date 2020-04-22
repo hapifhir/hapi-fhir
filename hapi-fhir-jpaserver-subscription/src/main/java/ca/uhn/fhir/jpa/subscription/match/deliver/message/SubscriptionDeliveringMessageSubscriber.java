@@ -88,7 +88,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 
 		String queueName = extractQueueNameFromEndpoint(endpointUrl);
 
-		IChannelProducer channelProducer = myChannelFactory.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, new ChannelConsumerSettings());
+		IChannelProducer channelProducer = myChannelFactory.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, new ChannelConsumerSettings().setNameAlreadyQualified(true));
 
 		// Grab the payload type (encoding mimetype) from the subscription
 		String payloadString = subscription.getPayloadString();

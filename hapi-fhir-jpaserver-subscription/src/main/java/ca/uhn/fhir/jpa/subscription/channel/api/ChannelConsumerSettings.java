@@ -24,6 +24,7 @@ public class ChannelConsumerSettings {
 	public static final Integer DEFAULT_CHANNEL_CONSUMERS = 2;
 
 	private Integer myConcurrentConsumers = DEFAULT_CHANNEL_CONSUMERS;
+	private boolean myNameAlreadyQualified = false;
 
 	/**
 	 * Constructor
@@ -41,4 +42,20 @@ public class ChannelConsumerSettings {
 		return this;
 	}
 
+	/**
+	 * Default false.  Indicates that the queue name has already been qualified and IChannelNamer doesn't need to be called on it again.
+ 	 * @return
+	 */
+	public boolean isNameAlreadyQualified() {
+		return myNameAlreadyQualified;
+	}
+
+	/**
+	 * Default false.  Indicates that the queue name has already been qualified and IChannelNamer doesn't need to be called on it again.
+	 * @return
+	 */
+	public ChannelConsumerSettings setNameAlreadyQualified(boolean theNameAlreadyQualified) {
+		myNameAlreadyQualified = theNameAlreadyQualified;
+		return this;
+	}
 }
