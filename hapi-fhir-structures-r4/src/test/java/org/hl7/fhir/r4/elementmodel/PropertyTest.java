@@ -34,7 +34,7 @@ public class PropertyTest {
 			property = new Property(workerContext, ed, sd);
 			property.getChildProperties("birthdate", null);
 		} catch (Error e) {
-    		assertEquals("", e.getMessage());
+    		assertEquals("types == 0, and no children found on Patient.extension", e.getMessage());
 		}
     }
 

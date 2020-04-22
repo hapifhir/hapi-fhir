@@ -14,7 +14,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
-import com.google.common.testing.EqualsTester;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -369,19 +368,13 @@ public class DateRangeParamR4Test {
 	public void testEqualsAndHashCode() {
 		Date lowerBound = new Date(currentTimeMillis());
 		Date upperBound = new Date(lowerBound.getTime() + SECONDS.toMillis(1));
-		new EqualsTester()
-			.addEqualityGroup(new DateRangeParam(),
-				new DateRangeParam())
-			.addEqualityGroup(new DateRangeParam(lowerBound, upperBound),
-				new DateRangeParam(new DateParam(GREATERTHAN_OR_EQUALS, lowerBound), new DateParam(LESSTHAN_OR_EQUALS, upperBound)))
-			.addEqualityGroup(new DateRangeParam(new DateParam(EQUAL, lowerBound)),
-				new DateRangeParam(new DateParam(null, lowerBound)),
-				new DateRangeParam(new DateParam(EQUAL, lowerBound), new DateParam(EQUAL, lowerBound)))
-			.addEqualityGroup(new DateRangeParam(lowerBound, null),
-				new DateRangeParam(new DateParam(GREATERTHAN_OR_EQUALS, lowerBound), null))
-			.addEqualityGroup(new DateRangeParam(null, upperBound),
-				new DateRangeParam(null, new DateParam(LESSTHAN_OR_EQUALS, upperBound)))
-			.testEquals();
+		assertEquals(new DateRangeParam(), new DateRangeParam());
+
+		assertEquals(new DateRangeParam(lowerBound, upperBound), new DateRangeParam(new DateParam(GREATERTHAN_OR_EQUALS, lowerBound), new DateParam(LESSTHAN_OR_EQUALS, upperBound)));
+		assertEquals(new DateRangeParam(new DateParam(EQUAL, lowerBound)), new DateRangeParam(new DateParam(null, lowerBound)));
+		assertEquals(new DateRangeParam(new DateParam(EQUAL, lowerBound)), new DateRangeParam(new DateParam(EQUAL, lowerBound), new DateParam(EQUAL, lowerBound)));
+		assertEquals(new DateRangeParam(lowerBound, null), new DateRangeParam(new DateParam(GREATERTHAN_OR_EQUALS, lowerBound), null));
+		assertEquals(new DateRangeParam(null, upperBound), new DateRangeParam(null, new DateParam(LESSTHAN_OR_EQUALS, upperBound)));
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -457,7 +450,7 @@ public class DateRangeParamR4Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

@@ -28,11 +28,10 @@ import org.hl7.fhir.dstu2016may.model.Observation.ObservationRelationshipType;
 import org.hl7.fhir.dstu2016may.model.Observation.ObservationStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.builder.Input;
@@ -54,13 +53,13 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.nullable;
@@ -2260,9 +2259,14 @@ public class XmlParserDstu2_1Test {
 	/**
 	 * See #342
 	 */
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testParseInvalid() {
-		ourCtx.newXmlParser().parseResource("FOO");
+		try {
+			ourCtx.newXmlParser().parseResource("FOO");
+			fail();
+		} catch (DataFormatException e) {
+			// good
+		}
 	}
 
 	/**
@@ -2586,7 +2590,7 @@ public class XmlParserDstu2_1Test {
 				.withComparisonController(ComparisonControllers.Default)
 				.build();
 
-		assertTrue(d.toString(), !d.hasDifferences());
+		assertTrue(!d.hasDifferences(), d.toString());
 	}
 
 	@ResourceDef(name = "Patient")

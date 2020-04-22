@@ -1221,7 +1221,7 @@ public class ClientR4Test {
 			client.updatePatient(new IdType("Patient/100/_history/200"), patient);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("HTTP 409 Conflict", e.getMessage());
 		}
 	}
 
