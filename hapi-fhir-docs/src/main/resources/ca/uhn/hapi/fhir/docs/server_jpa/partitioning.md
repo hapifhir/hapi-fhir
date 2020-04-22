@@ -312,7 +312,7 @@ The following request body could be used:
 
 # Limitations
 
-Partitioning is a relatively new feature in HAPI FHIR (added in HAPI FHIR 5.0.0) and has a number of known limitations. If you are intending to use partitioning for achieving a multi-tenant architecture it is important to carefully consider these limitations. 
+Partitioning is a relatively new feature in HAPI FHIR (added in HAPI FHIR 5.0.0) and has a number of known limitations. If you are intending to use partitioning for achieving a multi-tenant architecture it is important to consider these limitations. 
 
 None of the limitations listed here are considered permanent. Over time the HAPI FHIR team are hoping to make all of these features partition aware.
 
