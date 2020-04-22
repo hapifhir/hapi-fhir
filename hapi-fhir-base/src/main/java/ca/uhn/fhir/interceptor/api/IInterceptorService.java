@@ -24,6 +24,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public interface IInterceptorService extends IInterceptorBroadcaster {
 
@@ -94,5 +95,5 @@ public interface IInterceptorService extends IInterceptorBroadcaster {
 	/**
 	 * Unregisters all interceptors that are indicated by the given callback function returning <code>true</code>
 	 */
-	void unregisterInterceptorsIf(Function<Object, Boolean> theShouldUnregisterFunction);
+	void unregisterInterceptorsIf(Predicate<Object> theShouldUnregisterFunction);
 }

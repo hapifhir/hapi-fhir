@@ -27,7 +27,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
@@ -168,7 +168,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private Integer myMaxResultsToFetch;
 	private Set<ResourcePersistentId> myPidSet;
 	private PredicateBuilder myPredicateBuilder;
-	private PartitionId myPartitionId;
+	private RequestPartitionId myRequestPartitionId;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
@@ -187,7 +187,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private void searchForIdsWithAndOr(String theResourceName, String theNextParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest) {
-		myPredicateBuilder.searchForIdsWithAndOr(theResourceName, theNextParamName, theAndOrParams, theRequest, myPartitionId);
+		myPredicateBuilder.searchForIdsWithAndOr(theResourceName, theNextParamName, theAndOrParams, theRequest, myRequestPartitionId);
 	}
 
 	private void searchForIdsWithAndOr(@Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
@@ -225,8 +225,8 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
-	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, PartitionId thePartitionId) {
-		init(theParams, theSearchUuid, thePartitionId);
+	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+		init(theParams, theSearchUuid, theRequestPartitionId);
 
 		TypedQuery<Long> query = createQuery(null, null, true, theRequest);
 		return new CountQueryIterator(query);
@@ -241,8 +241,8 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
-	public IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest, PartitionId thePartitionId) {
-		init(theParams, theSearchRuntimeDetails.getSearchUuid(), thePartitionId);
+	public IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+		init(theParams, theSearchRuntimeDetails.getSearchUuid(), theRequestPartitionId);
 
 		if (myPidSet == null) {
 			myPidSet = new HashSet<>();
@@ -251,12 +251,12 @@ public class SearchBuilder implements ISearchBuilder {
 		return new QueryIterator(theSearchRuntimeDetails, theRequest);
 	}
 
-	private void init(SearchParameterMap theParams, String theSearchUuid, PartitionId thePartitionId) {
+	private void init(SearchParameterMap theParams, String theSearchUuid, RequestPartitionId theRequestPartitionId) {
 		myParams = theParams;
 		myCriteriaBuilder = myEntityManager.getCriteriaBuilder();
 		mySearchUuid = theSearchUuid;
 		myPredicateBuilder = new PredicateBuilder(this, myPredicateBuilderFactory);
-		myPartitionId = thePartitionId;
+		myRequestPartitionId = theRequestPartitionId;
 	}
 
 
@@ -304,7 +304,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 				StringParam idParam = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-				ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(myPartitionId, myResourceName, idParam.getValue());
+				ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParam.getValue());
 				if (myAlsoIncludePids == null) {
 					myAlsoIncludePids = new ArrayList<>(1);
 				}
@@ -359,9 +359,9 @@ public class SearchBuilder implements ISearchBuilder {
 				myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myResourceType"), myResourceName));
 			}
 			myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myDeleted")));
-			if (myPartitionId != null) {
-				if (myPartitionId.getPartitionId() != null) {
-					myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myPartitionIdValue").as(Integer.class), myPartitionId.getPartitionId()));
+			if (myRequestPartitionId != null) {
+				if (myRequestPartitionId.getPartitionId() != null) {
+					myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myPartitionIdValue").as(Integer.class), myRequestPartitionId.getPartitionId()));
 				} else {
 					myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myPartitionIdValue").as(Integer.class)));
 				}
@@ -488,7 +488,7 @@ public class SearchBuilder implements ISearchBuilder {
 					Predicate joinParam1 = theBuilder.equal(join.get("myParamName"), theSort.getParamName());
 					theQueryRoot.addPredicate(joinParam1);
 				} else {
-					Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionSettings, myPartitionId, myResourceName, theSort.getParamName());
+					Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionSettings, myRequestPartitionId, myResourceName, theSort.getParamName());
 					Predicate joinParam1 = theBuilder.equal(join.get("myHashIdentity"), hashIdentity);
 					theQueryRoot.addPredicate(joinParam1);
 				}
@@ -877,7 +877,7 @@ public class SearchBuilder implements ISearchBuilder {
 					.add(StorageProcessingMessage.class, msg);
 				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
 
-				addPredicateCompositeStringUnique(theParams, indexString, myPartitionId);
+				addPredicateCompositeStringUnique(theParams, indexString, myRequestPartitionId);
 			}
 		}
 	}
@@ -892,11 +892,11 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private void addPredicateCompositeStringUnique(@Nonnull SearchParameterMap theParams, String theIndexedString, PartitionId thePartitionId) {
+	private void addPredicateCompositeStringUnique(@Nonnull SearchParameterMap theParams, String theIndexedString, RequestPartitionId theRequestPartitionId) {
 		Join<ResourceTable, ResourceIndexedCompositeStringUnique> join = myQueryRoot.join("myParamsCompositeStringUnique", JoinType.LEFT);
 
-		if (thePartitionId != null) {
-			Integer partitionId = thePartitionId.getPartitionId();
+		if (theRequestPartitionId != null) {
+			Integer partitionId = theRequestPartitionId.getPartitionId();
 			Predicate predicate = myCriteriaBuilder.equal(join.get("myPartitionIdValue").as(Integer.class), partitionId);
 			myQueryRoot.addPredicate(predicate);
 		}

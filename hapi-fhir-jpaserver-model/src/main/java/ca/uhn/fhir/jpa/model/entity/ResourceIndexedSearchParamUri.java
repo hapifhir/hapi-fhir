@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -209,8 +209,8 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		return defaultString(getUri()).equalsIgnoreCase(uri.getValueNotNull());
 	}
 
-	public static long calculateHashUri(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String theResourceType, String theParamName, String theUri) {
-		return hash(thePartitionSettings, thePartitionId, theResourceType, theParamName, theUri);
+	public static long calculateHashUri(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUri) {
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUri);
 	}
 
 

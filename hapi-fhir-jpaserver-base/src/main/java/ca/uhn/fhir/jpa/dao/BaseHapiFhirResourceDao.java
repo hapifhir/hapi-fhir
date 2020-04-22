@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -216,8 +216,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
 		}
 
-		PartitionId partitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequestDetails, theResource);
-		return doCreate(theResource, theIfNoneExist, thePerformIndexing, theUpdateTimestamp, theRequestDetails, partitionId);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequestDetails, theResource);
+		return doCreate(theResource, theIfNoneExist, thePerformIndexing, theUpdateTimestamp, theRequestDetails, requestPartitionId);
 	}
 
 	@Override
@@ -446,14 +446,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	private DaoMethodOutcome doCreate(T theResource, String theIfNoneExist, boolean thePerformIndexing, Date theUpdateTime, RequestDetails theRequest, PartitionId thePartitionId) {
+	private DaoMethodOutcome doCreate(T theResource, String theIfNoneExist, boolean thePerformIndexing, Date theUpdateTime, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 		StopWatch w = new StopWatch();
 
 		preProcessResourceForStorage(theResource);
 
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
-		entity.setPartitionId(thePartitionId);
+		entity.setPartitionId(theRequestPartitionId);
 
 		if (isNotBlank(theIfNoneExist)) {
 			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType, theRequest);
@@ -1005,20 +1005,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
-		@Nullable PartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, getResourceName());
-		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(partitionId, getResourceName(), theId.getIdPart());
+		@Nullable RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, getResourceName());
+		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, getResourceName(), theId.getIdPart());
 		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid.getIdAsLong());
 
 		// Verify that the resource is for the correct partition
-		if (partitionId != null) {
-			if (partitionId.getPartitionId() == null) {
+		if (requestPartitionId != null) {
+			if (requestPartitionId.getPartitionId() == null) {
 				if (entity.getPartitionId() != null) {
-					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", partitionId, entity.getPartitionId());
+					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", requestPartitionId, entity.getPartitionId());
 					entity = null;
 				}
 			} else if (entity.getPartitionId() != null) {
-				if (!entity.getPartitionId().getPartitionId().equals(partitionId.getPartitionId())) {
-					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", partitionId, entity.getPartitionId());
+				if (!entity.getPartitionId().getPartitionId().equals(requestPartitionId.getPartitionId())) {
+					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", requestPartitionId, entity.getPartitionId());
 					entity = null;
 				}
 			} else {
@@ -1064,15 +1064,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@NotNull
 	protected ResourceTable readEntityLatestVersion(IIdType theId, RequestDetails theRequestDetails) {
-		PartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, getResourceName());
-		return readEntityLatestVersion(theId, partitionId);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, getResourceName());
+		return readEntityLatestVersion(theId, requestPartitionId);
 	}
 
 	@NotNull
-	private ResourceTable readEntityLatestVersion(IIdType theId, @Nullable PartitionId thePartitionId) {
+	private ResourceTable readEntityLatestVersion(IIdType theId, @Nullable RequestPartitionId theRequestPartitionId) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
-		ResourcePersistentId persistentId = myIdHelperService.resolveResourcePersistentIds(thePartitionId, getResourceName(), theId.getIdPart());
+		ResourcePersistentId persistentId = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, getResourceName(), theId.getIdPart());
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
@@ -1209,8 +1209,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
 
 
-		PartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, getResourceName());
-		try (IResultIterator iter = builder.createQuery(theParams, searchRuntimeDetails, theRequest, partitionId)) {
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, getResourceName());
+		try (IResultIterator iter = builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId)) {
 			while (iter.hasNext()) {
 				retVal.add(iter.next());
 			}
@@ -1314,11 +1314,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			 */
 			resourceId = theResource.getIdElement();
 
-			PartitionId partitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequest, theResource);
+			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequest, theResource);
 			try {
-				entity = readEntityLatestVersion(resourceId, partitionId);
+				entity = readEntityLatestVersion(resourceId, requestPartitionId);
 			} catch (ResourceNotFoundException e) {
-				return doCreate(theResource, null, thePerformIndexing, new Date(), theRequest, partitionId);
+				return doCreate(theResource, null, thePerformIndexing, new Date(), theRequest, requestPartitionId);
 			}
 		}
 

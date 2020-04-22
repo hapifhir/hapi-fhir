@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.BigDecimalNumericFieldBridge;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -289,12 +289,12 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		return retval;
 	}
 
-	public static long calculateHashSystemAndUnits(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String theResourceType, String theParamName, String theSystem, String theUnits) {
-		return hash(thePartitionSettings, thePartitionId, theResourceType, theParamName, theSystem, theUnits);
+	public static long calculateHashSystemAndUnits(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theSystem, String theUnits) {
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theSystem, theUnits);
 	}
 
-	public static long calculateHashUnits(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String theResourceType, String theParamName, String theUnits) {
-		return hash(thePartitionSettings, thePartitionId, theResourceType, theParamName, theUnits);
+	public static long calculateHashUnits(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUnits) {
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUnits);
 	}
 
 

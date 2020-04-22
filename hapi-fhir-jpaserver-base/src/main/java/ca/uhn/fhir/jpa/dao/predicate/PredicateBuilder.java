@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -56,75 +56,75 @@ public class PredicateBuilder {
 		myPredicateBuilderUri = thePredicateBuilderFactory.newPredicateBuilderUri(theSearchBuilder);
 	}
 
-	void addPredicateCoords(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, PartitionId thePartitionId) {
-		myPredicateBuilderCoords.addPredicate(theResourceName, theParamName, theNextAnd, null, thePartitionId);
+	void addPredicateCoords(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, RequestPartitionId theRequestPartitionId) {
+		myPredicateBuilderCoords.addPredicate(theResourceName, theParamName, theNextAnd, null, theRequestPartitionId);
 	}
 
-	Predicate addPredicateDate(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation, PartitionId thePartitionId) {
-		return myPredicateBuilderDate.addPredicate(theResourceName, theParamName, theNextAnd, theOperation, thePartitionId);
+	Predicate addPredicateDate(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderDate.addPredicate(theResourceName, theParamName, theNextAnd, theOperation, theRequestPartitionId);
 	}
 
-	Predicate addPredicateNumber(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation, PartitionId thePartitionId) {
-		return myPredicateBuilderNumber.addPredicate(theResourceName, theParamName, theNextAnd, theOperation, thePartitionId);
+	Predicate addPredicateNumber(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderNumber.addPredicate(theResourceName, theParamName, theNextAnd, theOperation, theRequestPartitionId);
 	}
 
-	Predicate addPredicateQuantity(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation, PartitionId thePartitionId) {
-		return myPredicateBuilderQuantity.addPredicate(theResourceName, theParamName, theNextAnd, theOperation, thePartitionId);
+	Predicate addPredicateQuantity(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderQuantity.addPredicate(theResourceName, theParamName, theNextAnd, theOperation, theRequestPartitionId);
 	}
 
-	void addPredicateString(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, PartitionId thePartitionId) {
-		myPredicateBuilderString.addPredicate(theResourceName, theParamName, theNextAnd, SearchFilterParser.CompareOperation.sw, thePartitionId);
+	void addPredicateString(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, RequestPartitionId theRequestPartitionId) {
+		myPredicateBuilderString.addPredicate(theResourceName, theParamName, theNextAnd, SearchFilterParser.CompareOperation.sw, theRequestPartitionId);
 	}
 
-	Predicate addPredicateString(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation, PartitionId thePartitionId) {
-		return myPredicateBuilderString.addPredicate(theResourceName, theParamName, theNextAnd, theOperation, thePartitionId);
+	Predicate addPredicateString(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderString.addPredicate(theResourceName, theParamName, theNextAnd, theOperation, theRequestPartitionId);
 	}
 
-	void addPredicateTag(List<List<IQueryParameterType>> theAndOrParams, String theParamName, PartitionId thePartitionId) {
-		myPredicateBuilderTag.addPredicateTag(theAndOrParams, theParamName, thePartitionId);
+	void addPredicateTag(List<List<IQueryParameterType>> theAndOrParams, String theParamName, RequestPartitionId theRequestPartitionId) {
+		myPredicateBuilderTag.addPredicateTag(theAndOrParams, theParamName, theRequestPartitionId);
 	}
 
-	Predicate addPredicateToken(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation, PartitionId thePartitionId) {
-		return myPredicateBuilderToken.addPredicate(theResourceName, theParamName, theNextAnd, theOperation, thePartitionId);
+	Predicate addPredicateToken(String theResourceName, String theParamName, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderToken.addPredicate(theResourceName, theParamName, theNextAnd, theOperation, theRequestPartitionId);
 	}
 
-	Predicate addPredicateUri(String theResourceName, String theName, List<? extends IQueryParameterType> theSingletonList, SearchFilterParser.CompareOperation theOperation, PartitionId thePartitionId) {
-		return myPredicateBuilderUri.addPredicate(theResourceName, theName, theSingletonList, theOperation, thePartitionId);
+	Predicate addPredicateUri(String theResourceName, String theName, List<? extends IQueryParameterType> theSingletonList, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderUri.addPredicate(theResourceName, theName, theSingletonList, theOperation, theRequestPartitionId);
 	}
 
-	public void searchForIdsWithAndOr(String theResourceName, String theNextParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest, PartitionId thePartitionId) {
-		myPredicateBuilderReference.searchForIdsWithAndOr(theResourceName, theNextParamName, theAndOrParams, theRequest, thePartitionId);
+	public void searchForIdsWithAndOr(String theResourceName, String theNextParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+		myPredicateBuilderReference.searchForIdsWithAndOr(theResourceName, theNextParamName, theAndOrParams, theRequest, theRequestPartitionId);
 	}
 
-	Subquery<Long> createLinkSubquery(String theParameterName, String theTargetResourceType, ArrayList<IQueryParameterType> theOrValues, RequestDetails theRequest, PartitionId thePartitionId) {
-		return myPredicateBuilderReference.createLinkSubquery(true, theParameterName, theTargetResourceType, theOrValues, theRequest, thePartitionId);
+	Subquery<Long> createLinkSubquery(String theParameterName, String theTargetResourceType, ArrayList<IQueryParameterType> theOrValues, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderReference.createLinkSubquery(true, theParameterName, theTargetResourceType, theOrValues, theRequest, theRequestPartitionId);
 	}
 
 	Predicate createResourceLinkPathPredicate(String theTargetResourceType, String theParamReference, Join<ResourceTable, ResourceLink> theJoin) {
 		return myPredicateBuilderReference.createResourceLinkPathPredicate(theTargetResourceType, theParamReference, theJoin);
 	}
 
-	void addPredicateResourceId(List<List<IQueryParameterType>> theAndOrParams, String theResourceName, PartitionId thePartitionId) {
-		myPredicateBuilderResourceId.addPredicateResourceId(theAndOrParams, theResourceName, null, thePartitionId);
+	void addPredicateResourceId(List<List<IQueryParameterType>> theAndOrParams, String theResourceName, RequestPartitionId theRequestPartitionId) {
+		myPredicateBuilderResourceId.addPredicateResourceId(theAndOrParams, theResourceName, null, theRequestPartitionId);
 	}
 
-	public Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, PartitionId thePartitionId) {
-		return myPredicateBuilderResourceId.addPredicateResourceId(theValues, theResourceName, theOperation, thePartitionId);
+	public Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderResourceId.addPredicateResourceId(theValues, theResourceName, theOperation, theRequestPartitionId);
 	}
 
-	Predicate createPredicateString(IQueryParameterType theLeftValue, String theResourceName, String theName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> theStringJoin, PartitionId thePartitionId) {
-		return myPredicateBuilderString.createPredicateString(theLeftValue, theResourceName, theName, theBuilder, theStringJoin, thePartitionId);
+	Predicate createPredicateString(IQueryParameterType theLeftValue, String theResourceName, String theName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> theStringJoin, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderString.createPredicateString(theLeftValue, theResourceName, theName, theBuilder, theStringJoin, theRequestPartitionId);
 	}
 
-	Collection<Predicate> createPredicateToken(List<IQueryParameterType> theTokens, String theResourceName, String theName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theTokenJoin, PartitionId thePartitionId) {
-		return myPredicateBuilderToken.createPredicateToken(theTokens, theResourceName, theName, theBuilder, theTokenJoin, thePartitionId);
+	Collection<Predicate> createPredicateToken(List<IQueryParameterType> theTokens, String theResourceName, String theName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theTokenJoin, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderToken.createPredicateToken(theTokens, theResourceName, theName, theBuilder, theTokenJoin, theRequestPartitionId);
 	}
 
-	Predicate createPredicateDate(IQueryParameterType theLeftValue, String theResourceName, String theName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> theDateJoin, PartitionId thePartitionId) {
-		return myPredicateBuilderDate.createPredicateDate(theLeftValue, theResourceName, theName, theBuilder, theDateJoin, thePartitionId);
+	Predicate createPredicateDate(IQueryParameterType theLeftValue, String theResourceName, String theName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> theDateJoin, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderDate.createPredicateDate(theLeftValue, theResourceName, theName, theBuilder, theDateJoin, theRequestPartitionId);
 	}
 
-	Predicate createPredicateQuantity(IQueryParameterType theLeftValue, String theResourceName, String theName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamQuantity, ResourceIndexedSearchParamQuantity> theDateJoin, PartitionId thePartitionId) {
-		return myPredicateBuilderQuantity.createPredicateQuantity(theLeftValue, theResourceName, theName, theBuilder, theDateJoin, thePartitionId);
+	Predicate createPredicateQuantity(IQueryParameterType theLeftValue, String theResourceName, String theName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamQuantity, ResourceIndexedSearchParamQuantity> theDateJoin, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderQuantity.createPredicateQuantity(theLeftValue, theResourceName, theName, theBuilder, theDateJoin, theRequestPartitionId);
 	}
 }

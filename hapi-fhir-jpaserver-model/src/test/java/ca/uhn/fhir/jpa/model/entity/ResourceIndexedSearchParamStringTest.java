@@ -50,4 +50,22 @@ public class ResourceIndexedSearchParamStringTest {
 		assertNotEquals(val1, "");
 	}
 
+	@Test
+	public void testEqualsDifferentPartition() {
+		ResourceIndexedSearchParamString val1 = new ResourceIndexedSearchParamString()
+			.setValueExact("aaa")
+			.setValueNormalized("AAA");
+		val1.setPartitionSettings(new PartitionSettings().setIncludePartitionInSearchHashes(true));
+		val1.calculateHashes();
+		ResourceIndexedSearchParamString val2 = new ResourceIndexedSearchParamString()
+			.setValueExact("aaa")
+			.setValueNormalized("AAA");
+		val2.setPartitionSettings(new PartitionSettings().setIncludePartitionInSearchHashes(true));
+		val2.calculateHashes();
+		assertEquals(val1, val1);
+		assertEquals(val1, val2);
+		assertNotEquals(val1, null);
+		assertNotEquals(val1, "");
+	}
+
 }

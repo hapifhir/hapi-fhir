@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -60,7 +60,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 											String theParamName,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation operation,
-											PartitionId thePartitionId) {
+											RequestPartitionId theRequestPartitionId) {
 
 		boolean newJoin = false;
 		if (myJoinMap == null) {
@@ -77,7 +77,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 		if (theList.get(0).getMissing() != null) {
 			Boolean missing = theList.get(0).getMissing();
-			addPredicateParamMissingForNonReference(theResourceName, theParamName, missing, join, thePartitionId);
+			addPredicateParamMissingForNonReference(theResourceName, theParamName, missing, join, theRequestPartitionId);
 			return null;
 		}
 
@@ -96,7 +96,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 		myQueryRoot.setHasIndexJoins();
 		if (newJoin) {
-			Predicate identityAndValuePredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicates, thePartitionId);
+			Predicate identityAndValuePredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicates, theRequestPartitionId);
 			myQueryRoot.addPredicate(identityAndValuePredicate);
 		} else {
 			myQueryRoot.addPredicate(orPredicates);
@@ -110,13 +110,13 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 													 String theParamName,
 													 CriteriaBuilder theBuilder,
 													 From<?, ResourceIndexedSearchParamDate> theFrom,
-													 PartitionId thePartitionId) {
+													 RequestPartitionId theRequestPartitionId) {
 		Predicate predicateDate = createPredicateDate(theParam,
 			theBuilder,
 			theFrom,
 			null
 		);
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, predicateDate, thePartitionId);
+		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, predicateDate, theRequestPartitionId);
 	}
 
 	private Predicate createPredicateDate(IQueryParameterType theParam,

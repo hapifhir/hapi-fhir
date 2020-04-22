@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -279,11 +279,11 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return defaultString(getValueNormalized()).startsWith(normalizedString);
 	}
 
-	public static long calculateHashExact(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String theResourceType, String theParamName, String theValueExact) {
-		return hash(thePartitionSettings, thePartitionId, theResourceType, theParamName, theValueExact);
+	public static long calculateHashExact(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theValueExact) {
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theValueExact);
 	}
 
-	public static long calculateHashNormalized(PartitionSettings thePartitionSettings, PartitionId thePartitionId, ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized) {
+	public static long calculateHashNormalized(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized) {
 		/*
 		 * If we're not allowing contained searches, we'll add the first
 		 * bit of the normalized value to the hash. This helps to
@@ -295,6 +295,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			hashPrefixLength = 0;
 		}
 
-		return hash(thePartitionSettings, thePartitionId, theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
 	}
 }

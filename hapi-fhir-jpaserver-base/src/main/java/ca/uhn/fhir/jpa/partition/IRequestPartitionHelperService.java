@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.partition;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -29,8 +29,8 @@ import javax.annotation.Nullable;
 
 public interface IRequestPartitionHelperService {
 	@Nullable
-	PartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType);
+    RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType);
 
 	@Nullable
-	PartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource);
+    RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource);
 }

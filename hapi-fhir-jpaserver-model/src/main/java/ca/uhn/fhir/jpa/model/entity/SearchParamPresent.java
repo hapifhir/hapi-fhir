@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -126,9 +126,9 @@ public class SearchParamPresent extends BasePartitionable implements Serializabl
 		myPartitionSettings = thePartitionSettings;
 	}
 
-	public static long calculateHashPresence(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String theResourceType, String theParamName, Boolean thePresent) {
+	public static long calculateHashPresence(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, Boolean thePresent) {
 		String string = thePresent != null ? Boolean.toString(thePresent) : Boolean.toString(false);
-		return BaseResourceIndexedSearchParam.hash(thePartitionSettings, thePartitionId, theResourceType, theParamName, string);
+		return BaseResourceIndexedSearchParam.hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, string);
 	}
 
 }

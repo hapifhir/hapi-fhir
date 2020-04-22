@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -60,7 +60,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 														 String theParamName,
 														 CriteriaBuilder theBuilder,
 														 From<?, ResourceIndexedSearchParamCoords> theFrom,
-														 PartitionId thePartitionId) {
+														 RequestPartitionId theRequestPartitionId) {
 		String latitudeValue;
 		String longitudeValue;
 		Double distanceKm = 0.0;
@@ -121,7 +121,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 			longitudePredicate = longitudePredicateFromBox(theBuilder, theFrom, box);
 		}
 		Predicate singleCode = theBuilder.and(latitudePredicate, longitudePredicate);
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, thePartitionId);
+		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, theRequestPartitionId);
 	}
 
 	private Predicate latitudePredicateFromBox(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamCoords> theFrom, SearchBox theBox) {
@@ -150,16 +150,16 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 											String theParamName,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation theOperation,
-											PartitionId thePartitionId) {
+											RequestPartitionId theRequestPartitionId) {
 		Join<ResourceTable, ResourceIndexedSearchParamCoords> join = createJoin(SearchBuilderJoinEnum.COORDS, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
+			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);
 			return null;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
-		addPartitionIdPredicate(thePartitionId, join, codePredicates);
+		addPartitionIdPredicate(theRequestPartitionId, join, codePredicates);
 
 		for (IQueryParameterType nextOr : theList) {
 
@@ -168,7 +168,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 				theParamName,
                     myCriteriaBuilder,
 				join,
-				thePartitionId);
+                    theRequestPartitionId);
 			codePredicates.add(singleCode);
 		}
 

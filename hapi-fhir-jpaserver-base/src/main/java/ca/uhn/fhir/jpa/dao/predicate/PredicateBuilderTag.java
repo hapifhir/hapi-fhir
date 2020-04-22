@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
@@ -60,7 +60,7 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 		super(theSearchBuilder);
 	}
 
-	void addPredicateTag(List<List<IQueryParameterType>> theList, String theParamName, PartitionId thePartitionId) {
+	void addPredicateTag(List<List<IQueryParameterType>> theList, String theParamName, RequestPartitionId theRequestPartitionId) {
 		TagTypeEnum tagType;
 		if (Constants.PARAM_TAG.equals(theParamName)) {
 			tagType = TagTypeEnum.TAG;
@@ -172,8 +172,8 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 			Predicate tagListPredicate = createPredicateTagList(defJoin, myCriteriaBuilder, tagType, tokens);
 			List<Predicate> predicates = Lists.newArrayList(tagListPredicate);
 
-			if (thePartitionId != null) {
-				addPartitionIdPredicate(thePartitionId, tagJoin, predicates);
+			if (theRequestPartitionId != null) {
+				addPartitionIdPredicate(theRequestPartitionId, tagJoin, predicates);
 			}
 
 			myQueryRoot.addPredicates(predicates);

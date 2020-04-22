@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -283,17 +283,17 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return retVal;
 	}
 
-	public static long calculateHashSystem(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String theResourceType, String theParamName, String theSystem) {
-		return hash(thePartitionSettings, thePartitionId, theResourceType, theParamName, trim(theSystem));
+	public static long calculateHashSystem(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theSystem) {
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, trim(theSystem));
 	}
 
-	public static long calculateHashSystemAndValue(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String theResourceType, String theParamName, String theSystem, String theValue) {
-		return hash(thePartitionSettings, thePartitionId, theResourceType, theParamName, defaultString(trim(theSystem)), trim(theValue));
+	public static long calculateHashSystemAndValue(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theSystem, String theValue) {
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, defaultString(trim(theSystem)), trim(theValue));
 	}
 
-	public static long calculateHashValue(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String theResourceType, String theParamName, String theValue) {
+	public static long calculateHashValue(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theValue) {
 		String value = trim(theValue);
-		return hash(thePartitionSettings, thePartitionId, theResourceType, theParamName, value);
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
 

@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
@@ -57,17 +57,17 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 											String theParamName,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation operation,
-											PartitionId thePartitionId) {
+											RequestPartitionId theRequestPartitionId) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamUri> join = createJoin(SearchBuilderJoinEnum.URI, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
+			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);
 			return null;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
-		addPartitionIdPredicate(thePartitionId, join, codePredicates);
+		addPartitionIdPredicate(theRequestPartitionId, join, codePredicates);
 
 		for (IQueryParameterType nextOr : theList) {
 
@@ -108,13 +108,13 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 					}
 
 					Predicate uriPredicate = join.get("myUri").as(String.class).in(toFind);
-					Predicate hashAndUriPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, uriPredicate, thePartitionId);
+					Predicate hashAndUriPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, uriPredicate, theRequestPartitionId);
 					codePredicates.add(hashAndUriPredicate);
 
 				} else if (param.getQualifier() == UriParamQualifierEnum.BELOW) {
 
 					Predicate uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createLeftMatchLikeExpression(value));
-					Predicate hashAndUriPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, uriPredicate, thePartitionId);
+					Predicate hashAndUriPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, uriPredicate, theRequestPartitionId);
 					codePredicates.add(hashAndUriPredicate);
 
 				} else {
@@ -125,7 +125,7 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 
 						Predicate uriPredicate = null;
 						if (operation == null || operation == SearchFilterParser.CompareOperation.eq) {
-							long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(getPartitionSettings(), thePartitionId, theResourceName, theParamName, value);
+							long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, value);
 							Predicate hashPredicate = myCriteriaBuilder.equal(join.get("myHashUri"), hashUri);
 							codePredicates.add(hashPredicate);
 						} else if (operation == SearchFilterParser.CompareOperation.ne) {
@@ -150,7 +150,7 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 						}
 
 						if (uriPredicate != null) {
-							long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), thePartitionId, theResourceName, theParamName);
+							long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName);
 							Predicate hashIdentityPredicate = myCriteriaBuilder.equal(join.get("myHashIdentity"), hashIdentity);
 							codePredicates.add(myCriteriaBuilder.and(hashIdentityPredicate, uriPredicate));
 						}
@@ -180,7 +180,7 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 			theParamName,
 			join,
 			orPredicate,
-			thePartitionId);
+                theRequestPartitionId);
 		myQueryRoot.setHasIndexJoins();
 		myQueryRoot.addPredicate(outerPredicate);
 		return outerPredicate;

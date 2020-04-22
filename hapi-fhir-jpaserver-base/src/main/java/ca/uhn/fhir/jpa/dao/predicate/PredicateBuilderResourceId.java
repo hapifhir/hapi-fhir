@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
@@ -58,9 +58,9 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 	}
 
 	@Nullable
-	Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, PartitionId thePartitionId) {
+	Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
-		Predicate nextPredicate = createPredicate(myQueryRoot.getRoot(), theResourceName, theValues, theOperation, thePartitionId);
+		Predicate nextPredicate = createPredicate(myQueryRoot.getRoot(), theResourceName, theValues, theOperation, theRequestPartitionId);
 
 		if (nextPredicate != null) {
 			myQueryRoot.addPredicate(nextPredicate);
@@ -71,7 +71,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 	}
 
 	@Nullable
-	private Predicate createPredicate(Root<ResourceTable> theRoot, String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, PartitionId thePartitionId) {
+	private Predicate createPredicate(Root<ResourceTable> theRoot, String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 		Predicate nextPredicate = null;
 
 		Set<ResourcePersistentId> allOrPids = null;
@@ -89,7 +89,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 				if (isNotBlank(value)) {
 					haveValue = true;
 					try {
-						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(thePartitionId, theResourceName, valueAsId.getIdPart());
+						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, theResourceName, valueAsId.getIdPart());
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {
 						// This is not an error in a search, it just results in no matchesFhirResourceDaoR4InterceptorTest

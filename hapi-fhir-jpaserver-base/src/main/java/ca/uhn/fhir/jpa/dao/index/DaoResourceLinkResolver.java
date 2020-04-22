@@ -26,12 +26,11 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -64,11 +63,11 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	private DaoRegistry myDaoRegistry;
 
 	@Override
-	public IResourceLookup findTargetResource(PartitionId thePartitionId, RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theResourceType, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
+	public IResourceLookup findTargetResource(RequestPartitionId theRequestPartitionId, RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theResourceType, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
 		IResourceLookup resolvedResource;
 		String idPart = theSourceResourceId.getIdPart();
 		try {
-			resolvedResource = myIdHelperService.resolveResourceIdentity(thePartitionId, theResourceType, idPart, theRequest);
+			resolvedResource = myIdHelperService.resolveResourceIdentity(theRequestPartitionId, theResourceType, idPart, theRequest);
 			ourLog.trace("Translated {}/{} to resource PID {}", theType, idPart, resolvedResource);
 		} catch (ResourceNotFoundException e) {
 

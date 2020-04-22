@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.*;
@@ -2004,8 +2004,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	private void addCreatePartition(Integer thePartitionId, LocalDate thePartitionDate) {
 		Validate.notNull(thePartitionId);
-		PartitionId partitionId = PartitionId.fromPartitionId(thePartitionId, thePartitionDate);
-		myPartitionInterceptor.addCreatePartition(partitionId);
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(thePartitionId, thePartitionDate);
+		myPartitionInterceptor.addCreatePartition(requestPartitionId);
 	}
 
 	private void addCreateNoPartition() {
@@ -2013,21 +2013,21 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	private void addCreateNoPartitionId(LocalDate thePartitionDate) {
-		PartitionId partitionId = PartitionId.fromPartitionId(null, thePartitionDate);
-		myPartitionInterceptor.addCreatePartition(partitionId);
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(null, thePartitionDate);
+		myPartitionInterceptor.addCreatePartition(requestPartitionId);
 	}
 
 	private void addReadPartition(Integer thePartitionId) {
-		PartitionId partitionId = null;
+		RequestPartitionId requestPartitionId = null;
 		if (thePartitionId != null) {
-			partitionId = PartitionId.fromPartitionId(thePartitionId, null);
+			requestPartitionId = RequestPartitionId.fromPartitionId(thePartitionId, null);
 		}
-		myPartitionInterceptor.addReadPartition(partitionId);
+		myPartitionInterceptor.addReadPartition(requestPartitionId);
 	}
 
 	private void addDefaultReadPartition() {
-		PartitionId partitionId = PartitionId.fromPartitionId(null, null);
-		myPartitionInterceptor.addReadPartition(partitionId);
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(null, null);
+		myPartitionInterceptor.addReadPartition(requestPartitionId);
 	}
 
 	public IIdType createPatient(Integer thePartitionId, Consumer<Patient>... theModifiers) {
@@ -2105,35 +2105,35 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	public static class MyInterceptor {
 
 
-		private final List<PartitionId> myCreatePartitionIds = new ArrayList<>();
-		private final List<PartitionId> myReadPartitionIds = new ArrayList<>();
+		private final List<RequestPartitionId> myCreateRequestPartitionIds = new ArrayList<>();
+		private final List<RequestPartitionId> myReadRequestPartitionIds = new ArrayList<>();
 
-		public void addCreatePartition(PartitionId thePartitionId) {
-			myCreatePartitionIds.add(thePartitionId);
+		public void addCreatePartition(RequestPartitionId theRequestPartitionId) {
+			myCreateRequestPartitionIds.add(theRequestPartitionId);
 		}
 
-		public void addReadPartition(PartitionId thePartitionId) {
-			myReadPartitionIds.add(thePartitionId);
+		public void addReadPartition(RequestPartitionId theRequestPartitionId) {
+			myReadRequestPartitionIds.add(theRequestPartitionId);
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-		public PartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
 			assertNotNull(theResource);
-			PartitionId retVal = myCreatePartitionIds.remove(0);
+			RequestPartitionId retVal = myCreateRequestPartitionIds.remove(0);
 			ourLog.info("Returning partition for create: {}", retVal);
 			return retVal;
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-		public PartitionId PartitionIdentifyRead(ServletRequestDetails theRequestDetails) {
-			PartitionId retVal = myReadPartitionIds.remove(0);
+		public RequestPartitionId PartitionIdentifyRead(ServletRequestDetails theRequestDetails) {
+			RequestPartitionId retVal = myReadRequestPartitionIds.remove(0);
 			ourLog.info("Returning partition for read: {}", retVal);
 			return retVal;
 		}
 
 		public void assertNoRemainingIds() {
-			assertEquals(0, myCreatePartitionIds.size());
-			assertEquals(0, myReadPartitionIds.size());
+			assertEquals(0, myCreateRequestPartitionIds.size());
+			assertEquals(0, myReadRequestPartitionIds.size());
 		}
 	}
 

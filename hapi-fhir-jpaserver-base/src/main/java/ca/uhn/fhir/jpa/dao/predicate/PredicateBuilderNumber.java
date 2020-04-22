@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -55,17 +55,17 @@ class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateB
 											String theParamName,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation operation,
-											PartitionId thePartitionId) {
+											RequestPartitionId theRequestPartitionId) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamNumber> join = createJoin(SearchBuilderJoinEnum.NUMBER, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
+			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);
 			return null;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
-		addPartitionIdPredicate(thePartitionId, join, codePredicates);
+		addPartitionIdPredicate(theRequestPartitionId, join, codePredicates);
 
 		for (IQueryParameterType nextOr : theList) {
 
@@ -98,8 +98,8 @@ class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateB
 
 				String invalidMessageName = "invalidNumberPrefix";
 
-				Predicate predicateNumeric = createPredicateNumeric(theResourceName, theParamName, join, myCriteriaBuilder, nextOr, prefix, value, fromObj, invalidMessageName, thePartitionId);
-				Predicate predicateOuter = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, predicateNumeric, thePartitionId);
+				Predicate predicateNumeric = createPredicateNumeric(theResourceName, theParamName, join, myCriteriaBuilder, nextOr, prefix, value, fromObj, invalidMessageName, theRequestPartitionId);
+				Predicate predicateOuter = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, predicateNumeric, theRequestPartitionId);
 				codePredicates.add(predicateOuter);
 
 			} else {

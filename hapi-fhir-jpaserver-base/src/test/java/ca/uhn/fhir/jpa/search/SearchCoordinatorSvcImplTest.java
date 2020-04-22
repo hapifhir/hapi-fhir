@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -184,7 +184,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<ResourcePersistentId> pids = createPidSequence(800);
 		IResultIterator iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
-		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(PartitionId.class))).thenReturn(iter);
+		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
@@ -217,7 +217,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<ResourcePersistentId> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 1);
-		when(mySearchBuilder.createQuery(any(), any(), any(), nullable(PartitionId.class))).thenReturn(iter);
+		when(mySearchBuilder.createQuery(any(), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		when(mySearchCacheSvc.save(any())).thenAnswer(t -> {
@@ -299,7 +299,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<ResourcePersistentId> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(PartitionId.class))).thenReturn(iter);
+		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
@@ -323,7 +323,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<ResourcePersistentId> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 500);
-		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(PartitionId.class))).thenReturn(iter);
+		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
@@ -368,7 +368,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<ResourcePersistentId> pids = createPidSequence(800);
 		IResultIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(PartitionId.class))).thenReturn(iter);
+		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		when(mySearchCacheSvc.save(any())).thenAnswer(t ->{
 			ourLog.info("Saving search");
 			return t.getArgument( 0, Search.class);
@@ -416,7 +416,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<ResourcePersistentId> pids = createPidSequence(100);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(PartitionId.class))).thenReturn(iter);
+		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
@@ -518,7 +518,7 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<ResourcePersistentId> pids = createPidSequence(800);
-		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(PartitionId.class))).thenReturn(new ResultIterator(pids.iterator()));
+		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(new ResultIterator(pids.iterator()));
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
@@ -539,7 +539,7 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<ResourcePersistentId> pids = createPidSequence(800);
-		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class), nullable(PartitionId.class))).thenReturn(new ResultIterator(pids.iterator()));
+		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(new ResultIterator(pids.iterator()));
 
 		pids = createPidSequence(110);
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(eq(pids), any(Collection.class), any(List.class), anyBoolean(), nullable(RequestDetails.class));

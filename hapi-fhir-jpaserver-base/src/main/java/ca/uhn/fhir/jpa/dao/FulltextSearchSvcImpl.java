@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -303,9 +303,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		// Partitioning is not supported for this operation
 		Validate.isTrue(myPartitionSettings.isPartitioningEnabled() == false, "Suggest keywords not supported for partitioned system");
-		PartitionId partitionId = null;
+		RequestPartitionId requestPartitionId = null;
 
-		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(partitionId, contextParts[0], contextParts[1]);
+		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, contextParts[0], contextParts[1]);
 
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 

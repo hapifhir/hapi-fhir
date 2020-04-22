@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -57,20 +57,20 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 											String theParamName,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation theOperation,
-											PartitionId thePartitionId) {
+											RequestPartitionId theRequestPartitionId) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamQuantity> join = createJoin(SearchBuilderJoinEnum.QUANTITY, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
+			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);
 			return null;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
-		addPartitionIdPredicate(thePartitionId, join, codePredicates);
+		addPartitionIdPredicate(theRequestPartitionId, join, codePredicates);
 
 		for (IQueryParameterType nextOr : theList) {
-			Predicate singleCode = createPredicateQuantity(nextOr, theResourceName, theParamName, myCriteriaBuilder, join, theOperation, thePartitionId);
+			Predicate singleCode = createPredicateQuantity(nextOr, theResourceName, theParamName, myCriteriaBuilder, join, theOperation, theRequestPartitionId);
 			codePredicates.add(singleCode);
 		}
 
@@ -85,14 +85,14 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 														  String theParamName,
 														  CriteriaBuilder theBuilder,
 														  From<?, ResourceIndexedSearchParamQuantity> theFrom,
-														  PartitionId thePartitionId) {
+														  RequestPartitionId theRequestPartitionId) {
 		return createPredicateQuantity(theParam,
 			theResourceName,
 			theParamName,
 			theBuilder,
 			theFrom,
 			null,
-			thePartitionId);
+                theRequestPartitionId);
 	}
 
 	private Predicate createPredicateQuantity(IQueryParameterType theParam,
@@ -101,7 +101,7 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 															CriteriaBuilder theBuilder,
 															From<?, ResourceIndexedSearchParamQuantity> theFrom,
 															SearchFilterParser.CompareOperation operation,
-															PartitionId thePartitionId) {
+															RequestPartitionId theRequestPartitionId) {
 		String systemValue;
 		String unitsValue;
 		ParamPrefixEnum cmpValue = null;
@@ -158,7 +158,7 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 			final Expression<BigDecimal> path = theFrom.get("myValue");
 			String invalidMessageName = "invalidQuantityPrefix";
 
-			Predicate num = createPredicateNumeric(theResourceName, null, theFrom, theBuilder, theParam, cmpValue, valueValue, path, invalidMessageName, thePartitionId);
+			Predicate num = createPredicateNumeric(theResourceName, null, theFrom, theBuilder, theParam, cmpValue, valueValue, path, invalidMessageName, theRequestPartitionId);
 
 			Predicate singleCode;
 			if (system == null && code == null) {
@@ -171,18 +171,18 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 				singleCode = theBuilder.and(system, code, num);
 			}
 
-			return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, thePartitionId);
+			return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, theRequestPartitionId);
 		}
 
 		Predicate hashPredicate;
 		if (!isBlank(systemValue) && !isBlank(unitsValue)) {
-			long hash = ResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(getPartitionSettings(), thePartitionId, theResourceName, theParamName, systemValue, unitsValue);
+			long hash = ResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, systemValue, unitsValue);
 			hashPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentitySystemAndUnits"), hash);
 		} else if (!isBlank(unitsValue)) {
-			long hash = ResourceIndexedSearchParamQuantity.calculateHashUnits(getPartitionSettings(), thePartitionId, theResourceName, theParamName, unitsValue);
+			long hash = ResourceIndexedSearchParamQuantity.calculateHashUnits(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, unitsValue);
 			hashPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentityAndUnits"), hash);
 		} else {
-			long hash = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), thePartitionId, theResourceName, theParamName);
+			long hash = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName);
 			hashPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentity"), hash);
 		}
 
@@ -190,7 +190,7 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 		final Expression<BigDecimal> path = theFrom.get("myValue");
 		String invalidMessageName = "invalidQuantityPrefix";
 
-		Predicate numericPredicate = createPredicateNumeric(theResourceName, null, theFrom, theBuilder, theParam, cmpValue, valueValue, path, invalidMessageName, thePartitionId);
+		Predicate numericPredicate = createPredicateNumeric(theResourceName, null, theFrom, theBuilder, theParam, cmpValue, valueValue, path, invalidMessageName, theRequestPartitionId);
 
 		return theBuilder.and(hashPredicate, numericPredicate);
 	}

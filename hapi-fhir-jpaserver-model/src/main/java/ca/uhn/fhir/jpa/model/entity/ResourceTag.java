@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -55,12 +55,12 @@ public class ResourceTag extends BaseTag {
 	public ResourceTag() {
 	}
 
-	public ResourceTag(ResourceTable theResourceTable, TagDefinition theTag, PartitionId thePartitionId) {
+	public ResourceTag(ResourceTable theResourceTable, TagDefinition theTag, RequestPartitionId theRequestPartitionId) {
 		setTag(theTag);
 		setResource(theResourceTable);
 		setResourceId(theResourceTable.getId());
 		setResourceType(theResourceTable.getResourceType());
-		setPartitionId(thePartitionId);
+		setPartitionId(theRequestPartitionId);
 	}
 
 	public Long getResourceId() {

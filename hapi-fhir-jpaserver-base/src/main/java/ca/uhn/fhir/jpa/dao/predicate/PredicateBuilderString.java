@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -58,20 +58,20 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 											String theParamName,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation theOperation,
-											PartitionId thePartitionId) {
+											RequestPartitionId theRequestPartitionId) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamString> join = createJoin(SearchBuilderJoinEnum.STRING, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, thePartitionId);
+			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);
 			return null;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
-		addPartitionIdPredicate(thePartitionId, join, codePredicates);
+		addPartitionIdPredicate(theRequestPartitionId, join, codePredicates);
 
 		for (IQueryParameterType nextOr : theList) {
-			Predicate singleCode = createPredicateString(nextOr, theResourceName, theParamName, myCriteriaBuilder, join, theOperation, thePartitionId);
+			Predicate singleCode = createPredicateString(nextOr, theResourceName, theParamName, myCriteriaBuilder, join, theOperation, theRequestPartitionId);
 			codePredicates.add(singleCode);
 		}
 
@@ -88,14 +88,14 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 														String theParamName,
 														CriteriaBuilder theBuilder,
 														From<?, ResourceIndexedSearchParamString> theFrom,
-														PartitionId thePartitionId) {
+														RequestPartitionId theRequestPartitionId) {
 		return createPredicateString(theParameter,
 			theResourceName,
 			theParamName,
 			theBuilder,
 			theFrom,
 			null,
-			thePartitionId);
+                theRequestPartitionId);
 	}
 
 	private Predicate createPredicateString(IQueryParameterType theParameter,
@@ -104,7 +104,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 														 CriteriaBuilder theBuilder,
 														 From<?, ResourceIndexedSearchParamString> theFrom,
 														 SearchFilterParser.CompareOperation operation,
-														 PartitionId thePartitionId) {
+														 RequestPartitionId theRequestPartitionId) {
 		String rawSearchTerm;
 		if (theParameter instanceof TokenParam) {
 			TokenParam id = (TokenParam) theParameter;
@@ -154,12 +154,12 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 				singleCode = theBuilder.and(singleCode, exactCode);
 			}
 
-			return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, thePartitionId);
+			return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, theRequestPartitionId);
 		}
 		boolean exactMatch = theParameter instanceof StringParam && ((StringParam) theParameter).isExact();
 		if (exactMatch) {
 			// Exact match
-			Long hash = ResourceIndexedSearchParamString.calculateHashExact(getPartitionSettings(), thePartitionId, theResourceName, theParamName, rawSearchTerm);
+			Long hash = ResourceIndexedSearchParamString.calculateHashExact(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, rawSearchTerm);
 			return theBuilder.equal(theFrom.get("myHashExact").as(Long.class), hash);
 		} else {
 			// Normalized Match
@@ -187,34 +187,34 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 			Predicate predicate;
 			if ((operation == null) ||
 				(operation == SearchFilterParser.CompareOperation.sw)) {
-				Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), thePartitionId, myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
+				Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), theRequestPartitionId, myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
 				Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
 				Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
 				predicate = theBuilder.and(hashCode, singleCode);
 			} else if ((operation == SearchFilterParser.CompareOperation.ew) ||
 				(operation == SearchFilterParser.CompareOperation.co)) {
 				Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
-				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, thePartitionId);
+				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, theRequestPartitionId);
 			} else if (operation == SearchFilterParser.CompareOperation.eq) {
-				Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), thePartitionId, myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
+				Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), theRequestPartitionId, myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
 				Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
 				Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), normalizedString);
 				predicate = theBuilder.and(hashCode, singleCode);
 			} else if (operation == SearchFilterParser.CompareOperation.ne) {
 				Predicate singleCode = theBuilder.notEqual(theFrom.get("myValueNormalized").as(String.class), likeExpression);
-				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, thePartitionId);
+				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, theRequestPartitionId);
 			} else if (operation == SearchFilterParser.CompareOperation.gt) {
 				Predicate singleCode = theBuilder.greaterThan(theFrom.get("myValueNormalized").as(String.class), likeExpression);
-				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, thePartitionId);
+				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, theRequestPartitionId);
 			} else if (operation == SearchFilterParser.CompareOperation.lt) {
 				Predicate singleCode = theBuilder.lessThan(theFrom.get("myValueNormalized").as(String.class), likeExpression);
-				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, thePartitionId);
+				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, theRequestPartitionId);
 			} else if (operation == SearchFilterParser.CompareOperation.ge) {
 				Predicate singleCode = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueNormalized").as(String.class), likeExpression);
-				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, thePartitionId);
+				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, theRequestPartitionId);
 			} else if (operation == SearchFilterParser.CompareOperation.le) {
 				Predicate singleCode = theBuilder.lessThanOrEqualTo(theFrom.get("myValueNormalized").as(String.class), likeExpression);
-				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, thePartitionId);
+				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, theRequestPartitionId);
 			} else {
 				throw new IllegalArgumentException("Don't yet know how to handle operation " + operation + " on a string");
 			}

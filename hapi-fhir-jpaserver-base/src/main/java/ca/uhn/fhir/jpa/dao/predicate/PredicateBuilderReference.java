@@ -30,7 +30,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
@@ -129,7 +129,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation operation,
 											RequestDetails theRequest,
-											PartitionId thePartitionId) {
+											RequestPartitionId theRequestPartitionId) {
 
 		//Is this just to ensure the chain has been split correctly???
 		assert theParamName.contains(".") == false;
@@ -141,7 +141,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissingForReference(theResourceName, theParamName, theList.get(0).getMissing(), thePartitionId);
+			addPredicateParamMissingForReference(theResourceName, theParamName, theList.get(0).getMissing(), theRequestPartitionId);
 			return null;
 		}
 
@@ -181,7 +181,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 					 * Handle chained search, e.g. Patient?organization.name=Kwik-e-mart
 					 */
 
-					return addPredicateReferenceWithChain(theResourceName, theParamName, theList, join, new ArrayList<>(), ref, theRequest, thePartitionId);
+					return addPredicateReferenceWithChain(theResourceName, theParamName, theList, join, new ArrayList<>(), ref, theRequest, theRequestPartitionId);
 
 				}
 
@@ -192,7 +192,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
-		addPartitionIdPredicate(thePartitionId, join, codePredicates);
+		addPartitionIdPredicate(theRequestPartitionId, join, codePredicates);
 
 		for (IIdType next : targetIds) {
 			if (!next.hasResourceType()) {
@@ -201,7 +201,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		// Resources by ID
-		List<ResourcePersistentId> targetPids = myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId, targetIds, theRequest);
+		List<ResourcePersistentId> targetPids = myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestPartitionId, targetIds, theRequest);
 		if (!targetPids.isEmpty()) {
 			ourLog.debug("Searching for resource link with target PIDs: {}", targetPids);
 			Predicate pathPredicate;
@@ -259,7 +259,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	 * This is for handling queries like the following: /Observation?device.identifier=urn:system|foo in which we use a chain
 	 * on the device.
 	 */
-	private Predicate addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, Join<ResourceTable, ResourceLink> theJoin, List<Predicate> theCodePredicates, ReferenceParam theReferenceParam, RequestDetails theRequest, PartitionId thePartitionId) {
+	private Predicate addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, Join<ResourceTable, ResourceLink> theJoin, List<Predicate> theCodePredicates, ReferenceParam theReferenceParam, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 		final List<Class<? extends IBaseResource>> resourceTypes;
 		if (!theReferenceParam.hasResourceType()) {
 
@@ -404,7 +404,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			}
 
 
-			Subquery<Long> subQ = createLinkSubquery(foundChainMatch, chain, subResourceName, orValues, theRequest, thePartitionId);
+			Subquery<Long> subQ = createLinkSubquery(foundChainMatch, chain, subResourceName, orValues, theRequest, theRequestPartitionId);
 
 			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theJoin);
 			Predicate pidPredicate = theJoin.get("myTargetResourcePid").in(subQ);
@@ -500,7 +500,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		return chainValue;
 	}
 
-	Subquery<Long> createLinkSubquery(boolean theFoundChainMatch, String theChain, String theSubResourceName, List<IQueryParameterType> theOrValues, RequestDetails theRequest, PartitionId thePartitionId) {
+	Subquery<Long> createLinkSubquery(boolean theFoundChainMatch, String theChain, String theSubResourceName, List<IQueryParameterType> theOrValues, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 		Subquery<Long> subQ = myQueryRoot.subquery(Long.class);
 		/*
 		 * We're doing a chain call, so push the current query root
@@ -518,7 +518,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myDeleted")));
 
 		if (theFoundChainMatch) {
-			searchForIdsWithAndOr(theSubResourceName, theChain, andOrParams, theRequest, thePartitionId);
+			searchForIdsWithAndOr(theSubResourceName, theChain, andOrParams, theRequest, theRequestPartitionId);
 			subQ.where(myQueryRoot.getPredicateArray());
 		}
 
@@ -529,7 +529,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		return subQ;
 	}
 
-	void searchForIdsWithAndOr(String theResourceName, String theParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest, PartitionId thePartitionId) {
+	void searchForIdsWithAndOr(String theResourceName, String theParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		if (theAndOrParams.isEmpty()) {
 			return;
@@ -537,7 +537,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 		switch (theParamName) {
 			case IAnyResource.SP_RES_ID:
-				myPredicateBuilder.addPredicateResourceId(theAndOrParams, theResourceName, thePartitionId);
+				myPredicateBuilder.addPredicateResourceId(theAndOrParams, theResourceName, theRequestPartitionId);
 				break;
 
 			case IAnyResource.SP_RES_LANGUAGE:
@@ -546,13 +546,13 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				break;
 
 			case Constants.PARAM_HAS:
-				addPredicateHas(theResourceName, theAndOrParams, theRequest, thePartitionId);
+				addPredicateHas(theResourceName, theAndOrParams, theRequest, theRequestPartitionId);
 				break;
 
 			case Constants.PARAM_TAG:
 			case Constants.PARAM_PROFILE:
 			case Constants.PARAM_SECURITY:
-				myPredicateBuilder.addPredicateTag(theAndOrParams, theParamName, thePartitionId);
+				myPredicateBuilder.addPredicateTag(theAndOrParams, theParamName, theRequestPartitionId);
 				break;
 
 			case Constants.PARAM_SOURCE:
@@ -565,7 +565,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				if (nextParamDef != null) {
 
 					if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
-						if (thePartitionId == null) {
+						if (theRequestPartitionId == null) {
 							throw new PreconditionFailedException("This server is not configured to support search against all partitions");
 						}
 					}
@@ -573,53 +573,53 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 					switch (nextParamDef.getParamType()) {
 						case DATE:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								myPredicateBuilder.addPredicateDate(theResourceName, theParamName, nextAnd, null, thePartitionId);
+								myPredicateBuilder.addPredicateDate(theResourceName, theParamName, nextAnd, null, theRequestPartitionId);
 							}
 							break;
 						case QUANTITY:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								myPredicateBuilder.addPredicateQuantity(theResourceName, theParamName, nextAnd, null, thePartitionId);
+								myPredicateBuilder.addPredicateQuantity(theResourceName, theParamName, nextAnd, null, theRequestPartitionId);
 							}
 							break;
 						case REFERENCE:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								addPredicate(theResourceName, theParamName, nextAnd, null, theRequest, thePartitionId);
+								addPredicate(theResourceName, theParamName, nextAnd, null, theRequest, theRequestPartitionId);
 							}
 							break;
 						case STRING:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								myPredicateBuilder.addPredicateString(theResourceName, theParamName, nextAnd, SearchFilterParser.CompareOperation.sw, thePartitionId);
+								myPredicateBuilder.addPredicateString(theResourceName, theParamName, nextAnd, SearchFilterParser.CompareOperation.sw, theRequestPartitionId);
 							}
 							break;
 						case TOKEN:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 								if ("Location.position".equals(nextParamDef.getPath())) {
-									myPredicateBuilder.addPredicateCoords(theResourceName, theParamName, nextAnd, thePartitionId);
+									myPredicateBuilder.addPredicateCoords(theResourceName, theParamName, nextAnd, theRequestPartitionId);
 								} else {
-									myPredicateBuilder.addPredicateToken(theResourceName, theParamName, nextAnd, null, thePartitionId);
+									myPredicateBuilder.addPredicateToken(theResourceName, theParamName, nextAnd, null, theRequestPartitionId);
 								}
 							}
 							break;
 						case NUMBER:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								myPredicateBuilder.addPredicateNumber(theResourceName, theParamName, nextAnd, null, thePartitionId);
+								myPredicateBuilder.addPredicateNumber(theResourceName, theParamName, nextAnd, null, theRequestPartitionId);
 							}
 							break;
 						case COMPOSITE:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								addPredicateComposite(theResourceName, nextParamDef, nextAnd, thePartitionId);
+								addPredicateComposite(theResourceName, nextParamDef, nextAnd, theRequestPartitionId);
 							}
 							break;
 						case URI:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								myPredicateBuilder.addPredicateUri(theResourceName, theParamName, nextAnd, SearchFilterParser.CompareOperation.eq, thePartitionId);
+								myPredicateBuilder.addPredicateUri(theResourceName, theParamName, nextAnd, SearchFilterParser.CompareOperation.eq, theRequestPartitionId);
 							}
 							break;
 						case HAS:
 						case SPECIAL:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 								if ("Location.position".equals(nextParamDef.getPath())) {
-									myPredicateBuilder.addPredicateCoords(theResourceName, theParamName, nextAnd, thePartitionId);
+									myPredicateBuilder.addPredicateCoords(theResourceName, theParamName, nextAnd, theRequestPartitionId);
 								}
 							}
 							break;
@@ -648,7 +648,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 								// point to do something more fancy...
 								ArrayList<Predicate> holdPredicates = new ArrayList<>(myQueryRoot.getPredicates());
 
-								Predicate filterPredicate = processFilter(filter, theResourceName, theRequest, thePartitionId);
+								Predicate filterPredicate = processFilter(filter, theResourceName, theRequest, theRequestPartitionId);
 								myQueryRoot.clearPredicates();
 								myQueryRoot.addPredicates(holdPredicates);
 								myQueryRoot.addPredicate(filterPredicate);
@@ -670,16 +670,16 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 	}
 
-	private Predicate processFilter(SearchFilterParser.Filter theFilter, String theResourceName, RequestDetails theRequest, PartitionId thePartitionId) {
+	private Predicate processFilter(SearchFilterParser.Filter theFilter, String theResourceName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		if (theFilter instanceof SearchFilterParser.FilterParameter) {
-			return processFilterParameter((SearchFilterParser.FilterParameter) theFilter, theResourceName, theRequest, thePartitionId);
+			return processFilterParameter((SearchFilterParser.FilterParameter) theFilter, theResourceName, theRequest, theRequestPartitionId);
 		} else if (theFilter instanceof SearchFilterParser.FilterLogical) {
 			// Left side
-			Predicate xPredicate = processFilter(((SearchFilterParser.FilterLogical) theFilter).getFilter1(), theResourceName, theRequest, thePartitionId);
+			Predicate xPredicate = processFilter(((SearchFilterParser.FilterLogical) theFilter).getFilter1(), theResourceName, theRequest, theRequestPartitionId);
 
 			// Right side
-			Predicate yPredicate = processFilter(((SearchFilterParser.FilterLogical) theFilter).getFilter2(), theResourceName, theRequest, thePartitionId);
+			Predicate yPredicate = processFilter(((SearchFilterParser.FilterLogical) theFilter).getFilter2(), theResourceName, theRequest, theRequestPartitionId);
 
 			if (((SearchFilterParser.FilterLogical) theFilter).getOperation() == SearchFilterParser.FilterLogicalOperation.and) {
 				return myCriteriaBuilder.and(xPredicate, yPredicate);
@@ -687,13 +687,13 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				return myCriteriaBuilder.or(xPredicate, yPredicate);
 			}
 		} else if (theFilter instanceof SearchFilterParser.FilterParameterGroup) {
-			return processFilter(((SearchFilterParser.FilterParameterGroup) theFilter).getContained(), theResourceName, theRequest, thePartitionId);
+			return processFilter(((SearchFilterParser.FilterParameterGroup) theFilter).getContained(), theResourceName, theRequest, theRequestPartitionId);
 		}
 		return null;
 	}
 
 	private Predicate processFilterParameter(SearchFilterParser.FilterParameter theFilter,
-														  String theResourceName, RequestDetails theRequest, PartitionId thePartitionId) {
+														  String theResourceName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, theFilter.getParamPath().getName());
 
@@ -706,7 +706,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 					null,
 					null,
 					theFilter.getValue());
-				return myPredicateBuilder.addPredicateResourceId(Collections.singletonList(Collections.singletonList(param)), myResourceName, theFilter.getOperation(), thePartitionId);
+				return myPredicateBuilder.addPredicateResourceId(Collections.singletonList(Collections.singletonList(param)), myResourceName, theFilter.getOperation(), theRequestPartitionId);
 			} else {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
 			}
@@ -728,13 +728,13 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		} else {
 			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
 			if (typeEnum == RestSearchParameterTypeEnum.URI) {
-				return myPredicateBuilder.addPredicateUri(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new UriParam(theFilter.getValue())), theFilter.getOperation(), thePartitionId);
+				return myPredicateBuilder.addPredicateUri(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new UriParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.STRING) {
-				return myPredicateBuilder.addPredicateString(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new StringParam(theFilter.getValue())), theFilter.getOperation(), thePartitionId);
+				return myPredicateBuilder.addPredicateString(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new StringParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.DATE) {
-				return myPredicateBuilder.addPredicateDate(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new DateParam(theFilter.getValue())), theFilter.getOperation(), thePartitionId);
+				return myPredicateBuilder.addPredicateDate(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new DateParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.NUMBER) {
-				return myPredicateBuilder.addPredicateNumber(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new NumberParam(theFilter.getValue())), theFilter.getOperation(), thePartitionId);
+				return myPredicateBuilder.addPredicateNumber(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new NumberParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.REFERENCE) {
 				String paramName = theFilter.getParamPath().getName();
 				SearchFilterParser.CompareOperation operation = theFilter.getOperation();
@@ -742,9 +742,9 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				String chain = (theFilter.getParamPath().getNext() != null) ? theFilter.getParamPath().getNext().toString() : null;
 				String value = theFilter.getValue();
 				ReferenceParam referenceParam = new ReferenceParam(resourceType, chain, value);
-				return addPredicate(theResourceName, paramName, Collections.singletonList(referenceParam), operation, theRequest, thePartitionId);
+				return addPredicate(theResourceName, paramName, Collections.singletonList(referenceParam), operation, theRequest, theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
-				return myPredicateBuilder.addPredicateQuantity(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new QuantityParam(theFilter.getValue())), theFilter.getOperation(), thePartitionId);
+				return myPredicateBuilder.addPredicateQuantity(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(new QuantityParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
 				throw new InvalidRequestException("Composite search parameters not currently supported with _filter clauses");
 			} else if (typeEnum == RestSearchParameterTypeEnum.TOKEN) {
@@ -753,7 +753,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 					null,
 					null,
 					theFilter.getValue());
-				return myPredicateBuilder.addPredicateToken(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(param), theFilter.getOperation(), thePartitionId);
+				return myPredicateBuilder.addPredicateToken(theResourceName, theFilter.getParamPath().getName(), Collections.singletonList(param), theFilter.getOperation(), theRequestPartitionId);
 			}
 		}
 		return null;
@@ -888,7 +888,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		return retVal;
 	}
 
-	private void addPredicateHas(String theResourceType, List<List<IQueryParameterType>> theHasParameters, RequestDetails theRequest, PartitionId thePartitionId) {
+	private void addPredicateHas(String theResourceType, List<List<IQueryParameterType>> theHasParameters, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		for (List<? extends IQueryParameterType> nextOrList : theHasParameters) {
 
@@ -951,7 +951,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 					.forEach(rp -> rp.setChain(getChainedPart(chainedPartOfParameter)));
 			}
 
-			Subquery<Long> subQ = myPredicateBuilder.createLinkSubquery(paramName, targetResourceType, orValues, theRequest, thePartitionId);
+			Subquery<Long> subQ = myPredicateBuilder.createLinkSubquery(paramName, targetResourceType, orValues, theRequest, theRequestPartitionId);
 			Join<ResourceTable, ResourceLink> join = myQueryRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
 
 			Predicate pathPredicate = myPredicateBuilder.createResourceLinkPathPredicate(targetResourceType, paramReference, join);
@@ -966,7 +966,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		return parameter.substring(parameter.indexOf(".") + 1);
 	}
 
-	private void addPredicateComposite(String theResourceName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd, PartitionId thePartitionId) {
+	private void addPredicateComposite(String theResourceName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd, RequestPartitionId theRequestPartitionId) {
 		// TODO: fail if missing is set for a composite query
 
 		IQueryParameterType or = theNextAnd.get(0);
@@ -977,37 +977,37 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 		RuntimeSearchParam left = theParamDef.getCompositeOf().get(0);
 		IQueryParameterType leftValue = cp.getLeftValue();
-		myQueryRoot.addPredicate(createCompositeParamPart(theResourceName, myQueryRoot.getRoot(), left, leftValue, thePartitionId));
+		myQueryRoot.addPredicate(createCompositeParamPart(theResourceName, myQueryRoot.getRoot(), left, leftValue, theRequestPartitionId));
 
 		RuntimeSearchParam right = theParamDef.getCompositeOf().get(1);
 		IQueryParameterType rightValue = cp.getRightValue();
-		myQueryRoot.addPredicate(createCompositeParamPart(theResourceName, myQueryRoot.getRoot(), right, rightValue, thePartitionId));
+		myQueryRoot.addPredicate(createCompositeParamPart(theResourceName, myQueryRoot.getRoot(), right, rightValue, theRequestPartitionId));
 
 	}
 
-	private Predicate createCompositeParamPart(String theResourceName, Root<ResourceTable> theRoot, RuntimeSearchParam theParam, IQueryParameterType leftValue, PartitionId thePartitionId) {
+	private Predicate createCompositeParamPart(String theResourceName, Root<ResourceTable> theRoot, RuntimeSearchParam theParam, IQueryParameterType leftValue, RequestPartitionId theRequestPartitionId) {
 		Predicate retVal = null;
 		switch (theParam.getParamType()) {
 			case STRING: {
 				From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> stringJoin = theRoot.join("myParamsString", JoinType.INNER);
-				retVal = myPredicateBuilder.createPredicateString(leftValue, theResourceName, theParam.getName(), myCriteriaBuilder, stringJoin, thePartitionId);
+				retVal = myPredicateBuilder.createPredicateString(leftValue, theResourceName, theParam.getName(), myCriteriaBuilder, stringJoin, theRequestPartitionId);
 				break;
 			}
 			case TOKEN: {
 				From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> tokenJoin = theRoot.join("myParamsToken", JoinType.INNER);
 				List<IQueryParameterType> tokens = Collections.singletonList(leftValue);
-				Collection<Predicate> tokenPredicates = myPredicateBuilder.createPredicateToken(tokens, theResourceName, theParam.getName(), myCriteriaBuilder, tokenJoin, thePartitionId);
+				Collection<Predicate> tokenPredicates = myPredicateBuilder.createPredicateToken(tokens, theResourceName, theParam.getName(), myCriteriaBuilder, tokenJoin, theRequestPartitionId);
 				retVal = myCriteriaBuilder.and(tokenPredicates.toArray(new Predicate[0]));
 				break;
 			}
 			case DATE: {
 				From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> dateJoin = theRoot.join("myParamsDate", JoinType.INNER);
-				retVal = myPredicateBuilder.createPredicateDate(leftValue, theResourceName, theParam.getName(), myCriteriaBuilder, dateJoin, thePartitionId);
+				retVal = myPredicateBuilder.createPredicateDate(leftValue, theResourceName, theParam.getName(), myCriteriaBuilder, dateJoin, theRequestPartitionId);
 				break;
 			}
 			case QUANTITY: {
 				From<ResourceIndexedSearchParamQuantity, ResourceIndexedSearchParamQuantity> dateJoin = theRoot.join("myParamsQuantity", JoinType.INNER);
-				retVal = myPredicateBuilder.createPredicateQuantity(leftValue, theResourceName, theParam.getName(), myCriteriaBuilder, dateJoin, thePartitionId);
+				retVal = myPredicateBuilder.createPredicateQuantity(leftValue, theResourceName, theParam.getName(), myCriteriaBuilder, dateJoin, theRequestPartitionId);
 				break;
 			}
 			case COMPOSITE:

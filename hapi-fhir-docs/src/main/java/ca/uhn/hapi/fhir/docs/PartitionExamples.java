@@ -23,7 +23,7 @@ package ca.uhn.hapi.fhir.docs;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -46,19 +46,19 @@ public class PartitionExamples {
 	public class RequestTenantPartitionInterceptor {
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-		public PartitionId PartitionIdentifyCreate(ServletRequestDetails theRequestDetails) {
+		public RequestPartitionId PartitionIdentifyCreate(ServletRequestDetails theRequestDetails) {
 			return extractPartitionIdFromRequest(theRequestDetails);
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-		public PartitionId PartitionIdentifyRead(ServletRequestDetails theRequestDetails) {
+		public RequestPartitionId PartitionIdentifyRead(ServletRequestDetails theRequestDetails) {
 			return extractPartitionIdFromRequest(theRequestDetails);
 		}
 
-		private PartitionId extractPartitionIdFromRequest(ServletRequestDetails theRequestDetails) {
+		private RequestPartitionId extractPartitionIdFromRequest(ServletRequestDetails theRequestDetails) {
 			// We will use the tenant ID that came from the request as the partition name
 			String tenantId = theRequestDetails.getTenantId();
-			return PartitionId.fromPartitionName(tenantId);
+			return RequestPartitionId.fromPartitionName(tenantId);
 		}
 
 	}
@@ -70,15 +70,15 @@ public class PartitionExamples {
 	public class CustomHeaderBasedPartitionInterceptor {
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-		public PartitionId PartitionIdentifyCreate(ServletRequestDetails theRequestDetails) {
+		public RequestPartitionId PartitionIdentifyCreate(ServletRequestDetails theRequestDetails) {
 			String partitionName = theRequestDetails.getHeader("X-Partition-Name");
-			return PartitionId.fromPartitionName(partitionName);
+			return RequestPartitionId.fromPartitionName(partitionName);
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-		public PartitionId PartitionIdentifyRead(ServletRequestDetails theRequestDetails) {
+		public RequestPartitionId PartitionIdentifyRead(ServletRequestDetails theRequestDetails) {
 			String partitionName = theRequestDetails.getHeader("X-Partition-Name");
-			return PartitionId.fromPartitionName(partitionName);
+			return RequestPartitionId.fromPartitionName(partitionName);
 		}
 
 	}
@@ -90,13 +90,13 @@ public class PartitionExamples {
 	public class ResourceTypePartitionInterceptor {
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-		public PartitionId PartitionIdentifyCreate(IBaseResource theResource) {
+		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource) {
 			if (theResource instanceof Patient) {
-				return PartitionId.fromPartitionName("PATIENT");
+				return RequestPartitionId.fromPartitionName("PATIENT");
 			} else if (theResource instanceof Observation) {
-					return PartitionId.fromPartitionName("OBSERVATION");
+					return RequestPartitionId.fromPartitionName("OBSERVATION");
 			} else {
-				return PartitionId.fromPartitionName("OTHER");
+				return RequestPartitionId.fromPartitionName("OTHER");
 			}
 		}
 

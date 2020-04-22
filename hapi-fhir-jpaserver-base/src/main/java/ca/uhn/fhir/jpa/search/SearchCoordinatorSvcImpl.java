@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
@@ -39,7 +39,6 @@ import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
@@ -272,8 +271,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					String resourceType = search.getResourceType();
 					SearchParameterMap params = search.getSearchParameterMap().orElseThrow(() -> new IllegalStateException("No map in PASSCOMPLET search"));
 					IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(resourceType);
-					PartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, resourceType);
-					SearchContinuationTask task = new SearchContinuationTask(search, resourceDao, params, resourceType, theRequestDetails, partitionId);
+					RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, resourceType);
+					SearchContinuationTask task = new SearchContinuationTask(search, resourceDao, params, resourceType, theRequestDetails, requestPartitionId);
 					myIdToSearchTask.put(search.getUuid(), task);
 					myExecutor.submit(task);
 				}
@@ -386,9 +385,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
 
-		PartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, theResourceType);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, theResourceType);
 
-		SearchTask task = new SearchTask(search, theCallingDao, theParams, theResourceType, theRequestDetails, partitionId);
+		SearchTask task = new SearchTask(search, theCallingDao, theParams, theResourceType, theRequestDetails, requestPartitionId);
 		myIdToSearchTask.put(search.getUuid(), task);
 		myExecutor.submit(task);
 
@@ -468,8 +467,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			// Load the results synchronously
 			final List<ResourcePersistentId> pids = new ArrayList<>();
 
-			PartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, theResourceType);
-			try (IResultIterator resultIter = theSb.createQuery(theParams, searchRuntimeDetails, theRequestDetails, partitionId)) {
+			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, theResourceType);
+			try (IResultIterator resultIter = theSb.createQuery(theParams, searchRuntimeDetails, theRequestDetails, requestPartitionId)) {
 				while (resultIter.hasNext()) {
 					pids.add(resultIter.next());
 					if (theLoadSynchronousUpTo != null && pids.size() >= theLoadSynchronousUpTo) {
@@ -621,7 +620,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		private final CountDownLatch myCompletionLatch;
 		private final ArrayList<ResourcePersistentId> myUnsyncedPids = new ArrayList<>();
 		private final RequestDetails myRequest;
-		private final PartitionId myPartitionId;
+		private final RequestPartitionId myRequestPartitionId;
 		private Search mySearch;
 		private boolean myAbortRequested;
 		private int myCountSavedTotal = 0;
@@ -636,7 +635,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		/**
 		 * Constructor
 		 */
-		protected SearchTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequest, PartitionId thePartitionId) {
+		protected SearchTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 			mySearch = theSearch;
 			myCallingDao = theCallingDao;
 			myParams = theParams;
@@ -644,7 +643,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			myCompletionLatch = new CountDownLatch(1);
 			mySearchRuntimeDetails = new SearchRuntimeDetails(theRequest, mySearch.getUuid());
 			mySearchRuntimeDetails.setQueryString(theParams.toNormalizedQueryString(theCallingDao.getContext()));
-			myPartitionId = thePartitionId;
+			myRequestPartitionId = theRequestPartitionId;
 			myRequest = theRequest;
 			myParentTransaction = ElasticApm.currentTransaction();
 		}
@@ -1002,7 +1001,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			if (wantCount) {
 				ourLog.trace("Performing count");
 				ISearchBuilder sb = newSearchBuilder();
-				Iterator<Long> countIterator = sb.createCountQuery(myParams, mySearch.getUuid(), myRequest, myPartitionId);
+				Iterator<Long> countIterator = sb.createCountQuery(myParams, mySearch.getUuid(), myRequest, myRequestPartitionId);
 				Long count = countIterator.next();
 				ourLog.trace("Got count {}", count);
 
@@ -1078,7 +1077,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			/*
 			 * Construct the SQL query we'll be sending to the database
 			 */
-			try (IResultIterator resultIterator = sb.createQuery(myParams, mySearchRuntimeDetails, myRequest, myPartitionId)) {
+			try (IResultIterator resultIterator = sb.createQuery(myParams, mySearchRuntimeDetails, myRequest, myRequestPartitionId)) {
 				assert (resultIterator != null);
 
 				/*
@@ -1130,8 +1129,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	public class SearchContinuationTask extends SearchTask {
 
-		public SearchContinuationTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequest, PartitionId thePartitionId) {
-			super(theSearch, theCallingDao, theParams, theResourceType, theRequest, thePartitionId);
+		public SearchContinuationTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+			super(theSearch, theCallingDao, theParams, theResourceType, theRequest, theRequestPartitionId);
 		}
 
 		@Override

@@ -26,7 +26,7 @@ import java.time.LocalDate;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
-public class PartitionId {
+public class RequestPartitionId {
 
 	private final Integer myPartitionId;
 	private final LocalDate myPartitionDate;
@@ -35,7 +35,7 @@ public class PartitionId {
 	/**
 	 * Constructor
 	 */
-	private PartitionId(@Nullable String thePartitionName, @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
+	private RequestPartitionId(@Nullable String thePartitionName, @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
 		myPartitionName = thePartitionName;
 		myPartitionId = thePartitionId;
 		myPartitionDate = thePartitionDate;
@@ -70,37 +70,37 @@ public class PartitionId {
 	/**
 	 * Create a string representation suitable for use as a cache key. Null aware.
 	 */
-	public static String stringifyForKey(PartitionId thePartitionId) {
+	public static String stringifyForKey(RequestPartitionId theRequestPartitionId) {
 		String retVal = "(null)";
-		if (thePartitionId != null) {
-			retVal = thePartitionId.getPartitionIdStringOrNullString();
+		if (theRequestPartitionId != null) {
+			retVal = theRequestPartitionId.getPartitionIdStringOrNullString();
 		}
 		return retVal;
 	}
 
 	@Nonnull
-	public static PartitionId fromPartitionId(@Nullable Integer thePartitionId) {
+	public static RequestPartitionId fromPartitionId(@Nullable Integer thePartitionId) {
 		return fromPartitionId(thePartitionId, null);
 	}
 
 	@Nonnull
-	public static PartitionId fromPartitionId(@Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
-		return new PartitionId(null, thePartitionId, thePartitionDate);
+	public static RequestPartitionId fromPartitionId(@Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
+		return new RequestPartitionId(null, thePartitionId, thePartitionDate);
 	}
 
 	@Nonnull
-	public static PartitionId fromPartitionName(@Nullable String thePartitionName) {
+	public static RequestPartitionId fromPartitionName(@Nullable String thePartitionName) {
 		return fromPartitionName(thePartitionName, null);
 	}
 
 	@Nonnull
-	public static PartitionId fromPartitionName(@Nullable String thePartitionName, @Nullable LocalDate thePartitionDate) {
-		return new PartitionId(thePartitionName, null, thePartitionDate);
+	public static RequestPartitionId fromPartitionName(@Nullable String thePartitionName, @Nullable LocalDate thePartitionDate) {
+		return new RequestPartitionId(thePartitionName, null, thePartitionDate);
 	}
 
 	@Nonnull
-	public static PartitionId forPartitionNameAndId(@Nullable String thePartitionName, @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
-		return new PartitionId(thePartitionName, thePartitionId, thePartitionDate);
+	public static RequestPartitionId forPartitionNameAndId(@Nullable String thePartitionName, @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
+		return new RequestPartitionId(thePartitionName, thePartitionId, thePartitionDate);
 	}
 
 }

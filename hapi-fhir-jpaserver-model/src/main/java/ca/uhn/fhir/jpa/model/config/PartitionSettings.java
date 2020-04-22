@@ -51,8 +51,9 @@ public class PartitionSettings {
 	 * This setting has no effect if partitioning is not enabled via {@link #isPartitioningEnabled()}.
 	 * </p>
 	 */
-	public void setIncludePartitionInSearchHashes(boolean theIncludePartitionInSearchHashes) {
+	public PartitionSettings setIncludePartitionInSearchHashes(boolean theIncludePartitionInSearchHashes) {
 		myIncludePartitionInSearchHashes = theIncludePartitionInSearchHashes;
+		return this;
 	}
 
 	/**

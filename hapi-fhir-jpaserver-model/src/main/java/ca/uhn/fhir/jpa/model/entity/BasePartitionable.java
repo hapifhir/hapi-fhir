@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
@@ -41,7 +41,7 @@ public class BasePartitionable implements Serializable {
 	@Column(name = PartitionablePartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
 	private Integer myPartitionIdValue;
 
-	public PartitionId getPartitionId() {
+	public RequestPartitionId getPartitionId() {
 		if (myPartitionId != null) {
 			return myPartitionId.toPartitionId();
 		} else {
@@ -49,9 +49,9 @@ public class BasePartitionable implements Serializable {
 		}
 	}
 
-	public void setPartitionId(@Nullable PartitionId thePartitionId) {
-		if (thePartitionId != null) {
-			myPartitionId = new PartitionablePartitionId(thePartitionId.getPartitionId(), thePartitionId.getPartitionDate());
+	public void setPartitionId(@Nullable RequestPartitionId theRequestPartitionId) {
+		if (theRequestPartitionId != null) {
+			myPartitionId = new PartitionablePartitionId(theRequestPartitionId.getPartitionId(), theRequestPartitionId.getPartitionDate());
 		} else {
 			myPartitionId = null;
 		}

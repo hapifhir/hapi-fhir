@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -167,19 +167,19 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		return this;
 	}
 
-	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String theResourceType, String theParamName) {
-		return hash(thePartitionSettings, thePartitionId, theResourceType, theParamName);
+	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName) {
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName);
 	}
 
 	/**
 	 * Applies a fast and consistent hashing algorithm to a set of strings
 	 */
-	static long hash(PartitionSettings thePartitionSettings, PartitionId thePartitionId, String... theValues) {
+	static long hash(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String... theValues) {
 		Hasher hasher = HASH_FUNCTION.newHasher();
 
-		if (thePartitionSettings.isPartitioningEnabled() && thePartitionSettings.isIncludePartitionInSearchHashes() && thePartitionId != null) {
-			if (thePartitionId.getPartitionId() != null) {
-				hasher.putInt(thePartitionId.getPartitionId());
+		if (thePartitionSettings.isPartitioningEnabled() && thePartitionSettings.isIncludePartitionInSearchHashes() && theRequestPartitionId != null) {
+			if (theRequestPartitionId.getPartitionId() != null) {
+				hasher.putInt(theRequestPartitionId.getPartitionId());
 			}
 		}
 

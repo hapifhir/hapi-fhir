@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
@@ -80,7 +80,7 @@ public class PartitionablePartitionId implements Cloneable {
 			.setPartitionDate(getPartitionDate());
 	}
 
-	public PartitionId toPartitionId() {
-		return PartitionId.fromPartitionId(getPartitionId(), getPartitionDate());
+	public RequestPartitionId toPartitionId() {
+		return RequestPartitionId.fromPartitionId(getPartitionId(), getPartitionDate());
 	}
 }
