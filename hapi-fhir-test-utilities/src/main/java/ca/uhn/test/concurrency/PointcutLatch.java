@@ -220,8 +220,8 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 			.toString();
 	}
 
-	public Object getSingleLatchInvocationParameter() {
-		return getSingleLatchInvocationParameter(myCalledWith.get());
+	public Object getLatchInvocationParameter() {
+		return getLatchInvocationParameter(myCalledWith.get());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -253,13 +253,13 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		return hookParams.values().stream().map(ourFhirObjectToStringMapper).collect(Collectors.joining(", "));
 	}
 
-	public static Object getSingleLatchInvocationParameter(List<HookParams> theHookParams) {
+	public static Object getLatchInvocationParameter(List<HookParams> theHookParams) {
 		Validate.notNull(theHookParams);
 		Validate.isTrue(theHookParams.size() == 1, "Expected Pointcut to be invoked 1 time");
-		return getSingleLatchInvocationParameter(theHookParams, 0);
+		return getLatchInvocationParameter(theHookParams, 0);
 	}
 
-	public static Object getSingleLatchInvocationParameter(List<HookParams> theHookParams, int index) {
+	public static Object getLatchInvocationParameter(List<HookParams> theHookParams, int index) {
 		Validate.notNull(theHookParams);
 		HookParams arg = theHookParams.get(index);
 		Validate.isTrue(arg.values().size() == 1, "Expected pointcut to be invoked with 1 argument");

@@ -72,7 +72,7 @@ public class PartitionRunnerTest {
 		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(1);
 		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
-		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getSingleLatchInvocationParameter(myLatch.awaitExpected());
+		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
 		assertEquals("main", partitionCall.threadName);
 		assertEquals(1, partitionCall.size);
 	}
@@ -85,7 +85,7 @@ public class PartitionRunnerTest {
 		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(1);
 		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
-		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getSingleLatchInvocationParameter(myLatch.awaitExpected());
+		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
 		assertEquals("main", partitionCall.threadName);
 		assertEquals(2, partitionCall.size);
 	}
@@ -99,10 +99,10 @@ public class PartitionRunnerTest {
 		myLatch.setExpectedCount(2);
 		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
-		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getSingleLatchInvocationParameter(calls, 0);
+		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
 		assertThat(partitionCall1.threadName, isOneOf(EXPUNGE_THREADNAME_1, EXPUNGE_THREADNAME_2));
 		assertEquals(5, partitionCall1.size);
-		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getSingleLatchInvocationParameter(calls, 1);
+		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
 		assertThat(partitionCall2.threadName, isOneOf(EXPUNGE_THREADNAME_1, EXPUNGE_THREADNAME_2));
 		assertEquals(5, partitionCall2.size);
 		assertNotEquals(partitionCall1.threadName, partitionCall2.threadName);
@@ -121,10 +121,10 @@ public class PartitionRunnerTest {
 		myLatch.setExpectedCount(2);
 		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
-		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getSingleLatchInvocationParameter(calls, 0);
+		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
 		assertThat(partitionCall1.threadName, isOneOf(EXPUNGE_THREADNAME_1, EXPUNGE_THREADNAME_2));
 		assertEquals(true, nums.remove(partitionCall1.size));
-		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getSingleLatchInvocationParameter(calls, 1);
+		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
 		assertThat(partitionCall2.threadName, isOneOf(EXPUNGE_THREADNAME_1, EXPUNGE_THREADNAME_2));
 		assertEquals(true, nums.remove(partitionCall2.size));
 		assertNotEquals(partitionCall1.threadName, partitionCall2.threadName);
@@ -141,12 +141,12 @@ public class PartitionRunnerTest {
 		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
 		{
-			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getSingleLatchInvocationParameter(calls, 0);
+			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
 			assertEquals(EXPUNGE_THREADNAME_1, partitionCall.threadName);
 			assertEquals(5, partitionCall.size);
 		}
 		{
-			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getSingleLatchInvocationParameter(calls, 1);
+			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
 			assertEquals(EXPUNGE_THREADNAME_1, partitionCall.threadName);
 			assertEquals(5, partitionCall.size);
 		}
