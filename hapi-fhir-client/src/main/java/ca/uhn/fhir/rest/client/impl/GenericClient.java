@@ -604,7 +604,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class DeleteInternal extends BaseSearch<IDeleteTyped, IDeleteWithQueryTyped, IBaseOperationOutcome> implements IDelete, IDeleteTyped, IDeleteWithQuery, IDeleteWithQueryTyped {
+	private class DeleteInternal extends BaseSearch<IDeleteTyped, IDeleteWithQueryTyped, MethodOutcome> implements IDelete, IDeleteTyped, IDeleteWithQuery, IDeleteWithQueryTyped {
 
 		private boolean myConditional;
 		private IIdType myId;
@@ -613,7 +613,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private DeleteCascadeModeEnum myCascadeMode;
 
 		@Override
-		public IBaseOperationOutcome execute() {
+		public MethodOutcome execute() {
 
 			Map<String, List<String>> additionalParams = new HashMap<>();
 			if (myCascadeMode != null) {
@@ -635,7 +635,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			} else {
 				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), mySearchUrl, getParamMap());
 			}
-			OperationOutcomeResponseHandler binding = new OperationOutcomeResponseHandler();
+
+			OutcomeResponseHandler binding = new OutcomeResponseHandler();
 
 			return invoke(additionalParams, binding, invocation);
 		}
@@ -1385,30 +1386,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			retVal.setResource(response);
 			retVal.setCreatedUsingStatusCode(theResponseStatusCode);
 			retVal.setResponseHeaders(theHeaders);
-			return retVal;
-		}
-	}
-
-	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<IBaseOperationOutcome> {
-
-		@Override
-		public IBaseOperationOutcome invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders)
-			throws BaseServerResponseException {
-			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
-			if (respType == null) {
-				return null;
-			}
-			IParser parser = respType.newParser(myContext);
-			IBaseOperationOutcome retVal;
-			try {
-				// TODO: handle if something else than OO comes back
-				retVal = (IBaseOperationOutcome) parser.parseResource(theResponseInputStream);
-			} catch (DataFormatException e) {
-				ourLog.warn("Failed to parse OperationOutcome response", e);
-				return null;
-			}
-			MethodUtil.parseClientRequestResourceHeaders(null, theHeaders, retVal);
-
 			return retVal;
 		}
 	}

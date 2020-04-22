@@ -377,7 +377,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		});
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-		IBaseOperationOutcome outcome;
+		MethodOutcome outcome;
 
 		// Regular delete
 		outcome = client
@@ -1629,7 +1629,6 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		idx++;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void testSearchByQuantity() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = prepareClientForSearchResponse();

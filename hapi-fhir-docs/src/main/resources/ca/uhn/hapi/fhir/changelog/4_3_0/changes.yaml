@@ -37,6 +37,23 @@
     package import statements.
     "
 - item:
+     issue: "1804"
+     type: "change"
+     title: "**Breaking Change**:
+    The Generic/Fluent **delete()** operation now returns a [MethodOutcome](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/api/MethodOutcome.html)
+    object instead of an OperationOutcome. The OperationOutcomoe is still available direcly by querying
+    the MethodOutcome object, but this change makes the delete() method more consistent with
+    other similar methods in the API.
+    "
+- item:
+     type: "change"
+     title: "**Breaking Change**:
+    Some R4 and R5 structure fields containing a `code` value with a **Required (closed) binding**
+    did not use the java Enum type that was generated for the given field. These have been changed
+    to use the Enum values where possible. This change does not remove any functionality from the model
+    but may require a small amount of re-coding to deal with new setter/getter types on a few fields.
+    "
+- item:
      issue: "1807"
      type: "change"
      title: "**New Feature**:

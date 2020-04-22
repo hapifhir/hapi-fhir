@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1791
+title: The GraphQL Expression parser sometimes fails and reports unhelpful error messages when using search arguments.
+   Thanks to Ibrohim Kholilul Islam for the pull request!

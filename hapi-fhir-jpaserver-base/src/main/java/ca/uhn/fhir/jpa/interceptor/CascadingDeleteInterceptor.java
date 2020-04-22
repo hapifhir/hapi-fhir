@@ -34,8 +34,10 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictOutcome;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import org.apache.commons.lang3.Validate;
@@ -45,6 +47,9 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -92,7 +97,12 @@ public class CascadingDeleteInterceptor {
 	public DeleteConflictOutcome handleDeleteConflicts(DeleteConflictList theConflictList, RequestDetails theRequest) {
 		ourLog.debug("Have delete conflicts: {}", theConflictList);
 
-		if (!shouldCascade(theRequest)) {
+		if (shouldCascade(theRequest) == DeleteCascadeModeEnum.NONE) {
+
+			// Add a message to the response
+			String message = theRequest.getFhirContext().getLocalizer().getMessage(CascadingDeleteInterceptor.class, "noParam");
+			theRequest.getUserData().put(CASCADED_DELETES_FAILED_KEY, message);
+
 			return null;
 		}
 
@@ -180,28 +190,12 @@ public class CascadingDeleteInterceptor {
 	/**
 	 * Subclasses may override
 	 *
-	 * @param theRequest The REST request
+	 * @param theRequest The REST request (may be null)
 	 * @return Returns true if cascading delete should be allowed
 	 */
-	@SuppressWarnings("WeakerAccess")
-	protected boolean shouldCascade(RequestDetails theRequest) {
-		if (theRequest != null) {
-			String[] cascadeParameters = theRequest.getParameters().get(Constants.PARAMETER_CASCADE_DELETE);
-			if (cascadeParameters != null && Arrays.asList(cascadeParameters).contains(Constants.CASCADE_DELETE)) {
-				return true;
-			}
-
-			String cascadeHeader = theRequest.getHeader(Constants.HEADER_CASCADE);
-			if (Constants.CASCADE_DELETE.equals(cascadeHeader)) {
-				return true;
-			}
-
-			// Add a message to the response
-			String message = theRequest.getFhirContext().getLocalizer().getMessage(CascadingDeleteInterceptor.class, "noParam");
-			theRequest.getUserData().put(CASCADED_DELETES_FAILED_KEY, message);
-		}
-
-		return false;
+	@Nonnull
+	protected DeleteCascadeModeEnum shouldCascade(@Nullable RequestDetails theRequest) {
+		return RestfulServerUtils.extractDeleteCascadeParameter(theRequest);
 	}
 
 
