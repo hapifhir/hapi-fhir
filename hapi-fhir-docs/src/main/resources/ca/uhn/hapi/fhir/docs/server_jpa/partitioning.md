@@ -67,7 +67,7 @@ This interceptor can implement the hooks shown below.
 
 ## Identify Partition for Create (Required)
 
-A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE`](/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_CREATE) pointcut must be registered, and this hook method will be invoked every time a resource is being created in order to determine the partition to create the resource in.
+A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE`](/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_CREATE) pointcut must be registered, and this hook method will be invoked every time a resource is created in order to determine the partition the resource is assigned to.
 
 The criteria for determining the partition will depend on your use case. For example:
  
