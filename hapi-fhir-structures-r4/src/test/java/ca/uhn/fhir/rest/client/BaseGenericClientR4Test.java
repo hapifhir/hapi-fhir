@@ -84,6 +84,22 @@ public abstract class BaseGenericClientR4Test {
 		return capt;
 	}
 
+	protected ArgumentCaptor<HttpUriRequest> prepareClientForCapabilityStatement() throws IOException {
+		final String msg = "{\"resourceType\":\"CapabilityStatement\", \"fhirVersion\":\"4.0.1\"}";
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) {
+				return new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8);
+			}
+		});
+		return capt;
+	}
+
 	protected ArgumentCaptor<HttpUriRequest> prepareClientForCreateResponse() throws IOException {
 		final String msg = "{\"resourceType\":\"Patient\",\"id\":\"123\",\"active\":true}";
 

@@ -75,6 +75,10 @@ public class UrlTenantSelectionInterceptor {
 		}
 		String requestUri = theRequest.getUri();
 		String serverBase = theClient.getServerBase();
+		if (serverBase.endsWith("/")) {
+			serverBase = serverBase.substring(0, serverBase.length() - 1);
+		}
+
 		Validate.isTrue(requestUri.startsWith(serverBase), "Request URI %s does not start with server base %s", requestUri, serverBase);
 
 		String newUri = serverBase + "/" + tenantId + requestUri.substring(serverBase.length());
