@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.util;
+package ca.uhn.fhir.empi.model;
 
 import org.hl7.fhir.r4.model.Person;
 

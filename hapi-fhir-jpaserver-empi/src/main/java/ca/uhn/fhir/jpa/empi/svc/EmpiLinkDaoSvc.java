@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.model.EmpiMessages;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -44,7 +45,7 @@ public class EmpiLinkDaoSvc {
 	@Autowired
 	private ResourceTableHelper myResourceTableHelper;
 
-	public void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
+	public void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiMessages theEmpiMessages) {
 		Long personPid = myResourceTableHelper.getPidOrNull(thePerson);
 		Long resourcePid = myResourceTableHelper.getPidOrNull(theResource);
 
@@ -52,7 +53,9 @@ public class EmpiLinkDaoSvc {
 
 		empiLink.setLinkSource(theLinkSource);
 		empiLink.setMatchResult(theMatchResult);
-		ourLog.debug("Creating EmpiLink from {} to {} -> {}", thePerson.getIdElement(), theResource.getIdElement(), theMatchResult);
+		String message = String.format("Creating EmpiLink from %s to %s -> %s", thePerson.getIdElement().toUnqualifiedVersionless(), theResource.getIdElement().toUnqualifiedVersionless(), theMatchResult);
+		theEmpiMessages.addMessage(message);
+		ourLog.debug(message);
 		myEmpiLinkDao.save(empiLink);
 	}
 

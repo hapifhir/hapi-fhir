@@ -27,8 +27,24 @@ import java.util.Collection;
 import java.util.List;
 
 public interface IEmpiMatchFinderSvc {
+	/**
+	 * Retrieve a list of possible patient/practitioner candidates for matching, based on the given {@link IBaseResource}
+	 * Internally, performs all EMPI matching rules on the type of the resource.
+	 *
+	 * @param theResourceType the type of the resource.
+	 * @param theResource the resource that we are attempting to find matches for.
+	 * @return a List of {@link MatchedTargetCandidate} representing POSSIBLE_MATCH and MATCH outcomes.
+	 */
 	@Nonnull
-	List<MatchedTargetCandidate> getMatchedTargetCandidates(String theResourceType, IBaseResource theBaseResource);
+	List<MatchedTargetCandidate> getMatchedTargetCandidates(String theResourceType, IBaseResource theResource);
 
-	Collection<IBaseResource> findMatches(String theResourceType, IBaseResource theResource);
+	/**
+	 * Retrieve a list of patient/practitioner matches, based on the given {@link IBaseResource}
+	 * Internally, performs all EMPI matching rules on the type of the resource then filters out non-matches.
+	 *
+	 * @param theResourceType the type of the resource.
+	 * @param theResource the resource that we are attempting to find matches for.
+	 * @return a List of {@link IBaseResource} representing all people who had a MATCH outcome.
+	 */
+	List<IBaseResource> findMatches(String theResourceType, IBaseResource theResource);
 }

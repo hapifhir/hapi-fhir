@@ -1,13 +1,11 @@
 package ca.uhn.fhir.empi.util;
 
-import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
-import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import junit.framework.TestCase;
 import org.junit.Test;
 
 import static ca.uhn.fhir.empi.api.EmpiLinkSourceEnum.*;
 import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.*;
-import static ca.uhn.fhir.empi.util.CanonicalIdentityAssuranceLevel.*;
+import static ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel.*;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNull.nullValue;

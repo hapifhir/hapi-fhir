@@ -3,16 +3,17 @@ package ca.uhn.fhir.empi.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.rules.config.EmpiSettingsImpl;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
-import ca.uhn.fhir.empi.util.CanonicalEID;
+import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Test;
+
 import java.util.Optional;
 
 import static ca.uhn.fhir.empi.api.Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 
 public class EIDHelperTest {
@@ -24,7 +25,7 @@ public class EIDHelperTest {
 		setEnterpriseEIDSystem(EXTERNAL_ID_SYSTEM_FOR_TEST);
 	}};
 
-	private static final EmpiSettingsImpl mySettings = new EmpiSettingsImpl(){{
+	private static final EmpiSettingsImpl mySettings = new EmpiSettingsImpl() {{
 		setEmpiRules(myRules);
 	}};
 

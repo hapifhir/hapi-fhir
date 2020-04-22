@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
+import ca.uhn.fhir.empi.model.EmpiMessages;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.helper.EmpiHelperConfig;
@@ -29,6 +30,7 @@ import static ca.uhn.fhir.empi.api.Constants.CODE_HAPI_EMPI_MANAGED;
 import static ca.uhn.fhir.empi.api.Constants.SYSTEM_EMPI_MANAGED;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -110,7 +112,7 @@ public class EmpiDaoInterceptorTest extends BaseEmpiR4Test {
 	public void testEmpiManagedPersonCannotBeModifiedByPersonUpdateRequest() throws InterruptedException {
 		// When EMPI is enabled, only the EMPI system is allowed to modify Person links of Persons with the EMPI-MANAGED tag.
 		Patient patient = new Patient();
-		IIdType patientId = myEmpiHelper.createWithLatch(new Patient()).getId().toUnqualifiedVersionless();
+		IIdType patientId = myEmpiHelper.createWithLatch(new Patient()).getDaoMethodOutcome().getId().toUnqualifiedVersionless();
 
 		patient.setId(patientId);
 
@@ -125,5 +127,20 @@ public class EmpiDaoInterceptorTest extends BaseEmpiR4Test {
 		} catch (ForbiddenOperationException e) {
 			assertEquals("Cannot create or modify Persons who are managed by EMPI.", e.getMessage());
 		}
+	}
+	
+	@Test
+	public void testEmpiPointcutReceivesEmpiMessages() throws InterruptedException {
+		EmpiHelperR4.ExcellentWrapper wrapper = myEmpiHelper.createWithLatch(buildJanePatient());
+		EmpiMessages empiMessages = wrapper.getEmpiMessages();
+		List<String> messages = empiMessages.getValues();
+
+		assertThat(messages, hasSize(3));
+
+		assertThat(messages.get(0), is(equalToIgnoringCase("There were no matched candidates for EMPI, creating a new Person.")));
+		assertThat(messages.get(1), is(containsString("Creating new link from new Person -> ")));
+		assertThat(messages.get(1), is(containsString("with IdentityAssuranceLevel: LEVEL3")));
+		assertThat(messages.get(2), is(containsString("Creating EmpiLink from")));
+		assertThat(messages.get(2), is(containsString("MATCH")));
 	}
 }

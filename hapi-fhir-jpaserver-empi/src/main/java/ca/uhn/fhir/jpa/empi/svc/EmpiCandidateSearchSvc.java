@@ -66,12 +66,13 @@ public class EmpiCandidateSearchSvc {
 	private ResourceTableHelper myResourceTableHelper;
 
 	/**
-	 * Given a target resource, search for all resources that are considered an EMPI match based on locally defined
-	 * EMPI rules.
+	 * Given a target resource, search for all resources that are considered an EMPI match based on defined EMPI rules.
+	 *
 	 *
 	 * @param theResourceType
-	 * @param theResource the target resource we are attempting to match.
-	 * @return the list of candidate resources which could be matches to theResource
+	 * @param theResource the target {@link IBaseResource} we are attempting to match.
+	 *
+	 * @return the list of candidate {@link IBaseResource} which could be matches to theResource
 	 */
 	public Collection<IBaseResource> findCandidates(String theResourceType, IBaseResource theResource) {
 		Map<Long, IBaseResource> matchedPidsToResources = new HashMap<>();

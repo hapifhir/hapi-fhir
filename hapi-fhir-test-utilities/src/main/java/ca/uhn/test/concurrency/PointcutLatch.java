@@ -24,6 +24,7 @@ package ca.uhn.test.concurrency;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -219,9 +220,22 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 			.toString();
 	}
 
-	public Object getLatchInvocationParameter() {
-		return getLatchInvocationParameter(myCalledWith.get());
+	public Object getSingleLatchInvocationParameter() {
+		return getSingleLatchInvocationParameter(myCalledWith.get());
 	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T getLatchInvocationParameterOfType(Class<T> theType) {
+		List<HookParams> hookParamsList = myCalledWith.get();
+		Validate.notNull(hookParamsList);
+		Validate.isTrue(hookParamsList.size() == 1, "Expected Pointcut to be invoked 1 time");
+		HookParams hookParams = hookParamsList.get(0);
+		ListMultimap<Class<?>, Object> paramsForType = hookParams.getParamsForType();
+		List<Object> objects = paramsForType.get(theType);
+		Validate.isTrue(objects.size() == 1);
+		return (T) objects.get(0);
+	}
+
 
 	private class PointcutLatchException extends IllegalStateException {
 		private static final long serialVersionUID = 1372636272233536829L;
@@ -239,13 +253,13 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		return hookParams.values().stream().map(ourFhirObjectToStringMapper).collect(Collectors.joining(", "));
 	}
 
-	public static Object getLatchInvocationParameter(List<HookParams> theHookParams) {
+	public static Object getSingleLatchInvocationParameter(List<HookParams> theHookParams) {
 		Validate.notNull(theHookParams);
 		Validate.isTrue(theHookParams.size() == 1, "Expected Pointcut to be invoked 1 time");
-		return getLatchInvocationParameter(theHookParams, 0);
+		return getSingleLatchInvocationParameter(theHookParams, 0);
 	}
 
-	public static Object getLatchInvocationParameter(List<HookParams> theHookParams, int index) {
+	public static Object getSingleLatchInvocationParameter(List<HookParams> theHookParams, int index) {
 		Validate.notNull(theHookParams);
 		HookParams arg = theHookParams.get(index);
 		Validate.isTrue(arg.values().size() == 1, "Expected pointcut to be invoked with 1 argument");

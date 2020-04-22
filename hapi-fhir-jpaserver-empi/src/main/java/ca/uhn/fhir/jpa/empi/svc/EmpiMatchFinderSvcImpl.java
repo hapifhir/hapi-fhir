@@ -42,17 +42,17 @@ public class EmpiMatchFinderSvcImpl implements IEmpiMatchFinderSvc {
 
 	@Override
 	@Nonnull
-	public List<MatchedTargetCandidate> getMatchedTargetCandidates(String theResourceType, IBaseResource theBaseResource) {
-		Collection<IBaseResource> targetCandidates = myEmpiCandidateSearchSvc.findCandidates(theResourceType, theBaseResource);
+	public List<MatchedTargetCandidate> getMatchedTargetCandidates(String theResourceType, IBaseResource theResource) {
+		Collection<IBaseResource> targetCandidates = myEmpiCandidateSearchSvc.findCandidates(theResourceType, theResource);
 
 		return targetCandidates.stream()
-			.map(candidate -> new MatchedTargetCandidate(candidate, myEmpiResourceComparatorSvc.getMatchResult(theBaseResource, candidate)))
+			.map(candidate -> new MatchedTargetCandidate(candidate, myEmpiResourceComparatorSvc.getMatchResult(theResource, candidate)))
 			.collect(Collectors.toList());
 	}
 
 	@Override
 	@Nonnull
-	public Collection<IBaseResource> findMatches(String theResourceType, IBaseResource theResource) {
+	public List<IBaseResource> findMatches(String theResourceType, IBaseResource theResource) {
 		List<MatchedTargetCandidate> targetCandidates = getMatchedTargetCandidates(theResourceType, theResource);
 		return targetCandidates.stream()
 			.filter(candidate -> candidate.getMatchResult() == EmpiMatchResultEnum.MATCH)

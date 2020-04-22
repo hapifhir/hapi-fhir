@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.empi.broker;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.model.EmpiMessages;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -65,24 +66,30 @@ public class EmpiMessageHandler implements MessageHandler {
 	}
 
 	public void matchEmpiAndUpdateLinks(ResourceModifiedMessage theMsg) {
-	String resourceType = theMsg.getId(myFhirContext).getResourceType();
+		String resourceType = theMsg.getId(myFhirContext).getResourceType();
 		validateResourceType(resourceType);
+		EmpiMessages messages = null;
 		try {
 			switch (theMsg.getOperationType()) {
 				case CREATE:
-					handleCreatePatientOrPractitioner(theMsg);
+					messages = handleCreatePatientOrPractitioner(theMsg);
 					break;
 				case UPDATE:
 					//FIXME EMPI implement updates.
+					//messages = handleUpdatePatientOrPractitioner(theMsg);
 					break;
 				case DELETE:
 				default:
 					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 			}
+		}catch (Exception e) {
+			messages = new EmpiMessages();
+			messages.addMessage("Failure during EMPI processing: " + e.getMessage());
 		} finally {
 			// Interceptor call: EMPI_AFTER_PERSISTED_RESOURCE_CHECKED
 			HookParams params = new HookParams()
-				.add(ResourceModifiedMessage.class, theMsg);
+				.add(ResourceModifiedMessage.class, theMsg)
+				.add(EmpiMessages.class, messages);
 			myInterceptorBroadcaster.callHooks(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, params);
 		}
 	}
@@ -93,7 +100,7 @@ public class EmpiMessageHandler implements MessageHandler {
 		}
 	}
 
-	private void handleCreatePatientOrPractitioner(ResourceModifiedMessage theMsg) {
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theMsg.getNewPayload(myFhirContext));
+	private EmpiMessages handleCreatePatientOrPractitioner(ResourceModifiedMessage theMsg) {
+		return myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theMsg.getNewPayload(myFhirContext));
 	}
 }

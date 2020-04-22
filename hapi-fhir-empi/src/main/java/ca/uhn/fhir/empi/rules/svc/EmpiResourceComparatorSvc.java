@@ -64,6 +64,16 @@ public class EmpiResourceComparatorSvc {
 		}
 
 	}
+
+	/**
+	 * Given two {@link IBaseResource}s, perform all comparisons on them to determine an {@link EmpiMatchResultEnum}, indicating
+	 * to what level the two resources are considered to be matching.
+	 *
+	 * @param theLeftResource The first {@link IBaseResource}.
+	 * @param theRightResource The second {@link IBaseResource}
+	 *
+	 * @return an {@link EmpiMatchResultEnum} indicating the result of the comparison.
+	 */
 	public EmpiMatchResultEnum getMatchResult(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		return compare(theLeftResource, theRightResource);
 	}

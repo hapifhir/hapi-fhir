@@ -48,6 +48,16 @@ public class EmpiResourceFieldComparator implements IEmpiMatcher<IBaseResource> 
 		myResourcePath = theEmpiFieldMatchJson.getResourcePath();
 	}
 
+	/**
+	 * Compares two {@link IBaseResource}s and determines if they match, using the algorithm defined in this object's EmpiFieldMatchJson.
+	 *
+	 * In this implementation, it determines whether a given field matches between two resources. Internally this is evaluated using FhirPath. If any of the elements of theLeftResource
+	 * match any of the elements of theRightResource, will return true. Otherwise, false.
+	 *
+	 * @param theLeftResource the first {@link IBaseResource}
+	 * @param theRightResource the second {@link IBaseResource}
+	 * @return A boolean indicating whether they match.
+	 */
 	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean match(IBaseResource theLeftResource, IBaseResource theRightResource) {

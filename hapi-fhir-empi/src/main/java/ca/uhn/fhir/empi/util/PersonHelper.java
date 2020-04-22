@@ -23,6 +23,10 @@ package ca.uhn.fhir.empi.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.Constants;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.model.CanonicalEID;
+import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
+import ca.uhn.fhir.empi.model.EmpiMessages;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -54,6 +58,12 @@ public final class PersonHelper {
 		myFhirContext = theFhirContext;
 	}
 
+	/**
+	 * Given a Person, extract all {@link IIdType}s for the linked targets.
+	 * @param thePerson the Person to extract link IDs from.
+	 *
+	 * @return a Stream of {@link IIdType}.
+	 */
 	public Stream<IIdType> getLinks(IBaseResource thePerson) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
@@ -68,15 +78,30 @@ public final class PersonHelper {
 		}
 	}
 
+	/**
+	 * Determine whether or not the given {@link IBaseResource} person contains a link to a particular {@link IIdType}
+	 *
+	 * @param thePerson The person to check
+	 * @param theResourceId The ID to check.
+	 *
+	 * @return A boolean indicating whether or not there was a contained link.
+	 */
     public boolean containsLinkTo(IBaseResource thePerson, IIdType theResourceId) {
 		 Stream<IIdType> links = getLinks(thePerson);
 		 return links.anyMatch(link -> link.getValue().equals(theResourceId.getValue()));
     }
 
-	public void addOrUpdateLink(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel) {
+	/**
+	 * Create or update a link from source {@link IBaseResource} to the target {@link IIdType}, with the given {@link CanonicalIdentityAssuranceLevel}.
+	 *  @param thePerson The person who's link needs to be updated.
+	 * @param theResourceId The target of the link
+	 * @param canonicalAssuranceLevel The level of certainty of this link.
+	 * @param theEmpiMessages
+	 */
+	public void addOrUpdateLink(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, EmpiMessages theEmpiMessages) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				handleLinkUpdateR4(thePerson, theResourceId, canonicalAssuranceLevel);
+				handleLinkUpdateR4(thePerson, theResourceId, canonicalAssuranceLevel, theEmpiMessages);
 				break;
 			default:
 				// FIXME EMPI moar versions
@@ -84,7 +109,7 @@ public final class PersonHelper {
 		}
 	}
 
-	private void handleLinkUpdateR4(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel) {
+	private void handleLinkUpdateR4(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, EmpiMessages theEmpiMessages) {
 		if (canonicalAssuranceLevel == null) {
 			return;
 		}
@@ -92,19 +117,29 @@ public final class PersonHelper {
 		Person person = (Person) thePerson;
 		if (!containsLinkTo(thePerson, theResourceId)) {
 			person.addLink().setTarget(new Reference(theResourceId)).setAssurance(canonicalAssuranceLevel.toR4());
+			theEmpiMessages.addMessage("Creating new link from " + (StringUtils.isBlank(thePerson.getIdElement().getValue()) ? "new Person" : thePerson.getIdElement().toUnqualifiedVersionless()) + " -> " + theResourceId.toUnqualifiedVersionless() + " with IdentityAssuranceLevel: " + canonicalAssuranceLevel.name());
 		} else {
 			person.getLink().stream()
 				.filter(link -> link.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()))
 				.findFirst()
-				.ifPresent(link -> link.setAssurance(canonicalAssuranceLevel.toR4()));
+				.ifPresent(link -> {
+					theEmpiMessages.addMessage("Updating link from " + thePerson.getIdElement().toUnqualifiedVersionless() + " -> " + theResourceId.toUnqualifiedVersionless() + ". Changing IdentityAssuranceLevel: " + link.getAssurance().toCode() + " -> " + canonicalAssuranceLevel.name());
+					link.setAssurance(canonicalAssuranceLevel.toR4());
+			});
 		}
 	}
 
-	public void removeLink(IBaseResource thePerson, IIdType theResourceId) {
+	/**
+	 * Removes a link from the given {@link IBaseResource} to the target {@link IIdType}.
+	 *  @param thePerson The person to remove the link from.
+	 * @param theResourceId The target ID to remove.
+	 * @param theEmpiMessages
+	 */
+	public void removeLink(IBaseResource thePerson, IIdType theResourceId, EmpiMessages theEmpiMessages) {
 		if (!containsLinkTo(thePerson, theResourceId)) {
 			return;
 		}
-
+		theEmpiMessages.addMessage("Removing PersonLinkComponent from " + thePerson.getIdElement().toUnqualifiedVersionless() + " -> " + theResourceId.toUnqualifiedVersionless());
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person person = (Person) thePerson;
@@ -129,7 +164,7 @@ public final class PersonHelper {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person person = new Person();
-				CanonicalEID  eidToApply = myEIDHelper.getExternalEid(theSourceResource).orElse(myEIDHelper.createHapiEid());
+				CanonicalEID eidToApply = myEIDHelper.getExternalEid(theSourceResource).orElse(myEIDHelper.createHapiEid());
 				person.addIdentifier(eidToApply.toR4());
 				person.getMeta().addTag(buildEmpiManagedTag());
 				copyEmpiTargetDataIntoPerson(theSourceResource, person);
@@ -177,7 +212,16 @@ public final class PersonHelper {
 		return empiManagedCoding;
 	}
 
-	public IBaseResource updatePersonFromEmpiTarget(IBaseResource thePerson, IBaseResource theEmpiTarget) {
+	/**
+	 * Update a Person's EID based on the incoming target resource. If the incoming resource has an external EID, it is applied
+	 * to the Person, unless that person already has an external EID which does not match, in which case throw {@link IllegalArgumentException}
+	 *
+	 * @param thePerson The person to update the external EID on.
+	 * @param theEmpiTarget The target we will retrieve the external EID from.
+	 *
+	 * @return the modified {@link IBaseResource} representing the person.
+	 */
+	public IBaseResource updatePersonExternalEidFromEmpiTarget(IBaseResource thePerson, IBaseResource theEmpiTarget) {
 		//This handles overwriting an automatically assigned EID if a patient that links is coming in with an official EID.
 		Person person = ((Person)thePerson);
 		Optional<CanonicalEID> incomingTargetEid = myEIDHelper.getExternalEid(theEmpiTarget);

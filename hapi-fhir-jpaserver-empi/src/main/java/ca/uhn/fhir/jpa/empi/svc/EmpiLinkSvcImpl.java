@@ -23,9 +23,11 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
+import ca.uhn.fhir.empi.model.EmpiMessages;
 import ca.uhn.fhir.empi.util.AssuranceLevelUtil;
-import ca.uhn.fhir.empi.util.CanonicalIdentityAssuranceLevel;
+import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.empi.util.PersonHelper;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -34,9 +36,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.HashMap;
-import java.util.Map;
 
+/**
+ * This class is in charge of managing EmpiLinks between Persons and target resources
+ */
 @Service
 public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
@@ -48,15 +51,10 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	private PersonHelper myPersonHelper;
 	@Autowired
 	private ResourceTableHelper myResourceTableHelper;
-	private static Map<EmpiMatchResultEnum, String> matchToCanonicalAssuranceLevel = new HashMap<EmpiMatchResultEnum, String>(){{
-		put(EmpiMatchResultEnum.NO_MATCH, "level1");
-		put(EmpiMatchResultEnum.POSSIBLE_MATCH, "level2");
-		put(EmpiMatchResultEnum.MATCH, "level3");
-	}};
 
 	@Override
 	@Transactional
-	public void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
+	public void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiMessages theEmpiMessages) {
 		IIdType resourceId = theResource.getIdElement().toUnqualifiedVersionless();
 
 		validateRequestIsLegal(thePerson, theResource, theMatchResult, theLinkSource);
@@ -64,15 +62,16 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		switch (theMatchResult) {
 			case MATCH:
 			case POSSIBLE_MATCH:
-				myPersonHelper.addOrUpdateLink(thePerson, resourceId, assuranceLevel);
+				myPersonHelper.addOrUpdateLink(thePerson, resourceId, assuranceLevel, theEmpiMessages);
 				break;
 			case NO_MATCH:
-				myPersonHelper.removeLink(thePerson, resourceId);
+				myPersonHelper.removeLink(thePerson, resourceId, theEmpiMessages);
 			case POSSIBLE_DUPLICATE:
 				break;
 		}
-		myEmpiResourceDaoSvc.updatePerson(thePerson);
-		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource);
+		DaoMethodOutcome daoMethodOutcome = myEmpiResourceDaoSvc.updatePerson(thePerson);
+		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theEmpiMessages);
+
 	}
 
 	/**
@@ -114,8 +113,8 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		}
 	}
 
-	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource);
+	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiMessages theEmpiMessages) {
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theEmpiMessages);
 	}
 
 

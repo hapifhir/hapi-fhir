@@ -23,6 +23,7 @@ package ca.uhn.fhir.empi.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.Constants;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.model.CanonicalEID;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,17 +51,41 @@ public final class EIDHelper {
 		);
 	}
 
+	/**
+	 * Given an {@link IBaseResource} representing a patient/practitioner/person, retrieve their externally-assigned EID,
+	 * represented as a {@link CanonicalEID}
+	 *
+	 * @param theResource the resource to extract the EID from.
+	 *
+	 * @return An optional {@link CanonicalEID} representing the external EID. Absent if the EID is not present.
+	 */
 	public Optional<CanonicalEID> getExternalEid(IBaseResource theResource) {
 		return CanonicalEID.extractFromResource(myFhirContext, myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem(), theResource);
 	}
 
+	/**
+	 * Given an {@link IBaseResource} representing a patient/practitioner/person, retrieve their internally-assigned EID,
+	 * represented as a {@link CanonicalEID}
+	 *
+	 * @param theResource the resource to extract the EID from.
+	 *
+	 * @return An optional {@link CanonicalEID} representing the internal EID. Absent if the EID is not present.
+	 */
 	public Optional<CanonicalEID> getHapiEid(IBaseResource theResource) {
 		return CanonicalEID.extractFromResource(myFhirContext, Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, theResource);
 	}
 
-    boolean eidsMatch(CanonicalEID theFirstEid, CanonicalEID theSecondEid) {
-        return Objects.equals(theFirstEid.getValue(), theSecondEid.getValue()) && Objects.equals(theFirstEid.getSystem(), theSecondEid.getSystem());
-    }
+	/**
+	 * Determines whether two {@link CanonicalEID} have the same system and value.
+	 *
+	 * @param theFirstEid the first EID
+	 * @param theSecondEid the second EID
+	 *
+	 * @return a boolean indicating whether they are the same.
+	 */
+	public boolean eidsMatch(CanonicalEID theFirstEid, CanonicalEID theSecondEid) {
+		return Objects.equals(theFirstEid.getValue(), theSecondEid.getValue()) && Objects.equals(theFirstEid.getSystem(), theSecondEid.getSystem());
+	}
 
 
 }

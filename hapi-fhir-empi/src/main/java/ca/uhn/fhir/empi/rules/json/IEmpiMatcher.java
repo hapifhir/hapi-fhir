@@ -21,5 +21,13 @@ package ca.uhn.fhir.empi.rules.json;
  */
 
 public interface IEmpiMatcher<T> {
-	boolean match(T theLeftString, T theRightString);
+	/**
+	 * Determines whether two <T>s match.
+	 *
+	 * @param theLeft the first operand of the comparison
+	 * @param theRight the second operand of the comparison
+	 *
+	 * @return Whether or not the left and right operands matched.
+	 */
+	boolean match(T theLeft, T theRight);
 }

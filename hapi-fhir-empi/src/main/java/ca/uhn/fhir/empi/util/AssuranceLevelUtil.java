@@ -22,6 +22,7 @@ package ca.uhn.fhir.empi.util;
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 /**
