@@ -95,17 +95,17 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
-	@Column(name = "HASH_NORM_PREFIX", nullable = false)
+	@Column(name = "HASH_NORM_PREFIX", nullable = true)
 	private Long myHashNormalizedPrefix;
 	/**
 	 * @since 3.6.0 - At some point this should be made not-null
 	 */
-	@Column(name = "HASH_IDENTITY", nullable = false)
+	@Column(name = "HASH_IDENTITY", nullable = true)
 	private Long myHashIdentity;
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
-	@Column(name = "HASH_EXACT", nullable = false)
+	@Column(name = "HASH_EXACT", nullable = true)
 	private Long myHashExact;
 	@Transient
 	private transient ModelConfig myModelConfig;
