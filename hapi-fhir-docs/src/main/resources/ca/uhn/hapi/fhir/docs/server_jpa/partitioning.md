@@ -73,7 +73,7 @@ The criteria for determining the partition will depend on your use case. For exa
  
 * If you are implementing multi-tenancy the partition might be determined by using the [Request Tenant ID](/docs/server_plain/multitenancy.html). It could also be determined by looking at request headers, or the authorized user/session context, etc.
 
-* If you are implementing segmented data partitioning, the partition might be determined by examining the actpartitionInterceptorHeadersual resource being created, by the identity of the sending system, etc.    
+* If you are implementing segmented data partitioning, the partition might be determined by examining the actual resource being created, by the identity of the sending system, etc.    
 
 ## Identify Partition for Read (Optional)
 

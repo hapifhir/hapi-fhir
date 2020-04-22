@@ -2,7 +2,7 @@
 
 **This page is a work in progress. It is not yet comprehensive.**
 
-It contains a description of the tables within the HAPI FHIR JPA database. Note that columns are shown using Java datatypes as opposed to SQL datatypes, because the exact SQL datatype used will vary depending on the underlying database platform. 
+It contains a description of the tables within the HAPI FHIR JPA database. Note that columns are shown using Java datatypes as opposed to SQL datatypes, because the exact SQL datatype used will vary depending on the underlying database platform. The schema creation scripts can be used to determine the underlying column types. 
 
 # Background: Persistent IDs (PIDs)
 

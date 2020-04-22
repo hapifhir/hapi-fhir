@@ -43,7 +43,7 @@ public class PartitionManagementProviderTest {
 	@ClassRule
 	public static RestfulServerRule ourServerRule = new RestfulServerRule(ourCtx);
 	@MockBean
-	private IPartitionConfigSvc myPartitionConfigSvc;
+	private IPartitionLookupSvc myPartitionConfigSvc;
 	@Autowired
 	private PartitionManagementProvider myPartitionManagementProvider;
 	private IGenericClient myClient;

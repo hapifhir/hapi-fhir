@@ -67,7 +67,7 @@ public class DaoSubscriptionMatcherTest {
 	public static class MyConfig {
 
 		@Bean
-		public PartitionSettings partitionConfig() {
+		public PartitionSettings partitionSettings() {
 			return new PartitionSettings();
 		}
 

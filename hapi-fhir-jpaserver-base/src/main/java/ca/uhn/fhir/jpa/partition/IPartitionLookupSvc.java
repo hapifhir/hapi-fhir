@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 
-public interface IPartitionConfigSvc {
+public interface IPartitionLookupSvc {
 
 	/**
 	 * This is mostly here for unit test purposes. Regular code is not expected to call this method directly.

@@ -17,7 +17,7 @@ import org.springframework.test.context.TestPropertySource;
 public class TestSubscriptionConfig {
 
 	@Bean
-	public PartitionSettings partitionConfig() {
+	public PartitionSettings partitionSettings() {
 		return new PartitionSettings();
 	}
 

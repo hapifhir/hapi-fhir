@@ -30,7 +30,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.partition.IPartitionConfigSvc;
+import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
@@ -103,7 +103,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
 	@Autowired
-	protected IPartitionConfigSvc myPartitionConfigSvc;
+	protected IPartitionLookupSvc myPartitionConfigSvc;
 	@Autowired
 	protected ITermReadSvc myHapiTerminologySvc;
 	@Autowired

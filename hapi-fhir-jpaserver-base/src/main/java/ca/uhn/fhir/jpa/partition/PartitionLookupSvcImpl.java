@@ -44,13 +44,13 @@ import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class PartitionConfigSvcImpl implements IPartitionConfigSvc {
+public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 	public static final int DEFAULT_PERSISTED_PARTITION_ID = 0;
 	public static final String DEFAULT_PERSISTED_PARTITION_NAME = "DEFAULT";
 	private static final String DEFAULT_PERSISTED_PARTITION_DESC = "Default partition";
 	private static final Pattern PARTITION_NAME_VALID_PATTERN = Pattern.compile("[a-zA-Z0-9_-]+");
-	private static final Logger ourLog = LoggerFactory.getLogger(PartitionConfigSvcImpl.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(PartitionLookupSvcImpl.class);
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
@@ -115,7 +115,7 @@ public class PartitionConfigSvcImpl implements IPartitionConfigSvc {
 		validatePartitionNameDoesntAlreadyExist(thePartition.getName());
 
 		if (thePartition.getId() == DEFAULT_PERSISTED_PARTITION_ID) {
-			String msg = myFhirCtx.getLocalizer().getMessage(PartitionConfigSvcImpl.class, "cantCreatePartition0");
+			String msg = myFhirCtx.getLocalizer().getMessage(PartitionLookupSvcImpl.class, "cantCreatePartition0");
 			throw new InvalidRequestException(msg);
 		}
 
@@ -132,7 +132,7 @@ public class PartitionConfigSvcImpl implements IPartitionConfigSvc {
 
 		Optional<PartitionEntity> existingPartitionOpt = myPartitionDao.findById(thePartition.getId());
 		if (existingPartitionOpt.isPresent() == false) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionConfigSvcImpl.class, "unknownPartitionId", thePartition.getId());
+			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", thePartition.getId());
 			throw new InvalidRequestException(msg);
 		}
 
@@ -143,7 +143,7 @@ public class PartitionConfigSvcImpl implements IPartitionConfigSvc {
 
 		if (DEFAULT_PERSISTED_PARTITION_ID == thePartition.getId()) {
 			if (!DEFAULT_PERSISTED_PARTITION_NAME.equals(thePartition.getName())) {
-				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionConfigSvcImpl.class, "cantRenameDefaultPartition");
+				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "cantRenameDefaultPartition");
 				throw new InvalidRequestException(msg);
 			}
 		}
@@ -161,13 +161,13 @@ public class PartitionConfigSvcImpl implements IPartitionConfigSvc {
 		Validate.notNull(thePartitionId);
 
 		if (DEFAULT_PERSISTED_PARTITION_ID == thePartitionId) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionConfigSvcImpl.class, "cantDeleteDefaultPartition");
+			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "cantDeleteDefaultPartition");
 			throw new InvalidRequestException(msg);
 		}
 
 		Optional<PartitionEntity> partition = myPartitionDao.findById(thePartitionId);
 		if (!partition.isPresent()) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionConfigSvcImpl.class, "unknownPartitionId", thePartitionId);
+			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", thePartitionId);
 			throw new IllegalArgumentException(msg);
 		}
 
@@ -178,19 +178,19 @@ public class PartitionConfigSvcImpl implements IPartitionConfigSvc {
 
 	private void validatePartitionNameDoesntAlreadyExist(String theName) {
 		if (myPartitionDao.findForName(theName).isPresent()) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionConfigSvcImpl.class, "cantCreateDuplicatePartitionName", theName);
+			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "cantCreateDuplicatePartitionName", theName);
 			throw new InvalidRequestException(msg);
 		}
 	}
 
 	private void validateHaveValidPartitionIdAndName(PartitionEntity thePartition) {
 		if (thePartition.getId() == null || isBlank(thePartition.getName())) {
-			String msg = myFhirCtx.getLocalizer().getMessage(PartitionConfigSvcImpl.class, "missingPartitionIdOrName");
+			String msg = myFhirCtx.getLocalizer().getMessage(PartitionLookupSvcImpl.class, "missingPartitionIdOrName");
 			throw new InvalidRequestException(msg);
 		}
 
 		if (!PARTITION_NAME_VALID_PATTERN.matcher(thePartition.getName()).matches()) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionConfigSvcImpl.class, "invalidName", thePartition.getName());
+			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", thePartition.getName());
 			throw new InvalidRequestException(msg);
 		}
 
@@ -203,7 +203,7 @@ public class PartitionConfigSvcImpl implements IPartitionConfigSvc {
 			return myTxTemplate.execute(t -> myPartitionDao
 				.findForName(theName)
 				.orElseThrow(() -> {
-					String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionConfigSvcImpl.class, "invalidName", theName);
+					String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", theName);
 					return new IllegalArgumentException(msg);
 				}));
 		}
@@ -216,7 +216,7 @@ public class PartitionConfigSvcImpl implements IPartitionConfigSvc {
 			return myTxTemplate.execute(t -> myPartitionDao
 				.findById(theId)
 				.orElseThrow(() -> {
-					String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionConfigSvcImpl.class, "unknownPartitionId", theId);
+					String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", theId);
 					return new IllegalArgumentException(msg);
 				}));
 		}

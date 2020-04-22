@@ -69,7 +69,7 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 		}
 
 		@Bean
-		public PartitionSettings partitionConfig() {
+		public PartitionSettings partitionSettings() {
 			return new PartitionSettings();
 		}
 

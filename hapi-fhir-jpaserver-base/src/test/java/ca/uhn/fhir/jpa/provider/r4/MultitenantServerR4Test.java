@@ -21,7 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static ca.uhn.fhir.jpa.partition.PartitionConfigSvcImpl.DEFAULT_PERSISTED_PARTITION_NAME;
+import static ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl.DEFAULT_PERSISTED_PARTITION_NAME;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;

@@ -7,7 +7,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.*;
-import ca.uhn.fhir.jpa.partition.IPartitionConfigSvc;
+import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
@@ -76,7 +76,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	private int myPartitionId2;
 	private boolean myHaveDroppedForcedIdUniqueConstraint;
 	@Autowired
-	private IPartitionConfigSvc myPartitionConfigSvc;
+	private IPartitionLookupSvc myPartitionConfigSvc;
 
 	@After
 	public void after() {
@@ -365,12 +365,11 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		createRequestId();
 
 		addCreatePartition(myPartitionId, myPartitionDate);
-		addCreatePartition(myPartitionId, myPartitionDate);
-
 		Organization org = new Organization();
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
 
+		addCreatePartition(myPartitionId, myPartitionDate);
 		Patient p = new Patient();
 		p.getMeta().addTag("http://system", "code", "diisplay");
 		p.addName().setFamily("FAM");
@@ -436,7 +435,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 			assertEquals(myPartitionDate, presents.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_IDX_CMP_STRING_UNIQ
-			List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAllForResourceId(patientId);
+			List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAllForResourceIdForUnitTest(patientId);
 			assertEquals(1, uniques.size());
 			assertEquals(myPartitionId, uniques.get(0).getPartitionId().getPartitionId().intValue());
 			assertEquals(myPartitionDate, uniques.get(0).getPartitionId().getPartitionDate());
@@ -450,12 +449,11 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		createRequestId();
 
 		addCreateNoPartitionId(myPartitionDate);
-		addCreateNoPartitionId(myPartitionDate);
-
 		Organization org = new Organization();
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
 
+		addCreateNoPartitionId(myPartitionDate);
 		Patient p = new Patient();
 		p.getMeta().addTag("http://system", "code", "diisplay");
 		p.addName().setFamily("FAM");
@@ -521,7 +519,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 			assertEquals(myPartitionDate, presents.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_IDX_CMP_STRING_UNIQ
-			List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAllForResourceId(patientId);
+			List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAllForResourceIdForUnitTest(patientId);
 			assertEquals(1, uniques.size());
 			assertEquals(null, uniques.get(0).getPartitionId().getPartitionId());
 			assertEquals(myPartitionDate, uniques.get(0).getPartitionId().getPartitionDate());
@@ -533,13 +531,12 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	@Test
 	public void testCreate_ForcedId_WithPartition() {
 		addCreatePartition(myPartitionId, myPartitionDate);
-		addCreatePartition(myPartitionId, myPartitionDate);
-
 		Organization org = new Organization();
 		org.setId("org");
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.update(org).getId().toUnqualifiedVersionless();
 
+		addCreatePartition(myPartitionId, myPartitionDate);
 		Patient p = new Patient();
 		p.setId("pat");
 		p.getManagingOrganization().setReferenceElement(orgId);
@@ -560,13 +557,12 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	@Test
 	public void testCreate_ForcedId_NoPartition() {
 		addCreateNoPartition();
-		addCreateNoPartition();
-
 		Organization org = new Organization();
 		org.setId("org");
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.update(org).getId().toUnqualifiedVersionless();
 
+		addCreateNoPartition();
 		Patient p = new Patient();
 		p.setId("pat");
 		p.getManagingOrganization().setReferenceElement(orgId);
@@ -585,13 +581,12 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	@Test
 	public void testCreate_ForcedId_DefaultPartition() {
 		addCreateNoPartitionId(myPartitionDate);
-		addCreateNoPartitionId(myPartitionDate);
-
 		Organization org = new Organization();
 		org.setId("org");
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.update(org).getId().toUnqualifiedVersionless();
 
+		addCreateNoPartitionId(myPartitionDate);
 		Patient p = new Patient();
 		p.setId("pat");
 		p.getManagingOrganization().setReferenceElement(orgId);
@@ -613,10 +608,10 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	@Test
 	public void testUpdateResourceWithPartition() {
 		createRequestId();
-		addCreatePartition(myPartitionId, myPartitionDate);
-		addCreatePartition(myPartitionId, myPartitionDate);
 
 		// Create a resource
+		addCreatePartition(myPartitionId, myPartitionDate);
+		addCreatePartition(myPartitionId, myPartitionDate);
 		Patient p = new Patient();
 		p.getMeta().addTag("http://system", "code", "diisplay");
 		p.setActive(true);

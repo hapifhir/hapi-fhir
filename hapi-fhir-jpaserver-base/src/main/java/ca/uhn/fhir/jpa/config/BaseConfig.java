@@ -16,9 +16,9 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.partition.IPartitionConfigSvc;
+import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
-import ca.uhn.fhir.jpa.partition.PartitionConfigSvcImpl;
+import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperService;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
@@ -241,8 +241,8 @@ public abstract class BaseConfig {
 
 	@Bean
 	@Lazy
-	public IPartitionConfigSvc partitionConfigSvc() {
-		return new PartitionConfigSvcImpl();
+	public IPartitionLookupSvc partitionConfigSvc() {
+		return new PartitionLookupSvcImpl();
 	}
 
 	@Bean

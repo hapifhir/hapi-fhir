@@ -52,7 +52,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
-	private IPartitionConfigSvc myPartitionConfigSvc;
+	private IPartitionLookupSvc myPartitionConfigSvc;
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired

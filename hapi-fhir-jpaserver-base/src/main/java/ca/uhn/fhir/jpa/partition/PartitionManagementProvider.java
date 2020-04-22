@@ -47,7 +47,7 @@ public class PartitionManagementProvider {
 	@Autowired
 	private FhirContext myCtx;
 	@Autowired
-	private IPartitionConfigSvc myPartitionConfigSvc;
+	private IPartitionLookupSvc myPartitionConfigSvc;
 
 	/**
 	 * Add Partition:

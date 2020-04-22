@@ -33,5 +33,5 @@ public interface IResourceIndexedCompositeStringUniqueDao extends JpaRepository<
 	ResourceIndexedCompositeStringUnique findByQueryString(@Param("str") String theQueryString);
 
 	@Query("SELECT r FROM ResourceIndexedCompositeStringUnique r WHERE r.myResourceId = :resId")
-	List<ResourceIndexedCompositeStringUnique> findAllForResourceId(@Param("resId") Long theResourceId);
+	List<ResourceIndexedCompositeStringUnique> findAllForResourceIdForUnitTest(@Param("resId") Long theResourceId);
 }

@@ -304,20 +304,7 @@ public class IdHelperService {
 				.map(t -> t.getIdPartAsLong())
 				.collect(Collectors.toList());
 			if (!pids.isEmpty()) {
-				Collection<Object[]> lookup;
-				if (theRequestPartitionId != null) {
-					if (theRequestPartitionId.getPartitionId() != null) {
-						lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartition(pids, theRequestPartitionId.getPartitionId());
-					} else {
-						lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(pids);
-					}
-				} else {
-					lookup = myResourceTableDao.findLookupFieldsByResourcePid(pids);
-				}
-				lookup
-					.stream()
-					.map(t -> new ResourceLookup((String) t[0], (Long) t[1], (Date) t[2]))
-					.forEach(retVal::add);
+				resolvePids(theRequestPartitionId, pids, retVal);
 			}
 		}
 
@@ -370,6 +357,23 @@ public class IdHelperService {
 		}
 
 		return retVal;
+	}
+
+	private void resolvePids(RequestPartitionId theRequestPartitionId, List<Long> thePidsToResolve, List<IResourceLookup> theTarget) {
+		Collection<Object[]> lookup;
+		if (theRequestPartitionId != null) {
+			if (theRequestPartitionId.getPartitionId() != null) {
+				lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartition(thePidsToResolve, theRequestPartitionId.getPartitionId());
+			} else {
+				lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(thePidsToResolve);
+			}
+		} else {
+			lookup = myResourceTableDao.findLookupFieldsByResourcePid(thePidsToResolve);
+		}
+		lookup
+			.stream()
+			.map(t -> new ResourceLookup((String) t[0], (Long) t[1], (Date) t[2]))
+			.forEach(theTarget::add);
 	}
 
 	public void clearCache() {
