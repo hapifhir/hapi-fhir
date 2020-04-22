@@ -43,7 +43,7 @@ When a resource is **updated**, the partition ID and date from the previous vers
 
 When a **read operation** is being performed (e.g. a read, search, history, etc.), a separate [interceptor hook](#partition-interceptors) is invoked in order to determine whether the operation should target a specific partition. The outcome of this hook determines how the partitioning manifests itself to the end user: 
 
-* If all read operations are scoped by the interceptor to only apply to a single partition, then the partitioning behaves as a **multitenant** solution.
+* The system can be configured to operate as a **multitenant** solution by configuring the partition interceptor to scope all read operations to read data only from the partition that request has access to.```
 * If read operations are scopes to all partitions, then the partitioning is simply partitioning the data into logical segments.
 
 # Enabling Partitioning in HAPI FHIR
