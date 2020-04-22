@@ -48,7 +48,7 @@ When a **read operation** is being performed (e.g. a read, search, history, etc.
 
 # Enabling Partitioning in HAPI FHIR
 
-Enabling partitioning on the server involves a set of steps.
+Follow these steps to enable partitioning on the server:
 
 The [PartitionConfig](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionConfig.html) bean contains configuration settings related to partitioning within the server. To enable partitioning, the [setPartitioningEnabled(boolean)](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionConfig.html#setPartitioningEnabled(boolean)) property should be enabled.
 
