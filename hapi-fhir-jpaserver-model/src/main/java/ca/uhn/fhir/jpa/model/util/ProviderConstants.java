@@ -27,17 +27,17 @@ public class ProviderConstants {
 	/**
 	 * Operation name: add partition
 	 */
-	public static final String PARTITION_MANAGEMENT_ADD_PARTITION = "partition-management-add-partition";
+	public static final String PARTITION_MANAGEMENT_ADD_PARTITION = "$partition-management-add-partition";
 
 	/**
 	 * Operation name: update partition
 	 */
-	public static final String PARTITION_MANAGEMENT_UPDATE_PARTITION = "partition-management-update-partition";
+	public static final String PARTITION_MANAGEMENT_UPDATE_PARTITION = "$partition-management-update-partition";
 
 	/**
 	 * Operation name: update partition
 	 */
-	public static final String PARTITION_MANAGEMENT_DELETE_PARTITION = "partition-management-delete-partition";
+	public static final String PARTITION_MANAGEMENT_DELETE_PARTITION = "$partition-management-delete-partition";
 
 	public static final String PARTITION_MANAGEMENT_PARTITION_ID = "id";
 	public static final String PARTITION_MANAGEMENT_PARTITION_NAME = "name";
