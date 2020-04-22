@@ -28,6 +28,14 @@ public class EmpiResourceFieldComparatorTest extends BaseTest {
 	}
 
 	@Test
+	public void testSimplePatient() {
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		assertFalse(myComparator.match(patient, myJohny));
+	}
+
+	@Test
 	public void testBadType() {
 		Encounter encounter = new Encounter();
 		encounter.setId("Encounter/1");
