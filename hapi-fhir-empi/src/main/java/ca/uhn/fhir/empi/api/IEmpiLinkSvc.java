@@ -23,6 +23,8 @@ package ca.uhn.fhir.empi.api;
 import ca.uhn.fhir.empi.model.EmpiMessages;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nullable;
+
 public interface IEmpiLinkSvc {
 
 	/**
@@ -34,5 +36,5 @@ public interface IEmpiLinkSvc {
 	 * @param theLinkSource the initiator of the change in link status.
 	 * @param theEmpiMessages
 	 */
-	void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiMessages theEmpiMessages);
+	void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiMessages theEmpiMessages);
 }

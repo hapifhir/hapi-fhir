@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class EmpiLinkDaoSvc {
 	@Autowired
 	private ResourceTableHelper myResourceTableHelper;
 
-	public void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiMessages theEmpiMessages) {
+	public void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiMessages theEmpiMessages) {
 		Long personPid = myResourceTableHelper.getPidOrNull(thePerson);
 		Long resourcePid = myResourceTableHelper.getPidOrNull(theResource);
 
@@ -54,7 +55,7 @@ public class EmpiLinkDaoSvc {
 		empiLink.setLinkSource(theLinkSource);
 		empiLink.setMatchResult(theMatchResult);
 		String message = String.format("Creating EmpiLink from %s to %s -> %s", thePerson.getIdElement().toUnqualifiedVersionless(), theResource.getIdElement().toUnqualifiedVersionless(), theMatchResult);
-		theEmpiMessages.addMessage(message);
+		EmpiMessages.addMessage(theEmpiMessages, message);
 		ourLog.debug(message);
 		myEmpiLinkDao.save(empiLink);
 	}

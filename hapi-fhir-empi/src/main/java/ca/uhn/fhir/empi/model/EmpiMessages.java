@@ -16,4 +16,11 @@ public class EmpiMessages {
 		return myMessages;
 	}
 
+	public static void addMessage(EmpiMessages theEmpiMessages, String theMessage) {
+		if (theEmpiMessages == null) {
+			return;
+		}
+		theEmpiMessages.addMessage(theMessage);
+	}
+
 }
