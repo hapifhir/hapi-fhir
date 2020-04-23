@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.empi.broker;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.model.EmpiMessages;
+import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -68,28 +68,27 @@ public class EmpiMessageHandler implements MessageHandler {
 	public void matchEmpiAndUpdateLinks(ResourceModifiedMessage theMsg) {
 		String resourceType = theMsg.getId(myFhirContext).getResourceType();
 		validateResourceType(resourceType);
-		EmpiMessages messages = null;
+		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromRequestId(theMsg.getParentRequestId());//FIXME EMPI gotta add this to ResourceModifiedMessage.
 		try {
 			switch (theMsg.getOperationType()) {
 				case CREATE:
-					messages = handleCreatePatientOrPractitioner(theMsg);
+					transactionLogMessages = handleCreatePatientOrPractitioner(theMsg, transactionLogMessages);
 					break;
 				case UPDATE:
 					//FIXME EMPI implement updates.
-					//messages = handleUpdatePatientOrPractitioner(theMsg);
+					//messages = handleUpdatePatientOrPractitioner(theMsg, transactionLogMessages);
 					break;
 				case DELETE:
 				default:
 					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 			}
 		}catch (Exception e) {
-			messages = new EmpiMessages();
-			messages.addMessage("Failure during EMPI processing: " + e.getMessage());
+			TransactionLogMessages.addMessage(transactionLogMessages, "Failure during EMPI processing: " + e.getMessage());
 		} finally {
 			// Interceptor call: EMPI_AFTER_PERSISTED_RESOURCE_CHECKED
 			HookParams params = new HookParams()
 				.add(ResourceModifiedMessage.class, theMsg)
-				.add(EmpiMessages.class, messages);
+				.add(TransactionLogMessages.class, transactionLogMessages);
 			myInterceptorBroadcaster.callHooks(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, params);
 		}
 	}
@@ -100,7 +99,7 @@ public class EmpiMessageHandler implements MessageHandler {
 		}
 	}
 
-	private EmpiMessages handleCreatePatientOrPractitioner(ResourceModifiedMessage theMsg) {
-		return myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theMsg.getNewPayload(myFhirContext));
+	private TransactionLogMessages handleCreatePatientOrPractitioner(ResourceModifiedMessage theMsg, TransactionLogMessages theTransactionLogMessages) {
+		return myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theMsg.getNewPayload(myFhirContext), theTransactionLogMessages);
 	}
 }

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.helper;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.model.EmpiMessages;
+import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -20,26 +20,26 @@ public class EmpiHelperR4 extends BaseEmpiHelper {
 	@Autowired
 	protected FhirContext myFhirContext;
 
-	public ExcellentWrapper createWithLatch(IBaseResource theResource) throws InterruptedException {
+	public OutcomeAndLogMessageWrapper createWithLatch(IBaseResource theResource) throws InterruptedException {
 		return createWithLatch(theResource, true);
 	}
 
-	public ExcellentWrapper createWithLatch(IBaseResource theBaseResource, boolean isExternalHttpRequest) throws InterruptedException {
+	public OutcomeAndLogMessageWrapper createWithLatch(IBaseResource theBaseResource, boolean isExternalHttpRequest) throws InterruptedException {
 		myAfterEmpiLatch.setExpectedCount(1);
 		DaoMethodOutcome daoMethodOutcome = doCreateResource(theBaseResource, isExternalHttpRequest);
 		myAfterEmpiLatch.awaitExpected();
-		return new ExcellentWrapper(daoMethodOutcome, myAfterEmpiLatch.getLatchInvocationParameterOfType(EmpiMessages.class));
+		return new OutcomeAndLogMessageWrapper(daoMethodOutcome, myAfterEmpiLatch.getLatchInvocationParameterOfType(TransactionLogMessages.class));
 	}
 
-	public ExcellentWrapper updateWithLatch(IBaseResource theIBaseResource) throws InterruptedException {
+	public OutcomeAndLogMessageWrapper updateWithLatch(IBaseResource theIBaseResource) throws InterruptedException {
 		return updateWithLatch(theIBaseResource, true);
 	}
 
-	public ExcellentWrapper updateWithLatch(IBaseResource theIBaseResource, boolean isExternalHttpRequest) throws InterruptedException {
+	public OutcomeAndLogMessageWrapper updateWithLatch(IBaseResource theIBaseResource, boolean isExternalHttpRequest) throws InterruptedException {
 		myAfterEmpiLatch.setExpectedCount(1);
 		DaoMethodOutcome daoMethodOutcome = doUpdateResource(theIBaseResource, isExternalHttpRequest);
 		myAfterEmpiLatch.awaitExpected();
-		return new ExcellentWrapper(daoMethodOutcome, myAfterEmpiLatch.getLatchInvocationParameterOfType(EmpiMessages.class));
+		return new OutcomeAndLogMessageWrapper(daoMethodOutcome, myAfterEmpiLatch.getLatchInvocationParameterOfType(TransactionLogMessages.class));
 	}
 
 	public DaoMethodOutcome doCreateResource(IBaseResource theResource, boolean isExternalHttpRequest) {
@@ -78,24 +78,24 @@ public class EmpiHelperR4 extends BaseEmpiHelper {
 
 	/**
 	 * Excellent wrapper is a simple wrapper class which is _excellent_. It allows us to skip the fact that java doesn't allow
-	 * multiple returns, and wraps both the Method Outcome of the DAO, _and_ the EmpiMessages that were passed to the pointcut
+	 * multiple returns, and wraps both the Method Outcome of the DAO, _and_ the TransactionLogMessages that were passed to the pointcut
 	 * by the EMPI module.
 	 */
-	public class ExcellentWrapper {
+	public class OutcomeAndLogMessageWrapper {
 		DaoMethodOutcome myDaoMethodOutcome;
-		EmpiMessages myEmpiMessages;
+		TransactionLogMessages myLogMessages;
 
-		private ExcellentWrapper(DaoMethodOutcome theDaoMethodOutcome,  EmpiMessages theEmpiMessages) {
+		private OutcomeAndLogMessageWrapper(DaoMethodOutcome theDaoMethodOutcome, TransactionLogMessages theTransactionLogMessages) {
 			myDaoMethodOutcome = theDaoMethodOutcome;
-			myEmpiMessages = theEmpiMessages;
+			myLogMessages = theTransactionLogMessages;
 		}
 
 		public DaoMethodOutcome getDaoMethodOutcome() {
 			return myDaoMethodOutcome;
 		}
 
-		public EmpiMessages getEmpiMessages() {
-			return myEmpiMessages;
+		public TransactionLogMessages getLogMessages() {
+			return myLogMessages;
 		}
 	}
 

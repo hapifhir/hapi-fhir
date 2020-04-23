@@ -25,7 +25,7 @@ import ca.uhn.fhir.empi.api.Constants;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
-import ca.uhn.fhir.empi.model.EmpiMessages;
+import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -96,12 +96,12 @@ public final class PersonHelper {
 	 *  @param thePerson The person who's link needs to be updated.
 	 * @param theResourceId The target of the link
 	 * @param canonicalAssuranceLevel The level of certainty of this link.
-	 * @param theEmpiMessages
+	 * @param theTransactionLogMessages
 	 */
-	public void addOrUpdateLink(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, EmpiMessages theEmpiMessages) {
+	public void addOrUpdateLink(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				handleLinkUpdateR4(thePerson, theResourceId, canonicalAssuranceLevel, theEmpiMessages);
+				handleLinkUpdateR4(thePerson, theResourceId, canonicalAssuranceLevel, theTransactionLogMessages);
 				break;
 			default:
 				// FIXME EMPI moar versions
@@ -109,7 +109,7 @@ public final class PersonHelper {
 		}
 	}
 
-	private void handleLinkUpdateR4(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, EmpiMessages theEmpiMessages) {
+	private void handleLinkUpdateR4(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages) {
 		if (canonicalAssuranceLevel == null) {
 			return;
 		}
@@ -117,13 +117,13 @@ public final class PersonHelper {
 		Person person = (Person) thePerson;
 		if (!containsLinkTo(thePerson, theResourceId)) {
 			person.addLink().setTarget(new Reference(theResourceId)).setAssurance(canonicalAssuranceLevel.toR4());
-			theEmpiMessages.addMessage("Creating new link from " + (StringUtils.isBlank(thePerson.getIdElement().getValue()) ? "new Person" : thePerson.getIdElement().toUnqualifiedVersionless()) + " -> " + theResourceId.toUnqualifiedVersionless() + " with IdentityAssuranceLevel: " + canonicalAssuranceLevel.name());
+			TransactionLogMessages.addMessage(theTransactionLogMessages, ("Creating new link from " + (StringUtils.isBlank(thePerson.getIdElement().getValue()) ? "new Person" : thePerson.getIdElement().toUnqualifiedVersionless()) + " -> " + theResourceId.toUnqualifiedVersionless() + " with IdentityAssuranceLevel: " + canonicalAssuranceLevel.name()));
 		} else {
 			person.getLink().stream()
 				.filter(link -> link.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()))
 				.findFirst()
 				.ifPresent(link -> {
-					theEmpiMessages.addMessage("Updating link from " + thePerson.getIdElement().toUnqualifiedVersionless() + " -> " + theResourceId.toUnqualifiedVersionless() + ". Changing IdentityAssuranceLevel: " + link.getAssurance().toCode() + " -> " + canonicalAssuranceLevel.name());
+					TransactionLogMessages.addMessage(theTransactionLogMessages, ("Updating link from " + thePerson.getIdElement().toUnqualifiedVersionless() + " -> " + theResourceId.toUnqualifiedVersionless() + ". Changing IdentityAssuranceLevel: " + link.getAssurance().toCode() + " -> " + canonicalAssuranceLevel.name()));
 					link.setAssurance(canonicalAssuranceLevel.toR4());
 			});
 		}
@@ -133,13 +133,13 @@ public final class PersonHelper {
 	 * Removes a link from the given {@link IBaseResource} to the target {@link IIdType}.
 	 *  @param thePerson The person to remove the link from.
 	 * @param theResourceId The target ID to remove.
-	 * @param theEmpiMessages
+	 * @param theTransactionLogMessages
 	 */
-	public void removeLink(IBaseResource thePerson, IIdType theResourceId, EmpiMessages theEmpiMessages) {
+	public void removeLink(IBaseResource thePerson, IIdType theResourceId, TransactionLogMessages theTransactionLogMessages) {
 		if (!containsLinkTo(thePerson, theResourceId)) {
 			return;
 		}
-		theEmpiMessages.addMessage("Removing PersonLinkComponent from " + thePerson.getIdElement().toUnqualifiedVersionless() + " -> " + theResourceId.toUnqualifiedVersionless());
+		TransactionLogMessages.addMessage(theTransactionLogMessages, "Removing PersonLinkComponent from " + thePerson.getIdElement().toUnqualifiedVersionless() + " -> " + theResourceId.toUnqualifiedVersionless());
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person person = (Person) thePerson;

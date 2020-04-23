@@ -216,7 +216,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	protected Patient createPatientAndUpdateLinks(Patient thePatient) {
 		thePatient = createPatient(thePatient);
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient);
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, null);
 		return thePatient;
 	}
 
@@ -224,7 +224,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		thePractitioner.setActive(true);
 		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(thePractitioner);
 		thePractitioner.setId(daoMethodOutcome.getId());
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePractitioner);
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePractitioner, null);
 		return thePractitioner;
 	}
 

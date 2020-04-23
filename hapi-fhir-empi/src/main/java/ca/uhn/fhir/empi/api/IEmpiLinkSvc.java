@@ -20,7 +20,7 @@ package ca.uhn.fhir.empi.api;
  * #L%
  */
 
-import ca.uhn.fhir.empi.model.EmpiMessages;
+import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nullable;
@@ -34,7 +34,7 @@ public interface IEmpiLinkSvc {
 	 * @param theResource the target resource, which is one of Patient/Practitioner
 	 * @param theMatchResult the current status of the match to set the link to.
 	 * @param theLinkSource the initiator of the change in link status.
-	 * @param theEmpiMessages
+	 * @param theTransactionLogMessages
 	 */
-	void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiMessages theEmpiMessages);
+	void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable TransactionLogMessages theTransactionLogMessages);
 }

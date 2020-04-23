@@ -24,7 +24,7 @@ import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.model.CanonicalEID;
-import ca.uhn.fhir.empi.model.EmpiMessages;
+import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.util.EmpiUtil;
@@ -62,39 +62,39 @@ public class EmpiMatchLinkSvc {
 	 * Does nothing if resource is determined to be not managed by EMPI.
 	 *
 	 * @param theResource the incoming EMPI target, which is either a Patient or Practitioner.
-	 * @return an {@link EmpiMessages} which contains all informational messages related to EMPI processing of this resource.
+	 * @param theTransactionLogMessages
+	 * @return an {@link TransactionLogMessages} which contains all informational messages related to EMPI processing of this resource.
 	 */
-	public EmpiMessages updateEmpiLinksForEmpiTarget(IBaseResource theResource) {
+	public TransactionLogMessages updateEmpiLinksForEmpiTarget(IBaseResource theResource, @Nullable TransactionLogMessages theTransactionLogMessages) {
 		if (EmpiUtil.isManagedByEmpi(theResource)) {
-			return doEmpiUpdate(theResource);
+			return doEmpiUpdate(theResource, theTransactionLogMessages);
 		} else {
 			return null;
 		}
 	}
 
-	private EmpiMessages doEmpiUpdate(IBaseResource theResource) {
+	private TransactionLogMessages doEmpiUpdate(IBaseResource theResource, TransactionLogMessages theTransactionLogMessages) {
 		List<MatchedPersonCandidate> personCandidates = myEmpiPersonFindingSvc.findPersonCandidates(theResource);
-		EmpiMessages messages = new EmpiMessages();
 		if (personCandidates.isEmpty()) {
-			handleEmpiWithNoCandidates(theResource, messages);
+			handleEmpiWithNoCandidates(theResource, theTransactionLogMessages);
 		} else if (personCandidates.size() == 1) {
-			handleEmpiWithSingleCandidate(theResource, personCandidates, messages);
+			handleEmpiWithSingleCandidate(theResource, personCandidates, theTransactionLogMessages);
 		} else {
-			handleEmpiWithMultipleCandidates(theResource, personCandidates, messages);
+			handleEmpiWithMultipleCandidates(theResource, personCandidates, theTransactionLogMessages);
 		}
-		return messages;
+		return theTransactionLogMessages;
 	}
 
-	private void handleEmpiWithMultipleCandidates(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates, EmpiMessages theMessages) {
+	private void handleEmpiWithMultipleCandidates(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates, TransactionLogMessages theMessages) {
 		Long samplePersonPid = thePersonCandidates.get(0).getCandidatePersonPid().getIdAsLong();
 		boolean allSamePerson = thePersonCandidates.stream()
 			.allMatch(candidate -> candidate.getCandidatePersonPid().getIdAsLong().equals(samplePersonPid));
 
 		if (allSamePerson) {
-			EmpiMessages.addMessage(theMessages, "EMPI received multiple match candidates, but they are all linked to the same person.");
+			TransactionLogMessages.addMessage(theMessages, "EMPI received multiple match candidates, but they are all linked to the same person.");
 			handleEmpiWithSingleCandidate(theResource, thePersonCandidates, theMessages);
 		} else {
-			EmpiMessages.addMessage(theMessages, "EMPI received multiple match candidates, that were linked to different Persons. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
+			TransactionLogMessages.addMessage(theMessages, "EMPI received multiple match candidates, that were linked to different Persons. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
 			//Set them all as POSSIBLE_MATCH
 			List<IBaseResource> persons = thePersonCandidates.stream().map(mpc -> getPersonFromMatchedPersonCandidate(mpc)).collect(Collectors.toList());
 				persons.forEach(person -> {
@@ -110,18 +110,18 @@ public class EmpiMatchLinkSvc {
 		}
 	}
 
-	private void handleEmpiWithNoCandidates(IBaseResource theResource, @Nullable EmpiMessages theMessages) {
-		EmpiMessages.addMessage(theMessages, "There were no matched candidates for EMPI, creating a new Person.");
+	private void handleEmpiWithNoCandidates(IBaseResource theResource, @Nullable TransactionLogMessages theMessages) {
+		TransactionLogMessages.addMessage(theMessages, "There were no matched candidates for EMPI, creating a new Person.");
 		IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
 		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theMessages);
 	}
 
-	private void handleEmpiWithSingleCandidate(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates, @Nullable EmpiMessages theMessages) {
-		EmpiMessages.addMessage(theMessages, "EMPI has narrowed down to one candidate for matching.");
+	private void handleEmpiWithSingleCandidate(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates, @Nullable TransactionLogMessages theMessages) {
+		TransactionLogMessages.addMessage(theMessages, "EMPI has narrowed down to one candidate for matching.");
 		MatchedPersonCandidate matchedPersonCandidate = thePersonCandidates.get(0);
 		IBaseResource person = getPersonFromMatchedPersonCandidate(matchedPersonCandidate);
 		if (myPersonHelper.isPotentialDuplicate(person, theResource)) {
-			EmpiMessages.addMessage(theMessages, "Duplicate detected based on the fact that both resources have different external EIDs.");
+			TransactionLogMessages.addMessage(theMessages, "Duplicate detected based on the fact that both resources have different external EIDs.");
 			IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
 			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theMessages);
 			myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theMessages);
