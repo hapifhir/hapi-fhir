@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -35,8 +34,6 @@ import org.springframework.stereotype.Service;
 public abstract class ExpungeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeService.class);
 
-	@Autowired
-	private DaoConfig myConfig;
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 	@Autowired
