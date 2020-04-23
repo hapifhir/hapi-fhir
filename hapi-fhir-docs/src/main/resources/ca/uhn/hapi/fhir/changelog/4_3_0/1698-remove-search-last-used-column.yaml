@@ -1,7 +1,7 @@
 ---
 type: change
 issue: 1698
-title: "Removed the SEARCH_LAST_RETURNED column of the HFJ_SEARCH table.  Hapi updated the HFJ_SEARCH table with every
+title: "Removed the SEARCH_LAST_RETURNED column of the HFJ_SEARCH table.  HAPI FHIR updated the HFJ_SEARCH table with every
 request, but this led to unecessary database load.  The purpose of this column was to ensure that search results were
 kept around long enough for systems that needed them for paging (default one hour).  When expiring search results,
 we used to add one hour to SEARCH_LAST_RETURNED to determine the expiry time.  However, the length of time where a search
