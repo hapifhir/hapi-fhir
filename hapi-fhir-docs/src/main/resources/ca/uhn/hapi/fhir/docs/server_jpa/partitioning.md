@@ -132,7 +132,7 @@ Before a partition can be used, it must be registered using these methods.
 
 ## Creating a Partition
 
-The `$partition-management-add-partition` operation can be used to create a new partition. This operation takes the following parameters:
+The `$partition-management-create-partition` operation can be used to create a new partition. This operation takes the following parameters:
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -176,7 +176,7 @@ The `$partition-management-add-partition` operation can be used to create a new 
 An HTTP POST to the following URL would be used to invoke this operation:
 
 ```url
-http://example.com/$partition-management-add-partition 
+http://example.com/$partition-management-create-partition 
 ```
 
 The following request body could be used:
@@ -243,7 +243,7 @@ The `$partition-management-update-partition` operation can be used to update an 
 An HTTP POST to the following URL would be used to invoke this operation:
 
 ```url
-http://example.com/$partition-management-add-partition 
+http://example.com/$partition-management-create-partition 
 ```
 
 The following request body could be used:

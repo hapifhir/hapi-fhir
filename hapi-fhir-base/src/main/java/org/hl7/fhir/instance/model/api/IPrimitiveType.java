@@ -33,5 +33,9 @@ public interface IPrimitiveType<T> extends IBaseDatatype {
 	boolean hasValue();
 	
 	IPrimitiveType<T> setValue(T theValue) throws IllegalArgumentException;
-	
+
+	static <T> T toValueOrNull(IPrimitiveType<T> thePrimitiveType) {
+		return thePrimitiveType != null ? thePrimitiveType.getValue() : null;
+	}
+
 }

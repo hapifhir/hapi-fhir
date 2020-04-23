@@ -134,7 +134,7 @@ public class MultitenantServerR4Test extends BaseResourceProviderR4Test {
 		ourClient
 			.operation()
 			.onServer()
-			.named(ProviderConstants.PARTITION_MANAGEMENT_ADD_PARTITION)
+			.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
 			.withParameter(Parameters.class, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(1))
 			.andParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType("TENANT-A"))
 			.execute();
@@ -142,7 +142,7 @@ public class MultitenantServerR4Test extends BaseResourceProviderR4Test {
 		ourClient
 			.operation()
 			.onServer()
-			.named(ProviderConstants.PARTITION_MANAGEMENT_ADD_PARTITION)
+			.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
 			.withParameter(Parameters.class, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(2))
 			.andParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType("TENANT-B"))
 			.execute();
