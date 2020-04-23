@@ -202,14 +202,14 @@ public class IdHelperService {
 				if (nextIds.size() > 0) {
 
 					Collection<Object[]> views;
-					if (theRequestPartitionId != null) {
+					if (theRequestPartitionId.isAllPartitions()) {
+						views = myForcedIdDao.findByTypeAndForcedId(nextResourceType, nextIds);
+					} else {
 						if (theRequestPartitionId.getPartitionId() != null) {
 							views = myForcedIdDao.findByTypeAndForcedIdInPartition(nextResourceType, nextIds, theRequestPartitionId.getPartitionId());
 						} else {
 							views = myForcedIdDao.findByTypeAndForcedIdInPartitionNull(nextResourceType, nextIds);
 						}
-					} else {
-						views = myForcedIdDao.findByTypeAndForcedId(nextResourceType, nextIds);
 					}
 					for (Object[] nextView : views) {
 						String forcedId = (String) nextView[0];
@@ -260,15 +260,9 @@ public class IdHelperService {
 		return typeToIds;
 	}
 
-	private Long resolveResourceIdentity(@Nullable RequestPartitionId theRequestPartitionId, @Nonnull String theResourceType, @Nonnull String theId) {
+	private Long resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, @Nonnull String theResourceType, @Nonnull String theId) {
 		Optional<Long> pid;
-		if (theRequestPartitionId != null) {
-			if (theRequestPartitionId.getPartitionId() == null) {
-				pid = myForcedIdDao.findByPartitionIdNullAndTypeAndForcedId(theResourceType, theId);
-			} else {
-				pid = myForcedIdDao.findByPartitionIdAndTypeAndForcedId(theRequestPartitionId.getPartitionId(), theResourceType, theId);
-			}
-		} else {
+		if (theRequestPartitionId.isAllPartitions()) {
 			try {
 				pid = myForcedIdDao.findByTypeAndForcedId(theResourceType, theId);
 			} catch (IncorrectResultSizeDataAccessException e) {
@@ -279,6 +273,12 @@ public class IdHelperService {
 				 */
 				String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
 				throw new PreconditionFailedException(msg);
+			}
+		} else {
+			if (theRequestPartitionId.getPartitionId() == null) {
+				pid = myForcedIdDao.findByPartitionIdNullAndTypeAndForcedId(theResourceType, theId);
+			} else {
+				pid = myForcedIdDao.findByPartitionIdAndTypeAndForcedId(theRequestPartitionId.getPartitionId(), theResourceType, theId);
 			}
 		}
 
@@ -329,14 +329,14 @@ public class IdHelperService {
 				Collection<Object[]> views;
 				assert isNotBlank(nextResourceType);
 
-				if (theRequestPartitionId != null) {
+				if (theRequestPartitionId.isAllPartitions()) {
+					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds);
+				} else {
 					if (theRequestPartitionId.getPartitionId() != null) {
 						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, theRequestPartitionId.getPartitionId());
 					} else {
 						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(nextResourceType, nextIds);
 					}
-				} else {
-					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds);
 				}
 
 				for (Object[] next : views) {
@@ -361,14 +361,14 @@ public class IdHelperService {
 
 	private void resolvePids(RequestPartitionId theRequestPartitionId, List<Long> thePidsToResolve, List<IResourceLookup> theTarget) {
 		Collection<Object[]> lookup;
-		if (theRequestPartitionId != null) {
+		if (theRequestPartitionId.isAllPartitions()) {
+			lookup = myResourceTableDao.findLookupFieldsByResourcePid(thePidsToResolve);
+		} else {
 			if (theRequestPartitionId.getPartitionId() != null) {
 				lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartition(thePidsToResolve, theRequestPartitionId.getPartitionId());
 			} else {
 				lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(thePidsToResolve);
 			}
-		} else {
-			lookup = myResourceTableDao.findLookupFieldsByResourcePid(thePidsToResolve);
 		}
 		lookup
 			.stream()

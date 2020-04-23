@@ -35,36 +35,37 @@ import java.util.Date;
 
 public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryTable, Long> {
 
-	@Query("SELECT COUNT(*) FROM ResourceHistoryTable t WHERE t.myUpdated >= :cutoff")
-	int countForAllResourceTypes(
-		@Temporal(value = TemporalType.TIMESTAMP) @Param("cutoff") Date theCutoff
-	);
-
-	@Query("SELECT COUNT(*) FROM ResourceHistoryTable t")
-	int countForAllResourceTypes(
-	);
-
-	@Query("SELECT COUNT(*) FROM ResourceHistoryTable t WHERE t.myResourceId = :id AND t.myUpdated >= :cutoff")
-	int countForResourceInstance(
-		@Param("id") Long theId,
-		@Temporal(value = TemporalType.TIMESTAMP) @Param("cutoff") Date theCutoff
-	);
-
-	@Query("SELECT COUNT(*) FROM ResourceHistoryTable t WHERE t.myResourceId = :id")
-	int countForResourceInstance(
-		@Param("id") Long theId
-	);
-
-	@Query("SELECT COUNT(*) FROM ResourceHistoryTable t WHERE t.myResourceType = :type AND t.myUpdated >= :cutoff")
-	int countForResourceType(
-		@Param("type") String theType,
-		@Temporal(value = TemporalType.TIMESTAMP) @Param("cutoff") Date theCutoff
-	);
-
-	@Query("SELECT COUNT(*) FROM ResourceHistoryTable t WHERE t.myResourceType = :type")
-	int countForResourceType(
-		@Param("type") String theType
-	);
+	// FIXME: remove commented
+//	@Query("SELECT COUNT(*) FROM ResourceHistoryTable t WHERE t.myUpdated >= :cutoff")
+//	int countForAllResourceTypes(
+//		@Temporal(value = TemporalType.TIMESTAMP) @Param("cutoff") Date theCutoff
+//	);
+//
+//	@Query("SELECT COUNT(*) FROM ResourceHistoryTable t")
+//	int countForAllResourceTypes(
+//	);
+//
+//	@Query("SELECT COUNT(*) FROM ResourceHistoryTable t WHERE t.myResourceId = :id AND t.myUpdated >= :cutoff")
+//	int countForResourceInstance(
+//		@Param("id") Long theId,
+//		@Temporal(value = TemporalType.TIMESTAMP) @Param("cutoff") Date theCutoff
+//	);
+//
+//	@Query("SELECT COUNT(*) FROM ResourceHistoryTable t WHERE t.myResourceId = :id")
+//	int countForResourceInstance(
+//		@Param("id") Long theId
+//	);
+//
+//	@Query("SELECT COUNT(*) FROM ResourceHistoryTable t WHERE t.myResourceType = :type AND t.myUpdated >= :cutoff")
+//	int countForResourceType(
+//		@Param("type") String theType,
+//		@Temporal(value = TemporalType.TIMESTAMP) @Param("cutoff") Date theCutoff
+//	);
+//
+//	@Query("SELECT COUNT(*) FROM ResourceHistoryTable t WHERE t.myResourceType = :type")
+//	int countForResourceType(
+//		@Param("type") String theType
+//	);
 
 	@Query("SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceId = :id AND t.myResourceVersion = :version")
 	ResourceHistoryTable findForIdAndVersionAndFetchProvenance(@Param("id") long theId, @Param("version") long theVersion);

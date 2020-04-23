@@ -11,6 +11,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.RequestPartitionHelperService;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -97,6 +99,7 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
@@ -164,7 +167,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
-
+	@Autowired
+	private HistoryBuilderFactory myHistoryBuilderFactory;
 	@Autowired
 	protected DeleteConflictService myDeleteConflictService;
 	@Autowired
@@ -384,42 +388,24 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 	}
 
+@Autowired
+private RequestPartitionHelperService myRequestPartitionHelperService;
 
-	protected IBundleProvider history(RequestDetails theRequest, String theResourceName, Long theId, Date theSince, Date theUntil) {
+	protected IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive) {
 
-		String resourceName = defaultIfBlank(theResourceName, null);
+		String resourceName = defaultIfBlank(theResourceType, null);
 
 		Search search = new Search();
 		search.setDeleted(false);
 		search.setCreated(new Date());
-		search.setLastUpdated(theSince, theUntil);
+		search.setLastUpdated(theRangeStartInclusive, theRangeEndInclusive);
 		search.setUuid(UUID.randomUUID().toString());
 		search.setResourceType(resourceName);
-		search.setResourceId(theId);
+		search.setResourceId(theResourcePid);
 		search.setSearchType(SearchTypeEnum.HISTORY);
 		search.setStatus(SearchStatusEnum.FINISHED);
 
-		if (theSince != null) {
-			if (resourceName == null) {
-				search.setTotalCount(myResourceHistoryTableDao.countForAllResourceTypes(theSince));
-			} else if (theId == null) {
-				search.setTotalCount(myResourceHistoryTableDao.countForResourceType(resourceName, theSince));
-			} else {
-				search.setTotalCount(myResourceHistoryTableDao.countForResourceInstance(theId, theSince));
-			}
-		} else {
-			if (resourceName == null) {
-				search.setTotalCount(myResourceHistoryTableDao.countForAllResourceTypes());
-			} else if (theId == null) {
-				search.setTotalCount(myResourceHistoryTableDao.countForResourceType(resourceName));
-			} else {
-				search.setTotalCount(myResourceHistoryTableDao.countForResourceInstance(theId));
-			}
-		}
-
-		search = mySearchCacheSvc.save(search);
-
-		return myPersistedJpaBundleProviderFactory.newInstance(theRequest, search.getUuid());
+		return myPersistedJpaBundleProviderFactory.newInstance(theRequest, search);
 	}
 
 	@Autowired

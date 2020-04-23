@@ -20,21 +20,20 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.config.BaseConfig;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
 
-public class SearchBuilderFactory {
+import javax.annotation.Nullable;
+import java.util.Date;
+
+public class HistoryBuilderFactory {
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
-	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
-		return (ISearchBuilder) myApplicationContext.getBean(BaseConfig.SEARCH_BUILDER, theDao, theResourceName, theResourceType);
+	public HistoryBuilder newHistoryBuilder(@Nullable String theResourceType, @Nullable Long theResourceId, @Nullable Date theRangeStartInclusive, @Nullable Date theRangeEndInclusive) {
+		return (HistoryBuilder) myApplicationContext.getBean(BaseConfig.HISTORY_BUILDER, theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
 	}
 
 }

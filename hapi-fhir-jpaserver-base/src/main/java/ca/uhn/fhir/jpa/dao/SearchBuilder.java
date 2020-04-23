@@ -122,8 +122,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * The SearchBuilder is responsible for actually forming the SQL query that handles
  * searches for resources
  */
-@Component
-@Scope("prototype")
 public class SearchBuilder implements ISearchBuilder {
 
 	/**
@@ -175,7 +173,7 @@ public class SearchBuilder implements ISearchBuilder {
 	/**
 	 * Constructor
 	 */
-	SearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+	public SearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		myCallingDao = theDao;
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
@@ -359,7 +357,7 @@ public class SearchBuilder implements ISearchBuilder {
 				myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myResourceType"), myResourceName));
 			}
 			myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myDeleted")));
-			if (myRequestPartitionId != null) {
+			if (!myRequestPartitionId.isAllPartitions()) {
 				if (myRequestPartitionId.getPartitionId() != null) {
 					myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myPartitionIdValue").as(Integer.class), myRequestPartitionId.getPartitionId()));
 				} else {
@@ -895,7 +893,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private void addPredicateCompositeStringUnique(@Nonnull SearchParameterMap theParams, String theIndexedString, RequestPartitionId theRequestPartitionId) {
 		Join<ResourceTable, ResourceIndexedCompositeStringUnique> join = myQueryRoot.join("myParamsCompositeStringUnique", JoinType.LEFT);
 
-		if (theRequestPartitionId != null) {
+		if (!theRequestPartitionId.isAllPartitions()) {
 			Integer partitionId = theRequestPartitionId.getPartitionId();
 			Predicate predicate = myCriteriaBuilder.equal(join.get("myPartitionIdValue").as(Integer.class), partitionId);
 			myQueryRoot.addPredicate(predicate);
@@ -1276,7 +1274,7 @@ public class SearchBuilder implements ISearchBuilder {
 		return ResourcePersistentId.fromLongList(query.getResultList());
 	}
 
-	private static Predicate[] toPredicateArray(List<Predicate> thePredicates) {
+	static Predicate[] toPredicateArray(List<Predicate> thePredicates) {
 		return thePredicates.toArray(new Predicate[0]);
 	}
 }

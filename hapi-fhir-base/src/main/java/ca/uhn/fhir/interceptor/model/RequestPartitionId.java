@@ -28,17 +28,34 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class RequestPartitionId {
 
+	private static final RequestPartitionId ALL_PARTITIONS = new RequestPartitionId();
 	private final Integer myPartitionId;
 	private final LocalDate myPartitionDate;
 	private final String myPartitionName;
+	private final boolean myAllPartitions;
 
 	/**
-	 * Constructor
+	 * Constructor for a single partition
 	 */
 	private RequestPartitionId(@Nullable String thePartitionName, @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
 		myPartitionName = thePartitionName;
 		myPartitionId = thePartitionId;
 		myPartitionDate = thePartitionDate;
+		myAllPartitions = false;
+	}
+
+	/**
+	 * Constructor for all partitions
+	 */
+	private RequestPartitionId() {
+		myPartitionId = null;
+		myPartitionDate = null;
+		myPartitionName = null;
+		myAllPartitions = true;
+	}
+
+	public boolean isAllPartitions() {
+		return myAllPartitions;
 	}
 
 	public String getPartitionName() {
@@ -76,6 +93,16 @@ public class RequestPartitionId {
 			retVal = theRequestPartitionId.getPartitionIdStringOrNullString();
 		}
 		return retVal;
+	}
+
+	@Nonnull
+	public static RequestPartitionId fromAllPartitions() {
+		return ALL_PARTITIONS;
+	}
+
+	@Nonnull
+	public static RequestPartitionId fromDefaultPartition() {
+		return fromPartitionId(null);
 	}
 
 	@Nonnull

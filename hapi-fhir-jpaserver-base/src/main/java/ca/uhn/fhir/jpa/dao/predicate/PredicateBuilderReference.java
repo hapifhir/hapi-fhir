@@ -565,7 +565,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				if (nextParamDef != null) {
 
 					if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
-						if (theRequestPartitionId == null) {
+						if (theRequestPartitionId.isAllPartitions()) {
 							throw new PreconditionFailedException("This server is not configured to support search against all partitions");
 						}
 					}
