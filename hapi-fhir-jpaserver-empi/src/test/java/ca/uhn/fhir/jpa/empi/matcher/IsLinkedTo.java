@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.matcher;
 
-import ca.uhn.fhir.jpa.empi.svc.EmpiLinkDaoSvc;
-import ca.uhn.fhir.jpa.empi.svc.ResourceTableHelper;
+import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -21,8 +21,8 @@ public class IsLinkedTo extends BasePersonMatcher {
 	private List<Long> baseResourcePersonPids;
 	private Long incomingResourcePersonPid;
 
-	protected IsLinkedTo(ResourceTableHelper theResourceTableHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
-		super(theResourceTableHelper, theEmpiLinkDaoSvc, theBaseResource);
+	protected IsLinkedTo(ResourceTablePidHelper theResourceTablePidHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
+		super(theResourceTablePidHelper, theEmpiLinkDaoSvc, theBaseResource);
 	}
 
 
@@ -44,8 +44,8 @@ public class IsLinkedTo extends BasePersonMatcher {
 	public void describeTo(Description theDescription) {
 	}
 
-	public static Matcher<IBaseResource> linkedTo(ResourceTableHelper theResourceTableHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
-		return new IsLinkedTo(theResourceTableHelper, theEmpiLinkDaoSvc, theBaseResource);
+	public static Matcher<IBaseResource> linkedTo(ResourceTablePidHelper theResourceTablePidHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
+		return new IsLinkedTo(theResourceTablePidHelper, theEmpiLinkDaoSvc, theBaseResource);
 	}
 
 }

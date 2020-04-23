@@ -20,25 +20,20 @@ package ca.uhn.fhir.jpa.empi.svc;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.rules.json.EmpiFilterSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,19 +46,13 @@ public class EmpiCandidateSearchSvc {
 	private static final Logger ourLog = getLogger(EmpiCandidateSearchSvc.class);
 
 	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
 	private IEmpiSettings myEmpiConfig;
 	@Autowired
-	private MatchUrlService myMatchUrlService;
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
-	@Autowired
-	private SearchParamExtractorService mySearchParamExtractorService;
+	private EmpiSearchParamSvc myEmpiSearchParamSvc;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	private ResourceTableHelper myResourceTableHelper;
+	private ResourceTablePidHelper myResourceTablePidHelper;
 
 	/**
 	 * Given a target resource, search for all resources that are considered an EMPI match based on defined EMPI rules.
@@ -88,7 +77,7 @@ public class EmpiCandidateSearchSvc {
 			}
 
 			//to compare it to all known PERSON objects, using the overlapping search parameters that they have.
-			List<String> valuesFromResourceForSearchParam = getValueFromResourceForSearchParam(theResource, resourceSearchParam);
+			List<String> valuesFromResourceForSearchParam = myEmpiSearchParamSvc.getValueFromResourceForSearchParam(theResource, resourceSearchParam);
 			if (valuesFromResourceForSearchParam.isEmpty()) {
 				continue;
 			}
@@ -99,7 +88,7 @@ public class EmpiCandidateSearchSvc {
 		//Sometimes, we are running this function on a resource that has not yet been persisted,
 		//so it may not have an ID yet, precluding the need to remove it.
 		if (theResource.getIdElement().getIdPart() != null) {
-			matchedPidsToResources.remove(myResourceTableHelper.getPidOrNull(theResource));
+			matchedPidsToResources.remove(myResourceTablePidHelper.getPidOrNull(theResource));
 		}
 
 		return matchedPidsToResources.values();
@@ -124,8 +113,8 @@ public class EmpiCandidateSearchSvc {
 		ourLog.warn("About to execute URL query: {}", resourceCriteria);
 
 		//2.
-		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceType);
-		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(resourceCriteria, resourceDef);
+		SearchParameterMap searchParameterMap = myEmpiSearchParamSvc.mapFromCriteria(theResourceType, resourceCriteria);
+
 		searchParameterMap.setLoadSynchronous(true);
 
 		//TODO EMPI this will blow up under large scale i think.
@@ -135,7 +124,7 @@ public class EmpiCandidateSearchSvc {
 		List<IBaseResource> resources = search.getResources(0, search.size());
 
 		//4.
-		resources.forEach(resource -> theMatchedPidsToResources.put(myResourceTableHelper.getPidOrNull(resource), resource));
+		resources.forEach(resource -> theMatchedPidsToResources.put(myResourceTablePidHelper.getPidOrNull(resource), resource));
 	}
 
 	/*
@@ -144,18 +133,12 @@ public class EmpiCandidateSearchSvc {
 	 *
 	 * Patient?active=true&name.given=Gary,Grant
 	 */
-	@NotNull
+	@Nonnull
 	private String buildResourceQueryString(String theResourceType, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam, List<String> theValuesFromResourceForSearchParam) {
 		List<String> criteria = new ArrayList<>(theFilterCriteria);
 		criteria.add(buildResourceMatchQuery(resourceSearchParam.getSearchParam(), theValuesFromResourceForSearchParam));
 
 		return theResourceType + "?" +  String.join("&", criteria);
-	}
-
-	private List<String> getValueFromResourceForSearchParam(IBaseResource theResource, EmpiResourceSearchParamJson theFilterSearchParam) {
-		String resourceType = myFhirContext.getResourceDefinition(theResource).getName();
-		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(resourceType, theFilterSearchParam.getSearchParam());
-		return mySearchParamExtractorService.extractParamValuesAsStrings(activeSearchParam, theResource);
 	}
 
 	private String buildResourceMatchQuery(String theSearchParamName, List<String> theResourceValues) {

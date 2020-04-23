@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.empi.svc;
+package ca.uhn.fhir.jpa.dao;
 
 /*-
  * #%L
@@ -24,16 +24,17 @@ import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.model.EmpiMessages;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
+import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,11 +45,11 @@ public class EmpiLinkDaoSvc {
 	@Autowired
 	private IEmpiLinkDao myEmpiLinkDao;
 	@Autowired
-	private ResourceTableHelper myResourceTableHelper;
+	private ResourceTablePidHelper myResourceTablePidHelper;
 
 	public void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiMessages theEmpiMessages) {
-		Long personPid = myResourceTableHelper.getPidOrNull(thePerson);
-		Long resourcePid = myResourceTableHelper.getPidOrNull(theResource);
+		Long personPid = myResourceTablePidHelper.getPidOrNull(thePerson);
+		Long resourcePid = myResourceTablePidHelper.getPidOrNull(theResource);
 
 		EmpiLink empiLink = getOrCreateEmpiLinkByPersonPidAndTargetPid(personPid, resourcePid);
 
@@ -62,7 +63,7 @@ public class EmpiLinkDaoSvc {
 
 
 
-	@NotNull
+	@Nonnull
 	public EmpiLink getOrCreateEmpiLinkByPersonPidAndTargetPid(Long thePersonPid, Long theResourcePid) {
 		EmpiLink existing = getLinkByPersonPidAndTargetPid(thePersonPid, theResourcePid);
 		if (existing != null) {
@@ -125,4 +126,9 @@ public class EmpiLinkDaoSvc {
 		 return myEmpiLinkDao.findAll(example);
 	 }
 
+	public Optional<EmpiLink> findEmpiLinkByTargetId(IBaseResource theBaseResource) {
+		EmpiLink empiLink = new EmpiLink().setTargetPid(myResourceTablePidHelper.getPidOrNull(theBaseResource));
+		Example<EmpiLink> example = Example.of(empiLink);
+		return myEmpiLinkDao.findOne(example);
+	}
 }

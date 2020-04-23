@@ -83,7 +83,7 @@ public class IdHelperService {
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
-	@Autowired(required = true)
+	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -96,7 +96,6 @@ public class IdHelperService {
 		myPersistentIdCache = newCache();
 		myResourceLookupCache = newCache();
 	}
-
 
 	public void delete(ForcedId forcedId) {
 		myForcedIdDao.deleteByPid(forcedId.getId());

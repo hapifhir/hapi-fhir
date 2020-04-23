@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.empi.config;
 
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiDaoInterceptor;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiSubmitterInterceptorLoader;
+import ca.uhn.fhir.jpa.empi.svc.EmpiSearchParamSvc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -39,5 +40,10 @@ public class EmpiSubmitterConfig {
 	@Bean
 	EmpiSubmitterInterceptorLoader empiSubmitterInterceptorLoader() {
 		return new EmpiSubmitterInterceptorLoader();
+	}
+
+	@Bean
+	EmpiSearchParamSvc empiSearchParamSvc() {
+		return new EmpiSearchParamSvc();
 	}
 }

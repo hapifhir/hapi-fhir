@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.empi.matcher;
 
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.jpa.empi.svc.EmpiLinkDaoSvc;
-import ca.uhn.fhir.jpa.empi.svc.ResourceTableHelper;
+import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
  */
 public class IsPossibleMatchWith extends BasePersonMatcher {
 
-	protected IsPossibleMatchWith(ResourceTableHelper theResourceTableHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
-		super(theResourceTableHelper, theEmpiLinkDaoSvc, theBaseResource);
+	protected IsPossibleMatchWith(ResourceTablePidHelper theResourceTablePidHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
+		super(theResourceTablePidHelper, theEmpiLinkDaoSvc, theBaseResource);
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class IsPossibleMatchWith extends BasePersonMatcher {
 		mismatchDescription.appendText("No Empi Link With POSSIBLE_MATCH was found");
 	}
 
-	public static Matcher<IBaseResource> possibleMatchWith(ResourceTableHelper theResourceTableHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
-		return new IsPossibleMatchWith(theResourceTableHelper, theEmpiLinkDaoSvc, theBaseResource);
+	public static Matcher<IBaseResource> possibleMatchWith(ResourceTablePidHelper theResourceTablePidHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
+		return new IsPossibleMatchWith(theResourceTablePidHelper, theEmpiLinkDaoSvc, theBaseResource);
 	}
 }

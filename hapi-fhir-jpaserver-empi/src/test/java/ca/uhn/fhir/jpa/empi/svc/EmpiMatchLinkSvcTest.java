@@ -213,7 +213,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		List<Long> duplicatePids = Stream.of(patient1, patient2)
 			.map(this::getPersonFromTarget)
-			.map(myResourceTableHelper::getPidOrNull)
+			.map(myResourceTablePidHelper::getPidOrNull)
 			.collect(Collectors.toList());
 
 		//The two Persons related to the patients should both show up in the only existing POSSIBLE_DUPLICATE EmpiLink.
@@ -304,7 +304,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(incomingJanePatient, is(possibleMatchWith(janePatient, janePatient2)));
 
 		//Ensure there is no successful MATCH links for incomingJanePatient
-		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTableHelper.getPidOrNull(incomingJanePatient));
+		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTablePidHelper.getPidOrNull(incomingJanePatient));
 		assertThat(matchedLinkForTargetPid.isPresent(), is(false));
 	}
 

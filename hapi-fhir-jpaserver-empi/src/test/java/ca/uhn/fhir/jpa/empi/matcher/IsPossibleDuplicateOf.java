@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.empi.matcher;
 
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.jpa.empi.svc.EmpiLinkDaoSvc;
-import ca.uhn.fhir.jpa.empi.svc.ResourceTableHelper;
+import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -19,8 +19,8 @@ public class IsPossibleDuplicateOf extends BasePersonMatcher {
 	 */
 	private Long incomingPersonPid;
 
-	protected IsPossibleDuplicateOf(ResourceTableHelper theResourceTableHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
-		super(theResourceTableHelper, theEmpiLinkDaoSvc, theBaseResource);
+	protected IsPossibleDuplicateOf(ResourceTablePidHelper theResourceTablePidHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
+		super(theResourceTablePidHelper, theEmpiLinkDaoSvc, theBaseResource);
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public class IsPossibleDuplicateOf extends BasePersonMatcher {
 		mismatchDescription.appendText("No Empi Link With POSSIBLE_DUPLICATE was found");
 	}
 
-	public static Matcher<IBaseResource> possibleDuplicateOf(ResourceTableHelper theResourceTableHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
-		return new IsPossibleDuplicateOf(theResourceTableHelper, theEmpiLinkDaoSvc, theBaseResource);
+	public static Matcher<IBaseResource> possibleDuplicateOf(ResourceTablePidHelper theResourceTablePidHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
+		return new IsPossibleDuplicateOf(theResourceTablePidHelper, theEmpiLinkDaoSvc, theBaseResource);
 	}
 }

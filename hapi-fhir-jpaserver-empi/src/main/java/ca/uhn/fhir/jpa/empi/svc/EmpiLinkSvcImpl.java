@@ -23,11 +23,13 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
+import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.empi.model.EmpiMessages;
 import ca.uhn.fhir.empi.util.AssuranceLevelUtil;
-import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -51,7 +53,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	@Autowired
 	private PersonHelper myPersonHelper;
 	@Autowired
-	private ResourceTableHelper myResourceTableHelper;
+	private ResourceTablePidHelper myResourceTablePidHelper;
 
 	@Override
 	@Transactional
@@ -108,8 +110,8 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 			return null;
 		} else {
 			return myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(
-				myResourceTableHelper.getPidOrNull(thePerson),
-				myResourceTableHelper.getPidOrNull(theCandidate)
+				myResourceTablePidHelper.getPidOrNull(thePerson),
+				myResourceTablePidHelper.getPidOrNull(theCandidate)
 			);
 		}
 	}

@@ -26,16 +26,16 @@ import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.MatchedTargetCandidate;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
-import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
+import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -51,9 +51,7 @@ public class EmpiPersonFindingSvc {
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	IEmpiLinkDao myEmpiLinkDao;
-	@Autowired
-	ResourceTableHelper myResourceTableHelper;
+	ResourceTablePidHelper myResourceTablePidHelper;
 	@Autowired
 	private EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 	@Autowired
@@ -108,7 +106,7 @@ public class EmpiPersonFindingSvc {
 		if (eidFromResource.isPresent()) {
 		IBaseResource foundPerson = myEmpiResourceDaoSvc.searchPersonByEid(eidFromResource.get().getValue());
 			if (foundPerson != null) {
-				Long pidOrNull = myResourceTableHelper.getPidOrNull(foundPerson);
+				Long pidOrNull = myResourceTablePidHelper.getPidOrNull(foundPerson);
 
 				//We make a fake link here as there no link for this association yet.
 				//FIXME EMPI proobably have to re-model MatchedPersonCandidate?? I don't like making this fake thing to throw around.
@@ -129,7 +127,7 @@ public class EmpiPersonFindingSvc {
 	 * @return an Optional list of {@link MatchedPersonCandidate} indicating matches.
 	 */
 	private Optional<List<MatchedPersonCandidate>> attemptToFindPersonCandidateFromEmpiLinkTable(IBaseResource theBaseResource) {
-		Long targetPid = myResourceTableHelper.getPidOrNull(theBaseResource);
+		Long targetPid = myResourceTablePidHelper.getPidOrNull(theBaseResource);
 		Optional<EmpiLink> oLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(targetPid);
 		if (oLink.isPresent()) {
 			ResourcePersistentId pid = new ResourcePersistentId(oLink.get().getPersonPid());
@@ -188,7 +186,7 @@ public class EmpiPersonFindingSvc {
 		List<MatchedPersonCandidate> matchedPersonCandidates = new ArrayList<>();
 		matchedCandidates = matchedCandidates.stream().filter(mc -> mc.getMatchResult().equals(EmpiMatchResultEnum.MATCH) || mc.getMatchResult().equals(EmpiMatchResultEnum.POSSIBLE_MATCH)).collect(Collectors.toList());
 		for (MatchedTargetCandidate match: matchedCandidates) {
-			Optional<EmpiLink> optMatchEmpiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTableHelper.getPidOrNull(match.getCandidate()));
+			Optional<EmpiLink> optMatchEmpiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTablePidHelper.getPidOrNull(match.getCandidate()));
 			if (!optMatchEmpiLink.isPresent()) {
 				continue;
 			}
@@ -211,7 +209,7 @@ public class EmpiPersonFindingSvc {
 	}
 
 	private List<Long> getNoMatchPersonPids(IBaseResource theBaseResource) {
-		Long targetPid = myResourceTableHelper.getPidOrNull(theBaseResource);
+		Long targetPid = myResourceTablePidHelper.getPidOrNull(theBaseResource);
 		return myEmpiLinkDaoSvc.getEmpiLinksByTargetPidAndMatchResult(targetPid, EmpiMatchResultEnum.NO_MATCH)
 			.stream()
 			.map(EmpiLink::getPersonPid)
@@ -219,7 +217,7 @@ public class EmpiPersonFindingSvc {
 	}
 
 	private boolean hasNoMatchLink(IBaseResource theBaseResource, Long thePersonPid) {
-		Optional<EmpiLink> noMatchLink = myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(thePersonPid, myResourceTableHelper.getPidOrNull(theBaseResource), EmpiMatchResultEnum.NO_MATCH);
+		Optional<EmpiLink> noMatchLink = myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(thePersonPid, myResourceTablePidHelper.getPidOrNull(theBaseResource), EmpiMatchResultEnum.NO_MATCH);
 		return noMatchLink.isPresent();
 	}
 
@@ -227,11 +225,9 @@ public class EmpiPersonFindingSvc {
 		return new ResourcePersistentId(thePersonPid);
 	}
 
-	@NotNull
+	@Nonnull
 	public Optional<EmpiLink> findEmpiLinkByTargetId(IBaseResource theBaseResource) {
-		EmpiLink empiLink = new EmpiLink().setTargetPid(myResourceTableHelper.getPidOrNull(theBaseResource));
-		Example<EmpiLink> example = Example.of(empiLink);
-		return myEmpiLinkDao.findOne(example);
+		return myEmpiLinkDaoSvc.findEmpiLinkByTargetId(theBaseResource);
 	}
 
 }

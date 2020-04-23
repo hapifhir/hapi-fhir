@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.empi.matcher;
 
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.jpa.empi.svc.EmpiLinkDaoSvc;
-import ca.uhn.fhir.jpa.empi.svc.ResourceTableHelper;
+import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -14,12 +14,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class BasePersonMatcher extends TypeSafeMatcher<IBaseResource> {
-    protected ResourceTableHelper myResourceTableHelper;
+    protected ResourceTablePidHelper myResourceTablePidHelper;
     protected EmpiLinkDaoSvc myEmpiLinkDaoSvc;
     protected Collection<IBaseResource> myBaseResources;
 
-    protected BasePersonMatcher(ResourceTableHelper theResourceTableHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
-        myResourceTableHelper = theResourceTableHelper;
+    protected BasePersonMatcher(ResourceTablePidHelper theResourceTablePidHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
+        myResourceTablePidHelper = theResourceTablePidHelper;
         myEmpiLinkDaoSvc = theEmpiLinkDaoSvc;
         myBaseResources = Arrays.stream(theBaseResource).collect(Collectors.toList());
     }
@@ -29,7 +29,7 @@ public abstract class BasePersonMatcher extends TypeSafeMatcher<IBaseResource> {
 			  EmpiLink matchLink = getMatchedEmpiLink(theResource);
 			  return matchLink == null ? null : matchLink.getPersonPid();
         } else if (isPerson(theResource)) {
-            return myResourceTableHelper.getPidOrNull(theResource);
+            return myResourceTablePidHelper.getPidOrNull(theResource);
         } else {
             throw new IllegalArgumentException("Resources of type " + theResource.getIdElement().getResourceType() + " cannot be persons!");
         }
@@ -59,7 +59,7 @@ public abstract class BasePersonMatcher extends TypeSafeMatcher<IBaseResource> {
     }
 
     protected List<EmpiLink> getEmpiLinksForTarget(IBaseResource thePatientOrPractitionerResource, EmpiMatchResultEnum theMatchResult) {
-        Long pidOrNull = myResourceTableHelper.getPidOrNull(thePatientOrPractitionerResource);
+        Long pidOrNull = myResourceTablePidHelper.getPidOrNull(thePatientOrPractitionerResource);
         List<EmpiLink> matchLinkForTarget = myEmpiLinkDaoSvc.getEmpiLinksByTargetPidAndMatchResult(pidOrNull, theMatchResult);
         if (!matchLinkForTarget.isEmpty()) {
             return matchLinkForTarget;

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.empi.svc;
+package ca.uhn.fhir.jpa.dao.index;
 
 /*-
  * #%L
@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.empi.svc;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -28,14 +29,25 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
-public class ResourceTableHelper {
+public class ResourceTablePidHelper {
 	private static final String RESOURCE_PID = "RESOURCE_PID";
 
+	private final IdHelperService myIdHelperService;
+
 	@Autowired
-	IdHelperService myIdHelperService;
+	public ResourceTablePidHelper(IdHelperService theIdHelperService) {
+		myIdHelperService = theIdHelperService;
+	}
 
 	@Nullable
 	public Long getPidOrNull(IBaseResource theResource) {
@@ -50,5 +62,27 @@ public class ResourceTableHelper {
 			}
 		}
 		return retval;
+	}
+
+	@Nonnull
+	public Long getPidOrThrowException(IIdType theId) {
+		return getPidOrThrowException(theId, null);
+	}
+
+	@Nonnull
+	public Long getPidOrThrowException(IIdType theId, RequestDetails theRequestDetails) {
+		List<IIdType> ids = Collections.singletonList(theId);
+		List<ResourcePersistentId> resourcePersistentIds = myIdHelperService.resolveResourcePersistentIds(ids, theRequestDetails);
+		return resourcePersistentIds.get(0).getIdAsLong();
+	}
+
+	@Nonnull
+	public Long getPidOrThrowException(IAnyResource theResource) {
+		return (Long) theResource.getUserData(RESOURCE_PID);
+	}
+
+	@Nonnull
+	public Map<Long, IIdType> getPidToIdMap(Collection<IIdType> theSubscriberIds) {
+		return theSubscriberIds.stream().collect(Collectors.toMap(this::getPidOrThrowException, Function.identity()));
 	}
 }

@@ -47,6 +47,7 @@ public class EmpiDaoInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualPersonManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+		// FIXME EMPI find a better way to identify EMPI calls
 		if (isInternalRequest(theRequestDetails)) {
 			return;
 		}

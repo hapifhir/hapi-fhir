@@ -66,11 +66,6 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	EmpiLinkDaoSvc empiLinkDaoSvc() {
-		return new EmpiLinkDaoSvc();
-	}
-
-	@Bean
 	PersonHelper personHelper(FhirContext theFhirContext) {
 		return new PersonHelper(theFhirContext);
 	}
@@ -113,11 +108,6 @@ public class EmpiConsumerConfig {
 	@Bean
 	EmpiResourceComparatorSvc empiResourceComparatorSvc(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
 		return new EmpiResourceComparatorSvc(theFhirContext, theEmpiConfig);
-	}
-
-	@Bean
-	ResourceTableHelper resourceTableHelper() {
-		return new ResourceTableHelper();
 	}
 
 	@PostConstruct
