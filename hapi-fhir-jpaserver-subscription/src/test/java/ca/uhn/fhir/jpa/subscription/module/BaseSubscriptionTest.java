@@ -9,13 +9,11 @@ import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
-import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSubscriptionProvider;
 import ca.uhn.fhir.jpa.subscription.module.config.TestSubscriptionConfig;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.junit.After;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -32,8 +30,6 @@ public abstract class BaseSubscriptionTest {
 
 	@Autowired
 	protected IInterceptorService myInterceptorRegistry;
-	@Autowired
-	MockFhirClientSubscriptionProvider myMockFhirClientSubscriptionProvider;
 
 	@Autowired
 	ISearchParamRegistry mySearchParamRegistry;
