@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.model;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -50,6 +51,8 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 	private String myPayload;
 	@JsonProperty("payloadId")
 	private String myPayloadId;
+	@JsonProperty("parentRequestId")
+	private String myParentRequestId;
 	@JsonIgnore
 	private transient IBaseResource myPayloadDecoded;
 
@@ -66,6 +69,13 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 		setOperationType(theOperationType);
 		if (theOperationType != OperationTypeEnum.DELETE) {
 			setNewPayload(theFhirContext, theResource);
+		}
+	}
+
+	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
+		this(theFhirContext, theNewResource, theOperationType);
+		if (theRequest != null) {
+			setParentRequestId(theRequest.getRequestId());
 		}
 	}
 
@@ -114,6 +124,14 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 		if (theId != null) {
 			myId = theId.getValue();
 		}
+	}
+
+	public String getParentRequestId() {
+		return myParentRequestId;
+	}
+
+	public void setParentRequestId(String theParentRequestId) {
+		myParentRequestId = theParentRequestId;
 	}
 
 	private void setNewPayload(FhirContext theCtx, IBaseResource theNewPayload) {

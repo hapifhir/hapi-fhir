@@ -67,6 +67,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 
 	protected void doDelivery(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, IChannelProducer theChannelProducer, IBaseResource thePayloadResource) {
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
+		payload.setParentRequestId(theMsg.getParentRequestId());
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(payload);
 		theChannelProducer.send(message);
 		ourLog.debug("Delivering {} message payload {} for {}", theMsg.getOperationType(), theMsg.getPayloadId(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());

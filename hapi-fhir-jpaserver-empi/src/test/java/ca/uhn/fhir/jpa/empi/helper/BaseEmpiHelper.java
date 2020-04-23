@@ -73,6 +73,7 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 		when(myMockSrd.getInterceptorBroadcaster()).thenReturn(myMockInterceptorBroadcaster);
 		when(myMockSrd.getServletRequest()).thenReturn(myMockServletRequest);
 		when(myMockSrd.getServer()).thenReturn(myMockRestfulServer);
+		when(myMockSrd.getRequestId()).thenReturn("MOCK_REQUEST");
 		when(myMockRestfulServer.getFhirContext()).thenReturn(myMockFhirContext);
 
 		//This sets up our basic interceptor, and also attached the latch so we can await the hook calls.

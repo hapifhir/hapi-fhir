@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
-import ca.uhn.fhir.empi.model.EmpiMessages;
+import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
@@ -130,17 +130,18 @@ public class EmpiDaoInterceptorTest extends BaseEmpiR4Test {
 	}
 	
 	@Test
-	public void testEmpiPointcutReceivesEmpiMessages() throws InterruptedException {
-		EmpiHelperR4.ExcellentWrapper wrapper = myEmpiHelper.createWithLatch(buildJanePatient());
-		EmpiMessages empiMessages = wrapper.getEmpiMessages();
-		List<String> messages = empiMessages.getValues();
+	public void testEmpiPointcutReceivesTransactionLogMessages() throws InterruptedException {
+		EmpiHelperR4.OutcomeAndLogMessageWrapper wrapper = myEmpiHelper.createWithLatch(buildJanePatient());
 
+		TransactionLogMessages empiTransactionLogMessages = wrapper.getLogMessages();
+		assertThat(empiTransactionLogMessages.getParentRequestId(), is(equalToIgnoringCase("MOCK_REQUEST")));
+
+		List<String> messages = empiTransactionLogMessages.getValues();
 		assertThat(messages, hasSize(3));
-
 		assertThat(messages.get(0), is(equalToIgnoringCase("There were no matched candidates for EMPI, creating a new Person.")));
-		assertThat(messages.get(1), is(containsString("Creating new link from new Person -> ")));
-		assertThat(messages.get(1), is(containsString("with IdentityAssuranceLevel: LEVEL3")));
-		assertThat(messages.get(2), is(containsString("Creating EmpiLink from")));
-		assertThat(messages.get(2), is(containsString("MATCH")));
+		assertThat(messages.get(1), containsString("Creating new link from new Person -> "));
+		assertThat(messages.get(1), containsString("with IdentityAssuranceLevel: LEVEL3"));
+		assertThat(messages.get(2), containsString("Creating EmpiLink from"));
+		assertThat(messages.get(2), containsString("MATCH"));
 	}
 }

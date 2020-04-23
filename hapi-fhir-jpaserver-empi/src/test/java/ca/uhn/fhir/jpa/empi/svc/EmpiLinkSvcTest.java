@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
-import ca.uhn.fhir.empi.model.EmpiMessages;
+import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
@@ -47,14 +47,14 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		Patient patient = createPatient();
 
 		{
-			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, new EmpiMessages());
+			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, null);
 			assertLinkCount(1);
 			Person newPerson = myPersonDao.read(personId);
 			assertEquals(1, newPerson.getLink().size());
 		}
 
 		{
-			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL,new EmpiMessages() );
+			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL, null);
 			assertLinkCount(1);
 			Person newPerson = myPersonDao.read(personId);
 			assertEquals(0, newPerson.getLink().size());
@@ -66,9 +66,9 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		Person person = createPerson(buildJanePerson());
 		Patient patient = createPatient(buildJanePatient());
 
-		myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL,new EmpiMessages() );
+		myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL, null);
 		try {
-			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, new EmpiMessages());
+			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, null);
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), is(equalTo("EMPI system is not allowed to modify links on manually created links")));
@@ -82,7 +82,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 		// Test: it should be impossible to have a AUTO NO_MATCH record.  The only NO_MATCH records in the system must be MANUAL.
 		try {
-			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.AUTO, new EmpiMessages());
+			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.AUTO, null);
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), is(equalTo("EMPI system is not allowed to automatically NO_MATCH a resource")));
