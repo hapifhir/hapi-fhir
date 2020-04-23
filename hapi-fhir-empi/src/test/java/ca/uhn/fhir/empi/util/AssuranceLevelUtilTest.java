@@ -3,7 +3,8 @@ package ca.uhn.fhir.empi.util;
 import junit.framework.TestCase;
 import org.junit.Test;
 
-import static ca.uhn.fhir.empi.api.EmpiLinkSourceEnum.*;
+import static ca.uhn.fhir.empi.api.EmpiLinkSourceEnum.AUTO;
+import static ca.uhn.fhir.empi.api.EmpiLinkSourceEnum.MANUAL;
 import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.*;
 import static ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel.*;
 import static org.hamcrest.core.Is.is;

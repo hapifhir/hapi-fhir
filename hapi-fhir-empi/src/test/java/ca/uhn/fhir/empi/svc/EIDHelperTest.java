@@ -1,9 +1,9 @@
 package ca.uhn.fhir.empi.svc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.rules.config.EmpiSettingsImpl;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
-import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;

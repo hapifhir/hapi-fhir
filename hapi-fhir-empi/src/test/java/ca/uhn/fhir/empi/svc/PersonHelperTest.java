@@ -1,7 +1,6 @@
 package ca.uhn.fhir.empi.svc;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -13,7 +12,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 public class PersonHelperTest {
 	public static final FhirContext ourFhirContext = FhirContext.forR4();
