@@ -80,8 +80,7 @@ public class SubscriptionRegistry {
 		return activeSubscription.map(ActiveSubscription::getSubscription);
 	}
 
-	@SuppressWarnings("UnusedReturnValue")
-	private CanonicalSubscription registerSubscription(IIdType theId, IBaseResource theSubscription) {
+	private void registerSubscription(IIdType theId, IBaseResource theSubscription) {
 		Validate.notNull(theId);
 		String subscriptionId = theId.getIdPart();
 		Validate.notBlank(subscriptionId);
@@ -101,7 +100,6 @@ public class SubscriptionRegistry {
 			.add(CanonicalSubscription.class, canonicalized);
 		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, params);
 
-		return canonicalized;
 	}
 
 	public void unregisterSubscriptionIfRegistered(String theSubscriptionId) {
@@ -172,15 +170,6 @@ public class SubscriptionRegistry {
 
 	private boolean channelTypeSame(CanonicalSubscription theExistingSubscription, CanonicalSubscription theNewSubscription) {
 		return theExistingSubscription.getChannelType().equals(theNewSubscription.getChannelType());
-	}
-
-	public boolean unregisterSubscriptionIfRegistered(IBaseResource theSubscription, String theStatusString) {
-		if (hasSubscription(theSubscription.getIdElement()).isPresent()) {
-			ourLog.info("Removing {} subscription {}", theStatusString, theSubscription.getIdElement().toUnqualified().getValue());
-			unregisterSubscriptionIfRegistered(theSubscription.getIdElement().getIdPart());
-			return true;
-		}
-		return false;
 	}
 
 	public int size() {
