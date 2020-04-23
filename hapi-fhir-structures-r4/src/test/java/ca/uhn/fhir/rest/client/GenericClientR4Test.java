@@ -63,13 +63,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
@@ -317,7 +311,7 @@ public class GenericClientR4Test {
 		Bundle resp = client
 			.history()
 			.onType(Patient.class)
-			.andReturnBundle(Bundle.class)
+			.returnBundle(Bundle.class)
 			.execute();
 
 		assertEquals("foo=bar", capt.getAllValues().get(0).getFirstHeader("Cookie").getValue());
@@ -508,7 +502,7 @@ public class GenericClientR4Test {
 		Bundle resp = client
 			.history()
 			.onType(CustomTypeR4Test.MyCustomPatient.class)
-			.andReturnBundle(Bundle.class)
+			.returnBundle(Bundle.class)
 			.execute();
 
 		assertEquals(1, resp.getEntry().size());
@@ -751,7 +745,7 @@ public class GenericClientR4Test {
 
 		Bundle outcome = client
 			.history()
-			.onServer().andReturnBundle(Bundle.class)
+			.onServer().returnBundle(Bundle.class)
 			.at(new DateRangeParam().setLowerBound("2011").setUpperBound("2018"))
 			.execute();
 
@@ -2411,7 +2405,7 @@ public class GenericClientR4Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		client.fetchConformance().ofType(CapabilityStatement.class).execute();
+		client.capabilities().ofType(CapabilityStatement.class).execute();
 		assertEquals("http://example.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 	}
@@ -2436,7 +2430,7 @@ public class GenericClientR4Test {
 		Bundle resp = client
 			.history()
 			.onType(Patient.class)
-			.andReturnBundle(Bundle.class)
+			.returnBundle(Bundle.class)
 			.execute();
 
 	}
