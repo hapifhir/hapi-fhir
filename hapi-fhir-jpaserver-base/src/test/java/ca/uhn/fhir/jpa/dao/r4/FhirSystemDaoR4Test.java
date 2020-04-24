@@ -596,7 +596,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		runInTransaction(()->{
 			myEntityManager
-				.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashNormalizedPrefix = null")
+				.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashNormalizedPrefix = 0")
 				.executeUpdate();
 		});
 
@@ -608,6 +608,15 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
+
+		runInTransaction(()->{
+			ResourceIndexedSearchParamString param = myResourceIndexedSearchParamStringDao.findAll()
+				.stream()
+				.filter(t -> t.getParamName().equals("family"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(-6332913947530887803L, param.getHashNormalizedPrefix().longValue());
+		});
 
 		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
 	}
@@ -625,16 +634,16 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		runInTransaction(()->{
 			Long i = myEntityManager
-				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity IS null", Long.class)
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity = 0", Long.class)
 				.getSingleResult();
 			assertEquals(0L, i.longValue());
 
 			myEntityManager
-				.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashIdentity = null")
+				.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashIdentity = 0")
 				.executeUpdate();
 
 			i = myEntityManager
-				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity IS null", Long.class)
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity = 0", Long.class)
 				.getSingleResult();
 			assertThat(i, greaterThan(1L));
 
@@ -645,7 +654,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		runInTransaction(()->{
 			Long i = myEntityManager
-				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity IS null", Long.class)
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity = 0", Long.class)
 				.getSingleResult();
 			assertEquals(0L, i.longValue());
 		});

@@ -121,6 +121,7 @@ public class ExpungeEverythingService {
 		counter.addAndGet(expungeEverythingByType(ResourceHistoryProvenanceEntity.class));
 		counter.addAndGet(expungeEverythingByType(ResourceHistoryTable.class));
 		counter.addAndGet(expungeEverythingByType(ResourceTable.class));
+		counter.addAndGet(expungeEverythingByType(PartitionEntity.class));
 		myTxTemplate.execute(t -> {
 			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + org.hibernate.search.jpa.Search.class.getSimpleName() + " d"));
 			return null;

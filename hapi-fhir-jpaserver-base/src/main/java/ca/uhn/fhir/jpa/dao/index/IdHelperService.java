@@ -21,9 +21,8 @@ package ca.uhn.fhir.jpa.dao.index;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -31,12 +30,10 @@ import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
-import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.ListMultimap;
@@ -48,9 +45,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,10 +58,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This class is used to convert between PIDs (the internal primary key for a particular resource as
@@ -93,6 +94,8 @@ public class IdHelperService {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private FhirContext myFhirCtx;
 
 	private Cache<String, Long> myPersistentIdCache;
 	private Cache<String, IResourceLookup> myResourceLookupCache;
@@ -115,10 +118,10 @@ public class IdHelperService {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	public IResourceLookup resolveResourceIdentity(String theResourceName, String theResourceId, RequestDetails theRequestDetails) throws ResourceNotFoundException {
+	public IResourceLookup resolveResourceIdentity(RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId, RequestDetails theRequestDetails) throws ResourceNotFoundException {
 		// We only pass 1 input in so only 0..1 will come back
-		IdDt id = new IdDt(theResourceName, theResourceId);
-		Collection<IResourceLookup> matches = translateForcedIdToPids(theRequestDetails, Collections.singletonList(id));
+		IdDt id = new IdDt(theResourceType, theResourceId);
+		Collection<IResourceLookup> matches = translateForcedIdToPids(theRequestPartitionId, theRequestDetails, Collections.singletonList(id));
 		assert matches.size() <= 1;
 		if (matches.isEmpty()) {
 			throw new ResourceNotFoundException(id);
@@ -132,14 +135,14 @@ public class IdHelperService {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	public ResourcePersistentId resolveResourcePersistentIds(String theResourceType, String theId) {
+	public ResourcePersistentId resolveResourcePersistentIds(RequestPartitionId theRequestPartitionId, String theResourceType, String theId) {
 		Long retVal;
 		if (myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId)) {
 			if (myDaoConfig.isDeleteEnabled()) {
-				retVal = resolveResourceIdentity(theResourceType, theId);
+				retVal = resolveResourceIdentity(theRequestPartitionId, theResourceType, theId);
 			} else {
-				String key = theResourceType + "/" + theId;
-				retVal = myPersistentIdCache.get(key, t -> resolveResourceIdentity(theResourceType, theId));
+				String key = RequestPartitionId.stringifyForKey(theRequestPartitionId) + "/" + theResourceType + "/" + theId;
+				retVal = myPersistentIdCache.get(key, t -> resolveResourceIdentity(theRequestPartitionId, theResourceType, theId));
 			}
 
 		} else {
@@ -150,10 +153,13 @@ public class IdHelperService {
 	}
 
 	/**
-	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs
+	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs.
+	 * <p>
+	 * This implementation will always try to use a cache for performance, meaning that it can resolve resources that
+	 * are deleted (but note that forced IDs can't change, so the cache can't return incorrect results)
 	 */
 	@Nonnull
-	public List<ResourcePersistentId> resolveResourcePersistentIds(List<IIdType> theIds, RequestDetails theRequest) {
+	public List<ResourcePersistentId> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds, RequestDetails theRequest) {
 		theIds.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
 		if (theIds.isEmpty()) {
@@ -183,29 +189,35 @@ public class IdHelperService {
 
 			} else {
 
-				if (!myDaoConfig.isDeleteEnabled()) {
-					for (Iterator<String> idIterator = nextIds.iterator(); idIterator.hasNext(); ) {
-						String nextId = idIterator.next();
-						String key = nextResourceType + "/" + nextId;
-						Long nextCachedPid = myPersistentIdCache.getIfPresent(key);
-						if (nextCachedPid != null) {
-							idIterator.remove();
-							retVal.add(new ResourcePersistentId(nextCachedPid));
-						}
+				for (Iterator<String> idIterator = nextIds.iterator(); idIterator.hasNext(); ) {
+					String nextId = idIterator.next();
+					String key = RequestPartitionId.stringifyForKey(theRequestPartitionId) + "/" + nextResourceType + "/" + nextId;
+					Long nextCachedPid = myPersistentIdCache.getIfPresent(key);
+					if (nextCachedPid != null) {
+						idIterator.remove();
+						retVal.add(new ResourcePersistentId(nextCachedPid));
 					}
 				}
 
 				if (nextIds.size() > 0) {
-					Collection<Object[]> views = myForcedIdDao.findByTypeAndForcedId(nextResourceType, nextIds);
+
+					Collection<Object[]> views;
+					if (theRequestPartitionId != null) {
+						if (theRequestPartitionId.getPartitionId() != null) {
+							views = myForcedIdDao.findByTypeAndForcedIdInPartition(nextResourceType, nextIds, theRequestPartitionId.getPartitionId());
+						} else {
+							views = myForcedIdDao.findByTypeAndForcedIdInPartitionNull(nextResourceType, nextIds);
+						}
+					} else {
+						views = myForcedIdDao.findByTypeAndForcedId(nextResourceType, nextIds);
+					}
 					for (Object[] nextView : views) {
 						String forcedId = (String) nextView[0];
 						Long pid = (Long) nextView[1];
 						retVal.add(new ResourcePersistentId(pid));
 
-						if (!myDaoConfig.isDeleteEnabled()) {
-							String key = nextResourceType + "/" + forcedId;
-							myPersistentIdCache.put(key, pid);
-						}
+						String key = RequestPartitionId.stringifyForKey(theRequestPartitionId) + "/" + nextResourceType + "/" + forcedId;
+						myPersistentIdCache.put(key, pid);
 					}
 				}
 
@@ -248,15 +260,35 @@ public class IdHelperService {
 		return typeToIds;
 	}
 
-	private Long resolveResourceIdentity(String theResourceType, String theId) {
-		Long retVal;
-		retVal = myForcedIdDao
-			.findByTypeAndForcedId(theResourceType, theId)
-			.orElseThrow(() -> new ResourceNotFoundException(new IdDt(theResourceType, theId)));
-		return retVal;
+	private Long resolveResourceIdentity(@Nullable RequestPartitionId theRequestPartitionId, @Nonnull String theResourceType, @Nonnull String theId) {
+		Optional<Long> pid;
+		if (theRequestPartitionId != null) {
+			if (theRequestPartitionId.getPartitionId() == null) {
+				pid = myForcedIdDao.findByPartitionIdNullAndTypeAndForcedId(theResourceType, theId);
+			} else {
+				pid = myForcedIdDao.findByPartitionIdAndTypeAndForcedId(theRequestPartitionId.getPartitionId(), theResourceType, theId);
+			}
+		} else {
+			try {
+				pid = myForcedIdDao.findByTypeAndForcedId(theResourceType, theId);
+			} catch (IncorrectResultSizeDataAccessException e) {
+				/*
+				 *  This means that:
+				 *  1. There are two resources with the exact same resource type and forced id
+				 *  2. The unique constraint on this column-pair has been dropped
+				 */
+				String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
+				throw new PreconditionFailedException(msg);
+			}
+		}
+
+		if (!pid.isPresent()) {
+			throw new ResourceNotFoundException(new IdDt(theResourceType, theId));
+		}
+		return pid.get();
 	}
 
-	private Collection<IResourceLookup> translateForcedIdToPids(RequestDetails theRequest, Collection<IIdType> theId) {
+	private Collection<IResourceLookup> translateForcedIdToPids(RequestPartitionId theRequestPartitionId, RequestDetails theRequest, Collection<IIdType> theId) {
 		theId.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
 		if (theId.isEmpty()) {
@@ -272,10 +304,7 @@ public class IdHelperService {
 				.map(t -> t.getIdPartAsLong())
 				.collect(Collectors.toList());
 			if (!pids.isEmpty()) {
-				myResourceTableDao.findLookupFieldsByResourcePid(pids)
-					.stream()
-					.map(lookup -> new ResourceLookup((String)lookup[0], (Long)lookup[1], (Date)lookup[2]))
-					.forEach(retVal::add);
+				resolvePids(theRequestPartitionId, pids, retVal);
 			}
 		}
 
@@ -298,14 +327,16 @@ public class IdHelperService {
 
 			if (nextIds.size() > 0) {
 				Collection<Object[]> views;
-				if (isBlank(nextResourceType)) {
-					warnAboutUnqualifiedForcedIdResolution(theRequest);
-					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextIds);
+				assert isNotBlank(nextResourceType);
 
+				if (theRequestPartitionId != null) {
+					if (theRequestPartitionId.getPartitionId() != null) {
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, theRequestPartitionId.getPartitionId());
+					} else {
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(nextResourceType, nextIds);
+					}
 				} else {
-
 					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds);
-
 				}
 
 				for (Object[] next : views) {
@@ -328,15 +359,21 @@ public class IdHelperService {
 		return retVal;
 	}
 
-	private void warnAboutUnqualifiedForcedIdResolution(RequestDetails theRequest) {
-		StorageProcessingMessage msg = new StorageProcessingMessage()
-			.setMessage("This search uses unqualified resource IDs (an ID without a resource type). This is less efficient than using a qualified type.");
-		ourLog.debug(msg.getMessage());
-		HookParams params = new HookParams()
-			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest)
-			.add(StorageProcessingMessage.class, msg);
-		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
+	private void resolvePids(RequestPartitionId theRequestPartitionId, List<Long> thePidsToResolve, List<IResourceLookup> theTarget) {
+		Collection<Object[]> lookup;
+		if (theRequestPartitionId != null) {
+			if (theRequestPartitionId.getPartitionId() != null) {
+				lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartition(thePidsToResolve, theRequestPartitionId.getPartitionId());
+			} else {
+				lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(thePidsToResolve);
+			}
+		} else {
+			lookup = myResourceTableDao.findLookupFieldsByResourcePid(thePidsToResolve);
+		}
+		lookup
+			.stream()
+			.map(t -> new ResourceLookup((String) t[0], (Long) t[1], (Date) t[2]))
+			.forEach(theTarget::add);
 	}
 
 	public void clearCache() {

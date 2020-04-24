@@ -45,7 +45,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 	public void before() throws Exception {
 		super.before();
 
-		myDeleteInterceptor = new CascadingDeleteInterceptor(myDaoRegistry, myInterceptorBroadcaster);
+		myDeleteInterceptor = new CascadingDeleteInterceptor(myFhirCtx, myDaoRegistry, myInterceptorBroadcaster);
 	}
 
 	@Override
@@ -97,6 +97,20 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 		} catch (ResourceVersionConflictException e) {
 			// good
 			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+		}
+	}
+
+	@Test
+	public void testDeleteWithNoRequestObject() {
+		createResources();
+
+		myInterceptorRegistry.registerInterceptor(myDeleteInterceptor);
+
+		try {
+			myPatientDao.delete(myPatientId);
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			assertThat(e.getMessage(), containsString("because at least one resource has a reference to this resource"));
 		}
 	}
 

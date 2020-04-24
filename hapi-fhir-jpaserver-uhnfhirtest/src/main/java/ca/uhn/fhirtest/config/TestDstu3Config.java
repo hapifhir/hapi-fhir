@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.dialect.PostgreSQL94Dialect;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -101,6 +102,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
 		retVal.setDefaultQueryTimeout(20);
+		retVal.setMaxConnLifetimeMillis(5 * DateUtils.MILLIS_PER_MINUTE);
 		return retVal;
 	}
 

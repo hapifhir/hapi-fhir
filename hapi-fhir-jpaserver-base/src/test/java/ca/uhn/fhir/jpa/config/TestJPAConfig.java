@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
@@ -27,6 +28,11 @@ public class TestJPAConfig {
 	@Bean
 	public DaoConfig daoConfig() {
 		return new DaoConfig();
+	}
+
+	@Bean
+	public PartitionSettings partitionSettings() {
+		return new PartitionSettings();
 	}
 
 	@Bean

@@ -187,6 +187,7 @@ public class DaoConfig {
 	 */
 	private boolean myDeleteEnabled = true;
 
+
 	/**
 	 * Constructor
 	 */

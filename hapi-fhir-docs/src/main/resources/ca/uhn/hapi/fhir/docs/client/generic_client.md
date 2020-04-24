@@ -181,6 +181,14 @@ Conditional deletions are also possible, which is a form where instead of deleti
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|deleteConditional}}
 ```
 
+## Cascading Delete
+
+The following snippet shows now to request a cascading delete. Note that this is a HAPI FHIR specific feature and is not supported on all servers.
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|deleteCascade}}
+```
+
 # Update - Instance
 
 Updating a resource is similar to creating one, except that an ID must be supplied since you are updating a previously existing resource instance.

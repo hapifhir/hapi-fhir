@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 public class SearchParamMatcher {
 	@Autowired
@@ -33,9 +32,7 @@ public class SearchParamMatcher {
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	public InMemoryMatchResult match(String theCriteria, IBaseResource theResource, RequestDetails theRequest) {
-
 		ResourceIndexedSearchParams resourceIndexedSearchParams = myIndexedSearchParamExtractor.extractIndexedSearchParams(theResource, theRequest);
-
 		return myInMemoryResourceMatcher.match(theCriteria, theResource, resourceIndexedSearchParams);
 	}
 }

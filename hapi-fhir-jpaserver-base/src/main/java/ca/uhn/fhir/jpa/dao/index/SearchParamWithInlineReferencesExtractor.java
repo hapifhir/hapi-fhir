@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
@@ -69,7 +70,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Lazy
 public class SearchParamWithInlineReferencesExtractor {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamWithInlineReferencesExtractor.class);
-
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	protected EntityManager myEntityManager;
 	@Autowired
 	private MatchResourceUrlService myMatchResourceUrlService;
 	@Autowired
@@ -88,18 +90,17 @@ public class SearchParamWithInlineReferencesExtractor {
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
-
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	public void populateFromResource(ResourceIndexedSearchParams theParams, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
 		extractInlineReferences(theResource, theRequest);
 
-		mySearchParamExtractorService.extractFromResource(theRequest, theParams, theEntity, theResource, theUpdateTime, true);
+		mySearchParamExtractorService.extractFromResource(theEntity.getPartitionId(), theRequest, theParams, theEntity, theResource, theUpdateTime, true);
 
 		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
-			theParams.findMissingSearchParams(myDaoConfig.getModelConfig(), theEntity, activeSearchParams);
+			theParams.findMissingSearchParams(myPartitionSettings, myDaoConfig.getModelConfig(), theEntity, activeSearchParams);
 		}
 
 		/*
@@ -202,7 +203,6 @@ public class SearchParamWithInlineReferencesExtractor {
 			}
 		}
 	}
-
 
 
 	/**
