@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { TestR4ConfigWithElasticsearchClient.class })
-public class FhirResourceDaoR4SearchLastNTest extends BaseJpaTest {
+public class FhirResourceDaoR4SearchLastNIT extends BaseJpaTest {
 
 	@Autowired
 	@Qualifier("myPatientDaoR4")

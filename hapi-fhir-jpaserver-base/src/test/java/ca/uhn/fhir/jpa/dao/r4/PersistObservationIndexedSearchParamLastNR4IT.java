@@ -40,16 +40,13 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4ConfigWithElasticsearchClient.class})
-public class PersistObservationIndexedSearchParamLastNR4Test {
+public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	@Autowired
 	IObservationIndexedSearchParamLastNDao myResourceIndexedObservationLastNDao;
 
 	@Autowired
 	IObservationIndexedCodeCodeableConceptSearchParamDao myCodeableConceptIndexedSearchParamNormalizedDao;
-
-//	@Autowired
-//	ObservationLastNIndexPersistR4Svc myObservationLastNIndexPersistR4Svc;
 
 	@Autowired
 	private ElasticsearchSvcImpl elasticsearchSvc;
@@ -68,9 +65,6 @@ public class PersistObservationIndexedSearchParamLastNR4Test {
 
 		myResourceIndexedObservationLastNDao.deleteAll();
 		myCodeableConceptIndexedSearchParamNormalizedDao.deleteAll();
-//		testObservationPersist = new BaseObservationLastNIndexPersistSvc(myEntityManager, myResourceIndexedObservationLastNDao,
-//			myObservationIndexedCodeCodingSearchParamDao, mySearchParamExtractor, myContext);
-
 
 	}
 

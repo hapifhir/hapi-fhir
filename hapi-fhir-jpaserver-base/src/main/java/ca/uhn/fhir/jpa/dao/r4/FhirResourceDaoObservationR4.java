@@ -21,14 +21,10 @@ package ca.uhn.fhir.jpa.dao.r4;
  */
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDaoObservation;
-import ca.uhn.fhir.jpa.dao.data.IObservationIndexedCodeCodingSearchParamDao;
-import ca.uhn.fhir.jpa.dao.data.IObservationIndexedSearchParamLastNDao;
 import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistSvc;
-import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistR4Svc;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;

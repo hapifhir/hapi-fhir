@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestElasticsearchConfig.class})
-public class LastNElasticsearchSvcMultipleObservationsTest {
+public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	@Autowired
 	private ElasticsearchSvcImpl elasticsearchSvc;

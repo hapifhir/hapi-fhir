@@ -320,86 +320,30 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		/*
-		 * Fulltext search
-		 */
-		/*
-		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-			if (myFulltextSearchSvc == null) {
-				if (myParams.containsKey(Constants.PARAM_TEXT)) {
-					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-				} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-				}
-			}
-
-			List<ResourcePersistentId> pids;
-			if (myParams.getEverythingMode() != null) {
-				pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
-			} else {
-				pids = myFulltextSearchSvc.search(myResourceName, myParams);
-			}
-			if (pids.isEmpty()) {
-				// Will never match
-				pids = Collections.singletonList(new ResourcePersistentId(-1L));
-			}
-
-			myQueryRoot.addPredicate(myQueryRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(pids)));
-		} else if (myParams.isLastN()) {
-			if (myIElasticsearchSvc == null) {
-				if (myParams.isLastN()) {
-					throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
-				}
-			}
-
-			if (myParams.isLastN()) {
-				Integer myMaxObservationsPerCode = null;
-				String[] maxCountParams = theRequest.getParameters().get("max");
-				if (maxCountParams != null && maxCountParams.length > 0) {
-					myMaxObservationsPerCode = Integer.valueOf(maxCountParams[0]);
-				} else {
-					throw new InvalidRequestException("Max parameter is required for $lastn operation");
-				}
-				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myMaxObservationsPerCode);
-				for (String lastnResourceId : lastnResourceIds) {
-					lastnPids.add(myIdHelperService.resolveResourcePersistentIds(myResourceName, lastnResourceId));
-				}
-				if (lastnPids.isEmpty()) {
-					// Will never match
-					pids = Collections.singletonList(new ResourcePersistentId(-1L));
-				}
-				myQueryRoot.addPredicate(myQueryRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(pids)));
-			}
-		}
-		 */
-		/*
-		 * lastn search
+		 * Fulltext or lastn search
 		 */
 		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
-		List<ResourcePersistentId> lastnPids = new ArrayList<>();
-		List<ResourcePersistentId> fullTextSearchPids = new ArrayList<>();
-
-		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-			if (myFulltextSearchSvc == null) {
-				if (myParams.containsKey(Constants.PARAM_TEXT)) {
-					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-				} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+			List<ResourcePersistentId> pids = new ArrayList<>();
+			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
+				if (myFulltextSearchSvc == null) {
+					if (myParams.containsKey(Constants.PARAM_TEXT)) {
+						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
+						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+					}
 				}
-			}
 
-			if (myParams.getEverythingMode() != null) {
-				fullTextSearchPids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
-			} else {
-				fullTextSearchPids = myFulltextSearchSvc.search(myResourceName, myParams);
-			}
-			} else {
-			if (myIElasticsearchSvc == null) {
-				if (myParams.isLastN()) {
-					throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
+				if (myParams.getEverythingMode() != null) {
+					pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
+				} else {
+					pids = myFulltextSearchSvc.search(myResourceName, myParams);
 				}
-			}
-
-			if (myParams.isLastN()) {
+			} else if (myParams.isLastN()) {
+				if (myIElasticsearchSvc == null) {
+					if (myParams.isLastN()) {
+						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
+					}
+				}
 				Integer myMaxObservationsPerCode = null;
 				String[] maxCountParams = theRequest.getParameters().get("max");
 				if (maxCountParams != null && maxCountParams.length > 0) {
@@ -409,24 +353,8 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myMaxObservationsPerCode);
 				for (String lastnResourceId : lastnResourceIds) {
-					lastnPids.add(myIdHelperService.resolveResourcePersistentIds(myResourceName, lastnResourceId));
+					pids.add(myIdHelperService.resolveResourcePersistentIds(myResourceName, lastnResourceId));
 				}
-			}
-		}
-
-			//
-			List<ResourcePersistentId> pids;
-			if (fullTextSearchPids.isEmpty()) {
-				pids = lastnPids;
-			} else if (lastnPids.isEmpty()) {
-				pids = fullTextSearchPids;
-			} else {
-				// Intersection of the fullTextSearchPids and lastnPids
-				Set<ResourcePersistentId> pidIntersection = fullTextSearchPids.stream()
-					.distinct()
-					.filter(lastnPids::contains)
-					.collect(Collectors.toSet());
-				pids = new ArrayList<>(pidIntersection);
 			}
 			if (pids.isEmpty()) {
 				// Will never match
@@ -434,6 +362,7 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 
 			myQueryRoot.addPredicate(myQueryRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(pids)));
+
 		}
 
 		/*

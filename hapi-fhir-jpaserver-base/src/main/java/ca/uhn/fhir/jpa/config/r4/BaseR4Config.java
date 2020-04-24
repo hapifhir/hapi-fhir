@@ -7,8 +7,6 @@ import ca.uhn.fhir.jpa.config.BaseConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
-import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistSvc;
-import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistR4Svc;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;

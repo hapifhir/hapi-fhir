@@ -164,7 +164,7 @@ public class FhirAutoConfiguration {
 		private ScheduledExecutorService myScheduledExecutorService;
 
 		@Configuration
-		@EntityScan(basePackages = {"ca.uhn.fhir.jpa.entity", "ca.uhn.fhir.jpa.model.entity"})
+		@EntityScan(basePackages = {"ca.uhn.fhir.jpa.entity", "ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.dao.lastn.entity"})
 		@Import({
 			SubscriptionChannelConfig.class,
 			SubscriptionProcessorConfig.class,

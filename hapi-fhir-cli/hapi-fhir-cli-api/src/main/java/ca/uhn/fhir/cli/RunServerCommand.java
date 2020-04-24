@@ -72,8 +72,6 @@ public class RunServerCommand extends BaseCommand {
 		options.addOption(null, OPTION_DISABLE_REFERENTIAL_INTEGRITY, false, "If this flag is set, the server will not enforce referential integrity");
 
 		addOptionalOption(options, "u", "url", "Url", "If this option is set, specifies the JDBC URL to use for the database connection");
-		addOptionalOption(options, "d", "default-size", "PageSize", "If this option is set, specifies the default page size for number of query results");
-		addOptionalOption(options, "m", "max-size", "MaxSize", "If this option is set, specifies the maximum result set size for queries");
 
 		Long defaultReuseSearchResults = DaoConfig.DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
 		String defaultReuseSearchResultsStr = defaultReuseSearchResults == null ? "off" : String.valueOf(defaultReuseSearchResults);
@@ -111,17 +109,6 @@ public class RunServerCommand extends BaseCommand {
 		}
 
 		ContextHolder.setDatabaseUrl(theCommandLine.getOptionValue("u"));
-
-		String defaultPageSize = theCommandLine.getOptionValue("d");
-		String maxPageSize = theCommandLine.getOptionValue("m");
-		if (defaultPageSize != null) {
-			ContextHolder.setDefaultPageSize(Integer.valueOf(defaultPageSize));
-			if (maxPageSize != null) {
-				ContextHolder.setMaxPageSize(Integer.valueOf(maxPageSize));
-			} else {
-				ContextHolder.setMaxPageSize(Integer.valueOf(defaultPageSize));
-			}
-		}
 
 		String reuseSearchResults = theCommandLine.getOptionValue(OPTION_REUSE_SEARCH_RESULTS_MILLIS);
 		if (reuseSearchResults != null) {

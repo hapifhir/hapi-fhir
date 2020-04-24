@@ -160,7 +160,7 @@ public class JpaServerDemo extends RestfulServer {
 		/*
 		 * This is a simple paging strategy that keeps the last 10 searches in memory
 		 */
-		setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(ContextHolder.getDefaultPageSize()).setMaximumPageSize(ContextHolder.getMaxPageSize()));
+		setPagingProvider(new FifoMemoryPagingProvider(10));
 
 		// Register a CORS filter
 		CorsInterceptor corsInterceptor = new CorsInterceptor();

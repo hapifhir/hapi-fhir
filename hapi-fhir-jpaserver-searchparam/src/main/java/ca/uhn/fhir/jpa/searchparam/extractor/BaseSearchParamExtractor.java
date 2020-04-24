@@ -636,7 +636,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void addToken_Coding(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		theParams.add(createSearchParamForCoding(theResourceType, theSearchParam, theValue));
+		ResourceIndexedSearchParamToken resourceIndexedSearchParamToken = createSearchParamForCoding(theResourceType, theSearchParam, theValue);
+		if (resourceIndexedSearchParamToken != null) {
+			theParams.add(resourceIndexedSearchParamToken);
+		}
 
 		String text = getDisplayTextForCoding(theValue);
 		createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);

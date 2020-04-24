@@ -22,6 +22,7 @@ public class ObservationIndexedCodeCodeableConceptEntity {
     @Column(name = "CODEABLE_CONCEPT_TEXT", nullable = true)
     private String myCodeableConceptText;
 
+    // TODO: Make coding a Collection. Need to first figure out how to maintain this over time.
     @IndexedEmbedded(depth=2, prefix = "coding")
 //    @OneToMany(mappedBy = "myCodeableConceptId", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	 @JoinColumn(name = "CODEABLE_CONCEPT_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_CONCEPT_CODE"))

@@ -33,8 +33,6 @@ public class ContextHolder {
 	private static String ourPath;
 	private static Long ourReuseSearchResultsMillis;
 	private static String ourDatabaseUrl;
-	private static Integer myDefaultPageSize = 10;
-	private static Integer myMaxPageSize = 50;
 
 	static {
 		ourReuseSearchResultsMillis = DaoConfig.DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
@@ -102,21 +100,4 @@ public class ContextHolder {
 	public static void setDatabaseUrl(String theDatabaseUrl) {
 		ourDatabaseUrl = theDatabaseUrl;
 	}
-
-	public static void setDefaultPageSize(Integer theDefaultPageSize) {
-		myDefaultPageSize = theDefaultPageSize;
-	}
-
-	public static Integer getDefaultPageSize() {
-		return myDefaultPageSize;
-	}
-
-	public static void setMaxPageSize(Integer theMaxPageSize) {
-		myMaxPageSize = theMaxPageSize;
-	}
-
-	public static Integer getMaxPageSize() {
-		return myMaxPageSize;
-	}
-
 }

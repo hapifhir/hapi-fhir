@@ -53,8 +53,12 @@ public class ObservationLastNIndexPersistSvc {
 			effectiveDtm = mySearchParameterExtractor.extractDateFromResource(effectiveDateElement.get(0), "Observation.effective");
 		}
 
-		// Only index for lastn if Observation has a subject and effective date/time
-		if (subjectId == null || effectiveDtm == null) {
+		// Build CodeableConcept entity for Observation.Code.
+		List<IBase> observationCodeCodeableConcepts = mySearchParameterExtractor.extractValues("Observation.code", theResource);
+
+
+		// Only index for lastn if Observation has a subject, effective date/time and code
+		if (subjectId == null || effectiveDtm == null || observationCodeCodeableConcepts.size() == 0) {
 			return;
 		}
 
@@ -76,17 +80,6 @@ public class ObservationLastNIndexPersistSvc {
 		indexedObservation.setIdentifier(resourcePID);
 		indexedObservation.setSubject(subjectId);
 
-		// Build CodeableConcept entities for Observation.Category
-		List<IBase> observationCategoryCodeableConcepts = mySearchParameterExtractor.extractValues("Observation.category", theResource);
-		Set<ObservationIndexedCategoryCodeableConceptEntity> categoryCodeableConceptEntities = new HashSet<>();
-		for (IBase categoryCodeableConcept : observationCategoryCodeableConcepts) {
-			// Build CodeableConcept entities for each category CodeableConcept
-			categoryCodeableConceptEntities.add(getCategoryCodeableConceptEntities(categoryCodeableConcept));
-		}
-		indexedObservation.setCategoryCodeableConcepts(categoryCodeableConceptEntities);
-
-		// Build CodeableConcept entity for Observation.Code.
-		List<IBase> observationCodeCodeableConcepts = mySearchParameterExtractor.extractValues("Observation.code", theResource);
 
 		// Determine if a Normalized ID was created previously for Observation Code
 		boolean observationCodeUpdate = false;
@@ -101,6 +94,15 @@ public class ObservationLastNIndexPersistSvc {
 
 		// Create/update normalized Observation Code index record
 		ObservationIndexedCodeCodeableConceptEntity codeableConceptField = getCodeCodeableConcept(observationCodeCodeableConcepts.get(0), observationCodeNormalizedId);
+
+		// Build CodeableConcept entities for Observation.Category
+		List<IBase> observationCategoryCodeableConcepts = mySearchParameterExtractor.extractValues("Observation.category", theResource);
+		Set<ObservationIndexedCategoryCodeableConceptEntity> categoryCodeableConceptEntities = new HashSet<>();
+		for (IBase categoryCodeableConcept : observationCategoryCodeableConcepts) {
+			// Build CodeableConcept entities for each category CodeableConcept
+			categoryCodeableConceptEntities.add(getCategoryCodeableConceptEntities(categoryCodeableConcept));
+		}
+		indexedObservation.setCategoryCodeableConcepts(categoryCodeableConceptEntities);
 
 		if (observationCodeUpdate) {
 			myEntityManager.merge(codeableConceptField);
@@ -152,16 +154,18 @@ public class ObservationLastNIndexPersistSvc {
 			ResourceIndexedSearchParamToken param = mySearchParameterExtractor.createSearchParamForCoding("Observation",
 				new RuntimeSearchParam(null, null, "code", null, null, null, null, null, null, null),
 				nextCoding);
-			String system = param.getSystem();
-			String code = param.getValue();
-			String text = mySearchParameterExtractor.getDisplayTextForCoding(nextCoding);
-			if (code != null && system != null) {
-				codeCodeableConceptId = myObservationIndexedCodeCodingSearchParamDao.findForCodeAndSystem(code, system);
-			} else {
-				codeCodeableConceptId = myObservationIndexedCodeCodingSearchParamDao.findForDisplay(text);
-			}
-			if (codeCodeableConceptId != null) {
-				break;
+			if (param != null) {
+				String system = param.getSystem();
+				String code = param.getValue();
+				String text = mySearchParameterExtractor.getDisplayTextForCoding(nextCoding);
+				if (code != null && system != null) {
+					codeCodeableConceptId = myObservationIndexedCodeCodingSearchParamDao.findForCodeAndSystem(code, system);
+				} else {
+					codeCodeableConceptId = myObservationIndexedCodeCodingSearchParamDao.findForDisplay(text);
+				}
+				if (codeCodeableConceptId != null) {
+					break;
+				}
 			}
 		}
 
@@ -172,20 +176,28 @@ public class ObservationLastNIndexPersistSvc {
 		ResourceIndexedSearchParamToken param = mySearchParameterExtractor.createSearchParamForCoding("Observation",
 			new RuntimeSearchParam(null, null, "category", null, null, null, null, null, null, null),
 			theValue);
-		String system = param.getSystem();
-		String code = param.getValue();
-		String text = mySearchParameterExtractor.getDisplayTextForCoding(theValue);
-		return new ObservationIndexedCategoryCodingEntity(system, code, text);
+		ObservationIndexedCategoryCodingEntity observationIndexedCategoryCodingEntity = null;
+		if (param != null) {
+			String system = param.getSystem();
+			String code = param.getValue();
+			String text = mySearchParameterExtractor.getDisplayTextForCoding(theValue);
+			observationIndexedCategoryCodingEntity = new ObservationIndexedCategoryCodingEntity(system, code, text);
+		}
+		return observationIndexedCategoryCodingEntity;
 	}
 
 	private ObservationIndexedCodeCodingEntity getCodeCoding(IBase theValue, String observationCodeNormalizedId) {
 		ResourceIndexedSearchParamToken param = mySearchParameterExtractor.createSearchParamForCoding("Observation",
 			new RuntimeSearchParam(null, null, "code", null, null, null, null, null, null, null),
 			theValue);
-		String system = param.getSystem();
-		String code = param.getValue();
-		String text = mySearchParameterExtractor.getDisplayTextForCoding(theValue);
-		return new ObservationIndexedCodeCodingEntity(system, code, text, observationCodeNormalizedId);
+		ObservationIndexedCodeCodingEntity observationIndexedCodeCodingEntity = null;
+		if (param != null) {
+			String system = param.getSystem();
+			String code = param.getValue();
+			String text = mySearchParameterExtractor.getDisplayTextForCoding(theValue);
+			observationIndexedCodeCodingEntity = new ObservationIndexedCodeCodingEntity(system, code, text, observationCodeNormalizedId);
+		}
+		return observationIndexedCodeCodingEntity;
 	}
 
 	public void deleteObservationIndex(IBasePersistedResource theEntity) {
