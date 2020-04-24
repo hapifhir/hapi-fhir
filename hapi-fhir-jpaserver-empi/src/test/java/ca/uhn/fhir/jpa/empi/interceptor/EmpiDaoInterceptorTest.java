@@ -134,7 +134,9 @@ public class EmpiDaoInterceptorTest extends BaseEmpiR4Test {
 		EmpiHelperR4.OutcomeAndLogMessageWrapper wrapper = myEmpiHelper.createWithLatch(buildJanePatient());
 
 		TransactionLogMessages empiTransactionLogMessages = wrapper.getLogMessages();
-		assertThat(empiTransactionLogMessages.getTransactionGuid(), is(equalToIgnoringCase("MOCK_REQUEST")));
+
+		//There is no TransactionGuid here as there is no TransactionLog in this context.
+		assertThat(empiTransactionLogMessages.getTransactionGuid(), is(nullValue()));
 
 		List<String> messages = empiTransactionLogMessages.getValues();
 		assertThat(messages, hasSize(3));
