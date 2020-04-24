@@ -22,24 +22,26 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.api.Constants;
 import org.hibernate.annotations.OptimisticLock;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import java.util.Collection;
 import java.util.Date;
 
 @MappedSuperclass
-public abstract class BaseHasResource implements IBaseResourceEntity, IBasePersistedResource {
+public abstract class BaseHasResource extends BasePartitionable implements IBaseResourceEntity, IBasePersistedResource {
 
 	@Column(name = "RES_DELETED_AT", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myDeleted;
 
-	// TODO: move to resource history table
 	@Column(name = "RES_VERSION", nullable = true, length = 7)
 	@Enumerated(EnumType.STRING)
 	@OptimisticLock(excluded = true)
@@ -60,7 +62,7 @@ public abstract class BaseHasResource implements IBaseResourceEntity, IBasePersi
 	private Date myUpdated;
 
 	/**
-	 * This is stored as an optimization to avoid neeind to query for this
+	 * This is stored as an optimization to avoid needing to query for this
 	 * after an update
 	 */
 	@Transient

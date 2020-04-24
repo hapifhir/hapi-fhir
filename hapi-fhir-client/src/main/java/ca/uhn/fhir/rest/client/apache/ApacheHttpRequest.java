@@ -34,6 +34,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.*;
 
@@ -108,6 +109,11 @@ public class ApacheHttpRequest implements IHttpRequest {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public void setUri(String theUrl) {
+		myRequest.setURI(URI.create(theUrl));
 	}
 
 	@Override

@@ -265,7 +265,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		assertEquals(1, myObservationDao.search(map).size().intValue());
-//		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 		// Resolve forced ID, Perform search, load result
 		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
@@ -279,8 +278,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		assertEquals(1, myObservationDao.search(map).size().intValue());
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
-		// Resolve forced ID, Perform search, load result
-		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		// Resolve forced ID, Perform search, load result (this time we reuse the cached forced-id resolution)
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());

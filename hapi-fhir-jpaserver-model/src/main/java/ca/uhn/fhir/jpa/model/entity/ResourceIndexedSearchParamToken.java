@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.apache.commons.lang3.StringUtils;
@@ -101,8 +103,9 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamToken(String theResourceType, String theParamName, String theSystem, String theValue) {
+	public ResourceIndexedSearchParamToken(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, String theSystem, String theValue) {
 		super();
+		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setSystem(theSystem);
@@ -110,17 +113,31 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	@Override
+	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+		super.copyMutableValuesFrom(theSource);
+		ResourceIndexedSearchParamToken source = (ResourceIndexedSearchParamToken) theSource;
+
+		mySystem = source.mySystem;
+		myValue = source.myValue;
+		myHashSystem = source.myHashSystem;
+		myHashSystemAndValue = source.getHashSystemAndValue();
+		myHashValue = source.myHashValue;
+		myHashIdentity = source.myHashIdentity;
+	}
+
+
+	@Override
 	@PrePersist
 	public void calculateHashes() {
-		if (myHashSystem == null) {
+		if (myHashSystem == null && getParamName() != null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
 			String system = getSystem();
 			String value = getValue();
-			setHashIdentity(calculateHashIdentity(resourceType, paramName));
-			setHashSystem(calculateHashSystem(resourceType, paramName, system));
-			setHashSystemAndValue(calculateHashSystemAndValue(resourceType, paramName, system, value));
-			setHashValue(calculateHashValue(resourceType, paramName, value));
+			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
+			setHashSystem(calculateHashSystem(getPartitionSettings(), getPartitionId(), resourceType, paramName, system));
+			setHashSystemAndValue(calculateHashSystemAndValue(getPartitionSettings(), getPartitionId(), resourceType, paramName, system, value));
+			setHashValue(calculateHashValue(getPartitionSettings(), getPartitionId(), resourceType, paramName, value));
 		}
 	}
 
@@ -190,7 +207,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	@Override
 	public void setId(Long theId) {
-		myId =theId;
+		myId = theId;
 	}
 
 	public String getSystem() {
@@ -244,39 +261,39 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 			return false;
 		}
 		TokenParam token = (TokenParam) theParam;
-		boolean retval = false;
+		boolean retVal = false;
 		String valueString = defaultString(getValue());
 		String tokenValueString = defaultString(token.getValue());
 
 		// Only match on system if it wasn't specified
 		if (token.getSystem() == null || token.getSystem().isEmpty()) {
 			if (valueString.equalsIgnoreCase(tokenValueString)) {
-				retval = true;
+				retVal = true;
 			}
 		} else if (tokenValueString == null || tokenValueString.isEmpty()) {
 			if (token.getSystem().equalsIgnoreCase(getSystem())) {
-				retval = true;
+				retVal = true;
 			}
 		} else {
 			if (token.getSystem().equalsIgnoreCase(getSystem()) &&
 				valueString.equalsIgnoreCase(tokenValueString)) {
-				retval = true;
+				retVal = true;
 			}
 		}
-		return retval;
+		return retVal;
 	}
 
-	public static long calculateHashSystem(String theResourceType, String theParamName, String theSystem) {
-		return hash(theResourceType, theParamName, trim(theSystem));
+	public static long calculateHashSystem(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theSystem) {
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, trim(theSystem));
 	}
 
-	public static long calculateHashSystemAndValue(String theResourceType, String theParamName, String theSystem, String theValue) {
-		return hash(theResourceType, theParamName, defaultString(trim(theSystem)), trim(theValue));
+	public static long calculateHashSystemAndValue(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theSystem, String theValue) {
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, defaultString(trim(theSystem)), trim(theValue));
 	}
 
-	public static long calculateHashValue(String theResourceType, String theParamName, String theValue) {
+	public static long calculateHashValue(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theValue) {
 		String value = trim(theValue);
-		return hash(theResourceType, theParamName, value);
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
 

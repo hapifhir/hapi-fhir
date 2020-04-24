@@ -30,7 +30,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+// TODO: move this to ca.uhn.fhir.jpa.model.config
 public class ModelConfig {
+
 	/**
 	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
 	 * values:
@@ -55,7 +57,7 @@ public class ModelConfig {
 	private boolean myAllowExternalReferences = false;
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<>();
 	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
-	private boolean myDefaultSearchParamsCanBeOverridden = false;
+	private boolean myDefaultSearchParamsCanBeOverridden = true;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private String myEmailFromAddress = "noreply@unknown.com";
 	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
@@ -76,7 +78,7 @@ public class ModelConfig {
 	 * the behaviour of the default search parameters.
 	 * </p>
 	 * <p>
-	 * The default value for this setting is {@code false}
+	 * The default value for this setting is {@code true}
 	 * </p>
 	 */
 	public boolean isDefaultSearchParamsCanBeOverridden() {
@@ -92,7 +94,7 @@ public class ModelConfig {
 	 * the behaviour of the default search parameters.
 	 * </p>
 	 * <p>
-	 * The default value for this setting is {@code false}
+	 * The default value for this setting is {@code true}
 	 * </p>
 	 */
 	public void setDefaultSearchParamsCanBeOverridden(boolean theDefaultSearchParamsCanBeOverridden) {

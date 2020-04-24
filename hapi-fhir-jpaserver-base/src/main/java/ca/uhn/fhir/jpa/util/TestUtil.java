@@ -126,11 +126,13 @@ public class TestUtil {
 				boolean hasColumn = nextField.getAnnotation(Column.class) != null;
 				boolean hasJoinColumn = nextField.getAnnotation(JoinColumn.class) != null;
 				boolean hasEmbeddedId = nextField.getAnnotation(EmbeddedId.class) != null;
+				boolean hasEmbedded = nextField.getAnnotation(Embedded.class) != null;
 				OneToMany oneToMany = nextField.getAnnotation(OneToMany.class);
 				OneToOne oneToOne = nextField.getAnnotation(OneToOne.class);
 				boolean isOtherSideOfOneToManyMapping = oneToMany != null && isNotBlank(oneToMany.mappedBy());
 				boolean isOtherSideOfOneToOneMapping = oneToOne != null && isNotBlank(oneToOne.mappedBy());
 				Validate.isTrue(
+					hasEmbedded ||
 					hasColumn ||
 						hasJoinColumn ||
 						isOtherSideOfOneToManyMapping ||

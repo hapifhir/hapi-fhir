@@ -231,7 +231,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 				map.setLastUpdated(new DateRangeParam(job.getSince(), null));
 			}
 
-			IResultIterator resultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, theJobUuid), null);
+			IResultIterator resultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, theJobUuid), null, null);
 			storeResultsToFiles(nextCollection, sb, resultIterator, jobResourceCounter, jobStopwatch);
 		}
 

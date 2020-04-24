@@ -9,7 +9,12 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.RiskAssessment;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -18,7 +23,9 @@ import org.junit.Test;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 @SuppressWarnings({"Duplicates"})
 public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
@@ -183,22 +190,21 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add(Constants.PARAM_FILTER, new StringParam(String.format("status eq active or _id eq %s",
-			idVal)));
+		map.add(Constants.PARAM_FILTER, new StringParam(String.format("status eq active or _id eq %s", idVal)));
+		myCaptureQueriesListener.clear();
+		found = toUnqualifiedVersionlessIdValues(myEncounterDao.search(map));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertThat(found, Matchers.empty());
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam(String.format("_id eq %s", idVal)));
 		found = toUnqualifiedVersionlessIdValues(myEncounterDao.search(map));
 		assertThat(found, Matchers.empty());
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add(Constants.PARAM_FILTER, new StringParam(String.format("_id eq %s",
-			idVal)));
-		found = toUnqualifiedVersionlessIdValues(myEncounterDao.search(map));
-		assertThat(found, Matchers.empty());
-
-		map = new SearchParameterMap();
-		map.setLoadSynchronous(true);
-		map.add(Constants.PARAM_FILTER, new StringParam(String.format("_id eq %s",
-			idVal)));
+		map.add(Constants.PARAM_FILTER, new StringParam(String.format("_id eq %s", idVal)));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		assertThat(found, containsInAnyOrder(id1));
 

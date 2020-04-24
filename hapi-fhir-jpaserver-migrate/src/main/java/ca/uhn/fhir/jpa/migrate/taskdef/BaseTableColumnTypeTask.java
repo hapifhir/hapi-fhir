@@ -82,6 +82,14 @@ public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.ORACLE_12C, "timestamp");
 		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.POSTGRES_9_4, "timestamp");
 
+		setColumnType(ColumnTypeEnum.DATE_ONLY, DriverTypeEnum.H2_EMBEDDED, "date");
+		setColumnType(ColumnTypeEnum.DATE_ONLY, DriverTypeEnum.DERBY_EMBEDDED, "date");
+		setColumnType(ColumnTypeEnum.DATE_ONLY, DriverTypeEnum.MARIADB_10_1, "date");
+		setColumnType(ColumnTypeEnum.DATE_ONLY, DriverTypeEnum.MYSQL_5_7, "date");
+		setColumnType(ColumnTypeEnum.DATE_ONLY, DriverTypeEnum.MSSQL_2012, "date");
+		setColumnType(ColumnTypeEnum.DATE_ONLY, DriverTypeEnum.ORACLE_12C, "date");
+		setColumnType(ColumnTypeEnum.DATE_ONLY, DriverTypeEnum.POSTGRES_9_4, "date");
+
 		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.H2_EMBEDDED, "boolean");
 		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.DERBY_EMBEDDED, "boolean");
 		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.MSSQL_2012, "bit");
@@ -203,6 +211,7 @@ public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 
 		LONG,
 		STRING,
+		DATE_ONLY,
 		DATE_TIMESTAMP,
 		BOOLEAN,
 		FLOAT,

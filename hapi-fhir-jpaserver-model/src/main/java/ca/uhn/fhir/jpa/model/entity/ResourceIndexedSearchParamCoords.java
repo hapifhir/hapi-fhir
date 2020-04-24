@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -61,7 +62,8 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	public ResourceIndexedSearchParamCoords() {
 	}
 
-	public ResourceIndexedSearchParamCoords(String theResourceType, String theParamName, double theLatitude, double theLongitude) {
+	public ResourceIndexedSearchParamCoords(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, double theLatitude, double theLongitude) {
+		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setLatitude(theLatitude);
@@ -71,10 +73,10 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	@Override
 	@PrePersist
 	public void calculateHashes() {
-		if (myHashIdentity == null) {
+		if (myHashIdentity == null && getParamName() != null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
-			setHashIdentity(calculateHashIdentity(resourceType, paramName));
+			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 		}
 	}
 
@@ -102,6 +104,15 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		b.append(getLongitude(), obj.getLongitude());
 		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
+	}
+
+	@Override
+	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+		super.copyMutableValuesFrom(theSource);
+		ResourceIndexedSearchParamCoords source = (ResourceIndexedSearchParamCoords) theSource;
+		myLatitude = source.getLatitude();
+		myLongitude = source.getLongitude();
+		myHashIdentity = source.myHashIdentity;
 	}
 
 	public void setHashIdentity(Long theHashIdentity) {

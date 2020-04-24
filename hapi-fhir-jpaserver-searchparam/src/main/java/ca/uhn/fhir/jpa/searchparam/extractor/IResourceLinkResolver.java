@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  */
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -36,6 +37,7 @@ public interface IResourceLinkResolver {
 	 * <p>
 	 * This method returns an {@link IResourceLookup} so as to avoid needing to resolve the entire resource.
 	 *
+	 * @param theRequestPartitionId      The partition ID of the target resource
 	 * @param theSearchParam      The param that is being indexed
 	 * @param theSourcePath       The path within the resource where this reference was found
 	 * @param theSourceResourceId The ID of the resource containing the reference to the target being resolved
@@ -44,7 +46,7 @@ public interface IResourceLinkResolver {
 	 * @param theReference        The reference being resolved
 	 * @param theRequest          The incoming request, if any
 	 */
-	IResourceLookup findTargetResource(RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest);
+	IResourceLookup findTargetResource(RequestPartitionId theRequestPartitionId, RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest);
 
 	void validateTypeOrThrowException(Class<? extends IBaseResource> theType);
 

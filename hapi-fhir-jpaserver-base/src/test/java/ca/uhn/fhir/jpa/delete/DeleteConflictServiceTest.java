@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.junit.Test;
@@ -50,6 +51,8 @@ public class DeleteConflictServiceTest {
 		DeleteConflictService myDeleteConflictService() { return new DeleteConflictService(); }
 		@Bean
 		DaoConfig myDaoConfig() { return new DaoConfig(); }
+		@Bean
+		PartitionSettings partitionSettings() { return new PartitionSettings(); }
 	}
 
 	@Test
