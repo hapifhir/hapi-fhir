@@ -119,4 +119,9 @@ public class JaxRsHttpRequest implements IHttpRequest {
 		return ""; // TODO: can we get this from somewhere?
 	}
 
+	@Override
+	public void setUri(String theUrl) {
+		throw new UnsupportedOperationException();
+	}
+
 }

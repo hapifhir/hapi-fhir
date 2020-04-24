@@ -22,16 +22,17 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.math.BigDecimal;
 
 import static ca.uhn.fhir.model.primitive.IdDt.isValidLong;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/ {
 
@@ -76,6 +77,17 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		}
 
 		setValueAsQueryToken(null, null, qualifier, theValue);
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @since 5.0.0
+	 */
+	public ReferenceParam(IIdType theValue) {
+		if (theValue != null) {
+			setValueAsQueryToken(null, null, null, theValue.getValue());
+		}
 	}
 
 	@Override
@@ -209,7 +221,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 */
 	public ReferenceParam setValue(String theValue) {
 		IdDt id = new IdDt(theValue);
-		String qualifier= null;
+		String qualifier = null;
 		if (id.hasResourceType()) {
 			qualifier = ":" + id.getResourceType();
 		}
@@ -231,7 +243,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 * to {@link DateParam}. This is useful if you are using reference parameters and want to handle
 	 * chained parameters of different types in a single method.
 	 * <p>
-	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
+	 * See <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/rest_operations_search.html#chained-resource-references">Dynamic Chains</a>
 	 * in the HAPI FHIR documentation for an example of how to use this method.
 	 * </p>
 	 */
@@ -246,7 +258,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 * to {@link NumberParam}. This is useful if you are using reference parameters and want to handle
 	 * chained parameters of different types in a single method.
 	 * <p>
-	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
+	 * See <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/rest_operations_search.html#chained-resource-references">Dynamic Chains</a>
 	 * in the HAPI FHIR documentation for an example of how to use this method.
 	 * </p>
 	 */
@@ -261,7 +273,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 * to {@link QuantityParam}. This is useful if you are using reference parameters and want to handle
 	 * chained parameters of different types in a single method.
 	 * <p>
-	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
+	 * See <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/rest_operations_search.html#chained-resource-references">Dynamic Chains</a>
 	 * in the HAPI FHIR documentation for an example of how to use this method.
 	 * </p>
 	 */
@@ -286,7 +298,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 * to {@link StringParam}. This is useful if you are using reference parameters and want to handle
 	 * chained parameters of different types in a single method.
 	 * <p>
-	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
+	 * See <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/rest_operations_search.html#chained-resource-references">Dynamic Chains</a>
 	 * in the HAPI FHIR documentation for an example of how to use this method.
 	 * </p>
 	 */
@@ -301,7 +313,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 * to {@link TokenParam}. This is useful if you are using reference parameters and want to handle
 	 * chained parameters of different types in a single method.
 	 * <p>
-	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
+	 * See <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/rest_operations_search.html#chained-resource-references">Dynamic Chains</a>
 	 * in the HAPI FHIR documentation for an example of how to use this method.
 	 * </p>
 	 */

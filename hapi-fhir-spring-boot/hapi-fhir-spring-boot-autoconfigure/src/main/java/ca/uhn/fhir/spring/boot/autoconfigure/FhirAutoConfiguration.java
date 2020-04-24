@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
@@ -179,6 +180,14 @@ public class FhirAutoConfiguration {
 				DaoConfig fhirDaoConfig = new DaoConfig();
 				return fhirDaoConfig;
 			}
+
+			@Bean
+			@ConditionalOnMissingBean
+			@ConfigurationProperties("hapi.fhir.jpa")
+			public PartitionSettings partitionSettings() {
+				return new PartitionSettings();
+			}
+
 
 			@Bean
 			@ConditionalOnMissingBean

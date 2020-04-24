@@ -1,0 +1,8 @@
+---
+type: add
+issue: 1783
+title: "In the JPA server, the ModelConfig setting 'DefaultSearchParamsCanBeOverridden' now has a default value of
+   *true* (previously this was *false*). In addition, when creating/updating a SearchParameter resource, the system
+   will now raise an error if the client is attempting to override a built-in SearchParameter when this setting
+   is disabled (previously this was silently ignored)."
+

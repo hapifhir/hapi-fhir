@@ -223,6 +223,8 @@ public class JdbcUtils {
 						int dataType = indexes.getInt("DATA_TYPE");
 						Long length = indexes.getLong("COLUMN_SIZE");
 						switch (dataType) {
+							case Types.BOOLEAN:
+								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN, length);
 							case Types.VARCHAR:
 								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, length);
 							case Types.NUMERIC:

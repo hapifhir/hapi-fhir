@@ -61,7 +61,6 @@ public class DaoSearchParamSynchronizer {
 	}
 
 	private <T extends BaseResourceIndex> void synchronize(ResourceIndexedSearchParams theParams, ResourceTable theEntity, AddRemoveCount theAddRemoveCount, Collection<T> theNewParms, Collection<T> theExistingParms) {
-		theParams.calculateHashes(theNewParms);
 		List<T> quantitiesToRemove = subtract(theExistingParms, theNewParms);
 		List<T> quantitiesToAdd = subtract(theNewParms, theExistingParms);
 		tryToReuseIndexEntities(quantitiesToRemove, quantitiesToAdd);
@@ -69,6 +68,10 @@ public class DaoSearchParamSynchronizer {
 			myEntityManager.remove(next);
 			theEntity.getParamsQuantity().remove(next);
 		}
+		for (T next : quantitiesToAdd) {
+			next.setPartitionId(theEntity.getPartitionId());
+		}
+		theParams.calculateHashes(theNewParms);
 		for (T next : quantitiesToAdd) {
 			myEntityManager.merge(next);
 		}
@@ -102,7 +105,8 @@ public class DaoSearchParamSynchronizer {
 
 			// Take a row we were going to remove, and repurpose its ID
 			T entityToReuse = theIndexesToRemove.remove(theIndexesToRemove.size() - 1);
-			targetEntity.setId(entityToReuse.getId());
+			entityToReuse.copyMutableValuesFrom(targetEntity);
+			theIndexesToAdd.set(addIndex, entityToReuse);
 		}
 	}
 

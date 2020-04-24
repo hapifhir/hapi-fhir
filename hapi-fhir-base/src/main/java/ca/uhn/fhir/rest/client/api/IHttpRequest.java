@@ -64,6 +64,11 @@ public interface IHttpRequest {
 	String getUri();
 
 	/**
+	 * Modify the request URI, or null
+	 */
+	void setUri(String theUrl);
+
+	/**
 	 * Return the HTTP verb (e.g. "GET")
 	 */
 	String getHttpVerbName();

@@ -20,6 +20,7 @@
 			"contactName": "Kevin Mayfield",
 			"contactEmail": "Kevin.mayfield@mayfield-is.co.uk",
 			"link": "https://data.developer.nhs.uk/ccri/exp",
+            "city": "UK",
 			"lat": 55.378052,
 			"lon": -3.435973,
 			"added": "2019-08-19"
@@ -29,6 +30,7 @@
 			"contactName": "David Hay",
 			"contactEmail": "david.hay25@gmail.com",
 			"link": "http://clinfhir.com",
+            "city": "New Zealand",
 			"lat": -42.651737,
 			"lon": 171.926909,
 			"added": "2019-08-18"

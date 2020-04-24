@@ -171,6 +171,10 @@ public abstract class BaseStorageDao {
 		JpaInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequestDetails, thePointcut, theParams);
 	}
 
+	protected Object doCallHooksAndReturnObject(RequestDetails theRequestDetails, Pointcut thePointcut, HookParams theParams) {
+		return JpaInterceptorBroadcaster.doCallHooksAndReturnObject(getInterceptorBroadcaster(), theRequestDetails, thePointcut, theParams);
+	}
+
 	protected abstract IInterceptorBroadcaster getInterceptorBroadcaster();
 
 	public IBaseOperationOutcome createErrorOperationOutcome(String theMessage, String theCode) {

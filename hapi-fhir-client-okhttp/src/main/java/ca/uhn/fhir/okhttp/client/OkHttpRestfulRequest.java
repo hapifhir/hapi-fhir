@@ -89,7 +89,12 @@ public class OkHttpRestfulRequest implements IHttpRequest {
         return myUrl;
     }
 
-    @Override
+	@Override
+	public void setUri(String theUrl) {
+		myUrl = theUrl;
+	}
+
+	@Override
     public String getHttpVerbName() {
         return myRequestTypeEnum.name();
     }
