@@ -20,29 +20,37 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDaoObservation;
+import ca.uhn.fhir.jpa.dao.data.IObservationIndexedCodeCodingSearchParamDao;
+import ca.uhn.fhir.jpa.dao.data.IObservationIndexedSearchParamLastNDao;
+import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistR4Svc;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
 public class FhirResourceDaoObservationR4 extends BaseHapiFhirResourceDaoObservation<Observation> {
 
+
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	protected EntityManager myEntityManager;
+
 	@Autowired
-	ObservationLastNIndexPersistR4Svc myObservationLastNIndexPersistR4Svc;
+	ObservationLastNIndexPersistSvc myObservationLastNIndexPersistSvc;
 
 	@Override
 	public IBundleProvider observationsLastN(SearchParameterMap theSearchParameterMap,  RequestDetails theRequestDetails, HttpServletResponse theServletResponse) {
@@ -52,19 +60,19 @@ public class FhirResourceDaoObservationR4 extends BaseHapiFhirResourceDaoObserva
 		return mySearchCoordinatorSvc.registerSearch(this, theSearchParameterMap, getResourceName(), new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)), theRequestDetails);
 	}
 
-
-
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
-		if(thePerformIndexing) {
-			// Update indexes here for LastN operation.
-			Observation observation = (Observation)theResource;
-			Reference subjectReference = observation.getSubject();
-			String subjectID = subjectReference.getReference();
-			myObservationLastNIndexPersistR4Svc.indexObservation(observation, subjectID);
+		if (!retVal.isUnchangedInCurrentOperation()) {
+			if (retVal.getDeleted() == null) {
+				// Update indexes here for LastN operation.
+				Observation observation = (Observation) theResource;
+				myObservationLastNIndexPersistSvc.indexObservation(observation);
+			} else {
+				myObservationLastNIndexPersistSvc.deleteObservationIndex(retVal);
+			}
 		}
 
 		return retVal;

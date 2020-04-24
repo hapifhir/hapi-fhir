@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.lastn.entity;
 
-import org.hibernate.search.annotations.DocumentId;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.IndexedEmbedded;
 
@@ -10,15 +9,7 @@ import java.util.Set;
 @Embeddable
 public class ObservationIndexedCategoryCodeableConceptEntity {
 
-    @Id
-    @DocumentId(name = "category_concept_id")
-    @SequenceGenerator(name = "SEQ_CATEGORY_CONCEPT", sequenceName = "SEQ_CATEGORY_CONCEPT")
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CATEGORY_CONCEPT")
-    @Column(name = "CATEGORY_CONCEPT_ID")
-    private Long myId;
-
     @Field(name = "text")
-    @Column(name = "CODEABLE_CONCEPT_TEXT", nullable = true)
     private String myCodeableConceptText;
 
     @IndexedEmbedded(depth=2, prefix = "coding")

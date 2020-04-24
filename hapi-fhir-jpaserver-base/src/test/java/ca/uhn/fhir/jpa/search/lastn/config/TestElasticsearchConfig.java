@@ -4,8 +4,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
 import pl.allegro.tech.embeddedelasticsearch.PopularProperties;
 
@@ -15,8 +13,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
-@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory")
-@EnableTransactionManagement
 public class TestElasticsearchConfig {
 
 	private final String elasticsearchHost = "127.0.0.1";

@@ -2,12 +2,10 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.*;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /*
  * #%L
@@ -53,6 +51,23 @@ public interface ISearchParamExtractor {
 
 	String[] split(String theExpression);
 
+	List<IBase> extractValues(String thePaths, IBaseResource theResource);
+
+	String toRootTypeName(IBase nextObject);
+
+	String toTypeName(IBase nextObject);
+
+	PathAndRef extractReferenceLinkFromResource(IBase theValue, String thePath);
+
+	Date extractDateFromResource(IBase theValue, String thePath);
+
+	ResourceIndexedSearchParamToken createSearchParamForCoding(String theResourceType, RuntimeSearchParam theSearchParam, IBase theValue);
+
+	String getDisplayTextForCoding(IBase theValue);
+
+	List<IBase> getCodingsFromCodeableConcept(IBase theValue);
+
+	String getDisplayTextFromCodeableConcept(IBase theValue);
 
 	class SearchParamSet<T> extends HashSet<T> {
 

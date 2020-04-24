@@ -20,66 +20,32 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
-import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistDstu3Svc;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDaoObservation;
+import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.Collections;
 import java.util.Date;
 
-public class FhirResourceDaoObservationDstu3 extends BaseHapiFhirResourceDao<Observation> implements IFhirResourceDaoObservation<Observation> {
+public class FhirResourceDaoObservationDstu3 extends BaseHapiFhirResourceDaoObservation<Observation> {
 
 	@Autowired
-	ObservationLastNIndexPersistDstu3Svc myObservationLastNIndexPersistDstu3Svc;
-
-	private IBundleProvider doLastNOperation(IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequest) {
-		SearchParameterMap paramMap = new SearchParameterMap();
-		if (theCount != null) {
-			paramMap.setCount(theCount.getValue());
-		}
-		if (theContent != null) {
-			paramMap.add(Constants.PARAM_CONTENT, theContent);
-		}
-		if (theNarrative != null) {
-			paramMap.add(Constants.PARAM_TEXT, theNarrative);
-		}
-		paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
-		paramMap.setEverythingMode(theId != null ? EverythingModeEnum.PATIENT_INSTANCE : EverythingModeEnum.PATIENT_TYPE);
-		paramMap.setSort(theSort);
-		paramMap.setLastUpdated(theLastUpdated);
-		if (theId != null) {
-			paramMap.add("_id", new StringParam(theId.getIdPart()));
-		}
-		
-		if (!isPagingProviderDatabaseBacked(theRequest)) {
-			paramMap.setLoadSynchronous(true);
-		}
-		
-		return mySearchCoordinatorSvc.registerSearch(this, paramMap, getResourceName(), new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)), theRequest);
-	}
+	ObservationLastNIndexPersistSvc myObservationLastNIndexPersistSvc;
 
 	@Override
-	public IBundleProvider observationsLastN(SearchParameterMap theSearchParameterMap, RequestDetails theRequestDetails, HttpServletResponse theServletResponse) {
+	public IBundleProvider observationsLastN(SearchParameterMap theSearchParameterMap,  RequestDetails theRequestDetails, HttpServletResponse theServletResponse) {
+
+		updateSearchParamsForLastn(theSearchParameterMap, theRequestDetails);
+
 		return mySearchCoordinatorSvc.registerSearch(this, theSearchParameterMap, getResourceName(), new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)), theRequestDetails);
 	}
 
@@ -88,12 +54,14 @@ public class FhirResourceDaoObservationDstu3 extends BaseHapiFhirResourceDao<Obs
 												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
-		if(thePerformIndexing) {
-			// Update indexes here for LastN operation.
-			Observation observation = (Observation)theResource;
-			Reference subjectReference = observation.getSubject();
-			String subjectID = subjectReference.getReference();
-			myObservationLastNIndexPersistDstu3Svc.indexObservation(observation, subjectID);
+		if (!retVal.isUnchangedInCurrentOperation()) {
+			if (retVal.getDeleted() == null) {
+				// Update indexes here for LastN operation.
+				Observation observation = (Observation) theResource;
+				myObservationLastNIndexPersistSvc.indexObservation(observation);
+			} else {
+				myObservationLastNIndexPersistSvc.deleteObservationIndex(theEntity);
+			}
 		}
 
 		return retVal;

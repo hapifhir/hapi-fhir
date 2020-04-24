@@ -129,9 +129,4 @@ public class BaseR5Config extends BaseConfigDstu3Plus {
 		return new TermReadSvcR5();
 	}
 
-	@Bean
-	public ObservationLastNIndexPersistR5Svc observationLastNIndexpersistSvc() {
-		return new ObservationLastNIndexPersistR5Svc();
-	}
-
 }

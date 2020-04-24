@@ -3,10 +3,13 @@ package ca.uhn.fhir.jpa.dao.lastn.entity;
 import org.hibernate.search.annotations.*;
 
 import javax.persistence.*;
+import javax.persistence.Index;
 import java.util.*;
 
 @Entity
-@Table(name = "HFJ_LASTN_OBSERVATION")
+@Table(name = "HFJ_LASTN_OBSERVATION", indexes = {
+	@Index(name = "IDX_LASTN_OBSERVATION_RESID", columnList = "RESOURCE_IDENTIFIER", unique = true)
+})
 @Indexed(index = "observation_index")
 public class ObservationIndexedSearchParamLastNEntity {
 
@@ -16,7 +19,7 @@ public class ObservationIndexedSearchParamLastNEntity {
     @Column(name = "LASTN_ID")
     private Long myId;
 
-    @Field(name = "subject", analyze = Analyze.NO)
+	@Field(name = "subject", analyze = Analyze.NO)
     @Column(name = "LASTN_SUBJECT_ID", nullable = true)
     private String mySubject;
 

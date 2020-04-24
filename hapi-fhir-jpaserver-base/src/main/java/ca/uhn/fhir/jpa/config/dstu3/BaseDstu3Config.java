@@ -126,9 +126,4 @@ public class BaseDstu3Config extends BaseConfigDstu3Plus {
 		return new TermReadSvcDstu3();
 	}
 
-	@Bean
-	public ObservationLastNIndexPersistDstu3Svc observationLastNIndexpersistSvc() {
-		return new ObservationLastNIndexPersistDstu3Svc();
-	}
-
 }

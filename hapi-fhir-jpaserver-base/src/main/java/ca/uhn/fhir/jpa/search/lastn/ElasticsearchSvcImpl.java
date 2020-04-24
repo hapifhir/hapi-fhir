@@ -53,6 +53,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	private final String GROUP_BY_SUBJECT = "group_by_subject";
 	private final String GROUP_BY_CODE = "group_by_code";
+	private final String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
 
 
 	public ElasticsearchSvcImpl(String theHostname, int thePort, String theUsername, String thePassword) {
@@ -198,7 +199,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	@Override
 	public List<String> executeLastN(SearchParameterMap theSearchParameterMap, Integer theMaxObservationsPerCode) {
-		String[] topHitsInclude = {"identifier"};
+		String[] topHitsInclude = {OBSERVATION_IDENTIFIER_FIELD_NAME};
 		SearchRequest myLastNRequest = buildObservationsSearchRequest(theSearchParameterMap, createCompositeAggregationBuilder(theMaxObservationsPerCode, topHitsInclude));
 		try {
 			SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
@@ -518,4 +519,11 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
 	}
 
+	public void deleteObservationIndex(String theObservationIdentifier) throws IOException {
+		DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(IndexConstants.OBSERVATION_DOCUMENT_TYPE);
+		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+		boolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_IDENTIFIER_FIELD_NAME, theObservationIdentifier));
+		deleteByQueryRequest.setQuery(boolQueryBuilder);
+		myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+	}
 }
