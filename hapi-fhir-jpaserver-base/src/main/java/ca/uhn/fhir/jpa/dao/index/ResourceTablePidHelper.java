@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.index;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -56,7 +57,7 @@ public class ResourceTablePidHelper {
 		if (retval == null) {
 			IIdType id = theResource.getIdElement();
 			try {
-				retval = myIdHelperService.resolveResourcePersistentIds(id.getResourceType(), id.getIdPart()).getIdAsLong();
+				retval = myIdHelperService.resolveResourcePersistentIds(null, id.getResourceType(), id.getIdPart()).getIdAsLong();
 			} catch (ResourceNotFoundException e) {
 				return null;
 			}
@@ -70,9 +71,9 @@ public class ResourceTablePidHelper {
 	}
 
 	@Nonnull
-	public Long getPidOrThrowException(IIdType theId, RequestDetails theRequestDetails) {
+	Long getPidOrThrowException(IIdType theId, RequestDetails theRequestDetails) {
 		List<IIdType> ids = Collections.singletonList(theId);
-		List<ResourcePersistentId> resourcePersistentIds = myIdHelperService.resolveResourcePersistentIds(ids, theRequestDetails);
+		List<ResourcePersistentId> resourcePersistentIds = myIdHelperService.resolveResourcePersistentIdsWithCache(null, ids, theRequestDetails);
 		return resourcePersistentIds.get(0).getIdAsLong();
 	}
 
@@ -81,8 +82,12 @@ public class ResourceTablePidHelper {
 		return (Long) theResource.getUserData(RESOURCE_PID);
 	}
 
-	@Nonnull
-	public Map<Long, IIdType> getPidToIdMap(Collection<IIdType> theSubscriberIds) {
-		return theSubscriberIds.stream().collect(Collectors.toMap(this::getPidOrThrowException, Function.identity()));
+	public Map<Long, IIdType> getPidToIdMap(Collection<IIdType> theSubscriberIds, RequestDetails theRequestDetails) {
+		return theSubscriberIds.stream().collect(Collectors.toMap(t->getPidOrThrowException(t), Function.identity()));
+	}
+
+	@VisibleForTesting
+	public void clearCacheForUnitTest() {
+		myIdHelperService.clearCache();
 	}
 }
