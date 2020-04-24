@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.empi.interceptor;
 
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR JPA Server - Enterprise Master Patient Index
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%

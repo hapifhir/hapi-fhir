@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - Enterprise Master Patient Index
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
