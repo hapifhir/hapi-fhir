@@ -71,7 +71,7 @@ public class ResourceTablePidHelper {
 	}
 
 	@Nonnull
-	Long getPidOrThrowException(IIdType theId, RequestDetails theRequestDetails) {
+	public Long getPidOrThrowException(IIdType theId, RequestDetails theRequestDetails) {
 		List<IIdType> ids = Collections.singletonList(theId);
 		List<ResourcePersistentId> resourcePersistentIds = myIdHelperService.resolveResourcePersistentIdsWithCache(null, ids, theRequestDetails);
 		return resourcePersistentIds.get(0).getIdAsLong();
