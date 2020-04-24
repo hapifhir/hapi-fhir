@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.config;
  */
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -44,5 +45,10 @@ public class TestJpaConfig {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;
+	}
+
+	@Bean
+	public PartitionSettings partitionSettings() {
+		return new PartitionSettings();
 	}
 }
