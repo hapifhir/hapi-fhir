@@ -53,6 +53,11 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(5);
 		DatabaseSearchCacheSvcImpl.setMaximumSearchesToCheckForDeletionCandidacyForUnitTest(10);
 
+		runInTransaction(()->{
+			assertEquals(0, mySearchDao.count());
+			assertEquals(0, mySearchResultDao.count());
+		});
+
 		// Create lots of searches
 		runInTransaction(()->{
 			for (int i = 0; i < 20; i++) {

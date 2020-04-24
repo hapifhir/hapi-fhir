@@ -8,6 +8,8 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
+import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -108,12 +110,17 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ISearchResultCacheSvc mySearchResultCacheSvc;
 	@Autowired
 	protected ISearchCacheSvc mySearchCacheSvc;
+	@Autowired
+	protected IPartitionLookupSvc myPartitionConfigSvc;
 
 	@After
 	public void afterPerformCleanup() {
 		BaseHapiFhirDao.setDisableIncrementOnUpdateForUnitTest(false);
 		if (myCaptureQueriesListener != null) {
 			myCaptureQueriesListener.clear();
+		}
+		if (myPartitionConfigSvc != null) {
+			myPartitionConfigSvc.clearCaches();
 		}
 	}
 
@@ -141,6 +148,13 @@ public abstract class BaseJpaTest extends BaseTest {
 
 				assertFalse(isReadOnly.get());
 			}
+		}
+	}
+
+	@Before
+	public void beforeInitPartitions() {
+		if (myPartitionConfigSvc != null) {
+			myPartitionConfigSvc.start();
 		}
 	}
 

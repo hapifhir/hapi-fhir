@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -39,7 +41,10 @@ import java.util.Collections;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ValidateTest.class);
@@ -49,6 +54,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private ITermReadSvc myTermReadSvc;
 	@Autowired
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvcc;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	/**
 	 * Create a loinc valueset that expands to more results than the expander is willing to do
@@ -156,7 +163,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myValueSetDao.create(vs);
 		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		await().until(()->myTermReadSvc.isValueSetPreExpandedForCodeValidation(vs));
+		await().until(() -> myTermReadSvc.isValueSetPreExpandedForCodeValidation(vs));
 
 		// Load the profile, which is just the Vital Signs profile modified to accept all loinc codes
 		// and not just certain ones
@@ -214,10 +221,29 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testValidateCodeableConceptWithNoSystem() {
+		AllergyIntolerance allergy = new AllergyIntolerance();
+		allergy.getText().setStatus(Narrative.NarrativeStatus.GENERATED).getDiv().setValue("<div>hi!</div>");
+		allergy.getClinicalStatus().addCoding().setSystem(null).setCode("active").setDisplay("Active");
+		allergy.getVerificationStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-verification").setCode("confirmed").setDisplay("Confirmed");
+		allergy.setPatient(new Reference("Patient/123"));
 
-	private OperationOutcome validateAndReturnOutcome(Observation theObs) {
+		allergy.addNote()
+			.setText("This is text")
+			.setAuthor(new Reference("Patient/123"));
+
+		ourLog.info(myFhirCtx.newJsonParser().encodeResourceToString(allergy));
+
+		OperationOutcome oo = validateAndReturnOutcome(allergy);
+		assertThat(encode(oo), containsString("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/allergyintolerance-clinical"));
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends IBaseResource> OperationOutcome validateAndReturnOutcome(T theObs) {
+		IFhirResourceDao<T> dao = (IFhirResourceDao<T>) myDaoRegistry.getResourceDao(theObs.getClass());
 		try {
-			MethodOutcome outcome = myObservationDao.validate(theObs, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
+			MethodOutcome outcome = dao.validate(theObs, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
 			return (OperationOutcome) outcome.getOperationOutcome();
 		} catch (PreconditionFailedException e) {
 			return (OperationOutcome) e.getOperationOutcome();
@@ -787,7 +813,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			assertThat(oo.getIssueFirstRep().getDiagnostics(), containsString("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/condition-clinical"));
 		}
 	}
-
 
 
 	private IBaseResource findResourceByIdInBundle(Bundle vss, String name) {

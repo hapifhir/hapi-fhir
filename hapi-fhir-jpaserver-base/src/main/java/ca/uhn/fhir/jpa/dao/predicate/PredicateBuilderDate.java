@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -58,7 +59,8 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 	public Predicate addPredicate(String theResourceName,
 											String theParamName,
 											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation operation) {
+											SearchFilterParser.CompareOperation operation,
+											RequestPartitionId theRequestPartitionId) {
 
 		boolean newJoin = false;
 		if (myJoinMap == null) {
@@ -75,26 +77,26 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 		if (theList.get(0).getMissing() != null) {
 			Boolean missing = theList.get(0).getMissing();
-			addPredicateParamMissing(theResourceName, theParamName, missing, join);
+			addPredicateParamMissingForNonReference(theResourceName, theParamName, missing, join, theRequestPartitionId);
 			return null;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
+
 		for (IQueryParameterType nextOr : theList) {
-			IQueryParameterType params = nextOr;
-			Predicate p = createPredicateDate(params,
-				theResourceName,
-				theParamName,
+			Predicate p = createPredicateDate(nextOr,
 				myCriteriaBuilder,
 				join,
-				operation);
+				operation
+			);
 			codePredicates.add(p);
 		}
 
 		Predicate orPredicates = myCriteriaBuilder.or(toArray(codePredicates));
 
+		myQueryRoot.setHasIndexJoins();
 		if (newJoin) {
-			Predicate identityAndValuePredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicates);
+			Predicate identityAndValuePredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicates, theRequestPartitionId);
 			myQueryRoot.addPredicate(identityAndValuePredicate);
 		} else {
 			myQueryRoot.addPredicate(orPredicates);
@@ -107,19 +109,17 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 													 String theResourceName,
 													 String theParamName,
 													 CriteriaBuilder theBuilder,
-													 From<?, ResourceIndexedSearchParamDate> theFrom) {
+													 From<?, ResourceIndexedSearchParamDate> theFrom,
+													 RequestPartitionId theRequestPartitionId) {
 		Predicate predicateDate = createPredicateDate(theParam,
-			theResourceName,
-			theParamName,
 			theBuilder,
 			theFrom,
-			null);
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, predicateDate);
+			null
+		);
+		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, predicateDate, theRequestPartitionId);
 	}
 
 	private Predicate createPredicateDate(IQueryParameterType theParam,
-													  String theResourceName,
-													  String theParamName,
 													  CriteriaBuilder theBuilder,
 													  From<?, ResourceIndexedSearchParamDate> theFrom,
 													  SearchFilterParser.CompareOperation theOperation) {
@@ -156,8 +156,8 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 																  SearchFilterParser.CompareOperation operation) {
 		Date lowerBound = theRange.getLowerBoundAsInstant();
 		Date upperBound = theRange.getUpperBoundAsInstant();
-		Predicate lt = null;
-		Predicate gt = null;
+		Predicate lt;
+		Predicate gt;
 		Predicate lb = null;
 		Predicate ub = null;
 
