@@ -40,7 +40,7 @@
      issue: "1804"
      type: "change"
      title: "**Breaking Change**:
-    The Generic/Fluent **delete()** operation now returns a [MethodOutcome](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/api/MethodOutcome.html)
+    The Generic/Fluent **delete()** operation now returns a [MethodOutcome](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/api/MethodOutcome.html)
     object instead of an OperationOutcome. The OperationOutcomoe is still available direcly by querying
     the MethodOutcome object, but this change makes the delete() method more consistent with
     other similar methods in the API.
