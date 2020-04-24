@@ -68,7 +68,7 @@ public class EmpiMessageHandler implements MessageHandler {
 	public void matchEmpiAndUpdateLinks(ResourceModifiedMessage theMsg) {
 		String resourceType = theMsg.getId(myFhirContext).getResourceType();
 		validateResourceType(resourceType);
-		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromRequestId(theMsg.getParentRequestId());//FIXME EMPI gotta add this to ResourceModifiedMessage.
+		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theMsg.getParentTransactionGuid());
 		try {
 			switch (theMsg.getOperationType()) {
 				case CREATE:

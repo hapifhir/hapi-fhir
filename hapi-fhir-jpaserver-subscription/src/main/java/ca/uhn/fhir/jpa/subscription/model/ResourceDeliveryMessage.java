@@ -41,17 +41,17 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	private transient IBaseResource myPayload;
 	@JsonProperty("payloadId")
 	private String myPayloadId;
-	@JsonProperty("parentRequestId")
-	private String myParentRequestId;
+	@JsonProperty("parentTransactionGuid")
+	private String myParentTransactionGuid;
 	@JsonProperty("operationType")
 	private ResourceModifiedMessage.OperationTypeEnum myOperationType;
 
-	public String getParentRequestId() {
-		return myParentRequestId;
+	public String getParentTransactionGuid() {
+		return myParentTransactionGuid;
 	}
 
-	public void setParentRequestId(String theParentRequestId) {
-		myParentRequestId = theParentRequestId;
+	public void setParentTransactionGuid(String theParentTransactionGuid) {
+		myParentTransactionGuid = theParentTransactionGuid;
 	}
 
 	/**

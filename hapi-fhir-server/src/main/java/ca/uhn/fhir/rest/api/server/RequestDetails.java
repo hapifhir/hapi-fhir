@@ -73,6 +73,7 @@ public abstract class RequestDetails {
 	private Map<Object, Object> myUserData;
 	private IBaseResource myResource;
 	private String myRequestId;
+	private String myTransactionGuid;
 	private String myFixedConditionalUrl;
 
 	/**
@@ -513,6 +514,14 @@ public abstract class RequestDetails {
 		deferredCallback.playDeferredActions();
 		myInterceptorBroadcaster = deferredCallback.getWrap();
 		myDeferredInterceptorBroadcaster = null;
+	}
+
+	public String getTransactionGuid() {
+		return myTransactionGuid;
+	}
+
+	public void setTransactionGuid(String theTransactionGuid) {
+		myTransactionGuid = theTransactionGuid;
 	}
 
 

@@ -51,8 +51,8 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 	private String myPayload;
 	@JsonProperty("payloadId")
 	private String myPayloadId;
-	@JsonProperty("parentRequestId")
-	private String myParentRequestId;
+	@JsonProperty("parentTransactionGuid")
+	private String myParentTransactionGuid;
 	@JsonIgnore
 	private transient IBaseResource myPayloadDecoded;
 
@@ -75,7 +75,7 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		this(theFhirContext, theNewResource, theOperationType);
 		if (theRequest != null) {
-			setParentRequestId(theRequest.getRequestId());
+			setParentTransactionGuid(theRequest.getTransactionGuid());
 		}
 	}
 
@@ -126,12 +126,12 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 		}
 	}
 
-	public String getParentRequestId() {
-		return myParentRequestId;
+	public String getParentTransactionGuid() {
+		return myParentTransactionGuid;
 	}
 
-	public void setParentRequestId(String theParentRequestId) {
-		myParentRequestId = theParentRequestId;
+	public void setParentTransactionGuid(String theParentTransactionGuid) {
+		myParentTransactionGuid = theParentTransactionGuid;
 	}
 
 	private void setNewPayload(FhirContext theCtx, IBaseResource theNewPayload) {

@@ -25,14 +25,14 @@ import java.util.List;
 
 public class TransactionLogMessages {
 	private List<String> myMessages;
-	private final String myParentRequestId;
+	private final String myTransactionGuid;
 
-	private TransactionLogMessages(String theParentRequestId) {
-		myParentRequestId = theParentRequestId;
+	private TransactionLogMessages(String theTransactionGuid) {
+		myTransactionGuid = theTransactionGuid;
 	}
 
-	public static TransactionLogMessages createFromRequestId(String theParentRequestId) {
-		return new TransactionLogMessages(theParentRequestId);
+	public static TransactionLogMessages createFromTransactionGuid(String theTransactionGuid) {
+		return new TransactionLogMessages(theTransactionGuid);
 	}
 
 	private void addMessage(String theMessage) {
@@ -53,7 +53,7 @@ public class TransactionLogMessages {
 		theTransactionLogMessages.addMessage(theMessage);
 	}
 
-	public String getParentRequestId() {
-		return myParentRequestId;
+	public String getTransactionGuid() {
+		return myTransactionGuid;
 	}
 }
