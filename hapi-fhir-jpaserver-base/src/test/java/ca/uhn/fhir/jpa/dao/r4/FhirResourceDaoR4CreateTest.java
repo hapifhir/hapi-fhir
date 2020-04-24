@@ -1,9 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -13,7 +14,6 @@ import org.junit.AfterClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
@@ -60,7 +60,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateWithUuidResourceStrategy() {
+	public void testCreateWithUuidServerResourceStrategy() {
 		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
 
 		Patient p = new Patient();
@@ -72,6 +72,35 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p = myPatientDao.read(id);
 		assertEquals("FAM", p.getNameFirstRep().getFamily());
 
+	}
+
+	@Test
+	public void testCreateWithUuidServerResourceStrategy_ClientIdNotAllowed() {
+		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
+		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
+
+		Patient p = new Patient();
+		p.addName().setFamily("FAM");
+		IIdType id = myPatientDao.create(p).getId().toUnqualified();
+
+		assertThat(id.getIdPart(), matchesPattern("[a-z0-9]{8}-.*"));
+
+		p = myPatientDao.read(id);
+		assertEquals("FAM", p.getNameFirstRep().getFamily());
+
+	}
+
+	/**
+	 * See #1352
+	 */
+	@Test
+	public void testCreateWithSampledDataInObservation() {
+		Observation o = new Observation();
+		o.setStatus(Observation.ObservationStatus.FINAL);
+		SampledData sampledData = new SampledData();
+		sampledData.setData("2 3 4 5 6");
+		o.setValue(sampledData);
+		assertTrue(myObservationDao.create(o).getCreated());
 	}
 
 	@Test
@@ -136,7 +165,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.create(p).getId();
 			fail();
-		} catch (DataIntegrityViolationException e) {
+		} catch (ResourceVersionConflictException e) {
 			// good
 		}
 
@@ -239,6 +268,29 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertThat(output.getEntry().get(0).getResponse().getLocation(), matchesPattern("Organization/[a-z0-9]{8}-.*"));
 		assertThat(output.getEntry().get(1).getResponse().getLocation(), matchesPattern("Patient/[a-z0-9]{8}-.*"));
 
+
+	}
+
+	@Test
+	public void testTagsInContainedResourcesPreserved() {
+		Patient p = new Patient();
+		p.setActive(true);
+
+		Organization o = new Organization();
+		o.getMeta().addTag("http://foo", "bar", "FOOBAR");
+		p.getManagingOrganization().setResource(o);
+
+		ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = myPatientDao.read(id);
+
+		ourLog.info("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		Organization org = (Organization) p.getManagingOrganization().getResource();
+		assertEquals("#1", org.getId());
+		assertEquals(1, org.getMeta().getTag().size());
 
 	}
 

@@ -4,14 +4,14 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,22 +19,17 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.List;
-
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Utilities for dealing with OperationOutcome resources across various model versions
@@ -43,20 +38,17 @@ public class OperationOutcomeUtil {
 
 	/**
 	 * Add an issue to an OperationOutcome
-	 * 
-	 * @param theCtx
-	 *           The fhir context
-	 * @param theOperationOutcome
-	 *           The OO resource to add to
-	 * @param theSeverity
-	 *           The severity (fatal | error | warning | information)
-	 * @param theDetails
-	 *           The details string
+	 *  @param theCtx              The fhir context
+	 * @param theOperationOutcome The OO resource to add to
+	 * @param theSeverity         The severity (fatal | error | warning | information)
+	 * @param theDetails          The details string
 	 * @param theCode
+	 * @return Returns the newly added issue
 	 */
-	public static void addIssue(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, String theSeverity, String theDetails, String theLocation, String theCode) {
+	public static IBase addIssue(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, String theSeverity, String theDetails, String theLocation, String theCode) {
 		IBase issue = createIssue(theCtx, theOperationOutcome);
 		populateDetails(theCtx, issue, theSeverity, theDetails, theLocation, theCode);
+		return issue;
 	}
 
 	private static IBase createIssue(FhirContext theCtx, IBaseResource theOutcome) {
@@ -108,9 +100,13 @@ public class OperationOutcomeUtil {
 		if (theOutcome == null) {
 			return false;
 		}
+		return getIssueCount(theCtx, theOutcome) > 0;
+	}
+
+	public static int getIssueCount(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
 		RuntimeResourceDefinition ooDef = theCtx.getResourceDefinition(theOutcome);
 		BaseRuntimeChildDefinition issueChild = ooDef.getChildByName("issue");
-		return issueChild.getAccessor().getValues(theOutcome).size() > 0;
+		return issueChild.getAccessor().getValues(theOutcome).size();
 	}
 
 	public static IBaseOperationOutcome newInstance(FhirContext theCtx) {
@@ -136,7 +132,6 @@ public class OperationOutcomeUtil {
 
 		BaseRuntimeElementDefinition<?> stringDef = detailsChild.getChildByName(detailsChild.getElementName());
 		BaseRuntimeChildDefinition severityChild = issueElement.getChildByName("severity");
-		BaseRuntimeChildDefinition locationChild = issueElement.getChildByName("location");
 
 		IPrimitiveType<?> severityElem = (IPrimitiveType<?>) severityChild.getChildByName("severity").newInstance(severityChild.getInstanceConstructorArguments());
 		severityElem.setValueAsString(theSeverity);
@@ -146,11 +141,16 @@ public class OperationOutcomeUtil {
 		string.setValueAsString(theDetails);
 		detailsChild.getMutator().setValue(theIssue, string);
 
+		addLocationToIssue(theCtx, theIssue, theLocation);
+	}
+
+	public static void addLocationToIssue(FhirContext theContext, IBase theIssue, String theLocation) {
 		if (isNotBlank(theLocation)) {
+			BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theIssue.getClass());
+			BaseRuntimeChildDefinition locationChild = issueElement.getChildByName("location");
 			IPrimitiveType<?> locationElem = (IPrimitiveType<?>) locationChild.getChildByName("location").newInstance(locationChild.getInstanceConstructorArguments());
 			locationElem.setValueAsString(theLocation);
 			locationChild.getMutator().addValue(theIssue, locationElem);
 		}
 	}
-
 }

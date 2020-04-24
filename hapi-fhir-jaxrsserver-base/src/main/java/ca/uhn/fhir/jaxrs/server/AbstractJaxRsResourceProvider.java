@@ -4,14 +4,14 @@ package ca.uhn.fhir.jaxrs.server;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -102,7 +102,7 @@ implements IRestfulServer<JaxRsRequest>, IResourceProvider {
         theBindings = JaxRsMethodBindings.getMethodBindings(this, theProviderClass);
     }
 
-    /**
+	/**
      * The base for request for a resource provider has the following form:</br>
      * {@link AbstractJaxRsResourceProvider#getBaseForServer()
      * getBaseForServer()} + "/" +
@@ -219,7 +219,7 @@ implements IRestfulServer<JaxRsRequest>, IResourceProvider {
      * @see <a href="https://www.hl7.org/fhir/http.html#read">https://www.hl7.org/fhir/http.html#read</a>
      */
     @GET
-    @Path("/{id}")
+    @Path("/{id : ((?!_history).)*}")
     public Response find(@PathParam("id") final String id)
             throws IOException {
         return execute(getResourceRequest(RequestTypeEnum.GET, RestOperationTypeEnum.READ).id(id));
@@ -244,7 +244,7 @@ implements IRestfulServer<JaxRsRequest>, IResourceProvider {
     }
 
     /**
-     * Retrieve the update history for a particular resource
+     * Retrieve a version of a resource
      * 
      * @param id the id of the resource
      * @param version the version of the resource
@@ -253,13 +253,42 @@ implements IRestfulServer<JaxRsRequest>, IResourceProvider {
      */
     @GET
     @Path("/{id}/_history/{version}")
-    public Response findHistory(@PathParam("id") final String id, @PathParam("version") final String version)
+    public Response findVersion(@PathParam("id") final String id, @PathParam("version") final String version)
             throws IOException {
         final Builder theRequest = getResourceRequest(RequestTypeEnum.GET, RestOperationTypeEnum.VREAD).id(id).version(version);
         return execute(theRequest);
     }
 
-    /**
+	/**
+	 * Retrieve the update history for a particular resource
+	 *
+	 * @param id the id of the resource
+	 * @return the response
+	 * @see <a href="https://www.hl7.org/fhir/http.html#history">https://www.hl7.org/fhir/http.html#history</a>
+	 */
+	@GET
+	@Path("/{id}/_history")
+	public Response historyForInstance(@PathParam("id") final String id)
+		throws IOException {
+		final Builder theRequest = getResourceRequest(RequestTypeEnum.GET, RestOperationTypeEnum.HISTORY_INSTANCE).id(id);
+		return execute(theRequest);
+	}
+
+	/**
+	 * Retrieve the update history for a particular type
+	 *
+	 * @return the response
+	 * @see <a href="https://www.hl7.org/fhir/http.html#history">https://www.hl7.org/fhir/http.html#history</a>
+	 */
+	@GET
+	@Path("/_history")
+	public Response historyForType()
+		throws IOException {
+		final Builder theRequest = getResourceRequest(RequestTypeEnum.GET, RestOperationTypeEnum.HISTORY_TYPE);
+		return execute(theRequest);
+	}
+
+	/**
      * Compartment Based Access
      * 
      * @param id the resource to which the compartment belongs
@@ -269,8 +298,8 @@ implements IRestfulServer<JaxRsRequest>, IResourceProvider {
      * @see <a href="https://www.hl7.org/fhir/compartments.html#compartment">https://www.hl7.org/fhir/compartments.html#compartment</a>
      */
     @GET
-    @Path("/{id}/{compartment}")
-    public Response findCompartment(@PathParam("id") final String id, @PathParam("compartment") final String compartment)
+    @Path("/{id}/{compartment : ((?!_history).)*}")
+	 public Response findCompartment(@PathParam("id") final String id, @PathParam("compartment") final String compartment)
             throws IOException {
         final Builder theRequest = getResourceRequest(RequestTypeEnum.GET, RestOperationTypeEnum.SEARCH_TYPE).id(id).compartment(
                 compartment);

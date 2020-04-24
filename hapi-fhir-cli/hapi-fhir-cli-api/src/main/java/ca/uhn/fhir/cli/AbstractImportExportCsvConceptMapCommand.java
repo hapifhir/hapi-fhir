@@ -4,14 +4,14 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,10 +27,19 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -62,6 +71,29 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseComma
 			.sorted()
 			.collect(Collectors.joining(", "));
 		addRequiredOption(theOptions, FHIR_VERSION_PARAM, FHIR_VERSION_PARAM_LONGOPT, FHIR_VERSION_PARAM_NAME, FHIR_VERSION_PARAM_DESC + versions);
+	}
+
+	protected BufferedReader getBufferedReader() throws IOException {
+		return new BufferedReader(getInputStreamReader());
+	}
+
+	protected InputStreamReader getInputStreamReader() throws IOException {
+		return new InputStreamReader(getBOMInputStream());
+	}
+
+	protected BOMInputStream getBOMInputStream() throws IOException {
+		return new BOMInputStream(
+			getInputStream(),
+			false,
+			ByteOrderMark.UTF_8,
+			ByteOrderMark.UTF_16BE,
+			ByteOrderMark.UTF_16LE,
+			ByteOrderMark.UTF_32BE,
+			ByteOrderMark.UTF_32LE);
+	}
+
+	protected InputStream getInputStream() throws IOException {
+		return Files.newInputStream(Paths.get(file), StandardOpenOption.READ);
 	}
 
 	@Override

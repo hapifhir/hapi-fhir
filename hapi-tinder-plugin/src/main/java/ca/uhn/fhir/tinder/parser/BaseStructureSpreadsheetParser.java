@@ -7,7 +7,7 @@ import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.tinder.model.*;
 import ca.uhn.fhir.tinder.util.XMLUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.w3c.dom.Document;
@@ -23,7 +23,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser {
 
-	public BaseStructureSpreadsheetParser(String theVersion, String theBaseDir) {
+	public BaseStructureSpreadsheetParser(String theVersion, String theBaseDir) throws MojoFailureException {
 		super(theVersion, theBaseDir);
 
 		myBindingStrengths = new HashMap<>();
@@ -110,7 +110,6 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			// Map<String,String> blockFullNameToShortName = new
 			// HashMap<String,String>();
 
-			Map<String, List<String>> pathToResourceTypes = new HashMap<String, List<String>>();
 			List<Child> blockCopies = new ArrayList<Child>();
 			for (int i = 2; i < rows.getLength(); i++) {
 				Element nextRow = (Element) rows.item(i);
@@ -160,8 +159,6 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				if (elem instanceof Child) {
 					scanForSimpleSetters(elem);
 				}
-
-				pathToResourceTypes.put(name, elem.getType());
 
 			}
 
@@ -241,12 +238,17 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				continue;
 			}
 			nextName = nextName.toLowerCase().trim().replace(".", "");
-			if ("name".equals(nextName) || "binding name".equals(nextName)) {
-				colName = j;
-			} else if ("reference".equals(nextName)) {
-				colRef = j;
-			} else if ("conformance".equals(nextName)) {
-				colStrength = j;
+			switch (nextName) {
+				case "name":
+				case "binding name":
+					colName = j;
+					break;
+				case "reference":
+					colRef = j;
+					break;
+				case "conformance":
+					colStrength = j;
+					break;
 			}
 		}
 

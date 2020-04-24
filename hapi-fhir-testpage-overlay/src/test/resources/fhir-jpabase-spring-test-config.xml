@@ -13,7 +13,7 @@
 	<context:annotation-config />
 	<context:mbean-server />
 
-	<bean id="myDaoConfig" class="ca.uhn.fhir.jpa.dao.DaoConfig">
+	<bean id="myDaoConfig" class="ca.uhn.fhir.jpa.api.config.DaoConfig">
 	</bean>
 
 	<bean id="myPersistenceDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" lazy-init="true">

@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,17 +26,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.util.Set;
 
-public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> {
+public class ModifyColumnTask extends BaseTableColumnTypeTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ModifyColumnTask.class);
 
+	public ModifyColumnTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
 	@Override
-	public void execute() {
+	public void validate() {
+		super.validate();
+		setDescription("Modify column " + getColumnName() + " on table " + getTableName());
+	}
 
-		String existingType;
+	@Override
+	public void doExecute() throws SQLException {
+
+		JdbcUtils.ColumnType existingType;
 		boolean nullable;
+
+		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
+		if (!columnNames.contains(getColumnName())) {
+			logInfo(ourLog, "Column {} doesn't exist on table {} - No action performed", getColumnName(), getTableName());
+			return;
+		}
+
 		try {
 			existingType = JdbcUtils.getColumnType(getConnectionProperties(), getTableName(), getColumnName());
 			nullable = JdbcUtils.isColumnNullable(getConnectionProperties(), getTableName(), getColumnName());
@@ -44,15 +61,29 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 			throw new InternalErrorException(e);
 		}
 
-		String wantedType = getColumnType().getDescriptor(getColumnLength());
-		boolean alreadyOfCorrectType = existingType.equals(wantedType);
+		Long taskColumnLength = getColumnLength();
+		boolean isShrinkOnly = false;
+		if (taskColumnLength != null) {
+			long existingLength = existingType.getLength() != null ? existingType.getLength() : 0;
+			if (existingLength > taskColumnLength) {
+				if (isNoColumnShrink()) {
+					taskColumnLength = existingLength;
+				} else {
+					if (existingType.getColumnTypeEnum() == getColumnType()) {
+						isShrinkOnly = true;
+					}
+				}
+			}
+		}
+
+		boolean alreadyOfCorrectType = existingType.equals(getColumnType(), taskColumnLength);
 		boolean alreadyCorrectNullable = isNullable() == nullable;
 		if (alreadyOfCorrectType && alreadyCorrectNullable) {
-			ourLog.info("Column {} on table {} is already of type {} and has nullable {} - No action performed", getColumnName(), getTableName(), wantedType, nullable);
+			logInfo(ourLog, "Column {} on table {} is already of type {} and has nullable {} - No action performed", getColumnName(), getTableName(), existingType, nullable);
 			return;
 		}
 
-		String type = getSqlType();
+		String type = getSqlType(taskColumnLength);
 		String notNull = getSqlNotNull();
 
 		String sql = null;
@@ -89,17 +120,33 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 			case MSSQL_2012:
 				sql = "alter table " + getTableName() + " alter column " + getColumnName() + " " + type + notNull;
 				break;
+			case H2_EMBEDDED:
+				if (!alreadyOfCorrectType) {
+					sql = "alter table " + getTableName() + " alter column " + getColumnName() + " type " + type;
+				}
+				if (!alreadyCorrectNullable) {
+					if (isNullable()) {
+						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " drop not null";
+					} else {
+						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " set not null";
+					}
+				}
+				break;
 			default:
 				throw new IllegalStateException("Dont know how to handle " + getDriverType());
 		}
 
-		ourLog.info("Updating column {} on table {} to type {}", getColumnName(), getTableName(), type);
+		if (!isFailureAllowed() && isShrinkOnly) {
+			setFailureAllowed(true);
+		}
+
+		logInfo(ourLog, "Updating column {} on table {} to type {}", getColumnName(), getTableName(), type);
 		if (sql != null) {
 			executeSql(getTableName(), sql);
 		}
 
 		if (sqlNotNull != null) {
-			ourLog.info("Updating column {} on table {} to not null", getColumnName(), getTableName());
+			logInfo(ourLog, "Updating column {} on table {} to not null", getColumnName(), getTableName());
 			executeSql(getTableName(), sqlNotNull);
 		}
 	}

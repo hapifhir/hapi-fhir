@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,11 +20,12 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.VersionEnum;
 import com.google.common.collect.ForwardingMap;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -37,43 +38,64 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask> {
+public class CalculateHashesTask extends BaseTableColumnTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CalculateHashesTask.class);
 	private int myBatchSize = 10000;
 	private Map<String, Function<MandatoryKeyMap<String, Object>, Long>> myCalculators = new HashMap<>();
 	private ThreadPoolExecutor myExecutor;
 
+	/**
+	 * Constructor
+	 */
+	public CalculateHashesTask(VersionEnum theRelease, String theVersion) {
+		super(theRelease.toString(), theVersion);
+		setDescription("Calculate resource search parameter index hashes");
+	}
+
 	public void setBatchSize(int theBatchSize) {
 		myBatchSize = theBatchSize;
 	}
 
-	/**
-	 * Constructor
-	 */
-	public CalculateHashesTask() {
-		super();
+	@Override
+	public CalculateHashesTask setColumnName(String theColumnName) {
+		super.setColumnName(theColumnName);
+		return this;
 	}
 
 	@Override
-	public synchronized void execute() throws SQLException {
+	public synchronized void doExecute() throws SQLException {
 		if (isDryRun()) {
+			return;
+		}
+
+		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
+		// This table was added shortly after hash indexes were added, so it is a reasonable indicator for whether this
+		// migration has already been run
+		if (tableNames.contains("HFJ_RES_REINDEX_JOB")) {
+			logInfo(ourLog, "The table HFJ_RES_REINDEX_JOB already exists.  Skipping calculate hashes task.");
 			return;
 		}
 
 		initializeExecutor();
 		try {
 
-			while(true) {
+			while (true) {
 				MyRowCallbackHandler rch = new MyRowCallbackHandler();
 				getTxTemplate().execute(t -> {
-					JdbcTemplate jdbcTemplate = newJdbcTemnplate();
+					JdbcTemplate jdbcTemplate = newJdbcTemplate();
 					jdbcTemplate.setMaxRows(100000);
 					String sql = "SELECT * FROM " + getTableName() + " WHERE " + getColumnName() + " IS NULL";
-					ourLog.info("Finding up to {} rows in {} that requires hashes", myBatchSize, getTableName());
+					logInfo(ourLog, "Finding up to {} rows in {} that requires hashes", myBatchSize, getTableName());
 
 					jdbcTemplate.query(sql, rch);
 					rch.done();
@@ -87,7 +109,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 					break;
 				}
 
-				ourLog.info("Waiting for {} tasks to complete", futures.size());
+				logInfo(ourLog, "Waiting for {} tasks to complete", futures.size());
 				for (Future<?> next : futures) {
 					try {
 						next.get();
@@ -119,7 +141,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 		RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
 			@Override
 			public void rejectedExecution(Runnable theRunnable, ThreadPoolExecutor theExecutor) {
-				ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", executorQueue.size());
+				logInfo(ourLog, "Note: Executor queue is full ({} elements), waiting for a slot to become available!", executorQueue.size());
 				StopWatch sw = new StopWatch();
 				try {
 					executorQueue.put(theRunnable);
@@ -127,7 +149,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 					throw new RejectedExecutionException("Task " + theRunnable.toString() +
 						" rejected from " + theE.toString());
 				}
-				ourLog.info("Slot become available after {}ms", sw.getMillis());
+				logInfo(ourLog, "Slot become available after {}ms", sw.getMillis());
 			}
 		};
 		myExecutor = new ThreadPoolExecutor(
@@ -177,13 +199,13 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 					arguments.add((Number) nextRow.get("SP_ID"));
 
 					// Apply update SQL
-					newJdbcTemnplate().update(sqlBuilder.toString(), arguments.toArray());
+					newJdbcTemplate().update(sqlBuilder.toString(), arguments.toArray());
 
 				}
 
 				return theRows.size();
 			});
-			ourLog.info("Updated {} rows on {} in {}", theRows.size(), getTableName(), sw.toString());
+			logInfo(ourLog, "Updated {} rows on {} in {}", theRows.size(), getTableName(), sw.toString());
 		};
 		return myExecutor.submit(task);
 	}
@@ -237,7 +259,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 		}
 
 		@Override
-		public V get(@NullableDecl Object theKey) {
+		public V get(Object theKey) {
 			if (!containsKey(theKey)) {
 				throw new IllegalArgumentException("No key: " + theKey);
 			}

@@ -58,6 +58,8 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 			myCtx = FhirContext.forDstu3();
 		} else if ("R4".equals(fhirVersion)) {
 			myCtx = FhirContext.forR4();
+		} else if ("R5".equals(fhirVersion)) {
+			myCtx = FhirContext.forR5();
 		} else {
 			throw new MojoFailureException("Unknown version: " + fhirVersion);
 		}
@@ -155,10 +157,12 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		FhirContext ctxDstu2_1;
 		FhirContext ctxDstu3;
 		FhirContext ctxR4;
+		FhirContext ctxR5;
 		ctxDstu2 = FhirContext.forDstu2();
 //		ctxDstu2_1 = FhirContext.forDstu2_1();
-//		ctxDstu3 = FhirContext.forDstu3();
+		ctxDstu3 = FhirContext.forDstu3();
 		ctxR4 = FhirContext.forR4();
+		ctxR5 = FhirContext.forR5();
 
 		LoggerContext loggerContext = ((ch.qos.logback.classic.Logger) ourLog).getLoggerContext();
 		URL mainURL = ConfigurationWatchListUtil.getMainWatchURL(loggerContext);
@@ -225,18 +229,42 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 //		byteCount += m.getByteCount();
 //		fileCount += m.getFileCount();
 
+//		m = new ResourceMinimizerMojo();
+//		m.myCtx = ctxR4;
+//		m.targetDirectory = new File("./hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/profile");
+//		m.fhirVersion = "R4";
+//		m.execute();
+//		byteCount += m.getByteCount();
+//		fileCount += m.getFileCount();
+//
+//		m = new ResourceMinimizerMojo();
+//		m.myCtx = ctxR4;
+//		m.targetDirectory = new File("./hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/valueset");
+//		m.fhirVersion = "R4";
+//		m.execute();
+//		byteCount += m.getByteCount();
+//		fileCount += m.getFileCount();
+
 		m = new ResourceMinimizerMojo();
-		m.myCtx = ctxR4;
-		m.targetDirectory = new File("./hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/profile");
-		m.fhirVersion = "R4";
+		m.myCtx = ctxR5;
+		m.targetDirectory = new File("./hapi-fhir-validation-resources-r5/src/main/resources/org/hl7/fhir/r5/model/profile");
+		m.fhirVersion = "R5";
 		m.execute();
 		byteCount += m.getByteCount();
 		fileCount += m.getFileCount();
 
 		m = new ResourceMinimizerMojo();
-		m.myCtx = ctxR4;
-		m.targetDirectory = new File("./hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/valueset");
-		m.fhirVersion = "R4";
+		m.myCtx = ctxR5;
+		m.targetDirectory = new File("./hapi-fhir-validation-resources-r5/src/main/resources/org/hl7/fhir/r5/model/valueset");
+		m.fhirVersion = "R5";
+		m.execute();
+		byteCount += m.getByteCount();
+		fileCount += m.getFileCount();
+
+		m = new ResourceMinimizerMojo();
+		m.myCtx = ctxR5;
+		m.targetDirectory = new File("./hapi-fhir-validation-resources-r5/src/main/resources/org/hl7/fhir/r5/model/extension");
+		m.fhirVersion = "R5";
 		m.execute();
 		byteCount += m.getByteCount();
 		fileCount += m.getFileCount();

@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,7 +37,7 @@ public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 
 	public ValidateMethodBindingDstu2Plus(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
 			Validate theAnnotation) {
-		super(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, true, Constants.EXTOP_VALIDATE, theAnnotation.type(), new OperationParam[0], BundleTypeEnum.COLLECTION);
+		super(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, true, Constants.EXTOP_VALIDATE, theAnnotation.type(), null, new OperationParam[0], BundleTypeEnum.COLLECTION);
 
 		List<IParameter> newParams = new ArrayList<IParameter>();
 		int idx = 0;

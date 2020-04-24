@@ -4,14 +4,14 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
@@ -39,15 +38,16 @@ import org.hl7.fhir.r4.model.UriType;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
 
 public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConceptMapCommand {
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
@@ -156,7 +156,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 
 	private org.hl7.fhir.dstu3.model.ConceptMap convertCsvToConceptMapDstu3() throws ExecutionException {
 		try {
-			return VersionConvertor_30_40.convertConceptMap(convertCsvToConceptMapR4());
+			return convertConceptMap(convertCsvToConceptMapR4());
 		} catch (FHIRException fe) {
 			throw new ExecutionException(fe);
 		}
@@ -166,7 +166,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 		ourLog.info("Converting CSV to ConceptMap...");
 		ConceptMap retVal = new ConceptMap();
 		try (
-			Reader reader = Files.newBufferedReader(Paths.get(file));
+			Reader reader = getBufferedReader();
 			CSVParser csvParser = new CSVParser(
 				reader,
 				CSVFormat
@@ -176,7 +176,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 					.withFirstRecordAsHeader()
 					.withIgnoreHeaderCase()
 					.withIgnoreEmptyLines()
-					.withTrim());
+					.withTrim())
 		) {
 			retVal.setUrl(conceptMapUrl);
 

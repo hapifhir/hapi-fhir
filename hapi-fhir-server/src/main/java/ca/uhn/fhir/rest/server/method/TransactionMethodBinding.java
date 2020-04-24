@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,17 +22,13 @@ package ca.uhn.fhir.rest.server.method;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
-import java.util.IdentityHashMap;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
@@ -92,17 +88,17 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (theRequest.getRequestType() != RequestTypeEnum.POST) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (isNotBlank(theRequest.getOperation())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (isNotBlank(theRequest.getResourceName())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
-		return true;
+		return MethodMatchEnum.EXACT;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -120,15 +116,6 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 			return response;
 		}
 
-		// Grab the IDs of all of the resources in the transaction
-		List<IResource> resources;
-		resources = (List<IResource>) theMethodParams[myTransactionParamIndex];
-
-		IdentityHashMap<IResource, IdDt> oldIds = new IdentityHashMap<IResource, IdDt>();
-		for (IResource next : resources) {
-			oldIds.put(next, next.getId());
-		}
-
 		// Call the server implementation method
 		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
@@ -142,17 +129,10 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 		List<IBaseResource> retResources = retVal.getResources(0, retVal.size());
 		for (int i = 0; i < retResources.size(); i++) {
-			IdDt oldId = oldIds.get(retResources.get(i));
 			IBaseResource newRes = retResources.get(i);
 			if (newRes.getIdElement() == null || newRes.getIdElement().isEmpty()) {
 				if (!(newRes instanceof BaseOperationOutcome)) {
 					throw new InternalErrorException("Transaction method returned resource at index " + i + " with no id specified - IResource#setId(IdDt)");
-				}
-			}
-
-			if (oldId != null && !oldId.isEmpty()) {
-				if (!oldId.equals(newRes.getIdElement()) && newRes instanceof IResource) {
-					((IResource) newRes).getResourceMetadata().put(ResourceMetadataKeyEnum.PREVIOUS_ID, oldId);
 				}
 			}
 		}
@@ -167,11 +147,17 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		/*
 		 * If the method has no parsed resource parameter, we parse here in order to have something for the interceptor.
 		 */
+		IBaseResource resource;
 		if (myTransactionParamIndex != -1) {
-			theDetails.setResource((IBaseResource) theMethodParams[myTransactionParamIndex]);
+			resource = (IBaseResource) theMethodParams[myTransactionParamIndex];
 		} else {
 			Class<? extends IBaseResource> resourceType = getContext().getResourceDefinition("Bundle").getImplementingClass();
-			theDetails.setResource(ResourceParameter.parseResourceFromRequest(theRequestDetails, this, resourceType));
+			resource = ResourceParameter.parseResourceFromRequest(theRequestDetails, this, resourceType);
+		}
+
+		theRequestDetails.setResource(resource);
+		if (theDetails != null) {
+			theDetails.setResource(resource);
 		}
 
 	}

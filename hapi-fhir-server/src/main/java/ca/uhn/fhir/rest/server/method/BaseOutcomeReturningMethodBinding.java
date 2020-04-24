@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,25 +31,20 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Set;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
-
-	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader = EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE, RestOperationTypeEnum.PATCH);
 
 	private boolean myReturnVoid;
 
@@ -58,7 +53,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 		if (!theMethod.getReturnType().equals(MethodOutcome.class)) {
 			if (!allowVoidReturnType()) {
-				throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " is a @" + theMethodAnnotation.getSimpleName() + " method but it does not return " + MethodOutcome.class);
+				throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getName() + " is a @" + theMethodAnnotation.getSimpleName() + " method but it does not return " + MethodOutcome.class);
 			} else if (theMethod.getReturnType() == void.class) {
 				myReturnVoid = true;
 			}
@@ -83,10 +78,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	private int getOperationStatus(MethodOutcome response) {
 		switch (getRestOperationType()) {
 			case CREATE:
-				if (response == null) {
-					throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null, which is not allowed for create operation");
-				}
-				if (response.getCreated() == null || Boolean.TRUE.equals(response.getCreated())) {
+				validateResponseNotNullIfItShouldntBe(response);
+				if (response == null || response.getCreated() == null || Boolean.TRUE.equals(response.getCreated())) {
 					return Constants.STATUS_HTTP_201_CREATED;
 				}
 				return Constants.STATUS_HTTP_200_OK;
@@ -100,10 +93,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			case VALIDATE:
 			case DELETE:
 			default:
+				validateResponseNotNullIfItShouldntBe(response);
 				if (response == null) {
-					if (isReturnVoid() == false) {
-						throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
-					}
 					return Constants.STATUS_HTTP_204_NO_CONTENT;
 				}
 				if (response.getOperationOutcome() == null) {
@@ -113,21 +104,27 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		}
 	}
 
+	private void validateResponseNotNullIfItShouldntBe(MethodOutcome response) {
+		if (response == null && !isReturnVoid()) {
+			throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
+		}
+	}
+
 	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		Set<RequestTypeEnum> allowableRequestTypes = provideAllowableRequestTypes();
 		RequestTypeEnum requestType = theRequest.getRequestType();
 		if (!allowableRequestTypes.contains(requestType)) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (!getResourceName().equals(theRequest.getResourceName())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (getMatchingOperation() == null && StringUtils.isNotBlank(theRequest.getOperation())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (getMatchingOperation() != null && !getMatchingOperation().equals(theRequest.getOperation())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 
 		/*
@@ -140,7 +137,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		 * It's also needed for conditional update..
 		 */
 
-		return true;
+		return MethodMatchEnum.EXACT;
 	}
 
 	@Override
@@ -170,9 +167,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		}
 
 		IBaseOperationOutcome outcome = response != null ? response.getOperationOutcome() : null;
-		IBaseResource resource = response != null ? response.getResource() : null;
 
-		return returnResponse(theServer, theRequest, response, outcome, resource);
+		return returnResponse(theServer, theRequest, response, outcome);
 	}
 
 	public boolean isReturnVoid() {
@@ -181,31 +177,32 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 	protected abstract Set<RequestTypeEnum> provideAllowableRequestTypes();
 
-	private Object returnResponse(IRestfulServer<?> theServer, RequestDetails theRequest, MethodOutcome response, IBaseResource originalOutcome, IBaseResource resource) throws IOException {
-		boolean allowPrefer = false;
-		int operationStatus = getOperationStatus(response);
-		IBaseResource outcome = originalOutcome;
+	private Object returnResponse(IRestfulServer<?> theServer, RequestDetails theRequest, MethodOutcome theMethodOutcome, IBaseResource theOriginalOutcome) throws IOException {
+		int operationStatus = getOperationStatus(theMethodOutcome);
+		IBaseResource outcome = theOriginalOutcome;
 
-		if (ourOperationsWhichAllowPreferHeader.contains(getRestOperationType())) {
-			allowPrefer = true;
-		}
-
+		RestOperationTypeEnum restOperationType = getRestOperationType(theRequest);
+		boolean allowPrefer = RestfulServerUtils.respectPreferHeader(restOperationType);
 		if (allowPrefer) {
 			String prefer = theRequest.getHeader(Constants.HEADER_PREFER);
-			PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(prefer);
-			if (preferReturn == null) {
-				preferReturn = theServer.getDefaultPreferReturn();
-			}
+			PreferHeader preferReturn = RestfulServerUtils.parsePreferHeader(theServer, prefer);
+			PreferReturnEnum returnEnum = preferReturn.getReturn();
+			returnEnum = defaultIfNull(returnEnum, PreferReturnEnum.REPRESENTATION);
 
-			switch (preferReturn) {
+			switch (returnEnum) {
 				case REPRESENTATION:
-					outcome = resource;
+					if (theMethodOutcome != null) {
+						outcome = theMethodOutcome.getResource();
+						theMethodOutcome.fireResourceViewCallbacks();
+					} else {
+						outcome = null;
+					}
 					break;
 				case MINIMAL:
 					outcome = null;
 					break;
 				case OPERATION_OUTCOME:
-					outcome = originalOutcome;
+					outcome = theOriginalOutcome;
 					break;
 			}
 
@@ -215,41 +212,25 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		responseDetails.setResponseResource(outcome);
 		responseDetails.setResponseCode(operationStatus);
 
-		HttpServletRequest servletRequest = null;
-		HttpServletResponse servletResponse = null;
-		if (theRequest instanceof ServletRequestDetails) {
-			servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
-			servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
-		}
-
-		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-			IServerInterceptor next = theServer.getInterceptors().get(i);
-			boolean continueProcessing = next.outgoingResponse(theRequest, outcome);
-			if (!continueProcessing) {
-				return null;
-			}
-
-			continueProcessing = next.outgoingResponse(theRequest, responseDetails, servletRequest, servletResponse);
-			if (!continueProcessing) {
-				return null;
-			}
+		if (!BaseResourceReturningMethodBinding.callOutgoingResponseHook(theRequest, responseDetails)) {
+			return null;
 		}
 
 		IRestfulResponse restfulResponse = theRequest.getResponse();
 
-		if (response != null) {
-			if (response.getResource() != null) {
-				restfulResponse.setOperationResourceLastUpdated(RestfulServerUtils.extractLastUpdatedFromResource(response.getResource()));
+		if (theMethodOutcome != null) {
+			if (theMethodOutcome.getResource() != null) {
+				restfulResponse.setOperationResourceLastUpdated(RestfulServerUtils.extractLastUpdatedFromResource(theMethodOutcome.getResource()));
 			}
 
-			IIdType responseId = response.getId();
+			IIdType responseId = theMethodOutcome.getId();
 			if (responseId != null && responseId.getResourceType() == null && responseId.hasIdPart()) {
 				responseId = responseId.withResourceType(getResourceName());
 			}
 
 			if (responseId != null) {
 				String serverBase = theRequest.getFhirServerBase();
-				responseId = RestfulServerUtils.fullyQualifyResourceIdOrReturnNull(theServer, resource, serverBase, responseId);
+				responseId = RestfulServerUtils.fullyQualifyResourceIdOrReturnNull(theServer, theMethodOutcome.getResource(), serverBase, responseId);
 				restfulResponse.setOperationResourceId(responseId);
 			}
 		}
@@ -258,17 +239,6 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		Set<SummaryEnum> summaryMode = Collections.emptySet();
 
 		return restfulResponse.streamResponseAsResource(responseDetails.getResponseResource(), prettyPrint, summaryMode, responseDetails.getResponseCode(), null, theRequest.isRespondGzip(), true);
-	}
-
-
-	protected static void parseContentLocation(FhirContext theContext, MethodOutcome theOutcomeToPopulate, String theLocationHeader) {
-		if (StringUtils.isBlank(theLocationHeader)) {
-			return;
-		}
-
-		IIdType id = theContext.getVersion().newIdType();
-		id.setValue(theLocationHeader);
-		theOutcomeToPopulate.setId(id);
 	}
 
 }

@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.term.snomedct;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.term.snomedct;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
+import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import org.apache.commons.csv.CSVRecord;
 
 import java.util.Map;
@@ -56,9 +56,10 @@ public final class SctHandlerDescription implements IRecordHandler {
 
       String term = theRecord.get("term");
 
-      TermConcept concept = TerminologyLoaderSvcImpl.getOrCreateConcept(myCodeSystemVersion, myId2concept, id);
+      TermConcept concept = TermLoaderSvcImpl.getOrCreateConcept(myId2concept, id);
       concept.setCode(conceptId);
       concept.setDisplay(term);
+      concept.setCodeSystemVersion(myCodeSystemVersion);
       myCode2concept.put(conceptId, concept);
    }
 }

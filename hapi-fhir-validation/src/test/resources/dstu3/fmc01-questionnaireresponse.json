@@ -1,0 +1,60 @@
+{
+	"resourceType": "QuestionnaireResponse",
+	"id": "QRTest123",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2019-03-25T15:54:52.586-04:00"
+	},
+	"identifier": {
+		"system": "urn:oid:2.16.840.1.113883.3.7418.21.1",
+		"value": "Test123"
+	},
+	"questionnaire": {
+		"reference": "Questionnaire/FMCBinderOptimizationAssessment"
+	},
+	"status": "completed",
+	"subject": {
+		"reference": "Patient/P3000138294"
+	},
+	"context": {
+		"reference": "EpisodeOfCare/ECA890001"
+	},
+	"authored": "2019-03-25T00:00:00-04:00",
+	"author": {
+		"reference": "Practitioner/PRTDietician"
+	},
+	"item": [
+		{
+			"linkId": "Home Medications",
+			"text": "Home Medications",
+			"item": [
+				{
+					"linkId": "BO_RecCons",
+					"text": "Recommendation consistent with binder optimization guidelines",
+					"answer": [
+						{
+							"valueCoding": {
+								"system": "http://fkcfhir.org/fhir/cs/FMCYesNoUnk",
+								"code": "Yes",
+								"display": "Yes"
+							}
+						}
+					]
+				},
+				{
+					"linkId": "BO_ConsDrop",
+					"text": "Binder recommended",
+					"answer": [
+						{
+							"valueCoding": {
+								"system": "http://binder_recommended_fkc",
+								"code": "AURYXIA",
+								"display": "Auryxia"
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

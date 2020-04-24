@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,10 @@ package ca.uhn.fhir.rest.server.interceptor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -43,7 +47,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -55,6 +58,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * <b>See:</b> See the <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_server_interceptor.html">server
  * interceptor documentation</a> for more information on how to use this class.
  * </p>
+ * Note that unless otherwise stated, it is possible to throw any subclass of
+ * {@link BaseServerResponseException} from any interceptor method.
  */
 public interface IServerInterceptor {
 
@@ -86,6 +91,7 @@ public interface IServerInterceptor {
 	 * @throws ServletException If this exception is thrown, it will be re-thrown up to the container for handling.
 	 * @throws IOException      If this exception is thrown, it will be re-thrown up to the container for handling.
 	 */
+	@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
 	boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
 		throws ServletException, IOException;
 
@@ -106,6 +112,7 @@ public interface IServerInterceptor {
 	 * @throws AuthenticationException This exception may be thrown to indicate that the interceptor has detected an unauthorized access
 	 *                                 attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
 	boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException;
 
 	/**
@@ -124,6 +131,7 @@ public interface IServerInterceptor {
 	 * @param theProcessedRequest An object which will be populated with the details which were extracted from the raw request by the
 	 *                            server, e.g. the FHIR operation type and the parsed resource body (if any).
 	 */
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
 	void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theProcessedRequest);
 
 	/**
@@ -142,6 +150,7 @@ public interface IServerInterceptor {
 	 * must return <code>false</code>. In this case, no further processing will occur and no further interceptors
 	 * will be called.
 	 */
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
 	boolean incomingRequestPreProcessed(HttpServletRequest theRequest, HttpServletResponse theResponse);
 
 	/**
@@ -150,6 +159,7 @@ public interface IServerInterceptor {
 	 * @deprecated As of HAPI FHIR 3.2.0, this method is deprecated and will be removed in a future version of HAPI FHIR.
 	 */
 	@Deprecated
+	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
 	boolean outgoingResponse(RequestDetails theRequestDetails);
 
 	/**
@@ -158,6 +168,7 @@ public interface IServerInterceptor {
 	 * @deprecated As of HAPI FHIR 3.2.0, this method is deprecated and will be removed in a future version of HAPI FHIR.
 	 */
 	@Deprecated
+	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
 	boolean outgoingResponse(RequestDetails theRequestDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
 
 	/**
@@ -166,6 +177,7 @@ public interface IServerInterceptor {
 	 * @deprecated As of HAPI FHIR 3.2.0, this method is deprecated and will be removed in a future version of HAPI FHIR.
 	 */
 	@Deprecated
+	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
 	boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject);
 
 	/**
@@ -191,6 +203,8 @@ public interface IServerInterceptor {
 	 * favour of {@link #outgoingResponse(RequestDetails, ResponseDetails, HttpServletRequest, HttpServletResponse)}
 	 * and will be removed in a future version of HAPI FHIR.
 	 */
+	@Deprecated
+	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
 	boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
 		throws AuthenticationException;
 
@@ -214,6 +228,7 @@ public interface IServerInterceptor {
 	 * @throws AuthenticationException This exception may be thrown to indicate that the interceptor has detected an unauthorized access
 	 *                                 attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
+	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
 	boolean outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
 		throws AuthenticationException;
 
@@ -256,6 +271,7 @@ public interface IServerInterceptor {
 	 * should always return <code>null</code>. If this interceptor adds an OperationOutcome to the exception, it
 	 * should return an exception.
 	 */
+	@Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
 	BaseServerResponseException preProcessOutgoingException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest) throws ServletException;
 
 	/**
@@ -272,8 +288,14 @@ public interface IServerInterceptor {
 	 *
 	 * @param theRequestDetails The request itself
 	 */
+	@Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
 	void processingCompletedNormally(ServletRequestDetails theRequestDetails);
 
+	/**
+	 * @deprecated This class doesn't bring anything that can't be done with {@link RequestDetails}. That
+	 * class should be used instead. Deprecated in 4.0.0
+	 */
+	@Deprecated
 	class ActionRequestDetails {
 		private final FhirContext myContext;
 		private final IIdType myId;
@@ -410,10 +432,22 @@ public interface IServerInterceptor {
 			if (server == null) {
 				return;
 			}
-			List<IServerInterceptor> interceptors = server.getInterceptors();
-			for (IServerInterceptor next : interceptors) {
-				next.incomingRequestPreHandled(theOperationType, this);
-			}
+
+			IIdType previousRequestId = requestDetails.getId();
+			requestDetails.setId(getId());
+
+			IInterceptorService interceptorService = server.getInterceptorService();
+
+			HookParams params = new HookParams();
+			params.add(RestOperationTypeEnum.class, theOperationType);
+			params.add(this);
+			params.add(RequestDetails.class, this.getRequestDetails());
+			params.addIfMatchesType(ServletRequestDetails.class, this.getRequestDetails());
+			interceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, params);
+
+			// Reset the request ID
+			requestDetails.setId(previousRequestId);
+
 		}
 
 	}

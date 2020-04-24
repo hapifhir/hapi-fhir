@@ -1,29 +1,27 @@
 package ca.uhn.fhir.util;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,8 +43,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class StopWatch {
 
-	private static final NumberFormat DAY_FORMAT = new DecimalFormat("0.0");
-	private static final NumberFormat TEN_DAY_FORMAT = new DecimalFormat("0");
 	private static Long ourNowForUnitTest;
 	private long myStarted = now();
 	private TaskTiming myCurrentTask;
@@ -66,6 +62,15 @@ public class StopWatch {
 	 */
 	public StopWatch(Date theStart) {
 		myStarted = theStart.getTime();
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @param theStart The time that the stopwatch was started
+	 */
+	public StopWatch(long theStart) {
+		myStarted = theStart;
 	}
 
 	private void addNewlineIfContentExists(StringBuilder theB) {
@@ -94,6 +99,19 @@ public class StopWatch {
 	}
 
 	/**
+	 * Returns a nice human-readable display of the time taken per
+	 * operation. Note that this may not actually output the number
+	 * of milliseconds if the time taken per operation was very long (over
+	 * 10 seconds)
+	 *
+	 * @see #formatMillis(long)
+	 */
+	public String formatMillisPerOperation(long theNumOperations) {
+		double millisPerOperation = (((double) getMillis()) / Math.max(1.0, theNumOperations));
+		return formatMillis(millisPerOperation);
+	}
+
+	/**
 	 * Returns a string providing the durations of all tasks collected by {@link #startTask(String)}
 	 */
 	public String formatTaskDurations() {
@@ -109,6 +127,8 @@ public class StopWatch {
 				b.append(": ");
 				b.append(formatMillis(delta));
 			}
+		} else {
+			b.append("No tasks");
 		}
 
 		TaskTiming last = null;
@@ -155,9 +175,9 @@ public class StopWatch {
 	 * this method will return 15
 	 * </p>
 	 *
-	 * @see #getThroughput(int, TimeUnit)
+	 * @see #getThroughput(long, TimeUnit)
 	 */
-	public String formatThroughput(int theNumOperations, TimeUnit theUnit) {
+	public String formatThroughput(long theNumOperations, TimeUnit theUnit) {
 		double throughput = getThroughput(theNumOperations, theUnit);
 		return new DecimalFormat("0.0").format(throughput);
 	}
@@ -194,8 +214,8 @@ public class StopWatch {
 	/**
 	 * @param theNumOperations Ok for this to be 0, it will be treated as 1
 	 */
-	public int getMillisPerOperation(int theNumOperations) {
-		return (int) (((double) getMillis()) / Math.max(1.0, theNumOperations));
+	public long getMillisPerOperation(long theNumOperations) {
+		return (long) (((double) getMillis()) / Math.max(1.0, theNumOperations));
 	}
 
 	public Date getStartedDate() {
@@ -211,9 +231,9 @@ public class StopWatch {
 	 * this method will return 15
 	 * </p>
 	 *
-	 * @see #formatThroughput(int, TimeUnit)
+	 * @see #formatThroughput(long, TimeUnit)
 	 */
-	public double getThroughput(int theNumOperations, TimeUnit theUnit) {
+	public double getThroughput(long theNumOperations, TimeUnit theUnit) {
 		if (theNumOperations <= 0) {
 			return 0.0f;
 		}
@@ -221,10 +241,14 @@ public class StopWatch {
 		long millisElapsed = Math.max(1, getMillis());
 		long periodMillis = theUnit.toMillis(1);
 
-		double numerator = theNumOperations;
 		double denominator = ((double) millisElapsed) / ((double) periodMillis);
 
-		return numerator / denominator;
+		double throughput = (double) theNumOperations / denominator;
+		if (throughput > theNumOperations) {
+			throughput = theNumOperations;
+		}
+
+		return throughput;
 	}
 
 	public void restart() {
@@ -242,12 +266,11 @@ public class StopWatch {
 	 */
 	public void startTask(String theTaskName) {
 		endCurrentTask();
-		if (isNotBlank(theTaskName)) {
-			myCurrentTask = new TaskTiming()
-				.setTaskName(theTaskName)
-				.setStart(now());
-			myTasks.add(myCurrentTask);
-		}
+		Validate.notBlank(theTaskName, "Task name must not be blank");
+		myCurrentTask = new TaskTiming()
+			.setTaskName(theTaskName)
+			.setStart(now());
+		myTasks.add(myCurrentTask);
 	}
 
 	/**
@@ -259,77 +282,6 @@ public class StopWatch {
 	@Override
 	public String toString() {
 		return formatMillis(getMillis());
-	}
-
-	/**
-	 * Append a right-aligned and zero-padded numeric value to a `StringBuilder`.
-	 */
-	static private void append(StringBuilder tgt, String pfx, int dgt, long val) {
-		tgt.append(pfx);
-		if (dgt > 1) {
-			int pad = (dgt - 1);
-			for (long xa = val; xa > 9 && pad > 0; xa /= 10) {
-				pad--;
-			}
-			for (int xa = 0; xa < pad; xa++) {
-				tgt.append('0');
-			}
-		}
-		tgt.append(val);
-	}
-
-	/**
-	 * Formats a number of milliseconds for display (e.g.
-	 * in a log file), tailoring the output to how big
-	 * the value actually is.
-	 * <p>
-	 * Example outputs:
-	 * </p>
-	 * <ul>
-	 * <li>133ms</li>
-	 * <li>00:00:10.223</li>
-	 * <li>1.7 days</li>
-	 * <li>64 days</li>
-	 * </ul>
-	 */
-	public static String formatMillis(long val) {
-		StringBuilder buf = new StringBuilder(20);
-		if (val < (10 * DateUtils.MILLIS_PER_SECOND)) {
-			buf.append(val);
-			buf.append("ms");
-		} else if (val >= DateUtils.MILLIS_PER_DAY) {
-			double days = (double) val / DateUtils.MILLIS_PER_DAY;
-			if (days >= 10) {
-				buf.append(TEN_DAY_FORMAT.format(days));
-				buf.append(" days");
-			} else if (days != 1.0f) {
-				buf.append(DAY_FORMAT.format(days));
-				buf.append(" days");
-			} else {
-				buf.append(DAY_FORMAT.format(days));
-				buf.append(" day");
-			}
-		} else {
-			append(buf, "", 2, ((val % DateUtils.MILLIS_PER_DAY) / DateUtils.MILLIS_PER_HOUR));
-			append(buf, ":", 2, ((val % DateUtils.MILLIS_PER_HOUR) / DateUtils.MILLIS_PER_MINUTE));
-			append(buf, ":", 2, ((val % DateUtils.MILLIS_PER_MINUTE) / DateUtils.MILLIS_PER_SECOND));
-			if (val <= DateUtils.MILLIS_PER_MINUTE) {
-				append(buf, ".", 3, (val % DateUtils.MILLIS_PER_SECOND));
-			}
-		}
-		return buf.toString();
-	}
-
-	private static long now() {
-		if (ourNowForUnitTest != null) {
-			return ourNowForUnitTest;
-		}
-		return System.currentTimeMillis();
-	}
-
-	@VisibleForTesting
-	static void setNowForUnitTestForUnitTest(Long theNowForUnitTest) {
-		ourNowForUnitTest = theNowForUnitTest;
 	}
 
 	private static class TaskTiming {
@@ -370,6 +322,111 @@ public class StopWatch {
 			myTaskName = theTaskName;
 			return this;
 		}
+	}
+
+	private static NumberFormat getDayFormat() {
+		return new DecimalFormat("0.0");
+	}
+
+	private static NumberFormat getTenDayFormat() {
+		return new DecimalFormat("0");
+	}
+
+	private static NumberFormat getSubMillisecondMillisFormat() {
+		return new DecimalFormat("0.000");
+	}
+
+	/**
+	 * Append a right-aligned and zero-padded numeric value to a `StringBuilder`.
+	 */
+	static void appendRightAlignedNumber(StringBuilder theStringBuilder, String thePrefix, int theNumberOfDigits, long theValueToAppend) {
+		theStringBuilder.append(thePrefix);
+		if (theNumberOfDigits > 1) {
+			int pad = (theNumberOfDigits - 1);
+			for (long xa = theValueToAppend; xa > 9 && pad > 0; xa /= 10) {
+				pad--;
+			}
+			for (int xa = 0; xa < pad; xa++) {
+				theStringBuilder.append('0');
+			}
+		}
+		theStringBuilder.append(theValueToAppend);
+	}
+
+	/**
+	 * Formats a number of milliseconds for display (e.g.
+	 * in a log file), tailoring the output to how big
+	 * the value actually is.
+	 * <p>
+	 * Example outputs:
+	 * </p>
+	 * <ul>
+	 * <li>133ms</li>
+	 * <li>00:00:10.223</li>
+	 * <li>1.7 days</li>
+	 * <li>64 days</li>
+	 * </ul>
+	 */
+	public static String formatMillis(long theMillis) {
+		return formatMillis((double) theMillis);
+	}
+
+	/**
+	 * Formats a number of milliseconds for display (e.g.
+	 * in a log file), tailoring the output to how big
+	 * the value actually is.
+	 * <p>
+	 * Example outputs:
+	 * </p>
+	 * <ul>
+	 * <li>133ms</li>
+	 * <li>00:00:10.223</li>
+	 * <li>1.7 days</li>
+	 * <li>64 days</li>
+	 * </ul>
+	 */
+	public static String formatMillis(double theMillis) {
+		StringBuilder buf = new StringBuilder(20);
+		if (theMillis > 0.0 && theMillis < 1.0) {
+			buf.append(getSubMillisecondMillisFormat().format(theMillis));
+			buf.append("ms");
+		} else if (theMillis < (10 * DateUtils.MILLIS_PER_SECOND)) {
+			buf.append((int) theMillis);
+			buf.append("ms");
+		} else if (theMillis >= DateUtils.MILLIS_PER_DAY) {
+			double days = theMillis / DateUtils.MILLIS_PER_DAY;
+			if (days >= 10) {
+				buf.append(getTenDayFormat().format(days));
+				buf.append(" days");
+			} else if (days != 1.0f) {
+				buf.append(getDayFormat().format(days));
+				buf.append(" days");
+			} else {
+				buf.append(getDayFormat().format(days));
+				buf.append(" day");
+			}
+		} else {
+			long millisAsLong = (long) theMillis;
+			appendRightAlignedNumber(buf, "", 2, ((millisAsLong % DateUtils.MILLIS_PER_DAY) / DateUtils.MILLIS_PER_HOUR));
+			appendRightAlignedNumber(buf, ":", 2, ((millisAsLong % DateUtils.MILLIS_PER_HOUR) / DateUtils.MILLIS_PER_MINUTE));
+			appendRightAlignedNumber(buf, ":", 2, ((millisAsLong % DateUtils.MILLIS_PER_MINUTE) / DateUtils.MILLIS_PER_SECOND));
+			if (theMillis <= DateUtils.MILLIS_PER_MINUTE) {
+				appendRightAlignedNumber(buf, ".", 3, (millisAsLong % DateUtils.MILLIS_PER_SECOND));
+			}
+		}
+		return buf.toString();
+	}
+
+	private static long now() {
+		if (ourNowForUnitTest != null) {
+			return ourNowForUnitTest;
+		}
+		return System.currentTimeMillis();
+	}
+
+	@VisibleForTesting
+	static void setNowForUnitTestForUnitTest(Long theNowForUnitTest) {
+		ourNowForUnitTest = theNowForUnitTest;
 	}
 
 }

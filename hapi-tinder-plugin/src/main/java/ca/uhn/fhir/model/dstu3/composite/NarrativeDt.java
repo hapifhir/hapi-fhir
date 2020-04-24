@@ -104,7 +104,8 @@ public class NarrativeDt extends BaseNarrativeDt {
      * The actual narrative content, a stripped down version of XHTML
      * </p> 
 	 */
-	public XhtmlDt getDiv() {  
+	@Override
+	public XhtmlDt getDiv() {
 		if (myDiv == null) {
 			myDiv = new XhtmlDt();
 		}

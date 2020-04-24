@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,10 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -34,7 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
+public class ArbitrarySqlTask extends BaseTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ArbitrarySqlTask.class);
 	private final String myDescription;
@@ -44,7 +47,8 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 	private String myExecuteOnlyIfTableExists;
 	private List<TableAndColumn> myConditionalOnExistenceOf = new ArrayList<>();
 
-	public ArbitrarySqlTask(String theTableName, String theDescription) {
+	public ArbitrarySqlTask(VersionEnum theRelease, String theVersion, String theTableName, String theDescription) {
+		super(theRelease.toString(), theVersion);
 		myTableName = theTableName;
 		myDescription = theDescription;
 	}
@@ -59,21 +63,21 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 	}
 
 	@Override
-	public void execute() throws SQLException {
-		ourLog.info("Starting: {}", myDescription);
+	public void doExecute() throws SQLException {
+		logInfo(ourLog, "Starting: {}", myDescription);
 
 		if (StringUtils.isNotBlank(myExecuteOnlyIfTableExists)) {
 			Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 			if (!tableNames.contains(myExecuteOnlyIfTableExists.toUpperCase())) {
-				ourLog.info("Table {} does not exist - No action performed", myExecuteOnlyIfTableExists);
+				logInfo(ourLog, "Table {} does not exist - No action performed", myExecuteOnlyIfTableExists);
 				return;
 			}
 		}
 
 		for (TableAndColumn next : myConditionalOnExistenceOf) {
-			String columnType = JdbcUtils.getColumnType(getConnectionProperties(), next.getTable(), next.getColumn());
+			JdbcUtils.ColumnType columnType = JdbcUtils.getColumnType(getConnectionProperties(), next.getTable(), next.getColumn());
 			if (columnType == null) {
-				ourLog.info("Table {} does not have column {} - No action performed", next.getTable(), next.getColumn());
+				logInfo(ourLog, "Table {} does not have column {} - No action performed", next.getTable(), next.getColumn());
 				return;
 			}
 		}
@@ -99,6 +103,17 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 		myConditionalOnExistenceOf.add(new TableAndColumn(theTableName, theColumnName));
 	}
 
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		ArbitrarySqlTask otherObject = (ArbitrarySqlTask) theOtherObject;
+		theBuilder.append(myTableName, otherObject.myTableName);
+	}
+
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		theBuilder.append(myTableName);
+	}
+
 	public enum QueryModeEnum {
 		BATCH_UNTIL_NO_MORE
 	}
@@ -109,13 +124,12 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 
 	private class QueryTask extends Task {
 		private final String mySql;
-		private final QueryModeEnum myMode;
 		private final Consumer<Map<String, Object>> myConsumer;
 
 		public QueryTask(String theSql, QueryModeEnum theMode, Consumer<Map<String, Object>> theConsumer) {
 			mySql = theSql;
-			myMode = theMode;
 			myConsumer = theConsumer;
+			setDescription("Execute raw sql");
 		}
 
 
@@ -127,14 +141,14 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 
 			List<Map<String, Object>> rows;
 			do {
-				ourLog.info("Querying for up to {} rows", myBatchSize);
+				logInfo(ourLog, "Querying for up to {} rows", myBatchSize);
 				rows = getTxTemplate().execute(t -> {
-					JdbcTemplate jdbcTemplate = newJdbcTemnplate();
+					JdbcTemplate jdbcTemplate = newJdbcTemplate();
 					jdbcTemplate.setMaxRows(myBatchSize);
 					return jdbcTemplate.query(mySql, new ColumnMapRowMapper());
 				});
 
-				ourLog.info("Processing {} rows", rows.size());
+				logInfo(ourLog, "Processing {} rows", rows.size());
 				List<Map<String, Object>> finalRows = rows;
 				getTxTemplate().execute(t -> {
 					for (Map<String, Object> nextRow : finalRows) {

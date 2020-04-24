@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -65,18 +65,18 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 
 	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		IIdType idDt = (IIdType) theArgs[getIdParameterIndex()];
-		if (idDt == null) {
+		IIdType id = (IIdType) theArgs[getIdParameterIndex()];
+		if (id == null) {
 			throw new NullPointerException("ID can not be null");
 		}
 
-		if (idDt.hasResourceType() == false) {
-			idDt = idDt.withResourceType(getResourceName());
-		} else if (getResourceName().equals(idDt.getResourceType()) == false) {
-			throw new InvalidRequestException("ID parameter has the wrong resource type, expected '" + getResourceName() + "', found: " + idDt.getResourceType());
+		if (id.hasResourceType() == false) {
+			id = id.withResourceType(getResourceName());
+		} else if (getResourceName().equals(id.getResourceType()) == false) {
+			throw new InvalidRequestException("ID parameter has the wrong resource type, expected '" + getResourceName() + "', found: " + id.getResourceType());
 		}
 
-		HttpDeleteClientInvocation retVal = createDeleteInvocation(getContext(), idDt);
+		HttpDeleteClientInvocation retVal = createDeleteInvocation(getContext(), id, Collections.emptyMap());
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			IParameter nextParam = getParameters().get(idx);
@@ -86,9 +86,8 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		return retVal;
 	}
 
-	public static HttpDeleteClientInvocation createDeleteInvocation(FhirContext theContext, IIdType theId) {
-		HttpDeleteClientInvocation retVal = new HttpDeleteClientInvocation(theContext, theId);
-		return retVal;
+	public static HttpDeleteClientInvocation createDeleteInvocation(FhirContext theContext, IIdType theId, Map<String, List<String>> theAdditionalParams) {
+		return new HttpDeleteClientInvocation(theContext, theId, theAdditionalParams);
 	}
 
 
@@ -97,13 +96,8 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		return null;
 	}
 
-	public static HttpDeleteClientInvocation createDeleteInvocation(FhirContext theContext, String theSearchUrl) {
-		HttpDeleteClientInvocation retVal = new HttpDeleteClientInvocation(theContext, theSearchUrl);
-		return retVal;
-	}
-
-	public static HttpDeleteClientInvocation createDeleteInvocation(FhirContext theContext, String theResourceType, Map<String, List<String>> theParams) {
-		return new HttpDeleteClientInvocation(theContext, theResourceType, theParams);
+	public static HttpDeleteClientInvocation createDeleteInvocation(FhirContext theContext, String theSearchUrl, Map<String, List<String>> theParams) {
+		return new HttpDeleteClientInvocation(theContext, theSearchUrl, theParams);
 	}
 
 }

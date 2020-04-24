@@ -4,14 +4,14 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,31 +20,29 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import java.util.*;
 
 public abstract class BaseElement implements /*IElement, */ISupportsUndeclaredExtensions {
 
 	private static final long serialVersionUID = -3092659584634499332L;
 	private List<String> myFormatCommentsPost;
 	private List<String> myFormatCommentsPre;
-	
-   @Child(name = "extension", type = {ExtensionDt.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-   @Description(shortDefinition="Additional Content defined by implementations", formalDefinition="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension." )
+	private Map<String, Object> userData;
+
+	@Child(name = "extension", type = {ExtensionDt.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED, modifier = false, summary = false)
+	@Description(shortDefinition = "Additional Content defined by implementations", formalDefinition = "May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.")
 	private List<ExtensionDt> myUndeclaredExtensions;
-	
-   /**
-    * May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.
-    */
-   @Child(name = "modifierExtension", type = {ExtensionDt.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=true, summary=false)
-   @Description(shortDefinition="Extensions that cannot be ignored", formalDefinition="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions." )
+
+	/**
+	 * May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.
+	 */
+	@Child(name = "modifierExtension", type = {ExtensionDt.class}, order = 1, min = 0, max = Child.MAX_UNLIMITED, modifier = true, summary = false)
+	@Description(shortDefinition = "Extensions that cannot be ignored", formalDefinition = "May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.")
 	private List<ExtensionDt> myUndeclaredModifierExtensions;
 
 	@Override
@@ -146,6 +144,21 @@ public abstract class BaseElement implements /*IElement, */ISupportsUndeclaredEx
 	@Override
 	public boolean hasFormatComment() {
 		return (myFormatCommentsPre != null && !myFormatCommentsPre.isEmpty()) || (myFormatCommentsPost != null && !myFormatCommentsPost.isEmpty());
+	}
+
+	@Override
+	public Object getUserData(String name) {
+		if (userData == null)
+			return null;
+		return userData.get(name);
+	}
+
+	@Override
+	public void setUserData(String name, Object value) {
+		if (userData == null) {
+			userData = new HashMap<>();
+		}
+		userData.put(name, value);
 	}
 
 	/**

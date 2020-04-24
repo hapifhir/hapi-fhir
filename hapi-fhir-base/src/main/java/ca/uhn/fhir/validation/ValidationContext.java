@@ -1,20 +1,31 @@
 package ca.uhn.fhir.validation;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.LenientErrorHandler;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ObjectUtil;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,30 +34,23 @@ import java.util.List;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.LenientErrorHandler;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.ObjectUtil;
-
 public class ValidationContext<T> extends BaseValidationContext<T> implements IValidationContext<T> {
 
 	private final IEncoder myEncoder;
 	private final T myResource;
-	private String myResourceAsString;
 	private final EncodingEnum myResourceAsStringEncoding;
+	private final ValidationOptions myOptions;
+	private String myResourceAsString;
 
-	private ValidationContext(FhirContext theContext, T theResource, IEncoder theEncoder) {
-		this(theContext, theResource, theEncoder, new ArrayList<SingleValidationMessage>());
+	private ValidationContext(FhirContext theContext, T theResource, IEncoder theEncoder, ValidationOptions theOptions) {
+		this(theContext, theResource, theEncoder, new ArrayList<>(), theOptions);
 	}
-	
-	private ValidationContext(FhirContext theContext, T theResource, IEncoder theEncoder, List<SingleValidationMessage> theMessages) {
+
+	private ValidationContext(FhirContext theContext, T theResource, IEncoder theEncoder, List<SingleValidationMessage> theMessages, ValidationOptions theOptions) {
 		super(theContext, theMessages);
 		myResource = theResource;
 		myEncoder = theEncoder;
+		myOptions = theOptions;
 		if (theEncoder != null) {
 			myResourceAsStringEncoding = theEncoder.getEncoding();
 		} else {
@@ -72,8 +76,24 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 		return myResourceAsStringEncoding;
 	}
 
-	public static <T extends IBaseResource> IValidationContext<T> forResource(final FhirContext theContext, final T theResource) {
-		return new ValidationContext<T>(theContext, theResource, new IEncoder() {
+	@Nonnull
+	@Override
+	public ValidationOptions getOptions() {
+		return myOptions;
+	}
+
+	private interface IEncoder {
+		String encode();
+
+		EncodingEnum getEncoding();
+	}
+
+	public static <T extends IBaseResource> IValidationContext<T> forResource(final FhirContext theContext, final T theResource, ValidationOptions theOptions) {
+		ObjectUtil.requireNonNull(theContext, "theContext can not be null");
+		ObjectUtil.requireNonNull(theResource, "theResource can not be null");
+		ValidationOptions options = defaultIfNull(theOptions, ValidationOptions.empty());
+
+		IEncoder encoder = new IEncoder() {
 			@Override
 			public String encode() {
 				return theContext.newXmlParser().encodeResourceToString(theResource);
@@ -83,18 +103,15 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 			public EncodingEnum getEncoding() {
 				return EncodingEnum.XML;
 			}
-		});
+		};
+		return new ValidationContext<>(theContext, theResource, encoder, options);
 	}
 
-	private interface IEncoder {
-		String encode();
-
-		EncodingEnum getEncoding();
-	}
-
-	public static IValidationContext<IBaseResource> forText(final FhirContext theContext, final String theResourceBody) {
+	public static IValidationContext<IBaseResource> forText(final FhirContext theContext, final String theResourceBody, final ValidationOptions theOptions) {
 		ObjectUtil.requireNonNull(theContext, "theContext can not be null");
 		ObjectUtil.requireNotEmpty(theResourceBody, "theResourceBody can not be null or empty");
+		ValidationOptions options = defaultIfNull(theOptions, ValidationOptions.empty());
+
 		return new BaseValidationContext<IBaseResource>(theContext) {
 
 			private EncodingEnum myEncoding;
@@ -128,11 +145,17 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 				return myEncoding;
 			}
 
+			@Nonnull
+			@Override
+			public ValidationOptions getOptions() {
+				return options;
+			}
+
 		};
 	}
 
-	public static IValidationContext<IBaseResource> subContext(final IValidationContext<IBaseResource> theCtx, final IBaseResource theResource) {
-		return new ValidationContext<IBaseResource>(theCtx.getFhirContext(), theResource, new IEncoder() {
+	public static IValidationContext<IBaseResource> subContext(final IValidationContext<IBaseResource> theCtx, final IBaseResource theResource, ValidationOptions theOptions) {
+		return new ValidationContext<>(theCtx.getFhirContext(), theResource, new IEncoder() {
 			@Override
 			public String encode() {
 				return theCtx.getFhirContext().newXmlParser().encodeResourceToString(theResource);
@@ -142,6 +165,6 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 			public EncodingEnum getEncoding() {
 				return EncodingEnum.XML;
 			}
-		}, theCtx.getMessages());
+		}, theCtx.getMessages(), theOptions);
 	}
 }

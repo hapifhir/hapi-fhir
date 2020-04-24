@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Fri, Nov 1, 2019 09:29+1100 for FHIR v4.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="VisionPrescription" type="VisionPrescription">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">An authorization for the provision of glasses and/or contact lenses to a patient.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="VisionPrescription">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">An authorization for the provision of glasses and/or contact lenses to a patient.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A unique identifier assigned to this vision prescription.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="status" minOccurs="1" maxOccurs="1" type="FinancialResourceStatusCodes">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The status of the resource instance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="created" minOccurs="1" maxOccurs="1" type="dateTime">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The date this resource was created.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="patient" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A resource reference to the person to whom the vision prescription applies.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="encounter" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A reference to a resource that identifies the particular occurrence of contact between patient and health care provider during which the prescription was issued.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="dateWritten" minOccurs="1" maxOccurs="1" type="dateTime">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The date (and perhaps time) when the prescription was written.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="prescriber" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The healthcare professional responsible for authorizing the prescription.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="lensSpecification" type="VisionPrescription.LensSpecification" minOccurs="1" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Contain the details of  the individual lens specifications and serves as the authorization for the fullfillment by certified professionals.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="VisionPrescription.LensSpecification">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">An authorization for the provision of glasses and/or contact lenses to a patient.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="product" minOccurs="1" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies the type of vision correction product which is required for the patient.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="eye" minOccurs="1" maxOccurs="1" type="VisionEyes">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The eye for which the lens specification applies.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="sphere" minOccurs="0" maxOccurs="1" type="decimal">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Lens power measured in dioptres (0.25 units).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="cylinder" minOccurs="0" maxOccurs="1" type="decimal">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Power adjustment for astigmatism measured in dioptres (0.25 units).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="axis" minOccurs="0" maxOccurs="1" type="integer">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Adjustment for astigmatism measured in integer degrees.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="prism" type="VisionPrescription.Prism" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Allows for adjustment on two axis.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="add" minOccurs="0" maxOccurs="1" type="decimal">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Power adjustment for multifocal lenses measured in dioptres (0.25 units).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="power" minOccurs="0" maxOccurs="1" type="decimal">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Contact lens power measured in dioptres (0.25 units).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="backCurve" minOccurs="0" maxOccurs="1" type="decimal">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Back curvature measured in millimetres.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="diameter" minOccurs="0" maxOccurs="1" type="decimal">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Contact lens diameter measured in millimetres.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="duration" minOccurs="0" maxOccurs="1" type="Quantity">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The recommended maximum wear period for the lens.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="color" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Special color or pattern.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="brand" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Brand recommendations or restrictions.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="note" minOccurs="0" maxOccurs="unbounded" type="Annotation">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Notes for special requirements such as coatings and lens materials.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="VisionPrescription.Prism">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">An authorization for the provision of glasses and/or contact lenses to a patient.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="amount" minOccurs="1" maxOccurs="1" type="decimal">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Amount of prism to compensate for eye alignment in fractional units.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="base" minOccurs="1" maxOccurs="1" type="VisionBase">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The relative base, or reference lens edge, for the prism.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="VisionBase-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="up">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Up</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="down">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Down</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="in">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">In</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="out">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Out</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="VisionBase">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A coded concept listing the base codes.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="VisionBase-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="VisionEyes-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="right">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Right Eye</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="left">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Left Eye</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="VisionEyes">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A coded concept listing the eye codes.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="VisionEyes-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

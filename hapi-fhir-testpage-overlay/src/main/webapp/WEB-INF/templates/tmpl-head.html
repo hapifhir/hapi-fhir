@@ -1,29 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head th:fragment="head">
-		<meta charset="utf-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="description" content="" />
-		<meta name="author" content="" />
-		<script src="js/jquery-2.1.0.min.js"></script>
-		<script src="js/bootstrap.min.js"></script>
-		<link href="css/bootstrap.min.css" rel="stylesheet" />
- 		<link href="css/tester.css" rel="stylesheet" />
-		
-		<script type="text/javascript" th:utext="'var conformance = ' + ${jsonEncodedConf} + ';'">
-		</script>
-		<script type="text/javascript" th:utext="'var resourceName = \'' + ${resourceName} + '\';'">
-		</script>
-	
-		<link href="fa/css/font-awesome.min.css" rel="stylesheet" />
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head">
+   <meta charset="utf-8"/>
+   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+   <meta name="description" content=""/>
+   <meta name="author" content=""/>
 
-		<link href="css/hapi-narrative.css" rel="stylesheet" />
-		<script type="text/javascript" src="js/moment.min.js"></script>
-		<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
-		<script src="js/bootstrap-datetimepicker.min.js"></script>
-		<link href="css/select2.css" rel="stylesheet"/>
-		<script src="js/select2.min.js"></script>
-		<script src="js/RestfulTester.js" type="text/javascript" ></script>
-	</head>
+   <!-- JQuery and Bootstrap -->
+   <script th:src="@{/resources/jquery/dist/jquery.js}"></script>
+   <link rel="stylesheet" media="screen" th:href="@{/resources/bootstrap/css/bootstrap.min.css}" />
+   <link rel="stylesheet" media="screen" th:href="@{/resources/font-awesome/css/fontawesome.min.css}" />
+   <script th:src="@{/resources/font-awesome/js/all.min.js}" data-auto-replace-svg="nest"></script>
+   <link rel="stylesheet" media="screen" th:href="@{/resources/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css}" />
+   <script th:src="@{/resources/bootstrap/js/bootstrap.js}" defer="defer"></script>
+   <script th:src="@{/resources/bootstrap/js/tab.js}"></script>
+
+
+   <script type="text/javascript" th:utext="'var conformance = ' + ${jsonEncodedConf} + ';'">
+   </script>
+   <script type="text/javascript" th:utext="'var resourceName = \'' + ${resourceName} + '\';'">
+   </script>
+
+   <link rel="stylesheet" media="screen" th:href="@{/resources/font-awesome/css/all.min.css}" />
+   <script th:src="@{/resources/font-awesome/js/all.min.js}" data-auto-replace-svg="nest"></script>
+
+
+   <script th:src="@{/resources/moment/min/moment-with-locales.min.js}"></script>
+   <link th:href="@{/resources/Eonasdan-bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css}" rel="stylesheet" />
+   <script th:src="@{/resources/Eonasdan-bootstrap-datetimepicker/js/bootstrap-datetimepicker.js}"></script>
+   <link th:href="@{/resources/select2/dist/css/select2.css}" rel="stylesheet"/>
+   <script th:src="@{/resources/select2/dist/js/select2.min.js}"></script>
+
+
+   <script src="js/RestfulTester.js" type="text/javascript"></script>
+   <link href="css/tester.css" rel="stylesheet"/>
+   <link href="css/hapi-narrative.css" rel="stylesheet"/>
+
+</head>
 </html>

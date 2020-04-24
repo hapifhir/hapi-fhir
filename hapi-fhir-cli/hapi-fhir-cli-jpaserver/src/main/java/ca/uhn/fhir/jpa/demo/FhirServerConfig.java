@@ -1,13 +1,32 @@
 package ca.uhn.fhir.jpa.demo;
 
+/*-
+ * #%L
+ * HAPI FHIR - Command Line Client - Server WAR
+ * %%
+ * Copyright (C) 2014 - 2020 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu2;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,7 +43,7 @@ import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement()
-@Import(FhirDbConfig.class)
+@Import(CommonConfig.class)
 public class FhirServerConfig extends BaseJavaConfigDstu2 {
 
 	@Autowired
@@ -59,8 +78,9 @@ public class FhirServerConfig extends BaseJavaConfigDstu2 {
 
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
+	 * @return
 	 */
-	public IServerInterceptor loggingInterceptor() {
+	public LoggingInterceptor loggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
 		retVal.setLoggerName("fhirtest.access");
 		retVal.setMessageFormat(
@@ -72,9 +92,10 @@ public class FhirServerConfig extends BaseJavaConfigDstu2 {
 
 	/**
 	 * This interceptor adds some pretty syntax highlighting in responses when a browser is detected
+	 * @return
 	 */
 	@Bean(autowire = Autowire.BY_TYPE)
-	public IServerInterceptor responseHighlighterInterceptor() {
+	public ResponseHighlighterInterceptor responseHighlighterInterceptor() {
 		ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
 		return retVal;
 	}

@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.sp;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,10 +20,11 @@ package ca.uhn.fhir.jpa.sp;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
+import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,9 +41,10 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 	private DaoConfig myDaoConfig;
 
 	@Override
-	public void updatePresence(ResourceTable theResource, Map<String, Boolean> theParamNameToPresence) {
+	public AddRemoveCount updatePresence(ResourceTable theResource, Map<String, Boolean> theParamNameToPresence) {
+		AddRemoveCount retVal = new AddRemoveCount();
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
-			return;
+			return retVal;
 		}
 
 		Map<String, Boolean> presenceMap = new HashMap<>(theParamNameToPresence);
@@ -76,7 +78,8 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 				toDelete.add(nextEntry.getValue());
 			}
 		}
-		mySearchParamPresentDao.deleteInBatch(toDelete);
+		mySearchParamPresentDao.deleteAll(toDelete);
+		retVal.addToRemoveCount(toDelete.size());
 
 		// Add any that should be added
 		List<SearchParamPresent> toAdd = new ArrayList<>();
@@ -86,7 +89,9 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 			}
 		}
 		mySearchParamPresentDao.saveAll(toAdd);
+		retVal.addToRemoveCount(toAdd.size());
 
+		return retVal;
 	}
 
 }

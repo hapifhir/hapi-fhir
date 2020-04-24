@@ -4,14 +4,14 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,8 +44,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
-import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
@@ -54,8 +54,18 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -79,7 +89,7 @@ public class ExampleDataUploader extends BaseCommand {
 		}
 	}
 
-	private Bundle getBundleFromFileDstu2(Integer limit, File inputFile, FhirContext ctx) throws IOException, UnsupportedEncodingException {
+	private Bundle getBundleFromFileDstu2(Integer limit, File inputFile, FhirContext ctx) throws IOException {
 
 		Bundle bundle = new Bundle();
 
@@ -98,13 +108,13 @@ public class ExampleDataUploader extends BaseCommand {
 				break;
 			}
 
-			int len = 0;
+			int len;
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			while ((len = zis.read(buffer)) > 0) {
 				bos.write(buffer, 0, len);
 			}
 			byte[] exampleBytes = bos.toByteArray();
-			String exampleString = new String(exampleBytes, "UTF-8");
+			String exampleString = new String(exampleBytes, StandardCharsets.UTF_8);
 
 			if (ourLog.isTraceEnabled()) {
 				ourLog.trace("Next example: " + exampleString);
@@ -145,13 +155,13 @@ public class ExampleDataUploader extends BaseCommand {
 	}
 
 	@SuppressWarnings("unchecked")
-	private org.hl7.fhir.dstu3.model.Bundle getBundleFromFileDstu3(Integer limit, File inputFile, FhirContext ctx) throws IOException, UnsupportedEncodingException {
+	private org.hl7.fhir.dstu3.model.Bundle getBundleFromFileDstu3(Integer limit, File inputFile, FhirContext ctx) throws IOException {
 
 		org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		FhirValidator val = ctx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator(new DefaultProfileValidationSupport()));
+		val.registerValidatorModule(new FhirInstanceValidator(new DefaultProfileValidationSupport(ctx)));
 
 		ZipInputStream zis = new ZipInputStream(FileUtils.openInputStream(inputFile));
 		byte[] buffer = new byte[2048];
@@ -168,13 +178,13 @@ public class ExampleDataUploader extends BaseCommand {
 				break;
 			}
 
-			int len = 0;
+			int len;
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			while ((len = zis.read(buffer)) > 0) {
 				bos.write(buffer, 0, len);
 			}
 			byte[] exampleBytes = bos.toByteArray();
-			String exampleString = new String(exampleBytes, "UTF-8");
+			String exampleString = new String(exampleBytes, StandardCharsets.UTF_8);
 
 			if (ourLog.isTraceEnabled()) {
 				ourLog.trace("Next example: " + exampleString);
@@ -229,13 +239,13 @@ public class ExampleDataUploader extends BaseCommand {
 	}
 
 	@SuppressWarnings("unchecked")
-	private org.hl7.fhir.r4.model.Bundle getBundleFromFileR4(Integer limit, File inputFile, FhirContext ctx) throws IOException, UnsupportedEncodingException {
+	private org.hl7.fhir.r4.model.Bundle getBundleFromFileR4(Integer limit, File inputFile, FhirContext ctx) throws IOException {
 
 		org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
 		bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
 
 		FhirValidator val = ctx.newValidator();
-		val.registerValidatorModule(new org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator(new org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport()));
+		val.registerValidatorModule(new FhirInstanceValidator(new DefaultProfileValidationSupport(ctx)));
 
 		ZipInputStream zis = new ZipInputStream(FileUtils.openInputStream(inputFile));
 		byte[] buffer = new byte[2048];
@@ -252,13 +262,13 @@ public class ExampleDataUploader extends BaseCommand {
 				break;
 			}
 
-			int len = 0;
+			int len;
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			while ((len = zis.read(buffer)) > 0) {
 				bos.write(buffer, 0, len);
 			}
 			byte[] exampleBytes = bos.toByteArray();
-			String exampleString = new String(exampleBytes, "UTF-8");
+			String exampleString = new String(exampleBytes, StandardCharsets.UTF_8);
 
 			if (ourLog.isTraceEnabled()) {
 				ourLog.trace("Next example: " + exampleString);
@@ -369,8 +379,7 @@ public class ExampleDataUploader extends BaseCommand {
 
 	private void processBundleDstu2(FhirContext ctx, Bundle bundle) {
 
-		Map<String, Integer> ids = new HashMap<String, Integer>();
-		Set<String> fullIds = new HashSet<String>();
+		Set<String> fullIds = new HashSet<>();
 
 		for (Iterator<Entry> iterator = bundle.getEntry().iterator(); iterator.hasNext(); ) {
 			Entry next = iterator.next();
@@ -397,13 +406,14 @@ public class ExampleDataUploader extends BaseCommand {
 				}
 			}
 		}
-		Set<String> qualIds = new TreeSet<String>();
-		for (Iterator<Entry> iterator = bundle.getEntry().iterator(); iterator.hasNext(); ) {
-			Entry next = iterator.next();
+		Set<String> qualIds = new TreeSet<>();
+
+		for (Entry next : bundle.getEntry()) {
 			if (next.getResource().getId().getIdPart() != null) {
 				String nextId = next.getResource().getId().getValue();
 				next.getRequest().setMethod(HTTPVerbEnum.PUT);
 				next.getRequest().setUrl(nextId);
+				qualIds.add(nextId);
 			}
 		}
 
@@ -449,15 +459,14 @@ public class ExampleDataUploader extends BaseCommand {
 
 	private void processBundleDstu3(FhirContext ctx, org.hl7.fhir.dstu3.model.Bundle bundle) {
 
-		Map<String, Integer> ids = new HashMap<String, Integer>();
-		Set<String> fullIds = new HashSet<String>();
+		Set<String> fullIds = new HashSet<>();
 
 		for (Iterator<BundleEntryComponent> iterator = bundle.getEntry().iterator(); iterator.hasNext(); ) {
 			BundleEntryComponent next = iterator.next();
 
 			// DataElement have giant IDs that seem invalid, need to investigate this..
-			if ("Subscription".equals(next.getResource().getResourceType()) || "DataElement".equals(next.getResource().getResourceType())
-				|| "OperationOutcome".equals(next.getResource().getResourceType()) || "OperationDefinition".equals(next.getResource().getResourceType())) {
+			if ("Subscription".equals(next.getResource().getResourceType().name()) || "DataElement".equals(next.getResource().getResourceType().name())
+				|| "OperationOutcome".equals(next.getResource().getResourceType().name()) || "OperationDefinition".equals(next.getResource().getResourceType().name())) {
 				ourLog.info("Skipping " + next.getResource().getResourceType() + " example");
 				iterator.remove();
 			} else {
@@ -477,13 +486,13 @@ public class ExampleDataUploader extends BaseCommand {
 				}
 			}
 		}
-		Set<String> qualIds = new TreeSet<String>();
-		for (Iterator<BundleEntryComponent> iterator = bundle.getEntry().iterator(); iterator.hasNext(); ) {
-			BundleEntryComponent next = iterator.next();
+		Set<String> qualIds = new TreeSet<>();
+		for (BundleEntryComponent next : bundle.getEntry()) {
 			if (next.getResource().getIdElement().getIdPart() != null) {
 				String nextId = next.getResource().getIdElement().getValue();
 				next.getRequest().setMethod(HTTPVerb.PUT);
 				next.getRequest().setUrl(nextId);
+				qualIds.add(nextId);
 			}
 		}
 
@@ -529,15 +538,14 @@ public class ExampleDataUploader extends BaseCommand {
 
 	private void processBundleR4(FhirContext ctx, org.hl7.fhir.r4.model.Bundle bundle) {
 
-		Map<String, Integer> ids = new HashMap<String, Integer>();
-		Set<String> fullIds = new HashSet<String>();
+		Set<String> fullIds = new HashSet<>();
 
 		for (Iterator<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent> iterator = bundle.getEntry().iterator(); iterator.hasNext(); ) {
 			org.hl7.fhir.r4.model.Bundle.BundleEntryComponent next = iterator.next();
 
 			// DataElement have giant IDs that seem invalid, need to investigate this..
-			if ("Subscription".equals(next.getResource().getResourceType()) || "DataElement".equals(next.getResource().getResourceType())
-				|| "OperationOutcome".equals(next.getResource().getResourceType()) || "OperationDefinition".equals(next.getResource().getResourceType())) {
+			if ("Subscription".equals(next.getResource().getResourceType().name()) || "DataElement".equals(next.getResource().getResourceType().name())
+				|| "OperationOutcome".equals(next.getResource().getResourceType().name()) || "OperationDefinition".equals(next.getResource().getResourceType().name())) {
 				ourLog.info("Skipping " + next.getResource().getResourceType() + " example");
 				iterator.remove();
 			} else {
@@ -557,13 +565,13 @@ public class ExampleDataUploader extends BaseCommand {
 				}
 			}
 		}
-		Set<String> qualIds = new TreeSet<String>();
-		for (Iterator<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent> iterator = bundle.getEntry().iterator(); iterator.hasNext(); ) {
-			org.hl7.fhir.r4.model.Bundle.BundleEntryComponent next = iterator.next();
+		Set<String> qualIds = new TreeSet<>();
+		for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent next : bundle.getEntry()) {
 			if (next.getResource().getIdElement().getIdPart() != null) {
 				String nextId = next.getResource().getIdElement().getValue();
 				next.getRequest().setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT);
 				next.getRequest().setUrl(nextId);
+				qualIds.add(nextId);
 			}
 		}
 
@@ -616,7 +624,6 @@ public class ExampleDataUploader extends BaseCommand {
 		}
 
 		String specUrl;
-
 		switch (ctx.getVersion().getVersion()) {
 			case DSTU2:
 				specUrl = "http://hl7.org/fhir/dstu2/examples-json.zip";
@@ -635,7 +642,7 @@ public class ExampleDataUploader extends BaseCommand {
 
 		boolean cacheFile = theCommandLine.hasOption('c');
 
-		Collection<File> inputFiles = null;
+		Collection<File> inputFiles;
 		try {
 			inputFiles = loadFile(specUrl, filepath, cacheFile);
 			for (File inputFile : inputFiles) {
@@ -694,13 +701,11 @@ public class ExampleDataUploader extends BaseCommand {
 						continue;
 					}
 
-					boolean found = false;
 					for (int j = 0; j < resources.size(); j++) {
 						String candidateTarget = resources.get(j).getIdElement().getValue();
 						if (isNotBlank(nextTarget) && nextTarget.equals(candidateTarget)) {
 							ourLog.info("Reflexively adding resource {} to bundle as it is a reference target", nextTarget);
 							subResourceList.add(resources.remove(j));
-							found = true;
 							break;
 						}
 					}
@@ -715,7 +720,8 @@ public class ExampleDataUploader extends BaseCommand {
 			ourLog.info("About to upload {} examples in a transaction, {} remaining", subResourceList.size(), resources.size());
 
 			IVersionSpecificBundleFactory bundleFactory = ctx.newBundleFactory();
-			bundleFactory.initializeBundleFromResourceList(null, subResourceList, null, null, 0, BundleTypeEnum.TRANSACTION);
+			bundleFactory.addRootPropertiesToBundle(null, null, null, null, null, subResourceList.size(), BundleTypeEnum.TRANSACTION, null);
+			bundleFactory.addResourcesToBundle(new ArrayList<>(subResourceList), BundleTypeEnum.TRANSACTION, null, null, null);
 			IBaseResource subBundle = bundleFactory.getResourceBundle();
 
 			String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(subBundle);

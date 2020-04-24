@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,8 +21,11 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.api.Constants;
 import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.*;
@@ -30,7 +33,7 @@ import java.util.Collection;
 import java.util.Date;
 
 @MappedSuperclass
-public abstract class BaseHasResource implements IBaseResourceEntity {
+public abstract class BaseHasResource implements IBaseResourceEntity, IBasePersistedResource {
 
 	@Column(name = "RES_DELETED_AT", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -41,11 +44,6 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 	@Enumerated(EnumType.STRING)
 	@OptimisticLock(excluded = true)
 	private FhirVersionEnum myFhirVersion;
-
-	@OneToOne(optional = true, fetch = FetchType.LAZY, cascade = {}, orphanRemoval = false)
-	@JoinColumn(name = "FORCED_ID_PID")
-	@OptimisticLock(excluded = true)
-	private ForcedId myForcedId;
 
 	@Column(name = "HAS_TAGS", nullable = false)
 	@OptimisticLock(excluded = true)
@@ -61,17 +59,28 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 	@OptimisticLock(excluded = true)
 	private Date myUpdated;
 
+	/**
+	 * This is stored as an optimization to avoid neeind to query for this
+	 * after an update
+	 */
+	@Transient
+	private transient String myTransientForcedId;
+
+	public String getTransientForcedId() {
+		return myTransientForcedId;
+	}
+
+	public void setTransientForcedId(String theTransientForcedId) {
+		myTransientForcedId = theTransientForcedId;
+	}
+
+
 	public abstract BaseTag addTag(TagDefinition theDef);
 
 	@Override
 	public Date getDeleted() {
-		return myDeleted;
+		return cloneDate(myDeleted);
 	}
-
-	public void setDeleted(Date theDate) {
-		myDeleted = theDate;
-	}
-
 
 	@Override
 	public FhirVersionEnum getFhirVersion() {
@@ -82,24 +91,26 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 		myFhirVersion = theFhirVersion;
 	}
 
-	public ForcedId getForcedId() {
-		return myForcedId;
-	}
+	abstract public ForcedId getForcedId();
 
-	public void setForcedId(ForcedId theForcedId) {
-		myForcedId = theForcedId;
-	}
+	abstract public void setForcedId(ForcedId theForcedId);
 
 	@Override
 	public abstract Long getId();
 
 	@Override
-	public abstract IdDt getIdDt();
+	public boolean isDeleted() {
+		return myDeleted != null;
+	}
+
+	public void setDeleted(Date theDate) {
+		myDeleted = theDate;
+	}
 
 	@Override
 	public InstantDt getPublished() {
 		if (myPublished != null) {
-			return new InstantDt(myPublished);
+			return new InstantDt(cloneDate(myPublished));
 		} else {
 			return null;
 		}
@@ -107,6 +118,10 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 
 	public void setPublished(Date thePublished) {
 		myPublished = thePublished;
+	}
+
+	public void setPublished(InstantDt thePublished) {
+		myPublished = thePublished.getValue();
 	}
 
 	@Override
@@ -119,16 +134,20 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 
 	@Override
 	public InstantDt getUpdated() {
-		return new InstantDt(myUpdated);
+		return new InstantDt(cloneDate(myUpdated));
 	}
 
 	public void setUpdated(Date theUpdated) {
 		myUpdated = theUpdated;
 	}
 
+	public void setUpdated(InstantDt theUpdated) {
+		myUpdated = theUpdated.getValue();
+	}
+
 	@Override
 	public Date getUpdatedDate() {
-		return myUpdated;
+		return cloneDate(myUpdated);
 	}
 
 	@Override
@@ -143,12 +162,12 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 		myHasTags = theHasTags;
 	}
 
-	public void setPublished(InstantDt thePublished) {
-		myPublished = thePublished.getValue();
-	}
-
-	public void setUpdated(InstantDt theUpdated) {
-		myUpdated = theUpdated.getValue();
+	static Date cloneDate(Date theDate) {
+		Date retVal = theDate;
+		if (retVal != null) {
+			retVal = new Date(retVal.getTime());
+		}
+		return retVal;
 	}
 
 }

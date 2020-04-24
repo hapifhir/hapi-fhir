@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,29 +21,37 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.Set;
 
-public class AddColumnTask extends BaseTableColumnTypeTask<AddColumnTask> {
+public class AddColumnTask extends BaseTableColumnTypeTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddColumnTask.class);
 
+	public AddColumnTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void validate() {
+		super.validate();
+		setDescription("Add column " + getColumnName() + " on table " + getTableName());
+	}
+
+	@Override
+	public void doExecute() throws SQLException {
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 		if (columnNames.contains(getColumnName())) {
-			ourLog.info("Column {} already exists on table {} - No action performed", getColumnName(), getTableName());
+			logInfo(ourLog, "Column {} already exists on table {} - No action performed", getColumnName(), getTableName());
 			return;
 		}
 
 		String typeStatement = getTypeStatement();
 
-		String sql = "";
+		String sql;
 		switch (getDriverType()) {
 			case DERBY_EMBEDDED:
 			case MARIADB_10_1:
@@ -53,11 +61,14 @@ public class AddColumnTask extends BaseTableColumnTypeTask<AddColumnTask> {
 				break;
 			case MSSQL_2012:
 			case ORACLE_12C:
+			case H2_EMBEDDED:
 				sql = "alter table " + getTableName() + " add " + getColumnName() + " " + typeStatement;
 				break;
+			default:
+				throw new IllegalStateException();
 		}
 
-		ourLog.info("Adding column {} of type {} to table {}", getColumnName(), getSqlType(), getTableName());
+		logInfo(ourLog, "Adding column {} of type {} to table {}", getColumnName(), getSqlType(), getTableName());
 		executeSql(getTableName(), sql);
 	}
 

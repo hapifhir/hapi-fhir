@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.client.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -139,7 +139,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * Register a new interceptor for this client. An interceptor can be used to add additional logging, or add security headers, or pre-process responses, etc.
 	 */
 	@Override
-	void registerInterceptor(IClientInterceptor theInterceptor);
+	void registerInterceptor(Object theInterceptor);
 
 	/**
 	 * Search for resources matching a given set of criteria. Searching is a very powerful
@@ -168,10 +168,10 @@ public interface IGenericClient extends IRestfulClient {
 	ITransaction transaction();
 
 	/**
-	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}
+	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(Object)}
 	 */
 	@Override
-	void unregisterInterceptor(IClientInterceptor theInterceptor);
+	void unregisterInterceptor(Object theInterceptor);
 
 	/**
 	 * Fluent method for the "update" operation, which performs a logical delete on a server resource

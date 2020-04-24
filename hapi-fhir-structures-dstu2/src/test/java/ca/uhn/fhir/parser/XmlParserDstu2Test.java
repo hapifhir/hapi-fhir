@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
 import static org.hamcrest.Matchers.*;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -188,6 +189,47 @@ public class XmlParserDstu2Test {
 		parser.setParserErrorHandler(new StrictErrorHandler());
 		parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
 	}
+
+	@Test
+	public void testIdOnComposite() {
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <name id=\"foo\">\n" +
+			"     <family value=\"hello\"/>" +
+			"   </name>" +
+			"   <active value=\"true\"/>" +
+			"</Patient>";
+
+		IParser p = ourCtx.newXmlParser();
+
+		Patient patient = p.parseResource(Patient.class, input);
+		assertTrue(patient.getActive());
+		assertEquals("foo", patient.getNameFirstRep().getElementSpecificId());
+
+	}
+
+
+	@Test
+	public void testSetDontEncodeResourcesWithMetaSubPath() {
+		Patient p = new Patient();
+		ResourceMetadataKeyEnum.VERSION.put(p, "BBB");
+		p.setId("AAA");
+		p.getMeta().setVersionId("BBB");
+		p.getMeta().setLastUpdated(new InstantDt("2011-01-01T00:00:00.000Z").getValue());
+		p.getMeta().addTag().setSystem("SYS").setCode("CODE");
+		p.addName().addFamily("FAMILY");
+
+		IParser parser = ourCtx.newXmlParser();
+		parser.setDontEncodeElements(Sets.newHashSet("id", "*.meta.versionId", "*.meta.lastUpdated"));
+		String output = parser.encodeResourceToString(p);
+
+		assertThat(output, containsString("FAMILY"));
+		assertThat(output, containsString("SYS"));
+		assertThat(output, containsString("CODE"));
+		assertThat(output, not(containsString("AAA")));
+		assertThat(output, not(containsString("BBB")));
+		assertThat(output, not(containsString("2011")));
+	}
+
 
 	@Test()
 	public void testContainedResourceWithNoIdLenient() throws IOException {
@@ -779,7 +821,6 @@ public class XmlParserDstu2Test {
 		//@formatter:off
 		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">", 
 			"<meta>",
-			"<meta>",
 			"<profile value=\"http://foo/Profile1\"/>",
 			"<profile value=\"http://foo/Profile2\"/>",
 			"<tag>",
@@ -792,7 +833,6 @@ public class XmlParserDstu2Test {
 			"<code value=\"term2\"/>",
 			"<display value=\"label2\"/>",
 			"</tag>",
-			"</meta>",
 			"</meta>",
 			"<name>",
 			"<family value=\"FAMILY\"/>",
@@ -833,7 +873,6 @@ public class XmlParserDstu2Test {
 		//@formatter:off
 		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">", 
 			"<meta>",
-			"<meta>",
 			"<tag>",
 			"<system value=\"scheme1\"/>",
 			"<code value=\"term1\"/>",
@@ -844,7 +883,6 @@ public class XmlParserDstu2Test {
 			"<code value=\"term2\"/>",
 			"<display value=\"label2\"/>",
 			"</tag>",
-			"</meta>",
 			"</meta>",
 			"<name>",
 			"<family value=\"FAMILY\"/>",
@@ -1769,7 +1807,7 @@ public class XmlParserDstu2Test {
 
 		{
 			IParser p = ourCtx.newXmlParser();
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name", "Bundle.entry")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient.name", "Bundle.entry")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -1780,8 +1818,7 @@ public class XmlParserDstu2Test {
 		}
 		{
 			IParser p = ourCtx.newXmlParser();
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name")));
-			p.setEncodeElementsAppliesToResourceTypes(new HashSet<String>(Arrays.asList("Patient")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient.name")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -1792,8 +1829,7 @@ public class XmlParserDstu2Test {
 		}
 		{
 			IParser p = ourCtx.newXmlParser();
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient")));
-			p.setEncodeElementsAppliesToResourceTypes(new HashSet<String>(Arrays.asList("Patient")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -1818,7 +1854,7 @@ public class XmlParserDstu2Test {
 
 		{
 			IParser p = ourCtx.newXmlParser();
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Bundle.entry", "*.text", "*.(mandatory)")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Bundle.entry", "*.text", "*.(mandatory)")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);

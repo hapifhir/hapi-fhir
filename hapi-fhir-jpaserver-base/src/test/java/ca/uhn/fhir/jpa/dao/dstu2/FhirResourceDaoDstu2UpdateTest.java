@@ -1,33 +1,33 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.resource.Conformance;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.model.dstu2.resource.Organization;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.util.TestUtil;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2UpdateTest.class);
@@ -37,77 +37,6 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-
-	@Test
-	public void testUpdateAndGetHistoryResource() throws InterruptedException {
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("urn:system").setValue("001");
-		patient.addName().addFamily("Tester").addGiven("Joe");
-
-		MethodOutcome outcome = myPatientDao.create(patient, mySrd);
-		assertNotNull(outcome.getId());
-		assertFalse(outcome.getId().isEmpty());
-
-		assertEquals("1", outcome.getId().getVersionIdPart());
-
-		Date now = new Date();
-		Patient retrieved = myPatientDao.read(outcome.getId(), mySrd);
-		InstantDt published = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
-		InstantDt updated = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-		assertTrue(published.before(now));
-		assertTrue(updated.before(now));
-
-		Thread.sleep(1000);
-
-		reset(myInterceptor);
-		retrieved.getIdentifierFirstRep().setValue("002");
-		MethodOutcome outcome2 = myPatientDao.update(retrieved, mySrd);
-		assertEquals(outcome.getId().getIdPart(), outcome2.getId().getIdPart());
-		assertNotEquals(outcome.getId().getVersionIdPart(), outcome2.getId().getVersionIdPart());
-		assertEquals("2", outcome2.getId().getVersionIdPart());
-
-		// Verify interceptor
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.UPDATE), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertNotNull(details.getId());
-		assertEquals("Patient", details.getResourceType());
-		assertEquals(Patient.class, details.getResource().getClass());
-
-		Date now2 = new Date();
-
-		Patient retrieved2 = myPatientDao.read(outcome.getId().toVersionless(), mySrd);
-
-		assertEquals("2", retrieved2.getId().getVersionIdPart());
-		assertEquals("002", retrieved2.getIdentifierFirstRep().getValue());
-		InstantDt published2 = (InstantDt) retrieved2.getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
-		InstantDt updated2 = (InstantDt) retrieved2.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-		assertTrue(published2.before(now));
-		assertTrue(updated2.after(now));
-		assertTrue(updated2.before(now2));
-
-		Thread.sleep(2000);
-
-		/*
-		 * Get history
-		 */
-
-		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null, null, mySrd);
-
-		assertEquals(2, historyBundle.size().intValue());
-
-		List<IBaseResource> history = historyBundle.getResources(0, 2);
-		assertEquals("1", history.get(1).getIdElement().getVersionIdPart());
-		assertEquals("2", history.get(0).getIdElement().getVersionIdPart());
-		assertEquals(published, ResourceMetadataKeyEnum.PUBLISHED.get((IResource) history.get(1)));
-		assertEquals(published, ResourceMetadataKeyEnum.PUBLISHED.get((IResource) history.get(1)));
-		assertEquals(updated, ResourceMetadataKeyEnum.UPDATED.get((IResource) history.get(1)));
-		assertEquals("001", ((Patient) history.get(1)).getIdentifierFirstRep().getValue());
-		assertEquals(published2, ResourceMetadataKeyEnum.PUBLISHED.get((IResource) history.get(0)));
-		assertEquals(updated2, ResourceMetadataKeyEnum.UPDATED.get((IResource) history.get(0)));
-		assertEquals("002", ((Patient) history.get(0)).getIdentifierFirstRep().getValue());
-
-	}
 
 	@Test
 	public void testUpdateByUrl() {
@@ -159,6 +88,18 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 	}
 
 	/**
+	 * Make sure we can upload a real example resource from the DSTU2 argonaut example pack
+	 */
+	@Test
+	public void testUploadArgonautExampleConformance() throws IOException {
+		Conformance conformance = loadResourceFromClasspath(Conformance.class, "/dstu2/Conformance-server.json");
+		conformance.setId("");
+		myConformanceDao.create(conformance);
+
+		assertEquals(1, myConformanceDao.search(new SearchParameterMap().setLoadSynchronous(true)).size().intValue());
+	}
+
+	/**
 	 * Per the spec, update should preserve tags and security labels but not profiles
 	 */
 	@Test
@@ -184,7 +125,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		}
 		{
 			Patient p1 = new Patient();
-			p1.setId(p1id);
+			p1.setId(p1id.getValue());
 			p1.addName().addFamily(methodName);
 
 			TagList tagList = new TagList();
@@ -226,19 +167,19 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		p2.addName().addFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2BBB");
 		myPatientDao.create(p2, mySrd);
 
-		Set<Long> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA")));
+		Set<ResourcePersistentId> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA")), null);
 		assertEquals(1, ids.size());
-		assertThat(ids, contains(p1id.getIdPartAsLong()));
+		assertThat(ResourcePersistentId.toLongList(ids), contains(p1id.getIdPartAsLong()));
 
 		// Update the name
 		p1.getNameFirstRep().getGivenFirstRep().setValue("testUpdateMaintainsSearchParamsDstu2BBB");
 		MethodOutcome update2 = myPatientDao.update(p1, mySrd);
 		IIdType p1id2 = update2.getId();
 
-		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA")));
+		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA")), null);
 		assertEquals(0, ids.size());
 
-		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2BBB")));
+		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2BBB")), null);
 		assertEquals(2, ids.size());
 
 		// Make sure vreads work

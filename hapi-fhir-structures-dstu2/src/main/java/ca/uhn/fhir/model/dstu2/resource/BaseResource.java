@@ -9,14 +9,14 @@ import java.util.List;
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -98,6 +98,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 		return myContained;
 	}
 
+	@Override
 	public IdDt getId() {
 		if (myId == null) {
 			myId = new IdDt();
@@ -121,7 +122,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	@Override
 	public IBaseMetaType getMeta() {
 		return new IBaseMetaType() {
-			
+
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -132,12 +133,12 @@ public abstract class BaseResource extends BaseElement implements IResource {
 					newTagList.addAll(existingTagList);
 				}
 				ResourceMetadataKeyEnum.PROFILES.put(BaseResource.this, newTagList);
-				
+
 				IdDt tag = new IdDt(theProfile);
 				newTagList.add(tag);
 				return this;
 			}
-			
+
 			@Override
 			public IBaseCoding addSecurity() {
 				List<BaseCodingDt> tagList = ResourceMetadataKeyEnum.SECURITY_LABELS.get(BaseResource.this);
@@ -149,7 +150,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 				tagList.add(tag);
 				return tag;
 			}
-			
+
 			@Override
 			public IBaseCoding addTag() {
 				TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(BaseResource.this);
@@ -161,17 +162,27 @@ public abstract class BaseResource extends BaseElement implements IResource {
 				tagList.add(tag);
 				return tag;
 			}
-			
+
 			@Override
 			public List<String> getFormatCommentsPost() {
 				return Collections.emptyList();
 			}
-			
+
+			@Override
+			public Object getUserData(String theName) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void setUserData(String theName, Object theValue) {
+				throw new UnsupportedOperationException();
+			}
+
 			@Override
 			public List<String> getFormatCommentsPre() {
 				return Collections.emptyList();
 			}
-			
+
 			@Override
 			public Date getLastUpdated() {
 				InstantDt lu = ResourceMetadataKeyEnum.UPDATED.get(BaseResource.this);
@@ -180,7 +191,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 				}
 				return null;
 			}
-			
+
 			@Override
 			public List<? extends IPrimitiveType<String>> getProfile() {
 				ArrayList<IPrimitiveType<String>> retVal = new ArrayList<IPrimitiveType<String>>();
@@ -193,7 +204,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 				}
 				return Collections.unmodifiableList(retVal);
 			}
-			
+
 			@Override
 			public List<? extends IBaseCoding> getSecurity() {
 				ArrayList<CodingDt> retVal = new ArrayList<CodingDt>();
@@ -206,7 +217,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 				}
 				return Collections.unmodifiableList(retVal);
 			}
-			
+
 			@Override
 			public IBaseCoding getSecurity(String theSystem, String theCode) {
 				for (IBaseCoding next : getSecurity()) {
@@ -216,7 +227,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 				}
 				return null;
 			}
-			
+
 			@Override
 			public List<? extends IBaseCoding> getTag() {
 				ArrayList<IBaseCoding> retVal = new ArrayList<IBaseCoding>();
@@ -229,7 +240,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 				}
 				return Collections.unmodifiableList(retVal);
 			}
-			
+
 			@Override
 			public IBaseCoding getTag(String theSystem, String theCode) {
 				for (IBaseCoding next : getTag()) {
@@ -239,22 +250,22 @@ public abstract class BaseResource extends BaseElement implements IResource {
 				}
 				return null;
 			}
-			
+
 			@Override
 			public String getVersionId() {
 				return getId().getVersionIdPart();
 			}
-			
+
 			@Override
 			public boolean hasFormatComment() {
 				return false;
 			}
-			
+
 			@Override
 			public boolean isEmpty() {
 				return getResourceMetadata().isEmpty();
 			}
-			
+
 			@Override
 			public IBaseMetaType setLastUpdated(Date theHeaderDateValue) {
 				if (theHeaderDateValue == null) {
@@ -264,7 +275,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 				}
 				return this;
 			}
-			
+
 			@Override
 			public IBaseMetaType setVersionId(String theVersionId) {
 				setId(getId().withVersion(theVersionId));
@@ -302,10 +313,12 @@ public abstract class BaseResource extends BaseElement implements IResource {
 		myContained = theContained;
 	}
 	
+	@Override
 	public void setId(IdDt theId) {
 		myId = theId;
 	}
 
+	@Override
 	public BaseResource setId(IIdType theId) {
 		if (theId instanceof IdDt) {
 			myId = (IdDt) theId;
@@ -317,6 +330,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 		return this;
 	}
 
+	@Override
 	public BaseResource setId(String theId) {
 		if (theId == null) {
 			myId = null;

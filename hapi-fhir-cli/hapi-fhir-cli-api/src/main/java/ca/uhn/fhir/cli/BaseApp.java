@@ -4,14 +4,14 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,7 +25,11 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import com.helger.commons.io.file.FileHelper;
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.fusesource.jansi.Ansi;
@@ -41,12 +45,14 @@ import java.util.List;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
+@SuppressWarnings("WeakerAccess")
 public abstract class BaseApp {
-	public static final String STACKFILTER_PATTERN = "%xEx{full, sun.reflect, org.junit, org.eclipse, java.lang.reflect.Method, org.springframework, org.hibernate, com.sun.proxy, org.attoparser, org.thymeleaf}";
-	public static final String STACKFILTER_PATTERN_PROP = "log.stackfilter.pattern";
-	public static final String LINESEP = System.getProperty("line.separator");
 	protected static final org.slf4j.Logger ourLog;
+	static final String LINESEP = System.getProperty("line.separator");
+	private static final String STACKFILTER_PATTERN = "%xEx{full, sun.reflect, org.junit, org.eclipse, java.lang.reflect.Method, org.springframework, org.hibernate, com.sun.proxy, org.attoparser, org.thymeleaf}";
+	private static final String STACKFILTER_PATTERN_PROP = "log.stackfilter.pattern";
 	private static List<BaseCommand> ourCommands;
+	private static boolean ourDebugMode;
 
 	static {
 		System.setProperty(STACKFILTER_PATTERN_PROP, STACKFILTER_PATTERN);
@@ -62,12 +68,16 @@ public abstract class BaseApp {
 	private void logAppHeader() {
 		System.out.flush();
 		System.out.println("------------------------------------------------------------");
-		System.out.println("\ud83d\udd25 " + ansi().bold() + " " + provideProductName() + ansi().boldOff() + " " + provideProductVersion() + " - Command Line Tool");
+		logProductName();
 		System.out.println("------------------------------------------------------------");
 		System.out.println("Process ID                      : " + ManagementFactory.getRuntimeMXBean().getName());
 		System.out.println("Max configured JVM memory (Xmx) : " + FileHelper.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
 		System.out.println("Detected Java version           : " + System.getProperty("java.version"));
 		System.out.println("------------------------------------------------------------");
+	}
+
+	protected void logProductName() {
+		System.out.println("\ud83d\udd25 " + ansi().bold() + " " + provideProductName() + ansi().boldOff() + " " + provideProductVersion() + " - Command Line Tool");
 	}
 
 	private void logCommandUsage(BaseCommand theCommand) {
@@ -110,11 +120,17 @@ public abstract class BaseApp {
 		System.out.println("Options:");
 		HelpFormatter fmt = new HelpFormatter();
 		PrintWriter pw = new PrintWriter(System.out);
-		fmt.printOptions(pw, columns, theCommand.getOptions(), 2, 2);
+		fmt.printOptions(pw, columns, getOptions(theCommand), 2, 2);
 		pw.flush();
 
 		// That's it!
 		System.out.println();
+	}
+
+	private Options getOptions(BaseCommand theCommand) {
+		Options options = theCommand.getOptions();
+		options.addOption(null, "debug", false, "Enable debug mode");
+		return options;
 	}
 
 	private void logUsage() {
@@ -145,7 +161,7 @@ public abstract class BaseApp {
 
 	protected abstract String provideCommandName();
 
-	public List<BaseCommand> provideCommands() {
+	protected List<BaseCommand> provideCommands() {
 		ArrayList<BaseCommand> commands = new ArrayList<>();
 		commands.add(new RunServerCommand());
 		commands.add(new ExampleDataUploader());
@@ -156,7 +172,7 @@ public abstract class BaseApp {
 		commands.add(new IgPackUploader());
 		commands.add(new ExportConceptMapToCsvCommand());
 		commands.add(new ImportCsvToConceptMapCommand());
-		commands.add(new HapiMigrateDatabaseCommand());
+		commands.add(new HapiFlywayMigrateDatabaseCommand());
 		return commands;
 	}
 
@@ -227,7 +243,7 @@ public abstract class BaseApp {
 		myShutdownHook = new MyShutdownHook(command);
 		Runtime.getRuntime().addShutdownHook(myShutdownHook);
 
-		Options options = command.getOptions();
+		Options options = getOptions(command);
 		DefaultParser parser = new DefaultParser();
 		CommandLine parsedOptions;
 
@@ -240,6 +256,11 @@ public abstract class BaseApp {
 			parsedOptions = parser.parse(options, args, true);
 			if (!parsedOptions.getArgList().isEmpty()) {
 				throw new ParseException("Unrecognized argument: " + parsedOptions.getArgList().get(0));
+			}
+
+			if (parsedOptions.hasOption("debug")) {
+				loggingConfigOnDebug();
+				ourDebugMode = true;
 			}
 
 			// Actually execute the command
@@ -285,7 +306,7 @@ public abstract class BaseApp {
 	private void exitDueToException(Throwable e) {
 		if ("true".equals(System.getProperty("test"))) {
 			if (e instanceof CommandFailureException) {
-				throw (CommandFailureException)e;
+				throw (CommandFailureException) e;
 			}
 			throw new Error(e);
 		} else {
@@ -311,6 +332,24 @@ public abstract class BaseApp {
 		}
 	}
 
+	private class MyShutdownHook extends Thread {
+		private final BaseCommand myFinalCommand;
+
+		MyShutdownHook(BaseCommand theFinalCommand) {
+			myFinalCommand = theFinalCommand;
+		}
+
+		@Override
+		public void run() {
+			ourLog.info(provideProductName() + " is shutting down...");
+			myFinalCommand.cleanup();
+		}
+	}
+
+	public static boolean isDebugMode() {
+		return ourDebugMode;
+	}
+
 	private static void loggingConfigOff() {
 		try {
 			JoranConfigurator configurator = new JoranConfigurator();
@@ -332,18 +371,16 @@ public abstract class BaseApp {
 		}
 	}
 
-
-	private class MyShutdownHook extends Thread {
-		private final BaseCommand myFinalCommand;
-
-		MyShutdownHook(BaseCommand theFinalCommand) {
-			myFinalCommand = theFinalCommand;
+	private static void loggingConfigOnDebug() {
+		try {
+			JoranConfigurator configurator = new JoranConfigurator();
+			configurator.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
+			((LoggerContext) LoggerFactory.getILoggerFactory()).reset();
+			configurator.doConfigure(App.class.getResourceAsStream("/logback-cli-on-debug.xml"));
+		} catch (JoranException e) {
+			e.printStackTrace();
 		}
 
-		@Override
-		public void run() {
-			ourLog.info(provideProductName() + " is shutting down...");
-			myFinalCommand.cleanup();
-		}
+		ourLog.info("Debug logging is enabled");
 	}
 }

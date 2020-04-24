@@ -6,14 +6,14 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -98,18 +99,20 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		}
 		if (myResourceParameterIndex != -1) {
 			IBaseResource resource = ((IBaseResource) theParams[myResourceParameterIndex]);
-			String resourceId = resource.getIdElement().getIdPart();
-			String urlId = theRequest.getId() != null ? theRequest.getId().getIdPart() : null;
-			if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) == false) {
-				resource.setId(theRequest.getId());
-			}
+			if (resource != null) {
+				String resourceId = resource.getIdElement().getIdPart();
+				String urlId = theRequest.getId() != null ? theRequest.getId().getIdPart() : null;
+				if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) == false) {
+					resource.setId(theRequest.getId());
+				}
 
-			String matchUrl = null;
-			if (myConditionalUrlIndex != -1) {
-				matchUrl = (String) theParams[myConditionalUrlIndex];
-				matchUrl = defaultIfBlank(matchUrl, null);
+				String matchUrl = null;
+				if (myConditionalUrlIndex != -1) {
+					matchUrl = (String) theParams[myConditionalUrlIndex];
+					matchUrl = defaultIfBlank(matchUrl, null);
+				}
+				validateResourceIdAndUrlIdForNonConditionalOperation(resource, resourceId, urlId, matchUrl);
 			}
-			validateResourceIdAndUrlIdForNonConditionalOperation(resource, resourceId, urlId, matchUrl);
 		}
 	}
 
@@ -125,10 +128,16 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		/*
 		 * If the method has no parsed resource parameter, we parse here in order to have something for the interceptor.
 		 */
+		IBaseResource resource;
 		if (myResourceParameterIndex != -1) {
-			theDetails.setResource((IBaseResource) theMethodParams[myResourceParameterIndex]);
+			resource = (IBaseResource) theMethodParams[myResourceParameterIndex];
 		} else {
-			theDetails.setResource(ResourceParameter.parseResourceFromRequest(theRequestDetails, this, myResourceType));
+			resource = ResourceParameter.parseResourceFromRequest(theRequestDetails, this, myResourceType);
+		}
+
+		theRequestDetails.setResource(resource);
+		if (theDetails != null) {
+			theDetails.setResource(resource);
 		}
 
 	}

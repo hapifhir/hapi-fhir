@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,7 +51,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 
 	private final Integer myIdParamIndex;
 	private final RestOperationTypeEnum myResourceOperationType;
-	private String myResourceName;
+	private final String myResourceName;
 
 	public HistoryMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(toReturnType(theMethod, theProvider), theMethod, theContext, theProvider);
@@ -105,30 +105,36 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 
 	// ObjectUtils.equals is replaced by a JDK7 method..
 	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (!Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (theRequest.getResourceName() == null) {
-			return myResourceOperationType == RestOperationTypeEnum.HISTORY_SYSTEM;
+			if (myResourceOperationType == RestOperationTypeEnum.HISTORY_SYSTEM) {
+				return MethodMatchEnum.EXACT;
+			} else {
+				return MethodMatchEnum.NONE;
+			}
 		}
 		if (!StringUtils.equals(theRequest.getResourceName(), myResourceName)) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 
 		boolean haveIdParam = theRequest.getId() != null && !theRequest.getId().isEmpty();
 		boolean wantIdParam = myIdParamIndex != null;
 		if (haveIdParam != wantIdParam) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 
 		if (theRequest.getId() == null) {
-			return myResourceOperationType == RestOperationTypeEnum.HISTORY_TYPE;
+			if (myResourceOperationType != RestOperationTypeEnum.HISTORY_TYPE) {
+				return MethodMatchEnum.NONE;
+			}
 		} else if (theRequest.getId().hasVersionIdPart()) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 
-		return true;
+		return MethodMatchEnum.EXACT;
 	}
 
 
@@ -168,6 +174,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 				return resources.getPublished();
 			}
 
+			@Nonnull
 			@Override
 			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
 				List<IBaseResource> retVal = resources.getResources(theFromIndex, theToIndex);
@@ -178,7 +185,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 					}
 					if (isBlank(nextResource.getIdElement().getVersionIdPart()) && nextResource instanceof IResource) {
 						//TODO: Use of a deprecated method should be resolved.
-						IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get((IResource) nextResource);
+						IdDt versionId = ResourceMetadataKeyEnum.VERSION_ID.get((IResource) nextResource);
 						if (versionId == null || versionId.isEmpty()) {
 							throw new InternalErrorException("Server provided resource at index " + index + " with no Version ID set (using IResource#setId(IdDt))");
 						}

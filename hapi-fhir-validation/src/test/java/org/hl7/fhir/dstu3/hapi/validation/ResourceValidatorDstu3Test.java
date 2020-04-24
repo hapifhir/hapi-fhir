@@ -1,17 +1,24 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.validation.*;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.SchemaBaseValidator;
+import ca.uhn.fhir.validation.SingleValidationMessage;
+import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
@@ -21,6 +28,7 @@ import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.EligibilityResponse.BenefitComponent;
 import org.hl7.fhir.dstu3.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.AfterClass;
 import org.junit.Ignore;
@@ -32,8 +40,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class ResourceValidatorDstu3Test {
 
@@ -85,7 +98,7 @@ public class ResourceValidatorDstu3Test {
 			parser.parseResource(encoded);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: [element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
 		}
 	}
 
@@ -103,7 +116,7 @@ public class ResourceValidatorDstu3Test {
 		String encoded = parser.encodeResourceToString(careTeam);
 
 		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator(ourCtx));
 
 
 		ValidationResult result = val.validateWithResult(encoded);
@@ -147,7 +160,7 @@ public class ResourceValidatorDstu3Test {
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
 		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
-		val.registerValidatorModule(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator(ourCtx));
 
 		ValidationResult output = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
@@ -164,7 +177,7 @@ public class ResourceValidatorDstu3Test {
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
 		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
-		val.registerValidatorModule(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator(ourCtx));
 
 		ValidationResult output = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
@@ -175,8 +188,8 @@ public class ResourceValidatorDstu3Test {
 	@Test
 	@Ignore
 	public void testValidateProfileWithExtension() throws IOException, FHIRException {
-		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport();
-		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport();
+		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport(ourCtx);
+		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ourCtx);
 		ValidationSupportChain support = new ValidationSupportChain(valSupport, defaultSupport);
 
 		// Prepopulate SDs
@@ -197,7 +210,7 @@ public class ResourceValidatorDstu3Test {
 
 	private StructureDefinition loadStructureDefinition(DefaultProfileValidationSupport theDefaultValSupport, String theResName) throws IOException, FHIRException {
 		StructureDefinition derived = ourCtx.newXmlParser().parseResource(StructureDefinition.class, IOUtils.toString(ResourceValidatorDstu3Test.class.getResourceAsStream(theResName)));
-		StructureDefinition base = theDefaultValSupport.fetchStructureDefinition(ourCtx, derived.getBaseDefinition());
+		StructureDefinition base = (StructureDefinition) theDefaultValSupport.fetchStructureDefinition(derived.getBaseDefinition());
 		Validate.notNull(base);
 
 		IWorkerContext worker = new HapiWorkerContext(ourCtx, theDefaultValSupport);
@@ -221,7 +234,7 @@ public class ResourceValidatorDstu3Test {
 		String input = ourCtx.newXmlParser().encodeResourceToString(fhirObj);
 
 		FhirValidator validator = ourCtx.newValidator();
-		validator.registerValidatorModule(new FhirInstanceValidator());
+		validator.registerValidatorModule(new FhirInstanceValidator(ourCtx));
 
 		ValidationResult result = validator.validateWithResult(input);
 		// we should get some results, not an exception
@@ -252,7 +265,7 @@ public class ResourceValidatorDstu3Test {
 			"}";
 
 		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator(ourCtx));
 		ValidationResult output = val.validateWithResult(input);
 
 		OperationOutcome operationOutcome = (OperationOutcome) output.toOperationOutcome();
@@ -272,7 +285,7 @@ public class ResourceValidatorDstu3Test {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/questionnaire_jon_z_20160506.xml"), StandardCharsets.UTF_8);
 
 		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator(ourCtx));
 
 		ValidationResult result = val.validateWithResult(input);
 
@@ -313,7 +326,7 @@ public class ResourceValidatorDstu3Test {
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
 		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
-		val.registerValidatorModule(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator(ourCtx));
 
 		ValidationResult result = val.validateWithResult(q);
 
@@ -332,7 +345,7 @@ public class ResourceValidatorDstu3Test {
 		TestPatientFor327 patient = new TestPatientFor327();
 		patient.setBirthDate(new Date());
 		patient.setId("123");
-		patient.getText().setDivAsString("<div>FOO</div>");
+		patient.getText().setDivAsString("<div lang=\"en\">FOO</div>");
 		patient.getText().setStatus(NarrativeStatus.GENERATED);
 		patient.getLanguageElement().setValue("en");
 		patient.addExtension().setUrl("http://foo").setValue(new StringType("MOD"));
@@ -355,7 +368,7 @@ public class ResourceValidatorDstu3Test {
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
 		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
-		val.registerValidatorModule(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator(ourCtx));
 
 		ValidationResult result = val.validateWithResult(encoded);
 
@@ -401,7 +414,7 @@ public class ResourceValidatorDstu3Test {
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
 		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
-		val.registerValidatorModule(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator(ourCtx));
 
 		ValidationResult result = val.validateWithResult(messageString);
 
@@ -452,7 +465,7 @@ public class ResourceValidatorDstu3Test {
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
 		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
-		val.registerValidatorModule(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator(ourCtx));
 
 		ValidationResult result = val.validateWithResult(messageString);
 
@@ -477,7 +490,7 @@ public class ResourceValidatorDstu3Test {
 		private static final long serialVersionUID = 1L;
 
 		@Child(name = "testCondition")
-		@ca.uhn.fhir.model.api.annotation.Extension(url = "testCondition", definedLocally = true, isModifier = false)
+		@ca.uhn.fhir.model.api.annotation.Extension(url = "http://testCondition", definedLocally = true, isModifier = false)
 		private List<Reference> testConditions = null;
 
 		public List<Reference> getConditions() {

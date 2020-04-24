@@ -1,14 +1,12 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.term.TranslationMatch;
-import ca.uhn.fhir.jpa.term.TranslationRequest;
-import ca.uhn.fhir.jpa.term.TranslationResult;
+import ca.uhn.fhir.jpa.api.model.TranslationMatch;
+import ca.uhn.fhir.jpa.api.model.TranslationRequest;
+import ca.uhn.fhir.jpa.api.model.TranslationResult;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
-import org.hl7.fhir.r4.model.UriType;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +16,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 
@@ -1036,6 +1036,24 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			}
 		});
 	}
+
+
+	@Test
+	public void testUploadAndApplyR4DemoConceptMap() throws IOException {
+		upload("/r4/ConceptMap-icd-sct.xml");
+
+		CodeableConcept sourceCode = new CodeableConcept();
+		sourceCode.addCoding()
+			.setSystem("http://snomed.info/sct")
+			.setCode("263204007");
+		TranslationRequest request = new TranslationRequest();
+		request.setCodeableConcept(sourceCode);
+		request.setTargetSystem(new UriType("http://hl7.org/fhir/sid/icd-10-us"));
+		TranslationResult outcome = myConceptMapDao.translate(request, mySrd);
+
+		assertEquals("S52.209A", outcome.getMatches().get(0).getConcept().getCode());
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {

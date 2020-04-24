@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,21 +20,19 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Count;
-import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.StringUtils;
+
+import java.lang.reflect.Method;
+import java.util.Collection;
 
 public class CountParameter implements IParameter {
 
@@ -42,20 +40,20 @@ public class CountParameter implements IParameter {
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-		String[] sinceParams = theRequest.getParameters().get(Constants.PARAM_COUNT);
-		if (sinceParams != null) {
-			if (sinceParams.length > 0) {
-				if (StringUtils.isNotBlank(sinceParams[0])) {
+		String[] countParam = theRequest.getParameters().get(Constants.PARAM_COUNT);
+		if (countParam != null) {
+			if (countParam.length > 0) {
+				if (StringUtils.isNotBlank(countParam[0])) {
 					try {
-						IntegerDt since = new IntegerDt(sinceParams[0]);
-						return ParameterUtil.fromInteger(myType, since);
+						IntegerDt count = new IntegerDt(countParam[0]);
+						return ParameterUtil.fromInteger(myType, count);
 					} catch (DataFormatException e) {
-						throw new InvalidRequestException("Invalid " + Constants.PARAM_COUNT + " value: " + sinceParams[0]);
+						throw new InvalidRequestException("Invalid " + Constants.PARAM_COUNT + " value: " + countParam[0]);
 					}
 				}
 			}
 		}
-		return ParameterUtil.fromInteger(myType, null);
+		return null;
 	}
 
 	@Override

@@ -1,14 +1,16 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchStatusEnum;
-import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
-import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -19,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -29,7 +32,8 @@ import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
+import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLEANUP_JOB_INTERVAL_MILLIS;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 
@@ -37,16 +41,19 @@ import static org.junit.Assert.*;
 public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4SearchPageExpiryTest.class);
 
+	@Autowired
+	private ISearchDao mySearchEntityDao;
+
 	@After()
 	public void after() {
-		StaleSearchDeletingSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(myStaleSearchDeletingSvc);
-		staleSearchDeletingSvc.setCutoffSlackForUnitTest(StaleSearchDeletingSvcImpl.DEFAULT_CUTOFF_SLACK);
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(null);
+		DatabaseSearchCacheSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(mySearchCacheSvc);
+		staleSearchDeletingSvc.setCutoffSlackForUnitTest(SEARCH_CLEANUP_JOB_INTERVAL_MILLIS);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(null);
 	}
 
 	@Before
 	public void before() {
-		StaleSearchDeletingSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(myStaleSearchDeletingSvc);
+		DatabaseSearchCacheSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(mySearchCacheSvc);
 		staleSearchDeletingSvc.setCutoffSlackForUnitTest(0);
 		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
 	}
@@ -74,10 +81,13 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		}
 		Thread.sleep(10);
 
-		myDaoConfig.setExpireSearchResultsAfterMillis(1000L);
-		myDaoConfig.setReuseCachedSearchResultsForMillis(500L);
+		long reuseCachedSearchResultsForMillis = 500L;
+		myDaoConfig.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsForMillis);
+		long millisBetweenReuseAndExpire = 800L;
+		long expireSearchResultsAfterMillis = 1000L;
+		myDaoConfig.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
 		long start = System.currentTimeMillis();
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(start);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(start);
 
 		final String searchUuid1;
 		{
@@ -100,9 +110,9 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		}
 		assertEquals(searchUuid1, searchUuid2);
 
-		sleepAtLeast(501);
+		TestUtil.sleepAtLeast(reuseCachedSearchResultsForMillis + 1);
 
-		// We're now past 500ms so we shouldn't reuse the search
+		// We're now past reuseCachedSearchResultsForMillis so we shouldn't reuse the search
 
 		final String searchUuid3;
 		{
@@ -117,56 +127,52 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 
 		// Search just got used so it shouldn't be deleted
 
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(start + 500);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(start + reuseCachedSearchResultsForMillis);
+		final AtomicLong search1timestamp = new AtomicLong();
+		final AtomicLong search2timestamp = new AtomicLong();
 		final AtomicLong search3timestamp = new AtomicLong();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				Search search3 = mySearchEntityDao.findByUuid(searchUuid3);
-				assertNotNull(search3);
-				Search search2 = mySearchEntityDao.findByUuid(searchUuid2);
+				Search search1 = mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid1).orElseThrow(()->new InternalErrorException("Search doesn't exist"));
+				assertNotNull(search1);
+				search1timestamp.set(search1.getCreated().getTime());
+				Search search2 = mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid2).orElseThrow(()->new InternalErrorException("Search doesn't exist"));
 				assertNotNull(search2);
-				search3timestamp.set(search2.getSearchLastReturned().getTime());
+				search2timestamp.set(search2.getCreated().getTime());
+				Search search3 = mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid3).orElseThrow(()->new InternalErrorException("Search doesn't exist"));
+				assertNotNull(search3);
+				search3timestamp.set(search3.getCreated().getTime());
 			}
 		});
 
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(search3timestamp.get() + 800);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(search1timestamp.get() + millisBetweenReuseAndExpire);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNotNull(mySearchEntityDao.findByUuid(searchUuid3));
-			}
-		});
-		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNotNull(mySearchEntityDao.findByUuid(searchUuid1));
+				assertTrue(mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid3).isPresent());
+				assertTrue(mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid1).isPresent());
 			}
 		});
 
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(search3timestamp.get() + 1100);
-
-		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNull("Search 1 still exists", mySearchEntityDao.findByUuid(searchUuid1));
-				assertNotNull("Search 3 still exists", mySearchEntityDao.findByUuid(searchUuid3));
-			}
-		});
-
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(search3timestamp.get() + 2100);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(search1timestamp.get() + reuseCachedSearchResultsForMillis + expireSearchResultsAfterMillis + 1);
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNull("Search 1 still exists", mySearchEntityDao.findByUuid(searchUuid1));
-				assertNull("Search 3 still exists", mySearchEntityDao.findByUuid(searchUuid3));
+				assertFalse("Search 1 still exists", mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid1).isPresent());
+				assertTrue("Search 3 still exists", mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid3).isPresent());
 			}
 		});
 
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(search3timestamp.get() + reuseCachedSearchResultsForMillis + expireSearchResultsAfterMillis + 1);
+
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+
+		await().until(()-> newTxTemplate().execute(t -> !mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid1).isPresent()));
+		await().until(()-> newTxTemplate().execute(t -> !mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid3).isPresent()));
 	}
 
 	@Test
@@ -193,7 +199,6 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
 		final IBundleProvider bundleProvider = myPatientDao.search(params);
 		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
-		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
 
 		waitForSearchToSave(bundleProvider.getUuid());
 		final AtomicLong start = new AtomicLong();
@@ -202,30 +207,32 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				Search search = mySearchEntityDao.findByUuid(bundleProvider.getUuid());
+				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()).orElseThrow(()->new InternalErrorException("Search doesn't exist"));
 				assertNotNull("Failed after " + sw.toString(), search);
 				start.set(search.getCreated().getTime());
 				ourLog.info("Search was created: {}", new InstantType(new Date(start.get())));
 			}
 		});
 
-		myDaoConfig.setExpireSearchResultsAfterMillis(500);
-		myDaoConfig.setReuseCachedSearchResultsForMillis(500L);
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(start.get() + 499);
+		int expireSearchResultsAfterMillis = 700;
+		myDaoConfig.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
+		long reuseCachedSearchResultsForMillis = 400L;
+		myDaoConfig.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsForMillis);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(start.get() + expireSearchResultsAfterMillis - 1);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNotNull(mySearchEntityDao.findByUuid(bundleProvider.getUuid()));
+				assertNotNull(mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()));
 			}
 		});
 
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(start.get() + 600);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(start.get() + expireSearchResultsAfterMillis + reuseCachedSearchResultsForMillis + 1);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNull(mySearchEntityDao.findByUuid(bundleProvider.getUuid()));
+				assertFalse(mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()).isPresent());
 			}
 		});
 	}
@@ -247,8 +254,12 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		}
 		Thread.sleep(10);
 
-		myDaoConfig.setExpireSearchResultsAfterMillis(1000L);
-		myDaoConfig.setReuseCachedSearchResultsForMillis(500L);
+		long expireSearchResultsAfterMillis = 1000L;
+		myDaoConfig.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
+
+		long reuseCachedSearchResultsForMillis = 500L;
+		myDaoConfig.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsForMillis);
+
 		long start = System.currentTimeMillis();
 
 		final String searchUuid1;
@@ -274,9 +285,10 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		}
 		assertEquals(searchUuid1, searchUuid2);
 
-		sleepAtLeast(501);
+		TestUtil.sleepAtLeast(reuseCachedSearchResultsForMillis + 1);
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
-		// We're now past 500ms so we shouldn't reuse the search
+		// We're now past reuseCachedSearchResultsForMillis so we shouldn't reuse the search
 
 		final String searchUuid3;
 		{
@@ -289,43 +301,41 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		}
 		assertNotEquals(searchUuid1, searchUuid3);
 
-		// Search just got used so it shouldn't be deleted
+		waitForSearchToSave(searchUuid3);
+
+		// Search hasn't expired yet so it shouldn't be deleted
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		final AtomicLong search1timestamp = new AtomicLong();
 		final AtomicLong search3timestamp = new AtomicLong();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				Search search3 = mySearchEntityDao.findByUuid(searchUuid3);
+				Search search1 = mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid1).orElseThrow(()->new InternalErrorException("Search doesn't exist"));
+				Search search3 = mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid3).orElseThrow(()->new InternalErrorException("Search doesn't exist"));
 				assertNotNull(search3);
+				search1timestamp.set(search1.getCreated().getTime());
 				search3timestamp.set(search3.getCreated().getTime());
 			}
 		});
 
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(search3timestamp.get() + 800);
-
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(search1timestamp.get() + expireSearchResultsAfterMillis + reuseCachedSearchResultsForMillis + 1);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNotNull(mySearchEntityDao.findByUuid(searchUuid3));
-			}
-		});
-		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNull(mySearchEntityDao.findByUuid(searchUuid1));
+				assertFalse(mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid1).isPresent());
+				assertTrue(mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid3).isPresent());
 			}
 		});
 
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(search3timestamp.get() + 1100);
-
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(search3timestamp.get() + expireSearchResultsAfterMillis + reuseCachedSearchResultsForMillis + 1);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNull("Search 1 still exists", mySearchEntityDao.findByUuid(searchUuid1));
-				assertNull("Search 3 still exists", mySearchEntityDao.findByUuid(searchUuid3));
+				assertFalse("Search 1 still exists", mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid1).isPresent());
+				assertFalse("Search 3 still exists", mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid3).isPresent());
 			}
 		});
 
@@ -356,24 +366,24 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 				@Nullable
 				@Override
 				public Search doInTransaction(TransactionStatus status) {
-					return mySearchEntityDao.findByUuid(bundleProvider.getUuid());
+					return mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()).orElse(null);
 				}
 			});
 			if (search == null) {
-				sleepAtLeast(100);
+				TestUtil.sleepAtLeast(100);
 			}
 		}
 		assertNotNull("Search " + bundleProvider.getUuid() + " not found on disk after 10 seconds", search);
 
 
 		myDaoConfig.setExpireSearchResults(false);
-		StaleSearchDeletingSvcImpl.setNowForUnitTests(System.currentTimeMillis() + DateUtils.MILLIS_PER_DAY);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(System.currentTimeMillis() + DateUtils.MILLIS_PER_DAY);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				Search search = mySearchEntityDao.findByUuid(bundleProvider.getUuid());
+				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()).orElseThrow(()->new InternalErrorException("Search doesn't exist"));
 				assertNotNull(search);
 			}
 		});
@@ -386,7 +396,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				Search search = mySearchEntityDao.findByUuid(bundleProvider.getUuid());
+				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()).orElse(null);
 				assertNull(search);
 			}
 		});
@@ -405,9 +415,9 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
 				Search search = null;
 				for (int i = 0; i < 20 && search == null; i++) {
-					search = theSearchEntityDao.findByUuid(theUuid);
+					search = theSearchEntityDao.findByUuidAndFetchIncludes(theUuid).orElse(null);
 					if (search == null || search.getStatus() == SearchStatusEnum.LOADING) {
-						sleepAtLeast(100);
+						TestUtil.sleepAtLeast(100);
 					}
 				}
 				assertNotNull(search);

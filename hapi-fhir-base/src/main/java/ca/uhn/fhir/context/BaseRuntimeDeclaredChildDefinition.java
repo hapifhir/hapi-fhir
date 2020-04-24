@@ -4,14 +4,14 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,34 +20,34 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.util.ValidateUtil;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.util.ValidateUtil;
+import java.util.Optional;
 
 public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChildDefinition {
 	private final IAccessor myAccessor;
-	private String myBindingValueSet;
 	private final String myElementName;
 	private final Field myField;
 	private final String myFormalDefinition;
 	private final int myMax;
 	private final int myMin;
-	private boolean myModifier;
-
 	private final IMutator myMutator;
 	private final String myShortDefinition;
+	private String myBindingValueSet;
+	private boolean myModifier;
 	private boolean mySummary;
+
 	BaseRuntimeDeclaredChildDefinition(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) throws ConfigurationException {
 		super();
-		Validate.notNull(theField, "No field speficied");
+		Validate.notNull(theField, "No field specified");
 		ValidateUtil.isGreaterThanOrEqualTo(theChildAnnotation.min(), 0, "Min must be >= 0");
 		Validate.isTrue(theChildAnnotation.max() == -1 || theChildAnnotation.max() >= theChildAnnotation.min(), "Max must be >= Min (unless it is -1 / unlimited)");
 		Validate.notBlank(theElementName, "Element name must not be blank");
@@ -87,6 +87,10 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		return myBindingValueSet;
 	}
 
+	void setBindingValueSet(String theBindingValueSet) {
+		myBindingValueSet = theBindingValueSet;
+	}
+
 	@Override
 	public String getElementName() {
 		return myElementName;
@@ -119,15 +123,12 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		return myShortDefinition;
 	}
 
-	public BaseRuntimeElementDefinition<?> getSingleChildOrThrow() {
-		if (getValidChildNames().size() != 1) {
-			throw new IllegalStateException("This child has " + getValidChildNames().size() + " children, expected 1. This is a HAPI bug. Found: " + getValidChildNames());
-		}
-		return getChildByName(getValidChildNames().iterator().next());
-	}
-
 	public boolean isModifier() {
 		return myModifier;
+	}
+
+	protected void setModifier(boolean theModifier) {
+		myModifier = theModifier;
 	}
 
 	@Override
@@ -135,90 +136,85 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		return mySummary;
 	}
 
-	void setBindingValueSet(String theBindingValueSet) {
-		myBindingValueSet = theBindingValueSet;
-	}
-
-	protected void setModifier(boolean theModifier) {
-		myModifier = theModifier;
-	}
-
 	private final class FieldListAccessor implements IAccessor {
 		@SuppressWarnings("unchecked")
 		@Override
-		public List<IBase> getValues(Object theTarget) {
-			List<IBase> retVal;
-			try {
-				retVal = (List<IBase>) myField.get(theTarget);
-			} catch (Exception e) {
-				throw new ConfigurationException("Failed to get value", e);
-			}
-			
+		public List<IBase> getValues(IBase theTarget) {
+			List<IBase> retVal = (List<IBase>) getFieldValue(theTarget, myField);
 			if (retVal == null) {
 				retVal = Collections.emptyList();
 			}
 			return retVal;
 		}
+
 	}
 
 	protected final class FieldListMutator implements IMutator {
 		@Override
-		public void addValue(Object theTarget, IBase theValue) {
+		public void addValue(IBase theTarget, IBase theValue) {
 			addValue(theTarget, theValue, false);
 		}
 
-		private void addValue(Object theTarget, IBase theValue, boolean theClear) {
-			try {
-				@SuppressWarnings("unchecked")
-				List<IBase> existingList = (List<IBase>) myField.get(theTarget);
-				if (existingList == null) {
-					existingList = new ArrayList<IBase>(2);
-					myField.set(theTarget, existingList);
-				}
-				if (theClear) {
-					existingList.clear();
-				}
-				existingList.add(theValue);
-			} catch (Exception e) {
-				throw new ConfigurationException("Failed to set value", e);
+		private void addValue(IBase theTarget, IBase theValue, boolean theClear) {
+			@SuppressWarnings("unchecked")
+			List<IBase> existingList = (List<IBase>) getFieldValue(theTarget, myField);
+			if (existingList == null) {
+				existingList = new ArrayList<>(2);
+				setFieldValue(theTarget, existingList, myField);
 			}
+			if (theClear) {
+				existingList.clear();
+			}
+			existingList.add(theValue);
 		}
 
 		@Override
-		public void setValue(Object theTarget, IBase theValue) {
+		public void setValue(IBase theTarget, IBase theValue) {
 			addValue(theTarget, theValue, true);
 		}
 	}
 
 	private final class FieldPlainAccessor implements IAccessor {
 		@Override
-		public List<IBase> getValues(Object theTarget) {
-			try {
-				Object values = myField.get(theTarget);
-				if (values == null) {
-					return Collections.emptyList();
-				}
-				List<IBase> retVal = Collections.singletonList((IBase) values);
-				return retVal;
-			} catch (Exception e) {
-				throw new ConfigurationException("Failed to get value", e);
+		public List<IBase> getValues(IBase theTarget) {
+			Object values = getFieldValue(theTarget, myField);
+			if (values == null) {
+				return Collections.emptyList();
 			}
+			return Collections.singletonList((IBase) values);
+		}
+
+		@Override
+		public <T extends IBase> Optional<T> getFirstValueOrNull(IBase theTarget) {
+			return Optional.ofNullable(((T)getFieldValue(theTarget, myField)));
 		}
 	}
 
 	protected final class FieldPlainMutator implements IMutator {
 		@Override
-		public void addValue(Object theTarget, IBase theValue) {
-			try {
-				myField.set(theTarget, theValue);
-			} catch (Exception e) {
-				throw new ConfigurationException("Failed to set value", e);
-			}
+		public void addValue(IBase theTarget, IBase theValue) {
+			setFieldValue(theTarget, theValue, myField);
 		}
 
 		@Override
-		public void setValue(Object theTarget, IBase theValue) {
+		public void setValue(IBase theTarget, IBase theValue) {
 			addValue(theTarget, theValue);
+		}
+	}
+
+	private static void setFieldValue(IBase theTarget, Object theValue, Field theField) {
+		try {
+			theField.set(theTarget, theValue);
+		} catch (IllegalAccessException e) {
+			throw new ConfigurationException("Failed to set value", e);
+		}
+	}
+
+	private static Object getFieldValue(IBase theTarget, Field theField) {
+		try {
+			return theField.get(theTarget);
+		} catch (IllegalAccessException e) {
+			throw new ConfigurationException("Failed to get value", e);
 		}
 	}
 

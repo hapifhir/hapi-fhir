@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
-import ca.uhn.fhir.jpa.search.warm.WarmCacheEntry;
+import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -78,7 +78,7 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 				.setUrl("Patient?name=smith")
 		);
 		CacheWarmingSvcImpl cacheWarmingSvc = (CacheWarmingSvcImpl) myCacheWarmingSvc;
-		cacheWarmingSvc.initCacheMap();
+		ourLog.info("Have {} tasks", cacheWarmingSvc.initCacheMap().size());
 
 		Patient p1 = new Patient();
 		p1.setId("p1");
@@ -91,8 +91,11 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 		p2.addName().setFamily("Smith");
 		myPatientDao.update(p2);
 
-		Thread.sleep(2000);
+		myCacheWarmingSvc.performWarmingPass();
 
+		Thread.sleep(1000);
+
+		ourLog.info("About to perform search");
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("smith"));
 		IBundleProvider result = myPatientDao.search(params);

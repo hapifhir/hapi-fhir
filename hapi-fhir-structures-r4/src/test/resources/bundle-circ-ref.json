@@ -1,0 +1,369 @@
+{
+	"resourceType": "Bundle",
+	"id": "1f3236fa-2fab-453d-86e8-72387929257c",
+	"meta": {
+		"lastUpdated": "2019-04-04T17:53:00.051-04:00"
+	},
+	"type": "searchset",
+	"total": 2,
+	"link": [
+		{
+			"relation": "self",
+			"url": "https://uhndigitalfhir-dev.uhn.ca/uhn-fhir-service-v2/DiagnosticReport?_include=DiagnosticReport%3Aresult&_query=findDiagnosticReportsByPatientWithIssuedDate&code=urn%3Aoid%3A1.3.6.1.4.1.12201.102.5%7C491&issued=ge2000-08-07&subject%3Aidentifier=urn%3Aoid%3A2.16.840.1.113883.3.239.18.148%7C7001316"
+		}
+	],
+	"entry": [
+		{
+			"fullUrl": "https://uhndigitalfhir-dev.uhn.ca/uhn-fhir-service-v2/DiagnosticReport/5541279",
+			"resource": {
+				"resourceType": "DiagnosticReport",
+				"id": "5541279",
+				"meta": {
+					"profile": [
+						"http://fhir.uhn.ca/Profile/diagnosticreport"
+					]
+				},
+				"contained": [
+					{
+						"resourceType": "Observation",
+						"id": "1",
+						"meta": {
+							"profile": [
+								"http://fhir.uhn.ca/Profile/observation"
+							]
+						},
+						"extension": [
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#source_system_status",
+								"valueString": "F"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#lastUpdatedDateTime",
+								"valueInstant": "2007-07-30T14:48:41.000-04:00"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#createDateTime",
+								"valueInstant": "2007-07-30T14:48:41.000-04:00"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#sequence",
+								"valueString": "1"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#diagnosticReport",
+								"valueReference": {
+									"reference": "DiagnosticReport/5541279"
+								}
+							}
+						],
+						"status": "final",
+						"code": {
+							"coding": [
+								{
+									"system": "urn:oid:1.3.6.1.4.1.12201.102.6",
+									"code": "01005.1"
+								}
+							],
+							"text": "Creatinine"
+						},
+						"subject": {
+							"reference": "Patient/5556360"
+						},
+						"issued": "2007-07-30T14:48:41.000-04:00",
+						"valueQuantity": {
+							"value": 72.0,
+							"unit": "umol/L"
+						},
+						"interpretation": {
+							"coding": [
+								{
+									"system": "urn:uhn:qcpr:interpretation_codes",
+									"code": "N"
+								}
+							]
+						},
+						"referenceRange": [
+							{
+								"meaning": {
+									"text": "<=99"
+								}
+							}
+						]
+					},
+					{
+						"resourceType": "Observation",
+						"id": "2",
+						"meta": {
+							"profile": [
+								"http://fhir.uhn.ca/Profile/observation"
+							]
+						},
+						"extension": [
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#source_system_status",
+								"valueString": "F"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#lastUpdatedDateTime",
+								"valueInstant": "2007-07-30T14:48:41.000-04:00"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#createDateTime",
+								"valueInstant": "2007-07-30T14:48:41.000-04:00"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#sequence",
+								"valueString": "2"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#diagnosticReport",
+								"valueReference": {
+									"reference": "DiagnosticReport/5541279"
+								}
+							}
+						],
+						"status": "final",
+						"code": {
+							"coding": [
+								{
+									"system": "urn:oid:1.3.6.1.4.1.12201.102.6",
+									"code": "01439.2"
+								}
+							],
+							"text": "Tech Comment"
+						},
+						"subject": {
+							"reference": "Patient/5556360"
+						},
+						"issued": "2007-07-30T14:48:41.000-04:00",
+						"valueString": "Req#T07-104306,.",
+						"interpretation": {
+							"coding": [
+								{
+									"system": "urn:uhn:qcpr:interpretation_codes",
+									"code": "N"
+								}
+							]
+						}
+					}
+				],
+				"extension": [
+					{
+						"url": "http://fhir.uhn.ca/Profile/diagnosticreport#source_system_status",
+						"valueString": "F"
+					},
+					{
+						"url": "http://fhir.uhn.ca/Profile/diagnosticreport#lastUpdatedDateTime",
+						"valueInstant": "2007-07-30T14:48:41.000-04:00"
+					},
+					{
+						"url": "http://fhir.uhn.ca/Profile/diagnosticreport#createDateTime",
+						"valueInstant": "2007-07-30T14:48:41.000-04:00"
+					},
+					{
+						"url": "http://fhir.uhn.ca/Profile/diagnosticreport#terminologyCodesFromQuery",
+						"valueCoding": {
+							"system": "urn:oid:1.3.6.1.4.1.12201.102.5",
+							"code": "491"
+						}
+					}
+				],
+				"identifier": [
+					{
+						"system": "urn:uhn:qcpr:order_ids",
+						"value": "651621"
+					}
+				],
+				"status": "final",
+				"code": {
+					"coding": [
+						{
+							"system": "urn:oid:1.3.6.1.4.1.12201.102.5",
+							"code": "491"
+						}
+					],
+					"text": "Creatinine, Plasma"
+				},
+				"subject": {
+					"reference": "Patient/5556360"
+				},
+				"encounter": {
+					"reference": "Encounter/5556361"
+				},
+				"effectiveDateTime": "2007-04-26T14:36:00-04:00",
+				"issued": "2007-07-30T14:48:41.000-04:00",
+				"result": [
+					{
+						"reference": "#1"
+					},
+					{
+						"reference": "#2"
+					}
+				]
+			}
+		},
+		{
+			"fullUrl": "https://uhndigitalfhir-dev.uhn.ca/uhn-fhir-service-v2/DiagnosticReport/5777012",
+			"resource": {
+				"resourceType": "DiagnosticReport",
+				"id": "5777012",
+				"meta": {
+					"profile": [
+						"http://fhir.uhn.ca/Profile/diagnosticreport"
+					]
+				},
+				"contained": [
+					{
+						"resourceType": "Observation",
+						"id": "1",
+						"meta": {
+							"profile": [
+								"http://fhir.uhn.ca/Profile/observation"
+							]
+						},
+						"extension": [
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#source_system_status",
+								"valueString": "I"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#lastUpdatedDateTime",
+								"valueInstant": "2008-03-31T15:09:39.000-04:00"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#createDateTime",
+								"valueInstant": "2008-03-31T15:09:39.000-04:00"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#sequence",
+								"valueString": "1"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#diagnosticReport",
+								"valueReference": {
+									"reference": "DiagnosticReport/5777012"
+								}
+							}
+						],
+						"status": "preliminary",
+						"code": {
+							"coding": [
+								{
+									"system": "urn:oid:1.3.6.1.4.1.12201.102.6",
+									"code": "4.1"
+								}
+							],
+							"text": "When"
+						},
+						"subject": {
+							"reference": "Patient/5556360"
+						},
+						"issued": "2008-03-31T15:09:39.000-04:00",
+						"valueString": "Monday, 31 March 08 1508 Rout"
+					},
+					{
+						"resourceType": "Observation",
+						"id": "2",
+						"meta": {
+							"profile": [
+								"http://fhir.uhn.ca/Profile/observation"
+							]
+						},
+						"extension": [
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#source_system_status",
+								"valueString": "I"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#lastUpdatedDateTime",
+								"valueInstant": "2008-03-31T15:09:39.000-04:00"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#createDateTime",
+								"valueInstant": "2008-03-31T15:09:39.000-04:00"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#sequence",
+								"valueString": "2"
+							},
+							{
+								"url": "http://fhir.uhn.ca/Profile/observation#diagnosticReport",
+								"valueReference": {
+									"reference": "DiagnosticReport/5777012"
+								}
+							}
+						],
+						"status": "preliminary",
+						"code": {
+							"coding": [
+								{
+									"system": "urn:oid:1.3.6.1.4.1.12201.102.6",
+									"code": "5.2"
+								}
+							],
+							"text": "Specimen"
+						},
+						"subject": {
+							"reference": "Patient/5556360"
+						},
+						"issued": "2008-03-31T15:09:39.000-04:00",
+						"valueString": "Blood Plasma - Bio (Green)"
+					}
+				],
+				"extension": [
+					{
+						"url": "http://fhir.uhn.ca/Profile/diagnosticreport#source_system_status",
+						"valueString": "I"
+					},
+					{
+						"url": "http://fhir.uhn.ca/Profile/diagnosticreport#lastUpdatedDateTime",
+						"valueInstant": "2008-03-31T15:09:39.000-04:00"
+					},
+					{
+						"url": "http://fhir.uhn.ca/Profile/diagnosticreport#createDateTime",
+						"valueInstant": "2008-03-31T15:09:39.000-04:00"
+					},
+					{
+						"url": "http://fhir.uhn.ca/Profile/diagnosticreport#terminologyCodesFromQuery",
+						"valueCoding": {
+							"system": "urn:oid:1.3.6.1.4.1.12201.102.5",
+							"code": "491"
+						}
+					}
+				],
+				"identifier": [
+					{
+						"system": "urn:uhn:qcpr:order_ids",
+						"value": "814177"
+					}
+				],
+				"status": "registered",
+				"code": {
+					"coding": [
+						{
+							"system": "urn:oid:1.3.6.1.4.1.12201.102.5",
+							"code": "491"
+						}
+					],
+					"text": "Creatinine, Plasma"
+				},
+				"subject": {
+					"reference": "Patient/5556360"
+				},
+				"encounter": {
+					"reference": "Encounter/5606097"
+				},
+				"effectiveDateTime": "2008-03-31T15:09:00-04:00",
+				"issued": "2008-03-31T15:09:39.000-04:00",
+				"result": [
+					{
+						"reference": "#1"
+					},
+					{
+						"reference": "#2"
+					}
+				]
+			}
+		}
+	]
+}

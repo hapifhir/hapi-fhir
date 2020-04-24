@@ -9,7 +9,12 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Subscription;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +25,7 @@ import java.net.URI;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertThat;
 
@@ -105,17 +111,19 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 		mySocketImplementation = new SocketImplementation(mySubscriptionId, EncodingEnum.JSON);
 
 		myWebSocketClient.start();
-		URI echoUri = new URI("ws://localhost:" + ourPort + "/websocket");
+		URI echoUri = new URI("ws://localhost:" + ourPort + myModelConfig.getWebsocketContextPath());
 		ClientUpgradeRequest request = new ClientUpgradeRequest();
 		ourLog.info("Connecting to : {}", echoUri);
 		Future<Session> connection = myWebSocketClient.connect(mySocketImplementation, echoUri, request);
 		Session session = connection.get(2, TimeUnit.SECONDS);
 
 		ourLog.info("Connected to WS: {}", session.isOpen());
+
+		await().until(() -> mySubscriptionRegistry.size() == 1);
 	}
 
 	@Test
-	public void createObservation() throws Exception {
+	public void createObservation() {
 		Observation observation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation.setCode(codeableConcept);
@@ -139,7 +147,7 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void createObservationThatDoesNotMatch() throws Exception {
+	public void createObservationThatDoesNotMatch() {
 		Observation observation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation.setCode(codeableConcept);

@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,20 +20,40 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.api.IBaseReference;
+
 public class PathAndRef {
 
 	private final String myPath;
+	private final IBaseReference myRef;
+	private final String mySearchParamName;
+	private final boolean myCanonical;
+
+	/**
+	 * Constructor
+	 */
+	public PathAndRef(String theSearchParamName, String thePath, IBaseReference theRef, boolean theCanonical) {
+		super();
+		mySearchParamName = theSearchParamName;
+		myPath = thePath;
+		myRef = theRef;
+		myCanonical = theCanonical;
+	}
+
+	public boolean isCanonical() {
+		return myCanonical;
+	}
+
+	public String getSearchParamName() {
+		return mySearchParamName;
+	}
+
 	public String getPath() {
 		return myPath;
 	}
-	public PathAndRef(String thePath, Object theRef) {
-		super();
-		myPath = thePath;
-		myRef = theRef;
-	}
-	public Object getRef() {
+
+	public IBaseReference getRef() {
 		return myRef;
 	}
-	private final Object myRef;
-	
+
 }

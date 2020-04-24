@@ -4,14 +4,14 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.hl7.fhir.instance.model.api.*;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -44,56 +45,47 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 class ModelScanner {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelScanner.class);
 
-	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinitions = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
+	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinitions = new HashMap<>();
 	private FhirContext myContext;
-	private Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = new HashMap<String, RuntimeResourceDefinition>();
-	private Map<String, BaseRuntimeElementDefinition<?>> myNameToElementDefinitions = new HashMap<String, BaseRuntimeElementDefinition<?>>();
-	private Map<String, RuntimeResourceDefinition> myNameToResourceDefinitions = new HashMap<String, RuntimeResourceDefinition>();
-	private Map<String, Class<? extends IBaseResource>> myNameToResourceType = new HashMap<String, Class<? extends IBaseResource>>();
+	private Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = new HashMap<>();
+	private Map<String, BaseRuntimeElementDefinition<?>> myNameToElementDefinitions = new HashMap<>();
+	private Map<String, RuntimeResourceDefinition> myNameToResourceDefinitions = new HashMap<>();
+	private Map<String, Class<? extends IBaseResource>> myNameToResourceType = new HashMap<>();
 	private RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
-	private Set<Class<? extends IBase>> myScanAlso = new HashSet<Class<? extends IBase>>();
+	private Set<Class<? extends IBase>> myScanAlso = new HashSet<>();
 	private FhirVersionEnum myVersion;
 
 	private Set<Class<? extends IBase>> myVersionTypes;
 
 	ModelScanner(FhirContext theContext, FhirVersionEnum theVersion, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingDefinitions,
-					 Collection<Class<? extends IBase>> theResourceTypes) throws ConfigurationException {
+					 @Nonnull Collection<Class<? extends IBase>> theResourceTypes) throws ConfigurationException {
 		myContext = theContext;
 		myVersion = theVersion;
-		Set<Class<? extends IBase>> toScan;
-		if (theResourceTypes != null) {
-			toScan = new HashSet<Class<? extends IBase>>(theResourceTypes);
-		} else {
-			toScan = new HashSet<Class<? extends IBase>>();
-		}
+		Set<Class<? extends IBase>> toScan = new HashSet<>(theResourceTypes);
 		init(theExistingDefinitions, toScan);
 	}
 
-	public Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> getClassToElementDefinitions() {
+	Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> getClassToElementDefinitions() {
 		return myClassToElementDefinitions;
 	}
 
-	public Map<String, RuntimeResourceDefinition> getIdToResourceDefinition() {
+	Map<String, RuntimeResourceDefinition> getIdToResourceDefinition() {
 		return myIdToResourceDefinition;
 	}
 
-	public Map<String, BaseRuntimeElementDefinition<?>> getNameToElementDefinitions() {
+	Map<String, BaseRuntimeElementDefinition<?>> getNameToElementDefinitions() {
 		return myNameToElementDefinitions;
 	}
 
-	public Map<String, RuntimeResourceDefinition> getNameToResourceDefinition() {
+	Map<String, RuntimeResourceDefinition> getNameToResourceDefinition() {
 		return myNameToResourceDefinitions;
 	}
 
-	public Map<String, RuntimeResourceDefinition> getNameToResourceDefinitions() {
-		return (myNameToResourceDefinitions);
-	}
-
-	public Map<String, Class<? extends IBaseResource>> getNameToResourceType() {
+	Map<String, Class<? extends IBaseResource>> getNameToResourceType() {
 		return myNameToResourceType;
 	}
 
-	public RuntimeChildUndeclaredExtensionDefinition getRuntimeChildUndeclaredExtensionDefinition() {
+	RuntimeChildUndeclaredExtensionDefinition getRuntimeChildUndeclaredExtensionDefinition() {
 		return myRuntimeChildUndeclaredExtensionDefinition;
 	}
 
@@ -145,11 +137,10 @@ class ModelScanner {
 	}
 
 	private boolean isStandardType(Class<? extends IBase> theClass) {
-		boolean retVal = myVersionTypes.contains(theClass);
-		return retVal;
+		return myVersionTypes.contains(theClass);
 	}
 
-	private void scan(Class<? extends IBase> theClass) throws ConfigurationException {
+	void scan(Class<? extends IBase> theClass) throws ConfigurationException {
 		BaseRuntimeElementDefinition<?> existingDef = myClassToElementDefinitions.get(theClass);
 		if (existingDef != null) {
 			return;
@@ -204,9 +195,6 @@ class ModelScanner {
 		ourLog.debug("Scanning resource block class: {}", theClass.getName());
 
 		String resourceName = theClass.getCanonicalName();
-		if (isBlank(resourceName)) {
-			throw new ConfigurationException("Block type @" + Block.class.getSimpleName() + " annotation contains no name: " + theClass.getCanonicalName());
-		}
 
 		// Just in case someone messes up when upgrading from DSTU2
 		if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
@@ -341,14 +329,14 @@ class ModelScanner {
 
 	private void scanResourceForSearchParams(Class<? extends IBaseResource> theClass, RuntimeResourceDefinition theResourceDef) {
 
-		Map<String, RuntimeSearchParam> nameToParam = new HashMap<String, RuntimeSearchParam>();
-		Map<Field, SearchParamDefinition> compositeFields = new LinkedHashMap<Field, SearchParamDefinition>();
+		Map<String, RuntimeSearchParam> nameToParam = new HashMap<>();
+		Map<Field, SearchParamDefinition> compositeFields = new LinkedHashMap<>();
 
 		/*
 		 * Make sure we pick up fields in interfaces too.. This ensures that we
 		 * grab the _id field which generally gets picked up via interface
 		 */
-		Set<Field> fields = new HashSet<Field>(Arrays.asList(theClass.getFields()));
+		Set<Field> fields = new HashSet<>(Arrays.asList(theClass.getFields()));
 		Class<?> nextClass = theClass;
 		do {
 			for (Class<?> nextInterface : nextClass.getInterfaces()) {
@@ -400,12 +388,12 @@ class ModelScanner {
 		for (Entry<Field, SearchParamDefinition> nextEntry : compositeFields.entrySet()) {
 			SearchParamDefinition searchParam = nextEntry.getValue();
 
-			List<RuntimeSearchParam> compositeOf = new ArrayList<RuntimeSearchParam>();
+			List<RuntimeSearchParam> compositeOf = new ArrayList<>();
 			for (String nextName : searchParam.compositeOf()) {
 				RuntimeSearchParam param = nameToParam.get(nextName);
 				if (param == null) {
 					ourLog.warn("Search parameter {}.{} declares that it is a composite with compositeOf value '{}' but that is not a valid parametr name itself. Valid values are: {}",
-						new Object[]{theResourceDef.getName(), searchParam.name(), nextName, nameToParam.keySet()});
+						theResourceDef.getName(), searchParam.name(), nextName, nameToParam.keySet());
 					continue;
 				}
 				compositeOf.add(param);
@@ -417,7 +405,7 @@ class ModelScanner {
 	}
 
 	private Set<String> toTargetList(Class<? extends IBaseResource>[] theTarget) {
-		HashSet<String> retVal = new HashSet<String>();
+		HashSet<String> retVal = new HashSet<>();
 
 		for (Class<? extends IBaseResource> nextType : theTarget) {
 			ResourceDef resourceDef = nextType.getAnnotation(ResourceDef.class);
@@ -486,7 +474,7 @@ class ModelScanner {
 	}
 
 	static Set<Class<? extends IBase>> scanVersionPropertyFile(Set<Class<? extends IBase>> theDatatypes, Map<String, Class<? extends IBaseResource>> theResourceTypes, FhirVersionEnum theVersion, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingElementDefinitions) {
-		Set<Class<? extends IBase>> retVal = new HashSet<Class<? extends IBase>>();
+		Set<Class<? extends IBase>> retVal = new HashSet<>();
 
 		try (InputStream str = theVersion.getVersionImplementation().getFhirVersionPropertiesFile()) {
 			Properties prop = new Properties();

@@ -1,12 +1,10 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
-import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import com.google.common.collect.Lists;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
@@ -22,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -60,7 +59,14 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 	@Before
 	public void beforeRegisterEmailListener() throws FolderException {
 		ourTestSmtp.purgeEmailFromAllMailboxes();
+
+		ourLog.info("Before re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
+
 		mySubscriptionTestUtil.registerEmailInterceptor();
+
+		ourLog.info("After re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
 
 		mySubscriptionTestUtil.initEmailSender(ourListenerPort);
 
@@ -106,9 +112,13 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		return observation;
 	}
 
+	/**
+	 * Tests an email subscription with payload set to XML. The email sent must include content in the body of the email that is formatted as XML.
+	 * @throws Exception
+	 */
 	@Test
 	public void testEmailSubscriptionNormal() throws Exception {
-		String payload = "This is the body";
+		String payload = "application/fhir+xml";
 
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
@@ -132,13 +142,21 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(1, received.get(0).getAllRecipients().length);
 		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
 		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
-		assertEquals("This is the body", received.get(0).getContent().toString().trim());
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
+
+		// Expect the body of the email subscription to be an Observation formatted as XML
+		Observation parsedObservation = (Observation) ourClient.getFhirContext().newXmlParser().parseResource(received.get(0).getContent().toString().trim());
+		assertEquals("SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
+		assertEquals("1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
 	}
 
+	/**
+	 * Tests an email subscription with payload set to JSON. The email sent must include content in the body of the email that is formatted as JSON.
+	 * @throws Exception
+	 */
 	@Test
 	public void testEmailSubscriptionWithCustom() throws Exception {
-		String payload = "This is the body";
+		String payload = "application/fhir+json";
 
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
@@ -148,10 +166,10 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		Assert.assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(SubscriptionConstants.EXT_SUBSCRIPTION_EMAIL_FROM)
+			.setUrl(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM)
 			.setValue(new StringType("mailto:myfrom@from.com"));
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(SubscriptionConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
+			.setUrl(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
 			.setValue(new StringType("This is a subject"));
 		subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
 
@@ -179,13 +197,21 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
 		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
 		assertEquals("This is a subject", received.get(0).getSubject().toString().trim());
-		assertEquals("This is the body", received.get(0).getContent().toString().trim());
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
+
+		// Expect the body of the email subscription to be an Observation formatted as JSON
+		Observation parsedObservation = (Observation) ourClient.getFhirContext().newJsonParser().parseResource(received.get(0).getContent().toString().trim());
+		assertEquals("SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
+		assertEquals("1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
 	}
 
+	/**
+	 * Tests an email subscription with no payload. When the email is sent, the body of the email must be empty.
+	 * @throws Exception
+	 */
 	@Test
 	public void testEmailSubscriptionWithCustomNoMailtoOnFrom() throws Exception {
-		String payload = "This is the body";
+		String payload = "";
 
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
@@ -194,10 +220,10 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, sub1.getId());
 		Assert.assertNotNull(subscriptionTemp);
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(SubscriptionConstants.EXT_SUBSCRIPTION_EMAIL_FROM)
+			.setUrl(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM)
 			.setValue(new StringType("myfrom@from.com"));
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(SubscriptionConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
+			.setUrl(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
 			.setValue(new StringType("This is a subject"));
 		subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
 
@@ -225,7 +251,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
 		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
 		assertEquals("This is a subject", received.get(0).getSubject().toString().trim());
-		assertEquals("This is the body", received.get(0).getContent().toString().trim());
+		assertEquals("", received.get(0).getContent().toString().trim());
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
 		ourLog.info("Subscription: {}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(ourClient.history().onInstance(id).andReturnBundle(Bundle.class).execute()));
@@ -246,13 +272,13 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourListenerPort = RandomServerPortProvider.findFreePort();
-		ServerSetup smtp = new ServerSetup(ourListenerPort, null, ServerSetup.PROTOCOL_SMTP);
+		ServerSetup smtp = new ServerSetup(0, null, ServerSetup.PROTOCOL_SMTP);
 		smtp.setServerStartupTimeout(2000);
 		smtp.setReadTimeout(2000);
 		smtp.setConnectionTimeout(2000);
 		ourTestSmtp = new GreenMail(smtp);
 		ourTestSmtp.start();
+        ourListenerPort = ourTestSmtp.getSmtp().getPort();
 	}
 
 }

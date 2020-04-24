@@ -4,14 +4,14 @@ package ca.uhn.fhir.model.primitive;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,21 +20,20 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import ca.uhn.fhir.model.api.BasePrimitive;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.parser.DataFormatException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.time.DateUtils;
-import org.apache.commons.lang3.time.FastDateFormat;
-
-import ca.uhn.fhir.model.api.BasePrimitive;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.parser.DataFormatException;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	static final long NANOS_PER_MILLIS = 1000000L;
@@ -42,7 +41,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
 	private static final FastDateFormat ourHumanDateFormat = FastDateFormat.getDateInstance(FastDateFormat.MEDIUM);
 	private static final FastDateFormat ourHumanDateTimeFormat = FastDateFormat.getDateTimeInstance(FastDateFormat.MEDIUM, FastDateFormat.MEDIUM);
-
+	private static final FastDateFormat ourXmlDateTimeFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss");
+	public static final String NOW_DATE_CONSTANT = "%now";
 	private String myFractionalSeconds;
 	private TemporalPrecisionEnum myPrecision = null;
 	private TimeZone myTimeZone;
@@ -635,7 +635,12 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	@Override
 	public void setValueAsString(String theValue) throws DataFormatException {
 		clearTimeZone();
-		super.setValueAsString(theValue);
+
+		if (NOW_DATE_CONSTANT.equalsIgnoreCase(theValue)) {
+			super.setValueAsString(ourXmlDateTimeFormat.format(new Date()));
+		} else {
+			super.setValueAsString(theValue);
+		}
 	}
 
 	/**

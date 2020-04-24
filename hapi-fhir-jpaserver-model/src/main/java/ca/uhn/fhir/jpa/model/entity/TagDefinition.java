@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,12 +30,10 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
 
-//@formatter:on
 @Entity
 @Table(name = "HFJ_TAG_DEF", uniqueConstraints = {
 		@UniqueConstraint(name = "IDX_TAGDEF_TYPESYSCODE", columnNames = { "TAG_TYPE", "TAG_SYSTEM", "TAG_CODE" })
 })
-//@formatter:off
 public class TagDefinition implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -117,24 +115,18 @@ public class TagDefinition implements Serializable {
 		myHashCode = null;
 	}
 
-	public Tag toTag() {
-		return new Tag(getSystem(), getCode(), getDisplay());
-	}
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null) {
-			return false;
-		}
 		if (!(obj instanceof TagDefinition)) {
 			return false;
 		}
 		TagDefinition other = (TagDefinition) obj;
+
 		EqualsBuilder b = new EqualsBuilder();
-		
+
 		if (myId != null && other.myId != null) {
 			b.append(myId, other.myId);
 		} else {
@@ -142,7 +134,7 @@ public class TagDefinition implements Serializable {
 			b.append(mySystem, other.mySystem);
 			b.append(myCode, other.myCode);
 		}
-		
+
 		return b.isEquals();
 	}
 	

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1721
+title: When performing a terminology delta ADD operation, existing parent-child links were often
+   deleted and recrreated needlessly during operations, which could result in a deadlock. This has
+   been resolved.

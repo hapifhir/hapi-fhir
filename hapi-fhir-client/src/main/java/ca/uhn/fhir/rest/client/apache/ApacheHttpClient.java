@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.client.apache;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -87,11 +87,13 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 	}
 
 
+	@Override
 	protected IHttpRequest createHttpRequest() {
 		IHttpRequest retVal = createHttpRequest((HttpEntity)null);
 		return retVal;
 	}
 
+	@Override
 	protected IHttpRequest createHttpRequest(byte[] content) {
 		/*
 		 * Note: Be careful about changing which constructor we use for
@@ -109,6 +111,7 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 		return result;
 	}
 
+	@Override
 	protected IHttpRequest createHttpRequest(Map<String, List<String>> theParams) {
 		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
 		for (Entry<String, List<String>> nextParam : theParams.entrySet()) {
@@ -124,6 +127,7 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 	}
 
 
+	@Override
 	protected IHttpRequest createHttpRequest(String theContents) {
 		/*
 		 * We aren't using a StringEntity here because the constructors

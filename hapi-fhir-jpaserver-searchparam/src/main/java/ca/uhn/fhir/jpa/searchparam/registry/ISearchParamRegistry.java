@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
-import com.google.common.annotations.VisibleForTesting;
 
 import java.util.Collection;
 import java.util.List;
@@ -42,6 +41,8 @@ public interface ISearchParamRegistry {
 	 */
 	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
 
+	boolean refreshCacheIfNecessary();
+
 	Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams();
 
 	Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName);
@@ -49,8 +50,6 @@ public interface ISearchParamRegistry {
 	List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames);
 
 	List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName);
-
-	void refreshCacheIfNecessary();
 
 	/**
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
@@ -60,7 +59,4 @@ public interface ISearchParamRegistry {
 	RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName);
 
 	Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef);
-
-	@VisibleForTesting
-	void setSearchParamProviderForUnitTest(ISearchParamProvider theSearchParamProvider);
 }

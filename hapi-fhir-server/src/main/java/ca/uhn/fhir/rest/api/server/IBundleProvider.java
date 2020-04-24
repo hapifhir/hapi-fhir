@@ -3,6 +3,8 @@ package ca.uhn.fhir.rest.api.server;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 
@@ -10,14 +12,14 @@ import java.util.List;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -97,7 +99,7 @@ public interface IBundleProvider {
 	 * additional 20 resources which matched a client's _include specification.
 	 * <p>
 	 * Note that if this bundle provider was loaded using a
-	 * page ID (i.e. via {@link ca.uhn.fhir.rest.server.IPagingProvider#retrieveResultList(String, String)}
+	 * page ID (i.e. via {@link ca.uhn.fhir.rest.server.IPagingProvider#retrieveResultList(RequestDetails, String, String)}
 	 * because {@link #getNextPageId()} provided a value on the
 	 * previous page, then the indexes should be ignored and the
 	 * whole page returned.
@@ -107,6 +109,7 @@ public interface IBundleProvider {
 	 * @param theToIndex   The high index (exclusive) to return
 	 * @return A list of resources. The size of this list must be at least <code>theToIndex - theFromIndex</code>.
 	 */
+	@Nonnull
 	List<IBaseResource> getResources(int theFromIndex, int theToIndex);
 
 	/**
@@ -126,6 +129,7 @@ public interface IBundleProvider {
 	 * the search, and not to the individual page.
 	 * </p>
 	 */
+	@Nullable
 	String getUuid();
 
 	/**
@@ -144,6 +148,19 @@ public interface IBundleProvider {
 	 * _include's or OperationOutcome). May return {@literal null} if the total size is not
 	 * known or would be too expensive to calculate.
 	 */
+	@Nullable
 	Integer size();
+
+	/**
+	 * This method returns <code>true</code> if the bundle provider knows that at least
+	 * one result exists.
+	 */
+	default boolean isEmpty() {
+		Integer size = size();
+		if (size != null) {
+			return size == 0;
+		}
+		return getResources(0, 1).isEmpty();
+	}
 
 }

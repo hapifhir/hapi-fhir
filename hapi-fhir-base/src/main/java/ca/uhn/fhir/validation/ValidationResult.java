@@ -4,14 +4,14 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.util.Collections;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -120,7 +121,22 @@ public class ValidationResult {
 				location = null;
 			}
 			String severity = next.getSeverity() != null ? next.getSeverity().getCode() : null;
-			OperationOutcomeUtil.addIssue(myCtx, theOperationOutcome, severity, next.getMessage(), location, Constants.OO_INFOSTATUS_PROCESSING);
+			IBase issue = OperationOutcomeUtil.addIssue(myCtx, theOperationOutcome, severity, next.getMessage(), location, Constants.OO_INFOSTATUS_PROCESSING);
+			
+			if (next.getLocationLine() != null || next.getLocationCol() != null) {
+				String unknown = "(unknown)";
+				String line = unknown;
+				if (next.getLocationLine() != null && next.getLocationLine() != -1) {
+					line = next.getLocationLine().toString();
+				}
+				String col = unknown;
+				if (next.getLocationCol() != null && next.getLocationCol() != -1) {
+					col = next.getLocationCol().toString();
+				}
+				if (!unknown.equals(line) || !unknown.equals(col)) {
+					OperationOutcomeUtil.addLocationToIssue(myCtx, issue, "Line " + line + ", Col " + col);
+				}
+			}
 		}
 
 		if (myMessages.isEmpty()) {

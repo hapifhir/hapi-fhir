@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,15 +19,6 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.lang.reflect.Method;
-import java.util.*;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -44,27 +35,45 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethodBinding.class);
 
 	private static final Set<String> SPECIAL_SEARCH_PARAMS;
-	private String myCompartmentName;
-	private String myDescription;
-	private Integer myIdParamIndex;
-	private String myQueryName;
-	private boolean myAllowUnknownParams;
 
 	static {
 		HashSet<String> specialSearchParams = new HashSet<>();
 		specialSearchParams.add(IAnyResource.SP_RES_ID);
 		specialSearchParams.add(IAnyResource.SP_RES_LANGUAGE);
+		specialSearchParams.add(Constants.PARAM_INCLUDE);
+		specialSearchParams.add(Constants.PARAM_REVINCLUDE);
 		SPECIAL_SEARCH_PARAMS = Collections.unmodifiableSet(specialSearchParams);
 	}
 
-	public SearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
+	private final String myResourceProviderResourceName;
+	private final List<String> myRequiredParamNames;
+	private final List<String> myOptionalParamNames;
+	private final String myCompartmentName;
+	private String myDescription;
+	private final Integer myIdParamIndex;
+	private final String myQueryName;
+	private final boolean myAllowUnknownParams;
+
+	public SearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Class<? extends IBaseResource> theResourceProviderResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 		Search search = theMethod.getAnnotation(Search.class);
 		this.myQueryName = StringUtils.defaultIfBlank(search.queryName(), null);
@@ -89,10 +98,35 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			throw new ConfigurationException(msg);
 		}
 
+		if (theResourceProviderResourceType != null) {
+			this.myResourceProviderResourceName = theContext.getResourceDefinition(theResourceProviderResourceType).getName();
+		} else {
+			this.myResourceProviderResourceName = null;
+		}
+
+		myRequiredParamNames = getQueryParameters()
+			.stream()
+			.filter(t -> t.isRequired())
+			.map(t -> t.getName())
+			.collect(Collectors.toList());
+		myOptionalParamNames = getQueryParameters()
+			.stream()
+			.filter(t -> !t.isRequired())
+			.map(t -> t.getName())
+			.collect(Collectors.toList());
+
 	}
 
 	public String getDescription() {
 		return myDescription;
+	}
+
+	public String getQueryName() {
+		return myQueryName;
+	}
+
+	public String getResourceProviderResourceName() {
+		return myResourceProviderResourceName;
 	}
 
 	@Nonnull
@@ -108,133 +142,134 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public ReturnTypeEnum getReturnType() {
-			return ReturnTypeEnum.BUNDLE;
+		return ReturnTypeEnum.BUNDLE;
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		
-		String clientPreference = theRequest.getHeader(Constants.HEADER_PREFER);
-		boolean lenientHandling = false;
-		if(clientPreference != null)
-		{
-			String[] preferences = clientPreference.split(";");
-			for( String p : preferences){
-				if("handling:lenient".equalsIgnoreCase(p))
-				{
-					lenientHandling = true;
-					break;
-				}
-			}
-		}
-		
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+
 		if (theRequest.getId() != null && myIdParamIndex == null) {
-			ourLog.trace("Method {} doesn't match because ID is not null: {}", theRequest.getId());
-			return false;
+			ourLog.trace("Method {} doesn't match because ID is not null: {}", getMethod(), theRequest.getId());
+			return MethodMatchEnum.NONE;
 		}
 		if (theRequest.getRequestType() == RequestTypeEnum.GET && theRequest.getOperation() != null && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
 			ourLog.trace("Method {} doesn't match because request type is GET but operation is not null: {}", theRequest.getId(), theRequest.getOperation());
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (theRequest.getRequestType() == RequestTypeEnum.POST && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
 			ourLog.trace("Method {} doesn't match because request type is POST but operation is not _search: {}", theRequest.getId(), theRequest.getOperation());
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (theRequest.getRequestType() != RequestTypeEnum.GET && theRequest.getRequestType() != RequestTypeEnum.POST) {
-			ourLog.trace("Method {} doesn't match because request type is {}", getMethod());
-			return false;
+			ourLog.trace("Method {} doesn't match because request type is {}", getMethod(), theRequest.getRequestType());
+			return MethodMatchEnum.NONE;
 		}
 		if (!StringUtils.equals(myCompartmentName, theRequest.getCompartmentName())) {
-			ourLog.trace("Method {} doesn't match because it is for compartment {} but request is compartment {}", new Object[] { getMethod(), myCompartmentName, theRequest.getCompartmentName() });
-			return false;
+			ourLog.trace("Method {} doesn't match because it is for compartment {} but request is compartment {}", getMethod(), myCompartmentName, theRequest.getCompartmentName());
+			return MethodMatchEnum.NONE;
 		}
-		// This is used to track all the parameters so we can reject queries that
-		// have additional params we don't understand
-		Set<String> methodParamsTemp = new HashSet<String>();
-
-		Set<String> unqualifiedNames = theRequest.getUnqualifiedToQualifiedNames().keySet();
-		Set<String> qualifiedParamNames = theRequest.getParameters().keySet();
-		for (int i = 0; i < this.getParameters().size(); i++) {
-			if (!(getParameters().get(i) instanceof BaseQueryParameter)) {
-				continue;
-			}
-			BaseQueryParameter temp = (BaseQueryParameter) getParameters().get(i);
-			String name = temp.getName();
-			if (temp.isRequired()) {
-
-				if (qualifiedParamNames.contains(name)) {
-					QualifierDetails qualifiers = extractQualifiersFromParameterName(name);
-					if (qualifiers.passes(temp.getQualifierWhitelist(), temp.getQualifierBlacklist())) {
-						methodParamsTemp.add(name);
-					}
-				}
-				if (unqualifiedNames.contains(name)) {
-					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(name);
-					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
-					methodParamsTemp.addAll(qualifiedNames);
-				}
-				if (!qualifiedParamNames.contains(name) && !unqualifiedNames.contains(name))
-				{
-					ourLog.trace("Method {} doesn't match param '{}' is not present", getMethod().getName(), name);
-					return false;
-				}
-
-			} else {
-				if (qualifiedParamNames.contains(name)) {
-					QualifierDetails qualifiers = extractQualifiersFromParameterName(name);
-					if (qualifiers.passes(temp.getQualifierWhitelist(), temp.getQualifierBlacklist())) {
-						methodParamsTemp.add(name);
-					}
-				} 
-				if (unqualifiedNames.contains(name)) {
-					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(name);
-					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
-					methodParamsTemp.addAll(qualifiedNames);
-				}
-				if (!qualifiedParamNames.contains(name)) { 
-					methodParamsTemp.add(name);
-				}
-			}
+		if (theRequest.getParameters().get(Constants.PARAM_PAGINGACTION) != null) {
+			return MethodMatchEnum.NONE;
 		}
+
 		if (myQueryName != null) {
 			String[] queryNameValues = theRequest.getParameters().get(Constants.PARAM_QUERY);
 			if (queryNameValues != null && StringUtils.isNotBlank(queryNameValues[0])) {
 				String queryName = queryNameValues[0];
 				if (!myQueryName.equals(queryName)) {
 					ourLog.trace("Query name does not match {}", myQueryName);
-					return false;
+					return MethodMatchEnum.NONE;
 				}
-				methodParamsTemp.add(Constants.PARAM_QUERY);
 			} else {
 				ourLog.trace("Query name does not match {}", myQueryName);
-				return false;
+				return MethodMatchEnum.NONE;
 			}
 		} else {
 			String[] queryNameValues = theRequest.getParameters().get(Constants.PARAM_QUERY);
 			if (queryNameValues != null && StringUtils.isNotBlank(queryNameValues[0])) {
 				ourLog.trace("Query has name");
-				return false;
+				return MethodMatchEnum.NONE;
 			}
 		}
-		for (String next : theRequest.getParameters().keySet()) {
-			if (next.startsWith("_") && !SPECIAL_SEARCH_PARAMS.contains(next)) {
-				methodParamsTemp.add(next);
-			}
-		}
-		Set<String> keySet = theRequest.getParameters().keySet();
-		if(lenientHandling == true)
-			return true;
 
-		if (myAllowUnknownParams == false) {
-			for (String next : keySet) {
-				if (!methodParamsTemp.contains(next)) {
-					return false;
+		Set<String> unqualifiedNames = theRequest.getUnqualifiedToQualifiedNames().keySet();
+		Set<String> qualifiedParamNames = theRequest.getParameters().keySet();
+
+		MethodMatchEnum retVal = MethodMatchEnum.EXACT;
+		for (String nextRequestParam : theRequest.getParameters().keySet()) {
+			String nextUnqualifiedRequestParam = ParameterUtil.stripModifierPart(nextRequestParam);
+			if (nextRequestParam.startsWith("_") && !SPECIAL_SEARCH_PARAMS.contains(nextUnqualifiedRequestParam)) {
+				continue;
+			}
+
+			boolean parameterMatches = false;
+			boolean approx = false;
+			for (BaseQueryParameter nextMethodParam : getQueryParameters()) {
+
+				if (nextRequestParam.equals(nextMethodParam.getName())) {
+					QualifierDetails qualifiers = QualifierDetails.extractQualifiersFromParameterName(nextRequestParam);
+					if (qualifiers.passes(nextMethodParam.getQualifierWhitelist(), nextMethodParam.getQualifierBlacklist())) {
+						parameterMatches = true;
+					}
+				} else if (nextUnqualifiedRequestParam.equals(nextMethodParam.getName())) {
+					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(nextUnqualifiedRequestParam);
+					if (passesWhitelistAndBlacklist(qualifiedNames, nextMethodParam.getQualifierWhitelist(), nextMethodParam.getQualifierBlacklist())) {
+						parameterMatches = true;
+					}
+				}
+
+				// Repetitions supplied by URL but not supported by this parameter
+				if (theRequest.getParameters().get(nextRequestParam).length > 1 != nextMethodParam.supportsRepetition()) {
+					approx = true;
+				}
+
+			}
+
+
+			if (parameterMatches) {
+
+				if (approx) {
+					retVal = retVal.weakerOf(MethodMatchEnum.APPROXIMATE);
+				}
+
+			} else {
+
+				if (myAllowUnknownParams) {
+					retVal = retVal.weakerOf(MethodMatchEnum.APPROXIMATE);
+				} else {
+					retVal = retVal.weakerOf(MethodMatchEnum.NONE);
+				}
+
+			}
+
+			if (retVal == MethodMatchEnum.NONE) {
+				break;
+			}
+
+		}
+
+		if (retVal != MethodMatchEnum.NONE) {
+			for (String nextRequiredParamName : myRequiredParamNames) {
+				if (!qualifiedParamNames.contains(nextRequiredParamName)) {
+					if (!unqualifiedNames.contains(nextRequiredParamName)) {
+						retVal = MethodMatchEnum.NONE;
+						break;
+					}
 				}
 			}
 		}
-		return true;
-	}
+		if (retVal != MethodMatchEnum.NONE) {
+			for (String nextRequiredParamName : myOptionalParamNames) {
+				if (!qualifiedParamNames.contains(nextRequiredParamName)) {
+					if (!unqualifiedNames.contains(nextRequiredParamName)) {
+						retVal = retVal.weakerOf(MethodMatchEnum.APPROXIMATE);
+					}
+				}
+			}
+		}
 
+		return retVal;
+	}
 
 	@Override
 	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
@@ -253,70 +288,23 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		return false;
 	}
 
-	private List<String> processWhitelistAndBlacklist(List<String> theQualifiedNames, Set<String> theQualifierWhitelist, Set<String> theQualifierBlacklist) {
+
+	private boolean passesWhitelistAndBlacklist(List<String> theQualifiedNames, Set<String> theQualifierWhitelist, Set<String> theQualifierBlacklist) {
 		if (theQualifierWhitelist == null && theQualifierBlacklist == null) {
-			return theQualifiedNames;
+			return true;
 		}
-		ArrayList<String> retVal = new ArrayList<String>(theQualifiedNames.size());
 		for (String next : theQualifiedNames) {
-			QualifierDetails qualifiers = extractQualifiersFromParameterName(next);
+			QualifierDetails qualifiers = QualifierDetails.extractQualifiersFromParameterName(next);
 			if (!qualifiers.passes(theQualifierWhitelist, theQualifierBlacklist)) {
-				continue;
+				return false;
 			}
-			retVal.add(next);
 		}
-		return retVal;
+		return true;
 	}
 
 	@Override
 	public String toString() {
 		return getMethod().toString();
-	}
-	public static QualifierDetails extractQualifiersFromParameterName(String theParamName) {
-		QualifierDetails retVal = new QualifierDetails();
-		if (theParamName == null || theParamName.length() == 0) {
-			return retVal;
-		}
-
-		int dotIdx = -1;
-		int colonIdx = -1;
-		for (int idx = 0; idx < theParamName.length(); idx++) {
-			char nextChar = theParamName.charAt(idx);
-			if (nextChar == '.' && dotIdx == -1) {
-				dotIdx = idx;
-			} else if (nextChar == ':' && colonIdx == -1) {
-				colonIdx = idx;
-			}
-		}
-
-		if (dotIdx != -1 && colonIdx != -1) {
-			if (dotIdx < colonIdx) {
-				retVal.setDotQualifier(theParamName.substring(dotIdx, colonIdx));
-				retVal.setColonQualifier(theParamName.substring(colonIdx));
-				retVal.setParamName(theParamName.substring(0, dotIdx));
-				retVal.setWholeQualifier(theParamName.substring(dotIdx));
-			} else {
-				retVal.setColonQualifier(theParamName.substring(colonIdx, dotIdx));
-				retVal.setDotQualifier(theParamName.substring(dotIdx));
-				retVal.setParamName(theParamName.substring(0, colonIdx));
-				retVal.setWholeQualifier(theParamName.substring(colonIdx));
-			}
-		} else if (dotIdx != -1) {
-			retVal.setDotQualifier(theParamName.substring(dotIdx));
-			retVal.setParamName(theParamName.substring(0, dotIdx));
-			retVal.setWholeQualifier(theParamName.substring(dotIdx));
-		} else if (colonIdx != -1) {
-			retVal.setColonQualifier(theParamName.substring(colonIdx));
-			retVal.setParamName(theParamName.substring(0, colonIdx));
-			retVal.setWholeQualifier(theParamName.substring(colonIdx));
-		} else {
-			retVal.setParamName(theParamName);
-			retVal.setColonQualifier(null);
-			retVal.setDotQualifier(null);
-			retVal.setWholeQualifier(null);
-		}
-
-		return retVal;
 	}
 
 

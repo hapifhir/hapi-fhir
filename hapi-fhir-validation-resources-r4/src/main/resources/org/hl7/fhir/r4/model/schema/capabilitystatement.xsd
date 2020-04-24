@@ -1,0 +1,944 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Fri, Nov 1, 2019 09:29+1100 for FHIR v4.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="CapabilityStatement" type="CapabilityStatement">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="CapabilityStatement">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="url" minOccurs="0" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An absolute URI that is used to identify this capability statement when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this capability statement is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the capability statement is stored on different servers.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="version" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The identifier that is used to identify this version of the capability statement when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the capability statement author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A natural language name identifying the capability statement. This name should be usable as an identifier for the module by machine processing applications such as code generation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="title" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A short, descriptive, user-friendly title for the capability statement.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="status" minOccurs="1" maxOccurs="1" type="PublicationStatus">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The status of this capability statement. Enables tracking the life-cycle of the content.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="experimental" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A Boolean value to indicate that this capability statement is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="date" minOccurs="1" maxOccurs="1" type="dateTime">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The date  (and optionally time) when the capability statement was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the capability statement changes.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="publisher" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The name of the organization or individual that published the capability statement.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="contact" minOccurs="0" maxOccurs="unbounded" type="ContactDetail">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Contact details to assist a user in finding and communicating with the publisher.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="markdown">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A free text natural language description of the capability statement from a consumer's perspective. Typically, this is used when the capability statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="useContext" minOccurs="0" maxOccurs="unbounded" type="UsageContext">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate capability statement instances.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="jurisdiction" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A legal or geographic region in which the capability statement is intended to be used.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="purpose" minOccurs="0" maxOccurs="1" type="markdown">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Explanation of why this capability statement is needed and why it has been designed as it has.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="copyright" minOccurs="0" maxOccurs="1" type="markdown">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A copyright statement relating to the capability statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the capability statement.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="kind" minOccurs="1" maxOccurs="1" type="CapabilityStatementKind">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind, not instance of software) or a class of implementation (e.g. a desired purchase).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="instantiates" minOccurs="0" maxOccurs="unbounded" type="canonical">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Reference to a canonical URL of another CapabilityStatement that this software implements. This capability statement is a published API description that corresponds to a business service. The server may actually implement a subset of the capability statement it claims to implement, so the capability statement must specify the full capability details.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="imports" minOccurs="0" maxOccurs="unbounded" type="canonical">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Reference to a canonical URL of another CapabilityStatement that this software adds to. The capability statement automatically includes everything in the other statement, and it is not duplicated, though the server may repeat the same resources, interactions and operations to add additional details to them.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="software" type="CapabilityStatement.Software" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Software that is covered by this capability statement.  It is used when the capability statement describes the capabilities of a particular software version, independent of an installation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="implementation" type="CapabilityStatement.Implementation" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies a specific implementation instance that is described by the capability statement - i.e. a particular installation, rather than the capabilities of a software program.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="fhirVersion" minOccurs="1" maxOccurs="1" type="FHIRVersion">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The version of the FHIR specification that this CapabilityStatement describes (which SHALL be the same as the FHIR version of the CapabilityStatement itself). There is no default value.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="format" minOccurs="1" maxOccurs="unbounded" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A list of the formats supported by this implementation using their content types.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="patchFormat" minOccurs="0" maxOccurs="unbounded" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A list of the patch formats supported by this implementation using their content types.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="implementationGuide" minOccurs="0" maxOccurs="unbounded" type="canonical">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A list of implementation guides that the server does (or should) support in their entirety.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="rest" type="CapabilityStatement.Rest" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A definition of the restful capabilities of the solution, if any.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="messaging" type="CapabilityStatement.Messaging" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A description of the messaging capabilities of the solution.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="document" type="CapabilityStatement.Document" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A document definition.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CapabilityStatement.Software">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="name" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Name the software is known by.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="version" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The version identifier for the software covered by this statement.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="releaseDate" minOccurs="0" maxOccurs="1" type="dateTime">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Date this version of the software was released.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CapabilityStatement.Implementation">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="description" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Information about the specific installation that this capability statement relates to.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="url" minOccurs="0" maxOccurs="1" type="url">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An absolute base URL for the implementation.  This forms the base for REST interfaces as well as the mailbox and document interfaces.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="custodian" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The organization responsible for the management of the instance and oversight of the data on the server at the specified URL.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CapabilityStatement.Rest">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="mode" minOccurs="1" maxOccurs="1" type="RestfulCapabilityMode">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies whether this portion of the statement is describing the ability to initiate or receive restful operations.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="markdown">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Information about the system's restful capabilities that apply across all applications, such as security.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="security" type="CapabilityStatement.Security" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Information about security implementation from an interface perspective - what a client needs to know.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="resource" type="CapabilityStatement.Resource" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A specification of the restful capabilities of the solution for a specific resource type.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="interaction" type="CapabilityStatement.Interaction1" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A specification of restful operations supported by the system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="searchParam" type="CapabilityStatement.SearchParam" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Search parameters that are supported for searching all resources for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="operation" type="CapabilityStatement.Operation" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Definition of an operation or a named query together with its parameters and their meaning and type.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="compartment" minOccurs="0" maxOccurs="unbounded" type="canonical">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An absolute URI which is a reference to the definition of a compartment that the system supports. The reference is to a CompartmentDefinition resource by its canonical URL .</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CapabilityStatement.Security">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="cors" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Server adds CORS headers when responding to requests - this enables Javascript applications to use the server.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="service" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Types of security services that are supported/required by the system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="markdown">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">General description of how security works.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CapabilityStatement.Resource">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="type" minOccurs="1" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A type of resource exposed via the restful interface.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="profile" minOccurs="0" maxOccurs="1" type="canonical">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles](profiling.html#profile-uses).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="supportedProfile" minOccurs="0" maxOccurs="unbounded" type="canonical">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A list of profiles that represent different use cases supported by the system. For a server, &quot;supported by the system&quot; means the system hosts/produces a set of resources that are conformant to a particular profile, and allows clients that use its services to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile. See further discussion in [Using Profiles](profiling.html#profile-uses).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="markdown">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Additional information about the resource type used by the system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="interaction" type="CapabilityStatement.Interaction" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies a restful operation supported by the solution.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="versioning" minOccurs="0" maxOccurs="1" type="ResourceVersionPolicy">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources. If the value is 'versioned-update', then the server supports all the versioning features, including using e-tags for version integrity in the API.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="readHistory" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A flag for whether the server is able to return past versions as part of the vRead operation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="updateCreate" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A flag to indicate that the server allows or needs to allow the client to create new identities on the server (that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="conditionalCreate" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A flag that indicates that the server supports conditional create.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="conditionalRead" minOccurs="0" maxOccurs="1" type="ConditionalReadStatus">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A code that indicates how the server supports conditional read.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="conditionalUpdate" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A flag that indicates that the server supports conditional update.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="conditionalDelete" minOccurs="0" maxOccurs="1" type="ConditionalDeleteStatus">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A code that indicates how the server supports conditional delete.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="referencePolicy" minOccurs="0" maxOccurs="unbounded" type="ReferenceHandlingPolicy">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A set of flags that defines how references are supported.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="searchInclude" minOccurs="0" maxOccurs="unbounded" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A list of _include values supported by the server.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="searchRevInclude" minOccurs="0" maxOccurs="unbounded" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A list of _revinclude (reverse include) values supported by the server.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="searchParam" type="CapabilityStatement.SearchParam" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Search parameters for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="operation" type="CapabilityStatement.Operation" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Definition of an operation or a named query together with its parameters and their meaning and type. Consult the definition of the operation for details about how to invoke the operation, and the parameters.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CapabilityStatement.Interaction">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="code" minOccurs="1" maxOccurs="1" type="TypeRestfulInteraction">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Coded identifier of the operation, supported by the system resource.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="markdown">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Guidance specific to the implementation of this operation, such as 'delete is a logical delete' or 'updates are only allowed with version id' or 'creates permitted from pre-authorized certificates only'.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CapabilityStatement.SearchParam">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="name" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The name of the search parameter used in the interface.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="definition" minOccurs="0" maxOccurs="1" type="canonical">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An absolute URI that is a formal reference to where this parameter was first defined, so that a client can be confident of the meaning of the search parameter (a reference to [[[SearchParameter.url]]]). This element SHALL be populated if the search parameter refers to a SearchParameter defined by the FHIR core specification or externally defined IGs.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="type" minOccurs="1" maxOccurs="1" type="SearchParamType">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The type of value a search parameter refers to, and how the content is interpreted.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="markdown">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">This allows documentation of any distinct behaviors about how the search parameter is used.  For example, text matching algorithms.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CapabilityStatement.Operation">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="name" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The name of the operation or query. For an operation, this is the name  prefixed with $ and used in the URL. For a query, this is the name used in the _query parameter when the query is called.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="definition" minOccurs="1" maxOccurs="1" type="canonical">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Where the formal definition can be found. If a server references the base definition of an Operation (i.e. from the specification itself such as ```http://hl7.org/fhir/OperationDefinition/ValueSet-expand```), that means it supports the full capabilities of the operation - e.g. both GET and POST invocation.  If it only supports a subset, it must define its own custom [[[OperationDefinition]]] with a 'base' of the original OperationDefinition.  The custom definition would describe the specific subset of functionality supported.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="markdown">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Documentation that describes anything special about the operation behavior, possibly detailing different behavior for system, type and instance-level invocation of the operation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CapabilityStatement.Interaction1">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="code" minOccurs="1" maxOccurs="1" type="SystemRestfulInteraction">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A coded identifier of the operation, supported by the system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="markdown">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Guidance specific to the implementation of this operation, such as limitations on the kind of transactions allowed, or information about system wide search is implemented.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CapabilityStatement.Messaging">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="endpoint" type="CapabilityStatement.Endpoint" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An endpoint (network accessible address) to which messages and/or replies are to be sent.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="reliableCache" minOccurs="0" maxOccurs="1" type="unsignedInt">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Length if the receiver's reliable messaging cache in minutes (if a receiver) or how long the cache length on the receiver should be (if a sender).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="markdown">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Documentation about the system's messaging capabilities for this endpoint not otherwise documented by the capability statement.  For example, the process for becoming an authorized messaging exchange partner.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="supportedMessage" type="CapabilityStatement.SupportedMessage" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">References to message definitions for messages this system can send or receive.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CapabilityStatement.Endpoint">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="protocol" minOccurs="1" maxOccurs="1" type="Coding">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A list of the messaging transport protocol(s) identifiers, supported by this endpoint.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="address" minOccurs="1" maxOccurs="1" type="url">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The network address of the endpoint. For solutions that do not use network addresses for routing, it can be just an identifier.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CapabilityStatement.SupportedMessage">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="mode" minOccurs="1" maxOccurs="1" type="EventCapabilityMode">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The mode of this event declaration - whether application is sender or receiver.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="definition" minOccurs="1" maxOccurs="1" type="canonical">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Points to a message definition that identifies the messaging event, message structure, allowed responses, etc.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CapabilityStatement.Document">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="mode" minOccurs="1" maxOccurs="1" type="DocumentMode">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Mode of this document declaration - whether an application is a producer or consumer.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="markdown">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A description of how the application supports or uses the specified document profile.  For example, when documents are created, what action is taken with consumed documents, etc.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="profile" minOccurs="1" maxOccurs="1" type="canonical">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A profile on the document Bundle that constrains which resources are present, and their contents.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="CapabilityStatementKind-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="instance">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Instance</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="capability">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Capability</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="requirements">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Requirements</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="CapabilityStatementKind">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">How a capability statement is intended to be used.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="CapabilityStatementKind-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="EventCapabilityMode-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="sender">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Sender</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="receiver">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Receiver</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="EventCapabilityMode">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The mode of a message capability statement.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="EventCapabilityMode-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ResourceVersionPolicy-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="no-version">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">No VersionId Support</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="versioned">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Versioned</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="versioned-update">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">VersionId tracked fully</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ResourceVersionPolicy">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">How the system supports versioning for a resource.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="ResourceVersionPolicy-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="DocumentMode-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="producer">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Producer</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="consumer">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Consumer</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="DocumentMode">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Whether the application produces or consumes documents.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="DocumentMode-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="RestfulCapabilityMode-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="client">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Client</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="server">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Server</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="RestfulCapabilityMode">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The mode of a RESTful capability statement.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="RestfulCapabilityMode-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="TypeRestfulInteraction-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="read">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">read</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="vread">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">vread</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="update">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">update</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="patch">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">patch</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="delete">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">delete</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="history-instance">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">history-instance</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="history-type">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">history-type</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="create">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">create</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="search-type">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">search-type</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="TypeRestfulInteraction">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Operations supported by REST at the type or instance level.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="TypeRestfulInteraction-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="SystemRestfulInteraction-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="transaction">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">transaction</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="batch">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">batch</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="search-system">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">search-system</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="history-system">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">history-system</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="SystemRestfulInteraction">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Operations supported by REST at the system level.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="SystemRestfulInteraction-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ConditionalReadStatus-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="not-supported">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Not Supported</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="modified-since">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">If-Modified-Since</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="not-match">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">If-None-Match</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="full-support">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Full Support</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ConditionalReadStatus">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A code that indicates how the server supports conditional read.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="ConditionalReadStatus-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ReferenceHandlingPolicy-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="literal">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Literal References</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="logical">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Logical References</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="resolves">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Resolves References</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="enforced">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Reference Integrity Enforced</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="local">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Local References Only</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ReferenceHandlingPolicy">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A set of flags that defines how references are supported.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="ReferenceHandlingPolicy-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ConditionalDeleteStatus-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="not-supported">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Not Supported</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="single">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Single Deletes Supported</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="multiple">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Multiple Deletes Supported</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ConditionalDeleteStatus">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A code that indicates how the server supports conditional delete.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="ConditionalDeleteStatus-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

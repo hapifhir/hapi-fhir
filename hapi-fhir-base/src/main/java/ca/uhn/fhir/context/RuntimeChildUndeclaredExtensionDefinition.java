@@ -4,14 +4,14 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,12 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import org.apache.commons.text.WordUtils;
+import org.hl7.fhir.instance.model.api.IBase;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,18 +33,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.text.WordUtils;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-
 public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildDefinition {
 
 	private static final String VALUE_REFERENCE = "valueReference";
 	private static final String VALUE_RESOURCE = "valueResource";
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeChildUndeclaredExtensionDefinition.class);
 	private Map<String, BaseRuntimeElementDefinition<?>> myAttributeNameToDefinition;
 	private Map<Class<? extends IBase>, String> myDatatypeToAttributeName;
 	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myDatatypeToDefinition;
@@ -48,15 +47,13 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	}
 
 	private void addReferenceBinding(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions, String value) {
-		List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
-		types.add(IBaseResource.class);
 		BaseRuntimeElementDefinition<?> def = findResourceReferenceDefinition(theClassToElementDefinitions);
 
 		myAttributeNameToDefinition.put(value, def);
 		/*
 		 * Resource reference - The correct name is 'valueReference' in DSTU2 and 'valueResource' in DSTU1
 		 */
-		if (value != VALUE_RESOURCE) {
+		if (!value.equals(VALUE_RESOURCE)) {
 			myDatatypeToAttributeName.put(theContext.getVersion().getResourceReferenceType(), value);
 			myDatatypeToDefinition.put(BaseResourceReferenceDt.class, def);
 			myDatatypeToDefinition.put(theContext.getVersion().getResourceReferenceType(), def);
@@ -68,14 +65,14 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	public IAccessor getAccessor() {
 		return new IAccessor() {
 			@Override
-			public List<IBase> getValues(Object theTarget) {
+			public List<IBase> getValues(IBase theTarget) {
 				ExtensionDt target = (ExtensionDt) theTarget;
 				if (target.getValue() != null) {
-					return Collections.singletonList((IBase) target.getValue());
+					return Collections.singletonList(target.getValue());
 				}
-				ArrayList<IBase> retVal = new ArrayList<IBase>(target.getUndeclaredExtensions());
-				return retVal;
+				return new ArrayList<>(target.getUndeclaredExtensions());
 			}
+
 		};
 	}
 
@@ -113,24 +110,15 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	public IMutator getMutator() {
 		return new IMutator() {
 			@Override
-			public void addValue(Object theTarget, IBase theValue) {
+			public void addValue(IBase theTarget, IBase theValue) {
 				ExtensionDt target = (ExtensionDt) theTarget;
-				if (theValue instanceof IDatatype) {
-					target.setValue((IDatatype) theTarget);
-				} else {
-					target.getUndeclaredExtensions().add((ExtensionDt) theValue);
-				}
+				target.setValue((IDatatype) theTarget);
 			}
 
 			@Override
-			public void setValue(Object theTarget, IBase theValue) {
+			public void setValue(IBase theTarget, IBase theValue) {
 				ExtensionDt target = (ExtensionDt) theTarget;
-				if (theValue instanceof IDatatype) {
-					target.setValue((IDatatype) theTarget);
-				} else {
-					target.getUndeclaredExtensions().clear();
-					target.getUndeclaredExtensions().add((ExtensionDt) theValue);
-				}
+				target.setValue((IDatatype) theTarget);
 			}
 		};
 	}
@@ -145,8 +133,6 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		return false;
 	}
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeChildUndeclaredExtensionDefinition.class);
-	
 	@Override
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		Map<String, BaseRuntimeElementDefinition<?>> datatypeAttributeNameToDefinition = new HashMap<>();
@@ -162,15 +148,15 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 				if (isSpecialization) {
 					ourLog.trace("Not adding specialization: {}", next.getImplementingClass());
 				}
-				
+
 				if (!isSpecialization) {
-					
+
 					if (!next.isStandardType()) {
 						continue;
 					}
-					
+
 					String qualifiedName = next.getImplementingClass().getName();
-					
+
 					/*
 					 * We don't want user-defined custom datatypes ending up overriding the built in
 					 * types here. It would probably be better for there to be a way for
@@ -182,7 +168,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 							continue;
 						}
 					}
-					
+
 					String attrName = createExtensionChildName(next);
 					if (datatypeAttributeNameToDefinition.containsKey(attrName)) {
 						BaseRuntimeElementDefinition<?> existing = datatypeAttributeNameToDefinition.get(attrName);
@@ -206,8 +192,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	}
 
 	public static String createExtensionChildName(BaseRuntimeElementDefinition<?> next) {
-		String attrName = "value" + WordUtils.capitalize(next.getName());
-		return attrName;
+		return "value" + WordUtils.capitalize(next.getName());
 	}
 
 }

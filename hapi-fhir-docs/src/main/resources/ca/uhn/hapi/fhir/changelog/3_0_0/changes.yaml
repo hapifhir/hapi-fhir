@@ -1,0 +1,234 @@
+---
+- item:
+    type: "add"
+    title: "Support for FHIR R4 (current working draft) has been <b>added</b> (in a new module called <code>hapi-fhir-structures-r4</code> ) and support for FHIR DSTU1 ( <code>hapi-fhir-structures-dstu</code> ) has been <b>removed</b> . Removing support for the legacy DSTU1 FHIR version was a difficult decision, but it allows us the opportunitity to clean up the codebase quite a bit, and remove some confusing legacy parts of the API (such as the legacy Atom Bundle class). <br/><br/> A new redesigned table of HAPI FHIR versions to FHIR version support has been added to the Download Page"
+- item:
+    type: "add"
+    title: "HAPI FHIR's modules have been restructured for more consistency and less coupling between unrelated parts of the API. <br/><br/> A new complete list of HAPI FHIR modules has been added to the Download Page. Key changes include: <ul> <li> HAPI FHIR's <b>client</b> codebase has been moved out of <code>hapi-fhir-base</code> and in to a new module called <code>hapi-fhir-client</code>. Client users now need to explicitly add this JAR to their project (and non-client users now no longer need to depend on it) </li> <li> HAPI FHIR's <b>server</b> codebase has been moved out of <code>hapi-fhir-base</code> and in to a new module called <code>hapi-fhir-server</code>. Server users now need to explicitly add this JAR to their project (and non-server users now no longer need to depend on it) </li> <li> As a result of the client and server changes above, we no longer need to produce a special Android JAR which contains the client, server (which added space but was not used) and structures. There is now a normal module called <code>hapi-fhir-android</code> which is added to your Android Gradle file along with whatever structures JARs you wish to add. See the <a href=\"https://github.com/hapifhir/hapi-fhir-android-integration-test\">Android Integration Test</a> to see a sample project using HAPI FHIR 3.0.0. <b>Note that this has been reported to work by some people but others are having issues with it!</b> In order to avoid delaying this release any further we are releasing now despite these issues. If you are an Android guru and want to help iron things out please get in touch. If not, it might be a good idea to stay on HAPI FHIR 2.5 until the next point release of the 3.x series. </li> <li> A new JAR containing FHIR utilities called <code>hapi-fhir-utilities</code> has been added. This JAR reflects the ongoing harmonization between HAPI FHIR and the FHIR RI codebases and is generally required in order to use HAPI at this point (if you are using a dependency manager such as Maven or Gradle it will be brought in to your project automatically as a dependency) </li> </ul>"
+- item:
+    type: "add"
+    title: "In order to allow the reoganizations and decoupling above to happen, a number of important classes and interfaces have been moved to new packages. A sample list of these changes is listed below. When upgrading to 3.0.0 your project may well show a number of compile errors related to missing classes. In most cases this can be resolved by simply removing the HAPI imports from your classes and asking your IDE to \"Organize Imports\" once again. This is an annoying change we do realize, but it is neccesary in order to allow the project to continue to grow. <ul> <li>IGenericClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li> <li>IRestfulClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li> <li>AddProfileTagEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li> <li>IVersionSpecificBundleFactory moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li> <li>BundleInclusionRule moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li> <li>RestSearchParameterTypeEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li> <li>EncodingEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li> <li>Constants moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li> <li>IClientInterceptor moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li> <li>ITestingUiClientFactory moved from package ca.uhn.fhir.util to package ca.uhn.fhir.rest.server.util</li> </ul>"
+- item:
+    type: "add"
+    title: "Because the Atom-based DSTU1 Bundle class has been removed from the library, users of the HAPI FHIR client must now always include a Bundle return type in search calls. For example, the following call would have worked previously: <br/> Bundle bundle = client.search().forResource(Patient.class)<br/> .where(new TokenClientParam(\"gender\").exactly().code(\"unknown\"))<br/> .prettyPrint()<br/> .execute();<br/><br/> This now needs an explicit returnBundle statement, as follows: <br/> Bundle bundle = client.search().forResource(Patient.class)<br/> .where(new TokenClientParam(\"gender\").exactly().code(\"unknown\"))<br/> .prettyPrint()<br/> .returnBundle(Bundle.class)<br/> .execute();<br/>"
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Gson (JSON Parser): 2.8.0 -&gt; 2.8.1</li> <li>Commons-lang3 (Everywhere): 3.5 -&gt; 3.6</li> <!--<li>Saxon-HE (Validator): 9.5.1-5 -&gt; 9.8.0-3</li>--> <li>Apache HttpClient (FHIR Client): 4.5.2 -&gt; 4.5.3</li> <li>Apache HttpCore (FHIR Client): 4.4.5 -&gt; 4.4.6</li> <li>Phloc Commons (Schematron Validator): 4.4.6 -&gt; 4.4.11</li> <li>Hibernate (JPA): 5.2.9 -&gt; 5.2.10</li> <li>Hibernate Search (JPA): 5.7.0 -&gt; 5.7.1</li> <li>Spring (JPA): 4.3.7 -&gt; 4.3.10</li> <li>Spring Data JPA (JPA): 1.10.4 -&gt; 1.11.6</li> <li>Guava (JPA): 22.0 -&gt; 23.0</li> <li>Thymeleaf (Testpage Overlay): 3.0.2 -&gt; 3.0.7</li> <li>OkHttp (Android): 3.4.1 -&gt; 3.8.1</li> </ul>"
+- item:
+    type: "add"
+    title: "JPA Subscription support has been refactored. A design contributed by Jeff Chung for the REST Hook subscription module has been ported so that Websocket subscriptions use it too. This design uses an interceptor to scan resources as they are processed to test whether they should be delivered to subscriptions, instead of using a polling design. <br/><br/> In addition, this scanning has been reworked to happen in a separate thread from the main storage thread, which should improve performance and scalability of systems with multiple subscriptions. Thanks to Jeff for all of his work on this!"
+- item:
+    type: "fix"
+    title: "hapi-fhir-client-okhttp project POM had dependencies on both hapi-fhir-structures-dstu2 and hapi-fhir-structures-dstu3, which meant that any project using ookhttp would import both structures JARs. This has been removed."
+- item:
+    type: "add"
+    title: "JPA server is now able to handle placeholder IDs (e.g. urn:uuid:00....000) being used in Bundle.entry.request.url as a part of the conditional URL within transactions."
+- item:
+    type: "fix"
+    title: "Schematron validator now applies invariants to resources within a Bundle, not just to the outer Bundle resource itself"
+- item:
+    type: "fix"
+    title: "Server and Client both still included Category header for resource tags even though this feature was only present in FHIR DSTU1 and was removed from the specification in FHIR DSTU2. The presence of these headers sometimes caused parsed resource instances to contain duplicate tags"
+- item:
+    issue: "667"
+    type: "fix"
+    title: "When using the AuthorizationInterceptor with the JPA server, when a client is updating a resource from A to B, the user now needs to have write permission for both A and B. This is particularly important for cases where (for example) an Observation is being updated from having a subject of Patient/A to Patient/B. If the user has write permission for Patient/B's compartment, this would previously have been allowed even if the user did not have access to write to Patient/A's compartment. Thanks to Eeva Turkka for reporting!"
+- item:
+    type: "add"
+    title: "IServerOperationInterceptor now has a new method <code>resourceUpdated(RequestDetails, IBaseResource, IBaseResource)</code> which replaces the previous <code>resourceUpdated(RequestDetails, IBaseResource)</code> . This allows interceptors to be notified of resource updates, but also see what the resource looked like before the update. This change was made to support the change above, but seems like a useful feature all around."
+- item:
+    issue: "604"
+    type: "fix"
+    title: "Allow DateParam (used in servers) to handle values with MINUTE precision. Thanks to Christian Ohr for the pull request!"
+- item:
+    type: "fix"
+    title: "Fix HTTP 500 error in JPA server if a numeric search parameter was supplied with no value, e.g. <code>GET /Observation?value-quantity=</code>"
+- item:
+    type: "add"
+    title: "JPA server transaction processing now honours the Prefer header and includes created and updated resource bodies in the response bundle if it is set appropriately."
+- item:
+    type: "add"
+    title: "Optimize queries in JPA server remove a few redundant select columns when performing searches. This provides a slight speed increase in some cases."
+- item:
+    type: "add"
+    title: "Add configuration to JPA server DaoConfig that allows a maximum number of search results to be specified. Queries will never return more than this number, which can be good for avoiding accidental performance problems in situations where large queries should not be needed"
+- item:
+    issue: "674"
+    type: "fix"
+    title: "Prevent duplicates in $everything query response in JPA server. Thanks to @vlad-ignatov for reporting!"
+- item:
+    type: "fix"
+    title: "Fix issue in calling JPA server transactions programmatically where resources are linked by object reference and not by ID where indexes were not correctly generated. This should not affect most users."
+- item:
+    issue: "678"
+    type: "fix"
+    title: "Fix issue in SubscriptionInterceptor that caused interceptor to only actually notify listeners of the first 10 subscriptions. Thanks to Jeff Chung for the pull request!"
+- item:
+    issue: "693"
+    type: "fix"
+    title: "Fix potential ConcurrentModificationException when adding subscriptions while running under heavy load. Thanks to Jeff Chung for the pull request!"
+- item:
+    type: "add"
+    title: "JPA search now uses hibernate ScrollableResults instead of plain JPA List. This should improve performance over large search results."
+- item:
+    type: "add"
+    title: "JPA servers with no paging provider configured, or with a paging provider other than DatabaseBackedPagingProvider will load all results in a single pass and keep them in memory. Using this setup is not a good idea unless you know for sure that you will never have very large queries since it means that all results will be loaded into memory, but there are valid reasons to need this and it will perform better than paging to the database in that case. This fix also resolves a NullPointerException when performing an $everything search. Thanks to Kamal Othman for reporting!"
+- item:
+    type: "fix"
+    title: "Correct an issue in JPA server on Postgres where searches with a long search URL were not able to be automatically purged from the database after they were scheduled for deletion. Thanks to Ravi Kuchi for reporting!"
+- item:
+    type: "add"
+    title: "Add an optional and configurable hard limit on the total number of meta items (tags, profiles, and security labels) on an individual resource. The default is 1000."
+- item:
+    type: "add"
+    title: "When executing a search (HTTP GET) as a nested operation in in a transaction or batch operation, the search now returns a normal page of results with a link to the next page, like any other search would. Previously the search would return a small number of results with no paging performed, so this change brings transaction and batch processing in line with other types of search."
+- item:
+    type: "add"
+    title: "JPA server no longer returns an OperationOutcome resource as the first resource in the Bundle for a response to a batch operation. This behaviour was previously present, but was not specified in the FHIR specification so it caused confusion and was inconsistent with behaviour in other servers."
+- item:
+    type: "fix"
+    title: "Fix a regression in HAPI FHIR 2.5 JPA server where executing a search in a transaction or batch operation caused an exception. Thanks to Ravi Kuchi for reporting!"
+- item:
+    type: "fix"
+    title: "Correct an issue when processing transactions in JPA server where updates and creates to resources with tags caused the tags to be created twice in the database. These duplicates were utomatically filtered upon read so this issue was not user-visible, but it coule occasionally lead to performance issues if a resource containing multiple tags was updated many times via transactions."
+- item:
+    type: "fix"
+    title: "JPA server should not allow creation of resources that have a reference to a resource ID that previously existed but is now deleted. Thanks to Artem Sopin for reporting!"
+- item:
+    type: "add"
+    title: "JpaConformanceProvider now has a configuration setting to enable and disable adding resource counts to the server metadata."
+- item:
+    type: "fix"
+    title: "Avoid a deadlock in JPA server when the RequestValidatingInterceptor is being used and a large number of resources are being created by clients at the same time."
+- item:
+    type: "fix"
+    title: "Testpage Overlay's transaction method did not work if the response Bundle contained any entries that did not contain a resource (which is often the case in more recent versions of HAPI). Thanks to Sujay R for reporting!"
+- item:
+    type: "fix"
+    title: "When the server was returning a multi-page search result where the client did not explicitly request an encoding via the _format parameter, a _format parameter was incorrectly added to the paging links in the response Bundle. This would often explicitly request XML encoding because of the browser Accept header even though this was not what the client wanted."
+- item:
+    issue: "651"
+    type: "add"
+    title: "Enhancement to ResponseHighlighterInterceptor where links in the resource body are now converted to actual clickable hyperlinks. Thanks to Eugene Lubarsky for the pull request!"
+- item:
+    type: "add"
+    title: "BanUnsupportedHttpMethodsInterceptor has been modified so that it now allows HTTP PATCH to proceed."
+- item:
+    issue: "651"
+    type: "add"
+    title: "Enhancement to ResponseHighlighterInterceptor so that it now can be configured to display the request headers and response headers, and individual lines may be highlighted."
+- item:
+    type: "fix"
+    title: "AuthorizationInterceptor did not permit PATCH operations to proceed even if the user had write access for the resource being patched."
+- item:
+    issue: "682"
+    type: "fix"
+    title: "Fix an issue in HapiWorkerContext where structure definitions are not able to be retrieved if they are referred to by their relative or logical ID. This affects profile tooling such as StructureMapUtilities. Thanks to Travis Lukach for reporting and providing a test case!"
+- item:
+    issue: "679"
+    type: "fix"
+    title: "Add link to DSTU3 JavaDocs from documentation index. Thanks to Vadim Peretokin for the pull request!"
+- item:
+    issue: "680"
+    type: "fix"
+    title: "Fix a typo in the documentation. Thanks to Saren Currie for the pull request!"
+- item:
+    issue: "689"
+    type: "add"
+    title: "Add a command line flag to the CLI tool to allow configuration of the server search result cache timeout period. Thanks to Eugene Lubarsky for the pull request!"
+- item:
+    issue: "683"
+    type: "fix"
+    title: "Correct an issue with the model classes for STU3 where any classes containing the @ChildOrder annotation (basically the conformance resources) will not correctly set the order if any of the elements are a choice type (i.e. named \"foo[x]\"). Thanks to GitHub user @CarthageKing for the pull request!"
+- item:
+    type: "fix"
+    title: "Fix potential deadlock in stale search deleting task in JPA server, as well as potential deadlock when executing transactions containing nested searches when operating under extremely heavy load."
+- item:
+    type: "add"
+    title: "JPA server transaction operations now put OperationOutcome resources resulting from actions in <code>Bundle.entry.response.outcome</code> instead of the previous <code>Bundle.entry.resource</code>"
+- item:
+    issue: "696"
+    type: "fix"
+    title: "An issue was corrected where search parameters containing negative numbers were sometimes treated as positive numbers when processing the search. Thanks to Keith Boone for reporting and suggesting a fix!"
+- item:
+    issue: "699"
+    type: "fix"
+    title: "Fix an unfortunate typo in the custom structures documentation. Thanks to Jason Owen for the PR!"
+- item:
+    issue: "686"
+    type: "fix"
+    title: "Correct an issue in the validator (DSTU3/R4) where elements were not always correctly validated if the element contained only a profiled extension. Thanks to SÃ©bastien RiviÃ¨re for the pull request!"
+- item:
+    issue: "701"
+    type: "add"
+    title: "Testing UI now has a dropdown for modifiers on token search. Thanks to GitHub user @dconlan for the pull request!"
+- item:
+    issue: "688"
+    type: "add"
+    title: "When parsing an incomplete ID with the form <code>http://my.org/Foo</code> into IdDt and IdType objects, the Foo portion will now be treated as the resource type. Previously my.org was treated as the resource type and Foo was treated as the ID. Thanks to GitHub user @CarthageKing for the pull request!"
+- item:
+    issue: "695"
+    type: "fix"
+    title: "Extensions on ID datatypes were not parsed or serialized correctly. Thanks to Stephen RiviÃ¨re for the pull request!"
+- item:
+    issue: "710"
+    type: "fix"
+    title: "Fix a bug in REST Hook Subscription interceptors which prevented subscriptions from being activated. Thanks to Jeff Chung for the pull request!"
+- item:
+    issue: "708"
+    type: "fix"
+    title: "Fix broken links in usage pattern diagram on website. Thanks to Pascal Brandt for the pull request!"
+- item:
+    issue: "706"
+    type: "fix"
+    title: "Fix incorrect FHIR Version Strings that were being outputted and verified in the client for some versions of FHIR. Thanks to Clayton Bodendein for the pull request!"
+- item:
+    type: "add"
+    title: "Add a new constructor to SimpleRequestHeaderInterceptor which allows a complete header to be passed in (including name and value in one string)"
+- item:
+    type: "add"
+    title: "REST Hook subscriptions now honour the Subscription.channel.header field"
+- item:
+    type: "add"
+    title: "DSTU2 validator has been enhanced to do a better job handling ValueSets with expansions pointing to other ValueSets"
+- item:
+    type: "fix"
+    title: "REST HOOK subscriptions now use HTTP PUT if there is a payload type specified, regardless of whether the source event was a create or an update"
+- item:
+    issue: "712"
+    type: "add"
+    title: "Add appropriate import statements for logging to JPA demo code. Thanks to Rob Hausam for the pull request!"
+- item:
+    issue: "700"
+    type: "add"
+    title: "Add some browser performance logging to ResponseHighlightingInterceptor. Thanks to Eugene Lubarsky for the pull request, and for convincing James not to optimize something that did not need optimizing!"
+- item:
+    type: "add"
+    title: "A new config property has been added to the JPA seerver DaoConfig called \"setAutoCreatePlaceholderReferenceTargets\". This property causes references to unknown resources in created/updated resources to have a placeholder target resource automatically created."
+- item:
+    type: "add"
+    title: "The server LoggingInterceptor has had a variable called <code>processingTimeMillis</code> which logs the number of milliseconds the server took to process a given request since HAPI FHIR 2.5, but this was not documented. This variable has now been documented as a part of the available features."
+- item:
+    type: "add"
+    title: "A new experimental feature has been added to the JPA server which allows you to define certain search parameter combinations as being resource keys, so that a database constraint will prevent more than one resource from having a matching pair"
+- item:
+    type: "add"
+    title: "When using the client LoggingInterceptor in non-verbose mode, the log line showing the server's response HTTP status will now also include the returned <code>Location</code> header value as well"
+- item:
+    type: "add"
+    title: "A new flag has been add to the CLI upload-definitions command \"-e\" which allows skipping particular resources"
+- item:
+    type: "add"
+    title: "An issue in JPA server has been corrected where if a CodeSystem resource was deleted, it was not possible to create a new resource with the same URI as the previous one"
+- item:
+    type: "fix"
+    title: "When uploading a Bundle resource to the server (as a collection or document, not as a transaction) the ID was incorrectly stripped from resources being saved within the Bundle. This has been corrected."
+- item:
+    type: "add"
+    title: "Subscriptions in JPA server now support \"email\" delivery type through the use of a new interceptor which handles that type"
+- item:
+    type: "add"
+    title: "JPA server can now be configured to not support <code>:missing</code> modifiers, which increases write performance since fewer indexes are written"
+- item:
+    type: "add"
+    title: "A new JPA configuration option has been added to the DaoConfig which allows support for the <code>:missing</code> search parameter modifier to be enabled or disabled, and sets the default to DISABLED. <br/><br/> Support for this parameter causes many more index rows to be inserted in the database, which has a significant impact on write performance. A future HAPI update may allow these rows to be written asynchronously in order to improve this."

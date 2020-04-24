@@ -7,7 +7,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -32,12 +31,15 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
+import ca.uhn.fhir.test.utilities.JettyUtil;
+
 public class ServeMediaResourceRawInterceptorTest {
 
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ServeMediaResourceRawInterceptorTest.class);
 	private static int ourPort;
 	private static RestfulServer ourServlet;
+    private static Server ourServer;
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private static CloseableHttpClient ourClient;
 	private static Media ourNextResponse;
@@ -47,13 +49,13 @@ public class ServeMediaResourceRawInterceptorTest {
 	@Before
 	public void before() {
 		myInterceptor = new ServeMediaResourceRawInterceptor();
-		ourServlet.registerInterceptor(myInterceptor);
+		ourServlet.getInterceptorService().registerInterceptor(myInterceptor);
 	}
 
 	@After
 	public void after() {
 		ourNextResponse = null;
-		ourServlet.unregisterInterceptor(myInterceptor);
+		ourServlet.getInterceptorService().unregisterInterceptor(myInterceptor);
 	}
 
 	@Test
@@ -127,18 +129,16 @@ public class ServeMediaResourceRawInterceptorTest {
 	}
 
 	@AfterClass
-	public static void afterClassClearContext() throws IOException {
+	public static void afterClassClearContext() throws Exception {
+        JettyUtil.closeServer(ourServer);
 		ourClient.close();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-
 		// Create server
-		ourLog.info("Using port: {}", ourPort);
-		Server ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setDefaultResponseEncoding(EncodingEnum.JSON);
@@ -146,7 +146,8 @@ public class ServeMediaResourceRawInterceptorTest {
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		// Create client
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);

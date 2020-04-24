@@ -1,23 +1,30 @@
 package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.dao.data.ISearchDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.IResultIterator;
+import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchResult;
-import ca.uhn.fhir.jpa.entity.SearchStatusEnum;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
+import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -25,28 +32,51 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 
+import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"unchecked"})
 @RunWith(MockitoJUnitRunner.class)
@@ -54,89 +84,92 @@ public class SearchCoordinatorSvcImplTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchCoordinatorSvcImplTest.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	@Captor
-	ArgumentCaptor<Iterable<SearchResult>> mySearchResultIterCaptor;
 	@Mock
 	private IFhirResourceDao<?> myCallingDao;
 	@Mock
 	private EntityManager myEntityManager;
 	private int myExpectedNumberOfSearchBuildersCreated = 2;
 	@Mock
-	private ISearchBuilder mySearchBuider;
+	private SearchBuilder mySearchBuilder;
 	@Mock
-	private ISearchDao mySearchDao;
+	private ISearchCacheSvc mySearchCacheSvc;
 	@Mock
-	private ISearchIncludeDao mySearchIncludeDao;
-	@Mock
-	private ISearchResultDao mySearchResultDao;
+	private ISearchResultCacheSvc mySearchResultCacheSvc;
 	private SearchCoordinatorSvcImpl mySvc;
 	@Mock
 	private PlatformTransactionManager myTxManager;
-	private DaoConfig myDaoConfig;
 	private Search myCurrentSearch;
 	@Mock
 	private DaoRegistry myDaoRegistry;
+	@Mock
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Mock
+	private SearchBuilderFactory mySearchBuilderFactory;
+	@Mock
+	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 
 	@After
 	public void after() {
-		verify(myCallingDao, atMost(myExpectedNumberOfSearchBuildersCreated)).newSearchBuilder();
+		System.clearProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK);
+
+		verify(mySearchBuilderFactory, atMost(myExpectedNumberOfSearchBuildersCreated)).newSearchBuilder(any(), any(), any());
 	}
 
 	@Before
 	public void before() {
+		System.setProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK, "true");
+
 		myCurrentSearch = null;
 
 		mySvc = new SearchCoordinatorSvcImpl();
 		mySvc.setEntityManagerForUnitTest(myEntityManager);
 		mySvc.setTransactionManagerForUnitTest(myTxManager);
 		mySvc.setContextForUnitTest(ourCtx);
-		mySvc.setSearchDaoForUnitTest(mySearchDao);
-		mySvc.setSearchDaoIncludeForUnitTest(mySearchIncludeDao);
-		mySvc.setSearchDaoResultForUnitTest(mySearchResultDao);
+		mySvc.setSearchCacheServicesForUnitTest(mySearchCacheSvc, mySearchResultCacheSvc);
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
+		mySvc.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
+		mySvc.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
+		mySvc.setPersistedJpaBundleProviderFactoryForUnitTest(myPersistedJpaBundleProviderFactory);
 
-		myDaoConfig = new DaoConfig();
-		mySvc.setDaoConfigForUnitTest(myDaoConfig);
+		DaoConfig daoConfig = new DaoConfig();
+		mySvc.setDaoConfigForUnitTest(daoConfig);
 
-		when(myCallingDao.newSearchBuilder()).thenReturn(mySearchBuider);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
 
-		doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock theInvocation) throws Throwable {
-				PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) theInvocation.getArguments()[0];
-				provider.setSearchCoordinatorSvc(mySvc);
-				provider.setPlatformTransactionManager(myTxManager);
-				provider.setSearchDao(mySearchDao);
-				provider.setEntityManager(myEntityManager);
-				provider.setContext(ourCtx);
-				return null;
-			}
-		}).when(myCallingDao).injectDependenciesIntoBundleProvider(any(PersistedJpaBundleProvider.class));
+		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
+
+		when(myPersistedJpaBundleProviderFactory.newInstanceFirstPage(nullable(RequestDetails.class), nullable(Search.class), nullable(SearchCoordinatorSvcImpl.SearchTask.class), nullable(ISearchBuilder.class))).thenAnswer(t->{
+			RequestDetails requestDetails = t.getArgument(0, RequestDetails.class);
+			Search search = t.getArgument(1, Search.class);
+			SearchCoordinatorSvcImpl.SearchTask searchTask = t.getArgument(2, SearchCoordinatorSvcImpl.SearchTask.class);
+			ISearchBuilder searchBuilder = t.getArgument(3, ISearchBuilder.class);
+			PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, searchTask, searchBuilder, requestDetails);
+			retVal.setTxManagerForUnitTest(myTxManager);
+			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);
+			return retVal;
+		});
+
 	}
 
-	private List<Long> createPidSequence(int from, int to) {
-		List<Long> pids = new ArrayList<Long>();
-		for (long i = from; i < to; i++) {
-			pids.add(i);
+	private List<ResourcePersistentId> createPidSequence(int to) {
+		List<ResourcePersistentId> pids = new ArrayList<>();
+		for (long i = 10; i < to; i++) {
+			pids.add(new ResourcePersistentId(i));
 		}
 		return pids;
 	}
 
 	private Answer<Void> loadPids() {
-		Answer<Void> retVal = new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock theInvocation) throws Throwable {
-				List<Long> pids = (List<Long>) theInvocation.getArguments()[0];
-				List<IBaseResource> resources = (List<IBaseResource>) theInvocation.getArguments()[1];
-				for (Long nextPid : pids) {
-					Patient pt = new Patient();
-					pt.setId(nextPid.toString());
-					resources.add(pt);
-				}
-				return null;
+		return theInvocation -> {
+			List<ResourcePersistentId> pids = (List<ResourcePersistentId>) theInvocation.getArguments()[0];
+			List<IBaseResource> resources = (List<IBaseResource>) theInvocation.getArguments()[2];
+			for (ResourcePersistentId nextPid : pids) {
+				Patient pt = new Patient();
+				pt.setId(nextPid.toString());
+				resources.add(pt);
 			}
+			return null;
 		};
-		return retVal;
 	}
 
 	@Test
@@ -144,77 +177,114 @@ public class SearchCoordinatorSvcImplTest {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<Long> pids = createPidSequence(10, 800);
+		List<ResourcePersistentId> pids = createPidSequence(800);
 		IResultIterator iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
-		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
+		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(iter);
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(null, result.size());
 
 		try {
 			result.getResources(0, 100000);
 		} catch (InternalErrorException e) {
-			assertEquals("FAILED", e.getMessage());
+			assertThat(e.getMessage(), containsString("FAILED"));
+			assertThat(e.getMessage(), containsString("at ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImplTest"));
 		}
 
 	}
 
 	@Test
 	public void testAsyncSearchLargeResultSetBigCountSameCoordinator() {
+		List<ResourcePersistentId> allResults = new ArrayList<>();
+		doAnswer(t -> {
+			List<ResourcePersistentId> oldResults = t.getArgument(1, List.class);
+			List<ResourcePersistentId> newResults = t.getArgument(2, List.class);
+			ourLog.info("Saving {} new results - have {} old results", newResults.size(), oldResults.size());
+			assertEquals(allResults.size(), oldResults.size());
+			allResults.addAll(newResults);
+			return null;
+		}).when(mySearchResultCacheSvc).storeResults(any(), anyList(), anyList());
+
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<Long> pids = createPidSequence(10, 800);
+		List<ResourcePersistentId> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 1);
-		when(mySearchBuider.createQuery(any(), any(String.class))).thenReturn(iter);
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
+		when(mySearchBuilder.createQuery(any(), any(), any())).thenReturn(iter);
+		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		when(mySearchResultDao.findWithSearchUuid(any(), any())).thenAnswer(t -> {
-			List<Long> returnedValues = iter.getReturnedValues();
-			Pageable page = (Pageable) t.getArguments()[1];
-			int offset = (int) page.getOffset();
-			int end = (int) (page.getOffset() + page.getPageSize());
-			end = Math.min(end, returnedValues.size());
-			offset = Math.min(offset, returnedValues.size());
-			ourLog.info("findWithSearchUuid {} - {} out of {} values", offset, end, returnedValues.size());
-			return new PageImpl<>(returnedValues.subList(offset, end));
-		});
-
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
-		assertNotNull(result.getUuid());
-		assertEquals(null, result.size());
-
-		List<IBaseResource> resources;
-
-		when(mySearchDao.save(any())).thenAnswer(t -> {
-			Search search = (Search) t.getArguments()[0];
+		when(mySearchCacheSvc.save(any())).thenAnswer(t -> {
+			Search search = t.getArgument(0, Search.class);
 			myCurrentSearch = search;
 			return search;
 		});
-		when(mySearchDao.findByUuid(any())).thenAnswer(t -> myCurrentSearch);
-		IFhirResourceDao dao = myCallingDao;
-		when(myDaoRegistry.getResourceDao(any(String.class))).thenReturn(dao);
 
-		resources = result.getResources(0, 100000);
+		// Do all the stubbing before starting any work, since we want to avoid threading issues
+
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		assertNotNull(result.getUuid());
+		assertEquals(null, result.size());
+
+		List<IBaseResource> resources = result.getResources(0, 100000);
 		assertEquals(790, resources.size());
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("799", resources.get(789).getIdElement().getValueAsString());
 
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
-		verify(mySearchDao, atLeastOnce()).save(searchCaptor.capture());
-
-		verify(mySearchResultDao, atLeastOnce()).saveAll(mySearchResultIterCaptor.capture());
-		List<SearchResult> allResults = new ArrayList<>();
-		for (Iterable<SearchResult> next : mySearchResultIterCaptor.getAllValues()) {
-			allResults.addAll(Lists.newArrayList(next));
-		}
+		verify(mySearchCacheSvc, atLeastOnce()).save(searchCaptor.capture());
 
 		assertEquals(790, allResults.size());
-		assertEquals(10, allResults.get(0).getResourcePid().longValue());
-		assertEquals(799, allResults.get(789).getResourcePid().longValue());
+		assertEquals(10, allResults.get(0).getIdAsLong().longValue());
+		assertEquals(799, allResults.get(789).getIdAsLong().longValue());
 
 		myExpectedNumberOfSearchBuildersCreated = 4;
+	}
+
+
+	@Test
+	public void testFetchResourcesWhereSearchIsDeletedPartWayThroughProcessing() {
+
+		myCurrentSearch = new Search();
+		myCurrentSearch.setStatus(SearchStatusEnum.PASSCMPLET);
+		myCurrentSearch.setNumFound(10);
+
+		when(mySearchCacheSvc.fetchByUuid(any())).thenAnswer(t -> Optional.ofNullable(myCurrentSearch));
+
+		when(mySearchCacheSvc.tryToMarkSearchAsInProgress(any())).thenAnswer(t -> {
+			when(mySearchCacheSvc.fetchByUuid(any())).thenAnswer(t2 -> Optional.empty());
+			return Optional.empty();
+		});
+
+		try {
+			mySvc.getResources("1234-5678", 0, 100, null);
+			fail();
+		} catch (ResourceGoneException e) {
+			assertEquals("Search ID \"1234-5678\" does not exist and may have expired", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testFetchResourcesTimesOut() {
+
+		mySvc.setMaxMillisToWaitForRemoteResultsForUnitTest(10);
+
+		myCurrentSearch = new Search();
+		myCurrentSearch.setStatus(SearchStatusEnum.PASSCMPLET);
+		myCurrentSearch.setNumFound(10);
+
+		when(mySearchCacheSvc.fetchByUuid(any())).thenAnswer(t -> {
+			sleepAtLeast(100);
+			return Optional.ofNullable(myCurrentSearch);
+		});
+
+		try {
+			mySvc.getResources("1234-5678", 0, 100, null);
+			fail();
+		} catch (InternalErrorException e) {
+			assertThat(e.getMessage(), containsString("Request timed out"));
+		}
 	}
 
 	@Test
@@ -222,13 +292,13 @@ public class SearchCoordinatorSvcImplTest {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<Long> pids = createPidSequence(10, 800);
+		List<ResourcePersistentId> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
+		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(iter);
 
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
+		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(null, result.size());
 
@@ -241,6 +311,47 @@ public class SearchCoordinatorSvcImplTest {
 
 	}
 
+	@Test
+	public void testCancelActiveSearches() throws InterruptedException {
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("name", new StringParam("ANAME"));
+
+		List<ResourcePersistentId> pids = createPidSequence(800);
+		SlowIterator iter = new SlowIterator(pids.iterator(), 500);
+		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(iter);
+
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		assertNotNull(result.getUuid());
+
+		CountDownLatch completionLatch = new CountDownLatch(1);
+		Runnable taskStarter = () -> {
+			try {
+				ourLog.info("About to pull the first resource");
+				List<IBaseResource> resources = result.getResources(0, 1);
+				ourLog.info("Done pulling the first resource");
+		assertEquals(1, resources.size());
+			} finally {
+				completionLatch.countDown();
+			}
+		};
+		new Thread(taskStarter).start();
+
+		await().until(()->iter.getCountReturned() >= 3);
+
+		ourLog.info("About to cancel all searches");
+		mySvc.cancelAllActiveSearches();
+		ourLog.info("Done cancelling all searches");
+
+		try {
+			result.getResources(10, 20);
+		} catch (InternalErrorException e) {
+			assertThat(e.getMessage(), containsString("Abort has been requested"));
+			assertThat(e.getMessage(), containsString("at ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl"));
+		}
+
+		completionLatch.await(10, TimeUnit.SECONDS);
+	}
+
 	/**
 	 * Subsequent requests for the same search (i.e. a request for the next
 	 * page) within the same JVM will not use the original bundle provider
@@ -250,18 +361,21 @@ public class SearchCoordinatorSvcImplTest {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<Long> pids = createPidSequence(10, 800);
+		List<ResourcePersistentId> pids = createPidSequence(800);
 		IResultIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
-		when(mySearchDao.save(any())).thenAnswer(t -> t.getArguments()[0]);
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
+		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(iter);
+		when(mySearchCacheSvc.save(any())).thenAnswer(t ->{
+			ourLog.info("Saving search");
+			return t.getArgument( 0, Search.class);
+		});
+		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(null, result.size());
 
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
-		verify(mySearchDao, atLeast(1)).save(searchCaptor.capture());
+		verify(mySearchCacheSvc, atLeast(1)).save(searchCaptor.capture());
 		Search search = searchCaptor.getValue();
 		assertEquals(SearchTypeEnum.SEARCH, search.getSearchType());
 
@@ -274,13 +388,13 @@ public class SearchCoordinatorSvcImplTest {
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("19", resources.get(9).getIdElement().getValueAsString());
 
-		when(mySearchDao.findByUuid(eq(result.getUuid()))).thenReturn(search);
+		when(mySearchCacheSvc.fetchByUuid(eq(result.getUuid()))).thenReturn(Optional.of(search));
 
 		/*
 		 * Now call from a new bundle provider. This simulates a separate HTTP
 		 * client request coming in.
 		 */
-		provider = new PersistedJpaBundleProvider(result.getUuid(), myCallingDao);
+		provider = newPersistedJpaBundleProvider(result.getUuid());
 		resources = provider.getResources(10, 20);
 		assertEquals(10, resources.size());
 		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
@@ -289,20 +403,21 @@ public class SearchCoordinatorSvcImplTest {
 		myExpectedNumberOfSearchBuildersCreated = 4;
 	}
 
+
 	@Test
 	public void testAsyncSearchSmallResultSetSameCoordinator() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<Long> pids = createPidSequence(10, 100);
+		List<ResourcePersistentId> pids = createPidSequence(100);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
+		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(iter);
 
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
+		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
-		assertEquals(90, result.size().intValue());
+		assertEquals(90, Objects.requireNonNull(result.size()).intValue());
 
 		List<IBaseResource> resources = result.getResources(0, 30);
 		assertEquals(30, resources.size());
@@ -314,7 +429,9 @@ public class SearchCoordinatorSvcImplTest {
 	@Test
 	public void testGetPage() {
 		Pageable page = SearchCoordinatorSvcImpl.toPage(50, 73);
+		assert page != null;
 		assertEquals(50, page.getOffset());
+		assertEquals(23, page.getPageSize());
 	}
 
 	@Test
@@ -326,50 +443,48 @@ public class SearchCoordinatorSvcImplTest {
 		search.setSearchType(SearchTypeEnum.SEARCH);
 		search.setResourceType("Patient");
 
-		when(mySearchDao.findByUuid(eq(uuid))).thenReturn(search);
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
+		when(mySearchCacheSvc.fetchByUuid(eq(uuid))).thenReturn(Optional.of(search));
+		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		PersistedJpaBundleProvider provider;
 		List<IBaseResource> resources;
 
-		new Thread() {
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// ignore
+		new Thread(() -> {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// ignore
+			}
+
+			when(mySearchResultCacheSvc.fetchResultPids(any(Search.class), anyInt(), anyInt())).thenAnswer(theInvocation -> {
+				ArrayList<ResourcePersistentId> results = new ArrayList<>();
+				for (long i = theInvocation.getArgument(1, Integer.class); i < theInvocation.getArgument(2, Integer.class); i++) {
+					Long nextPid = i + 10L;
+					results.add(new ResourcePersistentId(nextPid));
 				}
 
-				when(mySearchResultDao.findWithSearchUuid(any(Search.class), any(Pageable.class))).thenAnswer(new Answer<Page<Long>>() {
-					@Override
-					public Page<Long> answer(InvocationOnMock theInvocation) throws Throwable {
-						Pageable page = (Pageable) theInvocation.getArguments()[1];
-
-						ArrayList<Long> results = new ArrayList<Long>();
-						int max = (page.getPageNumber() * page.getPageSize()) + page.getPageSize();
-						for (long i = page.getOffset(); i < max; i++) {
-							results.add(i + 10L);
-						}
-
-						return new PageImpl<Long>(results);
-					}
-				});
-				search.setStatus(SearchStatusEnum.FINISHED);
-			}
-		}.start();
+				return results;
+			});
+			search.setStatus(SearchStatusEnum.FINISHED);
+		}).start();
 
 		/*
 		 * Now call from a new bundle provider. This simulates a separate HTTP
 		 * client request coming in.
 		 */
-		provider = new PersistedJpaBundleProvider(uuid, myCallingDao);
+		provider = newPersistedJpaBundleProvider(uuid);
 		resources = provider.getResources(10, 20);
 		assertEquals(10, resources.size());
 		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("29", resources.get(9).getIdElement().getValueAsString());
 
-		provider = new PersistedJpaBundleProvider(uuid, myCallingDao);
+		provider = new PersistedJpaBundleProvider(null, uuid);
+		provider.setTxManagerForUnitTest(myTxManager);
+		provider.setSearchCacheSvcForUnitTest(mySearchCacheSvc);
+		provider.setContext(ourCtx);
+		provider.setDaoRegistryForUnitTest(myDaoRegistry);
+		provider.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
+		provider.setSearchCoordinatorSvcForUnitTest(mySvc);
 		resources = provider.getResources(20, 40);
 		assertEquals(20, resources.size());
 		assertEquals("30", resources.get(0).getIdElement().getValueAsString());
@@ -378,20 +493,33 @@ public class SearchCoordinatorSvcImplTest {
 		myExpectedNumberOfSearchBuildersCreated = 3;
 	}
 
+	@Nonnull
+	private PersistedJpaBundleProvider newPersistedJpaBundleProvider(String theUuid) {
+		PersistedJpaBundleProvider provider;
+		provider = new PersistedJpaBundleProvider(null, theUuid);
+		provider.setTxManagerForUnitTest(myTxManager);
+		provider.setSearchCacheSvcForUnitTest(mySearchCacheSvc);
+		provider.setContext(ourCtx);
+		provider.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
+		provider.setDaoRegistryForUnitTest(myDaoRegistry);
+		provider.setSearchCoordinatorSvcForUnitTest(mySvc);
+		return provider;
+	}
+
 	@Test
 	public void testSynchronousSearch() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		params.add("name", new StringParam("ANAME"));
 
-		List<Long> pids = createPidSequence(10, 800);
-		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(new ResultIterator(pids.iterator()));
+		List<ResourcePersistentId> pids = createPidSequence(800);
+		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(new ResultIterator(pids.iterator()));
 
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(eq(pids), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
+		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNull(result.getUuid());
-		assertEquals(790, result.size().intValue());
+		assertEquals(790, Objects.requireNonNull(result.size()).intValue());
 
 		List<IBaseResource> resources = result.getResources(0, 10000);
 		assertEquals(790, resources.size());
@@ -405,15 +533,15 @@ public class SearchCoordinatorSvcImplTest {
 		params.setLoadSynchronousUpTo(100);
 		params.add("name", new StringParam("ANAME"));
 
-		List<Long> pids = createPidSequence(10, 800);
-		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(new ResultIterator(pids.iterator()));
+		List<ResourcePersistentId> pids = createPidSequence(800);
+		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class))).thenReturn(new ResultIterator(pids.iterator()));
 
-		pids = createPidSequence(10, 110);
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(eq(pids), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
+		pids = createPidSequence(110);
+		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(eq(pids), any(Collection.class), any(List.class), anyBoolean(), nullable(RequestDetails.class));
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNull(result.getUuid());
-		assertEquals(100, result.size().intValue());
+		assertEquals(100, Objects.requireNonNull(result.size()).intValue());
 
 		List<IBaseResource> resources = result.getResources(0, 10000);
 		assertEquals(100, resources.size());
@@ -421,12 +549,68 @@ public class SearchCoordinatorSvcImplTest {
 		assertEquals("109", resources.get(99).getIdElement().getValueAsString());
 	}
 
-	public static class FailAfterNIterator extends BaseIterator<Long> implements IResultIterator {
+	/**
+	 * Simulate results being removed from the search result cache but not the search cache
+	 */
+	@Test
+	public void testFetchResultsReturnsNull() {
+
+		Search search = new Search();
+		search.setStatus(SearchStatusEnum.FINISHED);
+		search.setNumFound(100);
+		search.setTotalCount(100);
+		when(mySearchCacheSvc.fetchByUuid(eq("0000-1111"))).thenReturn(Optional.of(search));
+
+		when(mySearchResultCacheSvc.fetchResultPids(any(), anyInt(), anyInt())).thenReturn(null);
+
+		try {
+			mySvc.getResources("0000-1111", 0, 10, null);
+			fail();
+		}  catch (ResourceGoneException e) {
+			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
+		}
+
+	}
+
+	/**
+	 * Simulate results being removed from the search result cache but not the search cache
+	 */
+	@Test
+	public void testFetchAllResultsReturnsNull() {
+
+		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myCallingDao);
+		when(myCallingDao.getContext()).thenReturn(ourCtx);
+
+		Search search = new Search();
+		search.setUuid("0000-1111");
+		search.setResourceType("Patient");
+		search.setStatus(SearchStatusEnum.PASSCMPLET);
+		search.setNumFound(5);
+		search.setSearchParameterMap(new SearchParameterMap());
+		when(mySearchCacheSvc.fetchByUuid(eq("0000-1111"))).thenReturn(Optional.of(search));
+
+		when(mySearchCacheSvc.tryToMarkSearchAsInProgress(any())).thenAnswer(t->{
+			search.setStatus(SearchStatusEnum.LOADING);
+			return Optional.of(search);
+		});
+
+		when(mySearchResultCacheSvc.fetchAllResultPids(any())).thenReturn(null);
+
+		try {
+			mySvc.getResources("0000-1111", 0, 10, null);
+			fail();
+		}  catch (ResourceGoneException e) {
+			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
+		}
+
+	}
+
+	public static class FailAfterNIterator extends BaseIterator<ResourcePersistentId> implements IResultIterator {
 
 		private int myCount;
 		private IResultIterator myWrap;
 
-		public FailAfterNIterator(IResultIterator theWrap, int theCount) {
+		FailAfterNIterator(IResultIterator theWrap, int theCount) {
 			myWrap = theWrap;
 			myCount = theCount;
 		}
@@ -437,7 +621,7 @@ public class SearchCoordinatorSvcImplTest {
 		}
 
 		@Override
-		public Long next() {
+		public ResourcePersistentId next() {
 			myCount--;
 			if (myCount == 0) {
 				throw new NullPointerException("FAILED");
@@ -449,13 +633,24 @@ public class SearchCoordinatorSvcImplTest {
 		public int getSkippedCount() {
 			return myWrap.getSkippedCount();
 		}
+
+		@Override
+		public int getNonSkippedCount() {
+			return myCount;
+		}
+
+		@Override
+		public void close() {
+			// nothing
+		}
 	}
 
-	public static class ResultIterator extends BaseIterator<Long> implements IResultIterator {
+	public static class ResultIterator extends BaseIterator<ResourcePersistentId> implements IResultIterator {
 
-		private final Iterator<Long> myWrap;
+		private final Iterator<ResourcePersistentId> myWrap;
+		private int myCount;
 
-		public ResultIterator(Iterator<Long> theWrap) {
+		ResultIterator(Iterator<ResourcePersistentId> theWrap) {
 			myWrap = theWrap;
 		}
 
@@ -465,13 +660,24 @@ public class SearchCoordinatorSvcImplTest {
 		}
 
 		@Override
-		public Long next() {
+		public ResourcePersistentId next() {
+			myCount++;
 			return myWrap.next();
 		}
 
 		@Override
 		public int getSkippedCount() {
 			return 0;
+		}
+
+		@Override
+		public int getNonSkippedCount() {
+			return myCount;
+		}
+
+		@Override
+		public void close() {
+			// nothing
 		}
 	}
 
@@ -481,27 +687,22 @@ public class SearchCoordinatorSvcImplTest {
 	 * <p>
 	 * Don't use it in real code!
 	 */
-	public static class SlowIterator extends BaseIterator<Long> implements IResultIterator {
+	public static class SlowIterator extends BaseIterator<ResourcePersistentId> implements IResultIterator {
 
 		private static final Logger ourLog = LoggerFactory.getLogger(SlowIterator.class);
 		private final IResultIterator myResultIteratorWrap;
 		private int myDelay;
-		private Iterator<Long> myWrap;
-		private List<Long> myReturnedValues = new ArrayList<>();
+		private Iterator<ResourcePersistentId> myWrap;
+		private List<ResourcePersistentId> myReturnedValues = new ArrayList<>();
+		private AtomicInteger myCountReturned = new AtomicInteger(0);
 
-		public SlowIterator(Iterator<Long> theWrap, int theDelay) {
+		SlowIterator(Iterator<ResourcePersistentId> theWrap, int theDelay) {
 			myWrap = theWrap;
 			myDelay = theDelay;
 			myResultIteratorWrap = null;
 		}
 
-		public SlowIterator(IResultIterator theWrap, int theDelay) {
-			myWrap = theWrap;
-			myResultIteratorWrap = theWrap;
-			myDelay = theDelay;
-		}
-
-		public List<Long> getReturnedValues() {
+		List<ResourcePersistentId> getReturnedValues() {
 			return myReturnedValues;
 		}
 
@@ -514,15 +715,20 @@ public class SearchCoordinatorSvcImplTest {
 			return retVal;
 		}
 
+		public int getCountReturned() {
+			return myCountReturned.get();
+		}
+
 		@Override
-		public Long next() {
+		public ResourcePersistentId next() {
 			try {
 				Thread.sleep(myDelay);
 			} catch (InterruptedException e) {
 				// ignore
 			}
-			Long retVal = myWrap.next();
+			ResourcePersistentId retVal = myWrap.next();
 			myReturnedValues.add(retVal);
+			myCountReturned.incrementAndGet();
 			return retVal;
 		}
 
@@ -535,6 +741,15 @@ public class SearchCoordinatorSvcImplTest {
 			}
 		}
 
+		@Override
+		public int getNonSkippedCount() {
+			return 0;
+		}
+
+		@Override
+		public void close() {
+			// nothing
+		}
 	}
 
 	@AfterClass

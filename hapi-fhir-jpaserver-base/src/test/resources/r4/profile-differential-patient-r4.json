@@ -1,0 +1,80 @@
+{
+	"resourceType":"StructureDefinition",
+	"url":"http://example.com/fhir/StructureDefinition/patient-1a-extensions",
+	"version":"0.1",
+	"name":"PatientWithExtensions",
+	"title":"Patient Profile 1 - 1a Extensions",
+	"status":"active",
+	"experimental":false,
+	"date":"2019",
+	"publisher":"Chris Grenz",
+	"contact": [
+		{
+			"telecom": [
+				{
+					"system":"email",
+					"value":"chris.grenz@thoughtworks.com"
+				}
+			]
+		}
+	],
+	"description":"Profile of Patient with extensions",
+	"copyright":"(c)2019 Chris Grenz into public domain",
+	"fhirVersion":"4.0.0",
+	"kind":"resource",
+	"abstract":false,
+	"type":"Patient",
+	"baseDefinition":"http://hl7.org/fhir/StructureDefinition/Patient",
+	"derivation":"constraint",
+	"differential":{
+		"element": [
+			{
+				"id":"Patient",
+				"path":"Patient"
+			},
+			{
+				"id":"Patient.extension",
+				"path":"Patient.extension"
+			},
+			{
+				"id":"Patient.extension:doNotCall",
+				"path":"Patient.extension",
+				"sliceName":"doNotCall",
+				"type": [
+					{
+						"code":"Extension",
+						"profile": [
+							"http://example.com/fhir/StructureDefinition/patient-donotcall"
+						]
+					}
+				]
+			},
+			{
+				"id":"Patient.extension:legalCase",
+				"path":"Patient.extension",
+				"sliceName":"legalCase",
+				"type": [
+					{
+						"code":"Extension",
+						"profile": [
+							"http://example.com/fhir/StructureDefinition/patient-legalcase"
+						]
+					}
+				]
+			},
+			{
+				"id":"Patient.extension:legalCase.value[x]:valueBoolean.extension:leadCounsel",
+				"path":"Patient.extension.valueBoolean.extension",
+				"sliceName":"leadCounsel",
+				"type": [
+					{
+						"code":"Extension",
+						"profile": [
+							"http://example.com/fhir/StructureDefinition/patient-legalcase-leadcounsel"
+						]
+					}
+				]
+			}
+		]
+	}
+}

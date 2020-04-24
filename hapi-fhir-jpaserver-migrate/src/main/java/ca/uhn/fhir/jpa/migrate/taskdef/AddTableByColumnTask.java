@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,9 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,26 +31,37 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
+public class AddTableByColumnTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddTableByColumnTask.class);
 
 	private List<AddColumnTask> myAddColumnTasks = new ArrayList<>();
-	private String myPkColumn;
+	private List<String> myPkColumns;
 
-	public void addAddColumnTask(AddColumnTask theTask) {
-		myAddColumnTasks.add(theTask);
-	}
-
-	public void setPkColumn(String thePkColumn) {
-		myPkColumn = thePkColumn;
+	public AddTableByColumnTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void validate() {
+		super.validate();
+		setDescription("Add table " + getTableName());
+	}
+
+	public void addAddColumnTask(AddColumnTask theTask) {
+		Validate.notNull(theTask);
+		myAddColumnTasks.add(theTask);
+	}
+
+	public void setPkColumns(List<String> thePkColumns) {
+		myPkColumns = thePkColumns;
+	}
+
+	@Override
+	public void doExecute() throws SQLException {
 
 		if (JdbcUtils.getTableNames(getConnectionProperties()).contains(getTableName())) {
-			ourLog.info("Already have table named {} - No action performed", getTableName());
+			logInfo(ourLog, "Already have table named {} - No action performed", getTableName());
 			return;
 		}
 
@@ -68,7 +82,12 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 		}
 
 		sb.append(" PRIMARY KEY (");
-		sb.append(myPkColumn);
+		for (int i = 0; i < myPkColumns.size(); i++) {
+			if (i > 0) {
+				sb.append(", ");
+			}
+			sb.append(myPkColumns.get(i));
+		}
 		sb.append(")");
 
 		sb.append(" ) ");
@@ -82,10 +101,26 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 			case POSTGRES_9_4:
 			case ORACLE_12C:
 			case MSSQL_2012:
+			case H2_EMBEDDED:
 				break;
 		}
 
 		executeSql(getTableName(), sb.toString());
 
+	}
+
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		super.generateEquals(theBuilder, theOtherObject);
+		AddTableByColumnTask otherObject = (AddTableByColumnTask) theOtherObject;
+		theBuilder.append(myAddColumnTasks, otherObject.myAddColumnTasks);
+		theBuilder.append(myPkColumns, otherObject.myPkColumns);
+	}
+
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myAddColumnTasks);
+		theBuilder.append(myPkColumns);
 	}
 }

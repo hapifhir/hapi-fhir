@@ -61,7 +61,7 @@ public class ClientServerValidationDstu3Test {
 
 	@Test
 	public void testServerReturnsAppropriateVersionDstu3() throws Exception {
-		String appropriateFhirVersion = "3.0.1";
+		String appropriateFhirVersion = "3.0.2";
 		assertThat(appropriateFhirVersion, is(FhirVersionEnum.DSTU3.getFhirVersionString()));
 		CapabilityStatement conf = new CapabilityStatement();
 		conf.setFhirVersion(appropriateFhirVersion);
@@ -73,7 +73,7 @@ public class ClientServerValidationDstu3Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public InputStream answer(InvocationOnMock theInvocation) {
 				if (myFirstResponse) {
 					myFirstResponse=false;
 					return new ReaderInputStream(new StringReader(confResource), Charset.forName("UTF-8"));
@@ -125,7 +125,7 @@ public class ClientServerValidationDstu3Test {
 
 	@Test
 	public void testServerReturnsRightVersionDstu3() throws Exception {
-		String appropriateFhirVersion = "3.0.1";
+		String appropriateFhirVersion = "3.0.2";
 		assertThat(appropriateFhirVersion, is(FhirVersionEnum.DSTU3.getFhirVersionString()));
 		CapabilityStatement conf = new CapabilityStatement();
 		conf.setFhirVersion(appropriateFhirVersion);

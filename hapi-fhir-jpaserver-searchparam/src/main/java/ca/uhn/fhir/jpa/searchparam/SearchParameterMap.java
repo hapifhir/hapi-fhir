@@ -18,6 +18,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -26,14 +27,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,7 +46,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchParameterMap implements Serializable {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterMap.class);
 
-	private final HashMap<String, List<List<? extends IQueryParameterType>>> mySearchParameterMap = new LinkedHashMap<>();
+	private final HashMap<String, List<List<IQueryParameterType>>> mySearchParameterMap = new LinkedHashMap<>();
 
 	private static final long serialVersionUID = 1L;
 
@@ -59,6 +60,7 @@ public class SearchParameterMap implements Serializable {
 	private SortSpec mySort;
 	private SummaryEnum mySummaryMode;
 	private SearchTotalModeEnum mySearchTotalMode;
+	private QuantityParam myNearDistanceParam;
 
 	/**
 	 * Constructor
@@ -107,11 +109,11 @@ public class SearchParameterMap implements Serializable {
 			if (next == null) {
 				continue;
 			}
-			get(theName).add(next.getValuesAsQueryTokens());
+			get(theName).add((List<IQueryParameterType>) next.getValuesAsQueryTokens());
 		}
 	}
 
-		public void add(String theName, IQueryParameterOr<?> theOr) {
+	public void add(String theName, IQueryParameterOr<?> theOr) {
 		if (theOr == null) {
 			return;
 		}
@@ -119,10 +121,10 @@ public class SearchParameterMap implements Serializable {
 			put(theName, new ArrayList<>());
 		}
 
-		get(theName).add(theOr.getValuesAsQueryTokens());
+		get(theName).add((List<IQueryParameterType>) theOr.getValuesAsQueryTokens());
 	}
 
-	public Collection<List<List<? extends IQueryParameterType>>> values() {
+	public Collection<List<List<IQueryParameterType>>> values() {
 		return mySearchParameterMap.values();
 	}
 
@@ -272,8 +274,8 @@ public class SearchParameterMap implements Serializable {
 	 * This will only return true if all parameters have no modifier of any kind
 	 */
 	public boolean isAllParametersHaveNoModifier() {
-		for (List<List<? extends IQueryParameterType>> nextParamName : values()) {
-			for (List<? extends IQueryParameterType> nextAnd : nextParamName) {
+		for (List<List<IQueryParameterType>> nextParamName : values()) {
+			for (List<IQueryParameterType> nextAnd : nextParamName) {
 				for (IQueryParameterType nextOr : nextAnd) {
 					if (isNotBlank(nextOr.getQueryParameterQualifier())) {
 						return false;
@@ -319,7 +321,7 @@ public class SearchParameterMap implements Serializable {
 		Collections.sort(keys);
 		for (String nextKey : keys) {
 
-			List<List<? extends IQueryParameterType>> nextValuesAndsIn = get(nextKey);
+			List<List<IQueryParameterType>> nextValuesAndsIn = get(nextKey);
 			List<List<IQueryParameterType>> nextValuesAndsOut = new ArrayList<>();
 
 			for (List<? extends IQueryParameterType> nextValuesAndIn : nextValuesAndsIn) {
@@ -373,7 +375,6 @@ public class SearchParameterMap implements Serializable {
 						b.append(',');
 					}
 					String valueAsQueryToken = nextValueOr.getValueAsQueryToken(theCtx);
-//					b.append(ParameterUtil.escapeAndUrlEncode(valueAsQueryToken));
 					b.append(UrlUtil.escapeUrlParam(valueAsQueryToken));
 				}
 			}
@@ -420,12 +421,20 @@ public class SearchParameterMap implements Serializable {
 			b.append(getCount());
 		}
 
-		// Summary
+		// Summary mode (_summary)
 		if (getSummaryMode() != null) {
 			addUrlParamSeparator(b);
 			b.append(Constants.PARAM_SUMMARY);
 			b.append('=');
 			b.append(getSummaryMode().getCode());
+		}
+
+		// Search count mode (_total)
+		if (getSearchTotalMode() != null) {
+			addUrlParamSeparator(b);
+			b.append(Constants.PARAM_SEARCH_TOTAL_MODE);
+			b.append('=');
+			b.append(getSearchTotalMode().getCode());
 		}
 
 		if (b.length() == 0) {
@@ -439,7 +448,7 @@ public class SearchParameterMap implements Serializable {
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		if (isEmpty() == false) {
-			b.append("params", super.toString());
+			b.append("params", mySearchParameterMap);
 		}
 		if (getIncludes().isEmpty() == false) {
 			b.append("includes", getIncludes());
@@ -447,45 +456,41 @@ public class SearchParameterMap implements Serializable {
 		return b.toString();
 	}
 
+
 	public void clean() {
-		for (Map.Entry<String, List<List<? extends IQueryParameterType>>> nextParamEntry : this.entrySet()) {
+		for (Map.Entry<String, List<List<IQueryParameterType>>> nextParamEntry : this.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
-			List<List<? extends IQueryParameterType>> andOrParams = nextParamEntry.getValue();
-			clean(nextParamName, andOrParams);
+			List<List<IQueryParameterType>> andOrParams = nextParamEntry.getValue();
+			cleanParameter(nextParamName, andOrParams);
 		}
 	}
 
 	/*
-	 * Filter out
+	 * Given a particular named parameter, e.g. `name`, iterate over AndOrParams and remove any which are empty.
 	 */
-	private void clean(String theParamName, List<List<? extends IQueryParameterType>> theAndOrParams) {
-		for (int andListIdx = 0; andListIdx < theAndOrParams.size(); andListIdx++) {
-			List<? extends IQueryParameterType> nextOrList = theAndOrParams.get(andListIdx);
+	private void cleanParameter(String theParamName, List<List<IQueryParameterType>> theAndOrParams) {
+		theAndOrParams
+			.forEach(
+				orList -> {
+					List<IQueryParameterType> emptyParameters = orList.stream()
+						.filter(nextOr -> nextOr.getMissing() == null)
+						.filter(nextOr -> nextOr instanceof QuantityParam)
+						.filter(nextOr -> isBlank(((QuantityParam) nextOr).getValueAsString()))
+						.collect(Collectors.toList());
 
-			for (int orListIdx = 0; orListIdx < nextOrList.size(); orListIdx++) {
-				IQueryParameterType nextOr = nextOrList.get(orListIdx);
-				boolean hasNoValue = false;
-				if (nextOr.getMissing() != null) {
-					continue;
-				}
-				if (nextOr instanceof QuantityParam) {
-					if (isBlank(((QuantityParam) nextOr).getValueAsString())) {
-						hasNoValue = true;
-					}
-				}
-
-				if (hasNoValue) {
 					ourLog.debug("Ignoring empty parameter: {}", theParamName);
-					nextOrList.remove(orListIdx);
-					orListIdx--;
+					orList.removeAll(emptyParameters);
 				}
-			}
+			);
+		theAndOrParams.removeIf(List::isEmpty);
+	}
 
-			if (nextOrList.isEmpty()) {
-				theAndOrParams.remove(andListIdx);
-				andListIdx--;
-			}
-		}
+	public void setNearDistanceParam(QuantityParam theQuantityParam) {
+		myNearDistanceParam = theQuantityParam;
+	}
+
+	public QuantityParam getNearDistanceParam() {
+		return myNearDistanceParam;
 	}
 
 	public enum EverythingModeEnum {
@@ -603,11 +608,11 @@ public class SearchParameterMap implements Serializable {
 
 	// Wrapper methods
 
-	public List<List<? extends IQueryParameterType>> get(String theName) {
+	public List<List<IQueryParameterType>> get(String theName) {
 		return mySearchParameterMap.get(theName);
 	}
 
-	private void put(String theName, List<List<? extends IQueryParameterType>> theParams) {
+	private void put(String theName, List<List<IQueryParameterType>> theParams) {
 		mySearchParameterMap.put(theName, theParams);
 	}
 
@@ -623,11 +628,15 @@ public class SearchParameterMap implements Serializable {
 		return mySearchParameterMap.isEmpty();
 	}
 
-	public Set<Map.Entry<String, List<List<? extends IQueryParameterType>>>> entrySet() {
+	public Set<Map.Entry<String, List<List<IQueryParameterType>>>> entrySet() {
 		return mySearchParameterMap.entrySet();
 	}
 
-	public List<List<? extends IQueryParameterType>> remove(String theName) {
+	public List<List<IQueryParameterType>> remove(String theName) {
 		return mySearchParameterMap.remove(theName);
+	}
+
+	public int size() {
+		return mySearchParameterMap.size();
 	}
 }

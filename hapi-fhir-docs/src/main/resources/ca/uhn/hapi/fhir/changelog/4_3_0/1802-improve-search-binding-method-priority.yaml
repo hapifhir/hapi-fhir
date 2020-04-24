@@ -1,0 +1,8 @@
+---
+type: add
+issue: 1802
+title: "In a plain server, if a Resource Provider class had two methods with the same parameter names
+  (as specified in the @OptionalParam or @RequiredParam) but different cardinalities, the server could
+  sometimes pick the incorrect method to execute. The selection algorithm has been improved to no longer
+  have this issue, and to be more consistent and predictable in terms of which resource provider
+  method is selected when the choice is somewhat ambiguous."

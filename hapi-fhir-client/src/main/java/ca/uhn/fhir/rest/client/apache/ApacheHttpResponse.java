@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.client.apache;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.client.apache;
  */
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
@@ -53,25 +54,19 @@ public class ApacheHttpResponse extends BaseHttpResponse implements IHttpRespons
 		this.myResponse = theResponse;
 	}
 
-	@Deprecated // override deprecated method
-	@Override
-	public void bufferEntitity() throws IOException {
-		bufferEntity();
-	}
-
 	@Override
 	public void bufferEntity() throws IOException {
 		if (myEntityBuffered) {
 			return;
 		}
-		InputStream respEntity = readEntity();
-		if (respEntity != null) {
-			this.myEntityBuffered = true;
-			try {
-				this.myEntityBytes = IOUtils.toByteArray(respEntity);
-			} catch (IllegalStateException e) {
-				// FIXME resouce leak
-				throw new InternalErrorException(e);
+		try (InputStream respEntity = readEntity()) {
+			if (respEntity != null) {
+				this.myEntityBuffered = true;
+				try {
+					this.myEntityBytes = IOUtils.toByteArray(respEntity);
+				} catch (IllegalStateException e) {
+					throw new InternalErrorException(e);
+				}
 			}
 		}
 	}
@@ -103,7 +98,7 @@ public class ApacheHttpResponse extends BaseHttpResponse implements IHttpRespons
 			if (Constants.STATUS_HTTP_204_NO_CONTENT != myResponse.getStatusLine().getStatusCode()) {
 				ourLog.debug("Response did not specify a charset, defaulting to utf-8");
 			}
-			charset = Charset.forName("UTF-8");
+			charset = StandardCharsets.UTF_8;
 		}
 
 		return new InputStreamReader(readEntity(), charset);
@@ -115,11 +110,7 @@ public class ApacheHttpResponse extends BaseHttpResponse implements IHttpRespons
 		if (myResponse.getAllHeaders() != null) {
 			for (Header next : myResponse.getAllHeaders()) {
 				String name = next.getName().toLowerCase();
-				List<String> list = headers.get(name);
-				if (list == null) {
-					list = new ArrayList<>();
-					headers.put(name, list);
-				}
+				List<String> list = headers.computeIfAbsent(name, k -> new ArrayList<>());
 				list.add(next.getValue());
 			}
 

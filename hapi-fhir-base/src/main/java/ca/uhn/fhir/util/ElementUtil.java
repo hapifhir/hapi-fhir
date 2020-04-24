@@ -4,14 +4,14 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -76,24 +76,6 @@ public class ElementUtil {
 		return true;
 	}
 
-	/*
-	public static <T> void validateAllElementsAreOfTypeOrThrowClassCastExceptionForModelSetter(List<T> theList, Class<T> theType) {
-		if (theList == null) {
-			return;
-		}
-		for (T next : theList) {
-			if (next != null && theType.isAssignableFrom(next.getClass()) == false) {
-				StringBuilder b = new StringBuilder();
-				b.append("Failed to set invalid value, found element in list of type ");
-				b.append(next.getClass().getSimpleName());
-				b.append(" but expected ");
-				b.append(theType.getName());
-				throw new ClassCastException(b.toString());
-			}
-		}
-	}
-	*/
-	
 	public static boolean isEmpty(List<? extends IBase> theElements) {
 		if (theElements == null) {
 			return true;
@@ -141,8 +123,7 @@ public class ElementUtil {
 
 	//@SuppressWarnings("unchecked")
 	private static <T extends IElement> void addElement(ArrayList<T> retVal, IElement next, Class<T> theType) {
-		//FIXME There seems to be an error on theType == null => if (theType != null|| theType.isAssignableFrom
-		if (theType == null|| theType.isAssignableFrom(next.getClass())) {
+		if (theType != null && theType.isAssignableFrom(next.getClass())) {
 			retVal.add(theType.cast(next));
 		}
 		if (next instanceof ICompositeElement) {

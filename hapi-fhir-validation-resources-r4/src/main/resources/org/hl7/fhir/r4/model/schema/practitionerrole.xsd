@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Fri, Nov 1, 2019 09:29+1100 for FHIR v4.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="PractitionerRole" type="PractitionerRole">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A specific set of Roles/Locations/specialties/services that a practitioner may perform at an organization for a period of time.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="PractitionerRole">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A specific set of Roles/Locations/specialties/services that a practitioner may perform at an organization for a period of time.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Business Identifiers that are specific to a role/location.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="active" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Whether this practitioner role record is in active use.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="period" minOccurs="0" maxOccurs="1" type="Period">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The period during which the person is authorized to act as a practitioner in these role(s) for the organization.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="practitioner" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Practitioner that is able to provide the defined services for the organization.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="organization" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The organization where the Practitioner performs the roles associated.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="code" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Roles which this practitioner is authorized to perform for the organization.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="specialty" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Specific specialty of the practitioner.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="location" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The location(s) at which this practitioner provides care.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="healthcareService" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The list of healthcare services that this worker provides for this role's Organization/Location(s).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="telecom" minOccurs="0" maxOccurs="unbounded" type="ContactPoint">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Contact details that are specific to the role/location/service.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="availableTime" type="PractitionerRole.AvailableTime" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A collection of times the practitioner is available or performing this role at the location and/or healthcareservice.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="notAvailable" type="PractitionerRole.NotAvailable" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The practitioner is not available or performing this role during this period of time due to the provided reason.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="availabilityExceptions" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A description of site availability exceptions, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as details in the available Times and not available Times.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="endpoint" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Technical endpoints providing access to services operated for the practitioner with this role.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="PractitionerRole.AvailableTime">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A specific set of Roles/Locations/specialties/services that a practitioner may perform at an organization for a period of time.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="daysOfWeek" minOccurs="0" maxOccurs="unbounded" type="DaysOfWeek">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Indicates which days of the week are available between the start and end Times.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="allDay" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Is this always available? (hence times are irrelevant) e.g. 24 hour service.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="availableStartTime" minOccurs="0" maxOccurs="1" type="time">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The opening time of day. Note: If the AllDay flag is set, then this time is ignored.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="availableEndTime" minOccurs="0" maxOccurs="1" type="time">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The closing time of day. Note: If the AllDay flag is set, then this time is ignored.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="PractitionerRole.NotAvailable">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A specific set of Roles/Locations/specialties/services that a practitioner may perform at an organization for a period of time.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="description" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The reason that can be presented to the user as to why this time is not available.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="during" minOccurs="0" maxOccurs="1" type="Period">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Service is not available (seasonally or for a public holiday) from this date.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

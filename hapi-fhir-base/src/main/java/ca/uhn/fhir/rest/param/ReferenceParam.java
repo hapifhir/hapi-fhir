@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,24 +19,28 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.math.BigDecimal;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.CoverageIgnore;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.util.CoverageIgnore;
+import java.math.BigDecimal;
+
+import static ca.uhn.fhir.model.primitive.IdDt.isValidLong;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/ {
 
 	private String myChain;
+	private String myResourceType;
+	private String myBaseUrl;
+	private String myValue;
+	private String myIdPart;
 
-	private final IdDt myId = new IdDt();
 	/**
 	 * Constructor
 	 */
@@ -63,12 +67,15 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 * Constructor
 	 */
 	public ReferenceParam(String theResourceType, String theChain, String theValue) {
+		String qualifier = "";
 		if (isNotBlank(theResourceType)) {
-			setValue(theResourceType + "/" + theValue);
-		} else {
-			setValue(theValue);
+			qualifier = ":" + theResourceType;
 		}
-		setChain(theChain);
+		if (isNotBlank(theChain)) {
+			qualifier = qualifier + "." + theChain;
+		}
+
+		setValueAsQueryToken(null, null, qualifier, theValue);
 	}
 
 	@Override
@@ -90,55 +97,61 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 
 	@Override
 	String doGetValueAsQueryToken(FhirContext theContext) {
-		if (isBlank(myId.getResourceType())) {
-			return myId.getValue(); // e.g. urn:asdjd or 123 or cid:wieiuru or #1
+		if (isBlank(getResourceType())) {
+			return myValue; // e.g. urn:asdjd or 123 or cid:wieiuru or #1
 		} else {
-			if (isBlank(getChain())) {
-				return getResourceType() + "/" + myId.getIdPart();
+			if (isBlank(getChain()) && isNotBlank(getResourceType())) {
+				return getResourceType() + "/" + getIdPart();
 			}
-			return myId.getIdPart();
+			return myValue;
 		}
 	}
 
 	@Override
 	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		String q = theQualifier;
-		String resourceType = null;
-		boolean skipSetValue = false;
 		if (isNotBlank(q)) {
 			if (q.startsWith(":")) {
 				int nextIdx = q.indexOf('.');
 				if (nextIdx != -1) {
-					resourceType = q.substring(1, nextIdx);
 					myChain = q.substring(nextIdx + 1);
-					// type is explicitly defined so use it
-					myId.setParts(null, resourceType, theValue, null);
-					skipSetValue = true;
+					myResourceType = q.substring(1, nextIdx);
 				} else {
-					resourceType = q.substring(1);
+					myChain = null;
+					myResourceType = q.substring(1);
 				}
+
+				myValue = theValue;
+				myIdPart = theValue;
+
+				IdDt id = new IdDt(theValue);
+				if (!id.hasBaseUrl() && id.hasIdPart() && id.hasResourceType()) {
+					if (id.getResourceType().equals(myResourceType)) {
+						myIdPart = id.getIdPart();
+					}
+				}
+
 			} else if (q.startsWith(".")) {
 				myChain = q.substring(1);
-				// type not defined but this is a chain, so treat value as opaque
-				myId.setParts(null, null, theValue, null);
-				skipSetValue = true;
+				myResourceType = null;
+				myValue = theValue;
+				myIdPart = theValue;
 			}
+		} else {
+			myChain = null;
+			myValue = theValue;
+			IdDt id = new IdDt(theValue);
+			myResourceType = id.getResourceType();
+			myIdPart = id.getIdPart();
+			myBaseUrl = id.getBaseUrl();
 		}
 
-		if (!skipSetValue) {
-			setValue(theValue);
-
-			if (isNotBlank(resourceType) && isBlank(getResourceType())) {
-				setValue(resourceType + '/' + theValue);
-			}
-		}
 	}
-
 
 
 	@CoverageIgnore
 	public String getBaseUrl() {
-		return myId.getBaseUrl();
+		return myBaseUrl;
 	}
 
 
@@ -146,24 +159,34 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		return myChain;
 	}
 
+	public ReferenceParam setChain(String theChain) {
+		myChain = theChain;
+		return this;
+	}
 
 	@CoverageIgnore
 	public String getIdPart() {
-		return myId.getIdPart();
+		return myIdPart;
 	}
 
 	@CoverageIgnore
 	public BigDecimal getIdPartAsBigDecimal() {
-		return myId.getIdPartAsBigDecimal();
+		return new IdDt(myValue).getIdPartAsBigDecimal();
 	}
-	
+
 	@CoverageIgnore
 	public Long getIdPartAsLong() {
-		return myId.getIdPartAsLong();
+		return new IdDt(myValue).getIdPartAsLong();
 	}
 
 	public String getResourceType() {
-		return myId.getResourceType();
+		if (isNotBlank(myResourceType)) {
+			return myResourceType;
+		}
+		if (isBlank(myChain)) {
+			return new IdDt(myValue).getResourceType();
+		}
+		return null;
 	}
 
 	public Class<? extends IBaseResource> getResourceType(FhirContext theCtx) {
@@ -174,26 +197,33 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	}
 
 	public String getValue() {
-		return myId.getValue();
+		return myValue;
+	}
+
+	/**
+	 * Note that the parameter to this method <b>must</b> be a resource reference, e.g
+	 * <code>123</code> or <code>Patient/123</code> or <code>http://example.com/fhir/Patient/123</code>
+	 * or something like this. This is not appropriate for cases where a chain is being used and
+	 * the value is for a different type of parameter (e.g. a token). In that case, use one of the
+	 * setter constructors.
+	 */
+	public ReferenceParam setValue(String theValue) {
+		IdDt id = new IdDt(theValue);
+		String qualifier= null;
+		if (id.hasResourceType()) {
+			qualifier = ":" + id.getResourceType();
+		}
+		setValueAsQueryToken(null, null, qualifier, id.getIdPart());
+		return this;
 	}
 
 	public boolean hasResourceType() {
-		return myId.hasResourceType();
+		return isNotBlank(myResourceType);
 	}
 
 	@Override
 	protected boolean isSupportsChain() {
 		return true;
-	}
-
-	public ReferenceParam setChain(String theChain) {
-		myChain = theChain;
-		return this;
-	}
-
-	public ReferenceParam setValue(String theValue) {
-		myId.setValue(theValue);
-		return this;
 	}
 
 	/**
@@ -279,5 +309,9 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		TokenParam retVal = new TokenParam();
 		retVal.setValueAsQueryToken(theContext, null, null, getValueAsQueryToken(theContext));
 		return retVal;
+	}
+
+	public boolean isIdPartValidLong() {
+		return isValidLong(getIdPart());
 	}
 }

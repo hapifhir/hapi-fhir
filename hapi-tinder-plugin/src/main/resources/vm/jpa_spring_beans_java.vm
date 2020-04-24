@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 
 import javax.persistence.EntityManager;
 import org.springframework.transaction.PlatformTransactionManager;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
@@ -21,28 +21,22 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.jpa.api.dao.*;
 import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.api.rp.ResourceProviderFactory;
 
 @Configuration
 public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jpa.config${package_suffix}.Base${versionCapitalized}Config {
 
-	/**
-	 * Subclasses may override
-	 */
-	protected boolean isSupported(String theResourceType) {
-		return true;
-	}
-
 	@Bean(name="myResourceProviders${versionCapitalized}")
-	public List<IResourceProvider> resourceProviders${versionCapitalized}() {
-		List<IResourceProvider> retVal = new ArrayList<IResourceProvider>();
+	public ResourceProviderFactory resourceProviders${versionCapitalized}() {
+		ResourceProviderFactory retVal = new ResourceProviderFactory();
 #foreach ( $res in $resources )
-		if (isSupported("${res.name}")) {
-			retVal.add(rp${res.declaringClassNameComplete}${versionCapitalized}());
-		}
+		retVal.addSupplier(() -> isSupported("${res.name}") ? rp${res.declaringClassNameComplete}${versionCapitalized}() : null);
 #end
 		return retVal;
 	}
+
 
 	@Bean(name="myResourceDaos${versionCapitalized}")
 	public List<IFhirResourceDao<?>> resourceDaos${versionCapitalized}() {
@@ -63,30 +57,35 @@ public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jp
 		IFhirResourceDaoValueSet<ca.uhn.fhir.model.dstu2.resource.ValueSet, ca.uhn.fhir.model.dstu2.composite.CodingDt, ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt>
 #elseif ( ${versionCapitalized} == 'Dstu3' && ${res.name} == 'ValueSet' )
 		IFhirResourceDaoValueSet<org.hl7.fhir.dstu3.model.ValueSet, org.hl7.fhir.dstu3.model.Coding, org.hl7.fhir.dstu3.model.CodeableConcept>
-#elseif ( ${versionCapitalized} == 'R4' && ${res.name} == 'ValueSet' )
-		IFhirResourceDaoValueSet<org.hl7.fhir.r4.model.ValueSet, org.hl7.fhir.r4.model.Coding, org.hl7.fhir.r4.model.CodeableConcept>
+#elseif ( ${versionCapitalized.startsWith('R')} && ${res.name} == 'ValueSet' )
+		IFhirResourceDaoValueSet<org.hl7.fhir.${version}.model.ValueSet, org.hl7.fhir.${version}.model.Coding, org.hl7.fhir.${version}.model.CodeableConcept>
 #elseif ( ${versionCapitalized} == 'Dstu3' && ${res.name} == 'CodeSystem' )
 		IFhirResourceDaoCodeSystem<org.hl7.fhir.dstu3.model.CodeSystem, org.hl7.fhir.dstu3.model.Coding, org.hl7.fhir.dstu3.model.CodeableConcept>
-#elseif ( ${versionCapitalized} == 'R4' && ${res.name} == 'CodeSystem' )
-		IFhirResourceDaoCodeSystem<org.hl7.fhir.r4.model.CodeSystem, org.hl7.fhir.r4.model.Coding, org.hl7.fhir.r4.model.CodeableConcept>
+#elseif ( ${versionCapitalized.startsWith('R')} && ${res.name} == 'CodeSystem' )
+		IFhirResourceDaoCodeSystem<org.hl7.fhir.${version}.model.CodeSystem, org.hl7.fhir.${version}.model.Coding, org.hl7.fhir.${version}.model.CodeableConcept>
 #elseif ( ${versionCapitalized} == 'Dstu3' && ${res.name} == 'ConceptMap' )
 		IFhirResourceDaoConceptMap<org.hl7.fhir.dstu3.model.ConceptMap>
-#elseif ( ${versionCapitalized} == 'R4' && ${res.name} == 'ConceptMap' )
-		IFhirResourceDaoConceptMap<org.hl7.fhir.r4.model.ConceptMap>
-#elseif ( ${versionCapitalized} != 'Dstu1' && (${res.name} == 'Composition' ||  ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'SearchParameter' || ${res.name} == 'MessageHeader'))
+#elseif ( ${versionCapitalized.startsWith('R')} && ${res.name} == 'ConceptMap' )
+		IFhirResourceDaoConceptMap<org.hl7.fhir.${version}.model.ConceptMap>
+#elseif ( ${versionCapitalized} != 'Dstu1' && (${res.name} == 'Composition' ||  ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'SearchParameter' || ${res.name} == 'MessageHeader' || ${res.name} == 'StructureDefinition'))
 		IFhirResourceDao${res.name}<${resourcePackage}.${res.declaringClassNameComplete}>
 #else
 		IFhirResourceDao<${resourcePackage}.${res.declaringClassNameComplete}>
 #end
-		 dao${res.declaringClassNameComplete}${versionCapitalized}() {
+		dao${res.declaringClassNameComplete}${versionCapitalized}() {
+
 #if ( ${versionCapitalized} == 'Dstu3' && ${res.name} == 'ConceptMap' )
-		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
-#elseif ( ${versionCapitalized} == 'R4' && ${res.name} == 'ConceptMap' )
-		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
-#elseif ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'SearchParameter' || ${res.name} == 'CodeSystem'  || ${res.name} == 'MessageHeader' || ${res.name} == 'Composition')
-		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
+		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal;
+		retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
+#elseif ( ${versionCapitalized.startsWith('R')} && ${res.name} == 'ConceptMap' )
+		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal;
+		retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
+#elseif ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'SearchParameter' || ${res.name} == 'CodeSystem'  || ${res.name} == 'MessageHeader' || ${res.name} == 'Composition' || ${res.name} == 'StructureDefinition')
+    	ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal;
+		retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
 #else
-		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${versionCapitalized}<${resourcePackage}.${res.declaringClassNameComplete}> retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${versionCapitalized}<${resourcePackage}.${res.declaringClassNameComplete}>();
+		ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao<${resourcePackage}.${res.declaringClassNameComplete}> retVal;
+		retVal = new ca.uhn.fhir.jpa.dao.JpaResourceDao<${resourcePackage}.${res.declaringClassNameComplete}>();
 #end
 		retVal.setResourceType(${resourcePackage}.${res.declaringClassNameComplete}.class);
 		retVal.setContext(fhirContext${versionCapitalized}());

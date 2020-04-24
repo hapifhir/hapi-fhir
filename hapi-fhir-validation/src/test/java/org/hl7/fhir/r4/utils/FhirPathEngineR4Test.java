@@ -5,7 +5,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.utils.FhirPathEngineTest;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
@@ -127,7 +127,7 @@ public class FhirPathEngineR4Test {
 	}
 
 	@Test
-	public void testConcatenationFunction() throws FHIRException {
+	public void testStringCompare() throws FHIRException {
 		String exp = "element.first().path.startsWith(%resource.type) and element.tail().all(path.startsWith(%resource.type&'.'))";
 
 		StructureDefinition sd = new StructureDefinition();
@@ -138,9 +138,22 @@ public class FhirPathEngineR4Test {
 
 		Patient p = new Patient();
 		p.addName().setFamily("TEST");
-		List<Base> result = ourEngine.evaluate(null, p, diff, exp);
+		List<Base> result = ourEngine.evaluate(null, p, null, diff, exp);
 		ourLog.info(result.toString());
-//		assertEquals("TEST.", result);
+		assertEquals(true, ((BooleanType)result.get(0)).booleanValue());
+	}
+
+	@Test
+	public void testQuestionnaireResponseExpression() {
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		QuestionnaireResponse.QuestionnaireResponseItemComponent parent = qr.addItem().setLinkId("PARENT");
+		QuestionnaireResponse.QuestionnaireResponseItemComponent child = parent.addItem().setLinkId("CHILD");
+		child.addAnswer().setValue(new DateTimeType("2019-01-01"));
+
+		List<Base> answer = ourEngine.evaluate(qr, "QuestionnaireResponse.item.where(linkId = 'PARENT').item.where(linkId = 'CHILD').answer.value.as(DateTime)");
+		assertEquals("2019-01-01", ((DateTimeType)answer.get(0)).getValueAsString());
+
 	}
 
 
@@ -151,7 +164,7 @@ public class FhirPathEngineR4Test {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourEngine = new FHIRPathEngine(new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport()));
+		ourEngine = new FHIRPathEngine(new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport(ourCtx)));
 	}
 
 }

@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,12 +20,15 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoEncounter;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoEncounter;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -41,17 +44,17 @@ public class BaseJpaResourceProviderEncounterDstu2 extends JpaResourceProviderDs
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
 
-			@IdParam 
+			@IdParam
 			ca.uhn.fhir.model.primitive.IdDt theId,
-			
-			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.") 
-			@OperationParam(name = Constants.PARAM_COUNT) 
+
+			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
+			@OperationParam(name = Constants.PARAM_COUNT)
 			ca.uhn.fhir.model.primitive.UnsignedIntDt theCount,
-			
+
 			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
-			@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1) 
+			@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1)
 			DateRangeParam theLastUpdated,
-			
+
 			@Sort
 			SortSpec theSortSpec
 			) {
@@ -71,14 +74,14 @@ public class BaseJpaResourceProviderEncounterDstu2 extends JpaResourceProviderDs
 
 				javax.servlet.http.HttpServletRequest theServletRequest,
 
-				@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.") 
-				@OperationParam(name = Constants.PARAM_COUNT) 
+				@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
+				@OperationParam(name = Constants.PARAM_COUNT)
 				ca.uhn.fhir.model.primitive.UnsignedIntDt theCount,
-				
+
 				@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
-				@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1) 
+				@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1)
 				DateRangeParam theLastUpdated,
-				
+
 				@Sort
 				SortSpec theSortSpec
 				) {

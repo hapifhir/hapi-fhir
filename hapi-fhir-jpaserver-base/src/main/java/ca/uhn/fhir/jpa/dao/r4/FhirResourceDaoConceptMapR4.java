@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,17 +20,24 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
+import ca.uhn.fhir.jpa.api.model.TranslationMatch;
+import ca.uhn.fhir.jpa.api.model.TranslationRequest;
+import ca.uhn.fhir.jpa.api.model.TranslationResult;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
-import ca.uhn.fhir.jpa.term.TranslationMatch;
-import ca.uhn.fhir.jpa.term.TranslationRequest;
-import ca.uhn.fhir.jpa.term.TranslationResult;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -38,11 +45,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
+public class FhirResourceDaoConceptMapR4 extends BaseHapiFhirResourceDao<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
 	@Autowired
-	private IHapiTerminologySvc myHapiTerminologySvc;
+	private ITermReadSvc myHapiTerminologySvc;
 
 	@Override
 	public TranslationResult translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
@@ -158,15 +163,17 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 	}
 
 	@Override
-	protected ResourceTable updateEntity(RequestDetails theRequestDetails, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-													 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+	public ResourceTable updateEntity(RequestDetails theRequestDetails, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
+												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
-		if (retVal.getDeleted() == null) {
-			ConceptMap conceptMap = (ConceptMap) theResource;
-			myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, conceptMap);
-		} else {
-			myHapiTerminologySvc.deleteConceptMapAndChildren(retVal);
+		if (!retVal.isUnchangedInCurrentOperation()) {
+			if (retVal.getDeleted() == null) {
+				ConceptMap conceptMap = (ConceptMap) theResource;
+				myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, conceptMap);
+			} else {
+				myHapiTerminologySvc.deleteConceptMapAndChildren(retVal);
+			}
 		}
 
 		return retVal;

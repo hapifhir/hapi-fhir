@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.server.provider;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
@@ -8,7 +10,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -22,6 +24,10 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,9 +35,17 @@ import javax.servlet.ServletException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
+@RunWith(MockitoJUnitRunner.class)
 public class HashMapResourceProviderTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HashMapResourceProviderTest.class);
@@ -42,6 +56,9 @@ public class HashMapResourceProviderTest {
 	private static HashMapResourceProvider<Patient> myPatientResourceProvider;
 	private static HashMapResourceProvider<Observation> myObservationResourceProvider;
 
+	@Mock
+	private IAnonymousInterceptor myAnonymousInterceptor;
+
 	@Before
 	public void before() {
 		ourRestServer.clearData();
@@ -51,12 +68,18 @@ public class HashMapResourceProviderTest {
 
 	@Test
 	public void testCreateAndRead() {
+		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, myAnonymousInterceptor);
+		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, myAnonymousInterceptor);
+
 		// Create
 		Patient p = new Patient();
 		p.setActive(true);
 		IIdType id = ourClient.create().resource(p).execute().getId();
 		assertThat(id.getIdPart(), matchesPattern("[0-9]+"));
 		assertEquals("1", id.getVersionIdPart());
+
+		verify(myAnonymousInterceptor, Mockito.times(1)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED), any());
+		verify(myAnonymousInterceptor, Mockito.times(1)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED), any());
 
 		// Read
 		p = (Patient) ourClient.read().resource("Patient").withId(id).execute();
@@ -205,6 +228,7 @@ public class HashMapResourceProviderTest {
 		for (int i = 0; i < 100; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("FAM" + i);
+			ourClient.registerInterceptor(new LoggingInterceptor(true));
 			IIdType id = ourClient.create().resource(p).execute().getId();
 			assertThat(id.getIdPart(), matchesPattern("[0-9]+"));
 			assertEquals("1", id.getVersionIdPart());
@@ -280,12 +304,18 @@ public class HashMapResourceProviderTest {
 		assertEquals("1", id.getVersionIdPart());
 
 		// Update
+		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, myAnonymousInterceptor);
+		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, myAnonymousInterceptor);
+
 		p = new Patient();
 		p.setId(id);
 		p.setActive(false);
 		id = ourClient.update().resource(p).execute().getId();
 		assertThat(id.getIdPart(), matchesPattern("[0-9]+"));
 		assertEquals("2", id.getVersionIdPart());
+
+		verify(myAnonymousInterceptor, Mockito.times(1)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), any());
+		verify(myAnonymousInterceptor, Mockito.times(1)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), any());
 
 		assertEquals(1, myPatientResourceProvider.getCountCreate());
 		assertEquals(1, myPatientResourceProvider.getCountUpdate());
@@ -301,33 +331,6 @@ public class HashMapResourceProviderTest {
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		ourListenerServer.stop();
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void startListenerServer() throws Exception {
-		int ourListenerPort = PortUtil.findFreePort();
-		ourRestServer = new MyRestfulServer();
-		String ourBase = "http://localhost:" + ourListenerPort + "/";
-		ourListenerServer = new Server(ourListenerPort);
-
-		ourCtx.getRestfulClientFactory().setSocketTimeout(120000);
-		ourClient = ourCtx.newRestfulGenericClient(ourBase);
-
-		ServletContextHandler proxyHandler = new ServletContextHandler();
-		proxyHandler.setContextPath("/");
-
-		ServletHolder servletHolder = new ServletHolder();
-		servletHolder.setServlet(ourRestServer);
-		proxyHandler.addServlet(servletHolder, "/*");
-
-		ourListenerServer.setHandler(proxyHandler);
-		ourListenerServer.start();
 	}
 
 	private static class MyRestfulServer extends RestfulServer {
@@ -355,6 +358,33 @@ public class HashMapResourceProviderTest {
 		}
 
 
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		JettyUtil.closeServer(ourListenerServer);
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@BeforeClass
+	public static void startListenerServer() throws Exception {
+		ourRestServer = new MyRestfulServer();
+
+		ourListenerServer = new Server(0);
+
+		ServletContextHandler proxyHandler = new ServletContextHandler();
+		proxyHandler.setContextPath("/");
+
+		ServletHolder servletHolder = new ServletHolder();
+		servletHolder.setServlet(ourRestServer);
+		proxyHandler.addServlet(servletHolder, "/*");
+
+		ourListenerServer.setHandler(proxyHandler);
+		JettyUtil.startServer(ourListenerServer);
+		int ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
+		String ourBase = "http://localhost:" + ourListenerPort + "/";
+		ourCtx.getRestfulClientFactory().setSocketTimeout(120000);
+		ourClient = ourCtx.newRestfulGenericClient(ourBase);
 	}
 
 

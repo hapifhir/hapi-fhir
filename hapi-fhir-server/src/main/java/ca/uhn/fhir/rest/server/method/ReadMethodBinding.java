@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,18 +19,6 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -53,8 +41,19 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.util.DateUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadMethodBinding.class);
@@ -115,47 +114,62 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (!theRequest.getResourceName().equals(getResourceName())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		for (String next : theRequest.getParameters().keySet()) {
 			if (!next.startsWith("_")) {
-				return false;
+				return MethodMatchEnum.NONE;
 			}
 		}
 		if (theRequest.getId() == null) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (mySupportsVersion == false) {
 			if (theRequest.getId().hasVersionIdPart()) {
-				return false;
+				return MethodMatchEnum.NONE;
 			}
 		}
 		if (isNotBlank(theRequest.getCompartmentName())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (theRequest.getRequestType() != RequestTypeEnum.GET && theRequest.getRequestType() != RequestTypeEnum.HEAD ) {
 			ourLog.trace("Method {} doesn't match because request type is not GET or HEAD: {}", theRequest.getId(), theRequest.getRequestType());
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 		if (Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
 			if (mySupportsVersion == false) {
-				return false;
-			}
-			if (theRequest.getId().hasVersionIdPart() == false) {
-				return false;
+				return MethodMatchEnum.NONE;
+			} else if (theRequest.getId().hasVersionIdPart() == false) {
+				return MethodMatchEnum.NONE;
 			}
 		} else if (!StringUtils.isBlank(theRequest.getOperation())) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
-		return true;
+		return MethodMatchEnum.EXACT;
 	}
 
 
 	@Override
 	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		IIdType requestId = theRequest.getId();
+		FhirContext ctx = theRequest.getServer().getFhirContext();
+
+		String[] invalidQueryStringParams = new String[]{Constants.PARAM_CONTAINED, Constants.PARAM_COUNT, Constants.PARAM_INCLUDE, Constants.PARAM_REVINCLUDE, Constants.PARAM_SORT, Constants.PARAM_SEARCH_TOTAL_MODE};
+		List<String> invalidQueryStringParamsInRequest = new ArrayList<>();
+		Set<String> queryStringParamsInRequest = theRequest.getParameters().keySet();
+
+		for (String queryStringParamName : queryStringParamsInRequest) {
+			String lowercaseQueryStringParamName = queryStringParamName.toLowerCase();
+			if (StringUtils.startsWithAny(lowercaseQueryStringParamName, invalidQueryStringParams)) {
+				invalidQueryStringParamsInRequest.add(queryStringParamName);
+			}
+		}
+
+		if (!invalidQueryStringParamsInRequest.isEmpty()) {
+			throw new InvalidRequestException(ctx.getLocalizer().getMessage(ReadMethodBinding.class, "invalidParamsInRequest", invalidQueryStringParamsInRequest));
+		}
 
 		theMethodParams[myIdIndex] = ParameterUtil.convertIdToType(requestId, myIdParameterType);
 
@@ -163,7 +177,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		IBundleProvider retVal = toResourceList(response);
 
 
-		if (retVal.size() == 1) {
+		if (Integer.valueOf(1).equals(retVal.size())) {
 			List<IBaseResource> responseResources = retVal.getResources(0, 1);
 			IBaseResource responseResource = responseResources.get(0);
 
@@ -172,11 +186,13 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 				String ifNoneMatch = theRequest.getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
 				if (StringUtils.isNotBlank(ifNoneMatch)) {
 					ifNoneMatch = ParameterUtil.parseETagValue(ifNoneMatch);
-					if (responseResource.getIdElement() != null && responseResource.getIdElement().hasVersionIdPart()) {
-						if (responseResource.getIdElement().getVersionIdPart().equals(ifNoneMatch)) {
-							ourLog.debug("Returning HTTP 304 because request specified {}={}", Constants.HEADER_IF_NONE_MATCH, ifNoneMatch);
-							throw new NotModifiedException("Not Modified");
-						}
+					String versionIdPart = responseResource.getIdElement().getVersionIdPart();
+					if (StringUtils.isBlank(versionIdPart)) {
+						versionIdPart = responseResource.getMeta().getVersionId();
+					}
+					if (ifNoneMatch.equals(versionIdPart)) {
+						ourLog.debug("Returning HTTP 304 because request specified {}={}", Constants.HEADER_IF_NONE_MATCH, ifNoneMatch);
+						throw new NotModifiedException("Not Modified");
 					}
 				}
 			}
@@ -202,7 +218,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 				
 		} // if we have at least 1 result
-		
+
 		
 		return retVal;
 	}

@@ -58,6 +58,7 @@ public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDs
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
+	@Override
 	@After
 	public void after() throws Exception {
 		super.after();
@@ -70,6 +71,7 @@ public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDs
 		myWebSocketClient.stop();
 	}
 
+	@Override
 	@Before
 	public void before() throws Exception {
 		super.before();
@@ -109,7 +111,7 @@ public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDs
 		mySocketImplementation = new SocketImplementation(mySubscriptionId, EncodingEnum.JSON);
 
 		myWebSocketClient.start();
-		URI echoUri = new URI("ws://localhost:" + ourPort + "/websocket");
+		URI echoUri = new URI("ws://localhost:" + ourPort + myModelConfig.getWebsocketContextPath());
 		ClientUpgradeRequest request = new ClientUpgradeRequest();
 		ourLog.info("Connecting to : {}", echoUri);
 		Future<Session> connection = myWebSocketClient.connect(mySocketImplementation, echoUri, request);

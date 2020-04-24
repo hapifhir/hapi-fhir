@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
-import ca.uhn.fhir.jpa.term.TranslationRequest;
-import ca.uhn.fhir.jpa.term.TranslationResult;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
+import ca.uhn.fhir.jpa.api.model.TranslationRequest;
+import ca.uhn.fhir.jpa.api.model.TranslationResult;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -31,10 +31,20 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.ConceptMap;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.exceptions.FHIRException;
 
 import javax.servlet.http.HttpServletRequest;
+
+import static org.hl7.fhir.convertors.conv30_40.Parameters30_40.convertParameters;
 
 public class BaseJpaResourceProviderConceptMapDstu3 extends JpaResourceProviderDstu3<ConceptMap> {
 	@Operation(name = JpaConstants.OPERATION_TRANSLATE, idempotent = true, returnParameters = {
@@ -129,7 +139,7 @@ public class BaseJpaResourceProviderConceptMapDstu3 extends JpaResourceProviderD
 			TranslationResult result = dao.translate(translationRequest, theRequestDetails);
 
 			// Convert from R4 to DSTU3
-			return VersionConvertor_30_40.convertParameters(result.toParameters());
+			return convertParameters(result.toParameters());
 		} catch (FHIRException fe) {
 			throw new InternalErrorException(fe);
 		} finally {

@@ -1,18 +1,31 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.validation.IValidationContext;
+import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -22,29 +35,28 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.google.common.base.Charsets;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.util.PortUtil;
-import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.validation.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class RequestValidatingInterceptorR4Test {
 	private static CloseableHttpClient ourClient;
@@ -63,9 +75,7 @@ public class RequestValidatingInterceptorR4Test {
 	@Before
 	public void before() {
 		ourLastRequestWasSearch = false;
-		while (ourServlet.getInterceptors().size() > 0) {
-			ourServlet.unregisterInterceptor(ourServlet.getInterceptors().get(0));
-		}
+		ourServlet.getInterceptorService().unregisterAllInterceptors();
 
 		myInterceptor = new RequestValidatingInterceptor();
 		//		myInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
@@ -178,9 +188,47 @@ public class RequestValidatingInterceptorR4Test {
 		assertThat(status.toString(), (containsString("X-FHIR-Request-Validation: NO ISSUES")));
 	}
 
+
+
+	@Test
+	public void testValidateXmlPayloadWithXxeDirective_InstanceValidator() throws IOException {
+		IValidatorModule module = new FhirInstanceValidator(ourCtx);
+		myInterceptor.addValidatorModule(module);
+
+		String encoded =
+			"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" +
+				"<!DOCTYPE foo [  \n" +
+				"<!ELEMENT foo ANY >\n" +
+				"<!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]>" +
+				"<Patient xmlns=\"http://hl7.org/fhir\">" +
+				"<text>" +
+				"<status value=\"generated\"/>" +
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT &xxe; TEXT</div>\n" +
+				"</text>" +
+				"<address>" +
+				"<line value=\"FOO\"/>" +
+				"</address>" +
+				"</Patient>";
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+
+			ourLog.info("Response was:\n{}", status);
+			ourLog.info("Response was:\n{}", responseContent);
+
+			assertEquals(422, status.getStatusLine().getStatusCode());
+			assertThat(responseContent, containsString("DOCTYPE"));
+		}
+
+	}
+
+
 	@Test
 	public void testCreateXmlInvalidInstanceValidator() throws Exception {
-		IValidatorModule module = new FhirInstanceValidator();
+		IValidatorModule module = new FhirInstanceValidator(ourCtx);
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
@@ -194,16 +242,15 @@ public class RequestValidatingInterceptorR4Test {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		HttpResponse status = ourClient.execute(httpPost);
+		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+			ourLog.info("Response was:\n{}", status);
+			ourLog.info("Response was:\n{}", responseContent);
 
-		ourLog.info("Response was:\n{}", status);
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), containsString("X-FHIR-Request-Validation"));
+			assertEquals(422, status.getStatusLine().getStatusCode());
+			assertThat(status.toString(), containsString("X-FHIR-Request-Validation"));
+		}
 	}
 
 	@Test
@@ -463,14 +510,13 @@ public class RequestValidatingInterceptorR4Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 
 		PatientProvider patientProvider = new PatientProvider();
 
@@ -480,7 +526,8 @@ public class RequestValidatingInterceptorR4Test {
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

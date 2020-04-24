@@ -1,12 +1,11 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
 import ca.uhn.fhir.jpa.rp.dstu2.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu2.OrganizationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu2.PatientResourceProvider;
-import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -32,6 +31,8 @@ import java.util.List;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import ca.uhn.fhir.test.utilities.JettyUtil;
+
 public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderTransactionSearchDstu2Test.class);
@@ -46,7 +47,6 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 	@SuppressWarnings("deprecation")
 	@After
 	public void after() {
-		myRestServer.setUseBrowserFriendlyContentTypes(true);
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 		myDaoConfig.setMaximumSearchResultCountInTransaction(new DaoConfig().getMaximumSearchResultCountInTransaction());
 	}
@@ -77,13 +77,10 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 
 			restServer.setPlainProviders(mySystemProvider);
 
-			int myPort = RandomServerPortProvider.findFreePort();
-			ourServer = new Server(myPort);
+			ourServer = new Server(0);
 
 			ServletContextHandler proxyHandler = new ServletContextHandler();
 			proxyHandler.setContextPath("/");
-
-			ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 
 			ServletHolder servletHolder = new ServletHolder();
 			servletHolder.setServlet(restServer);
@@ -93,7 +90,9 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 			restServer.setFhirContext(ourCtx);
 
 			ourServer.setHandler(proxyHandler);
-			ourServer.start();
+			JettyUtil.startServer(ourServer);
+            int myPort = JettyUtil.getPortForStartedServer(ourServer);
+			ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 
 			ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
 			ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
@@ -298,7 +297,7 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 

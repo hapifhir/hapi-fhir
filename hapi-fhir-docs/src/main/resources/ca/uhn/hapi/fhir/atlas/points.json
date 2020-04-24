@@ -1,0 +1,341 @@
+{
+	"comment": [
+		"This is the HAPI FHIR Global Atlas data file. Please feel free to file a pull request",
+		"if you would like to add or update your project or organization. Any elements named",
+		"comment (such as this one) will be ignored because lousy JSON has no comments."
+	],
+	"points": [
+		{
+			"title": "OKDC - FHIR Manager",
+			"description": "Post orders, get results from federal laboratory system",
+			"lat": 47.223040,
+			"lon": 39.721380,
+			"city": "Rostov-On-Don",
+			"added": "2019-08-19"
+		},
+		{
+			"title": "Care Connect Reference Implementation",
+			"description": "UK/England NHS Reference FHIR Implementation",
+			"company": "Mayfield IS",
+			"contactName": "Kevin Mayfield",
+			"contactEmail": "Kevin.mayfield@mayfield-is.co.uk",
+			"link": "https://data.developer.nhs.uk/ccri/exp",
+			"lat": 55.378052,
+			"lon": -3.435973,
+			"added": "2019-08-19"
+		},
+		{
+			"title": "clinFHIR",
+			"contactName": "David Hay",
+			"contactEmail": "david.hay25@gmail.com",
+			"link": "http://clinfhir.com",
+			"lat": -42.651737,
+			"lon": 171.926909,
+			"added": "2019-08-18"
+		},
+		{
+			"title": "EDS AP-HP",
+			"description": "Health Datawarehouse",
+			"lat": 48.8647,
+			"lon": 2.349014,
+			"city": "Paris",
+			"added": "2019-09-02"
+		},
+		{
+			"title": "eHealth Innovation",
+			"description": "eHealth Innovation uses HAPI FHIR to power patient apps for managing chronic conditions",
+			"link": "http://ehealthinnovation.org",
+			"lat": 43.741667,
+			"lon": -79.373333,
+			"city": "Toronto",
+			"added": "2019-11-20"
+		},
+		{
+			"title": "CSIRO OntoServer",
+			"description": "Australia's national terminology server.  FHIR-native, fast, and comprehensive support for FHIR DSTU2.1, STU3, and R4",
+			"link": "https://ontoserver.csiro.au",
+			"contactName": "Michael Lawley",
+			"contactEmail": "ontoserver-support@csiro.au",
+			"city": "Brisbane",
+			"lat": -27.469770,
+			"lon": 153.025131
+		},
+		{
+			"title": "MOLIT Institut: VITU, HUB, EQU",
+			"description": "Virtual tumorboard based on FHIR, Management Frontend to import Patients from HIS and assign Questionnaire Tasks, Electronic Questionnaire based on FHIR Questionnaire",
+			"link": "https://demo.molit.eu",
+			"contactName": "Patrick Werner",
+			"contactEmail": "pa.f.werner@gmail.com",
+			"city": "Germany",
+			"lat": 50.1188,
+			"lon": 8.6843,
+			"added": "2019-08-18"
+		},
+		{
+			"title": "Altarum Institute",
+			"description": null,
+			"link": "https://demo.molit.eu",
+			"contactName": "Altarum Institute",
+			"contactEmail": "ray.humphrys@altarum.org",
+			"city": "Michigan",
+			"lat": 42.2807,
+			"lon": -83.7801,
+			"added": "2019-08-18"
+		},
+		{
+			"title": "Audacious Inquiry",
+			"description": "HIE Services",
+			"link": null,
+			"contactName": "Keith Boone",
+			"contactEmail": "kboone@ainq.com",
+			"city": "Maryland",
+			"lat": 39.4756,
+			"lon": -76.2420,
+			"added": "2019-08-18"
+		},
+		{
+			"title": "InfoClinic",
+			"description": "InfoClinic HAPI FHIR R4 Testing Server",
+			"link": "http://fhir.infoclinic.co",
+			"contactName": null,
+			"contactEmail": null,
+			"city": "Seoul, South Korea",
+			"lat": 37.5339,
+			"lon": 126.9775,
+			"added": "2019-08-18"
+		},
+		{
+			"title": "PGD FHIR",
+			"description": "Apothesource",
+			"link": null,
+			"contactName": null,
+			"contactEmail": null,
+			"city": "South Carolina, USA",
+			"lat": 34.2296,
+			"lon": -80.7147,
+			"added": "2019-08-19"
+		},
+		{
+			"title": "Drummond Group: Interoperability Hub",
+			"description": "Certified EHR FHIR Surveillance App",
+			"link": "http://www.interophub.com",
+			"contactName": null,
+			"contactEmail": null,
+			"city": "USA",
+			"lat": 35.3961,
+			"lon": -81.6303,
+			"added": "2019-08-19"
+		},
+		{
+			"title": "United States Digital Service/CMS",
+			"description": "Data at the Point of Care: FHIR API for enabling providers to retrieve CMS claims data in a bulk manner.",
+			"link": "http://dpc.cms.gov",
+			"contactName": null,
+			"contactEmail": null,
+			"city": "Washington DC, USA",
+			"lat": 38.8939,
+			"lon": -77.0365,
+			"added": "2019-08-20"
+		},
+		{
+			"title": "AHDIS AG",
+			"description": "Matchbox: Validation and conversion services",
+			"link": "http://dpc.cms.gov",
+			"contactName": "Oliver Egger",
+			"contactEmail": "oliver.egger@ahdis.ch",
+			"city": "Switzerland",
+			"lat": 47.2569,
+			"lon": 8.6989,
+			"added": "2019-08-20"
+		},
+		{
+			"title": "Trifork",
+			"description": "National Telemedicine Project",
+			"link": "https://docs.ehealth.sundhed.dk/latest/ig/index.html",
+			"contactName": "Jens Villadsen",
+			"contactEmail": "jvi@trifork.com",
+			"city": "Aarhus, Denmark",
+			"lat": 56.1534,
+			"lon": 10.2255,
+			"added": "2019-08-20"
+		},
+		{
+			"title": "VietTel",
+			"description": "VEHR-HL7",
+			"link": null,
+			"contactName": null,
+			"contactEmail": null,
+			"city": "Vietnam",
+			"lat": 10.8142,
+			"lon": 106.6438,
+			"added": "2019-08-20"
+		},
+		{
+			"title": "ISKRA Solutions Inc.",
+			"description": "Automatic reconciliation of FHIR messages: Highly scalable FHIR based microservice that uses rules engine to automatically match/reconcile FHIR submissions based on externalized configurable set of business defined criteria.",
+			"link": null,
+			"contactName": null,
+			"contactEmail": null,
+			"city": "Toronto, Canada",
+			"lat": 43.741667,
+			"lon": -79.373333,
+			"added": "2019-08-20"
+		},
+		{
+			"title": "Insiel S.p.a.",
+			"description": null,
+			"link": null,
+			"contactName": "Ivano Tomainu",
+			"contactEmail": "ivano.tomainu@insiel.it",
+			"city": "Italy",
+			"lat": 38.1193,
+			"lon": 13.3675,
+			"added": "2019-08-20"
+		},
+		{
+			"title": "Insiel S.p.a.",
+			"description": "PathLab.Tech",
+			"link": null,
+			"contactName": "Prateek Patil",
+			"contactEmail": "prateek@pathlab.tech",
+			"city": "Santa Clara, California",
+			"lat": 37.3526,
+			"lon": -121.9541,
+			"added": "2019-09-13"
+		},
+		{
+			"title": "Telemedis",
+			"description": "tisFHIR: Telemedicine Information System",
+			"link": null,
+			"contactName": "Władysław Węglarz",
+			"contactEmail": "wladyslaw.weglarz@telemedis.pl",
+			"city": "Warsaw, Poland",
+			"lat": 52.2500,
+			"lon": 21.0000,
+			"added": "2019-09-13"
+		},
+		{
+			"title": "CINVESTAV",
+			"description": "Estudio de algoritmos criptograficos ligeros para la seguridad de expedientes clínicos electrónicos",
+			"link": null,
+			"contactName": null,
+			"contactEmail": null,
+			"city": null,
+			"lat": 40.4172,
+			"lon": -3.6840,
+			"added": "2019-09-29"
+		},
+		{
+			"title": "Highmark",
+			"description": "FHIR-based Provider Directory Message Model: Using R4 FHIR we created a standard provider directory message model that captures all practitioners, practitioner roles, vendors, vendor roles, locations, healthcare services, affiliated directory networks and tiered insurance plans. We supply this FHIR-based extract to a well-known transparency vendor whom processes our FHIR message model extract and loads the data to be consumed and accessed on a web-based provider search application. Members can then access this provider search app to search for practitioners whom participate in their products and networks.",
+			"link": "https://highmark.sapphirecareselect.com",
+			"contactName": "Wayne Williams",
+			"contactEmail": "Wayne.Williams@hmhs.com",
+			"city": "Pittsburgh, PA",
+			"lat": 40.4562,
+			"lon": -79.8163,
+			"added": "2019-09-29"
+		},
+		{
+			"title": "ePHealth: ACS Health Care",
+			"description": "With the ACS App, Community Health Agents (CHA) work gets faster and faster, and they can take better care of their community. Best of all, it is 100% free to the Health Agent.",
+			"link": "http://ephealth.com.br/?lang=en",
+			"contactName": "Alan Lescano",
+			"contactEmail": "alan@ephealth.com.br",
+			"city": "Sao Paulo, Brazil",
+			"lat": -6.6167,
+			"lon": -38.1500,
+			"added": "2019-09-29"
+		},
+		{
+			"title": "CENS",
+			"description": "Centro Nacional en Sistemas de Información en Salud - CENS operates a national testing infrastructure based on HAPI FHIR.",
+			"link": "http://cens.cl",
+			"city": "Santiago, Chile",
+			"lat": -33.4000,
+			"lon": -70.6000,
+			"added": "2019-11-25"
+		},
+		{
+			"title": "Software Interoperability Lab for Asia",
+			"description": "",
+			"link": "",
+			"city": "Manila, Philippines",
+			"lat": 14.6914,
+			"lon": 120.9686,
+			"added": "2019-11-25"
+		},
+		{
+			"title": "Software Interoperability Lab for Asia",
+			"description": "SIL-A maintains a suite of tools used to promote interoperability and medical informatics across Asia.",
+			"link": "http://sil-asia.org/",
+			"city": "Manila, Philippines",
+			"lat": 14.6914,
+			"lon": 120.9686,
+			"added": "2019-11-25"
+		},
+		{
+			"title": "Lifen",
+			"description": "Lifen is a messaging platform to simplify data exchange between medical professionals, patients and EHRs systems",
+			"link": "https://www.lifen.fr",
+			"city": "Paris",
+			"lat": 48.8647,
+			"lon": 2.349014,
+			"added": "2019-11-22"
+		},
+		{
+			"title": "Aksara Digital Indonesia, PT.",
+			"description": "SaaS ERP for Healthcare Services",
+			"link": "https://ehealth.co.id",
+			"contactName": "Ibrohim Kholilul Islam",
+			"contactEmail": "ibrohim@ehealth.co.id",
+			"city": "Bandung, Indonesia",
+			"lat": -6.914744,
+			"lon": 107.609810,
+			"added": "2019-11-22"
+		},
+		{
+			"title": "Ivido",
+			"description": "Revolutionary personal healthcare environment",
+			"link": "https://ivido.nl/",
+			"contactName": "Jari Maijenburg",
+			"contactEmail": "info@ivido.nl",
+			"city": "The Hague, The Netherlands",
+			"lat": 52.070499,
+			"lon": 4.300700,
+			"added": "2019-12-18"
+		},
+		{
+			"title": "CDSS for EHR",
+			"description": "\"Hospital Italiano de Buenos Aires\", founded in 1853, is a non-profit civil association dedicated to general and highly complex medicine.",
+			"link": null,
+			"contactName": "Natalia Pérez López",
+			"contactEmail": "natalia.perez@hospitalitaliano.org.ar",
+			"city": "Buenos Aires, Argentina",
+			"lat": -34.603683,
+			"lon": -58.381557,
+			"added": "2019-12-27"
+		},
+		{
+			"title": "German Society for Wound Healing and Wound Treatment",
+			"description": "Establishment of regional registers based on HAPI FHIR for the global exchange of health data/eHealth Ressort of the DGfW e.V.: As the eHealth department of the DGfW e.V. we are looking for partners with whom we can jointly develop projects based on open standards for the national and global exchange of health information in the field of chronic wound care. In this context, we rely on open standards such as HAPI FHIR. In one of our latest projects \"EsmAiL\" we use HAPI FHIR together with the synaptor medical collaboration platform.",
+			"contactName": "Falk Huneke",
+			"link": "http://www.dgfw.de/akneinversa.html",
+			"city": "Germany",
+			"lat": 51.165691,
+			"lon": 10.451526
+		},
+		{
+			"title": "VEIG",
+			"description": "Vietnam Ehealth Innovation Group",
+			"link": "http://emr.com.vn",
+			"contactName": "Nguyen Hai Phong",
+			"contactEmail": "haiphong.nguyen@gmail.com",
+			"city": "Hanoi,Vietnam",
+			"lat": 21.026058,
+			"lon": 105.822715,
+			"added": "2020-03-06"
+		}
+
+	]
+}

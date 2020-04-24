@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,11 +20,10 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #L%
  */
 
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,18 +32,29 @@ import java.util.Objects;
 
 /**
  * This interceptor adds arbitrary header values to requests made by the client.
+ *
+ * This is now also possible directly on the Fluent Client API by calling
+ * {@link ca.uhn.fhir.rest.gclient.IClientExecutable#withAdditionalHeader(String, String)}
  */
-public class AdditionalRequestHeadersInterceptor implements IClientInterceptor {
-	private final Map<String, List<String>> additionalHttpHeaders = new HashMap<>();
+public class AdditionalRequestHeadersInterceptor {
+	private final Map<String, List<String>> myAdditionalHttpHeaders;
 
+	/**
+	 * Constructor
+	 */
 	public AdditionalRequestHeadersInterceptor() {
-		this(new HashMap<String, List<String>>());
+		myAdditionalHttpHeaders = new HashMap<>();
 	}
 
-	public AdditionalRequestHeadersInterceptor(Map<String, List<String>> additionalHttpHeaders) {
-		super();
-		if (additionalHttpHeaders != null) {
-			this.additionalHttpHeaders.putAll(additionalHttpHeaders);
+	/**
+	 * Constructor
+	 *
+	 * @param theHeaders The additional headers to add to every request
+	 */
+	public AdditionalRequestHeadersInterceptor(Map<String, List<String>> theHeaders) {
+		this();
+		if (theHeaders != null) {
+			myAdditionalHttpHeaders.putAll(theHeaders);
 		}
 	}
 
@@ -83,19 +93,19 @@ public class AdditionalRequestHeadersInterceptor implements IClientInterceptor {
 	 * @return the list of values for the header
 	 */
 	private List<String> getHeaderValues(String headerName) {
-		if (additionalHttpHeaders.get(headerName) == null) {
-			additionalHttpHeaders.put(headerName, new ArrayList<String>());
+		if (myAdditionalHttpHeaders.get(headerName) == null) {
+			myAdditionalHttpHeaders.put(headerName, new ArrayList<>());
 		}
-		return additionalHttpHeaders.get(headerName);
+		return myAdditionalHttpHeaders.get(headerName);
 	}
 
 	/**
 	 * Adds the additional header values to the HTTP request.
 	 * @param theRequest the HTTP request
 	 */
-	@Override
+	@Hook(Pointcut.CLIENT_REQUEST)
 	public void interceptRequest(IHttpRequest theRequest) {
-		for (Map.Entry<String, List<String>> header : additionalHttpHeaders.entrySet()) {
+		for (Map.Entry<String, List<String>> header : myAdditionalHttpHeaders.entrySet()) {
 			for (String headerValue : header.getValue()) {
 				if (headerValue != null) {
 					theRequest.addHeader(header.getKey(), headerValue);
@@ -104,13 +114,4 @@ public class AdditionalRequestHeadersInterceptor implements IClientInterceptor {
 		}
 	}
 
-	/**
-	 * Does nothing since this interceptor is not concerned with the response.
-	 * @param theResponse the HTTP response
-	 * @throws IOException
-	 */
-	@Override
-	public void interceptResponse(IHttpResponse theResponse) throws IOException {
-		// Do nothing. This interceptor is not concerned with the response.
-	}
 }

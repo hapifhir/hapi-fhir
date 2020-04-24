@@ -1,21 +1,23 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
-import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
+import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
-import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -49,20 +51,18 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
-	protected static JpaValidationSupportChainDstu3 myValidationSupport;
+	protected static IValidationSupport myValidationSupport;
 	protected static IGenericClient ourClient;
 	protected static CloseableHttpClient ourHttpClient;
 	protected static int ourPort;
 	protected static RestfulServer ourRestServer;
 	protected static String ourServerBase;
 	protected static GenericWebApplicationContext ourWebApplicationContext;
-	protected static SearchParamRegistryDstu3 ourSearchParamRegistry;
+	protected static SearchParamRegistryImpl ourSearchParamRegistry;
 	protected static DatabaseBackedPagingProvider ourPagingProvider;
-	protected static ISearchDao mySearchEntityDao;
-	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
-	private static Server ourServer;
-	private TerminologyUploaderProviderDstu3 myTerminologyUploaderProvider;
+	protected static ISearchCoordinatorSvc ourSearchCoordinatorSvc;
 	protected static SubscriptionTriggeringProvider ourSubscriptionTriggeringProvider;
+	private static Server ourServer;
 
 	public BaseResourceProviderDstu3Test() {
 		super();
@@ -71,11 +71,11 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	@After
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
-		myDaoConfig.getInterceptors().clear();
 		myResourceCountsCache.clear();
+		ourRestServer.getInterceptorService().unregisterAllInterceptors();
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Before
 	public void before() throws Exception {
 		myResourceCountsCache.clear();
@@ -84,29 +84,27 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
 		if (ourServer == null) {
-			ourPort = PortUtil.findFreePort();
-
 			ourRestServer = new RestfulServer(myFhirCtx);
-
-			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
-
-			ourRestServer.setResourceProviders((List) myResourceProviders);
-
+			ourRestServer.registerProviders(myResourceProviders.createProviders());
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
-			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderDstu3.class);
-			ourRestServer.setPlainProviders(mySystemProvider, myTerminologyUploaderProvider);
+			TerminologyUploaderProvider terminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProvider.class);
+			ourRestServer.registerProviders(mySystemProvider, terminologyUploaderProvider);
 
 			SubscriptionTriggeringProvider subscriptionTriggeringProvider = myAppCtx.getBean(SubscriptionTriggeringProvider.class);
 			ourRestServer.registerProvider(subscriptionTriggeringProvider);
 
-			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(ourRestServer, mySystemDao, myDaoConfig);
+			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
+
+			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(confProvider);
 
 			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
+			ourSearchCoordinatorSvc = myAppCtx.getBean(ISearchCoordinatorSvc.class);
 
-			Server server = new Server(ourPort);
+			Server server = new Server(0);
 
 			ServletContextHandler proxyHandler = new ServletContextHandler();
 			proxyHandler.setContextPath("/");
@@ -125,8 +123,8 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			ServletHolder subsServletHolder = new ServletHolder();
 			subsServletHolder.setServlet(dispatcherServlet);
 			subsServletHolder.setInitParameter(
-					ContextLoader.CONFIG_LOCATION_PARAM, 
-					WebsocketDispatcherConfig.class.getName());
+				ContextLoader.CONFIG_LOCATION_PARAM,
+				WebsocketDispatcherConfig.class.getName());
 			proxyHandler.addServlet(subsServletHolder, "/*");
 
 			// Register a CORS filter
@@ -148,21 +146,24 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			ourRestServer.registerInterceptor(corsInterceptor);
 
 			server.setHandler(proxyHandler);
-			server.start();
+			JettyUtil.startServer(server);
+			ourPort = JettyUtil.getPortForStartedServer(server);
+			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
-			myValidationSupport = wac.getBean(JpaValidationSupportChainDstu3.class);
-			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
-			mySearchEntityDao = wac.getBean(ISearchDao.class);
-			ourSearchParamRegistry = wac.getBean(SearchParamRegistryDstu3.class);
+			myValidationSupport = wac.getBean(IValidationSupport.class);
+			ourSearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
+			ourSearchParamRegistry = wac.getBean(SearchParamRegistryImpl.class);
 			ourSubscriptionTriggeringProvider = wac.getBean(SubscriptionTriggeringProvider.class);
+
+			confProvider.setSearchParamRegistry(ourSearchParamRegistry);
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 			if (shouldLogClient()) {
 				ourClient.registerInterceptor(new LoggingInterceptor());
 			}
-			
+
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(connectionManager);
@@ -193,11 +194,11 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 	@AfterClass
 	public static void afterClassClearContextBaseResourceProviderDstu3Test() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		ourHttpClient.close();
 		ourServer = null;
 		ourHttpClient = null;
-		myValidationSupport.flush();
+		myValidationSupport.invalidateCaches();
 		myValidationSupport = null;
 		ourWebApplicationContext.close();
 		ourWebApplicationContext = null;

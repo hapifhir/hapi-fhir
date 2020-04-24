@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,8 +47,8 @@ public class SearchParameter extends BaseQueryParameter {
 	static final String QUALIFIER_ANY_TYPE = ":*";
 
 	static {
-		ourParamTypes = new HashMap<Class<?>, RestSearchParameterTypeEnum>();
-		ourParamQualifiers = new HashMap<RestSearchParameterTypeEnum, Set<String>>();
+		ourParamTypes = new HashMap<>();
+		ourParamQualifiers = new HashMap<>();
 
 		ourParamTypes.put(StringParam.class, RestSearchParameterTypeEnum.STRING);
 		ourParamTypes.put(StringOrListParam.class, RestSearchParameterTypeEnum.STRING);
@@ -100,11 +100,9 @@ public class SearchParameter extends BaseQueryParameter {
 
 	private List<Class<? extends IQueryParameterType>> myCompositeTypes = Collections.emptyList();
 	private List<Class<? extends IBaseResource>> myDeclaredTypes;
-	private String myDescription;
 	private String myName;
 	private IParamBinder<?> myParamBinder;
 	private RestSearchParameterTypeEnum myParamType;
-	private Set<String> myQualifierBlacklist;
 	private Set<String> myQualifierWhitelist;
 	private boolean myRequired;
 	private Class<?> myType;
@@ -124,7 +122,7 @@ public class SearchParameter extends BaseQueryParameter {
 	 */
 	@Override
 	public List<QualifiedParamList> encode(FhirContext theContext, Object theObject) throws InternalErrorException {
-		ArrayList<QualifiedParamList> retVal = new ArrayList<QualifiedParamList>();
+		ArrayList<QualifiedParamList> retVal = new ArrayList<>();
 
 		// TODO: declaring method should probably have a generic type..
 		@SuppressWarnings("rawtypes")
@@ -137,14 +135,6 @@ public class SearchParameter extends BaseQueryParameter {
 		}
 
 		return retVal;
-	}
-
-	public List<Class<? extends IBaseResource>> getDeclaredTypes() {
-		return Collections.unmodifiableList(myDeclaredTypes);
-	}
-
-	public String getDescription() {
-		return myDescription;
 	}
 
 	/*
@@ -167,47 +157,21 @@ public class SearchParameter extends BaseQueryParameter {
 	}
 
 	@Override
-	public boolean handlesMissing() {
-		return false;
-	}
-
-	@Override
 	public boolean isRequired() {
 		return myRequired;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ca.uhn.fhir.rest.param.IParameter#parse(java.util.List)
-	 */
-	@Override
-	public Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
-		return myParamBinder.parse(theContext, getName(), theString);
-	}
-
-	public void setChainlists(String[] theChainWhitelist, String[] theChainBlacklist) {
-		myQualifierWhitelist = new HashSet<String>(theChainWhitelist.length);
+	public void setChainlists(String[] theChainWhitelist) {
+		myQualifierWhitelist = new HashSet<>(theChainWhitelist.length);
 		myQualifierWhitelist.add(QUALIFIER_ANY_TYPE);
 
-		for (int i = 0; i < theChainWhitelist.length; i++) {
-			if (theChainWhitelist[i].equals(OptionalParam.ALLOW_CHAIN_ANY)) {
+		for (String chain : theChainWhitelist) {
+			if (chain.equals(OptionalParam.ALLOW_CHAIN_ANY)) {
 				myQualifierWhitelist.add('.' + OptionalParam.ALLOW_CHAIN_ANY);
-			} else if (theChainWhitelist[i].equals(EMPTY_STRING)) {
+			} else if (chain.equals(EMPTY_STRING)) {
 				myQualifierWhitelist.add(".");
 			} else {
-				myQualifierWhitelist.add('.' + theChainWhitelist[i]);
-			}
-		}
-
-		if (theChainBlacklist.length > 0) {
-			myQualifierBlacklist = new HashSet<String>(theChainBlacklist.length);
-			for (String next : theChainBlacklist) {
-				if (next.equals(EMPTY_STRING)) {
-					myQualifierBlacklist.add(EMPTY_STRING);
-				} else {
-					myQualifierBlacklist.add('.' + next);
-				}
+				myQualifierWhitelist.add('.' + chain);
 			}
 		}
 	}
@@ -218,10 +182,6 @@ public class SearchParameter extends BaseQueryParameter {
 
 	public void setDeclaredTypes(Class<? extends IBaseResource>[] theTypes) {
 		myDeclaredTypes = Arrays.asList(theTypes);
-	}
-
-	public void setDescription(String theDescription) {
-		myDescription = theDescription;
 	}
 
 	public void setName(String name) {
@@ -271,7 +231,7 @@ public class SearchParameter extends BaseQueryParameter {
 			Set<String> builtInQualifiers = ourParamQualifiers.get(typeEnum);
 			if (builtInQualifiers != null) {
 				if (myQualifierWhitelist != null) {
-					HashSet<String> qualifierWhitelist = new HashSet<String>();
+					HashSet<String> qualifierWhitelist = new HashSet<>();
 					qualifierWhitelist.addAll(myQualifierWhitelist);
 					qualifierWhitelist.addAll(builtInQualifiers);
 					myQualifierWhitelist = qualifierWhitelist;

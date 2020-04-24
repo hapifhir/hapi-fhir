@@ -20,14 +20,14 @@ package ca.uhn.fhir.model.dstu2.composite;
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -162,7 +162,8 @@ public class ResourceReferenceDt
      * A reference to a location at which the other resource is found. The reference may a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources
      * </p> 
 	 */
-	public IdDt getReference() {  
+	@Override
+	public IdDt getReference() {
 		if (myReference == null) {
 			myReference = new IdDt();
 		}
@@ -183,6 +184,7 @@ public class ResourceReferenceDt
      * A reference to a location at which the other resource is found. The reference may a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources
      * </p> 
 	 */
+	@Override
 	public ResourceReferenceDt setReference(IdDt theValue) {
 		myReference = theValue;
 		return this;
@@ -196,7 +198,8 @@ public class ResourceReferenceDt
      * A reference to a location at which the other resource is found. The reference may a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources
      * </p> 
 	 */
-	public ResourceReferenceDt setReference( String theId) {
+	@Override
+	public ResourceReferenceDt setReference(String theId) {
 		myReference = new IdDt(theId); 
 		return this; 
 	}
@@ -240,7 +243,8 @@ public class ResourceReferenceDt
      * Plain text narrative that identifies the resource in addition to the resource reference
      * </p> 
 	 */
-	public ResourceReferenceDt setDisplay( String theString) {
+	@Override
+	public ResourceReferenceDt setDisplay(String theString) {
 		myDisplay = new StringDt(theString); 
 		return this; 
 	}

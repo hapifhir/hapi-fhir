@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,22 +21,26 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.ValidateUtil;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-//@formatter:off
+import static org.apache.commons.lang3.StringUtils.length;
+
 @Table(name = "TRM_CODESYSTEM_VER"
 	// Note, we used to have a constraint named IDX_CSV_RESOURCEPID_AND_VER (don't reuse this)
 )
 @Entity()
-//@formatter:on
 public class TermCodeSystemVersion implements Serializable {
+	public static final int MAX_VERSION_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
-
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myCodeSystem")
 	private Collection<TermConcept> myConcepts;
 
@@ -46,22 +50,33 @@ public class TermCodeSystemVersion implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
-	@OneToOne()
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_CODESYSVER_RES_ID"))
 	private ResourceTable myResource;
 
-	@Column(name = "CS_VERSION_ID", nullable = true, updatable = false)
+	@Column(name = "RES_ID", nullable = false, insertable = false, updatable = false)
+	private Long myResourcePid;
+
+	@Column(name = "CS_VERSION_ID", nullable = true, updatable = false, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemVersionId;
+
 	/**
 	 * This was added in HAPI FHIR 3.3.0 and is nullable just to avoid migration
 	 * issued. It should be made non-nullable at some point.
 	 */
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", nullable = true, foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
 	private TermCodeSystem myCodeSystem;
+
+	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
+	private Long myCodeSystemPid;
+
 	@SuppressWarnings("unused")
-	@OneToOne(mappedBy = "myCurrentVersion", optional = true)
+	@OneToOne(mappedBy = "myCurrentVersion", optional = true, fetch = FetchType.LAZY)
 	private TermCodeSystem myCodeSystemHavingThisVersionAsCurrentVersionIfAny;
+
+	@Column(name = "CS_DISPLAY", nullable = true, updatable = false, length = MAX_VERSION_LENGTH)
+	private String myCodeSystemDisplayName;
 
 	/**
 	 * Constructor
@@ -70,49 +85,26 @@ public class TermCodeSystemVersion implements Serializable {
 		super();
 	}
 
-	@CoverageIgnore
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (!(obj instanceof TermCodeSystemVersion)) {
-			return false;
-		}
-		TermCodeSystemVersion other = (TermCodeSystemVersion) obj;
-		if ((myResource.getId() == null) != (other.myResource.getId() == null)) {
-			return false;
-		} else if (!myResource.getId().equals(other.myResource.getId())) {
-			return false;
-		}
-
-		if (myCodeSystemVersionId == null) {
-			if (other.myCodeSystemVersionId != null) {
-				return false;
-			}
-		} else if (!myCodeSystemVersionId.equals(other.myCodeSystemVersionId)) {
-			return false;
-		}
-		return true;
-	}
 
 	public TermCodeSystem getCodeSystem() {
 		return myCodeSystem;
 	}
 
-	public void setCodeSystem(TermCodeSystem theCodeSystem) {
+	public TermCodeSystemVersion setCodeSystem(TermCodeSystem theCodeSystem) {
 		myCodeSystem = theCodeSystem;
+		return this;
 	}
 
 	public String getCodeSystemVersionId() {
 		return myCodeSystemVersionId;
 	}
 
-	public void setCodeSystemVersionId(String theCodeSystemVersionId) {
+	public TermCodeSystemVersion setCodeSystemVersionId(String theCodeSystemVersionId) {
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+			theCodeSystemVersionId, MAX_VERSION_LENGTH,
+			"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemVersionId));
 		myCodeSystemVersionId = theCodeSystemVersionId;
+		return this;
 	}
 
 	public Collection<TermConcept> getConcepts() {
@@ -130,17 +122,67 @@ public class TermCodeSystemVersion implements Serializable {
 		return myResource;
 	}
 
-	public void setResource(ResourceTable theResource) {
+	public TermCodeSystemVersion setResource(ResourceTable theResource) {
 		myResource = theResource;
+		return this;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) {
+			return true;
+		}
+
+		if (theO == null || getClass() != theO.getClass()) {
+			return false;
+		}
+
+		TermCodeSystemVersion that = (TermCodeSystemVersion) theO;
+
+		return new EqualsBuilder()
+			.append(myCodeSystemVersionId, that.myCodeSystemVersionId)
+			.append(myCodeSystemPid, that.myCodeSystemPid)
+			.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((myResource.getId() == null) ? 0 : myResource.getId().hashCode());
-		result = prime * result + ((myCodeSystemVersionId == null) ? 0 : myCodeSystemVersionId.hashCode());
-		return result;
+		HashCodeBuilder b = new HashCodeBuilder(17, 37);
+		b.append(myCodeSystemVersionId);
+		b.append(myCodeSystemPid);
+		return b.toHashCode();
 	}
 
+	public String getCodeSystemDisplayName() {
+		return myCodeSystemDisplayName;
+	}
+
+	public void setCodeSystemDisplayName(String theCodeSystemDisplayName) {
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+			theCodeSystemDisplayName, MAX_VERSION_LENGTH,
+			"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemDisplayName));
+		myCodeSystemDisplayName = theCodeSystemDisplayName;
+	}
+
+	public TermConcept addConcept() {
+		TermConcept concept = new TermConcept();
+		concept.setCodeSystemVersion(this);
+		getConcepts().add(concept);
+		return concept;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("pid", myId);
+		b.append("codeSystemResourcePid", myResourcePid);
+		b.append("codeSystemPid", myCodeSystemPid);
+		b.append("codeSystemVersionId", myCodeSystemVersionId);
+		return b.toString();
+	}
+
+	TermCodeSystemVersion setCodeSystemPidForUnitTest(long theCodeSystemPid) {
+		myCodeSystemPid = theCodeSystemPid;
+		return this;
+	}
 }

@@ -9,7 +9,8 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class StopWatchTest {
 
@@ -99,6 +100,7 @@ public class StopWatchTest {
 
 	@Test
 	public void testFormatMillis() {
+		assertEquals("0.134ms", StopWatch.formatMillis(0.1339d).replace(',', '.'));
 		assertEquals("1000ms", StopWatch.formatMillis(DateUtils.MILLIS_PER_SECOND));
 		assertEquals("00:01:00.000", StopWatch.formatMillis(DateUtils.MILLIS_PER_MINUTE));
 		assertEquals("00:01:01", StopWatch.formatMillis(DateUtils.MILLIS_PER_MINUTE + DateUtils.MILLIS_PER_SECOND));
@@ -127,6 +129,56 @@ public class StopWatchTest {
 	}
 
 	@Test
+	public void testFormatTaskDurationsDelayBetweenTasks() {
+		StopWatch sw = new StopWatch();
+
+		StopWatch.setNowForUnitTestForUnitTest(1000L);
+		sw.startTask("TASK1");
+
+		StopWatch.setNowForUnitTestForUnitTest(1500L);
+		sw.endCurrentTask();
+
+		StopWatch.setNowForUnitTestForUnitTest(2000L);
+		sw.startTask("TASK2");
+
+		StopWatch.setNowForUnitTestForUnitTest(2100L);
+		sw.endCurrentTask();
+
+		StopWatch.setNowForUnitTestForUnitTest(2200L);
+		String taskDurations = sw.formatTaskDurations();
+		ourLog.info(taskDurations);
+		assertEquals("TASK1: 500ms\n" +
+			"Between: 500ms\n" +
+			"TASK2: 100ms\n" +
+			"After last task: 100ms", taskDurations);
+	}
+
+	@Test
+	public void testFormatTaskDurationsLongDelayBeforeStart() {
+		StopWatch sw = new StopWatch(0);
+
+		StopWatch.setNowForUnitTestForUnitTest(1000L);
+		sw.startTask("TASK1");
+
+		StopWatch.setNowForUnitTestForUnitTest(1500L);
+		sw.startTask("TASK2");
+
+		StopWatch.setNowForUnitTestForUnitTest(1600L);
+		String taskDurations = sw.formatTaskDurations();
+		ourLog.info(taskDurations);
+		assertEquals("Before first task: 1000ms\nTASK1: 500ms\nTASK2: 100ms", taskDurations);
+	}
+
+	@Test
+	public void testFormatTaskDurationsNoTasks() {
+		StopWatch sw = new StopWatch(0);
+
+		String taskDurations = sw.formatTaskDurations();
+		ourLog.info(taskDurations);
+		assertEquals("No tasks", taskDurations);
+	}
+
+	@Test
 	public void testFormatThroughput60Ops4Min() {
 		StopWatch sw = new StopWatch(DateUtils.addMinutes(new Date(), -4));
 		String throughput = sw.formatThroughput(60, TimeUnit.MINUTES).replace(',', '.');
@@ -139,11 +191,11 @@ public class StopWatchTest {
 		int minutes = 60;
 		StopWatch sw = new StopWatch(DateUtils.addMinutes(new Date(), -minutes));
 		int numOperations = 60;
-		int millis = sw.getMillisPerOperation(numOperations);
+		long millis = sw.getMillisPerOperation(numOperations);
 		ourLog.info("{} operations in {}ms = {}ms / operation", numOperations, minutes * DateUtils.MILLIS_PER_MINUTE, millis);
 
-		assertThat(millis, Matchers.lessThan(62000));
-		assertThat(millis, Matchers.greaterThan(58000));
+		assertThat(millis, Matchers.lessThan(62000L));
+		assertThat(millis, Matchers.greaterThan(58000L));
 	}
 
 	@Test
@@ -206,6 +258,36 @@ public class StopWatchTest {
 		String string = sw.toString();
 		ourLog.info(string);
 		assertThat(string, matchesPattern("^[0-9]{3,4}ms$"));
+	}
+
+
+	@Test
+	public void testAppendRightAlignedNumber() {
+		StringBuilder b= new StringBuilder();
+
+		b.setLength(0);
+		StopWatch.appendRightAlignedNumber(b, "PFX", 0, 100);
+		assertEquals("PFX100", b.toString());
+
+		b.setLength(0);
+		StopWatch.appendRightAlignedNumber(b, "PFX", 1, 100);
+		assertEquals("PFX100", b.toString());
+
+		b.setLength(0);
+		StopWatch.appendRightAlignedNumber(b, "PFX", 2, 100);
+		assertEquals("PFX100", b.toString());
+
+		b.setLength(0);
+		StopWatch.appendRightAlignedNumber(b, "PFX", 3, 100);
+		assertEquals("PFX100", b.toString());
+
+		b.setLength(0);
+		StopWatch.appendRightAlignedNumber(b, "PFX", 4, 100);
+		assertEquals("PFX0100", b.toString());
+
+		b.setLength(0);
+		StopWatch.appendRightAlignedNumber(b, "PFX", 10, 100);
+		assertEquals("PFX0000000100", b.toString());
 	}
 
 }

@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,21 +20,28 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.annotation.Nonnull;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.left;
+import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
 @Table(name = "TRM_CONCEPT_MAP_GRP_ELEMENT", indexes = {
 	@Index(name = "IDX_CNCPT_MAP_GRP_CD", columnList = "SOURCE_CODE")
 })
 public class TermConceptMapGroupElement implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_MAP_GRP_ELM_PID", sequenceName = "SEQ_CONCEPT_MAP_GRP_ELM_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_MAP_GRP_ELM_PID")
@@ -45,7 +52,7 @@ public class TermConceptMapGroupElement implements Serializable {
 	@JoinColumn(name = "CONCEPT_MAP_GROUP_PID", nullable = false, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_TCMGELEMENT_GROUP"))
 	private TermConceptMapGroup myConceptMapGroup;
 
-	@Column(name = "SOURCE_CODE", nullable = false, length = TermConcept.CODE_LENGTH)
+	@Column(name = "SOURCE_CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
 
 	@Column(name = "SOURCE_DISPLAY", length = TermConcept.MAX_DESC_LENGTH)
@@ -54,25 +61,37 @@ public class TermConceptMapGroupElement implements Serializable {
 	@OneToMany(mappedBy = "myConceptMapGroupElement")
 	private List<TermConceptMapGroupElementTarget> myConceptMapGroupElementTargets;
 
+	@Column(name = "CONCEPT_MAP_URL", nullable = true, length = TermConceptMap.MAX_URL_LENGTH)
 	private String myConceptMapUrl;
+
+	@Column(name = "SYSTEM_URL", nullable = true, length = TermCodeSystem.MAX_URL_LENGTH)
 	private String mySystem;
+
+	@Column(name = "SYSTEM_VERSION", nullable = true, length = TermCodeSystemVersion.MAX_VERSION_LENGTH)
 	private String mySystemVersion;
+
+	@Column(name = "VALUESET_URL", nullable = true, length = TermValueSet.MAX_URL_LENGTH)
 	private String myValueSet;
 
 	public String getCode() {
 		return myCode;
 	}
 
-	public void setCode(String theCode) {
+	public TermConceptMapGroupElement setCode(@Nonnull String theCode) {
+		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCode, TermConcept.MAX_CODE_LENGTH,
+			"Code exceeds maximum length (" + TermConcept.MAX_CODE_LENGTH + "): " + length(theCode));
 		myCode = theCode;
+		return this;
 	}
 
 	public TermConceptMapGroup getConceptMapGroup() {
 		return myConceptMapGroup;
 	}
 
-	public void setConceptMapGroup(TermConceptMapGroup theTermConceptMapGroup) {
+	public TermConceptMapGroupElement setConceptMapGroup(TermConceptMapGroup theTermConceptMapGroup) {
 		myConceptMapGroup = theTermConceptMapGroup;
+		return this;
 	}
 
 	public List<TermConceptMapGroupElementTarget> getConceptMapGroupElementTargets() {
@@ -94,8 +113,9 @@ public class TermConceptMapGroupElement implements Serializable {
 		return myDisplay;
 	}
 
-	public void setDisplay(String theDisplay) {
-		myDisplay = theDisplay;
+	public TermConceptMapGroupElement setDisplay(String theDisplay) {
+		myDisplay = left(theDisplay, TermConcept.MAX_DESC_LENGTH);
+		return this;
 	}
 
 	public Long getId() {
@@ -149,7 +169,7 @@ public class TermConceptMapGroupElement implements Serializable {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("myId", myId)
 			.append(myConceptMapGroup != null ? ("myConceptMapGroup - id=" + myConceptMapGroup.getId()) : ("myConceptMapGroup=(null)"))
 			.append("myCode", myCode)

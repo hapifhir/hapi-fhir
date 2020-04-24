@@ -1,0 +1,52 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+    (dependent HAPI modules listed in brackets):
+    <ul>
+    <li>Hibernate ORM (JPA): 5.4.6 -&gt; 5.4.12</li>
+    <li>Hibernate Search (JPA): 5.11.3 -&gt; 5.11.5</li>
+    </ul>"
+- item:
+    issue: "1583"
+    type: "fix"
+    title: "**Breaking Change**:
+    The HAPI FHIR Validation infrastructure has changed significantly under the hood. Existing users of the
+    validator may need to change package declarations (as FhirInstanceValidator and several other related classes
+    have been moved) and potentially add new modules to their Validation Support Chain. See
+    [Migrating to HAPI FHIR 5.x](/hapi-fhir/docs/validation/instance_validator.html#migrating-to-hapi-fhir-5x)
+    for details on how to account for this change in your code.
+    "
+- item:
+     issue: "1769"
+     type: "change"
+     title: "**Breaking Change**:
+    The `IFluentPath` interface has been renamed to `IFhirPath`, and the `FhirContext#newFluentPath()` method
+    has been replaced with an equivalent `FhirContext.newFhirPath()`. The FhirPath expression language was initially
+    called FluentPath before being renamed, so this change brings HAPI FHIR inline with the correct naming.
+    "
+- item:
+     issue: "1790"
+     type: "change"
+     title: "**Breaking Change**:
+    Several classes in the JPA server have been moved to new packages, including the DaoConfig and IDao interfaces.
+    These classes have not changed in terms of functionality, but existing projects may need to adjust some
+    package import statements.
+    "
+- item:
+     issue: "1804"
+     type: "change"
+     title: "**Breaking Change**:
+    The Generic/Fluent **delete()** operation now returns a [MethodOutcome](/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/api/MethodOutcome.html)
+    object instead of an OperationOutcome. The OperationOutcomoe is still available direcly by querying
+    the MethodOutcome object, but this change makes the delete() method more consistent with
+    other similar methods in the API.
+    "
+- item:
+     type: "change"
+     title: "**Breaking Change**:
+    Some R4 and R5 structure fields containing a `code` value with a **Required (closed) binding**
+    did not use the java Enum type that was generated for the given field. These have been changed
+    to use the Enum values where possible. This change does not remove any functionality from the model
+    but may require a small amount of re-coding to deal with new setter/getter types on a few fields.
+    "

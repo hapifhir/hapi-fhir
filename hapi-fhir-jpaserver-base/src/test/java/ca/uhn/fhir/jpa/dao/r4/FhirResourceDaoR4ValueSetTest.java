@@ -1,34 +1,35 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
-import ca.uhn.fhir.util.TestUtil;
+import java.io.IOException;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
@@ -36,6 +37,11 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 	private IIdType myExtensionalVsId;
 
+	@After
+	public void after() {
+		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
+		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {
@@ -63,7 +69,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		StringType display = null;
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
-		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertFalse(result.isResult());
 	}
 
@@ -76,7 +82,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		StringType display = null;
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
-		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure--expiration", result.getDisplay());
 	}
@@ -90,7 +96,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		StringType display = null;
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
-		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -104,7 +110,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		StringType display = new StringType("Systolic blood pressure at First encounterXXXX");
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
-		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertFalse(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -118,7 +124,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		StringType display = new StringType("Systolic blood pressure at First encounter");
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
-		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -133,7 +139,34 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding().setSystem("http://acme.org").setCode("11378-7");
-		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		assertTrue(result.isResult());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+	}
+
+	@Test
+	public void testValidateCodeOperationByResourceIdAndCodeableConceptWithExistingValueSetAndPreExpansionEnabled() {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		UriType valueSetIdentifier = null;
+		IIdType id = myExtensionalVsId;
+		CodeType code = null;
+		UriType system = null;
+		StringType display = null;
+		Coding coding = null;
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setSystem("http://acme.org").setCode("11378-7");
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		assertTrue(result.isResult());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		assertTrue(result.isResult());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -147,13 +180,39 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		StringType display = null;
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
-		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test
-	public void testExpandById() throws IOException {
+	public void testValidateCodeOperationByResourceIdAndCodeAndSystemWithExistingValueSetAndPreExpansionEnabled() {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		UriType valueSetIdentifier = null;
+		IIdType id = myExtensionalVsId;
+		CodeType code = new CodeType("11378-7");
+		UriType system = new UriType("http://acme.org");
+		StringType display = null;
+		Coding coding = null;
+		CodeableConcept codeableConcept = null;
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		assertTrue(result.isResult());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		assertTrue(result.isResult());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		assertTrue(result.isResult());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+	}
+
+	@Test
+	public void testExpandById() {
 		String resp;
 
 		ValueSet expanded = myValueSetDao.expand(myExtensionalVsId, null, mySrd);
@@ -189,53 +248,42 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 	}
 	
 	@Test
-	@Ignore
-	public void testExpandByIdentifier() {
-		ValueSet expanded = myValueSetDao.expandByIdentifier("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "11378");
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
-		ourLog.info(resp);
-		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
+	public void testExpandByValueSet_ExceedsMaxSize() {
+		// Add a bunch of codes
+		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		for (int i = 0; i < 100; i++) {
+			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+		}
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
+		myDaoConfig.setMaximumExpansionSize(50);
 
-		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
-	}
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
+		vs.getCompose().addInclude().setSystem("http://loinc.org");
+		myValueSetDao.create(vs);
 
-	/**
-	 * This type of expansion doesn't really make sense..
-	 */
-	@Test
-	@Ignore
-	public void testExpandByValueSet() throws IOException {
-		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
-		ValueSet expanded = myValueSetDao.expand(toExpand, "11378");
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
-		ourLog.info(resp);
-		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
-
-		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
+		try {
+			myValueSetDao.expand(vs, null);
+			fail();
+		} catch (InternalErrorException e) {
+			assertEquals("Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!", e.getMessage());
+		}
 	}
 
 	
 	@Test
-	public void testValiedateCodeAgainstBuiltInValueSetAndCodeSystemWithValidCode() {
+	public void testValidateCodeAgainstBuiltInValueSetAndCodeSystemWithValidCode() {
 		IPrimitiveType<String> display = null;
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
-		StringType vsIdentifier = new StringType("http://hl7.org/fhir/ValueSet/yesnodontknow");
-		StringType code = new StringType("Y");
-		StringType system = new StringType("http://terminology.hl7.org/CodeSystem/v2-0136");
-		ValidateCodeResult result = myValueSetDao.validateCode(vsIdentifier, null, code, system, display, coding, codeableConcept, mySrd);
+		StringType vsIdentifier = new StringType("http://hl7.org/fhir/ValueSet/administrative-gender");
+		StringType code = new StringType("male");
+		StringType system = new StringType("http://hl7.org/fhir/administrative-gender");
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(vsIdentifier, null, code, system, display, coding, codeableConcept, mySrd);
 		
 		ourLog.info(result.getMessage());
 		assertTrue(result.getMessage(), result.isResult());
-		assertEquals("Yes", result.getDisplay());
+		assertEquals("Male", result.getDisplay());
 	}
 
 	

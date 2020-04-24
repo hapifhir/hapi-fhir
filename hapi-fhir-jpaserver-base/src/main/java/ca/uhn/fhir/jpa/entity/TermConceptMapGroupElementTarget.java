@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,20 +20,28 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 
+import javax.annotation.Nonnull;
 import javax.persistence.*;
 import java.io.Serializable;
+
+import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
 @Table(name = "TRM_CONCEPT_MAP_GRP_ELM_TGT", indexes = {
 	@Index(name = "IDX_CNCPT_MP_GRP_ELM_TGT_CD", columnList = "TARGET_CODE")
 })
 public class TermConceptMapGroupElementTarget implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+	static final int MAX_EQUIVALENCE_LENGTH = 50;
+
 	@Id()
 	@SequenceGenerator(name = "SEQ_CNCPT_MAP_GRP_ELM_TGT_PID", sequenceName = "SEQ_CNCPT_MAP_GRP_ELM_TGT_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CNCPT_MAP_GRP_ELM_TGT_PID")
@@ -44,27 +52,38 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 	@JoinColumn(name = "CONCEPT_MAP_GRP_ELM_PID", nullable = false, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_TCMGETARGET_ELEMENT"))
 	private TermConceptMapGroupElement myConceptMapGroupElement;
 
-	@Column(name = "TARGET_CODE", nullable = false, length = TermConcept.CODE_LENGTH)
+	@Column(name = "TARGET_CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
 
-	@Column(name = "TARGET_DISPLAY", length = TermConcept.MAX_DESC_LENGTH)
+	@Column(name = "TARGET_DISPLAY", nullable = true, length = TermConcept.MAX_DESC_LENGTH)
 	private String myDisplay;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "TARGET_EQUIVALENCE", length = 50)
+	@Column(name = "TARGET_EQUIVALENCE", nullable = true, length = MAX_EQUIVALENCE_LENGTH)
 	private ConceptMapEquivalence myEquivalence;
 
+	@Column(name = "CONCEPT_MAP_URL", nullable = true, length = TermConceptMap.MAX_URL_LENGTH)
 	private String myConceptMapUrl;
+
+	@Column(name = "SYSTEM_URL", nullable = true, length = TermCodeSystem.MAX_URL_LENGTH)
 	private String mySystem;
+
+	@Column(name = "SYSTEM_VERSION", nullable = true, length = TermCodeSystemVersion.MAX_VERSION_LENGTH)
 	private String mySystemVersion;
+
+	@Column(name = "VALUESET_URL", nullable = true, length = TermValueSet.MAX_URL_LENGTH)
 	private String myValueSet;
 
 	public String getCode() {
 		return myCode;
 	}
 
-	public void setCode(String theCode) {
+	public TermConceptMapGroupElementTarget setCode(@Nonnull String theCode) {
+		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCode, TermConcept.MAX_CODE_LENGTH,
+			"Code exceeds maximum length (" + TermConcept.MAX_CODE_LENGTH + "): " + length(theCode));
 		myCode = theCode;
+		return this;
 	}
 
 	public TermConceptMapGroupElement getConceptMapGroupElement() {
@@ -86,16 +105,18 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 		return myDisplay;
 	}
 
-	public void setDisplay(String theDisplay) {
+	public TermConceptMapGroupElementTarget setDisplay(String theDisplay) {
 		myDisplay = theDisplay;
+		return this;
 	}
 
 	public ConceptMapEquivalence getEquivalence() {
 		return myEquivalence;
 	}
 
-	public void setEquivalence(ConceptMapEquivalence theEquivalence) {
+	public TermConceptMapGroupElementTarget setEquivalence(ConceptMapEquivalence theEquivalence) {
 		myEquivalence = theEquivalence;
+		return this;
 	}
 
 	public Long getId() {
@@ -151,7 +172,7 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("myId", myId)
 			.append(myConceptMapGroupElement != null ? ("myConceptMapGroupElement - id=" + myConceptMapGroupElement.getId()) : ("myConceptMapGroupElement=(null)"))
 			.append("myCode", myCode)

@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,16 +21,21 @@ package ca.uhn.fhir.rest.server.method;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Method;
@@ -62,12 +67,12 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		if ("$graphql".equals(theRequest.getOperation())) {
-			return true;
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+		if (Constants.OPERATION_NAME_GRAPHQL.equals(theRequest.getOperation())) {
+			return MethodMatchEnum.EXACT;
 		}
 
-		return false;
+		return MethodMatchEnum.NONE;
 	}
 
 	@Override
@@ -85,11 +90,44 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 		String charset = Constants.CHARSET_NAME_UTF8;
 		boolean respondGzip = theRequest.isRespondGzip();
 
-		Writer writer = theRequest.getResponse().getResponseWriter(statusCode, statusMessage, contentType, charset, respondGzip);
-
 		String responseString = (String) response;
+
+		HttpServletRequest servletRequest=null;
+		HttpServletResponse servletResponse=null;
+		if (theRequest instanceof ServletRequestDetails) {
+			servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
+			servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
+		}
+
+		// Interceptor call: SERVER_OUTGOING_GRAPHQL_RESPONSE
+		HookParams params = new HookParams()
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(String.class, theRequest.getParameters().get(Constants.PARAM_GRAPHQL_QUERY)[0])
+			.add(String.class, responseString)
+			.add(HttpServletRequest.class, servletRequest)
+			.add(HttpServletResponse.class, servletResponse);
+		if (!theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_GRAPHQL_RESPONSE, params)) {
+			return null;
+		}
+
+		// Interceptor call: SERVER_OUTGOING_RESPONSE
+		params = new HookParams()
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(IBaseResource.class, null)
+			.add(ResponseDetails.class, new ResponseDetails())
+			.add(HttpServletRequest.class, servletRequest)
+			.add(HttpServletResponse.class, servletResponse);
+		if (!theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_RESPONSE, params)) {
+			return null;
+		}
+
+		// Write the response
+		Writer writer = theRequest.getResponse().getResponseWriter(statusCode, statusMessage, contentType, charset, respondGzip);
 		writer.write(responseString);
 		writer.close();
+
 
 		return null;
 	}

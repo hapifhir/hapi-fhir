@@ -4,14 +4,14 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -81,4 +81,18 @@ public enum TemporalPrecisionEnum {
 		return myCalendarConstant;
 	}
 
+	/**
+	 * Given the standard string representation - YYYY-DD-MMTHH:NN:SS.SSS - how long is the string for the stated precision?
+	 */
+	public int stringLength() {
+		switch (this) {
+			case YEAR: return 4;
+			case MONTH: return 7;
+			case DAY: return 10;
+			case MINUTE: return 16;
+			case SECOND: return 19;
+			case MILLI: return 23;
+		}
+		return 0; // ??
+	}
 }

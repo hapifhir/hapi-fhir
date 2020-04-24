@@ -1,25 +1,48 @@
 package ca.uhn.fhir.jpa.demo;
 
+/*-
+ * #%L
+ * HAPI FHIR - Command Line Client - Server WAR
+ * %%
+ * Copyright (C) 2014 - 2020 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.jpa.provider.r4.JpaConformanceProviderR4;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
-import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
-import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.api.rp.ResourceProviderFactory;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import org.springframework.web.context.ContextLoaderListener;
@@ -66,8 +89,8 @@ public class JpaServerDemo extends RestfulServer {
 			throw new IllegalStateException();
 		}
 
-		List<IResourceProvider> beans = myAppCtx.getBean(resourceProviderBeanName, List.class);
-		setResourceProviders(beans);
+		ResourceProviderFactory beans = myAppCtx.getBean(resourceProviderBeanName, ResourceProviderFactory.class);
+		registerProviders(beans.createProviders());
 		
 		/* 
 		 * The system provider implements non-resource-type methods, such as
@@ -78,14 +101,15 @@ public class JpaServerDemo extends RestfulServer {
 			systemProvider.add(myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class));
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
 			systemProvider.add(myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
-			systemProvider.add(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
+			systemProvider.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 		} else if (fhirVersion == FhirVersionEnum.R4) {
 			systemProvider.add(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
-			systemProvider.add(myAppCtx.getBean(TerminologyUploaderProviderR4.class));
+			systemProvider.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
+			systemProvider.add(myAppCtx.getBean(BaseConfig.GRAPHQL_PROVIDER_NAME));
 		} else {
 			throw new IllegalStateException();
 		}
-		setPlainProviders(systemProvider);
+		registerProviders(systemProvider);
 
 		/*
 		 * The conformance provider exports the supported resources, search parameters, etc for
@@ -102,14 +126,14 @@ public class JpaServerDemo extends RestfulServer {
 			IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, org.hl7.fhir.dstu3.model.Meta> systemDao = myAppCtx
 					.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao,
-					myAppCtx.getBean(DaoConfig.class));
+					myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else if (fhirVersion == FhirVersionEnum.R4) {
 			IFhirSystemDao<org.hl7.fhir.r4.model.Bundle, org.hl7.fhir.r4.model.Meta> systemDao = myAppCtx
 					.getBean("mySystemDaoR4", IFhirSystemDao.class);
 			JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(this, systemDao,
-					myAppCtx.getBean(DaoConfig.class));
+					myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else {
@@ -148,8 +172,10 @@ public class JpaServerDemo extends RestfulServer {
 		daoConfig.setEnforceReferentialIntegrityOnWrite(!ContextHolder.isDisableReferentialIntegrity());
 		daoConfig.setReuseCachedSearchResultsForMillis(ContextHolder.getReuseCachedSearchResultsForMillis());
 
-		SubscriptionInterceptorLoader subscriptionInterceptorLoader = myAppCtx.getBean(SubscriptionInterceptorLoader.class);
-		subscriptionInterceptorLoader.registerInterceptors();
+		DaoRegistry daoRegistry = myAppCtx.getBean(DaoRegistry.class);
+		IInterceptorBroadcaster interceptorBroadcaster = myAppCtx.getBean(IInterceptorBroadcaster.class);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(daoRegistry, interceptorBroadcaster);
+		getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 	}
 
 }

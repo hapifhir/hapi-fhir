@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Fri, Nov 1, 2019 09:29+1100 for FHIR v4.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="MedicinalProductIngredient" type="MedicinalProductIngredient">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">An ingredient of a manufactured item or pharmaceutical product.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="MedicinalProductIngredient">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">An ingredient of a manufactured item or pharmaceutical product.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="1" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The identifier(s) of this Ingredient that are assigned by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="role" minOccurs="1" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Ingredient role e.g. Active ingredient, excipient.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="allergenicIndicator" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">If the ingredient is a known or suspected allergen.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="manufacturer" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Manufacturer of this Ingredient.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="specifiedSubstance" type="MedicinalProductIngredient.SpecifiedSubstance" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A specified substance that comprises this ingredient.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="substance" type="MedicinalProductIngredient.Substance" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The ingredient substance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="MedicinalProductIngredient.SpecifiedSubstance">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">An ingredient of a manufactured item or pharmaceutical product.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="code" minOccurs="1" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The specified substance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="group" minOccurs="1" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The group of specified substance, e.g. group 1 to 4.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="confidentiality" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Confidentiality level of the specified substance as the ingredient.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="strength" type="MedicinalProductIngredient.Strength" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Quantity of the substance or specified substance present in the manufactured item or pharmaceutical product.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="MedicinalProductIngredient.Strength">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">An ingredient of a manufactured item or pharmaceutical product.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="presentation" minOccurs="1" maxOccurs="1" type="Ratio">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The quantity of substance in the unit of presentation, or in the volume (or mass) of the single pharmaceutical product or manufactured item.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="presentationLowLimit" minOccurs="0" maxOccurs="1" type="Ratio">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A lower limit for the quantity of substance in the unit of presentation. For use when there is a range of strengths, this is the lower limit, with the presentation attribute becoming the upper limit.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="concentration" minOccurs="0" maxOccurs="1" type="Ratio">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The strength per unitary volume (or mass).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="concentrationLowLimit" minOccurs="0" maxOccurs="1" type="Ratio">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A lower limit for the strength per unitary volume (or mass), for when there is a range. The concentration attribute then becomes the upper limit.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="measurementPoint" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">For when strength is measured at a particular point or distance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="country" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The country or countries for which the strength range applies.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="referenceStrength" type="MedicinalProductIngredient.ReferenceStrength" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Strength expressed in terms of a reference substance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="MedicinalProductIngredient.ReferenceStrength">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">An ingredient of a manufactured item or pharmaceutical product.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="substance" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Relevant reference substance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="strength" minOccurs="1" maxOccurs="1" type="Ratio">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Strength expressed in terms of a reference substance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="strengthLowLimit" minOccurs="0" maxOccurs="1" type="Ratio">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Strength expressed in terms of a reference substance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="measurementPoint" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">For when strength is measured at a particular point or distance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="country" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The country or countries for which the strength range applies.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="MedicinalProductIngredient.Substance">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">An ingredient of a manufactured item or pharmaceutical product.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="code" minOccurs="1" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The ingredient substance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="strength" type="MedicinalProductIngredient.Strength" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Quantity of the substance or specified substance present in the manufactured item or pharmaceutical product.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

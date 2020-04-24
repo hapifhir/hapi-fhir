@@ -6,14 +6,14 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,19 +45,7 @@ class PatchTypeParameter implements IParameter {
 
 	public static PatchTypeEnum getTypeForRequestOrThrowInvalidRequestException(RequestDetails theRequest) {
 		String contentTypeAll = defaultString(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE));
-		String contentType = contentTypeAll;
-		int semiColonIdx = contentType.indexOf(';');
-		if (semiColonIdx != -1) {
-			contentType = contentTypeAll.substring(0, semiColonIdx);
-		}
-		contentType = contentType.trim();
-		if (Constants.CT_JSON_PATCH.equals(contentType)) {
-			return PatchTypeEnum.JSON_PATCH;
-		} else if (Constants.CT_XML_PATCH.equals(contentType)) {
-			return PatchTypeEnum.XML_PATCH;
-		} else {
-			throw new InvalidRequestException("Invalid Content-Type for PATCH operation: " + contentTypeAll);
-		}
+		return PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(contentTypeAll);
 	}
 
 }

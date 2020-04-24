@@ -33,7 +33,6 @@ import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
-import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
@@ -51,90 +50,6 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
 
   public R4BundleFactory(FhirContext theContext) {
     myContext = theContext;
-  }
-
-  private void addResourcesForSearch(List<? extends IBaseResource> theResult) {
-    List<IBaseResource> includedResources = new ArrayList<IBaseResource>();
-    Set<IIdType> addedResourceIds = new HashSet<IIdType>();
-
-    for (IBaseResource next : theResult) {
-      if (next.getIdElement().isEmpty() == false) {
-        addedResourceIds.add(next.getIdElement());
-      }
-    }
-
-    for (IBaseResource nextBaseRes : theResult) {
-      Resource next = (Resource) nextBaseRes;
-      Set<String> containedIds = new HashSet<String>();
-      if (next instanceof DomainResource) {
-        for (Resource nextContained : ((DomainResource) next).getContained()) {
-          if (nextContained.getIdElement().isEmpty() == false) {
-            containedIds.add(nextContained.getIdElement().getValue());
-          }
-        }
-      }
-
-      List<IBaseReference> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IBaseReference.class);
-      do {
-        List<IAnyResource> addedResourcesThisPass = new ArrayList<>();
-
-        for (IBaseReference nextRef : references) {
-          IAnyResource nextRes = (IAnyResource) nextRef.getResource();
-          if (nextRes != null) {
-            if (nextRes.getIdElement().hasIdPart()) {
-              if (containedIds.contains(nextRes.getIdElement().getValue())) {
-                // Don't add contained IDs as top level resources
-                continue;
-              }
-
-              IIdType id = nextRes.getIdElement();
-              if (id.hasResourceType() == false) {
-                String resName = myContext.getResourceDefinition(nextRes).getName();
-                id = id.withResourceType(resName);
-              }
-
-              if (!addedResourceIds.contains(id)) {
-                addedResourceIds.add(id);
-                addedResourcesThisPass.add(nextRes);
-              }
-
-            }
-          }
-        }
-
-        // Linked resources may themselves have linked resources
-        references = new ArrayList<>();
-        for (IAnyResource iResource : addedResourcesThisPass) {
-          List<IBaseReference> newReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(iResource, IBaseReference.class);
-          references.addAll(newReferences);
-        }
-
-        includedResources.addAll(addedResourcesThisPass);
-
-      } while (references.isEmpty() == false);
-
-      BundleEntryComponent entry = myBundle.addEntry().setResource(next);
-      if (next.getIdElement().hasBaseUrl()) {
-        entry.setFullUrl(next.getId());
-      }
-
-      String httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(next);
-      if (httpVerb != null) {
-        entry.getRequest().getMethodElement().setValueAsString(httpVerb);
-        entry.getRequest().getUrlElement().setValue(next.getId());
-      }
-    }
-
-    /*
-     * Actually add the resources to the bundle
-     */
-    for (IBaseResource next : includedResources) {
-      BundleEntryComponent entry = myBundle.addEntry();
-      entry.setResource((Resource) next).getSearch().setMode(SearchEntryMode.INCLUDE);
-      if (next.getIdElement().hasBaseUrl()) {
-        entry.setFullUrl(next.getIdElement().getValue());
-      }
-    }
   }
 
   @Override
@@ -167,7 +82,7 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
         List<IAnyResource> addedResourcesThisPass = new ArrayList<IAnyResource>();
 
         for (ResourceReferenceInfo nextRefInfo : references) {
-          if (!theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
+          if (theBundleInclusionRule != null && !theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
             continue;
           }
 
@@ -216,17 +131,29 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
           entry.getRequest().setUrl(id.getValue());
         }
       }
-
-      // Populate Response
-      if ("1".equals(id.getVersionIdPart())) {
-        entry.getResponse().setStatus("201 Created");
-      } else if (isNotBlank(id.getVersionIdPart())) {
-        entry.getResponse().setStatus("200 OK");
-      }
-      if (isNotBlank(id.getVersionIdPart())) {
-        entry.getResponse().setEtag(RestfulServerUtils.createEtag(id.getVersionIdPart()));
+      if ("DELETE".equals(httpVerb)) {
+        entry.setResource(null);
       }
 
+      // Populate Bundle.entry.response
+      if (theBundleType != null) {
+        switch (theBundleType) {
+          case BATCH_RESPONSE:
+          case TRANSACTION_RESPONSE:
+          case HISTORY:
+            if ("1".equals(id.getVersionIdPart())) {
+              entry.getResponse().setStatus("201 Created");
+            } else if (isNotBlank(id.getVersionIdPart())) {
+              entry.getResponse().setStatus("200 OK");
+            }
+            if (isNotBlank(id.getVersionIdPart())) {
+              entry.getResponse().setEtag(RestfulServerUtils.createEtag(id.getVersionIdPart()));
+            }
+            break;
+        }
+      }
+
+      // Populate Bundle.entry.search
       String searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
       if (searchMode != null) {
         entry.getSearch().getModeElement().setValueAsString(searchMode);
@@ -299,44 +226,6 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
       }
     }
     return false;
-  }
-
-  @Override
-  public void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults,
-                                               BundleTypeEnum theBundleType) {
-    myBundle = new Bundle();
-
-    myBundle.setId(UUID.randomUUID().toString());
-
-    myBundle.getMeta().setLastUpdated(new Date());
-
-    myBundle.addLink().setRelation(Constants.LINK_FHIR_BASE).setUrl(theServerBase);
-    myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theCompleteUrl);
-    myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
-
-    if (theBundleType.equals(BundleTypeEnum.TRANSACTION)) {
-      for (IBaseResource nextBaseRes : theResources) {
-        Resource next = (Resource) nextBaseRes;
-        BundleEntryComponent nextEntry = myBundle.addEntry();
-
-        nextEntry.setResource(next);
-        if (next.getIdElement().isEmpty()) {
-          nextEntry.getRequest().setMethod(HTTPVerb.POST);
-        } else {
-          nextEntry.getRequest().setMethod(HTTPVerb.PUT);
-          if (next.getIdElement().isAbsolute()) {
-            nextEntry.getRequest().setUrl(next.getId());
-          } else {
-            String resourceType = myContext.getResourceDefinition(next).getName();
-            nextEntry.getRequest().setUrl(new IdType(theServerBase, resourceType, next.getIdElement().getIdPart(), next.getIdElement().getVersionIdPart()).getValue());
-          }
-        }
-      }
-    } else {
-      addResourcesForSearch(theResources);
-    }
-
-    myBundle.getTotalElement().setValue(theTotalResults);
   }
 
   @Override

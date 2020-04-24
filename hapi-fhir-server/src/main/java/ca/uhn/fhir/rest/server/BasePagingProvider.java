@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,8 +24,11 @@ import org.apache.commons.lang3.Validate;
 
 public abstract class BasePagingProvider implements IPagingProvider {
 
-	private int myDefaultPageSize = 10;
-	private int myMaximumPageSize = 50;
+	public static final int DEFAULT_DEFAULT_PAGE_SIZE = 10;
+	public static final int DEFAULT_MAX_PAGE_SIZE = 50;
+
+	private int myDefaultPageSize = DEFAULT_DEFAULT_PAGE_SIZE;
+	private int myMaximumPageSize = DEFAULT_MAX_PAGE_SIZE;
 
 	public BasePagingProvider() {
 		super();

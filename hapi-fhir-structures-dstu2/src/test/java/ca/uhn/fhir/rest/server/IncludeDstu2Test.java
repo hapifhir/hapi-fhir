@@ -1,12 +1,25 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.model.dstu2.valueset.SearchEntryModeEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.ElementUtil;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -18,30 +31,21 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.*;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.api.BundleInclusionRule;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.resource.*;
-import ca.uhn.fhir.model.dstu2.valueset.SearchEntryModeEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.util.*;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
 public class IncludeDstu2Test {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IncludeDstu2Test.class);
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IncludeDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 
@@ -66,7 +70,7 @@ public class IncludeDstu2Test {
 		ourLog.info(responseContent);
 
 		assertEquals(3, bundle.getEntry().size());
-		
+
 		assertEquals(new IdDt("Patient/p1"), BundleUtil.toListOfResources(ourCtx, bundle).get(0).getIdElement().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Patient/p2"), BundleUtil.toListOfResources(ourCtx, bundle).get(1).getIdElement().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Organization/o1"), BundleUtil.toListOfResources(ourCtx, bundle).get(2).getIdElement().toUnqualifiedVersionless());
@@ -255,38 +259,6 @@ public class IncludeDstu2Test {
 
 	}
 
-
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-
-		ourCtx = FhirContext.forDstu2();
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(patientProvider, new DummyDiagnosticReportResourceProvider());
-        servlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
-
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -335,9 +307,6 @@ public class IncludeDstu2Test {
 
 	}
 
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Search(queryName = "containedInclude")
@@ -402,7 +371,7 @@ public class IncludeDstu2Test {
 		}
 
 		@Search
-		public List<Patient> findPatient(@RequiredParam(name = Patient.SP_NAME) StringDt theName, @IncludeParam(allow = { "foo", "bar" }) Set<Include> theIncludes) {
+		public List<Patient> findPatient(@RequiredParam(name = Patient.SP_NAME) StringDt theName, @IncludeParam(allow = {"foo", "bar"}) Set<Include> theIncludes) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			Patient p = new Patient();
@@ -459,14 +428,46 @@ public class IncludeDstu2Test {
 			return mySecondOrg;
 		}
 
+		public void setSecondOrg(ResourceReferenceDt theSecondOrg) {
+			mySecondOrg = theSecondOrg;
+		}
+
 		@Override
 		public boolean isEmpty() {
 			return super.isEmpty() && ElementUtil.isEmpty(mySecondOrg);
 		}
 
-		public void setSecondOrg(ResourceReferenceDt theSecondOrg) {
-			mySecondOrg = theSecondOrg;
-		}
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		JettyUtil.closeServer(ourServer);
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+
+		ourCtx = FhirContext.forDstu2();
+		ourServer = new Server(0);
+
+		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
+
+		ServletHandler proxyHandler = new ServletHandler();
+		RestfulServer servlet = new RestfulServer(ourCtx);
+		servlet.setResourceProviders(patientProvider, new DummyDiagnosticReportResourceProvider());
+		servlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
+		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
+		ServletHolder servletHolder = new ServletHolder(servlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		JettyUtil.startServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
 
 	}
 

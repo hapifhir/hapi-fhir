@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.provider.r4;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,16 +20,24 @@ package ca.uhn.fhir.jpa.provider.r4;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
-import ca.uhn.fhir.jpa.term.TranslationRequest;
-import ca.uhn.fhir.jpa.term.TranslationResult;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
+import ca.uhn.fhir.jpa.api.model.TranslationRequest;
+import ca.uhn.fhir.jpa.api.model.TranslationResult;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -62,7 +70,7 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 			&& theSourceValueSet.hasValue();
 		boolean haveSourceCoding = theSourceCoding != null
 			&& theSourceCoding.hasCode();
-		boolean haveSourceCodeableConcept= theSourceCodeableConcept != null
+		boolean haveSourceCodeableConcept = theSourceCodeableConcept != null
 			&& theSourceCodeableConcept.hasCoding()
 			&& theSourceCodeableConcept.getCodingFirstRep().hasCode();
 		boolean haveTargetValueSet = theTargetValueSet != null

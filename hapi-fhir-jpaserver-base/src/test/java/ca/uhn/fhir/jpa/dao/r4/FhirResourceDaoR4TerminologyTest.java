@@ -1,18 +1,21 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -24,9 +27,9 @@ import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.ValueSet.*;
 import org.junit.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,20 +43,19 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4TerminologyTest.class);
-	@Autowired
-	private IHapiTerminologySvc myHapiTerminologySvc;
+
 
 	@After
 	public void after() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
 
-		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
+		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
 	@Before
 	public void before() {
 		myDaoConfig.setMaximumExpansionSize(5000);
-//		my
+		myCachingValidationSupport.invalidateCaches();
 	}
 
 	private CodeSystem createExternalCs() {
@@ -95,7 +97,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		TermConcept childCA = new TermConcept(cs, "childCA").setDisplay("Child CA");
 		parentC.addChild(childCA, RelationshipTypeEnum.ISA);
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", cs);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 
@@ -131,11 +133,11 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		TermConcept beagle = new TermConcept(cs, "beagle").setDisplay("Beagle");
 		dogs.addChild(beagle, RelationshipTypeEnum.ISA);
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", cs);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 
-	private CodeSystem createExternalCsLarge() {
+	private void createExternalCsLarge() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
@@ -162,8 +164,9 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			parentB.addChild(childI, RelationshipTypeEnum.ISA);
 		}
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", cs);
-		return codeSystem;
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 	}
 
 	private void createLocalCsAndVs() {
@@ -222,7 +225,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			myCodeSystemDao.create(codeSystem, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Can not create multiple code systems with URI \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
+			assertEquals("Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
 		}
 	}
 
@@ -253,12 +256,17 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	public void testConceptTimestamps() {
 		long start = System.currentTimeMillis() - 10;
 
+		runInTransaction(() -> {
+			List<TermConcept> concepts = myTermConceptDao.findAll();
+			assertThat(concepts, empty());
+		});
+
 		createExternalCsDogs();
 
 		runInTransaction(() -> {
 			List<TermConcept> concepts = myTermConceptDao.findAll();
 			for (TermConcept next : concepts) {
-				assertTrue(next.getUpdated().getTime() > start);
+				assertTrue(new InstantType(new Date(next.getUpdated().getTime())) + " <= " + new InstantType(new Date(start)), next.getUpdated().getTime() > start);
 			}
 		});
 	}
@@ -470,7 +478,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		concept = new TermConcept(cs, "LA9999-7");
 		cs.getConcepts().add(concept);
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", cs);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl(URL_MY_VALUE_SET);
@@ -479,9 +487,9 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			.setSystem(codeSystem.getUrl())
 			.addConcept(new ConceptReferenceComponent().setCode("LA2222-2"))
 			.addConcept(new ConceptReferenceComponent().setCode("LA1122-2"));
-		IIdType vsid = myValueSetDao.create(valueSet, mySrd).getId().toUnqualifiedVersionless();
+		IIdType vsId = myValueSetDao.create(valueSet, mySrd).getId().toUnqualifiedVersionless();
 
-		ValueSet expansion = myValueSetDao.expand(vsid, null, null);
+		ValueSet expansion = myValueSetDao.expand(vsId, null, null);
 		Set<String> codes = expansion
 			.getExpansion()
 			.getContains()
@@ -533,16 +541,16 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 	@Test
 	public void testExpandWithIsAInExternalValueSetReindex() {
-		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
+		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
 
 		createExternalCsAndLocalVs();
 
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 		myResourceReindexingSvc.forceReindexingPass();
-		myHapiTerminologySvc.saveDeferred();
-		myHapiTerminologySvc.saveDeferred();
-		myHapiTerminologySvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
 
 		ValueSet vs = new ValueSet();
 		ConceptSetComponent include = vs.getCompose().addInclude();
@@ -588,8 +596,8 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		try {
 			myValueSetDao.expand(vs, null);
 			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("unable to find code system http://example.com/my_code_systemAA", e.getMessage());
+		} catch (PreconditionFailedException e) {
+			assertEquals("Unknown CodeSystem URI \"http://example.com/my_code_systemAA\" referenced from ValueSet", e.getMessage());
 		}
 	}
 
@@ -748,7 +756,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	public void testIndexingIsDeferredForLargeCodeSystems() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(1);
 
-		myTermSvc.setProcessDeferred(false);
+		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
 
 		createExternalCsAndLocalVs();
 
@@ -762,14 +770,14 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		assertEquals(0, result.getExpansion().getContains().size());
 
-		myTermSvc.setProcessDeferred(true);
-		myTermSvc.saveDeferred();
-		myTermSvc.saveDeferred();
-		myTermSvc.saveDeferred();
-		myTermSvc.saveDeferred();
-		myTermSvc.saveDeferred();
-		myTermSvc.saveDeferred();
-		myTermSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
 
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
@@ -797,11 +805,11 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		cs.setResource(table);
 		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
 		cs.getConcepts().add(parentA);
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://snomed.info/sct", "Snomed CT", cs);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), "http://snomed.info/sct", "Snomed CT", "SYSTEM VERSION" , cs, table);
 
 		StringType code = new StringType("ParentA");
 		StringType system = new StringType("http://snomed.info/sct");
-		LookupCodeResult outcome = myCodeSystemDao.lookupCode(code, system, null, mySrd);
+		IValidationSupport.LookupCodeResult outcome = myCodeSystemDao.lookupCode(code, system, null, mySrd);
 		assertEquals(true, outcome.isFound());
 	}
 
@@ -834,7 +842,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		try {
 			myObservationDao.search(params).size();
 			fail();
-		} catch (InvalidRequestException e) {
+		} catch (InternalErrorException e) {
 			assertEquals("Expansion of ValueSet produced too many codes (maximum 1) - Operation aborted!", e.getMessage());
 		}
 	}
@@ -851,15 +859,15 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 		myResourceReindexingSvc.forceReindexingPass();
-		myTermSvc.saveDeferred();
-		myTermSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
 
 		// Again
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 		myResourceReindexingSvc.forceReindexingPass();
-		myTermSvc.saveDeferred();
-		myTermSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
 
 	}
 
@@ -873,11 +881,11 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		Observation obsBA = new Observation();
 		obsBA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("BA");
-		IIdType idBA = myObservationDao.create(obsBA, mySrd).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obsBA, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obsCA = new Observation();
 		obsCA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("CA");
-		IIdType idCA = myObservationDao.create(obsCA, mySrd).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obsCA, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "AAA").setModifier(TokenParamModifier.ABOVE));
@@ -914,7 +922,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		AllergyIntolerance ai3 = new AllergyIntolerance();
 		ai3.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("inactive");
-		String id3 = myAllergyIntoleranceDao.create(ai3, mySrd).getId().toUnqualifiedVersionless().getValue();
+		myAllergyIntoleranceDao.create(ai3, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap params;
 		params = new SearchParameterMap();
@@ -960,7 +968,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		AllergyIntolerance ai3 = new AllergyIntolerance();
 		ai3.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("inactive");
 		ai3.addCategory(org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory.FOOD);
-		String id3 = myAllergyIntoleranceDao.create(ai3, mySrd).getId().toUnqualifiedVersionless().getValue();
+		myAllergyIntoleranceDao.create(ai3, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap params;
 		params = new SearchParameterMap();
@@ -1007,7 +1015,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		Observation obs3 = new Observation();
 		obs3.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("subCodeB3");
-		IIdType id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "codeA").setModifier(TokenParamModifier.BELOW));
@@ -1029,11 +1037,11 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		Observation obsBA = new Observation();
 		obsBA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("BA");
-		IIdType idBA = myObservationDao.create(obsBA, mySrd).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obsBA, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obsCA = new Observation();
 		obsCA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("CA");
-		IIdType idCA = myObservationDao.create(obsCA, mySrd).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obsCA, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "A").setModifier(TokenParamModifier.BELOW));
@@ -1122,7 +1130,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		Observation obsCA = new Observation();
 		obsCA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("CA");
-		IIdType idCA = myObservationDao.create(obsCA, mySrd).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obsCA, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "childAA").setModifier(TokenParamModifier.BELOW));
@@ -1152,15 +1160,19 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		AuditEvent aeOut1 = new AuditEvent();
 		aeOut1.getType().setSystem("http://example.com").setCode("foo");
-		IIdType idOut1 = myAuditEventDao.create(aeOut1, mySrd).getId().toUnqualifiedVersionless();
+		myAuditEventDao.create(aeOut1, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(AuditEvent.SP_TYPE, new TokenParam(null, "http://hl7.org/fhir/ValueSet/audit-event-type").setModifier(TokenParamModifier.IN));
 		assertThat(toUnqualifiedVersionlessIdValues(myAuditEventDao.search(params)), containsInAnyOrder(idIn1.getValue(), idIn2.getValue()));
 
-		params = new SearchParameterMap();
-		params.add(AuditEvent.SP_TYPE, new TokenParam(null, "http://hl7.org/fhir/ValueSet/v3-PurposeOfUse").setModifier(TokenParamModifier.IN));
-		assertThat(toUnqualifiedVersionlessIdValues(myAuditEventDao.search(params)), empty());
+		try {
+			params = new SearchParameterMap();
+			params.add(AuditEvent.SP_TYPE, new TokenParam(null, "http://hl7.org/fhir/ValueSet/v3-PurposeOfUse").setModifier(TokenParamModifier.IN));
+		} catch (ResourceNotFoundException e) {
+			//noinspection SpellCheckingInspection
+			assertEquals("Unknown ValueSet: http%3A%2F%2Fhl7.org%2Ffhir%2FValueSet%2Fv3-PurposeOfUse", e.getMessage());
+		}
 	}
 
 	@Test
@@ -1177,7 +1189,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		Observation obsCA = new Observation();
 		obsCA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("CA");
-		IIdType idCA = myObservationDao.create(obsCA, mySrd).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obsCA, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
@@ -1193,8 +1205,9 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		try {
 			params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
 			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
-		} catch (InvalidRequestException e) {
-			assertEquals("Unable to find imported value set http://example.com/my_value_set", e.getMessage());
+		} catch (ResourceNotFoundException e) {
+			//noinspection SpellCheckingInspection
+			assertEquals("Unknown ValueSet: http%3A%2F%2Fexample.com%2Fmy_value_set", e.getMessage());
 		}
 	}
 
@@ -1203,7 +1216,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		ValueSet valueSet = new ValueSet();
 		valueSet.getCompose().addInclude().addValueSet("http://non_existant_VS");
 		valueSet.setUrl(URL_MY_VALUE_SET);
-		IIdType vsid = myValueSetDao.create(valueSet, mySrd).getId().toUnqualifiedVersionless();
+		IIdType vsId = myValueSetDao.create(valueSet, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap params;
 
@@ -1219,15 +1232,19 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		// Now let's update 
 		valueSet = new ValueSet();
-		valueSet.setId(vsid);
+		valueSet.setId(vsId);
 		valueSet.getCompose().addInclude().setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus").addConcept().setCode("A");
 		valueSet.setUrl(URL_MY_VALUE_SET);
 		myValueSetDao.update(valueSet, mySrd).getId().toUnqualifiedVersionless();
 
-		params = new SearchParameterMap();
-		params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
-		params.add(Observation.SP_STATUS, new TokenParam(null, "final"));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+		try {
+			params = new SearchParameterMap();
+			params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
+			params.add(Observation.SP_STATUS, new TokenParam(null, "final"));
+		} catch (ResourceNotFoundException e) {
+			//noinspection SpellCheckingInspection
+			assertEquals("Unknown ValueSet: http%3A%2F%2Fnon_existant_VS", e.getMessage());
+		}
 
 	}
 
@@ -1271,7 +1288,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	}
 
 	private ArrayList<String> toCodesContains(List<ValueSetExpansionContainsComponent> theContains) {
-		ArrayList<String> retVal = new ArrayList<String>();
+		ArrayList<String> retVal = new ArrayList<>();
 		for (ValueSetExpansionContainsComponent next : theContains) {
 			retVal.add(next.getCode());
 		}

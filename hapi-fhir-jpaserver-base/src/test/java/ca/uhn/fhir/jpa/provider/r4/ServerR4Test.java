@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
@@ -13,17 +16,43 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 public class ServerR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerR4Test.class);
+
+	@Autowired
+	private IFhirResourceDao<CapabilityStatement> myCapabilityStatementDao;
+
+	@Test
+	public void testCapabilityStatementValidates() throws IOException {
+		HttpGet get = new HttpGet(ourServerBase + "/metadata?_pretty=true&_format=json");
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
+
+			ourLog.info(respString);
+
+			CapabilityStatement cs = myFhirCtx.newJsonParser().parseResource(CapabilityStatement.class, respString);
+
+			try {
+				myCapabilityStatementDao.validate(cs, null, respString, EncodingEnum.JSON, null, null, null);
+			} catch (PreconditionFailedException e) {
+				ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+				fail();
+			}
+		}
+	}
 
 
 	/**
@@ -71,7 +100,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 		 * Initial fetch after a clear should return
 		 * no results
 		 */
-		ourResourceCountsCache.clear();
+		myResourceCountsCache.clear();
 
 		CapabilityStatement capabilityStatement = ourClient
 			.capabilities()
@@ -93,7 +122,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 		 * Now run a background pass (the update
 		 * method is called by the scheduler normally)
 		 */
-		ourResourceCountsCache.update();
+		myResourceCountsCache.update();
 
 		capabilityStatement = ourClient
 			.capabilities()

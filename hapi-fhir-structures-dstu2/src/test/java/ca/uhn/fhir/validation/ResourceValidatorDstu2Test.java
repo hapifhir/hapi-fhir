@@ -1,39 +1,44 @@
 package ca.uhn.fhir.validation;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.composite.TimingDt;
+import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.model.dstu2.valueset.ConditionVerificationStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
+import ca.uhn.fhir.model.dstu2.valueset.NarrativeStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.UnitsOfTimeEnum;
+import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.parser.XmlParserDstu2Test.TestPatientFor327;
+import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.dstu2.composite.*;
-import ca.uhn.fhir.model.dstu2.resource.*;
-import ca.uhn.fhir.model.dstu2.valueset.*;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.parser.*;
-import ca.uhn.fhir.parser.XmlParserDstu2Test.TestPatientFor327;
-import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class ResourceValidatorDstu2Test {
 
-	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceValidatorDstu2Test.class);
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 
 	private FhirValidator createFhirValidator() {
 		FhirValidator val = ourCtx.newValidator();
@@ -60,7 +65,7 @@ public class ResourceValidatorDstu2Test {
 		// Put in an invalid date
 		IParser parser = ourCtx.newXmlParser();
 		parser.setParserErrorHandler(new StrictErrorHandler());
-		
+
 		String encoded = parser.setPrettyPrint(true).encodeResourceToString(p).replace("2000-12-31", "2000-15-31");
 		ourLog.info(encoded);
 
@@ -70,26 +75,27 @@ public class ResourceValidatorDstu2Test {
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, ((OperationOutcome)result.toOperationOutcome()).getIssue().size());
+		assertEquals(2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
 		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
-		
+
 		try {
 			parser.parseResource(encoded);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: [element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
 		}
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testSchemaBundleValidator() throws IOException {
-		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"));
+		String res = IOUtils.toString(ResourceValidatorDstu2Test.class.getResourceAsStream("/bundle-example.json"));
 		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, res);
 
 		FhirValidator val = createFhirValidator();
 
-		val.validate(b);
+		ValidationResult result = val.validateWithResult(b);
+		assertTrue(result.isSuccessful());
 
 		MedicationOrder p = (MedicationOrder) b.getEntry().get(0).getResource();
 		TimingDt timing = new TimingDt();
@@ -97,19 +103,17 @@ public class ResourceValidatorDstu2Test {
 		timing.getRepeat().setDurationUnits((UnitsOfTimeEnum) null);
 		p.getDosageInstructionFirstRep().setTiming(timing);
 
-		try {
-			val.validate(b);
-			fail();
-		} catch (ValidationFailureException e) {
-			String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
-			ourLog.info(encoded);
-			assertThat(encoded, containsString("tim-1:"));
-		}
+		result = val.validateWithResult(b);
+		assertFalse(result.isSuccessful());
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.getOperationOutcome());
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("tim-1:"));
+
 	}
 
 	@Test
 	public void testSchemaBundleValidatorFails() throws IOException {
-		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"), StandardCharsets.UTF_8);
+		String res = IOUtils.toString(ResourceValidatorDstu2Test.class.getResourceAsStream("/bundle-example.json"), StandardCharsets.UTF_8);
 		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, res);
 
 
@@ -127,18 +131,18 @@ public class ResourceValidatorDstu2Test {
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b));
 
 		validationResult = val.validateWithResult(b);
-		
+
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(validationResult.toOperationOutcome()));
-		
+
 		assertFalse(validationResult.isSuccessful());
-		
+
 		String encoded = logOperationOutcome(validationResult);
 		assertThat(encoded, containsString("tim-1:"));
 	}
 
 	@Test
 	public void testSchemaBundleValidatorIsSuccessful() throws IOException {
-		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"), StandardCharsets.UTF_8);
+		String res = IOUtils.toString(ResourceValidatorDstu2Test.class.getResourceAsStream("/bundle-example.json"), StandardCharsets.UTF_8);
 		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, res);
 
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b));
@@ -181,7 +185,7 @@ public class ResourceValidatorDstu2Test {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testSchemaResourceValidator() throws IOException {
-		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("patient-example-dicom.json"));
+		String res = IOUtils.toString(ResourceValidatorDstu2Test.class.getResourceAsStream("/patient-example-dicom.json"));
 		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, res);
 
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p));
@@ -190,23 +194,21 @@ public class ResourceValidatorDstu2Test {
 		val.setValidateAgainstStandardSchema(true);
 		val.setValidateAgainstStandardSchematron(false);
 
-		val.validate(p);
+		ValidationResult result = val.validateWithResult(p);
+		assertTrue(result.isSuccessful());
 
 		p.getAnimal().getBreed().setText("The Breed");
-		try {
-			val.validate(p);
-			fail();
-		} catch (ValidationFailureException e) {
-			OperationOutcome operationOutcome = (OperationOutcome) e.getOperationOutcome();
-			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
-			assertEquals(1, operationOutcome.getIssue().size());
-			assertThat(operationOutcome.getIssueFirstRep().getDetailsElement().getValue(), containsString("cvc-complex-type"));
-		}
+		result = val.validateWithResult(p);
+		assertFalse(result.isSuccessful());
+		OperationOutcome operationOutcome = (OperationOutcome) result.getOperationOutcome();
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
+		assertEquals(1, operationOutcome.getIssue().size());
+		assertThat(operationOutcome.getIssueFirstRep().getDetailsElement().getValue(), containsString("cvc-complex-type"));
 	}
 
 	@Test
 	public void testSchematronResourceValidator() throws IOException {
-		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("patient-example-dicom.json"), StandardCharsets.UTF_8);
+		String res = IOUtils.toString(ResourceValidatorDstu2Test.class.getResourceAsStream("/patient-example-dicom.json"), StandardCharsets.UTF_8);
 		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, res);
 
 		FhirValidator val = ourCtx.newValidator();
@@ -236,35 +238,35 @@ public class ResourceValidatorDstu2Test {
 	@Test
 	public void testValidateResourceWithResourceElements() {
 
-      TestPatientFor327 patient = new TestPatientFor327();
-      patient.setBirthDate(new Date(), TemporalPrecisionEnum.DAY);
-      patient.setId("123");
-      patient.getText().setDiv("<div>FOO</div>");
-      patient.getText().setStatus(NarrativeStatusEnum.GENERATED);
-      patient.getLanguage().setValue("en");
-      patient.addUndeclaredExtension(true, "http://foo").setValue(new StringDt("MOD"));
-      ResourceMetadataKeyEnum.UPDATED.put(patient, new InstantDt(new Date()));
+		TestPatientFor327 patient = new TestPatientFor327();
+		patient.setBirthDate(new Date(), TemporalPrecisionEnum.DAY);
+		patient.setId("123");
+		patient.getText().setDiv("<div>FOO</div>");
+		patient.getText().setStatus(NarrativeStatusEnum.GENERATED);
+		patient.getLanguage().setValue("en");
+		patient.addUndeclaredExtension(true, "http://foo").setValue(new StringDt("MOD"));
+		ResourceMetadataKeyEnum.UPDATED.put(patient, new InstantDt(new Date()));
 
-      List<ResourceReferenceDt> conditions = new ArrayList<ResourceReferenceDt>();
-      Condition condition = new Condition();
-      condition.getPatient().setReference("Patient/123");
-      condition.addBodySite().setText("BODY SITE");
-      condition.getCode().setText("CODE");
-      condition.setVerificationStatus(ConditionVerificationStatusEnum.CONFIRMED);
+		List<ResourceReferenceDt> conditions = new ArrayList<>();
+		Condition condition = new Condition();
+		condition.getPatient().setReference("Patient/123");
+		condition.addBodySite().setText("BODY SITE");
+		condition.getCode().setText("CODE");
+		condition.setVerificationStatus(ConditionVerificationStatusEnum.CONFIRMED);
 		conditions.add(new ResourceReferenceDt(condition));
-      patient.setCondition(conditions);
-      patient.addIdentifier().setSystem("http://foo").setValue("123");
-      
-      String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		patient.setCondition(conditions);
+		patient.addIdentifier().setSystem("http://foo").setValue("123");
+
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 
 		FhirValidator val = createFhirValidator();
 		ValidationResult result = val.validateWithResult(encoded);
-		
+
 		String messageString = logOperationOutcome(result);
 
 		assertTrue(result.isSuccessful());
-		
+
 		assertThat(messageString, containsString("No issues"));
 
 	}
@@ -305,13 +307,13 @@ public class ResourceValidatorDstu2Test {
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
 		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
-        
+
 		ValidationResult result = val.validateWithResult(messageString);
 
 		logOperationOutcome(result);
 
 		assertTrue(result.isSuccessful());
-		
+
 		assertThat(messageString, containsString("valueReference"));
 		assertThat(messageString, not(containsString("valueResource")));
 	}
@@ -333,7 +335,7 @@ public class ResourceValidatorDstu2Test {
 		IParser p = FhirContext.forDstu2().newXmlParser().setPrettyPrint(true);
 		String messageString = p.encodeResourceToString(myPatient);
 		ourLog.info(messageString);
-		
+
 		//@formatter:off
 		assertThat(messageString, stringContainsInOrder(
 			"meta",
@@ -354,13 +356,13 @@ public class ResourceValidatorDstu2Test {
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
 		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
-        
+
 		ValidationResult result = val.validateWithResult(messageString);
 
 		logOperationOutcome(result);
 
 		assertTrue(result.isSuccessful());
-		
+
 		assertThat(messageString, containsString("valueReference"));
 		assertThat(messageString, not(containsString("valueResource")));
 	}

@@ -6,14 +6,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -137,7 +137,7 @@ public class DateClientParam  extends BaseClientParam implements IParam {
 			myPrefix = thePrefix;
 			this.previous = previous;
 		}
-		
+
 		public DateWithPrefix(ParamPrefixEnum thePrefix) {
 			myPrefix = thePrefix;
 		}
@@ -176,13 +176,27 @@ public class DateClientParam  extends BaseClientParam implements IParam {
 			dt.setPrecision(TemporalPrecisionEnum.SECOND);
 			return constructCriterion(dt);
 		}
-		
+
+		@Override
+		public IDateCriterion millis(Date theValue) {
+			DateTimeDt dt = new DateTimeDt(theValue);
+			dt.setPrecision(TemporalPrecisionEnum.MILLI);
+			return constructCriterion(dt);
+		}
+
+		@Override
+		public IDateCriterion millis(String theValue) {
+			DateTimeDt dt = new DateTimeDt(theValue);
+			dt.setPrecision(TemporalPrecisionEnum.MILLI);
+			return constructCriterion(dt);
+		}
+
 		private IDateCriterion constructCriterion(DateTimeDt dt) {
 			String valueAsString = dt.getValueAsString();
 			Criterion criterion = new Criterion(myPrefix, valueAsString);
 			if (previous != null) {
 				criterion.orCriterion = previous;
-			}	
+			}
 			return criterion;
 		}
 	}
@@ -199,8 +213,12 @@ public class DateClientParam  extends BaseClientParam implements IParam {
 
 		IDateCriterion second(String theValue);
 
+		IDateCriterion millis(Date theValue);
+
+		IDateCriterion millis(String theValue);
+
 	}
-	
+
 	public interface IDateCriterion extends ICriterion<DateClientParam> {
 		IDateSpecifier orAfter();
 

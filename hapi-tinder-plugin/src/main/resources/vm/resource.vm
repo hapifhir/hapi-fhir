@@ -120,6 +120,12 @@ public class ${className} extends ca.uhn.fhir.model.${version}.resource.BaseReso
 		return this;
 	}
 
+	@Override
+	public boolean hasData() {
+		return getContent() != null;
+	}
+
+
 #end
 #if ( ${className} ==  "Bundle" )
 	/**

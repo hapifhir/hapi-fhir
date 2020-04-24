@@ -22,13 +22,16 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		createSubscription(criteria1, payload, ourListenerServerBase);
-		createSubscription(criteria2, payload, ourListenerServerBase);
+		sendSubscription(criteria1, payload, ourListenerServerBase);
+		sendSubscription(criteria2, payload, ourListenerServerBase);
 
+		assertEquals(2, mySubscriptionRegistry.size());
+
+		ourObservationListener.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		ourObservationListener.awaitExpected();
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		assertEquals(1, ourContentTypes.size());
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 
@@ -40,13 +43,16 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		createSubscription(criteria1, payload, ourListenerServerBase);
-		createSubscription(criteria2, payload, ourListenerServerBase);
+		sendSubscription(criteria1, payload, ourListenerServerBase);
+		sendSubscription(criteria2, payload, ourListenerServerBase);
 
+		assertEquals(2, mySubscriptionRegistry.size());
+
+		ourObservationListener.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		ourObservationListener.awaitExpected();
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		assertEquals(1, ourContentTypes.size());
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -58,12 +64,15 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		String criteria1 = "Observation?code=SNOMED-CT|" + code;
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111";
 
-		createSubscription(criteria1, payload, ourListenerServerBase);
-		createSubscription(criteria2, payload, ourListenerServerBase);
+		sendSubscription(criteria1, payload, ourListenerServerBase);
+		sendSubscription(criteria2, payload, ourListenerServerBase);
 
+		assertEquals(2, mySubscriptionRegistry.size());
+
+		ourObservationListener.setExpectedCount(0);
 		sendObservation(code, "SNOMED-CT");
+		ourObservationListener.clear();
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		assertEquals(0, ourContentTypes.size());
 	}
 }

@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.client.impl;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,11 +22,14 @@ package ca.uhn.fhir.rest.client.impl;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.*;
@@ -54,7 +57,6 @@ import org.hl7.fhir.instance.model.api.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -98,7 +100,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint,
-																	  SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements, String theCustomAcceptHeaderValue) {
+																	  SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements, String theCustomAcceptHeaderValue,
+																	  Map<String, List<String>> theCustomHeaders) {
 		String resName = toResourceName(theType);
 		IIdType id = theId;
 		if (!id.hasBaseUrl()) {
@@ -131,10 +134,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		ResourceResponseHandler<T> binding = new ResourceResponseHandler<>(theType, (Class<? extends IBaseResource>) null, id, allowHtmlResponse);
 
 		if (theNotModifiedHandler == null) {
-			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements, null, theCustomAcceptHeaderValue);
+			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements, null, theCustomAcceptHeaderValue, theCustomHeaders);
 		}
 		try {
-			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements, null, theCustomAcceptHeaderValue);
+			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements, null, theCustomAcceptHeaderValue, theCustomHeaders);
 		} catch (NotModifiedException e) {
 			return theNotModifiedHandler.call();
 		}
@@ -228,7 +231,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	@Override
 	public <T extends IBaseResource> T read(final Class<T> theType, UriDt theUrl) {
 		IdDt id = theUrl instanceof IdDt ? ((IdDt) theUrl) : new IdDt(theUrl);
-		return doReadOrVRead(theType, id, false, null, null, false, null, null, null, null);
+		return doReadOrVRead(theType, id, false, null, null, false, null, null, null, null, null);
 	}
 
 	@Override
@@ -303,10 +306,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public <T extends IBaseResource> T vread(final Class<T> theType, IdDt theId) {
-		if (theId.hasVersionIdPart() == false) {
+		if (!theId.hasVersionIdPart()) {
 			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_NO_VERSION_ID_FOR_VREAD, theId.getValue()));
 		}
-		return doReadOrVRead(theType, theId, true, null, null, false, null, null, null, null);
+		return doReadOrVRead(theType, theId, true, null, null, false, null, null, null, null, null);
 	}
 
 	@Override
@@ -327,15 +330,17 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		Boolean myPrettyPrint;
 		SummaryEnum mySummaryMode;
 		CacheControlDirective myCacheControlDirective;
+		Map<String, List<String>> myCustomHeaderValues = new HashMap<>();
 		private String myCustomAcceptHeaderValue;
 		private List<Class<? extends IBaseResource>> myPreferResponseTypes;
 		private boolean myQueryLogRequestAndResponse;
-		private HashSet<String> mySubsetElements;
+		private Set<String> mySubsetElements;
 
 		public String getCustomAcceptHeaderValue() {
 			return myCustomAcceptHeaderValue;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public T accept(String theHeaderValue) {
 			myCustomAcceptHeaderValue = theHeaderValue;
@@ -350,6 +355,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return (T) this;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public T cacheControl(CacheControlDirective theCacheControlDirective) {
 			myCacheControlDirective = theCacheControlDirective;
@@ -367,6 +373,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return (T) this;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public T encoded(EncodingEnum theEncoding) {
 			Validate.notNull(theEncoding, "theEncoding must not be null");
@@ -388,6 +395,18 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return (T) this;
 		}
 
+		@SuppressWarnings("unchecked")
+		@Override
+		public T withAdditionalHeader(String theHeaderName, String theHeaderValue) {
+			Objects.requireNonNull(theHeaderName, "headerName cannot be null");
+			Objects.requireNonNull(theHeaderValue, "headerValue cannot be null");
+			if (!myCustomHeaderValues.containsKey(theHeaderName)) {
+				myCustomHeaderValues.put(theHeaderName, new ArrayList<>());
+			}
+			myCustomHeaderValues.get(theHeaderName).add(theHeaderValue);
+			return (T) this;
+		}
+
 		protected EncodingEnum getParamEncoding() {
 			return myParamEncoding;
 		}
@@ -403,7 +422,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return toTypeList(theDefault);
 		}
 
-		protected HashSet<String> getSubsetElements() {
+		protected Set<String> getSubsetElements() {
 			return mySubsetElements;
 		}
 
@@ -412,7 +431,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding(), myPrettyPrint);
 			}
 
-			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse, mySummaryMode, mySubsetElements, myCacheControlDirective, myCustomAcceptHeaderValue);
+			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse, mySummaryMode, mySubsetElements, myCacheControlDirective, myCustomAcceptHeaderValue, myCustomHeaderValues);
 			return resp;
 		}
 
@@ -585,26 +604,41 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class DeleteInternal extends BaseSearch<IDeleteTyped, IDeleteWithQueryTyped, IBaseOperationOutcome> implements IDelete, IDeleteTyped, IDeleteWithQuery, IDeleteWithQueryTyped {
+	private class DeleteInternal extends BaseSearch<IDeleteTyped, IDeleteWithQueryTyped, MethodOutcome> implements IDelete, IDeleteTyped, IDeleteWithQuery, IDeleteWithQueryTyped {
 
 		private boolean myConditional;
 		private IIdType myId;
 		private String myResourceType;
 		private String mySearchUrl;
+		private DeleteCascadeModeEnum myCascadeMode;
 
 		@Override
-		public IBaseOperationOutcome execute() {
+		public MethodOutcome execute() {
+
+			Map<String, List<String>> additionalParams = new HashMap<>();
+			if (myCascadeMode != null) {
+				switch (myCascadeMode) {
+					case DELETE:
+						addParam(getParamMap(), Constants.PARAMETER_CASCADE_DELETE, Constants.CASCADE_DELETE);
+						break;
+					default:
+					case NONE:
+						break;
+				}
+			}
+
 			HttpDeleteClientInvocation invocation;
 			if (myId != null) {
-				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myId);
+				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myId, getParamMap());
 			} else if (myConditional) {
 				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myResourceType, getParamMap());
 			} else {
-				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), mySearchUrl);
+				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), mySearchUrl, getParamMap());
 			}
-			OperationOutcomeResponseHandler binding = new OperationOutcomeResponseHandler();
-			Map<String, List<String>> params = new HashMap<String, List<String>>();
-			return invoke(params, binding, invocation);
+
+			OutcomeResponseHandler binding = new OutcomeResponseHandler();
+
+			return invoke(additionalParams, binding, invocation);
 		}
 
 		@Override
@@ -612,7 +646,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			Validate.notNull(theResource, "theResource can not be null");
 			IIdType id = theResource.getIdElement();
 			Validate.notNull(id, "theResource.getIdElement() can not be null");
-			if (id.hasResourceType() == false || id.hasIdPart() == false) {
+			if (!id.hasResourceType() || !id.hasIdPart()) {
 				throw new IllegalArgumentException("theResource.getId() must contain a resource type and logical ID at a minimum (e.g. Patient/1234), found: " + id.getValue());
 			}
 			myId = id;
@@ -622,7 +656,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IDeleteTyped resourceById(IIdType theId) {
 			Validate.notNull(theId, "theId can not be null");
-			if (theId.hasResourceType() == false || theId.hasIdPart() == false) {
+			if (!theId.hasResourceType() || !theId.hasIdPart()) {
 				throw new IllegalArgumentException("theId must contain a resource type and logical ID at a minimum (e.g. Patient/1234)found: " + theId.getValue());
 			}
 			myId = theId;
@@ -668,6 +702,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		@Override
+		public IDeleteTyped cascade(DeleteCascadeModeEnum theDelete) {
+			myCascadeMode = theDelete;
+			return this;
+		}
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
@@ -730,6 +769,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@SuppressWarnings("unchecked")
 		@Override
 		public IHistoryTyped andReturnBundle(Class theType) {
+			return returnBundle(theType);
+		}
+
+		@Override
+		public IHistoryTyped returnBundle(Class theType) {
 			Validate.notNull(theType, "theType must not be null on method andReturnBundle(Class)");
 			myReturnType = theType;
 			return this;
@@ -773,7 +817,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public IHistoryUntyped onInstance(IIdType theId) {
-			if (theId.hasResourceType() == false) {
+			if (!theId.hasResourceType()) {
 				throw new IllegalArgumentException("Resource ID does not have a resource type: " + theId.getValue());
 			}
 			myId = theId;
@@ -788,6 +832,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IHistoryUntyped onType(Class<? extends IBaseResource> theResourceType) {
 			myType = theResourceType;
+			return this;
+		}
+
+		@Override
+		public IHistoryUntyped onType(String theResourceType) {
+			myType = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 			return this;
 		}
 
@@ -849,7 +899,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					continue;
 				}
 				String relation = ((IPrimitiveType<?>) rel.get(0)).getValueAsString();
-				if (theWantRel.equals(relation) || (theWantRel == PREVIOUS && PREV.equals(relation))) {
+				if (theWantRel.equals(relation) || (PREVIOUS.equals(theWantRel) && PREV.equals(relation))) {
 					List<IBase> urls = linkDef.getChildByName("url").getAccessor().getValues(nextLink);
 					if (urls == null || urls.isEmpty()) {
 						continue;
@@ -1200,6 +1250,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
+		public IOperationUnnamed onType(String theResourceType) {
+			myType = myContext.getResourceDefinition(theResourceType).getImplementingClass();
+			return this;
+		}
+
+		@Override
 		public IOperationProcessMsg processMessage() {
 			myOperationName = Constants.EXTOP_PROCESS_MESSAGE;
 			return this;
@@ -1330,30 +1386,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			retVal.setResource(response);
 			retVal.setCreatedUsingStatusCode(theResponseStatusCode);
 			retVal.setResponseHeaders(theHeaders);
-			return retVal;
-		}
-	}
-
-	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<IBaseOperationOutcome> {
-
-		@Override
-		public IBaseOperationOutcome invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders)
-			throws BaseServerResponseException {
-			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
-			if (respType == null) {
-				return null;
-			}
-			IParser parser = respType.newParser(myContext);
-			IBaseOperationOutcome retVal;
-			try {
-				// TODO: handle if something else than OO comes back
-				retVal = (IBaseOperationOutcome) parser.parseResource(theResponseInputStream);
-			} catch (DataFormatException e) {
-				ourLog.warn("Failed to parse OperationOutcome response", e);
-				return null;
-			}
-			MethodUtil.parseClientRequestResourceHeaders(null, theHeaders, retVal);
-
 			return retVal;
 		}
 	}
@@ -1514,9 +1546,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public Object execute() {// AAA
 			if (myId.hasVersionIdPart()) {
-				return doReadOrVRead(myType.getImplementingClass(), myId, true, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements(), getCustomAcceptHeaderValue());
+				return doReadOrVRead(myType.getImplementingClass(), myId, true, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements(), getCustomAcceptHeaderValue(), myCustomHeaderValues);
 			}
-			return doReadOrVRead(myType.getImplementingClass(), myId, false, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements(), getCustomAcceptHeaderValue());
+			return doReadOrVRead(myType.getImplementingClass(), myId, false, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements(), getCustomAcceptHeaderValue(), myCustomHeaderValues);
 		}
 
 		@Override
@@ -1740,7 +1772,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			for (Include next : myInclude) {
 				if (next.isRecurse()) {
-					addParam(params, Constants.PARAM_INCLUDE_RECURSE, next.getValue());
+					if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+						addParam(params, Constants.PARAM_INCLUDE_ITERATE, next.getValue());
+					} else {
+						addParam(params, Constants.PARAM_INCLUDE_RECURSE, next.getValue());
+					}
 				} else {
 					addParam(params, Constants.PARAM_INCLUDE, next.getValue());
 				}
@@ -1748,7 +1784,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			for (Include next : myRevInclude) {
 				if (next.isRecurse()) {
-					addParam(params, Constants.PARAM_REVINCLUDE_RECURSE, next.getValue());
+					if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+						addParam(params, Constants.PARAM_REVINCLUDE_ITERATE, next.getValue());
+					} else {
+						addParam(params, Constants.PARAM_REVINCLUDE_RECURSE, next.getValue());
+					}
 				} else {
 					addParam(params, Constants.PARAM_REVINCLUDE, next.getValue());
 				}
@@ -1764,11 +1804,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					if (rootSs == null) {
 						rootSs = nextSortSpec;
 					} else {
-						// FIXME lastSs is null never set
-						// TODO unused assignment
 						lastSs.setChain(nextSortSpec);
 					}
-					// TODO unused assignment
 					lastSs = nextSortSpec;
 				}
 				if (rootSs != null) {
@@ -2017,7 +2054,35 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public ITransactionTyped<List<IBaseResource>> withResources(List<? extends IBaseResource> theResources) {
 			Validate.notNull(theResources, "theResources must not be null");
-			return new TransactionExecutable<List<IBaseResource>>(theResources);
+
+			for (IBaseResource next : theResources) {
+				String entryMethod = null;
+				if (next instanceof IResource) {
+					BundleEntryTransactionMethodEnum entryMethodEnum = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IResource) next);
+					if (entryMethodEnum != null) {
+						entryMethod = entryMethodEnum.getCode();
+					}
+				} else {
+					entryMethod = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IAnyResource) next);
+				}
+
+				if (isBlank(entryMethod)) {
+					if (isBlank(next.getIdElement().getValue())) {
+						entryMethod = "POST";
+					} else {
+						entryMethod = "PUT";
+					}
+					if (next instanceof IResource) {
+						ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put((IResource) next, BundleEntryTransactionMethodEnum.valueOf(entryMethod));
+					} else {
+						ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put((IAnyResource) next, entryMethod);
+					}
+
+				}
+
+			}
+
+			return new TransactionExecutable<>(theResources);
 		}
 
 	}
@@ -2256,7 +2321,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private static void addParam(Map<String, List<String>> params, String parameterName, String parameterValue) {
 		if (!params.containsKey(parameterName)) {
-			params.put(parameterName, new ArrayList<>());
+			params.put(parameterName, new ArrayList<String>());
 		}
 		params.get(parameterName).add(parameterValue);
 	}

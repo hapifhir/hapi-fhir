@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,19 +21,27 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.annotation.Nonnull;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
 @Table(name = "TRM_CONCEPT_MAP", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_CONCEPT_MAP_URL", columnNames = {"URL"})
 })
 public class TermConceptMap implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+	static final int MAX_URL_LENGTH = 200;
+
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_MAP_PID", sequenceName = "SEQ_CONCEPT_MAP_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_MAP_PID")
@@ -47,13 +55,13 @@ public class TermConceptMap implements Serializable {
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourcePid;
 
-	@Column(name = "SOURCE_URL", nullable = true, length = 200)
+	@Column(name = "SOURCE_URL", nullable = true, length = TermValueSet.MAX_URL_LENGTH)
 	private String mySource;
 
-	@Column(name = "TARGET_URL", nullable = true, length = 200)
+	@Column(name = "TARGET_URL", nullable = true, length = TermValueSet.MAX_URL_LENGTH)
 	private String myTarget;
 
-	@Column(name = "URL", length = 200, nullable = false)
+	@Column(name = "URL", nullable = false, length = MAX_URL_LENGTH)
 	private String myUrl;
 
 	@OneToMany(mappedBy = "myConceptMap")
@@ -75,47 +83,58 @@ public class TermConceptMap implements Serializable {
 		return myResource;
 	}
 
-	public void setResource(ResourceTable resource) {
-		myResource = resource;
+	public TermConceptMap setResource(ResourceTable theResource) {
+		myResource = theResource;
+		return this;
 	}
 
 	public Long getResourcePid() {
 		return myResourcePid;
 	}
 
-	public void setResourcePid(Long resourcePid) {
-		myResourcePid = resourcePid;
+	public TermConceptMap setResourcePid(Long theResourcePid) {
+		myResourcePid = theResourcePid;
+		return this;
 	}
 
 	public String getSource() {
 		return mySource;
 	}
 
-	public void setSource(String source) {
-		mySource = source;
+	public TermConceptMap setSource(String theSource) {
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theSource, TermValueSet.MAX_URL_LENGTH,
+			"Source exceeds maximum length (" + TermValueSet.MAX_URL_LENGTH + "): " + length(theSource));
+		mySource = theSource;
+		return this;
 	}
 
 	public String getTarget() {
 		return myTarget;
 	}
 
-	public void setTarget(String target) {
-		myTarget = target;
+	public TermConceptMap setTarget(String theTarget) {
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theTarget, TermValueSet.MAX_URL_LENGTH,
+			"Target exceeds maximum length (" + TermValueSet.MAX_URL_LENGTH + "): " + length(theTarget));
+		myTarget = theTarget;
+		return this;
 	}
 
 	public String getUrl() {
 		return myUrl;
 	}
 
-	public void setUrl(String theUrl) {
+	public TermConceptMap setUrl(@Nonnull String theUrl) {
+		ValidateUtil.isNotBlankOrThrowIllegalArgument(theUrl, "theUrl must not be null or empty");
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUrl, MAX_URL_LENGTH,
+			"URL exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theUrl));
 		myUrl = theUrl;
+		return this;
 	}
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("myId", myId)
-			.append("myResource", myResource.toString())
 			.append(myResource != null ? ("myResource=" + myResource.toString()) : ("myResource=(null)"))
 			.append("myResourcePid", myResourcePid)
 			.append("mySource", mySource)

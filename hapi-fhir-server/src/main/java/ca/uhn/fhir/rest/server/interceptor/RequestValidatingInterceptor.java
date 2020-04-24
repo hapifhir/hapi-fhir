@@ -6,14 +6,14 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,8 @@ import java.nio.charset.Charset;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -67,7 +69,7 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 		return theValidator.validateWithResult(theRequest);
 	}
 
-	@Override
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
 	public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
 		EncodingEnum encoding = RestfulServerUtils.determineRequestEncodingNoDefault(theRequestDetails);
 		if (encoding == null) {
@@ -102,7 +104,7 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 		return myAddValidationResultsToResponseOperationOutcome;
 	}
 
-	@Override
+	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
 		if (myAddValidationResultsToResponseOperationOutcome) {
 			if (theResponseObject instanceof IBaseOperationOutcome) {

@@ -1,0 +1,31 @@
+<ValueSet xmlns="http://hl7.org/fhir">
+	<url value="http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2" />
+	<identifier>
+		<value value="http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2" />
+	</identifier>
+	<name value="Terminology Services Connectation #1 Extensional case #2" />
+	<publisher value="Grahame Grieve" />
+	<contact>
+		<telecom>
+			<system value="email" />
+			<value value="grahame@healthintersections.com.au" />
+		</telecom>
+	</contact>
+	<description value="an enumeration of codes defined by LOINC" />
+	<status value="draft" />
+	<experimental value="true" />
+	<compose>
+		<include>
+			<system value="http://acme.org"/>
+		</include>
+		<exclude>
+			<system value="http://acme.org"/>
+			<concept>
+				<code value="8489-7" />
+			</concept>
+			<concept>
+				<code value="8490-5" />
+			</concept>
+		</exclude>
+	</compose>
+</ValueSet>

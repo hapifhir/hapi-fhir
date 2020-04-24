@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,28 +21,46 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.Set;
 
-public class DropColumnTask extends BaseTableColumnTask<DropColumnTask> {
+public class DropColumnTask extends BaseTableColumnTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropColumnTask.class);
 
+	public DropColumnTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void validate() {
+		super.validate();
+		setDescription("Drop column " + getColumnName() + " from table " + getTableName());
+	}
+
+	@Override
+	public void doExecute() throws SQLException {
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 		if (!columnNames.contains(getColumnName())) {
-			ourLog.info("Column {} does not exist on table {} - No action performed", getColumnName(), getTableName());
+			logInfo(ourLog, "Column {} does not exist on table {} - No action performed", getColumnName(), getTableName());
 			return;
 		}
 
-		String sql = "alter table " + getTableName() + " drop column " + getColumnName();
-		ourLog.info("Dropping column {} on table {}", getColumnName(), getTableName());
+		String tableName = getTableName();
+		String columnName = getColumnName();
+		String sql = createSql(tableName, columnName);
+		logInfo(ourLog, "Dropping column {} on table {}", getColumnName(), getTableName());
 		executeSql(getTableName(), sql);
 	}
+
+	@Language("SQL")
+	static String createSql(String theTableName, String theColumnName) {
+		return "alter table " + theTableName + " drop column " + theColumnName;
+	}
+
 
 }

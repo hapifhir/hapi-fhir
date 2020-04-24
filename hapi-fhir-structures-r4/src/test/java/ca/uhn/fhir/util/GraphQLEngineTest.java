@@ -2,11 +2,18 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.utils.GraphQLEngine;
-import org.hl7.fhir.utilities.graphql.*;
+import org.hl7.fhir.utilities.graphql.EGraphEngine;
+import org.hl7.fhir.utilities.graphql.EGraphQLException;
+import org.hl7.fhir.utilities.graphql.GraphQLResponse;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.hl7.fhir.utilities.graphql.Parser;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -16,7 +23,6 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -33,8 +39,8 @@ public class GraphQLEngineTest {
 		return obs;
 	}
 
-	private GraphQLEngine.IGraphQLStorageServices createStorageServices() throws FHIRException {
-		GraphQLEngine.IGraphQLStorageServices retVal = mock(GraphQLEngine.IGraphQLStorageServices.class);
+	private IGraphQLStorageServices createStorageServices() throws FHIRException {
+		IGraphQLStorageServices retVal = mock(IGraphQLStorageServices.class);
 		when(retVal.lookup(nullable(Object.class), nullable(Resource.class), nullable(Reference.class))).thenAnswer(new Answer<Object>() {
 			@Override
 			public Object answer(InvocationOnMock invocation) {
@@ -46,7 +52,7 @@ public class GraphQLEngineTest {
 				if (reference.getReference().equalsIgnoreCase("Patient/123")) {
 					Patient p = new Patient();
 					p.getBirthDateElement().setValueAsString("2011-02-22");
-					return new GraphQLEngine.IGraphQLStorageServices.ReferenceResolution(context, p);
+					return new IGraphQLStorageServices.ReferenceResolution(context, p);
 				}
 
 				ourLog.info("Not found!");
@@ -67,7 +73,8 @@ public class GraphQLEngineTest {
 		engine.setGraphQL(Parser.parse("{valueQuantity{value,unit}}"));
 		engine.execute();
 
-		ObjectValue output = engine.getOutput();
+		GraphQLResponse output = engine.getOutput();
+		output.setWriteWrapper(false);
 		StringBuilder outputBuilder = new StringBuilder();
 		output.write(outputBuilder, 0, "\n");
 
@@ -101,7 +108,8 @@ public class GraphQLEngineTest {
 		engine.setServices(createStorageServices());
 		engine.execute();
 
-		ObjectValue output = engine.getOutput();
+		GraphQLResponse output = engine.getOutput();
+		output.setWriteWrapper(false);
 		StringBuilder outputBuilder = new StringBuilder();
 		output.write(outputBuilder, 0, "\n");
 
@@ -121,7 +129,7 @@ public class GraphQLEngineTest {
 	@BeforeClass
 	public static void beforeClass() {
 		ourCtx = FhirContext.forR4();
-		ourWorkerCtx = new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport());
+		ourWorkerCtx = new HapiWorkerContext(ourCtx, ourCtx.getValidationSupport());
 	}
 
 }

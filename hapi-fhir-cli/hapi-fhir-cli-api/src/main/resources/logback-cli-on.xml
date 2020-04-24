@@ -3,7 +3,7 @@
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<useJansi>true</useJansi>
 		<encoder>
-			<pattern>%green(%d{yyyy-MM-dd}) %boldGreen(%d{HH:mm:ss}) %white([%thread]) %white(%-5level) %boldBlue(%logger{20}) %boldWhite(%msg%n)
+			<pattern>%green(%d{yyyy-MM-dd}) %boldGreen(%d{HH:mm:ss.SS}) %white([%thread]) %white(%-5level) %boldBlue(%logger{20}) %boldWhite(%msg%n)
 			</pattern>
 		</encoder>
 	</appender>
@@ -34,7 +34,13 @@
 	<!--
 	It's useful to have this log when uploading big terminologies
 	-->
-	<logger name="ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl" additivity="false" level="info">
+	<logger name="ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
 

@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,12 +20,15 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -81,7 +84,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		super();
 	}
 
-	private void addTextSearch(QueryBuilder theQueryBuilder, BooleanJunction<?> theBoolean, List<List<? extends IQueryParameterType>> theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameNGram) {
+	private void addTextSearch(QueryBuilder theQueryBuilder, BooleanJunction<?> theBoolean, List<List<IQueryParameterType>> theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameNGram) {
 		if (theTerms == null) {
 			return;
 		}
@@ -115,10 +118,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		}
 	}
 
-	private List<Long> doSearch(String theResourceName, SearchParameterMap theParams, Long theReferencingPid) {
+	private List<ResourcePersistentId> doSearch(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 
-		List<Long> pids = null;
+		List<ResourcePersistentId> pids = null;
 		
 		/*
 		 * Handle textual params
@@ -171,13 +174,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		/*
 		 * Handle _content parameter (resource body content)
 		 */
-		List<List<? extends IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
+		List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
 		addTextSearch(qb, bool, contentAndTerms, "myContentText", "myContentTextEdgeNGram", "myContentTextNGram");
 
 		/*
 		 * Handle _text parameter (resource narrative content)
 		 */
-		List<List<? extends IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
+		List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
 		addTextSearch(qb, bool, textAndTerms, "myNarrativeText", "myNarrativeTextEdgeNGram", "myNarrativeTextNGram");
 
 		if (theReferencingPid != null) {
@@ -194,19 +197,19 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		Query luceneQuery = bool.createQuery();
 
-		// wrap Lucene query in a javax.persistence.Query
+		// wrap Lucene query in a javax.persistence.SqlQuery
 		FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, ResourceTable.class);
 		jpaQuery.setProjection("myId");
 
 		// execute search
 		List<?> result = jpaQuery.getResultList();
 
-		ArrayList<Long> retVal = new ArrayList<>();
+		ArrayList<ResourcePersistentId> retVal = new ArrayList<>();
 		for (Object object : result) {
 			Object[] nextArray = (Object[]) object;
 			Long next = (Long) nextArray[0];
 			if (next != null) {
-				retVal.add(next);
+				retVal.add(new ResourcePersistentId(next));
 			}
 		}
 
@@ -214,9 +217,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	@Override
-	public List<Long> everything(String theResourceName, SearchParameterMap theParams) {
+	public List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, RequestDetails theRequest) {
 
-		Long pid = null;
+		ResourcePersistentId pid = null;
 		if (theParams.get(IAnyResource.SP_RES_ID) != null) {
 			String idParamValue;
 			IQueryParameterType idParam = theParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
@@ -227,11 +230,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 				StringParam idParm = (StringParam) idParam;
 				idParamValue = idParm.getValue();
 			}
-			pid = myIdHelperService.translateForcedIdToPid(theResourceName, idParamValue);
+//			pid = myIdHelperService.translateForcedIdToPid_(theResourceName, idParamValue, theRequest);
 		}
 
-		Long referencingPid = pid;
-		List<Long> retVal = doSearch(null, theParams, referencingPid);
+		ResourcePersistentId referencingPid = pid;
+		List<ResourcePersistentId> retVal = doSearch(null, theParams, referencingPid);
 		if (referencingPid != null) {
 			retVal.add(referencingPid);
 		}
@@ -263,13 +266,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Transactional()
 	@Override
-	public List<Long> search(String theResourceName, SearchParameterMap theParams) {
+	public List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams) {
 		return doSearch(theResourceName, theParams, null);
 	}
 
 	@Transactional()
 	@Override
-	public List<Suggestion> suggestKeywords(String theContext, String theSearchParam, String theText) {
+	public List<Suggestion> suggestKeywords(String theContext, String theSearchParam, String theText, RequestDetails theRequest) {
 		Validate.notBlank(theContext, "theContext must be provided");
 		Validate.notBlank(theSearchParam, "theSearchParam must be provided");
 		Validate.notBlank(theText, "theSearchParam must be provided");
@@ -280,7 +283,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		if (contextParts.length != 3 || "Patient".equals(contextParts[0]) == false || "$everything".equals(contextParts[2]) == false) {
 			throw new InvalidRequestException("Invalid context: " + theContext);
 		}
-		Long pid = myIdHelperService.translateForcedIdToPid(contextParts[0], contextParts[1]);
+		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(contextParts[0], contextParts[1]);
 
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 

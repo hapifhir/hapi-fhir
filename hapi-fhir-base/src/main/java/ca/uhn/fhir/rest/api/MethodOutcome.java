@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,10 +21,13 @@ package ca.uhn.fhir.rest.api;
  */
 
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +38,7 @@ public class MethodOutcome {
 	private IBaseOperationOutcome myOperationOutcome;
 	private IBaseResource myResource;
 	private Map<String, List<String>> myResponseHeaders;
+	private Collection<Runnable> myResourceViewCallbacks;
 
 	/**
 	 * Constructor
@@ -174,6 +178,7 @@ public class MethodOutcome {
 	 * </p>
 	 *
 	 * @return Returns a reference to <code>this</code> for easy method chaining
+	 * @see #registerResourceViewCallback(Runnable) to register a callback that should be invoked by the framework before the resource is shown/returned to a client
 	 */
 	public MethodOutcome setResource(IBaseResource theResource) {
 		myResource = theResource;
@@ -192,6 +197,35 @@ public class MethodOutcome {
 	 */
 	public void setResponseHeaders(Map<String, List<String>> theResponseHeaders) {
 		myResponseHeaders = theResponseHeaders;
+	}
+
+	/**
+	 * Registers a callback to be invoked before the resource in this object gets
+	 * returned to the client. Note that this is an experimental API and may change.
+	 *
+	 * @param theCallback The callback
+	 * @since 4.0.0
+	 */
+	public void registerResourceViewCallback(Runnable theCallback) {
+		Validate.notNull(theCallback, "theCallback must not be null");
+
+		if (myResourceViewCallbacks == null) {
+			myResourceViewCallbacks = new ArrayList<>(2);
+		}
+		myResourceViewCallbacks.add(theCallback);
+	}
+
+	/**
+	 * Fires callbacks registered to {@link #registerResourceViewCallback(Runnable)} and then
+	 * clears the list of registered callbacks.
+	 *
+	 * @since 4.0.0
+	 */
+	public void fireResourceViewCallbacks() {
+		if (myResourceViewCallbacks != null) {
+			myResourceViewCallbacks.forEach(t -> t.run());
+			myResourceViewCallbacks.clear();
+		}
 	}
 
 	public void setCreatedUsingStatusCode(int theResponseStatusCode) {

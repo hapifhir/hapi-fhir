@@ -3,15 +3,14 @@ package ca.uhn.fhir.parser;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.composite.*;
 import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.valueset.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
+import ca.uhn.fhir.parser.testprofile.CommunicationProfile;
+import ca.uhn.fhir.parser.testprofile.PatientProfile;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.TestUtil;
 import ch.qos.logback.classic.Level;
@@ -38,6 +37,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -69,6 +69,29 @@ public class JsonParserDstu2Test {
 		assertThat(timestampFields.organization.getReference().getIdPart(), equalTo("sjanic_org"));
 		assertThat(timestampFields.role.getCodingFirstRep().getSystem(), equalTo("sjanic"));
 		assertThat(timestampFields.role.getCodingFirstRep().getCode(), equalTo("Doctor"));
+	}
+
+
+	@Test
+	public void testSetDontEncodeResourcesWithMetaSubPath() {
+		Patient p = new Patient();
+		ResourceMetadataKeyEnum.VERSION.put(p, "BBB");
+		p.setId("AAA");
+		p.getMeta().setVersionId("BBB");
+		p.getMeta().setLastUpdated(new InstantDt("2011-01-01T00:00:00.000Z").getValue());
+		p.getMeta().addTag().setSystem("SYS").setCode("CODE");
+		p.addName().addFamily("FAMILY");
+
+		IParser parser = ourCtx.newJsonParser();
+		parser.setDontEncodeElements(Sets.newHashSet("id", "*.meta.versionId", "*.meta.lastUpdated"));
+		String output = parser.encodeResourceToString(p);
+
+		assertThat(output, containsString("FAMILY"));
+		assertThat(output, containsString("SYS"));
+		assertThat(output, containsString("CODE"));
+		assertThat(output, not(containsString("AAA")));
+		assertThat(output, not(containsString("BBB")));
+		assertThat(output, not(containsString("2011")));
 	}
 
 
@@ -475,37 +498,28 @@ public class JsonParserDstu2Test {
 		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
 
-		//@formatter:off
 		String actual = enc.trim();
 		ourLog.info("Actual:\n{}", actual);
 
-		assertEquals("{\n" +
-			"  \"resourceType\": \"Patient\",\n" +
-			"  \"meta\": {\n" +
-			"    \"security\": [\n" +
-			"      {\n" +
-			"        \"system\": \"SYSTEM1\",\n" +
-			"        \"version\": \"VERSION1\",\n" +
-			"        \"code\": \"CODE1\",\n" +
-			"        \"display\": \"DISPLAY1\"\n" +
-			"      },\n" +
-			"      {\n" +
-			"        \"system\": \"SYSTEM2\",\n" +
-			"        \"version\": \"VERSION2\",\n" +
-			"        \"code\": \"CODE2\",\n" +
-			"        \"display\": \"DISPLAY2\"\n" +
-			"      }\n" +
-			"    ]\n" +
-			"  },\n" +
-			"  \"name\": [\n" +
-			"    {\n" +
-			"      \"family\": [\n" +
-			"        \"FAMILY\"\n" +
-			"      ]\n" +
-			"    }\n" +
-			"  ]\n" +
-			"}", actual);
-		//@formatter:on
+		assertThat(actual, stringContainsInOrder("{",
+			"  \"resourceType\": \"Patient\",", 
+			"  \"meta\": {", 
+			"    \"security\": [ {", 
+			"      \"system\": \"SYSTEM1\",", 
+			"      \"version\": \"VERSION1\",", 
+			"      \"code\": \"CODE1\",", 
+			"      \"display\": \"DISPLAY1\"", 
+			"    }, {", 
+			"      \"system\": \"SYSTEM2\",", 
+			"      \"version\": \"VERSION2\",", 
+			"      \"code\": \"CODE2\",", 
+			"      \"display\": \"DISPLAY2\"", 
+			"    } ]", 
+			"  },", 
+			"  \"name\": [ {", 
+			"    \"family\": [ \"FAMILY\" ]", 
+			"  } ]", 
+			"}"));
 
 		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
 		List<BaseCodingDt> gotLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(parsed);
@@ -1055,6 +1069,52 @@ public class JsonParserDstu2Test {
 			assertThat(out, not(containsString("address")));
 			assertThat(out, not(containsString("meta")));
 		}
+	}
+
+	/**
+	 * When max cardinality in profile is changed to 1 output JSON should still contain an array.
+    * http://hl7.org/fhir/profiling.html#cardinality
+	 */
+	@Test
+	public void testEncodePatientProfileWithChangedCardinalityFromManyToOne() {
+		PatientProfile patient = new PatientProfile();
+		patient.myIdentifier = Collections.singletonList(new IdentifierDt("http://test-system", "test-code"));
+
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
+		ourLog.info(encoded);
+
+		assertThat(encoded, containsString("\"identifier\":[{\"system\":\"http://test-system\",\"value\":\"test-code\"}]"));
+	}
+
+	/**
+	 * When max cardinality in profile is changed to 1 output JSON should still contain an array.
+	 * http://hl7.org/fhir/profiling.html#cardinality
+	 */
+	@Test
+	public void testEncodePatientProfileWithChangedCardinalityFromManyToOneAsList() {
+		PatientProfile patient = new PatientProfile();
+		patient.myName =  new HumanNameDt().setText("Testname");
+
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
+		ourLog.info(encoded);
+
+		assertThat(encoded, containsString("\"name\":[{\"text\":\"Testname\"}]"));
+	}
+
+	/**
+	 * When max cardinality in profile is changed to 1 output JSON should still contain an array.
+	 * http://hl7.org/fhir/profiling.html#cardinality
+	 */
+	@Test
+	public void testEncodeCommunicationProfileWithChangedCardinalityFromManyToOneAsList() {
+		CommunicationProfile communication = new CommunicationProfile();
+		communication.myPayload = new CommunicationProfile._Payload();
+		communication.myPayload.myContent = new StringDt("testContent");
+
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(communication);
+		ourLog.info(encoded);
+
+		assertThat(encoded, containsString("\"payload\":[{\"contentString\":\"testContent\"}]"));
 	}
 
 	@Test
@@ -1941,7 +2001,7 @@ public class JsonParserDstu2Test {
 		ProcedureRequest p = parser.parseResource(ProcedureRequest.class, input);
 
 		ArgumentCaptor<String> capt = ArgumentCaptor.forClass(String.class);
-		verify(peh, Mockito.never()).unknownElement(Mockito.isNull(IParseLocation.class), capt.capture());
+		verify(peh, Mockito.never()).unknownElement(nullable(IParseLocation.class), capt.capture());
 		assertParsedResourcesExtensionMetadata(p);
 	}
 

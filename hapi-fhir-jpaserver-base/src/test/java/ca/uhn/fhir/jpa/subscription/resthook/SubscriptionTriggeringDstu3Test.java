@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.ProviderConstants;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.subscription.SubscriptionTriggeringSvcImpl;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
+import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -15,15 +17,28 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.ProxyUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.Subscription;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,8 +46,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  * Test the rest-hook subscriptions
@@ -54,6 +72,10 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
+	@Autowired
+	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
+	@Autowired
+	private ISchedulerService mySchedulerService;
 
 	@After
 	public void afterUnregisterRestHookListener() {
@@ -73,14 +95,12 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 
-		mySubscriptionTriggeringSvc.cancelAll();
-		mySubscriptionTriggeringSvc.setMaxSubmitPerPass(null);
+		SubscriptionTriggeringSvcImpl svc = ProxyUtil.getSingletonTarget(mySubscriptionTriggeringSvc, SubscriptionTriggeringSvcImpl.class);
+		svc.cancelAll();
+		svc.setMaxSubmitPerPass(null);
 
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 	}
-
-	@Autowired
-	private SubscriptionTriggeringSvcImpl mySubscriptionTriggeringSvc;
 
 	@Before
 	public void beforeRegisterRestHookListener() {
@@ -97,6 +117,8 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		ourCreatedPatients.clear();
 		ourUpdatedPatients.clear();
 		ourContentTypes.clear();
+
+		mySchedulerService.logStatusForUnitTest();
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
@@ -162,13 +184,16 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.operation()
 			.onInstance(subscriptionId)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.RESOURCE_ID, new UriType(obsId.toUnqualifiedVersionless().getValue()))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID, new UriType(obsId.toUnqualifiedVersionless().getValue()))
 			.execute();
 
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
 
 		waitForQueueToDrain();
+
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(2, ourUpdatedObservations);
 
@@ -202,14 +227,15 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForSize(50, ourUpdatedPatients);
 		beforeReset();
 
-		mySubscriptionTriggeringSvc.setMaxSubmitPerPass(33);
+		SubscriptionTriggeringSvcImpl svc = ProxyUtil.getSingletonTarget(mySubscriptionTriggeringSvc, SubscriptionTriggeringSvcImpl.class);
+		svc.setMaxSubmitPerPass(33);
 
 		Parameters response = ourClient
 			.operation()
 			.onInstance(sub1id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Observation?"))
-			.andParameter(SubscriptionTriggeringProvider.RESOURCE_ID, new UriType("Observation/O2"))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Observation?"))
+			.andParameter(ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID, new UriType("Observation/O2"))
 			.execute();
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
@@ -218,17 +244,100 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.operation()
 			.onInstance(sub2id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Patient?"))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?"))
 			.execute();
 		responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
 
-//		Thread.sleep(1000000000);
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		waitForSize(33, ourUpdatedObservations);
 
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
 		waitForSize(51, ourUpdatedObservations);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(0, ourCreatedPatients);
 		waitForSize(50, ourUpdatedPatients);
+
+	}
+
+	@Test
+	public void testTriggerUsingOrSeparatedList_MultipleStrings() throws Exception {
+		String payload = "application/fhir+json";
+		IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
+
+		// Create lots
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.setId("P" + i);
+			p.addName().setFamily("P" + i);
+			ourClient.update().resource(p).execute();
+		}
+		waitForSize(10, ourUpdatedPatients);
+
+		// Use multiple strings
+		beforeReset();
+		Parameters response = ourClient
+			.operation()
+			.onInstance(sub2id)
+			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_id=P0"))
+			.andParameter(ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_id=P1"))
+			.andParameter(ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_id=P2"))
+			.execute();
+		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
+		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+
+		SubscriptionTriggeringSvcImpl svc = ProxyUtil.getSingletonTarget(mySubscriptionTriggeringSvc, SubscriptionTriggeringSvcImpl.class);
+		assertEquals(0, svc.getActiveJobCount());
+
+		assertEquals(0, ourCreatedPatients.size());
+		await().until(() -> ourUpdatedPatients.size() == 3);
+
+	}
+
+	@Test
+	public void testTriggerUsingOrSeparatedList_SingleString() throws Exception {
+		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(13, 22, 100));
+
+		String payload = "application/fhir+json";
+		IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
+
+		// Create lots
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.setId("P" + i);
+			p.addName().setFamily("P" + i);
+			ourClient.update().resource(p).execute();
+		}
+		waitForSize(10, ourUpdatedPatients);
+
+		// Use a single
+		beforeReset();
+		Parameters response = ourClient
+			.operation()
+			.onInstance(sub2id)
+			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_id=P0,P1,P2"))
+			.execute();
+		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
+		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+
+		waitForSize(0, ourCreatedPatients);
+		waitForSize(3, ourUpdatedPatients);
 
 	}
 
@@ -258,13 +367,14 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForSize(50, ourUpdatedPatients);
 		beforeReset();
 
-		mySubscriptionTriggeringSvc.setMaxSubmitPerPass(33);
+		SubscriptionTriggeringSvcImpl svc = ProxyUtil.getSingletonTarget(mySubscriptionTriggeringSvc, SubscriptionTriggeringSvcImpl.class);
+		svc.setMaxSubmitPerPass(33);
 
 		Parameters response = ourClient
 			.operation()
 			.onInstance(sub1id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Observation?_count=10"))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Observation?_count=10"))
 			.execute();
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
@@ -273,10 +383,13 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.operation()
 			.onInstance(sub2id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Patient?_count=16"))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_count=16"))
 			.execute();
 		responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
 
 		waitForSize(10, ourUpdatedObservations);
 		waitForSize(0, ourCreatedObservations);
@@ -293,7 +406,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 				.operation()
 				.onType(Subscription.class)
 				.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-				.withParameter(Parameters.class, SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Observation"))
+				.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Observation"))
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
@@ -321,16 +434,19 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForSize(0, ourUpdatedPatients);
 		beforeReset();
 
-		mySubscriptionTriggeringSvc.setMaxSubmitPerPass(50);
+		SubscriptionTriggeringSvcImpl svc = ProxyUtil.getSingletonTarget(mySubscriptionTriggeringSvc, SubscriptionTriggeringSvcImpl.class);
+		svc.setMaxSubmitPerPass(50);
 
 		Parameters response = ourClient
 			.operation()
 			.onType(Subscription.class)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.SEARCH_URL, new StringType("Observation?"))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Observation?"))
 			.execute();
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+
+		mySubscriptionTriggeringSvc.runDeliveryPass();
 
 		waitForSize(20, ourUpdatedObservations);
 		waitForSize(0, ourCreatedObservations);
@@ -362,13 +478,15 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.operation()
 			.onInstance(subscriptionId)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionTriggeringProvider.RESOURCE_ID, new UriType(obsId.toUnqualifiedVersionless().getValue()))
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID, new UriType(obsId.toUnqualifiedVersionless().getValue()))
 			.execute();
 
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
 
 		waitForQueueToDrain();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 
@@ -436,15 +554,13 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 	@BeforeClass
 	public static void startListenerServer() throws Exception {
-		ourListenerPort = PortUtil.findFreePort();
 		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3());
-		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 
 		ObservationListener obsListener = new ObservationListener();
 		PatientListener ptListener = new PatientListener();
 		ourListenerRestServer.setResourceProviders(obsListener, ptListener);
 
-		ourListenerServer = new Server(ourListenerPort);
+		ourListenerServer = new Server(0);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
@@ -454,12 +570,14 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 
 		ourListenerServer.setHandler(proxyHandler);
-		ourListenerServer.start();
+		JettyUtil.startServer(ourListenerServer);
+		ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
+		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
 	@AfterClass
 	public static void stopListenerServer() throws Exception {
-		ourListenerServer.stop();
+		JettyUtil.closeServer(ourListenerServer);
 	}
 
 }

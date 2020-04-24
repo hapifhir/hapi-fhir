@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -32,6 +33,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Date;
 import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class TransactionProcessorVersionAdapterDstu3 implements TransactionProcessor.ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> {
 	@Override
@@ -65,7 +68,10 @@ public class TransactionProcessorVersionAdapterDstu3 implements TransactionProce
 	@Override
 	public void populateEntryWithOperationOutcome(BaseServerResponseException theCaughtEx, Bundle.BundleEntryComponent theEntry) {
 		OperationOutcome oo = new OperationOutcome();
-		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(theCaughtEx.getMessage());
+		oo.addIssue()
+			.setSeverity(OperationOutcome.IssueSeverity.ERROR)
+			.setDiagnostics(theCaughtEx.getMessage())
+			.setCode(OperationOutcome.IssueType.EXCEPTION);
 		theEntry.getResponse().setOutcome(oo);
 	}
 
@@ -101,6 +107,19 @@ public class TransactionProcessorVersionAdapterDstu3 implements TransactionProce
 		Bundle.HTTPVerb value = theEntry.getRequest().getMethodElement().getValue();
 		if (value != null) {
 			retVal = value.toCode();
+		}
+
+		/*
+		 * This is a workaround for the fact that PATCH isn't a valid constant for
+		 * DSTU3 Bundle.entry.request.method (it was added in R4)
+		 */
+		if (isBlank(retVal)) {
+			Resource resource = theEntry.getResource();
+			boolean isPatch = BundleUtil.isDstu3TransactionPatch(resource);
+
+			if (isPatch) {
+				retVal = "PATCH";
+			}
 		}
 		return retVal;
 	}

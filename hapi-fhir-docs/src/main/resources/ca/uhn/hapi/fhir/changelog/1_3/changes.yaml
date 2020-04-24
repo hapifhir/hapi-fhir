@@ -1,0 +1,165 @@
+---
+- item:
+    type: "add"
+    title: "Bump the version of a few dependencies to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Commons-lang3 (Core): 3.3.2 -&gt; 3.4</li> <li>Logback (Core): 1.1.2 -&gt; 1.1.3</li> <li>SLF4j (Core): 1.7.102 -&gt; 1.7.12</li> <li>Springframework (JPA, Web Tester): 4.1.5 -&gt; 4.2.2</li> <li>Hibernate (JPA, Web Tester): 4.2.17 -&gt; 5.\"</li> <li>Hibernate Validator (JPA, Web Tester): 5.2.1 -&gt; 5.2.2</li> <li>Derby (JPA, CLI, Public Server): 10.11.1.1 -&gt; 10.12.1.1 </li> <li>Jetty (JPA, CLI, Public Server): 9.2.6.v20141205 -&gt; 9.3.4.v20151007 </li> </ul>"
+- item:
+    type: "add"
+    title: "JPA and Tester Overlay now use Spring Java config files instead of the older XML config files. All example projects have been updated."
+- item:
+    type: "add"
+    title: "JPA server removes duplicate resource index entries before storing them (e.g. if a patient has the same name twice, only one index entry is created for that name)"
+- item:
+    type: "fix"
+    title: "JPA server did not correctly index search parameters of type \"reference\" where the path had multiple entries (i.e. \"Resource.path1 | Resource.path2\")"
+- item:
+    type: "fix"
+    title: "JPA server _history operations (server, type, instance) not correctly set the Bundle.entry.request.method to POST or PUT for create and updates of the resource."
+- item:
+    issue: "225"
+    type: "add"
+    title: "Support AND/OR on _id search parameter in JPA"
+- item:
+    type: "fix"
+    title: "Constructor for DateRanfeParam which dates in two DateParam instances was ignoring comparators on the DateParam."
+- item:
+    type: "fix"
+    title: "In JSON parsing, finding an object where an array was expected led to an unhelpful error message. Thanks to Avinash Shanbhag for reporting!"
+- item:
+    type: "add"
+    title: "JPA server gave an unhelpful error message if $meta-add or $meta-delete were called with no meta elements in the input Parameters"
+- item:
+    type: "fix"
+    title: "Narrative generator did not include OperationOutcome.issue.diagnostics in the generated narrative."
+- item:
+    issue: "250"
+    type: "add"
+    title: "Clients (generic and annotation) did not populate the Accept header on outgoing requests. This is now populated to indicate that the client supports both XML and JSON unless the user has explicitly requested one or the other (in which case the appropriate type only will be send in the accept header). Thanks to Avinash Shanbhag for reporting!"
+- item:
+    type: "add"
+    title: "QuestionnaireResponse validator now allows responses to questions of type OPENCHOICE to be of type 'string'"
+- item:
+    issue: "227"
+    type: "fix"
+    title: "JPA server should reject resources with a reference that points to an incorrectly typed resource (e.g. points to Patient/123 but resource 123 is actually an Observation) or points to a resource that is not valid in the location it is found in (e.g. points to Patient/123 but the field supposed to reference an Organization). Thanks to Bill de Beaubien for reporting!"
+- item:
+    type: "fix"
+    title: "In server, if a client request is received and it has an Accept header indicating that it supports both XML and JSON with equal weight, the server's default is used instead of the first entry in the list."
+- item:
+    type: "add"
+    title: "JPA server now supports searching with sort by token, quantity, number, Uri, and _lastUpdated (previously only string, date, and _id were supported)"
+- item:
+    type: "fix"
+    title: "Fix issue in JPA where a search with a _lastUpdated filter which matches no results would crash if the search also had a _sort"
+- item:
+    type: "fix"
+    title: "Fix several cases where invalid requests would cause an HTTP 500 instead of a more appropriate 400/404 in the JPA server (vread on invalid version, delete with no ID, etc.)"
+- item:
+    type: "fix"
+    title: "Fix narrative generation for DSTU2 Medication resource"
+- item:
+    type: "fix"
+    title: "Profile validator now works for valuesets which use v2 tables"
+- item:
+    type: "add"
+    title: "JPA server Patient/[id]/$everything operation now supports _lastUpdated filtering and _sort'ing of results."
+- item:
+    issue: "233"
+    type: "fix"
+    title: "Fix parser issue where profiled choice element datatypes (e.g. value[x] where one allowable type is Duration, which is a profile of Quantity) get incorrectly encoded using the profiled datatype name instead of the base datatype name as required by the FHIR spec. Thanks to Nehashri Puttu Lokesh for reporting!"
+- item:
+    type: "fix"
+    title: "Some generated Enum types in DSTU2 HAPI structures did not have latest valueset definitions applied. Thanks to Bill de Beaubien for reporting!"
+- item:
+    type: "fix"
+    title: "JPA server can now successfully search for tokens pointing at code values (values with no explicit system but an implied one, such as Patient.gender) even if the system is supplied in the query."
+- item:
+    issue: "235"
+    type: "fix"
+    title: "Correct issues with Android library. Thanks to Thomas Andersen for the submission!"
+- item:
+    type: "fix"
+    title: "JPA server incorrectly rejected match URLs if they did not contain a question mark. Thanks to Bill de Beaubien for reporting!"
+- item:
+    issue: "234"
+    type: "fix"
+    title: "Remove invalid entries in OSGi Manifest. Thanks to Alexander Kley for the fix!"
+- item:
+    type: "add"
+    title: "JPA server now supports $everything on Patient and Encounter types (patient and encounter instance was already supported)"
+- item:
+    type: "add"
+    title: "Generic client operation invocations now have an additional inline method for generating the input Parameters using chained method calls instead of by passing a Parameters resource in"
+- item:
+    type: "fix"
+    title: "Parsing an XML resource where the XHTML namespace was declared before the beginning of the narrative section caused an invalid re-encoding when encoding to JSON."
+- item:
+    type: "fix"
+    title: "Conditional deletes in JPA did not correctly process if the condition had a chain or a qualifier, e.g. \"Patient?organization.name\" or \"Patient.identifier:missing\""
+- item:
+    type: "add"
+    title: "Generic/fluent client search can now be performed using a complete URL supplied by user code. Thanks to Simone Heckmann pointing out that this was needed!"
+- item:
+    type: "add"
+    title: "Refactor JPA $everything operations so that they perform better"
+- item:
+    type: "add"
+    title: "Server operation methods can now declare the ID optional, via @IdParam(optional=true) meaning that the same operation can also be invoked at the type level."
+- item:
+    type: "add"
+    title: "Make JPA search queries with _lastUpdated parameter a bit more efficient"
+- item:
+    issue: "239"
+    type: "add"
+    title: "Clean up Android project to make it more lightweight and remove a number of unneeded dependencies. Thanks to Thomas Andersen for the pull request!"
+- item:
+    type: "fix"
+    title: "Fix a crash when encoding a Binary resource in JSON encoding if the resource has no content-type"
+- item:
+    type: "fix"
+    title: "JPA server now supports read/history/search in transaction entries by calling the actual implementing method in the server (previously the call was simulated, which meant that many features did not work)"
+- item:
+    type: "fix"
+    title: "ResourceReferenceDt#loadResource(IRestfulClient) did not use the client's read functionality, so it did not handle JSON responses or use interceptors. Thanks to JT for reporting!"
+- item:
+    type: "add"
+    title: "JPA server maximumn length for a URI search parameter has been reduced from 256 to 255 in order to accomodate MySQL's indexing requirements"
+- item:
+    issue: "242"
+    type: "fix"
+    title: "Server failed to respond correctly to compartment search operations if the same provider also contained a read operation. Thanks to GitHub user @am202 for reporting!"
+- item:
+    issue: "245"
+    type: "fix"
+    title: "Fix issue in testpage-overlay's new Java configuration where only the first configured server actually gets used."
+- item:
+    type: "add"
+    title: "Introduce IJpaServerInterceptor interceptors for JPA server which can be used for more fine grained operations."
+- item:
+    issue: "241"
+    type: "fix"
+    title: "Parser (XML and JSON) shouldn't encode an ID tag in resources which are part of a bundle when the resource has a UUID/OID ID."
+- item:
+    type: "add"
+    title: "Add ability for a server REST resource provider @Search method to declare that it should allow even parameters it doesn't understand."
+- item:
+    issue: "247"
+    type: "fix"
+    title: "Correctly set the Bundle.type value on all pages of a search result in the server, and correcltly set the same value in JPA server $everything results."
+- item:
+    type: "add"
+    title: "JPA $everything operations now support new parameters _content and _text, which work the same way as the same parameters on a search. This is experimental, since it is not a part of the core FHIR specification."
+- item:
+    issue: "250"
+    type: "add"
+    title: "Process \"Accept: text/xml\" and \"Accept: text/json\" headers was wanting the equivalent FHIR encoding styles. These are not correct, but the intention is clear so we will honour them just to be helpful."
+- item:
+    type: "fix"
+    title: "Generated Enum types for some ValueSets did not include all codes (specifically, ValueSets which defined concepts containing child concepts did not result in Enum values for the child concepts)"
+- item:
+    issue: "253"
+    type: "fix"
+    title: "In the JPA server, order of transaction processing should be DELETE, POST, PUT, GET, and the order should not matter within entries with the same verb. Thanks to Bill de Beaubien for reporting!"
+- item:
+    issue: "254"
+    type: "add"
+    title: "Add the ability to wire JPA conformance providers using Spring (basically, add default constructors and setters to the conformance providers). Thanks to C. Mike Bylund for the pull request!"

@@ -4,14 +4,14 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -93,8 +93,6 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			boolean nonPreferred = false;
 			if (IBaseResource.class.isAssignableFrom(next)) {
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
-				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
-				types.add((Class<? extends IBaseResource>) next);
 				nextDef = findResourceReferenceDefinition(theClassToElementDefinitions);
 
 				myNameToChildDefinition.put(getElementName() + "Reference", nextDef);

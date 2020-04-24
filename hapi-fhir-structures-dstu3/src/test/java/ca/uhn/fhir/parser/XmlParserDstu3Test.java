@@ -12,6 +12,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
@@ -44,6 +45,7 @@ import org.xmlunit.diff.ElementSelectors;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -68,6 +70,81 @@ public class XmlParserDstu3Test {
 		}
 		ourCtx.setNarrativeGenerator(null);
 	}
+
+	@Test
+	public void testEncodedResourceWithIncorrectRepresentationOfDecimalTypeToXml() {
+		DecimalType decimalType = new DecimalType();
+		decimalType.setValueAsString(".5");
+		MedicationRequest mr = new MedicationRequest();
+		Dosage dosage = new Dosage();
+		dosage.setDose(new SimpleQuantity()
+			.setValue(decimalType.getValue())
+			.setUnit("{tablet}")
+			.setSystem("http://unitsofmeasure.org")
+			.setCode("{tablet}"));
+		mr.addDosageInstruction(dosage);
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mr);
+		ourLog.info(encoded);
+		mr = ourCtx.newXmlParser().parseResource(MedicationRequest.class, encoded);
+		assertEquals(BigDecimal.valueOf(0.5), mr.getDosageInstructionFirstRep().getDoseSimpleQuantity().getValue());
+		assertTrue(encoded.contains("0.5"));
+	}
+
+	/**
+	 * We specifically include extensions on CapabilityStatement even in
+	 * summary mode, since this is behaviour that people depend on
+	 */
+	@Test
+	public void testEncodeSummaryCapabilityStatementExtensions() {
+
+		CapabilityStatement cs = new CapabilityStatement();
+		CapabilityStatement.CapabilityStatementRestComponent rest = cs.addRest();
+		rest.setMode(CapabilityStatement.RestfulCapabilityMode.CLIENT);
+		rest.getSecurity()
+			.addExtension()
+			.setUrl("http://foo")
+			.setValue(new StringType("bar"));
+
+		cs.getVersionElement().addExtension()
+			.setUrl("http://goo")
+			.setValue(new StringType("ber"));
+
+		String encoded = ourCtx.newXmlParser().setSummaryMode(true).setPrettyPrint(true).setPrettyPrint(true).encodeResourceToString(cs);
+		ourLog.info(encoded);
+
+		assertThat(encoded, Matchers.containsString("http://foo"));
+		assertThat(encoded, Matchers.containsString("bar"));
+		assertThat(encoded, Matchers.containsString("http://goo"));
+		assertThat(encoded, Matchers.containsString("ber"));
+	}
+
+
+	@Test
+	public void testEncodeInvalidMetaTime() {
+
+		Patient p = new Patient();
+		p.getMeta().getLastUpdatedElement().setValueAsString("2019-01-01");
+		String output = ourCtx.newXmlParser().encodeResourceToString(p);
+		assertThat(output, containsString("lastUpdated value=\"2019-01-01\""));
+
+	}
+
+	@Test
+	public void testEncodeExtensionWithNullUrl() {
+		{
+			Patient p = new Patient();
+			p.addExtension().setValue(new StringType("foo"));
+			String encoded = ourCtx.newXmlParser().encodeResourceToString(p);
+			assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><extension><valueString value=\"foo\"/></extension></Patient>", encoded);
+		}
+		{
+			Patient p = new Patient();
+			p.getActiveElement().addExtension().setValue(new StringType("foo"));
+			String encoded = ourCtx.newXmlParser().encodeResourceToString(p);
+			assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><active><extension><valueString value=\"foo\"/></extension></active></Patient>", encoded);
+		}
+	}
+
 
 	@Test
 	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {
@@ -147,6 +224,66 @@ public class XmlParserDstu3Test {
 
 	}
 
+	@Test
+	public void testUnknownAttributeInPrimitive() {
+
+		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+
+		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <total value=\"1\" foo=\"bar\"/>\n" +
+			"</Bundle>";
+
+		Bundle b = ourCtx.newXmlParser().setParserErrorHandler(errorHandler).parseResource(Bundle.class, bundle);
+		assertEquals(1, b.getTotal());
+
+		ArgumentCaptor<String> attributeCaptor = ArgumentCaptor.forClass(String.class);
+		verify(errorHandler, times(1)).unknownAttribute(any(), attributeCaptor.capture());
+		assertEquals("foo", attributeCaptor.getValue());
+	}
+
+	@Test
+	public void testUnknownElementInPrimitive() {
+
+		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+
+		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <total value=\"1\">\n" +
+			"      <foo/>" +
+			"   </total>\n" +
+			"</Bundle>";
+
+		Bundle b = ourCtx.newXmlParser().setParserErrorHandler(errorHandler).parseResource(Bundle.class, bundle);
+		assertEquals(1, b.getTotal());
+
+		ArgumentCaptor<String> attributeCaptor = ArgumentCaptor.forClass(String.class);
+		verify(errorHandler, times(1)).unknownElement(any(), attributeCaptor.capture());
+		assertEquals("foo", attributeCaptor.getValue());
+	}
+
+	@Test
+	public void testExtensionInInvalidSpot() {
+
+		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+
+		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <extension url=\"http://foo\">" +
+			"      <valueString value=\"blah\"/>" +
+			"   </extension>" +
+			"   <modifierExtension url=\"http://foo\">" +
+			"      <valueString value=\"blah\"/>" +
+			"   </modifierExtension>" +
+			"   <total value=\"1\"/>\n" +
+			"</Bundle>";
+
+		Bundle b = ourCtx.newXmlParser().setParserErrorHandler(errorHandler).parseResource(Bundle.class, bundle);
+		assertEquals(1, b.getTotal());
+
+		ArgumentCaptor<String> attributeCaptor = ArgumentCaptor.forClass(String.class);
+		verify(errorHandler, times(2)).unknownElement(any(), attributeCaptor.capture());
+		assertEquals("extension", attributeCaptor.getAllValues().get(0));
+		assertEquals("modifierExtension", attributeCaptor.getAllValues().get(1));
+	}
+
 
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {
@@ -178,6 +315,30 @@ public class XmlParserDstu3Test {
 		parser.setParserErrorHandler(new StrictErrorHandler());
 		parser.parseResource(Bundle.class, string);
 	}
+
+	@Test
+	public void testContainedResourceWithNoId2() {
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <contained>\n" +
+			"      <Organization xmlns=\"http://hl7.org/fhir\">\n" +
+			"         <name value=\"Contained Test Organization\"/>\n" +
+			"      </Organization>\n" +
+			"   </contained>" +
+			"   <active value=\"true\"/>" +
+			"</Patient>";
+
+		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+
+		IParser p = ourCtx.newXmlParser();
+		p.setParserErrorHandler(errorHandler);
+
+		Patient patient = p.parseResource(Patient.class, input);
+		assertTrue(patient.getActive());
+
+		verify(errorHandler, times(1)).containedResourceWithNoId(nullable(IParseLocation.class));
+
+	}
+
 
 	@Test()
 	public void testContainedResourceWithNoIdLenient() throws IOException {
@@ -679,7 +840,6 @@ public class XmlParserDstu3Test {
 
 		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<meta>",
-			"<meta>",
 			"<profile value=\"http://foo/Profile1\"/>",
 			"<profile value=\"http://foo/Profile2\"/>",
 			"<tag>",
@@ -692,7 +852,6 @@ public class XmlParserDstu3Test {
 			"<code value=\"term2\"/>",
 			"<display value=\"label2\"/>",
 			"</tag>",
-			"</meta>",
 			"</meta>",
 			"<name>",
 			"<family value=\"FAMILY\"/>",
@@ -739,7 +898,6 @@ public class XmlParserDstu3Test {
 
 		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<meta>",
-			"<meta>",
 			"<tag>",
 			"<system value=\"scheme1\"/>",
 			"<code value=\"term1\"/>",
@@ -750,7 +908,6 @@ public class XmlParserDstu3Test {
 			"<code value=\"term2\"/>",
 			"<display value=\"label2\"/>",
 			"</tag>",
-			"</meta>",
 			"</meta>",
 			"<name>",
 			"<family value=\"FAMILY\"/>",
@@ -1028,6 +1185,28 @@ public class XmlParserDstu3Test {
 
 		gp = (Organization) parent.getPartOf().getResource();
 		assertEquals("grandparent", gp.getName());
+	}
+
+	/**
+	 * See #402
+	 */
+	@Test
+	public void testEncodeCompositionDoesntOverwriteNarrative() {
+		FhirContext ctx = FhirContext.forDstu3();
+		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+
+		Composition composition  = new Composition();
+		composition.getText().setDivAsString("<div>root</div>");
+		composition.addSection().getText().setDivAsString("<div>section0</div>");
+		composition.addSection().getText().setDivAsString("<div>section1</div>");
+
+		String output = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(composition);
+		ourLog.info(output);
+
+		assertThat(output, containsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">root</div>"));
+		assertThat(output, containsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">section0</div>"));
+		assertThat(output, containsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">section1</div>"));
+
 	}
 
 	/**
@@ -1326,6 +1505,62 @@ public class XmlParserDstu3Test {
 		assertThat(encoded, containsString("tag"));
 		assertThat(encoded, containsString("scheme"));
 		assertThat(encoded, not(containsString("Label")));
+	}
+
+	@Test
+	public void testEncodeWithInvalidExtensionMissingUrl() {
+
+		Patient p = new Patient();
+		Extension root = p.addExtension();
+		root.setValue(new StringType("ROOT_VALUE"));
+
+		// Lenient error handler
+		IParser parser = ourCtx.newXmlParser();
+		String output = parser.encodeResourceToString(p);
+		ourLog.info("Output: {}", output);
+		assertThat(output, containsString("ROOT_VALUE"));
+
+		// Strict error handler
+		try {
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.encodeResourceToString(p);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Resource is missing required element 'url' in parent element 'Patient(res).extension'", e.getMessage());
+		}
+
+	}
+
+
+	@Test
+	public void testEncodeWithInvalidExtensionContainingValueAndNestedExtensions() {
+
+		Patient p = new Patient();
+		Extension root = p.addExtension();
+		root.setUrl("http://root");
+		root.setValue(new StringType("ROOT_VALUE"));
+		Extension child = root.addExtension();
+		child.setUrl("http://child");
+		child.setValue(new StringType("CHILD_VALUE"));
+
+		// Lenient error handler
+		IParser parser = ourCtx.newXmlParser();
+		String output = parser.encodeResourceToString(p);
+		ourLog.info("Output: {}", output);
+		assertThat(output, containsString("http://root"));
+		assertThat(output, containsString("ROOT_VALUE"));
+		assertThat(output, containsString("http://child"));
+		assertThat(output, containsString("CHILD_VALUE"));
+
+		// Strict error handler
+		try {
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.encodeResourceToString(p);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
+		}
+
 	}
 
 	@Test
@@ -1696,7 +1931,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testEncodeUndeclaredBlock() throws Exception {
+	public void testEncodeUndeclaredBlock() {
 		FooMessageHeader.FooMessageSourceComponent source = new FooMessageHeader.FooMessageSourceComponent();
 		source.getMessageHeaderApplicationId().setValue("APPID");
 		source.setName("NAME");
@@ -1726,7 +1961,7 @@ public class XmlParserDstu3Test {
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUse.HOME);
 		EnumFactory<AddressUse> fact = new AddressUseEnumFactory();
-		PrimitiveType<AddressUse> enumeration = new Enumeration<AddressUse>(fact).setValue(AddressUse.HOME);
+		PrimitiveType<AddressUse> enumeration = new Enumeration<>(fact).setValue(AddressUse.HOME);
 		patient.addExtension().setUrl("urn:foo").setValue(enumeration);
 
 		String val = parser.encodeResourceToString(patient);
@@ -1742,7 +1977,7 @@ public class XmlParserDstu3Test {
 
 	@Test
 	public void testEncodeWithContained() {
-		List<Resource> contained = new ArrayList<Resource>();
+		List<Resource> contained = new ArrayList<>();
 
 		// Will be added by reference
 		Patient p = new Patient();
@@ -1798,7 +2033,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testEncodeWithDontEncodeElements() throws Exception {
+	public void testEncodeWithDontEncodeElements() {
 		Patient patient = new Patient();
 		patient.setId("123");
 		patient.getMeta().addProfile("http://profile");
@@ -1853,7 +2088,7 @@ public class XmlParserDstu3Test {
 		{
 			IParser p = ourCtx.newXmlParser();
 			p.setDontEncodeElements(Sets.newHashSet("Patient.meta"));
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient.name")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(patient);
 			ourLog.info(out);
@@ -1862,11 +2097,12 @@ public class XmlParserDstu3Test {
 			assertThat(out, containsString("id"));
 			assertThat(out, not(containsString("address")));
 			assertThat(out, not(containsString("meta")));
+			assertThat(out, not(containsString("SUBSETTED")));
 		}
 	}
 
 	@Test
-	public void testEncodeWithEncodeElements() throws Exception {
+	public void testEncodeWithEncodeElements() {
 		Patient patient = new Patient();
 		patient.getMeta().addProfile("http://profile");
 		patient.addName().setFamily("FAMILY");
@@ -1889,8 +2125,7 @@ public class XmlParserDstu3Test {
 		}
 		{
 			IParser p = ourCtx.newXmlParser();
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name")));
-			p.setEncodeElementsAppliesToResourceTypes(new HashSet<String>(Arrays.asList("Patient")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient.name")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -1901,8 +2136,7 @@ public class XmlParserDstu3Test {
 		}
 		{
 			IParser p = ourCtx.newXmlParser();
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient")));
-			p.setEncodeElementsAppliesToResourceTypes(new HashSet<String>(Arrays.asList("Patient")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -1915,7 +2149,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testEncodeWithEncodeElementsAppliesToChildResourcesOnly() throws Exception {
+	public void testEncodeWithEncodeElementsAppliesToChildResourcesOnly() {
 		Patient patient = new Patient();
 		patient.getMeta().addProfile("http://profile");
 		patient.addName().setFamily("FAMILY");
@@ -1970,7 +2204,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testMoreExtensions() throws Exception {
+	public void testMoreExtensions() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
@@ -2290,42 +2524,27 @@ public class XmlParserDstu3Test {
 		output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(pat);
 		ourLog.info(output);
 
-		assertThat(output, stringContainsInOrder(
-			"{",
+		assertThat(output, stringContainsInOrder("{",
 			"  \"resourceType\": \"Patient\",",
 			"  \"id\": \"someid\",",
 			"  \"_id\": {",
-			"    \"fhir_comments\": [",
-			"      \" comment 1 \"",
-			"    ]",
+			"    \"fhir_comments\": [ \" comment 1 \" ]",
 			"  },",
-			"  \"extension\": [",
-			"    {",
-			"      \"fhir_comments\": [",
-			"        \" comment 2 \",",
-			"        \" comment 7 \"",
-			"      ],",
-			"      \"url\": \"urn:patientext:att\",",
-			"      \"valueAttachment\": {",
-			"        \"fhir_comments\": [",
-			"          \" comment 3 \",",
-			"          \" comment 6 \"",
-			"        ],",
-			"        \"contentType\": \"aaaa\",",
-			"        \"_contentType\": {",
-			"          \"fhir_comments\": [",
-			"            \" comment 4 \"",
-			"          ]",
-			"        },",
-			"        \"data\": \"AAAA\",",
-			"        \"_data\": {",
-			"          \"fhir_comments\": [",
-			"            \" comment 5 \"",
-			"          ]",
-			"        }",
+			"  \"extension\": [ {",
+			"    \"fhir_comments\": [ \" comment 2 \", \" comment 7 \" ],",
+			"    \"url\": \"urn:patientext:att\",",
+			"    \"valueAttachment\": {",
+			"      \"fhir_comments\": [ \" comment 3 \", \" comment 6 \" ],",
+			"      \"contentType\": \"aaaa\",",
+			"      \"_contentType\": {",
+			"        \"fhir_comments\": [ \" comment 4 \" ]",
+			"      },",
+			"      \"data\": \"AAAA\",",
+			"      \"_data\": {",
+			"        \"fhir_comments\": [ \" comment 5 \" ]",
 			"      }",
 			"    }",
-			"  ]",
+			"  } ]",
 			"}"));
 
 	}
@@ -2916,7 +3135,7 @@ public class XmlParserDstu3Test {
 			p.parseResource(resource);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: [element=\"active\"] Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
 		}
 
 		LenientErrorHandler errorHandler = new LenientErrorHandler();

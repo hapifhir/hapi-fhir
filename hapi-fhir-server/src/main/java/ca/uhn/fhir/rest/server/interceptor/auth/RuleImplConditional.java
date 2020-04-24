@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
@@ -31,7 +32,7 @@ import java.util.Set;
 public class RuleImplConditional extends BaseRule implements IAuthRule {
 
 	private AppliesTypeEnum myAppliesTo;
-	private Set<?> myAppliesToTypes;
+	private Set<String> myAppliesToTypes;
 	private RestOperationTypeEnum myOperationType;
 
 	RuleImplConditional(String theRuleName) {
@@ -40,30 +41,38 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 
 	@Override
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
-									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags) {
+									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
 
 		if (isOtherTenant(theRequestDetails)) {
 			return null;
 		}
 
-		if (theInputResourceId != null) {
+		if (theInputResourceId != null && theInputResourceId.hasIdPart()) {
 			return null;
 		}
 
 		if (theOperation == myOperationType) {
+			if (theRequestDetails.getConditionalUrl(myOperationType) == null) {
+				return null;
+			}
+
 			switch (myAppliesTo) {
 				case ALL_RESOURCES:
 				case INSTANCES:
 					break;
 				case TYPES:
-					if (theInputResource == null || !myAppliesToTypes.contains(theInputResource.getClass())) {
-						return null;
+					if (myOperationType == RestOperationTypeEnum.DELETE) {
+						String resourceName = theRequestDetails.getResourceName();
+						if (!myAppliesToTypes.contains(resourceName)) {
+							return null;
+						}
+					} else {
+						String inputResourceName = theRequestDetails.getFhirContext().getResourceDefinition(theInputResource).getName();
+						if (theInputResource == null || !myAppliesToTypes.contains(inputResourceName)) {
+							return null;
+						}
 					}
 					break;
-			}
-
-			if (theRequestDetails.getConditionalUrl(myOperationType) == null) {
-				return null;
 			}
 
 			if (getTenantApplicabilityChecker() != null) {
@@ -86,7 +95,7 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 		myAppliesTo = theAppliesTo;
 	}
 
-	void setAppliesToTypes(Set<?> theAppliesToTypes) {
+	void setAppliesToTypes(Set<String> theAppliesToTypes) {
 		myAppliesToTypes = theAppliesToTypes;
 	}
 

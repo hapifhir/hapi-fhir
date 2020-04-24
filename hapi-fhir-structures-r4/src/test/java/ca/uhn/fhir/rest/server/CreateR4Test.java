@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
-import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -36,6 +35,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class CreateR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateR4Test.class);
@@ -74,6 +75,23 @@ public class CreateR4Test {
 		assertEquals(1, status.getHeaders("Content-Location").length);
 		assertEquals("http://localhost:" + ourPort + "/Patient/1", status.getFirstHeader("Location").getValue());
 
+	}
+
+	@Test
+	public void testCreateFailsIfNoContentTypeProvided() throws Exception {
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"id\":\"999\", \"status\":\"active\"}", (ContentType) null));
+		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+
+			ourLog.info("Response was:\n{}", responseContent);
+
+			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(responseContent, containsString("No Content-Type header was provided in the request. This is required for \\\"CREATE\\\" operation"));
+
+		}
 	}
 
 	/**
@@ -377,14 +395,13 @@ public class CreateR4Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 
 		PatientProviderCreate patientProviderCreate = new PatientProviderCreate();
 		PatientProviderRead patientProviderRead = new PatientProviderRead();
@@ -397,7 +414,8 @@ public class CreateR4Test {
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

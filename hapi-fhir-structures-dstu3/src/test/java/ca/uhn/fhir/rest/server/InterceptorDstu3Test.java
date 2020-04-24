@@ -1,8 +1,12 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -13,7 +17,6 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetai
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -28,9 +31,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
@@ -38,12 +40,14 @@ import org.mockito.InOrder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class InterceptorDstu3Test {
 
@@ -58,9 +62,7 @@ public class InterceptorDstu3Test {
 
 	@After
 	public void after() {
-		for (IServerInterceptor next : new ArrayList<>(ourServlet.getInterceptors())) {
-			ourServlet.unregisterInterceptor(next);
-		}
+		ourServlet.getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@Before
@@ -80,6 +82,35 @@ public class InterceptorDstu3Test {
 			"   \"active\":true\n" +
 			"}";
 	}
+
+
+	@Test
+	public void testServerPreHandledOnOperationCapturesResource() throws IOException {
+
+		AtomicReference<IBaseResource> resource = new AtomicReference<>();
+		IAnonymousInterceptor interceptor = (thePointcut, theArgs) -> {
+			RequestDetails requestDetails = theArgs.get(RequestDetails.class);
+			resource.set(requestDetails.getResource());
+		};
+
+		ourServlet.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
+		try {
+			Parameters p = new Parameters();
+			p.addParameter().setName("limit").setValue(new IntegerType(123));
+			String input = ourCtx.newJsonParser().encodeResourceToString(p);
+
+			HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Patient/$postOperation");
+			post.setEntity(new StringEntity(input, ContentType.create("application/fhir+json", Constants.CHARSET_UTF8)));
+			try (CloseableHttpResponse status = ourClient.execute(post)) {
+				assertEquals(200, status.getStatusLine().getStatusCode());
+			}
+		} finally {
+			ourServlet.unregisterInterceptor(interceptor);
+		}
+
+		assertNotNull(resource.get());
+	}
+
 
 	@Test
 	public void testModifyResponse() throws IOException {
@@ -116,12 +147,26 @@ public class InterceptorDstu3Test {
 
 		when(myInterceptor1.incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor1.incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(ServletRequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(ServletRequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(IBaseResource.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+
 		when(myInterceptor2.incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor2.incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor2.outgoingResponse(nullable(ServletRequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
-		when(myInterceptor2.outgoingResponse(nullable(ServletRequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class))).thenReturn(true);
+		when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
+		when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class), nullable(IBaseResource.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+
+		doAnswer(t->{
+			RestOperationTypeEnum type = (RestOperationTypeEnum) t.getArguments()[0];
+			ActionRequestDetails det = (ActionRequestDetails) t.getArguments()[1];
+			type.toString();
+			return null;
+		}).when(myInterceptor1).incomingRequestPreHandled(any(), any());
 
 		String input = createInput();
 
@@ -139,18 +184,6 @@ public class InterceptorDstu3Test {
 		ArgumentCaptor<ActionRequestDetails> arTypeCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
 		order.verify(myInterceptor1, times(1)).incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
 		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(nullable(RestOperationTypeEnum.class), nullable(ActionRequestDetails.class));
-		order.verify(myInterceptor2, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), nullable(OperationOutcome.class));
-		order.verify(myInterceptor2, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
-		order.verify(myInterceptor1, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), nullable(OperationOutcome.class));
-		order.verify(myInterceptor1, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
-
-		// Avoid concurrency issues
-		Thread.sleep(500);
-
-		order.verify(myInterceptor2, times(1)).processingCompletedNormally(nullable(ServletRequestDetails.class));
-		order.verify(myInterceptor1, times(1)).processingCompletedNormally(nullable(ServletRequestDetails.class));
-		verifyNoMoreInteractions(myInterceptor1);
-		verifyNoMoreInteractions(myInterceptor2);
 
 		assertEquals(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, opTypeCapt.getValue());
 		assertNotNull(arTypeCapt.getValue().getResource());
@@ -162,9 +195,11 @@ public class InterceptorDstu3Test {
 
 		when(myInterceptor1.incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor1.incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(ServletRequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(ServletRequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		doThrow(new NullPointerException("FOO")).when(myInterceptor1).processingCompletedNormally(any());
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(IBaseResource.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
 
 		String input = createInput();
 
@@ -184,8 +219,11 @@ public class InterceptorDstu3Test {
 
 		when(myInterceptor1.incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor1.incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(ServletRequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(ServletRequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(IBaseResource.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
 
 		String input = createInput();
 
@@ -219,7 +257,11 @@ public class InterceptorDstu3Test {
 
 		when(myInterceptor1.incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor1.incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(nullable(ServletRequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(IBaseResource.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(RequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
 
 		String input = createInput();
 
@@ -256,7 +298,14 @@ public class InterceptorDstu3Test {
 		@Create()
 		public MethodOutcome create(@ResourceParam Patient theResource) {
 			ourLastPatient = theResource;
-			return new MethodOutcome();
+			return new MethodOutcome().setCreated(true);
+		}
+
+		@Operation(name="$postOperation")
+		public Parameters postOperation(
+			@OperationParam(name = "limit") IntegerType theLimit
+			) {
+			return new Parameters();
 		}
 
 		@Override
@@ -281,24 +330,25 @@ public class InterceptorDstu3Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setResourceProviders(patientProvider);
+		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

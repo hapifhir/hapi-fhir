@@ -11,14 +11,14 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,7 +40,7 @@ public class Include implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private final boolean myImmutable;
-	private boolean myRecurse;
+	private boolean myIterate;
 	private String myValue;
 
 	/**
@@ -59,12 +59,12 @@ public class Include implements Serializable {
 	 * 
 	 * @param theValue
 	 *           The <code>_include</code> value, e.g. "Patient:name"
-	 * @param theRecurse
+	 * @param theIterate
 	 *           Should the include recurse
 	 */
-	public Include(String theValue, boolean theRecurse) {
+	public Include(String theValue, boolean theIterate) {
 		myValue = theValue;
-		myRecurse = theRecurse;
+		myIterate = theIterate;
 		myImmutable = false;
 	}
 
@@ -73,12 +73,12 @@ public class Include implements Serializable {
 	 * 
 	 * @param theValue
 	 *           The <code>_include</code> value, e.g. "Patient:name"
-	 * @param theRecurse
+	 * @param theIterate
 	 *           Should the include recurse
 	 */
-	public Include(String theValue, boolean theRecurse, boolean theImmutable) {
+	public Include(String theValue, boolean theIterate, boolean theImmutable) {
 		myValue = theValue;
-		myRecurse = theRecurse;
+		myIterate = theIterate;
 		myImmutable = theImmutable;
 	}
 
@@ -111,7 +111,7 @@ public class Include implements Serializable {
 			return false;
 		}
 		Include other = (Include) obj;
-		if (myRecurse != other.myRecurse) {
+		if (myIterate != other.myIterate) {
 			return false;
 		}
 		if (myValue == null) {
@@ -177,7 +177,7 @@ public class Include implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (myRecurse ? 1231 : 1237);
+		result = prime * result + (myIterate ? 1231 : 1237);
 		result = prime * result + ((myValue == null) ? 0 : myValue.hashCode());
 		return result;
 	}
@@ -190,7 +190,7 @@ public class Include implements Serializable {
 	}
 
 	public boolean isRecurse() {
-		return myRecurse;
+		return myIterate;
 	}
 
 	/**
@@ -199,7 +199,7 @@ public class Include implements Serializable {
 	 * @return  Returns a reference to <code>this</code> for easy method chaining
 	 */
 	public Include setRecurse(boolean theRecurse) {
-		myRecurse = theRecurse;
+		myIterate = theRecurse;
 		return this;
 	}
 
@@ -214,7 +214,7 @@ public class Include implements Serializable {
 	 * Return a new
 	 */
 	public Include toLocked() {
-		Include retVal = new Include(myValue, myRecurse, true);
+		Include retVal = new Include(myValue, myIterate, true);
 		return retVal;
 	}
 
@@ -222,7 +222,7 @@ public class Include implements Serializable {
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this);
 		builder.append("value", myValue);
-		builder.append("recurse", myRecurse);
+		builder.append("iterate", myIterate);
 		return builder.toString();
 	}
 
@@ -273,7 +273,7 @@ public class Include implements Serializable {
 			b.append(':');
 			b.append(theResourceType);
 		}
-		Include retVal = new Include(b.toString(), myRecurse, myImmutable);
+		Include retVal = new Include(b.toString(), myIterate, myImmutable);
 		return retVal;
 	}
 

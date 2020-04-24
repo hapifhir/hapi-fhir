@@ -4,19 +4,20 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /*
  * #%L
  * HAPI FHIR OkHttp Client
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -62,7 +63,12 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 
     public synchronized Call.Factory getNativeClient() {
         if (myNativeClient == null) {
-            myNativeClient = new OkHttpClient();
+            myNativeClient = new OkHttpClient()
+				.newBuilder()
+				.connectTimeout(getConnectTimeout(), TimeUnit.MILLISECONDS)
+					.readTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS)
+					.writeTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS)
+				.build();
         }
 
         return myNativeClient;

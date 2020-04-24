@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -20,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -139,7 +142,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		sp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(sp);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		org.hl7.fhir.dstu3.model.Practitioner pract = new org.hl7.fhir.dstu3.model.Practitioner();
 		pract.setId("A");
@@ -169,7 +172,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		eyeColourSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(eyeColourSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Patient p1 = new Patient();
 		p1.setActive(true);
@@ -191,7 +194,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		attendingSp.getTarget().add(new CodeType("Practitioner"));
 		IIdType spId = mySearchParameterDao.create(attendingSp, mySrd).getId().toUnqualifiedVersionless();
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Practitioner p1 = new Practitioner();
 		p1.addName().setFamily("P1");
@@ -231,7 +234,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		threadIdSp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		threadIdSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(threadIdSp, mySrd);
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Communication com = new Communication();
 		com.setStatus(Communication.CommunicationStatus.INPROGRESS);
@@ -277,7 +280,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		sp.addTarget("Condition");
 		sp.addTarget("Observation");
 		mySearchParameterDao.create(sp);
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Condition condition = new Condition();
 		condition.getCode().setText("A condition");
@@ -313,7 +316,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setExpression("MedicationRequest.reasonCode | ProcedureRequest.reasonCode");
 		mySearchParameterDao.create(sp);
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		MedicationRequest mr = new MedicationRequest();
 		mr.addReasonCode().addCoding().setSystem("foo").setCode("bar");
@@ -343,7 +346,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		siblingSp.getTarget().add(new CodeType("Organization"));
 		mySearchParameterDao.create(siblingSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Patient p1 = new Patient();
 		p1.addName().setFamily("P1");
@@ -387,7 +390,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		siblingSp.getTarget().add(new CodeType("Patient"));
 		mySearchParameterDao.create(siblingSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Patient p1 = new Patient();
 		p1.addName().setFamily("P1");
@@ -441,7 +444,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(siblingSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Patient p1 = new Patient();
 		p1.addName().setFamily("P1");
@@ -496,7 +499,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		eyeColourSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(eyeColourSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Patient p1 = new Patient();
 		p1.setActive(true);
@@ -530,7 +533,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		siblingSp.getTarget().add(new CodeType("Organization"));
 		mySearchParameterDao.create(siblingSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Patient patient = new Patient();
 		patient.addName().setFamily("P2");
@@ -568,7 +571,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		siblingSp.getTarget().add(new CodeType("Organization"));
 		mySearchParameterDao.create(siblingSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Patient patient = new Patient();
 		patient.addName().setFamily("P2");
@@ -605,7 +608,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(siblingSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Appointment apt = new Appointment();
 		apt.setStatus(AppointmentStatus.ARRIVED);
@@ -647,7 +650,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(siblingSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Patient patient = new Patient();
 		patient.addName().setFamily("P2");
@@ -684,7 +687,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(siblingSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Patient patient = new Patient();
 		patient.addName().setFamily("P2");
@@ -722,7 +725,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		siblingSp.getTarget().add(new CodeType("Appointment"));
 		mySearchParameterDao.create(siblingSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Appointment apt = new Appointment();
 		apt.setStatus(AppointmentStatus.ARRIVED);
@@ -764,7 +767,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(siblingSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Appointment apt = new Appointment();
 		apt.setStatus(AppointmentStatus.ARRIVED);
@@ -807,7 +810,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		siblingSp.getTarget().add(new CodeType("Observation"));
 		mySearchParameterDao.create(siblingSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Appointment apt = new Appointment();
 		apt.setStatus(AppointmentStatus.ARRIVED);
@@ -849,7 +852,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(siblingSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Patient patient = new Patient();
 		patient.addName().setFamily("P2");
@@ -886,7 +889,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		displaySp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(displaySp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		MedicationStatement ms1 = new MedicationStatement();
 		ms1.setMedication(new CodeableConcept());
@@ -919,7 +922,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 		mySearchParameterDao.create(sp);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Specimen specimen = new Specimen();
 		specimen.setId("#FOO");
@@ -962,7 +965,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		IIdType spId = mySearchParameterDao.create(fooSp, mySrd).getId().toUnqualifiedVersionless();
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Patient pat = new Patient();
 		pat.setGender(AdministrativeGender.MALE);
@@ -993,7 +996,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		// Delete the param
 		mySearchParameterDao.delete(spId, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 		myResourceReindexingSvc.forceReindexingPass();
 		myResourceReindexingSvc.forceReindexingPass();
 
@@ -1021,7 +1024,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.DRAFT);
 		mySearchParameterDao.create(fooSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 
 		Patient pat = new Patient();
 		pat.setGender(AdministrativeGender.MALE);
@@ -1053,6 +1056,48 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		assertThat(foundResources, contains(patId.getValue()));
 
 	}
+
+	@Test
+	public void testProgramaticallyContainedByReferenceAreStillResolvable() {
+		SearchParameter sp = new SearchParameter();
+		sp.setUrl("http://hapifhir.io/fhir/StructureDefinition/sp-unique");
+		sp.setName("MEDICATIONADMINISTRATION-INGREDIENT-MEDICATION");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setCode("medicationadministration-ingredient-medication");
+		sp.addBase("MedicationAdministration");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("MedicationAdministration.medication.resolve().ingredient.item.as(Reference).resolve().code");
+		mySearchParameterDao.create(sp);
+		mySearchParamRegistry.forceRefresh();
+
+		Medication ingredient = new Medication();
+		ingredient.getCode().addCoding().setSystem("system").setCode("code");
+
+		Medication medication = new Medication();
+		medication.addIngredient().setItem(new Reference(ingredient));
+
+		MedicationAdministration medAdmin = new MedicationAdministration();
+		medAdmin.setMedication(new Reference(medication));
+
+		myMedicationAdministrationDao.create(medAdmin);
+		
+		runInTransaction(()->{
+			List<ResourceIndexedSearchParamToken> tokens = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().equals("medicationadministration-ingredient-medication"))
+				.collect(Collectors.toList());
+			ourLog.info("Tokens: {}", tokens);
+			assertEquals(tokens.toString(), 1, tokens.size());
+
+		});
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("medicationadministration-ingredient-medication", new TokenParam("system","code"));
+		assertEquals(1, myMedicationAdministrationDao.search(map).size().intValue());
+
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {

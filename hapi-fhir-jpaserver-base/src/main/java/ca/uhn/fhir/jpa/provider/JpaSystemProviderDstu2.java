@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl.Suggestion;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -14,15 +14,21 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,14 +42,14 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -69,9 +75,10 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProviderDstu2Plus<Bundl
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerDt theLimit,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanDt theExpungeDeletedResources,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanDt theExpungeOldVersions,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING) BooleanDt theExpungeEverything
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING) BooleanDt theExpungeEverything,
+		RequestDetails theRequestDetails
 	) {
-		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);
+		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything, theRequestDetails);
 		return toExpungeResponse(retVal);
 	}
 
@@ -82,9 +89,10 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProviderDstu2Plus<Bundl
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerDt theLimit,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanDt theExpungeDeletedResources,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanDt theExpungeOldVersions,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING) BooleanDt theExpungeEverything
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING) BooleanDt theExpungeEverything,
+		RequestDetails theRequestDetails
 	) {
-		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);
+		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything, theRequestDetails);
 		return toExpungeResponse(retVal);
 	}
 
@@ -212,8 +220,8 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProviderDstu2Plus<Bundl
 	public Parameters suggestKeywords(
 		@OperationParam(name = "context", min = 1, max = 1) String theContext,
 		@OperationParam(name = "searchParam", min = 1, max = 1) String theSearchParam,
-		@OperationParam(name = "text", min = 1, max = 1) String theText
-	) {
+		@OperationParam(name = "text", min = 1, max = 1) String theText,
+		RequestDetails theRequest) {
 		JpaSystemProviderDstu3.validateFulltextSearchEnabled(mySearchDao);
 
 		if (isBlank(theContext)) {
@@ -226,7 +234,7 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProviderDstu2Plus<Bundl
 			throw new InvalidRequestException("Parameter 'text' must be provided");
 		}
 
-		List<Suggestion> keywords = mySearchDao.suggestKeywords(theContext, theSearchParam, theText);
+		List<Suggestion> keywords = mySearchDao.suggestKeywords(theContext, theSearchParam, theText, theRequest);
 
 		Parameters retVal = new Parameters();
 		for (Suggestion next : keywords) {
@@ -246,6 +254,28 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProviderDstu2Plus<Bundl
 		} finally {
 			endRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());
 		}
+	}
+
+	/**
+	 * /$process-message
+	 */
+	@Operation(name = JpaConstants.OPERATION_PROCESS_MESSAGE, idempotent = false)
+	public IBaseBundle processMessage(
+		HttpServletRequest theServletRequest,
+		RequestDetails theRequestDetails,
+
+		@OperationParam(name = "content", min = 1, max = 1)
+		@Description(formalDefinition = "The message to process (or, if using asynchronous messaging, it may be a response message to accept)")
+			Bundle theMessageToProcess
+	) {
+
+		startRequest(theServletRequest);
+		try {
+			return getDao().processMessage(theRequestDetails, theMessageToProcess);
+		} finally {
+			endRequest(theServletRequest);
+		}
+
 	}
 
 	public static Parameters toExpungeResponse(org.hl7.fhir.r4.model.Parameters theRetVal) {

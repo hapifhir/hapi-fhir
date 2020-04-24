@@ -10,14 +10,14 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,7 +38,7 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
  * @see IParser#setParserErrorHandler(IParserErrorHandler)
  * @see FhirContext#setParserErrorHandler(IParserErrorHandler)
  */
-public class LenientErrorHandler implements IParserErrorHandler {
+public class LenientErrorHandler extends BaseErrorHandler implements IParserErrorHandler {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LenientErrorHandler.class);
 	private static final StrictErrorHandler STRICT_ERROR_HANDLER = new StrictErrorHandler();
@@ -84,7 +84,7 @@ public class LenientErrorHandler implements IParserErrorHandler {
 	public void invalidValue(IParseLocation theLocation, String theValue, String theError) {
 		if (isBlank(theValue) || myErrorOnInvalidValue == false) {
 			if (myLogErrors) {
-				ourLog.warn("Invalid attribute value \"{}\": {}", theValue, theError);
+				ourLog.warn("{}Invalid attribute value \"{}\": {}", describeLocation(theLocation), theValue, theError);
 			}
 		} else {
 			STRICT_ERROR_HANDLER.invalidValue(theLocation, theValue, theError);
@@ -133,28 +133,35 @@ public class LenientErrorHandler implements IParserErrorHandler {
 	@Override
 	public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
 		if (myLogErrors) {
-			ourLog.warn("Multiple repetitions of non-repeatable element '{}' found while parsing", theElementName);
+			ourLog.warn("{}Multiple repetitions of non-repeatable element '{}' found while parsing", describeLocation(theLocation), theElementName);
 		}
 	}
 
 	@Override
 	public void unknownAttribute(IParseLocation theLocation, String theElementName) {
 		if (myLogErrors) {
-			ourLog.warn("Unknown attribute '{}' found while parsing", theElementName);
+			ourLog.warn("{}Unknown attribute '{}' found while parsing",describeLocation(theLocation),  theElementName);
 		}
 	}
 
 	@Override
 	public void unknownElement(IParseLocation theLocation, String theElementName) {
 		if (myLogErrors) {
-			ourLog.warn("Unknown element '{}' found while parsing", theElementName);
+			ourLog.warn("{}Unknown element '{}' found while parsing", describeLocation(theLocation), theElementName);
 		}
 	}
 
 	@Override
 	public void unknownReference(IParseLocation theLocation, String theReference) {
 		if (myLogErrors) {
-			ourLog.warn("Resource has invalid reference: {}", theReference);
+			ourLog.warn("{}Resource has invalid reference: {}", describeLocation(theLocation), theReference);
+		}
+	}
+
+	@Override
+	public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation) {
+		if (myLogErrors) {
+			ourLog.warn("{}Extension contains both a value and nested extensions", describeLocation(theLocation));
 		}
 	}
 

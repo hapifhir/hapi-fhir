@@ -10,13 +10,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
@@ -56,7 +56,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		StringDt display = null;
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
-		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertFalse(result.isResult());
 	}
 
@@ -69,7 +69,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		StringDt display = null;
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
-		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure--expiration", result.getDisplay());
 	}
@@ -83,7 +83,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		StringDt display = null;
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
-		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -97,7 +97,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		StringDt display = new StringDt("Systolic blood pressure at First encounterXXXX");
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
-		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertFalse(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -111,7 +111,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		StringDt display = new StringDt("Systolic blood pressure at First encounter");
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
-		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -125,7 +125,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		StringDt display = null;
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = new CodeableConceptDt("http://loinc.org", "11378-7");
-		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -139,13 +139,13 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		StringDt display = null;
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
-		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test
-	public void testExpandById() throws IOException {
+	public void testExpandById() {
 		String resp;
 
 		ValueSet expanded = myValueSetDao.expand(myExtensionalVsId, null, mySrd);

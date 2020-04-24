@@ -1,0 +1,168 @@
+---
+- item:
+    type: "fix"
+    title: "A potential security vulnerability in the hapi-fhir-testpage-overlay project was corrected: A URL parameter was not being correctly escaped, leading to a potential XSS vulnerability. A big thanks to Mudit Punia and Dushyant Garg for reporting this."
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Guava (base): 25-jre -&gt; 27.1-jre</li> <li>Hibernate (JPA): 5.4.1 -&gt; 5.4.2</li> <li>Jackson (JPA): 2.9.7 -&gt; 2.9.8</li> <li>Spring (JPA): 5.1.3.RELEASE -&gt; 5.1.6.RELEASE</li> <li>Spring-Data (JPA): 2.1.3.RELEASE -&gt; 2.1.6.RELEASE</li> <li>Caffeine (JPA): 2.6.2 -&gt; 2.7.0</li> <li>JANSI (CLI): 1.16 -&gt; 1.17.1</li> <!--<li>Jetty (CLI): 9.4.14.v20181114 -&gt; 9.4.17.v20190418</li>--> </ul>"
+- item:
+    type: "add"
+    title: "In Servers that are configured to support extended mode <code>_elements</code> parameters, it is now possible to use the :exclude modifier to exclude entire resource types."
+- item:
+    type: "add"
+    title: "RequestDetails now has methods called getAttribute and setAttribute that can be used by interceptors to pass arbitrary data between requests."
+- item:
+    type: "add"
+    title: "The hapi-fhir-jpaserver-starter project has been updated to use a properties file for configuration, making it much easier to get started with this project. Thanks to Sean McIlvenna for the pull request!"
+- item:
+    type: "fix"
+    title: "The hapi-fhir-jpaserver-example did not have Subscription capabilities enabled after the refactoring of how Subscriptions are enabled that occurred in HAPI FHIR 3.7.0. Thanks to Volker Schmidt for the pull request!"
+- item:
+    type: "change"
+    title: "Re-use subscription channel and handlers when a subscription is updated (unless the channel type changed)."
+- item:
+    type: "fix"
+    title: "When using the <code>_elements</code> parameter on searches and reads, requesting extensions to be included caused the extensions to be included but not any values contained within. This has been corrected."
+- item:
+    type: "add"
+    title: "The JPA terminology service can now detect when Hibernate Search (Lucene) is not enabled, and will perform simple ValueSet expansions without relying on Hibenrate Search in such cases."
+- item:
+    issue: "1209"
+    type: "change"
+    title: "A Google Analytics script fragment was leftover in the hapi-fhir-jpaserver example and starter projects. Thanks to Patrick Werner for removing these!"
+- item:
+    type: "add"
+    title: "ParametersUtil now has a utility method that can be used to add parameter values using the string name of the datatype (e.g. \"dateTime\") in order to help building Parameters resources in a version-independent way."
+- item:
+    type: "fix"
+    title: "When performing a search using the JPA server, if a search returned between 1500 and 2000 results, a query for the final page of results would timeout due to a page calculation error. This has been corrected."
+- item:
+    type: "add"
+    title: "In the JPA server, a much more readable error message is now returned returned when two client threads collide while trying to simultaneously create a resource with the same client-assigned ID. In addition, better error messages are now returned when conflicts such as this one are hit within a FHIR transaction operation."
+- item:
+    type: "add"
+    title: "The JPA query builder has been optimized to take better advantage of SQL IN (..) expressions when performing token searches with multiple OR values."
+- item:
+    type: "add"
+    title: "The JPA server transaction processor will now automatically detect if the request Bundle contains multiple entries having identical conditional create operations, and collapse these into a single operation. This is done as a convenience, since many conversion algorithms can accidentally generate such duplicates."
+- item:
+    issue: "1223"
+    type: "fix"
+    title: "Searching the JPA server with multiple instances of the same token search parameter (e.g. \"Patient?identifier=&identifier=b\" returned no results even if resources should have matched. Thanks to @mingdatacom for reporting!"
+- item:
+    type: "add"
+    title: "A new config setting has been added to the JPA DaoConfig that disables validation of the resource type for target resources in references."
+- item:
+    type: "add"
+    title: "HapiLocalizer can now handle message patterns with braces that aren't a part of a message format expression. E.g. \"Here is an {example}\"."
+- item:
+    type: "add"
+    title: "JPA searches using a Composite Unique Index will now use that index for faster searching even if the search has _includes and/or _sorts. Previously these two features caused the search builder to skip using the index."
+- item:
+    type: "fix"
+    title: "JPA searches using a Composite Unique Index did not return the correct results if a REFERENCE search parameter was used with arguments that consisted of unqualified resource IDs."
+- item:
+    type: "fix"
+    title: "A non-threadsafe use of DateFormat was cleaned up in the StopWatch class."
+- item:
+    type: "add"
+    title: "When performing a search in the JPA server where one of the parameters is a reference with multiple values (e.g. Patient?organization=A,B) the generated SQL was previously a set of OR clauses and this has been collapsed into a single IN clause for better performance."
+- item:
+    type: "fix"
+    title: "When returning the results of a history operation from a HAPI FHIR server, any entries with a method of DELETE contained a stub resource in Bundle.entry.resource, even though the FHIR spec states that this field should be empty. This was corrected."
+- item:
+    type: "change"
+    title: "The hapi-fhir-testpage-overlay project no longer includes any library JARs in the built WAR, in order to prevent duplicates and conflicts in implementing projects."
+- item:
+    type: "fix"
+    title: "Two expunge bug fixes: The first bug is that the expunge operation wasn't bailing once it hit its limit. This resulted in a \"Page size must not be less than one!\" error. The second bug is that one case wasn't properly handled: when a resourceId with no version is provided. This executed the case where only resource type is provided."
+- item:
+    type: "fix"
+    title: "When updating a resource in the JPA server, if the contents have not actually changed the resource version is not updated and no new version is created. In this situation, the update time was modified however. It will no longer be updated."
+- item:
+    type: "fix"
+    title: "When running the JPA server in Resource Client ID strategy mode of \"ANY\", using the <code>_id</code> search parameter could return incorrect results. This has been corrected."
+- item:
+    type: "fix"
+    title: "Performing a PUT or POST against a HAPI FHIR Server with no request body caused an HTTP 500 to be returned instead of a more appropriate HTTP 400. This has been corrected."
+- item:
+    issue: "1255"
+    type: "fix"
+    title: "The fetchValueSet method on IValidationSupport implementation was not visible and could not be overridden. Thanks to Patrick Werner for the pull reuqest!"
+- item:
+    issue: "1280"
+    type: "fix"
+    title: "The JPA server failed to index R4 reources with search parameters pointing to the Money data type. Thanks to GitHub user @navyflower for reporting!"
+- item:
+    type: "fix"
+    title: "When validating DSTU3 QuestionnaireResponses that leverage the \"enableWhen\" functionality available in Questionnaire resources, the validation could sometimes fail incorrectly."
+- item:
+    type: "add"
+    title: "Added new configuration parameter to DaoConfig and ModelConfig to specify the websocket context path. (Before it was hardcoded to \"/websocket\")."
+- item:
+    type: "add"
+    title: "Added new IRemovableChannel interface. If a SubscriptionChannel implements this, then when a subscription channel is destroyed (because its subscription is deleted) then the remove() method will be called on that channel."
+- item:
+    type: "change"
+    title: "The JSON Patch provider has been switched to use the provider from the <a href=\"https://github.com/java-json-tools/json-patch\">Java JSON Tools</a> project, as it is much more robust and fault tolerant."
+- item:
+    type: "fix"
+    title: "Ensure that database cursors are closed immediately after performing a FHIR search."
+- item:
+    type: "add"
+    title: "When performing a JSON Patch in JPA server, the post-patched document is now validated to ensure that the patch was valid for the candidate resource. This means that invalid patches are caught and not just silently ignored."
+- item:
+    type: "add"
+    title: "Expunges are now done in batches in multiple threads. Both the number of expunge threads and batch size are configurable in DaoConfig."
+- item:
+    type: "fix"
+    title: "Validation errors were fixed when using a Questionnaire with enableWhen on a question that contains sub-items."
+- item:
+    type: "fix"
+    title: "Fixed \"because at least one resource has a reference to this resource\" delete error message that mistakingly reported the target instead of the source with the reference."
+- item:
+    type: "add"
+    title: "ValidationSupportChain will now call isCodeSystemSupported() on each entry in the chain before calling fetchCodeSystem() in order to reduce the work required by chain entries. Thanks to Anders Havn for the suggestion!"
+- item:
+    issue: "1299"
+    type: "fix"
+    title: "In JPA server when updating a resource using a client assigned ID, if the resource was previously deleted (meaning that the operation is actually a create), the server will now return an HTTP 201 instead of an HTTP 200. Thanks to Mario Hyland for reporting!"
+- item:
+    type: "fix"
+    title: "The HAPI FHIR CLI was unable to start a server in R4 mode in HAPI FHIR 3.7.0. This has been corrected."
+- item:
+    issue: "1311"
+    type: "fix"
+    title: "When encoding resources, profile declarations on contained resources will now be preserved. Thanks to Anders Havn for the pull request!"
+- item:
+    issue: "1305"
+    type: "fix"
+    title: "Two incorrect package declarations in unit tests were corrected. Thanks to github user @zaewonyx for the PR!"
+- item:
+    issue: "1228"
+    type: "add"
+    title: "The InstanceValidator now supports validating QuestionnairResponses with empty items for disabled questions. Thanks to Matti Uusitalo for the pull request!"
+- item:
+    issue: "1152"
+    type: "add"
+    title: "A new method has been added to the client that allows arbitrary headers to be easily added to the request. Thanks to Christian Ohr for the pull request!"
+- item:
+    issue: "1213"
+    type: "add"
+    title: "VersionConverter for R2-R3 has been modified to correectly handle the renamed basedOn field. Thanks to Gary Graham for the pull request!"
+- item:
+    issue: "1141"
+    type: "fix"
+    title: "The JPA database migration tool has been enhanced to support migration from HAPI FHIR 2.5. Thanks to Gary Graham for the pull request!"
+- item:
+    issue: "1244"
+    type: "add"
+    title: "Add a missing @Deprecated tag. Thanks to Drew Mitchell for the pull request!"
+- item:
+    issue: "1303"
+    type: "add"
+    title: "The JSON parser has removed a few unneeded super keywords that prevented overriding behaviour. Thanks to Anders Havn for the pull request!"
+- item:
+    issue: "1179"
+    type: "add"
+    title: "The DSTU2/3 version converter now converts Specimen resources. Thanks to Gary Graham for the pull request!"

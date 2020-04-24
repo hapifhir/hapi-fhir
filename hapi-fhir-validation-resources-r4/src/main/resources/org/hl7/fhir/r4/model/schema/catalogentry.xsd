@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Fri, Nov 1, 2019 09:29+1100 for FHIR v4.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="CatalogEntry" type="CatalogEntry">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Catalog entries are wrappers that contextualize items included in a catalog.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="CatalogEntry">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Catalog entries are wrappers that contextualize items included in a catalog.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Used in supporting different identifiers for the same product, e.g. manufacturer code and retailer code.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="type" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The type of item - medication, device, service, protocol or other.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="orderable" minOccurs="1" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Whether the entry represents an orderable item.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="referencedItem" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The item in a catalog or definition.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="additionalIdentifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Used in supporting related concepts, e.g. NDC to RxNorm.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="classification" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Classes of devices, or ATC for medication.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="status" minOccurs="0" maxOccurs="1" type="PublicationStatus">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Used to support catalog exchange even for unsupported products, e.g. getting list of medications even if not prescribable.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="validityPeriod" minOccurs="0" maxOccurs="1" type="Period">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The time period in which this catalog entry is expected to be active.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="validTo" minOccurs="0" maxOccurs="1" type="dateTime">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The date until which this catalog entry is expected to be active.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="lastUpdated" minOccurs="0" maxOccurs="1" type="dateTime">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Typically date of issue is different from the beginning of the validity. This can be used to see when an item was last updated.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="additionalCharacteristic" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Used for examplefor Out of Formulary, or any specifics.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="additionalClassification" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">User for example for ATC classification, or.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="relatedEntry" type="CatalogEntry.RelatedEntry" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Used for example, to point to a substance, or to a device used to administer a medication.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CatalogEntry.RelatedEntry">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Catalog entries are wrappers that contextualize items included in a catalog.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="relationtype" minOccurs="1" maxOccurs="1" type="CatalogEntryRelationType">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The type of relation to the related item: child, parent, packageContent, containerPackage, usedIn, uses, requires, etc.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="item" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The reference to the related item.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="CatalogEntryRelationType-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="triggers">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Triggers</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="is-replaced-by">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Replaced By</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="CatalogEntryRelationType">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The type of relations between entries.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="CatalogEntryRelationType-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

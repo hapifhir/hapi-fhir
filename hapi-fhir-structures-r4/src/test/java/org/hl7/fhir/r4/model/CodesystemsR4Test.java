@@ -29,7 +29,7 @@ import ca.uhn.fhir.validation.ValidationResult;
 public class CodesystemsR4Test {
 
 	@Test
-	public void testCodesystemsPresent() {
-		org.hl7.fhir.r4.model.codesystems.W3cProvenanceActivityType.class.toString();
+	public void testCodesystemsPresent() throws ClassNotFoundException {
+		Class.forName(org.hl7.fhir.r4.model.codesystems.W3cProvenanceActivityType.class.getName());
 	}
 }

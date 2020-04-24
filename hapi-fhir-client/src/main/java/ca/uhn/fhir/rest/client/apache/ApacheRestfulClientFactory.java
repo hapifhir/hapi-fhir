@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.client.apache;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -71,31 +71,34 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	protected ApacheHttpClient getHttpClient(String theServerBase) {
+	protected synchronized ApacheHttpClient getHttpClient(String theServerBase) {
 		return new ApacheHttpClient(getNativeHttpClient(), new StringBuilder(theServerBase), null, null, null, null);
 	}
 
 	@Override
-	public IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
+	public synchronized IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
 			String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
 		return new ApacheHttpClient(getNativeHttpClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType,
 				theHeaders);
 	}
 
-	public synchronized HttpClient getNativeHttpClient() {
+	public HttpClient getNativeHttpClient() {
 		if (myHttpClient == null) {
 
-			//FIXME potential resoource leak
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000,
 					TimeUnit.MILLISECONDS);
 			connectionManager.setMaxTotal(getPoolMaxTotal());
 			connectionManager.setDefaultMaxPerRoute(getPoolMaxPerRoute());
 
-			// @formatter:off
 			//TODO: Use of a deprecated method should be resolved.
-			RequestConfig defaultRequestConfig = RequestConfig.custom().setSocketTimeout(getSocketTimeout())
-					.setConnectTimeout(getConnectTimeout()).setConnectionRequestTimeout(getConnectionRequestTimeout())
-					.setStaleConnectionCheckEnabled(true).setProxy(myProxy).build();
+			RequestConfig defaultRequestConfig =
+				RequestConfig.custom()
+					.setSocketTimeout(getSocketTimeout())
+					.setConnectTimeout(getConnectTimeout())
+					.setConnectionRequestTimeout(getConnectionRequestTimeout())
+					.setStaleConnectionCheckEnabled(true)
+					.setProxy(myProxy)
+					.build();
 
 			HttpClientBuilder builder = HttpClients.custom().setConnectionManager(connectionManager)
 					.setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement();
@@ -109,7 +112,6 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 			}
 
 			myHttpClient = builder.build();
-			// @formatter:on
 
 		}
 
@@ -123,7 +125,7 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 
 	/**
 	 * Only allows to set an instance of type org.apache.http.client.HttpClient
-	 * @see ca.uhn.fhir.rest.client.api.IRestfulClientFactory#setHttpClient(ca.uhn.fhir.rest.client.api.IHttpClient)
+	 * @see ca.uhn.fhir.rest.client.api.IRestfulClientFactory#setHttpClient(Object)
 	 */
 	@Override
 	public synchronized void setHttpClient(Object theHttpClient) {

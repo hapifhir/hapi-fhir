@@ -2,11 +2,9 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
-import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingInterceptor;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -14,13 +12,23 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
@@ -56,7 +64,6 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-		SubscriptionActivatingInterceptor.setWaitForSubscriptionActivationSynchronouslyForUnitTest(false);
 	}
 
 	@Before
@@ -68,7 +75,6 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 	public void beforeReset() {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
-		SubscriptionActivatingInterceptor.setWaitForSubscriptionActivationSynchronouslyForUnitTest(true);
 	}
 
 	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {
@@ -257,14 +263,12 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 
 	@BeforeClass
 	public static void startListenerServer() throws Exception {
-		ourListenerPort = RandomServerPortProvider.findFreePort();
 		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3());
-		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 
 		ObservationListener obsListener = new ObservationListener();
 		ourListenerRestServer.setResourceProviders(obsListener);
 
-		ourListenerServer = new Server(ourListenerPort);
+		ourListenerServer = new Server(0);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
@@ -274,12 +278,14 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 
 		ourListenerServer.setHandler(proxyHandler);
-		ourListenerServer.start();
+		JettyUtil.startServer(ourListenerServer);
+        ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
+        ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
 	@AfterClass
 	public static void stopListenerServer() throws Exception {
-		ourListenerServer.stop();
+		JettyUtil.closeServer(ourListenerServer);
 	}
 
 	public static class ObservationListener implements IResourceProvider {

@@ -12,17 +12,17 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.*;
-import org.hl7.fhir.instance.model.Address.AddressUse;
-import org.hl7.fhir.instance.model.Address.AddressUseEnumFactory;
-import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.instance.model.Conformance.UnknownContentCode;
-import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
-import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.instance.model.Patient.ContactComponent;
-import org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionAnswerComponent;
-import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
-import org.hl7.fhir.instance.model.ValueSet.ValueSetCodeSystemComponent;
+import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.dstu2.model.Address.AddressUse;
+import org.hl7.fhir.dstu2.model.Address.AddressUseEnumFactory;
+import org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu2.model.Conformance.UnknownContentCode;
+import org.hl7.fhir.dstu2.model.Identifier.IdentifierUse;
+import org.hl7.fhir.dstu2.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.dstu2.model.Patient.ContactComponent;
+import org.hl7.fhir.dstu2.model.QuestionnaireResponse.QuestionAnswerComponent;
+import org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu2.model.ValueSet.ValueSetCodeSystemComponent;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -32,6 +32,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -1096,12 +1097,6 @@ public class JsonParserHl7OrgDstu2Test {
     assertEquals("idsystem", p.getIdentifier().get(0).getSystem());
   }
 
-  @Test
-  public void testParseSingleQuotes() {
-    ourCtx.newJsonParser().parseResource(Bundle.class, "{ \"resourceType\": \"Bundle\" }");
-    ourCtx.newJsonParser().parseResource(Bundle.class, "{ 'resourceType': 'Bundle' }");
-  }
-
   /**
    * HAPI FHIR < 0.6 incorrectly used "resource" instead of "reference"
    */
@@ -1133,7 +1128,7 @@ public class JsonParserHl7OrgDstu2Test {
   @Test
   public void testSimpleResourceEncode() throws IOException {
 
-    String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), Charset.forName("UTF-8"));
+    String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), StandardCharsets.UTF_8);
     Patient obs = ourCtx.newXmlParser().parseResource(Patient.class, xmlString);
 
     List<Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
@@ -1146,7 +1141,7 @@ public class JsonParserHl7OrgDstu2Test {
     String encoded = jsonParser.encodeResourceToString(obs);
     ourLog.info(encoded);
 
-    String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), Charset.forName("UTF-8"));
+    String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), StandardCharsets.UTF_8);
 
     JSON expected = JSONSerializer.toJSON(jsonString);
     JSON actual = JSONSerializer.toJSON(encoded.trim());
@@ -1203,7 +1198,7 @@ public class JsonParserHl7OrgDstu2Test {
 	@Test
 	public void testSimpleResourceEncodeWithCustomType() throws IOException, SAXException {
 
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), Charset.forName("UTF-8"));
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), StandardCharsets.UTF_8);
 		MyObservationWithExtensions obs = ourCtx.newJsonParser().parseResource(MyObservationWithExtensions.class, jsonString);
 
 		{
@@ -1218,15 +1213,15 @@ public class JsonParserHl7OrgDstu2Test {
 		assertEquals("str1", obs.getMoreExt().getStr1().getValue());
 		assertEquals("2011-01-02", obs.getModExt().getValueAsString());
 
-		List<org.hl7.fhir.instance.model.Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
-		org.hl7.fhir.instance.model.Extension undeclaredExtension = undeclaredExtensions.get(0);
+		List<org.hl7.fhir.dstu2.model.Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
+		org.hl7.fhir.dstu2.model.Extension undeclaredExtension = undeclaredExtensions.get(0);
 		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
 		IParser xmlParser = ourCtx.newXmlParser();
 		String encoded = xmlParser.encodeResourceToString(obs);
 		encoded = encoded.replaceAll("<!--.*-->", "").replace("\n", "").replace("\r", "").replaceAll(">\\s+<", "><");
 
-		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), Charset.forName("UTF-8"));
+		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), StandardCharsets.UTF_8);
 		xmlString = xmlString.replaceAll("<!--.*-->", "").replace("\n", "").replace("\r", "").replaceAll(">\\s+<", "><");
 
 		ourLog.info("Expected: " + xmlString);

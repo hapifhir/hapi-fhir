@@ -1,0 +1,232 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Commons Codec (Core): 1.11 -&gt; 1.12</li> <li>Apache HTTPClient (Client): 4.5.3 -&gt; 4.5.9</li> <li>Apache HTTPCore (Client>: 4.4.6 -&gt; 4.4.11</li> <li>Spring (JPA): 5.1.6.RELEASE -&gt; 5.1.8.RELEASE</li> <li>Spring-Data (JPA): 2.1.6.RELEASE -&gt; 2.1.8.RELEASE</li> <li>JANSI (CLI): 1.17.1 -&gt; 1.18</li> <li>json-patch (JPA): 1.10 -&gt; 1.15 (see changelog entry about this change)</li> <li>Jackson-Databind (JPA): 2.9.9 -&gt; 2.9.9.1 (due to a Jackson vulnerability CVE-2019-12384)</li> <li>commons-collections4 (Server/JPA): 4.1 -&gt; 4.3</li> <li>commons-dbcp2 (JPA): 2.5.0 -&gt; 2.6.0</li> <li>commons-lang3 (Core): 3.8.1 -&gt; 3.9</li> <li>commons-text (Core): 1.6 -&gt; 1.7</li> <li>Guava (JPA): 27.1-jre -&gt; 28.0-jre</li> </ul>"
+- item:
+    type: "change"
+    title: "<b>Breaking Change</b>: The HL7.org DSTU2 structures (and <i>ONLY</i> the HL7.org DSTU2 structures) have been moved to a new package. Where they were previously found in <code>org.hl7.fhir.instance.model</code> they are now found in <code>org.hl7.fhir.dstu2.model</code>. This was done in order to complete the harmonization between the <a href=\"https://github.com/jamesagnew/hapi-fhir\">HAPI FHIR</a> GitHub repository and the <a href=\"https://github.com/hapifhir/org.hl7.fhir.core/\">org.hl7.fhir.core</a> GitHub repository. This is the kind of change we don't make lightly, as we do know that it will be annoying for users of the existing library. It is a change however that will allow us to apply validator fixes much more quickly, and will greatly reduce the amount of effort required to keep up with R5 changes as they come out, so we're hoping it is worth it. Note that no classes are removed, they have only been moved, so it should be fairly straightforward to migrate existing code with an IDE."
+- item:
+    type: "change"
+    title: "<b>Breaking Change</b>: The <code>IPagingProvider</code> interface has been modified so that the <code>retrieveResultList</code> method now takes one additional parameter of type <code>RequestDetails</code>. If you have created a custom implementation of this interface, you can add this parameter and ignore it if needed. The use of the method has not changed, so this should be an easy fix to existing code."
+- item:
+    type: "change"
+    title: "<b>Breaking Change</b>: The HAPI FHIR REST client and server will now default to using JSON encoding instead of XML when the user has not explicitly configured a preference."
+- item:
+    type: "change"
+    title: "<b>Breaking Change</b>: The JPA $upload-external-code-system operation has been moved from being a server level operation (i.e. called on the root of the server) to being a type level operation (i.e. called on the CodeSystem type)."
+- item:
+    type: "change"
+    title: "<b>Breaking Change</b>: The FhirValidator#validate(IResource) method has been removed. It was deprecated in HAPI FHIR 0.7 and replaced with FhirValidator#validateWithResults(IBaseResource) so it is unlikely anyone is still depending on the old method."
+- item:
+    type: "add"
+    title: "<b>New Feature</b>: Support for the new R5 draft resources has been added. This support includes the client, server, and JPA server. Note that these definitions will change as the R5 standard is modified until it is released, so use with caution!"
+- item:
+    type: "add"
+    title: "<b>New Feature</b>: A new interceptor called <code>ConsentInterceptor</code> has been added. This interceptor allows JPA based servers to make appropriate consent decisions related to resources that and operations that are being returned. See Server Security for more information."
+- item:
+    type: "add"
+    title: "<b>New Feature</b>: The JPA server now supports GraphQL for DSTU3 / R4 / R5 servers."
+- item:
+    issue: "1220"
+    type: "add"
+    title: "<b>New Feature</b>: The JPA server now supports the <code>_filter</code> search parameter when configured to do so. The <a href=\"http://hl7.org/fhir/search_filter.html\">filter search parameter</a> is an extremely flexible and powerful feature, allowing for advanced grouping and order of operations on searches. It can be dangerous however, as it potentially allows users to create queries for which no database indexes exist in the default configuration so it is disabled by default. Thanks to Anthony Sute for the pull request and all of his support in what turned out to be a lengthy merge!"
+- item:
+    type: "add"
+    title: "<b>New Feature</b>: A new interceptor called CascadingDeleteInterceptor has been added to the JPA project. This interceptor allows deletes to cascade when a specific URL parameter or header is added to the request. Cascading deletes can also be controlled by a new flag in the AuthorizationIntereptor RuleBuilder, in order to ensure that cascading deletes are only available to users with sufficient permission."
+- item:
+    type: "add"
+    title: "Several enhancements have been made to the <code>AuthorizationInterceptor</code> : <ul> <li>The interceptor now registers against the <code>STORAGE_PRESHOW_RESOURCES</code> interceptor hook, which allows it to successfully authorize JPA operations that don't actually return resource content, such as GraphQL responses, and resources that have been filtered using the <code>_elements</code> parameter.</li> <li> </li>The rule list is now cached on a per-request basis, which should improve performance</ul>"
+- item:
+    type: "add"
+    title: "The $expunge global everything operation has been refactored to do deletes in small batches. This change will likely reduce performance, but does allow for the operation to succeed without timing out in larger systems."
+- item:
+    type: "fix"
+    title: "The JPA server did not correctly index Timing fields where the timing contained a period but no individual events. This has been corrected."
+- item:
+    issue: "1320"
+    type: "fix"
+    title: "The HAPI FHIR CLI import-csv-to-conceptmap command was not accounting for byte order marks in CSV files (e.g. some Excel CSV files). This has been fixed."
+- item:
+    issue: "1241"
+    type: "fix"
+    title: "A bug was fixed where deleting resources within a transaction did not always correctly enforce referential integrity even if referential integrity was enabled. Thanks to Tuomo Ala-Vannesluoma for reporting!"
+- item:
+    type: "fix"
+    title: "In the JPA server, the <code>_total=accurate</code> was not always respected if a previous search already existed in the query cache that matched the same search parameters."
+- item:
+    issue: "1337"
+    type: "fix"
+    title: "Improved stability of concurrency test framework. Thanks to Stig Døssing for the pull request!"
+- item:
+    type: "change"
+    title: "Moved in-memory matcher from Subscription module to SearchParam module and renamed the result type from SubscriptionMatchResult to InMemoryMatchResult."
+- item:
+    type: "add"
+    title: "Added some experimental version-independent model classes to ca.uhn.fhir.jpa.model.any. They permit writing code that is version independent."
+- item:
+    type: "add"
+    title: "Added new subclass of HashMapResourceProvider called SearchableHashMapResourceProvider that uses the in-memory matcher to search the HashMap (using a full table scan). This allows rudimentary testing without a database."
+- item:
+    type: "add"
+    title: "Added a new interceptor hook called STORAGE_PRESTORAGE_DELETE_CONFLICTS that is invoked when a resource delete operation is about to fail due to referential integrity conflicts. Hooks have access to the list of resources that have references to the resource being deleted and can delete them. The boolean return value of the hook indicates whether the server should try checking for conflicts again (true means try again)."
+- item:
+    issue: "1336"
+    type: "add"
+    title: "The HAPI FHIR unit test suite has been refactored to no longer rely on PortUtil to assign a free port. This should theoretically result in fewer failed builds resulting from port conflicts. Thanks to Stig Døssing for the pull request!"
+- item:
+    type: "fix"
+    title: "AuthorizationInterceptor sometimes failed with a 500 error when checking compartment membership on a resource that has a contained subject (Patient)."
+- item:
+    issue: "1348"
+    type: "add"
+    title: "JPA server now supports conditional PATCH operation (i.e. performing a patch with a syntax such as <code>/Patient?identifier=sys|val</code> )"
+- item:
+    issue: "1347"
+    type: "add"
+    title: "The json-patch library used in the JPA server has been changed from <a href=\"https://github.com/java-json-tools/json-patch\">java-json-tools.json-patch</a> to a more active fork of the same project: <a href=\"https://github.com/crate-metadata/json-patch\">crate-metadata.json-patch</a>. Thanks to Jens Villadsen for the suggestion and pull request!"
+- item:
+    issue: "1343"
+    type: "add"
+    title: "Support has been implemented in the JPA server for the CodeSystem <code>$subsumes</code> operation."
+- item:
+    type: "fix"
+    title: "Uploading the LOINC/RSNA Radiology Playbook would occasionally fail when evaluating part type names due to case sensitivity. This has been corrected."
+- item:
+    type: "add"
+    title: "A new pointcut has been added to the JPA server called <code>JPA_PERFTRACE_RAW_SQL</code> that can be used to capture the raw SQL statements that are sent to the underlying database."
+- item:
+    issue: "1355"
+    type: "fix"
+    title: "Invoking the transaction or batch operation on the JPA server would fail with a NullPointerException if the Bundle passed in did not contain a resource in an entry that required a resource (e.g. a POST). Thanks to GitHub user @lytvynenko-dmitriy for reporting!"
+- item:
+    issue: "1250"
+    type: "fix"
+    title: "HAPI FHIR Server (plain, JPA, and JAX-RS) all populated Bundle.entry.result on search result bundles, even though the FHIR specification states that this should not be populated. This has been corrected. Thanks to GitHub user @gitrust for reporting!"
+- item:
+    issue: "1352"
+    type: "fix"
+    title: "Creating R4 Observation resources with a value type of SampledData failed in the JPA server because of an indexing error. Thanks to Brian Reinhold for reporting!"
+- item:
+    type: "add"
+    title: "The JPA server now rejects subscriptions being submitted with no value in Subscription.status (this field is mandatory, but the subscription was previously ignored if no value was provided)"
+- item:
+    issue: "1361"
+    type: "fix"
+    title: "Fix a build failure thanks to Maven pom errors. Thanks to Gary Teichrow for the pull request!"
+- item:
+    issue: "1362"
+    type: "fix"
+    title: "The JPA server did not correctly process searches with a <code>_tag:not</code> expression containing more than one comma separated value."
+- item:
+    type: "add"
+    title: "The JSON and XML parsers will now raise a warning or error with the Parser Error Handler if an extension is being encoded that is missing a URL, or has both a value and nested extensions on the same parent extension."
+- item:
+    type: "fix"
+    title: "FHIR model classes have a method called <code>hasPrimitiveValue()</code> which previously returned true if the type was a primitive datatype (e.g. StringType). This method now only returns true if the type is a primitive datatype AND the type actually has a value."
+- item:
+    issue: "1330"
+    type: "add"
+    title: "Support in the JPA Terminology Service terminology uploader has been added for uploading the IMGT <a href=\"http://hla.alleles.org/nomenclature/index.html\">HLA Nomenclature</a> distribution files as a FHIR CodeSystem. Thanks to Joel Schneider for the contribution!"
+- item:
+    issue: "1354"
+    type: "add"
+    title: "A BOM POM has been added to the HAPI FHIR distribution, allowing users to import the HAPI FHIR library with all of its submodules automatically sharing the same version. Thanks to Stig Døssing for the pull request!"
+- item:
+    type: "add"
+    title: "AuthorizationInterceptor will now try to block delete operations sooner in the processing lifecycle if there is no chance they will be permitted later (i.e. because the type is not authorized at all)"
+- item:
+    type: "add"
+    title: "The HAPI FHIR server will now generate a random transaction ID to every request and add it to the response headers. Clients may supply the transaction header via the <code>X-Request-ID</code> header."
+- item:
+    type: "add"
+    title: "When attempting to read a resource that is deleted, a Location header is now returned that includes the resource ID and the version ID for the deleted resource."
+- item:
+    type: "fix"
+    title: "A number of columns in the JPA Terminology Services ConceptMap tables were not explicitly annotated with @Column, so the DB columns that were generated had Java ugly field names as their SQL column names. These have been renamed, and entries in the JPA migrator tool have been added for anyone upgrading."
+- item:
+    type: "fix"
+    title: "Field values with a datatype of <code>canonical</code> were indexed as though they were explicit resource references by the JPA server. This led to errors about external references not being supported when uploading various resources (e.g. Questionnaires with HL7-defined ValueSet references). This has been corrected. Note that at this time, we do not index canonical references at all (as we were previously doing it incorrectly). This will be improved soon."
+- item:
+    type: "add"
+    title: "IBundleProvider now has an isEmpty() method that can be used to check whether any results exist. A default implementation has been provided, so this is not a breaking change."
+- item:
+    type: "change"
+    title: "Server CapabilityStatement/Conformance repsonses from the /metadata endpoint will now be cached for 60 seconds always. This was previously a configurable setting on the ServerConformanceProvider, but it is now handled directly by the method binding so the provider now has no responsibility for caching."
+- item:
+    issue: "1370"
+    type: "fix"
+    title: "The OkHttp client did not correctly apply the connection timeout and socket timeout settings to client requests. Thanks to Petro Mykhailyshyn for the pull request!"
+- item:
+    type: "add"
+    title: "A new server interceptor hook called PROCESSING_COMPLETED has been added. This hook is called by the server at the end of processing every request (success and failure)."
+- item:
+    type: "fix"
+    title: "The <code>_summary</code> element was not always respected when encoding JSON resources."
+- item:
+    type: "change"
+    title: "The JPA server now uses the H2 database instead of the derby database to run its unit tests. We are hoping that this cuts down on the number of false test failures we get due to mysterious derby failures."
+- item:
+    type: "add"
+    title: "Added a new Pointcut STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING that is called at the start of the expungeEverything operation."
+- item:
+    type: "add"
+    title: "The JPA server now has the ability to generate snapshot profiles from differential profiles via the $snapshot operation, and will automatically generate a snapshot when needed for validation."
+- item:
+    type: "change"
+    title: "The Base64Binary types for DSTU3+ now use a byte array internally to represent their content, which is more efficient than storing base 64 encoded text to represent the binary as was previously done."
+- item:
+    type: "add"
+    title: "Creating/updating CodeSystems now persist <code>CodeSystem.concept.designation</code> to the terminology tables."
+- item:
+    type: "add"
+    title: "Expanded ValueSets now populate <code>ValueSet.expansion.contains.designation.language</code> ."
+- item:
+    type: "add"
+    title: "@Operation methods can now declare that they will manually process the request body and/or manually generate a response instead of letting the HAPI FHIR framework take care of these things. This is useful for situations where direct access to the low-level servlet streaming API is needed."
+- item:
+    type: "add"
+    title: "@Operation methods can now declare that they are global, meaning that they will apply to all resource types (or instances of all resource types) if they are found on a plain provider."
+- item:
+    type: "add"
+    title: "@Operation method parameters may now declare their type via a String name such as \"code\" or \"Coding\" in an attribute in @OperationParam. This is useful if you want to make operation methods that can operate across different versions of FHIR."
+- item:
+    type: "add"
+    title: "A new resource provider for JPA servers called <code>BinaryAccessProvider</code> has been added. This provider serves two custom operations called <code>$binary-access-read</code> and <code>$binary-access-write</code> that can be used to request binary data in Attachments as raw binary content instead of as base 64 encoded content."
+- item:
+    type: "change"
+    title: "A few columns named 'CODE' in the JPA terminology services tables have been renamed to 'CODEVAL' to avoid any possibility of conflicting with reserved words in MySQL. The database migrator tool has been updated to handle this change."
+- item:
+    type: "add"
+    title: "Support for PATCH operations performed within a transaction (using a Binary resource as the resource type in order to hold a JSONPatch or XMLPatch body) has been added to the JPA server."
+- item:
+    issue: "1390"
+    type: "fix"
+    title: "Two issues in the Thymeleaf Narrative Template which caused an error when generating a narrative on an untitled DiagnosticReport were fixed. Thanks to GitHub user @navyflower for reporting!"
+- item:
+    type: "add"
+    title: "A new attribute has been added to the @Operation annotation called <code>typeName</code> . This annotation can be used to specify a type for an operation declared on a plain provider without needing to use a specific version of the FHIR structures."
+- item:
+    type: "add"
+    title: "The $upload-external-code-system operation and the corresponding HAPI FHIR CLI command can now be used to upload custom vocabulary that has been converted into a standard file format defined by HAPI FHIR. This is useful for uploading large organizational code systems."
+- item:
+    type: "change"
+    title: "Two new operations, <code>$apply-codesystem-delta-add</code> and <code>$apply-codesystem-delta-remove</code> have been added to the terminology server. These methods allow codes to be dynamically added and removed from external (notpresent) codesystems."
+- item:
+    issue: "1404"
+    type: "fix"
+    title: "In the JAX-RS server, the resource type history and instance vread operations had ambiguous paths that could lead to the wrong method being called. Thanks to Seth Rylan Gainey for the pull request!"
+- item:
+    issue: "1414"
+    type: "fix"
+    title: "The profile validator (FhirInstanceValidator) can now be used to validate a resource using an explicit profile declaration rather than simply relying on the declared URL in the resource itself."
+- item:
+    type: "fix"
+    title: "When using the ResponseHighlighterInterceptor, some invalid requests that would normally generate an HTTP 400 response (e.g. an invalid _elements value) would cause an HTTP 500 crash."
+- item:
+    issue: "1388"
+    type: "add"
+    title: "When performing a read-if-newer operation on a plain server, the resource ID in Resource.meta.versionId is now used if a version isn't found in the resource ID itself. Thanks to Stig Døssing for the pull request!"
+- item:
+    issue: "1375"
+    type: "fix"
+    title: "An example datatype was corrected in the DSTU2 Identifier datatype StructureDefinition. Thanks to Nick Robison for the pull request!"

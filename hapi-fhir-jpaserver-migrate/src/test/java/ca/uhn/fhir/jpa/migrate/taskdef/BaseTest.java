@@ -1,21 +1,53 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.Migrator;
+import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.intellij.lang.annotations.Language;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
 
-public class BaseTest {
 
+@RunWith(Parameterized.class)
+public abstract class BaseTest {
+
+	private static final String DATABASE_NAME = "DATABASE";
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseTest.class);
 	private static int ourDatabaseUrl = 0;
+	private final Supplier<TestDatabaseDetails> myTestDatabaseDetails;
+	private BasicDataSource myDataSource;
 	private String myUrl;
-	private Migrator myMigrator;
+	private FlywayMigrator myMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
+
+	public BaseTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		myTestDatabaseDetails = theTestDatabaseDetails;
+	}
+
+	@Before
+	public void before() {
+		TestDatabaseDetails testDatabaseDetails = myTestDatabaseDetails.get();
+
+		myUrl = testDatabaseDetails.myUrl;
+		myConnectionProperties = testDatabaseDetails.myConnectionProperties;
+		myDataSource = testDatabaseDetails.myDataSource;
+		myMigrator = testDatabaseDetails.myMigrator;
+	}
 
 	public String getUrl() {
 		return myUrl;
@@ -25,6 +57,17 @@ public class BaseTest {
 		return myConnectionProperties;
 	}
 
+	protected BasicDataSource getDataSource() {
+		return myDataSource;
+	}
+
+	@After
+	public void resetMigrationVersion() throws SQLException {
+		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
+		if (tableNames.contains(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME)) {
+			executeSql("DELETE from " + SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME + " where \"installed_rank\" > 0");
+		}
+	}
 
 	protected void executeSql(@Language("SQL") String theSql, Object... theArgs) {
 		myConnectionProperties.getTxTemplate().execute(t -> {
@@ -39,7 +82,7 @@ public class BaseTest {
 		});
 	}
 
-	public Migrator getMigrator() {
+	public FlywayMigrator getMigrator() {
 		return myMigrator;
 	}
 
@@ -48,17 +91,75 @@ public class BaseTest {
 		myConnectionProperties.close();
 	}
 
-	@Before()
-	public void before() {
-		myUrl = "jdbc:derby:memory:database " + (ourDatabaseUrl++) + ";create=true";
+	protected DriverTypeEnum getDriverType() {
+		return myConnectionProperties.getDriverType();
+	}
 
-		myConnectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(myUrl, "SA", "SA");
+	public static class TestDatabaseDetails {
 
-		myMigrator = new Migrator();
-		myMigrator.setConnectionUrl(myUrl);
-		myMigrator.setDriverType(DriverTypeEnum.DERBY_EMBEDDED);
-		myMigrator.setUsername("SA");
-		myMigrator.setPassword("SA");
+		private final String myUrl;
+		private final DriverTypeEnum.ConnectionProperties myConnectionProperties;
+		private final BasicDataSource myDataSource;
+		private final FlywayMigrator myMigrator;
+
+		public TestDatabaseDetails(String theUrl, DriverTypeEnum.ConnectionProperties theConnectionProperties, BasicDataSource theDataSource, FlywayMigrator theMigrator) {
+			myUrl = theUrl;
+			myConnectionProperties = theConnectionProperties;
+			myDataSource = theDataSource;
+			myMigrator = theMigrator;
+		}
+
+	}
+
+	@Parameterized.Parameters(name = "{0}")
+	public static Collection<Supplier<TestDatabaseDetails>> data() {
+		ourLog.info("H2: {}", org.h2.Driver.class.toString());
+
+		ArrayList<Supplier<TestDatabaseDetails>> retVal = new ArrayList<>();
+
+		// H2
+		retVal.add(new Supplier<TestDatabaseDetails>() {
+			@Override
+			public TestDatabaseDetails get() {
+				String url = "jdbc:h2:mem:" + DATABASE_NAME + ourDatabaseUrl++;
+				DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
+				BasicDataSource dataSource = new BasicDataSource();
+				dataSource.setUrl(url);
+				dataSource.setUsername("SA");
+				dataSource.setPassword("SA");
+				dataSource.setDriverClassName(DriverTypeEnum.H2_EMBEDDED.getDriverClassName());
+				FlywayMigrator migrator = new FlywayMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.H2_EMBEDDED);
+				return new TestDatabaseDetails(url, connectionProperties, dataSource, migrator);
+			}
+
+			@Override
+			public String toString() {
+				return "H2";
+			}
+		});
+
+		// Derby
+		retVal.add(new Supplier<TestDatabaseDetails>() {
+			@Override
+			public TestDatabaseDetails get() {
+				String url = "jdbc:derby:memory:" + DATABASE_NAME + ourDatabaseUrl++ + ";create=true";
+				DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(url, "SA", "SA");
+				BasicDataSource dataSource = new BasicDataSource();
+				dataSource.setUrl(url);
+				dataSource.setUsername("SA");
+				dataSource.setPassword("SA");
+				dataSource.setDriverClassName(DriverTypeEnum.DERBY_EMBEDDED.getDriverClassName());
+				FlywayMigrator migrator = new FlywayMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.DERBY_EMBEDDED);
+				return new TestDatabaseDetails(url, connectionProperties, dataSource, migrator);
+			}
+
+			@Override
+			public String toString() {
+				return "Derby";
+			}
+		});
+
+		return retVal;
 	}
 
 }

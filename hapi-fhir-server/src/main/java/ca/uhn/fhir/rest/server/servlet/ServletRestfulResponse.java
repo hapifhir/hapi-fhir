@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.servlet;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,48 +20,50 @@ package ca.uhn.fhir.rest.server.servlet;
  * #L%
  */
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.zip.GZIPOutputStream;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-
-import org.hl7.fhir.instance.model.api.IBaseBinary;
-
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.ParseAction;
 import ca.uhn.fhir.rest.server.RestfulResponse;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.zip.GZIPOutputStream;
 
 public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetails> {
 
+	/**
+	 * Constructor
+	 */
 	public ServletRestfulResponse(ServletRequestDetails servletRequestDetails) {
 		super(servletRequestDetails);
 	}
 
 	@Override
-	public Object sendAttachmentResponse(IBaseBinary bin, int stausCode, String contentType) throws IOException {
+	public OutputStream sendAttachmentResponse(IBaseBinary theBinary, int theStatusCode, String contentType) throws IOException {
 		addHeaders();
 		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
-		theHttpResponse.setStatus(stausCode);
+		theHttpResponse.setStatus(theStatusCode);
 		theHttpResponse.setContentType(contentType);
 		theHttpResponse.setCharacterEncoding(null);
-		if (bin.getContent() == null || bin.getContent().length == 0) {
+		if (theBinary.getContent() == null || theBinary.getContent().length == 0) {
 			return theHttpResponse.getOutputStream();
 		}
-		theHttpResponse.setContentLength(bin.getContent().length);
+		theHttpResponse.setContentLength(theBinary.getContent().length);
 		ServletOutputStream oos = theHttpResponse.getOutputStream();
-		oos.write(bin.getContent());
+		oos.write(theBinary.getContent());
 		return oos;
 	}
 
 	@Override
-	public Writer getResponseWriter(int theStatusCode, String theStatusMessage, String theContentType, String theCharset, boolean theRespondGzip) throws UnsupportedEncodingException, IOException {
+	public Writer getResponseWriter(int theStatusCode, String theStatusMessage, String theContentType, String theCharset, boolean theRespondGzip) throws IOException {
 		addHeaders();
 		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
 		theHttpResponse.setCharacterEncoding(theCharset);
@@ -69,7 +71,7 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 		theHttpResponse.setContentType(theContentType);
 		if (theRespondGzip) {
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
-			return new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), Constants.CHARSET_NAME_UTF8);
+			return new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), StandardCharsets.UTF_8);
 		}
 		return theHttpResponse.getWriter();
 	}
@@ -93,7 +95,7 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 	}
 
 	@Override
-	public final Object sendWriterResponse(int theStatus, String theContentType, String theCharset, Writer theWriter) throws IOException {
+	public final Writer sendWriterResponse(int theStatus, String theContentType, String theCharset, Writer theWriter) {
 		return theWriter;
 	}
 

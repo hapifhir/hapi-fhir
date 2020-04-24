@@ -3,15 +3,11 @@ package ca.uhn.fhir.jaxrs.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.client.JaxRsRestfulClientFactory;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
-import ca.uhn.fhir.jaxrs.server.test.RandomServerPortProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsConformanceRestProviderDstu3;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPageProviderDstu3;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProviderDstu3;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.api.SearchStyleEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -45,6 +41,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
+import ca.uhn.fhir.test.utilities.JettyUtil;
+
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AbstractJaxRsResourceProviderDstu3Test {
 
@@ -68,7 +66,8 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 	}
 	
 	@AfterClass
-	public static void afterClassClearContext() {
+	public static void afterClassClearContext() throws Exception {
+        JettyUtil.closeServer(jettyServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
@@ -169,7 +168,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 	@Test
 	public void testDeletePatient() {
 		when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
-		final IBaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute();
+		final IBaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute().getOperationOutcome();
 		assertEquals("1", idCaptor.getValue().getIdPart());
 	}
 	
@@ -423,11 +422,9 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		ourPort = RandomServerPortProvider.findFreePort();
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		context.setContextPath("/");
-		System.out.println(ourPort);
-		jettyServer = new Server(ourPort);
+		jettyServer = new Server(0);
 		jettyServer.setHandler(context);
 		ServletHolder jerseyServlet = context.addServlet(org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.class, "/*");
 		jerseyServlet.setInitOrder(0);
@@ -442,7 +439,8 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 						), ","));
 		//@formatter:on
 		
-		jettyServer.start();
+		JettyUtil.startServer(jettyServer);
+        ourPort = JettyUtil.getPortForStartedServer(jettyServer);
 
 		ourCtx.setRestfulClientFactory(new JaxRsRestfulClientFactory(ourCtx));
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
@@ -451,15 +449,6 @@ public class AbstractJaxRsResourceProviderDstu3Test {
         client = ourCtx.newRestfulGenericClient(serverBase);
 		client.setEncoding(EncodingEnum.JSON);
 		client.registerInterceptor(new LoggingInterceptor(true));
-	}
-
-	@AfterClass
-	public static void tearDownClass() {
-		try {
-			jettyServer.destroy();
-		} catch (Exception e) {
-
-		}
 	}
 
 }

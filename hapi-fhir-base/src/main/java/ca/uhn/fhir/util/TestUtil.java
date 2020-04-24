@@ -4,14 +4,14 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,6 +39,11 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class TestUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
+	private static boolean ourShouldRandomizeTimezones = true;
+
+	public static void setShouldRandomizeTimezones(boolean theShouldRandomizeTimezones) {
+		ourShouldRandomizeTimezones = theShouldRandomizeTimezones;
+	}
 
 	/**
 	 * <b>THIS IS FOR UNIT TESTS ONLY - DO NOT CALL THIS METHOD FROM USER CODE</b>
@@ -107,7 +112,8 @@ public class TestUtil {
 	 * environment
 	 */
 	public static void randomizeLocale() {
- 		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
+//		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
+		Locale[] availableLocales = {Locale.US};
 		Locale.setDefault(availableLocales[(int) (Math.random() * availableLocales.length)]);
 		ourLog.info("Tests are running in locale: " + Locale.getDefault().getDisplayName());
 		if (Math.random() < 0.5) {
@@ -119,9 +125,13 @@ public class TestUtil {
 			System.setProperty("file.encoding", "UTF-8");
 			System.setProperty("line.separator", "\n");
 		}
-		String availableTimeZones[] = {"GMT+08:00", "GMT-05:00", "GMT+00:00", "GMT+03:30"};
-		String timeZone = availableTimeZones[(int) (Math.random() * availableTimeZones.length)];
-		TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
+
+		if (ourShouldRandomizeTimezones) {
+			String availableTimeZones[] = {"GMT+08:00", "GMT-05:00", "GMT+00:00", "GMT+03:30"};
+			String timeZone = availableTimeZones[(int) (Math.random() * availableTimeZones.length)];
+			TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
+		}
+
 		ourLog.info("Tests are using time zone: {}", TimeZone.getDefault().getID());
 	}
 
@@ -171,6 +181,15 @@ public class TestUtil {
 	 */
 	public static String stripReturns(String theString) {
 		return defaultString(theString).replace("\r", "");
+	}
+
+	/**
+	 * <b>THIS IS FOR UNIT TESTS ONLY - DO NOT CALL THIS METHOD FROM USER CODE</b>
+	 * <p>
+	 * Strip \r chars from a string to account for line ending platform differences
+	 */
+	public static String stripWhitespace(String theString) {
+		return stripReturns(theString).replace(" ", "");
 	}
 
 }

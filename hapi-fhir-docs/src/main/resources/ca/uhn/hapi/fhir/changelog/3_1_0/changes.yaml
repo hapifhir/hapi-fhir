@@ -1,0 +1,129 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Spring (JPA): 4.3.10 -&gt; 5.0.0</li> <li>Jackson (JPA): 2.8.1 -&gt; 2.9.2</li> </ul>"
+- item:
+    type: "fix"
+    title: "The Android client module has been restored to working order, and no longer requires a special classifier or an XML parser to be present in order to work. This means that the hapi-fhir-android library is much less likely to cause conflicts with other libraries imported into an Android application via Gradle. <br/><br/> See the HAPI FHIR Android Documentation for more information. As a part of this fix, all dependencies on the StAX API have been removed in environments where StAX is not present (such as Android). The client will now detect this case, and explicitly request JSON payloads from servers, meaning that Android clients no longer need to include two parser stacks"
+- item:
+    type: "add"
+    title: "A performance to the JPA server has been made which reduces the number of writes to index tables when updating a resource with contents that only make minor changes to the resource content. In many cases this can noticeably improve update performance."
+- item:
+    type: "fix"
+    title: "In FHIR DSTU3 the <code>ValueSet/$expand?identifier=foo</code> and <code>ValueSet/$validate-code?identifier=foo</code> parameters were changed to <code>ValueSet/$expand?url=foo</code> and <code>ValueSet/$validate-code?url=foo</code> respectively, but the JPA server had not caught up. The JPA DSTU3 server has been adjusted to accept either \"identifier\" or \"url\" (with \"url\" taking precedence), and the JPA R4 server has been changed to only accept \"url\". Thanks to Avinash Shanbhag for reporting!"
+- item:
+    issue: "744"
+    type: "fix"
+    title: "Fix an error in JPA server when using Derby Database, where search queries with a search URL longer than 255 characters caused a mysterious failure. Thanks to Chris Schuler and Bryn Rhodes for all of their help in reproducing this issue."
+- item:
+    type: "add"
+    title: "JPA server now supports the use of the <code>Cache-Control</code> header in order to allow the client to selectively disable the search result cache. This directive can also be used to disable result paging and return results faster when only a small number of results is needed. See the JPA Page for more information."
+- item:
+    type: "fix"
+    title: "In certain cases in the JPA server, if multiple threads all attempted to update the same resource simultaneously, the optimistic lock failure caused a \"gap\" in the history numbers to occur. This would then cause a mysterious failure when trying to update this resource further. This has been resolved."
+- item:
+    type: "add"
+    title: "JPA Server search/history results now set the ID of the returned Bundle to the ID of the search, meaning that if a search returns results from the Query cache, it will reuse the ID of the previously returned Bundle"
+- item:
+    type: "fix"
+    title: "Fix a NullPointerException when validating a Bundle (in DSTU3/R4) with no <code>Bundle.type</code> value"
+- item:
+    type: "add"
+    title: "The JPA server transaction operation (DSTU3/R4) did not correctly process the If-Match header when passed in via <code>Bundle.entry.request.ifMatch</code> value"
+- item:
+    type: "add"
+    title: "In Apache client, remove a log message at WARN level when the response does not specify a charset. This log line often showed up any time a server was not supplying a response, making client logs quite noisy"
+- item:
+    type: "add"
+    title: "A new configuration item has been added to the JPA server DaoConfig called <code>getCountSearchResultsUpTo()</code> . This setting governs how many search results the search coordinator should try to find before returning an initial search response to the user, which has an effect on whether the <code>Bundle.total</code> field is always populated in search responses. This has now been set to 20000 on out public server (fhirtest.uhn.ca) so most search results should now include a total."
+- item:
+    type: "fix"
+    title: "Remove a bunch of exceptions in the org.hl7.fhir.exception package from the hapi-fhir-base module, as they were also duplicated in the hapi-fhir-utilities module."
+- item:
+    type: "add"
+    title: "The DSTU2 XhtmlDt type has been modified so that it no longer uses the StAX XMLEvent type as its internal model, and instead simply uses a String. New methods called \"parse\" and \"encode\" have been added to HAPI FHIR's XmlUtil class, which can be used to convert between a String and an XML representation. This should allow HAPI FHIR to run in environments where StAX is not available, such as Android phones."
+- item:
+    issue: "761"
+    type: "add"
+    title: "Restored the <code>org.hl7.fhir.r4.model.codesystem.*</code> classes (which are Java Enums for the various FHIR codesystems). These were accidentally removed in HAPI FHIR 3.0.0. Thanks to GitHub user @CarthageKing for reporting!"
+- item:
+    type: "fix"
+    title: "The resource Profile Validator has been enhanced to not try to validate bound fields where the binding strength is \"example\", and a crash was resolved when validating QuestionnaireResponse answers with a type of \"choice\" where the choice was bound to a ValueSet."
+- item:
+    type: "fix"
+    title: "Remove the fake \"Test\" resource from DSTU2 structures. This was not a real resource type, and caused conflicts with the .NET client. Thanks to Vlad Ignatov for reporting!"
+- item:
+    issue: "720"
+    type: "fix"
+    title: "Parsing a DSTU3/R4 custom structure which contained a field of a custom type caused a crash during parsing. Thanks to GitHub user @mosaic-hgw for reporting!"
+- item:
+    issue: "711"
+    type: "add"
+    title: "Client logic for checking the version of the connected server to ensure it is for the correct version of FHIR now includes a check for R4 servers. Thanks to Clayton Bodendein for the pull request, including a number of great tests!"
+- item:
+    issue: "714"
+    type: "add"
+    title: "JAX-RS client framework now supports the ability to register your own JAX-RS Component Classes against the client, as well as better documentation about thread safety. Thanks to SÃ©bastien RiviÃ¨re for the pull request!"
+- item:
+    issue: "717"
+    type: "fix"
+    title: "Processing of the If-Modified-Since header on FHIR read operations was reversed, returning a 304 when the resource had been modified recently. Thanks to Michael Lawley for the pull request!"
+- item:
+    type: "add"
+    title: "Add <code>Prefer</code> and <code>Cache-Control</code> to the list of headers which are declared as being acceptable for CORS requests in CorsInterceptor, CLI, and JPA Example. Thanks to Patrick Werner for the pull request!"
+- item:
+    issue: "725"
+    type: "fix"
+    title: "DSTU2-hl7org and DSTU2.1 structures did not copy resource IDs when invoking copyValues(). Thanks to Clayton Bodendein for the pull request!"
+- item:
+    issue: "734"
+    type: "fix"
+    title: "When encoding a Binary resource, the Binary.securityContext field was not encoded correctly. Thanks to Malcolm McRoberts for the pull request with fix and test case!"
+- item:
+    type: "add"
+    title: "Bundle resources did not have their version encoded when serializing in FHIR resource (XML/JSON) format."
+- item:
+    type: "add"
+    title: "The Binary resource endpoint now supports the <code>X-Security-Context</code> header when reading or writing Binary contents using their native Content-Type (i.e exchanging the raw binary with the server, as opposed to exchanging a FHIR resource)."
+- item:
+    type: "fix"
+    title: "When paging through multiple pages of search results, if the client had requested a subset of resources to be returned using the <code>_elements</code> parameter, the elements list was lost after the first page of results. In addition, elements will not remove elements from search/history Bundles (i.e. elements from the Bundle itself, as opposed to elements in the entry resources) unless the Bundle elements are explicitly listed, e.g. <code>_include=Bundle.total</code> . Thanks to @parisni for reporting!"
+- item:
+    issue: "743"
+    type: "add"
+    title: "Add support for Spring Boot for initializing a number of parts of the library, as well as several examples. See the <a href=\"https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-spring-boot/hapi-fhir-spring-boot-samples\">Spring Boot samples</a> for examples of how this works. Thanks to Mathieu Ouellet for the contribution!"
+- item:
+    issue: "747"
+    type: "add"
+    title: "JPA server now has lucene index support moved to separate classes from the entity classes in order to facilitate support for ElasticSearch. Thanks to Jiang Liang for the pull request! Note that any existing JPA projects will need to add an additional property in their Spring config called <code>hibernate.search.model_mapping</code>. See <a href=\"https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-example/src/main/java/ca/uhn/fhir/jpa/demo/FhirServerConfig.java#L84\">this line</a> in the example project."
+- item:
+    issue: "755"
+    type: "add"
+    title: "A new client interceptor has been added called AdditionalRequestHeadersInterceptor, which allows a developer to add additional custom headers to a client requests. Thanks to Clayton Bodendein for the pull request!"
+- item:
+    type: "fix"
+    title: "An issue was fixed in JPA server where extensions on primitives which are nestedt several layers deep are lost when resources are retrieved"
+- item:
+    issue: "756"
+    type: "fix"
+    title: "Conditional deletes in JPA server were incorrectly denied by AuthorizationInterceptor if the delete was permitted via a compartment rule. Thanks to Alvin Leonard for the pull request!"
+- item:
+    issue: "767"
+    type: "add"
+    title: "JAX-RS server module was not able to generate server CapabilityStatement for some versions of FHIR (DSTU2_HL7ORG, DSTU2_1, or R4). Thanks to Clayton Bodendein for the Pull Request!"
+- item:
+    issue: "769"
+    type: "add"
+    title: "When a server method throws a DataFormatException, the error will now be converted into an HTTP 400 instead of an HTTP 500 when returned to the client (and a stack trace will now be returned to the client for JAX-RS server if configured to do so). Thanks to Clayton Bodendein for the pull request!"
+- item:
+    issue: "770"
+    type: "fix"
+    title: "JAX-RS server conformance provider in the example module passed in the server description, server name, and server version in the incorrect order. Thanks to Clayton Bodendein for the pull request!"
+- item:
+    issue: "774"
+    type: "fix"
+    title: "The learn more links on the website home page had broken links. Thanks to James Daily for the pull request to fix this!"
+- item:
+    issue: "762"
+    type: "add"
+    title: "Prevent a crash in AuthorizationInterceptor when processing transactions if the interceptor has rules declared which allow resources to be read/written by \"any ID of a given type\". Thanks to GitHub user @dconlan for the pull request!"

@@ -1,0 +1,42 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+	<id value="Consent" />
+	<meta>
+		<lastUpdated value="2017-12-21T17:22:27.087+01:00" />
+	</meta>
+	<url value="http://hl7.org/fhir/StructureDefinition/MyConsent" />
+	<name value="Consent" />
+	<status value="draft" />
+	<date value="2017-12-19T09:08:41.006+01:00" />
+	<description value="prueba&#xD;&#xA;" />
+	<fhirVersion value="3.0.1" />
+	<kind value="resource" />
+	<abstract value="false" />
+	<type value="Consent" />
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Consent" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="Consent.extension">
+			<path value="Consent.extension" />
+			<slicing>
+				<discriminator>
+					<type value="value" />
+					<path value="url" />
+				</discriminator>
+				<rules value="open" />
+			</slicing>
+		</element>
+		<element id="Consent.extension:pruebaExtension">
+			<path value="Consent.extension" />
+			<sliceName value="pruebaExtension" />
+			<min value="1" />
+			<type>
+				<code value="Extension" />
+				<profile value="http://hl7.org/fhir/StructureDefinition/PruebaExtension" />
+			</type>
+		</element>
+		<element id="Consent.identifier">
+			<path value="Consent.identifier" />
+			<min value="1" />
+		</element>
+	</differential>
+</StructureDefinition>

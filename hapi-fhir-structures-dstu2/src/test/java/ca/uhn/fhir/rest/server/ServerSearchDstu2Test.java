@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
@@ -29,6 +28,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
+
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class ServerSearchDstu2Test {
 
@@ -126,14 +127,13 @@ public class ServerSearchDstu2Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
@@ -144,7 +144,8 @@ public class ServerSearchDstu2Test {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
@@ -155,53 +156,47 @@ public class ServerSearchDstu2Test {
 
 	public static class DummyPatientResourceProvider {
 
-		//@formatter:off
 		@Search(allowUnknownParams=true)
 		public List<IBaseResource> searchParam1(
 				@RequiredParam(name = "param1") StringParam theParam) {
 			ourLastMethod = "searchParam1";
 			ourLastRef = theParam;
 			
-			List<IBaseResource> retVal = new ArrayList<IBaseResource>();
+			List<IBaseResource> retVal = new ArrayList<>();
 			Patient patient = new Patient();
 			patient.setId("123");
 			patient.addName().addGiven("GIVEN");
 			retVal.add(patient);
 			return retVal;
 		}
-		//@formatter:on
 
-		//@formatter:off
 		@Search(allowUnknownParams=true)
 		public List<IBaseResource> searchParam2(
 				@RequiredParam(name = "param2") StringParam theParam) {
 			ourLastMethod = "searchParam2";
 			ourLastRef = theParam;
 			
-			List<IBaseResource> retVal = new ArrayList<IBaseResource>();
+			List<IBaseResource> retVal = new ArrayList<>();
 			Patient patient = new Patient();
 			patient.setId("123");
 			patient.addName().addGiven("GIVEN");
 			retVal.add(patient);
 			return retVal;
 		}
-		//@formatter:on
 
-		//@formatter:off
 		@Search(allowUnknownParams=true)
 		public List<IBaseResource> searchParam3(
 				@RequiredParam(name = "param3") ReferenceParam theParam) {
 			ourLastMethod = "searchParam3";
 			ourLastRef2 = theParam;
 			
-			List<IBaseResource> retVal = new ArrayList<IBaseResource>();
+			List<IBaseResource> retVal = new ArrayList<>();
 			Patient patient = new Patient();
 			patient.setId("123");
 			patient.addName().addGiven("GIVEN");
 			retVal.add(patient);
 			return retVal;
 		}
-		//@formatter:on
 
 	}
 

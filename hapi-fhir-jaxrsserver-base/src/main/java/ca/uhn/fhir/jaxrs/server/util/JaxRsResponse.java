@@ -1,19 +1,39 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.ParseAction;
+import ca.uhn.fhir.rest.server.RestfulResponse;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.List;
+import java.util.Map.Entry;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,23 +41,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
-import java.io.*;
-import java.util.List;
-import java.util.Map.Entry;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.ParseAction;
-import ca.uhn.fhir.rest.server.RestfulResponse;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
 
 /**
  * The JaxRsResponse is a jax-rs specific implementation of the RestfulResponse.
@@ -60,8 +63,7 @@ public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
 	 * by the server.
 	 */
 	@Override
-	public Writer getResponseWriter(int theStatusCode, String theStatusMessage, String theContentType, String theCharset, boolean theRespondGzip)
-			throws UnsupportedEncodingException, IOException {
+	public Writer getResponseWriter(int theStatusCode, String theStatusMessage, String theContentType, String theCharset, boolean theRespondGzip) {
 		return new StringWriter();
 	}
 
@@ -78,7 +80,7 @@ public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
 	}
 
 	@Override
-	public Response sendAttachmentResponse(IBaseBinary bin, int statusCode, String contentType) throws IOException {
+	public Object sendAttachmentResponse(IBaseBinary bin, int statusCode, String contentType) {
 		ResponseBuilder response = buildResponse(statusCode);
 		if (bin.getContent() != null && bin.getContent().length > 0) {
 			response.header(Constants.HEADER_CONTENT_TYPE, contentType).entity(bin.getContent());

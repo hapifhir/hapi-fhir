@@ -23,14 +23,14 @@ import static org.apache.commons.lang3.StringUtils.*;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,7 +41,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 public class FhirTerser {
 
-	public static final Pattern COMPARTMENT_MATCHER_PATH = Pattern.compile("([a-zA-Z.]+)\\.where\\(resolve\\(\\) is ([a-zA-Z]+)\\)");
+	private static final Pattern COMPARTMENT_MATCHER_PATH = Pattern.compile("([a-zA-Z.]+)\\.where\\(resolve\\(\\) is ([a-zA-Z]+)\\)");
 	private FhirContext myContext;
 
 	public FhirTerser(FhirContext theContext) {
@@ -53,7 +53,7 @@ public class FhirTerser {
 		if (theChildDefinition == null)
 			return null;
 		if (theCurrentList == null || theCurrentList.isEmpty())
-			return new ArrayList<>(Arrays.asList(theChildDefinition.getElementName()));
+			return new ArrayList<>(Collections.singletonList(theChildDefinition.getElementName()));
 		List<String> newList = new ArrayList<>(theCurrentList);
 		newList.add(theChildDefinition.getElementName());
 		return newList;
@@ -84,10 +84,6 @@ public class FhirTerser {
 
 	private IBaseExtension createEmptyModifierExtension(IBaseHasModifierExtensions theBaseHasModifierExtensions, String theUrl) {
 		return (IBaseExtension) theBaseHasModifierExtensions.addModifierExtension().setUrl(theUrl);
-	}
-
-	private ExtensionDt createEmptyModifierExtensionDt(IBaseExtension theBaseExtension, String theUrl) {
-		return createEmptyExtensionDt(theBaseExtension, true, theUrl);
 	}
 
 	private ExtensionDt createEmptyModifierExtensionDt(ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, String theUrl) {
@@ -162,9 +158,9 @@ public class FhirTerser {
 	 * @return Returns a list of all matching elements
 	 */
 	public <T extends IBase> List<T> getAllPopulatedChildElementsOfType(IBaseResource theResource, final Class<T> theType) {
-		final ArrayList<T> retVal = new ArrayList<T>();
+		final ArrayList<T> retVal = new ArrayList<>();
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		visit(new IdentityHashMap<Object, Object>(), theResource, theResource, null, null, def, new IModelVisitor() {
+		visit(newMap(), theResource, theResource, null, null, def, new IModelVisitor() {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void acceptElement(IBaseResource theOuterResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
@@ -181,9 +177,9 @@ public class FhirTerser {
 	}
 
 	public List<ResourceReferenceInfo> getAllResourceReferences(final IBaseResource theResource) {
-		final ArrayList<ResourceReferenceInfo> retVal = new ArrayList<ResourceReferenceInfo>();
+		final ArrayList<ResourceReferenceInfo> retVal = new ArrayList<>();
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		visit(new IdentityHashMap<Object, Object>(), theResource, theResource, null, null, def, new IModelVisitor() {
+		visit(newMap(), theResource, theResource, null, null, def, new IModelVisitor() {
 			@Override
 			public void acceptElement(IBaseResource theOuterResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
 				if (theElement == null || theElement.isEmpty()) {
@@ -210,24 +206,22 @@ public class FhirTerser {
 	public BaseRuntimeChildDefinition getDefinition(Class<? extends IBaseResource> theResourceType, String thePath) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
 
-		BaseRuntimeElementCompositeDefinition<?> currentDef = def;
-
 		List<String> parts = Arrays.asList(thePath.split("\\."));
 		List<String> subList = parts.subList(1, parts.size());
 		if (subList.size() < 1) {
 			throw new ConfigurationException("Invalid path: " + thePath);
 		}
-		return getDefinition(currentDef, subList);
+		return getDefinition(def, subList);
 
 	}
 
 	public Object getSingleValueOrNull(IBase theTarget, String thePath) {
-		Class<Object> wantedType = Object.class;
+		Class<IBase> wantedType = IBase.class;
 
 		return getSingleValueOrNull(theTarget, thePath, wantedType);
 	}
 
-	public <T> T getSingleValueOrNull(IBase theTarget, String thePath, Class<T> theWantedType) {
+	public <T extends IBase> T getSingleValueOrNull(IBase theTarget, String thePath, Class<T> theWantedType) {
 		Validate.notNull(theTarget, "theTarget must not be null");
 		Validate.notBlank(thePath, "thePath must not be empty");
 
@@ -237,23 +231,22 @@ public class FhirTerser {
 		}
 
 		BaseRuntimeElementCompositeDefinition<?> currentDef = (BaseRuntimeElementCompositeDefinition<?>) def;
-		Object currentObj = theTarget;
 
 		List<String> parts = parsePath(currentDef, thePath);
 
-		List<T> retVal = getValues(currentDef, currentObj, parts, theWantedType);
+		List<T> retVal = getValues(currentDef, theTarget, parts, theWantedType);
 		if (retVal.isEmpty()) {
 			return null;
 		}
 		return retVal.get(0);
 	}
 
-	private <T> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList, Class<T> theWantedClass) {
+	private <T extends IBase> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, IBase theCurrentObj, List<String> theSubList, Class<T> theWantedClass) {
 		return getValues(theCurrentDef, theCurrentObj, theSubList, theWantedClass, false, false);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList, Class<T> theWantedClass, boolean theCreate, boolean theAddExtension) {
+	private <T extends IBase> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, IBase theCurrentObj, List<String> theSubList, Class<T> theWantedClass, boolean theCreate, boolean theAddExtension) {
 		String name = theSubList.get(0);
 		List<T> retVal = new ArrayList<>();
 
@@ -332,7 +325,7 @@ public class FhirTerser {
 				List<T> values = retVal;
 				retVal = new ArrayList<>();
 				for (T nextElement : values) {
-					BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition((Class<? extends IBase>) nextElement.getClass());
+					BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(nextElement.getClass());
 					List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass, theCreate, theAddExtension);
 					retVal.addAll(foundValues);
 				}
@@ -417,7 +410,7 @@ public class FhirTerser {
 				List<T> values = retVal;
 				retVal = new ArrayList<>();
 				for (T nextElement : values) {
-					BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition((Class<? extends IBase>) nextElement.getClass());
+					BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(nextElement.getClass());
 					List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass, theCreate, theAddExtension);
 					retVal.addAll(foundValues);
 				}
@@ -482,8 +475,8 @@ public class FhirTerser {
 	 * @param thePath     The path for the element to be accessed.
 	 * @return A list of values of type {@link Object}.
 	 */
-	public List<Object> getValues(IBaseResource theResource, String thePath) {
-		Class<Object> wantedClass = Object.class;
+	public List<IBase> getValues(IBaseResource theResource, String thePath) {
+		Class<IBase> wantedClass = IBase.class;
 
 		return getValues(theResource, thePath, wantedClass);
 	}
@@ -497,8 +490,8 @@ public class FhirTerser {
 	 * @param theCreate   When set to <code>true</code>, the terser will create a null-valued element where none exists.
 	 * @return A list of values of type {@link Object}.
 	 */
-	public List<Object> getValues(IBaseResource theResource, String thePath, boolean theCreate) {
-		Class<Object> wantedClass = Object.class;
+	public List<IBase> getValues(IBaseResource theResource, String thePath, boolean theCreate) {
+		Class<IBase> wantedClass = IBase.class;
 
 		return getValues(theResource, thePath, wantedClass, theCreate);
 	}
@@ -513,8 +506,8 @@ public class FhirTerser {
 	 * @param theAddExtension When set to <code>true</code>, the terser will add a null-valued extension where one or more such extensions already exist.
 	 * @return A list of values of type {@link Object}.
 	 */
-	public List<Object> getValues(IBaseResource theResource, String thePath, boolean theCreate, boolean theAddExtension) {
-		Class<Object> wantedClass = Object.class;
+	public List<IBase> getValues(IBaseResource theResource, String thePath, boolean theCreate, boolean theAddExtension) {
+		Class<IBase> wantedClass = IBase.class;
 
 		return getValues(theResource, thePath, wantedClass, theCreate, theAddExtension);
 	}
@@ -529,7 +522,7 @@ public class FhirTerser {
 	 * @param <T>            Type declared by <code>theWantedClass</code>
 	 * @return A list of values of type <code>theWantedClass</code>.
 	 */
-	public <T> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass) {
+	public <T extends IBase> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		List<String> parts = parsePath(def, thePath);
 		return getValues(def, theResource, parts, theWantedClass);
@@ -546,7 +539,7 @@ public class FhirTerser {
 	 * @param <T>            Type declared by <code>theWantedClass</code>
 	 * @return A list of values of type <code>theWantedClass</code>.
 	 */
-	public <T> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass, boolean theCreate) {
+	public <T extends IBase> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass, boolean theCreate) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		List<String> parts = parsePath(def, thePath);
 		return getValues(def, theResource, parts, theWantedClass, theCreate, false);
@@ -564,7 +557,7 @@ public class FhirTerser {
 	 * @param <T>             Type declared by <code>theWantedClass</code>
 	 * @return A list of values of type <code>theWantedClass</code>.
 	 */
-	public <T> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass, boolean theCreate, boolean theAddExtension) {
+	public <T extends IBase> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass, boolean theCreate, boolean theAddExtension) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		List<String> parts = parsePath(def, thePath);
 		return getValues(def, theResource, parts, theWantedClass, theCreate, theAddExtension);
@@ -649,7 +642,8 @@ public class FhirTerser {
 					wantType = matcher.group(2);
 				}
 
-				for (IBaseReference nextValue : getValues(theSource, nextPath, IBaseReference.class)) {
+				List<IBaseReference> values = getValues(theSource, nextPath, IBaseReference.class);
+				for (IBaseReference nextValue : values) {
 					IIdType nextTargetId = nextValue.getReferenceElement();
 					String nextRef = nextTargetId.toUnqualifiedVersionless().getValue();
 
@@ -669,7 +663,8 @@ public class FhirTerser {
 					}
 
 					if (isNotBlank(wantType)) {
-						if (!nextTargetId.getResourceType().equals(wantType)) {
+						String nextTargetIdResourceType = nextTargetId.getResourceType();
+						if (nextTargetIdResourceType == null || !nextTargetIdResourceType.equals(wantType)) {
 							continue;
 						}
 					}
@@ -692,104 +687,90 @@ public class FhirTerser {
 		theContainingElementPath.add(theElement);
 		theElementDefinitionPath.add(theDefinition);
 
-		theCallback.acceptElement(theElement, Collections.unmodifiableList(theContainingElementPath), Collections.unmodifiableList(theChildDefinitionPath),
+		boolean recurse = theCallback.acceptElement(theElement, Collections.unmodifiableList(theContainingElementPath), Collections.unmodifiableList(theChildDefinitionPath),
 			Collections.unmodifiableList(theElementDefinitionPath));
+		if (recurse) {
 
-		/*
-		 * Visit undeclared extensions
-		 */
-		if (theElement instanceof ISupportsUndeclaredExtensions) {
-			ISupportsUndeclaredExtensions containingElement = (ISupportsUndeclaredExtensions) theElement;
-			for (ExtensionDt nextExt : containingElement.getUndeclaredExtensions()) {
-				theContainingElementPath.add(nextExt);
-				theCallback.acceptUndeclaredExtension(nextExt, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath);
-				theContainingElementPath.remove(theContainingElementPath.size() - 1);
+			/*
+			 * Visit undeclared extensions
+			 */
+			if (theElement instanceof ISupportsUndeclaredExtensions) {
+				ISupportsUndeclaredExtensions containingElement = (ISupportsUndeclaredExtensions) theElement;
+				for (ExtensionDt nextExt : containingElement.getUndeclaredExtensions()) {
+					theContainingElementPath.add(nextExt);
+					theCallback.acceptUndeclaredExtension(nextExt, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath);
+					theContainingElementPath.remove(theContainingElementPath.size() - 1);
+				}
 			}
-		}
 
-		/*
-		 * Now visit the children of the given element
-		 */
-		switch (theDefinition.getChildType()) {
-			case ID_DATATYPE:
-			case PRIMITIVE_XHTML_HL7ORG:
-			case PRIMITIVE_XHTML:
-			case PRIMITIVE_DATATYPE:
-				// These are primitive types, so we don't need to visit their children
-				break;
-			case RESOURCE:
-			case RESOURCE_BLOCK:
-			case COMPOSITE_DATATYPE: {
-				BaseRuntimeElementCompositeDefinition<?> childDef = (BaseRuntimeElementCompositeDefinition<?>) theDefinition;
-				for (BaseRuntimeChildDefinition nextChild : childDef.getChildrenAndExtension()) {
-					List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
-					if (values != null) {
-						for (IBase nextValue : values) {
-							if (nextValue == null) {
-								continue;
-							}
-							if (nextValue.isEmpty()) {
-								continue;
-							}
-							BaseRuntimeElementDefinition<?> childElementDef;
-							childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
-
-							if (childElementDef == null) {
-								StringBuilder b = new StringBuilder();
-								b.append("Found value of type[");
-								b.append(nextValue.getClass().getSimpleName());
-								b.append("] which is not valid for field[");
-								b.append(nextChild.getElementName());
-								b.append("] in ");
-								b.append(childDef.getName());
-								b.append(" - Valid types: ");
-								for (Iterator<String> iter = new TreeSet<String>(nextChild.getValidChildNames()).iterator(); iter.hasNext(); ) {
-									BaseRuntimeElementDefinition<?> childByName = nextChild.getChildByName(iter.next());
-									b.append(childByName.getImplementingClass().getSimpleName());
-									if (iter.hasNext()) {
-										b.append(", ");
-									}
+			/*
+			 * Now visit the children of the given element
+			 */
+			switch (theDefinition.getChildType()) {
+				case ID_DATATYPE:
+				case PRIMITIVE_XHTML_HL7ORG:
+				case PRIMITIVE_XHTML:
+				case PRIMITIVE_DATATYPE:
+					// These are primitive types, so we don't need to visit their children
+					break;
+				case RESOURCE:
+				case RESOURCE_BLOCK:
+				case COMPOSITE_DATATYPE: {
+					BaseRuntimeElementCompositeDefinition<?> childDef = (BaseRuntimeElementCompositeDefinition<?>) theDefinition;
+					for (BaseRuntimeChildDefinition nextChild : childDef.getChildrenAndExtension()) {
+						List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
+						if (values != null) {
+							for (IBase nextValue : values) {
+								if (nextValue == null) {
+									continue;
 								}
-								throw new DataFormatException(b.toString());
-							}
+								if (nextValue.isEmpty()) {
+									continue;
+								}
+								BaseRuntimeElementDefinition<?> childElementDef;
+								Class<? extends IBase> valueType = nextValue.getClass();
+								childElementDef = nextChild.getChildElementDefinitionByDatatype(valueType);
+								while (childElementDef == null && IBase.class.isAssignableFrom(valueType)) {
+									childElementDef = nextChild.getChildElementDefinitionByDatatype(valueType);
+									valueType = (Class<? extends IBase>) valueType.getSuperclass();
+								}
 
-							if (nextChild instanceof RuntimeChildDirectResource) {
-								// Don't descend into embedded resources
-								theContainingElementPath.add(nextValue);
-								theChildDefinitionPath.add(nextChild);
-								theElementDefinitionPath.add(myContext.getElementDefinition(nextValue.getClass()));
-								theCallback.acceptElement(nextValue, Collections.unmodifiableList(theContainingElementPath), Collections.unmodifiableList(theChildDefinitionPath),
-									Collections.unmodifiableList(theElementDefinitionPath));
-								theChildDefinitionPath.remove(theChildDefinitionPath.size() - 1);
-								theContainingElementPath.remove(theContainingElementPath.size() - 1);
-								theElementDefinitionPath.remove(theElementDefinitionPath.size() - 1);
-							} else {
+								Class<? extends IBase> typeClass = nextValue.getClass();
+								while (childElementDef == null && IBase.class.isAssignableFrom(typeClass)) {
+									//noinspection unchecked
+									typeClass = (Class<? extends IBase>) typeClass.getSuperclass();
+									childElementDef = nextChild.getChildElementDefinitionByDatatype(typeClass);
+								}
+
+								Validate.notNull(childElementDef, "Found value of type[%s] which is not valid for field[%s] in %s", nextValue.getClass(), nextChild.getElementName(), childDef.getName());
+
 								visit(nextValue, nextChild, childElementDef, theCallback, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath);
 							}
 						}
 					}
+					break;
 				}
-				break;
-			}
-			case CONTAINED_RESOURCES: {
-				BaseContainedDt value = (BaseContainedDt) theElement;
-				for (IResource next : value.getContainedResources()) {
-					BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(next);
-					visit(next, null, def, theCallback, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath);
+				case CONTAINED_RESOURCES: {
+					BaseContainedDt value = (BaseContainedDt) theElement;
+					for (IResource next : value.getContainedResources()) {
+						BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(next);
+						visit(next, null, def, theCallback, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath);
+					}
+					break;
 				}
-				break;
-			}
-			case EXTENSION_DECLARED:
-			case UNDECL_EXT: {
-				throw new IllegalStateException("state should not happen: " + theDefinition.getChildType());
-			}
-			case CONTAINED_RESOURCE_LIST: {
-				if (theElement != null) {
-					BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theElement.getClass());
-					visit(theElement, null, def, theCallback, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath);
+				case EXTENSION_DECLARED:
+				case UNDECL_EXT: {
+					throw new IllegalStateException("state should not happen: " + theDefinition.getChildType());
 				}
-				break;
+				case CONTAINED_RESOURCE_LIST: {
+					if (theElement != null) {
+						BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theElement.getClass());
+						visit(theElement, null, def, theCallback, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath);
+					}
+					break;
+				}
 			}
+
 		}
 
 		if (theChildDefinition != null) {
@@ -812,14 +793,18 @@ public class FhirTerser {
 	 */
 	public void visit(IBaseResource theResource, IModelVisitor theVisitor) {
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		visit(new IdentityHashMap<Object, Object>(), theResource, theResource, null, null, def, theVisitor);
+		visit(newMap(), theResource, theResource, null, null, def, theVisitor);
+	}
+
+	public Map<Object, Object> newMap() {
+		return new IdentityHashMap<>();
 	}
 
 	/**
 	 * Visit all elements in a given resource
 	 * <p>
-	 * THIS ALTERNATE METHOD IS STILL EXPERIMENTAL
-	 *
+	 * <b>THIS ALTERNATE METHOD IS STILL EXPERIMENTAL! USE WITH CAUTION</b>
+	 * </p>
 	 * <p>
 	 * Note on scope: This method will descend into any contained resources ({@link IResource#getContained()}) as well, but will not descend into linked resources (e.g.
 	 * {@link BaseResourceReferenceDt#getResource()}) or embedded resources (e.g. Bundle.entry.resource)
@@ -828,12 +813,12 @@ public class FhirTerser {
 	 * @param theResource The resource to visit
 	 * @param theVisitor  The visitor
 	 */
-	void visit(IBaseResource theResource, IModelVisitor2 theVisitor) {
+	public void visit(IBaseResource theResource, IModelVisitor2 theVisitor) {
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		visit(theResource, null, def, theVisitor, new ArrayList<IBase>(), new ArrayList<BaseRuntimeChildDefinition>(), new ArrayList<BaseRuntimeElementDefinition<?>>());
+		visit(theResource, null, def, theVisitor, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 	}
 
-	private void visit(IdentityHashMap<Object, Object> theStack, IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition,
+	private void visit(Map<Object, Object> theStack, IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition,
 							 BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor theCallback) {
 		List<String> pathToElement = addNameToList(thePathToElement, theChildDefinition);
 
@@ -924,4 +909,66 @@ public class FhirTerser {
 
 	}
 
+	/**
+	 * Returns all embedded resources that are found embedded within <code>theResource</code>.
+	 * An embedded resource is a resource that can be found as a direct child within a resource,
+	 * as opposed to being referenced by the resource.
+	 * <p>
+	 * Examples include resources found within <code>Bundle.entry.resource</code>
+	 * and <code>Parameters.parameter.resource</code>, as well as contained resources
+	 * found within <code>Resource.contained</code>
+	 * </p>
+	 *
+	 * @param theRecurse Should embedded resources be recursively scanned for further embedded
+	 *                   resources
+	 * @return A collection containing the embedded resources. Order is arbitrary.
+	 */
+	public Collection<IBaseResource> getAllEmbeddedResources(IBaseResource theResource, boolean theRecurse) {
+		Validate.notNull(theResource, "theResource must not be null");
+		ArrayList<IBaseResource> retVal = new ArrayList<>();
+
+		visit(theResource, new IModelVisitor2() {
+			@Override
+			public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				if (theElement == theResource) {
+					return true;
+				}
+				if (theElement instanceof IBaseResource) {
+					retVal.add((IBaseResource) theElement);
+					return theRecurse;
+				}
+				return true;
+			}
+
+			@Override
+			public boolean acceptUndeclaredExtension(IBaseExtension<?, ?> theNextExt, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				return true;
+			}
+		});
+
+		return retVal;
+	}
+
+	/**
+	 * Clear all content on a resource
+	 */
+	public void clear(IBaseResource theInput) {
+		visit(theInput, new IModelVisitor2() {
+			@Override
+			public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				if (theElement instanceof IPrimitiveType) {
+					((IPrimitiveType) theElement).setValueAsString(null);
+				}
+				return true;
+			}
+
+			@Override
+			public boolean acceptUndeclaredExtension(IBaseExtension<?, ?> theNextExt, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				theNextExt.setUrl(null);
+				theNextExt.setValue(null);
+				return true;
+			}
+
+		});
+	}
 }

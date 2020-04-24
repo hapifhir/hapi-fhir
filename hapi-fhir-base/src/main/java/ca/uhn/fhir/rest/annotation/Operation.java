@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,14 +54,30 @@ public @interface Operation {
 	String name();
 
 	/**
-	 * On a client, this value should be populated with the resource type that the operation applies to. If set to
+	 * This value may be populated with the resource type that the operation applies to. If set to
 	 * {@link IBaseResource} (which is the default) than the operation applies to the server and not to a specific
 	 * resource type.
 	 * <p>
-	 * This value has no effect when used on server implementations.
+	 * This attribute should not be used a resource provider implementing
+	 * <code>IResourceProvider</code> since the type can be inferred from the
+	 * resource provider type.
 	 * </p>
+	 * @see #typeName() may also be used to specify a value as a String
 	 */
 	Class<? extends IBaseResource> type() default IBaseResource.class;
+
+	/**
+	 * This value may be populated with the resource type that the operation applies to. If set to
+	 * {@link IBaseResource} (which is the default) than the operation applies to the server and not to a specific
+	 * resource type.
+	 * <p>
+	 * This attribute should not be used a resource provider implementing
+	 * <code>IResourceProvider</code> since the type can be inferred from the
+	 * resource provider type.
+	 * </p>
+	 * @see #type() may also be used to specify a value for this setting as a class type
+	 */
+	String typeName() default "";
 
 	/**
 	 * If a given operation method is <b><a href="http://en.wikipedia.org/wiki/Idempotence">idempotent</a></b>
@@ -86,5 +102,38 @@ public @interface Operation {
 	 * bundle type to set in the bundle.
 	 */
 	BundleTypeEnum bundleType() default BundleTypeEnum.COLLECTION;
+
+	/**
+	 * If this is set to <code>true</code> (default is <code>false</code> and this is almost
+	 * always the right choice), the framework will not attempt to generate a response to
+	 * this method.
+	 * <p>
+	 * This is useful if you want to include an {@link javax.servlet.http.HttpServletResponse}
+	 * in your method parameters and create a response yourself directly from your
+	 * <code>@Operation</code> method.
+	 * </p>
+	 * <p>
+	 * Note that this will mean that interceptor methods will not get fired for the
+	 * response, so there are security implications to using this flag.
+	 * </p>
+	 */
+	boolean manualResponse() default false;
+
+	/**
+	 * If this is set to <code>true</code> (default is <code>false</code> and this is almost
+	 * always the right choice), the framework will not attempt to parse the request body,
+	 * but will instead delegate it to the <code>@Operation</code> method.
+	 * <p>
+	 * This is useful if you want to include an {@link javax.servlet.http.HttpServletRequest}
+	 * in your method parameters and parse the request yourself.
+	 * </p>
+	 */
+	boolean manualRequest() default false;
+
+	/**
+	 * If this is set to <code>true</code>, this method will be a <b>global operation</b>
+	 * meaning that it applies to all resource types
+	 */
+	boolean global() default false;
 
 }

@@ -1,42 +1,64 @@
 package ca.uhn.fhir.rest.client.method;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.*;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.Map.Entry;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.*;
-
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.method.OperationParameter.IOperationParamConverter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.binder.CollectionBinder;
-import ca.uhn.fhir.util.*;
+import ca.uhn.fhir.util.DateUtils;
+import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,7 +67,6 @@ import ca.uhn.fhir.util.*;
  * #L%
  */
 
-@SuppressWarnings("deprecation")
 public class MethodUtil {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MethodUtil.class);
@@ -208,23 +229,10 @@ public class MethodUtil {
 		return b;
 	}
 
-	public static void extractDescription(SearchParameter theParameter, Annotation[] theAnnotations) {
-		for (Annotation annotation : theAnnotations) {
-			if (annotation instanceof Description) {
-				Description desc = (Description) annotation;
-				if (isNotBlank(desc.formalDefinition())) {
-					theParameter.setDescription(desc.formalDefinition());
-				} else {
-					theParameter.setDescription(desc.shortDefinition());
-				}
-			}
-		}
-	}
-
 	@SuppressWarnings("unchecked")
 	public static List<IParameter> getResourceParameters(final FhirContext theContext, Method theMethod,
 			Object theProvider, RestOperationTypeEnum theRestfulOperationTypeEnum) {
-		List<IParameter> parameters = new ArrayList<IParameter>();
+		List<IParameter> parameters = new ArrayList<>();
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 		int paramIndex = 0;
@@ -268,10 +276,8 @@ public class MethodUtil {
 						parameter.setRequired(true);
 						parameter.setDeclaredTypes(((RequiredParam) nextAnnotation).targetTypes());
 						parameter.setCompositeTypes(((RequiredParam) nextAnnotation).compositeTypes());
-						parameter.setChainlists(((RequiredParam) nextAnnotation).chainWhitelist(),
-								((RequiredParam) nextAnnotation).chainBlacklist());
+						parameter.setChainlists(((RequiredParam) nextAnnotation).chainWhitelist());
 						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
-						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;
 					} else if (nextAnnotation instanceof OptionalParam) {
 						SearchParameter parameter = new SearchParameter();
@@ -279,10 +285,8 @@ public class MethodUtil {
 						parameter.setRequired(false);
 						parameter.setDeclaredTypes(((OptionalParam) nextAnnotation).targetTypes());
 						parameter.setCompositeTypes(((OptionalParam) nextAnnotation).compositeTypes());
-						parameter.setChainlists(((OptionalParam) nextAnnotation).chainWhitelist(),
-								((OptionalParam) nextAnnotation).chainBlacklist());
+						parameter.setChainlists(((OptionalParam) nextAnnotation).chainWhitelist());
 						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
-						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;
 					} else if (nextAnnotation instanceof RawParam) {
 						param = new RawParamsParmeter();
@@ -305,16 +309,11 @@ public class MethodUtil {
 							specType = parameterType;
 						}
 
-						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType,
-								specType);
+						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType,								specType);
 					} else if (nextAnnotation instanceof ResourceParam) {
 						if (IBaseResource.class.isAssignableFrom(parameterType)) {
 							// good
 						} else if (String.class.equals(parameterType)) {
-							// good
-						} else if (byte[].class.equals(parameterType)) {
-							// good
-						} else if (EncodingEnum.class.equals(parameterType)) {
 							// good
 						} else {
 							StringBuilder b = new StringBuilder();
@@ -322,16 +321,13 @@ public class MethodUtil {
 							b.append(theMethod.getName());
 							b.append("' is annotated with @");
 							b.append(ResourceParam.class.getSimpleName());
-							b.append(" but has a type that is not an implemtation of ");
+							b.append(" but has a type that is not an implementation of ");
 							b.append(IBaseResource.class.getCanonicalName());
-							b.append(" or String or byte[]");
 							throw new ConfigurationException(b.toString());
 						}
 						param = new ResourceParameter(parameterType);
 					} else if (nextAnnotation instanceof IdParam) {
 						param = new NullParameter();
-					} else if (nextAnnotation instanceof ServerBase) {
-						param = new ServerBaseParamBinder();
 					} else if (nextAnnotation instanceof Elements) {
 						param = new ElementsParameter();
 					} else if (nextAnnotation instanceof Since) {
@@ -363,19 +359,6 @@ public class MethodUtil {
 						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE,
 								Constants.EXTOP_VALIDATE_MODE, 0, 1).setConverter(new IOperationParamConverter() {
 									@Override
-									public Object incomingServer(Object theObject) {
-										if (isNotBlank(theObject.toString())) {
-											ValidationModeEnum retVal = ValidationModeEnum
-													.forCode(theObject.toString());
-											if (retVal == null) {
-												OperationParameter.throwInvalidMode(theObject.toString());
-											}
-											return retVal;
-										}
-										return null;
-									}
-
-									@Override
 									public Object outgoingClient(Object theObject) {
 										return ParametersUtil.createString(theContext,
 												((ValidationModeEnum) theObject).getCode());
@@ -389,10 +372,6 @@ public class MethodUtil {
 						}
 						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE,
 								Constants.EXTOP_VALIDATE_PROFILE, 0, 1).setConverter(new IOperationParamConverter() {
-									@Override
-									public Object incomingServer(Object theObject) {
-										return theObject.toString();
-									}
 
 									@Override
 									public Object outgoingClient(Object theObject) {

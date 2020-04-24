@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,6 +33,10 @@ import org.hibernate.search.annotations.NumericField;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.Objects;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 //@formatter:off
 @Embeddable
@@ -87,8 +91,9 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	}
 
 
-	public ResourceIndexedSearchParamQuantity(String theParamName, BigDecimal theValue, String theSystem, String theUnits) {
+	public ResourceIndexedSearchParamQuantity(String theResourceType, String theParamName, BigDecimal theValue, String theSystem, String theUnits) {
 		this();
+		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setSystem(theSystem);
 		setValue(theValue);
@@ -128,14 +133,12 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		}
 		ResourceIndexedSearchParamQuantity obj = (ResourceIndexedSearchParamQuantity) theObj;
 		EqualsBuilder b = new EqualsBuilder();
+		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-		b.append(getResource(), obj.getResource());
 		b.append(getSystem(), obj.getSystem());
 		b.append(getUnits(), obj.getUnits());
 		b.append(getValue(), obj.getValue());
-		b.append(getHashIdentity(), obj.getHashIdentity());
-		b.append(getHashIdentitySystemAndUnits(), obj.getHashIdentitySystemAndUnits());
-		b.append(getHashIdentityAndUnits(), obj.getHashIdentityAndUnits());
+		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
 	}
 
@@ -198,14 +201,14 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		return myValue;
 	}
 
-	public void setValue(BigDecimal theValue) {
+	public ResourceIndexedSearchParamQuantity setValue(BigDecimal theValue) {
 		clearHashes();
 		myValue = theValue;
+		return this;
 	}
 
 	@Override
 	public int hashCode() {
-		calculateHashes();
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getResourceType());
 		b.append(getParamName());
@@ -242,25 +245,29 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		boolean retval = false;
 
 		// Only match on system if it wasn't specified
-		if (quantity.getSystem() == null && quantity.getUnits() == null) {
-			if (getValue().equals(quantity.getValue())) {
-				retval = true;
-			}
-		} else if (quantity.getSystem() == null) {
-			if (getUnits().equalsIgnoreCase(quantity.getUnits()) &&
-				getValue().equals(quantity.getValue())) {
-				retval = true;
-			}
-		} else if (quantity.getUnits() == null) {
-			if (getSystem().equalsIgnoreCase(quantity.getSystem()) &&
-				getValue().equals(quantity.getValue())) {
+		String quantityUnitsString = defaultString(quantity.getUnits());
+		if (quantity.getSystem() == null && isBlank(quantityUnitsString)) {
+			if (Objects.equals(getValue(),quantity.getValue())) {
 				retval = true;
 			}
 		} else {
-			if (getSystem().equalsIgnoreCase(quantity.getSystem()) &&
-				getUnits().equalsIgnoreCase(quantity.getUnits()) &&
-				getValue().equals(quantity.getValue())) {
-				retval = true;
+			String unitsString = defaultString(getUnits());
+			if (quantity.getSystem() == null) {
+				if (unitsString.equalsIgnoreCase(quantityUnitsString) &&
+					Objects.equals(getValue(),quantity.getValue())) {
+					retval = true;
+				}
+			} else if (isBlank(quantityUnitsString)) {
+				if (getSystem().equalsIgnoreCase(quantity.getSystem()) &&
+					Objects.equals(getValue(),quantity.getValue())) {
+					retval = true;
+				}
+			} else {
+				if (getSystem().equalsIgnoreCase(quantity.getSystem()) &&
+					unitsString.equalsIgnoreCase(quantityUnitsString) &&
+					Objects.equals(getValue(),quantity.getValue())) {
+					retval = true;
+				}
 			}
 		}
 		return retval;

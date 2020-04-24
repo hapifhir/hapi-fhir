@@ -1,13 +1,18 @@
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.annotations.OptimisticLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.*;
 
@@ -17,14 +22,14 @@ import static org.apache.commons.lang3.StringUtils.left;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,16 +42,17 @@ import static org.apache.commons.lang3.StringUtils.left;
 @Table(name = "HFJ_SEARCH", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_SEARCH_UUID", columnNames = "SEARCH_UUID")
 }, indexes = {
-	@Index(name = "IDX_SEARCH_LASTRETURNED", columnList = "SEARCH_LAST_RETURNED"),
-	@Index(name = "IDX_SEARCH_RESTYPE_HASHS", columnList = "RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED")
+	@Index(name = "IDX_SEARCH_RESTYPE_HASHS", columnList = "RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED"),
+	@Index(name = "IDX_SEARCH_CREATED", columnList = "CREATED")
 })
-public class Search implements Serializable {
+public class Search implements ICachedSearchDetails, Serializable {
 
 	@SuppressWarnings("WeakerAccess")
 	public static final int UUID_COLUMN_LENGTH = 36;
 	private static final int MAX_SEARCH_QUERY_STRING = 10000;
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
+	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false, updatable = false)
 	private Date myCreated;
@@ -57,6 +63,9 @@ public class Search implements Serializable {
 	private Integer myFailureCode;
 	@Column(name = "FAILURE_MESSAGE", length = FAILURE_MESSAGE_LENGTH, nullable = true)
 	private String myFailureMessage;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "EXPIRY_OR_NULL", nullable = true)
+	private Date myExpiryOrNull;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCH")
 	@SequenceGenerator(name = "SEQ_SEARCH", sequenceName = "SEQ_SEARCH")
@@ -72,19 +81,14 @@ public class Search implements Serializable {
 	private Date myLastUpdatedLow;
 	@Column(name = "NUM_FOUND", nullable = false)
 	private int myNumFound;
+	@Column(name = "NUM_BLOCKED", nullable = true)
+	private Integer myNumBlocked;
 	@Column(name = "PREFERRED_PAGE_SIZE", nullable = true)
 	private Integer myPreferredPageSize;
 	@Column(name = "RESOURCE_ID", nullable = true)
 	private Long myResourceId;
 	@Column(name = "RESOURCE_TYPE", length = 200, nullable = true)
 	private String myResourceType;
-	@OneToMany(mappedBy = "mySearch", fetch = FetchType.LAZY)
-	private Collection<SearchResult> myResults;
-	@NotNull
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "SEARCH_LAST_RETURNED", nullable = false, updatable = false)
-	@OptimisticLock(excluded = true)
-	private Date mySearchLastReturned;
 	@Lob()
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "SEARCH_QUERY_STRING", nullable = true, updatable = false, length = MAX_SEARCH_QUERY_STRING)
@@ -108,12 +112,41 @@ public class Search implements Serializable {
 	@Lob
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
-
 	/**
 	 * Constructor
 	 */
 	public Search() {
 		super();
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myLastUpdatedHigh", myLastUpdatedHigh)
+			.append("myLastUpdatedLow", myLastUpdatedLow)
+			.append("myNumFound", myNumFound)
+			.append("myNumBlocked", myNumBlocked)
+			.append("myStatus", myStatus)
+			.append("myTotalCount", myTotalCount)
+			.append("myUuid", myUuid)
+			.append("myVersion", myVersion)
+			.toString();
+	}
+
+	public int getNumBlocked() {
+		return myNumBlocked != null ? myNumBlocked : 0;
+	}
+
+	public void setNumBlocked(int theNumBlocked) {
+		myNumBlocked = theNumBlocked;
+	}
+
+	public Date getExpiryOrNull() {
+		return myExpiryOrNull;
+	}
+
+	public void setExpiryOrNull(Date theExpiryOrNull) {
+		myExpiryOrNull = theExpiryOrNull;
 	}
 
 	public Boolean getDeleted() {
@@ -146,6 +179,9 @@ public class Search implements Serializable {
 
 	public void setFailureMessage(String theFailureMessage) {
 		myFailureMessage = left(theFailureMessage, FAILURE_MESSAGE_LENGTH);
+		if (System.getProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK) != null) {
+			myFailureMessage = theFailureMessage;
+		}
 	}
 
 	public Long getId() {
@@ -186,10 +222,12 @@ public class Search implements Serializable {
 	}
 
 	public int getNumFound() {
+		ourLog.trace("getNumFound {}", myNumFound);
 		return myNumFound;
 	}
 
 	public void setNumFound(int theNumFound) {
+		ourLog.trace("setNumFound {}", theNumFound);
 		myNumFound = theNumFound;
 	}
 
@@ -217,24 +255,20 @@ public class Search implements Serializable {
 		myResourceType = theResourceType;
 	}
 
-	public Date getSearchLastReturned() {
-		return mySearchLastReturned;
-	}
-
-	public void setSearchLastReturned(Date theDate) {
-		mySearchLastReturned = theDate;
-	}
-
 	public String getSearchQueryString() {
 		return mySearchQueryString;
 	}
 
 	public void setSearchQueryString(String theSearchQueryString) {
-		if (theSearchQueryString != null && theSearchQueryString.length() > MAX_SEARCH_QUERY_STRING) {
-			mySearchQueryString = null;
+		if (theSearchQueryString == null || theSearchQueryString.length() > MAX_SEARCH_QUERY_STRING) {
+			// We want this field to always have a wide distribution of values in order
+			// to avoid optimizers avoiding using it if it has lots of nulls, so in the
+			// case of null, just put a value that will never be hit
+			mySearchQueryString = UUID.randomUUID().toString();
 		} else {
 			mySearchQueryString = theSearchQueryString;
 		}
+		mySearchQueryStringHash = mySearchQueryString.hashCode();
 	}
 
 	public SearchTypeEnum getSearchType() {
@@ -246,10 +280,12 @@ public class Search implements Serializable {
 	}
 
 	public SearchStatusEnum getStatus() {
+		ourLog.trace("getStatus {}", myStatus);
 		return myStatus;
 	}
 
 	public void setStatus(SearchStatusEnum theStatus) {
+		ourLog.trace("setStatus {}", theStatus);
 		myStatus = theStatus;
 	}
 
@@ -304,11 +340,16 @@ public class Search implements Serializable {
 		return myVersion;
 	}
 
-	public SearchParameterMap getSearchParameterMap() {
-		return SerializationUtils.deserialize(mySearchParameterMap);
+	public Optional<SearchParameterMap> getSearchParameterMap() {
+		return Optional.ofNullable(mySearchParameterMap).map(t -> SerializationUtils.deserialize(mySearchParameterMap));
 	}
 
 	public void setSearchParameterMap(SearchParameterMap theSearchParameterMap) {
 		mySearchParameterMap = SerializationUtils.serialize(theSearchParameterMap);
+	}
+
+	@Override
+	public void setCannotBeReused() {
+		mySearchQueryStringHash = null;
 	}
 }

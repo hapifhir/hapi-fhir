@@ -4,14 +4,14 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,25 +20,28 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.*;
-import ca.uhn.fhir.util.UrlUtil;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBase;
 
 public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 
 	private static final Class<Void> VOID_CLASS = Void.class;
-	
-	private Map<Class<?>, Constructor<T>> myConstructors = Collections.synchronizedMap(new HashMap<Class<?>, Constructor<T>>());
-	private List<RuntimeChildDeclaredExtensionDefinition> myExtensions = new ArrayList<RuntimeChildDeclaredExtensionDefinition>();
-	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsModifier = new ArrayList<RuntimeChildDeclaredExtensionDefinition>();
-	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsNonModifier = new ArrayList<RuntimeChildDeclaredExtensionDefinition>();
 	private final Class<? extends T> myImplementingClass;
 	private final String myName;
 	private final boolean myStandardType;
-	private Map<String, RuntimeChildDeclaredExtensionDefinition> myUrlToExtension = new HashMap<String, RuntimeChildDeclaredExtensionDefinition>();
+	private Map<Class<?>, Constructor<T>> myConstructors = Collections.synchronizedMap(new HashMap<>());
+	private List<RuntimeChildDeclaredExtensionDefinition> myExtensions = new ArrayList<>();
+	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsModifier = new ArrayList<>();
+	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsNonModifier = new ArrayList<>();
+	private Map<String, RuntimeChildDeclaredExtensionDefinition> myUrlToExtension = new HashMap<>();
+	private BaseRuntimeElementDefinition<?> myRootParentDefinition;
 
 	public BaseRuntimeElementDefinition(String theName, Class<? extends T> theImplementingClass, boolean theStandardType) {
 		assert StringUtils.isNotBlank(theName);
@@ -49,32 +52,30 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		if (name.endsWith("Dt")) {
 			name = name.substring(0, name.length() - 2);
 		}
-		
-		
+
+
 		myName = name;
 		myStandardType = theStandardType;
 		myImplementingClass = theImplementingClass;
 	}
 
-	public void addExtension(RuntimeChildDeclaredExtensionDefinition theExtension) {
-		if (theExtension == null) {
-			throw new NullPointerException();
-		}
+	public void addExtension(@Nonnull RuntimeChildDeclaredExtensionDefinition theExtension) {
+		Validate.notNull(theExtension, "theExtension must not be null");
 		myExtensions.add(theExtension);
 	}
 
 	public abstract ChildTypeEnum getChildType();
 
 	@SuppressWarnings("unchecked")
-	private Constructor<T> getConstructor(Object theArgument) {
-		
-		Class<? extends Object> argumentType;
+	private Constructor<T> getConstructor(@Nullable Object theArgument) {
+
+		Class<?> argumentType;
 		if (theArgument == null) {
 			argumentType = VOID_CLASS;
 		} else {
 			argumentType = theArgument.getClass();
 		}
-		
+
 		Constructor<T> retVal = myConstructors.get(argumentType);
 		if (retVal == null) {
 			for (Constructor<?> next : getImplementingClass().getConstructors()) {
@@ -137,7 +138,7 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 
 	/**
 	 * @return Returns the runtime name for this resource (i.e. the name that
-	 *         will be used in encoded messages)
+	 * will be used in encoded messages)
 	 */
 	public String getName() {
 		return myName;
@@ -168,9 +169,14 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		}
 	}
 
+	public BaseRuntimeElementDefinition<?> getRootParentDefinition() {
+		return myRootParentDefinition;
+	}
+
 	/**
 	 * Invoked prior to use to perform any initialization and make object
 	 * mutable.
+	 *
 	 * @param theContext TODO
 	 */
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
@@ -193,44 +199,57 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		}
 
 		myExtensions = Collections.unmodifiableList(myExtensions);
+
+		Class parent = myImplementingClass;
+		do {
+			BaseRuntimeElementDefinition<?> parentDefinition = theClassToElementDefinitions.get(parent);
+			if (parentDefinition != null) {
+				myRootParentDefinition = parentDefinition;
+			}
+			parent = parent.getSuperclass();
+		} while (!parent.equals(Object.class));
+
 	}
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName()+"[" + getName() + ", " + getImplementingClass().getSimpleName() + "]";
+		return getClass().getSimpleName() + "[" + getName() + ", " + getImplementingClass().getSimpleName() + "]";
 	}
 
 	protected void validateSealed() {
-		/* 
+		/*
 		 * this does nothing, but BaseRuntimeElementCompositeDefinition
 		 * overrides this method to provide functionality because that class
 		 * defers the dealing process
 		 */
-		
+
 	}
 
 	public enum ChildTypeEnum {
-		COMPOSITE_DATATYPE, /**
+		COMPOSITE_DATATYPE,
+		/**
 		 * HL7.org structure style.
 		 */
-		CONTAINED_RESOURCE_LIST, /**
+		CONTAINED_RESOURCE_LIST,
+		/**
 		 * HAPI structure style.
 		 */
-		CONTAINED_RESOURCES, EXTENSION_DECLARED, 
-		ID_DATATYPE, 
-		PRIMITIVE_DATATYPE, /**
+		CONTAINED_RESOURCES, EXTENSION_DECLARED,
+		ID_DATATYPE,
+		PRIMITIVE_DATATYPE,
+		/**
 		 * HAPI style.
 		 */
-		PRIMITIVE_XHTML, 
+		PRIMITIVE_XHTML,
 		/**
 		 * HL7.org style.
 		 */
-		PRIMITIVE_XHTML_HL7ORG, 
-		RESOURCE, 
-		RESOURCE_BLOCK, 
-		
-		UNDECL_EXT, 
-		
+		PRIMITIVE_XHTML_HL7ORG,
+		RESOURCE,
+		RESOURCE_BLOCK,
+
+		UNDECL_EXT,
+
 	}
 
 }

@@ -2,21 +2,19 @@ package ca.uhn.fhir.jpa.subscription.module.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
-import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.util.PortUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.TestPropertySource;
 
 @Configuration
+@TestPropertySource(properties = {
+	"scheduling_disabled=true"
+})
 public class TestSubscriptionConfig {
-
-	@Autowired
-	FhirContext myFhirContext;
-	private static int ourPort;
-	private static String ourServerBase;
 
 	@Bean
 	public ModelConfig modelConfig() {
@@ -24,15 +22,13 @@ public class TestSubscriptionConfig {
 	}
 
 	@Bean
-	public IGenericClient fhirClient() {
-		ourPort = PortUtil.findFreePort();
-		ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
-
-		return myFhirContext.newRestfulGenericClient(ourServerBase);
+	public IGenericClient fhirClient(FhirContext theFhirContext) {
+        return Mockito.mock(IGenericClient.class);
 	};
 
 	@Bean
-	public ISubscriptionMatcher inMemorySubscriptionMatcher() {
+	public InMemorySubscriptionMatcher inMemorySubscriptionMatcher() {
 		return new InMemorySubscriptionMatcher();
 	}
+
 }

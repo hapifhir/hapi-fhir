@@ -7,9 +7,10 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
@@ -33,7 +34,8 @@ import org.junit.*;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class ETagServerR4Test {
 
@@ -56,12 +58,23 @@ public class ETagServerR4Test {
 
   @Test
   public void testAutomaticNotModified() throws Exception {
-    ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
+    doTestAutomaticNotModified();
+  }
 
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
-    httpGet.addHeader(Constants.HEADER_IF_NONE_MATCH, "\"222\"");
-    HttpResponse status = ourClient.execute(httpGet);
-    assertEquals(Constants.STATUS_HTTP_304_NOT_MODIFIED, status.getStatusLine().getStatusCode());
+  @Test
+  public void testAutomaticNotModifiedFromVersionInMeta() throws Exception {
+  	  ourPutVersionInPatientId = false;
+  	  ourPutVersionInPatientMeta = true;
+	  doTestAutomaticNotModified();
+  }
+
+  private void doTestAutomaticNotModified() throws Exception {
+	  ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
+
+	  HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
+	  httpGet.addHeader(Constants.HEADER_IF_NONE_MATCH, "\"222\"");
+	  HttpResponse status = ourClient.execute(httpGet);
+	  assertEquals(Constants.STATUS_HTTP_304_NOT_MODIFIED, status.getStatusLine().getStatusCode());
   }
 
   @Test
@@ -97,7 +110,7 @@ public class ETagServerR4Test {
 
     Header cl = status.getFirstHeader(Constants.HEADER_ETAG_LC);
     assertNotNull(cl);
-    assertEquals("W/\"333\"", cl.getValue());
+    assertEquals("W/\"222\"", cl.getValue());
   }
 
   @Test
@@ -172,23 +185,24 @@ public class ETagServerR4Test {
 
   @AfterClass
   public static void afterClass() throws Exception {
-    ourServer.stop();
+    JettyUtil.closeServer(ourServer);
   }
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    ourPort = PortUtil.findFreePort();
-    ourServer = new Server(ourPort);
+    ourServer = new Server(0);
 
     PatientProvider patientProvider = new PatientProvider();
 
     ServletHandler proxyHandler = new ServletHandler();
     RestfulServer servlet = new RestfulServer(ourCtx);
+    servlet.setDefaultResponseEncoding(EncodingEnum.XML);
     servlet.setResourceProviders(patientProvider);
     ServletHolder servletHolder = new ServletHolder(servlet);
     proxyHandler.addServletWithMapping(servletHolder, "/*");
     ourServer.setHandler(proxyHandler);
-    ourServer.start();
+    JettyUtil.startServer(ourServer);
+    ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
     ourConnectionManager = new PoolingHttpClientConnectionManager(50000, TimeUnit.MILLISECONDS);
     HttpClientBuilder builder = HttpClientBuilder.create();
@@ -213,7 +227,7 @@ public class ETagServerR4Test {
         patient.setId(theId.withVersion("222"));
       }
       if (ourPutVersionInPatientMeta) {
-        patient.getMeta().setVersionId("333");
+        patient.getMeta().setVersionId("222");
       }
       return patient;
     }

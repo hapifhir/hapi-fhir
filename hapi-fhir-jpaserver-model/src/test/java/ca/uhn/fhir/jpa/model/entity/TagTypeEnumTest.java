@@ -1,6 +1,5 @@
-package ca.uhn.fhir.jpa.entity;
+package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.util.TestUtil;
 import org.junit.AfterClass;
 import org.junit.Test;

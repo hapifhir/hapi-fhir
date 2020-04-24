@@ -16,6 +16,8 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -104,7 +106,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -127,7 +129,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -149,7 +151,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient-i-everything"));
+		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 		validate(opDef);
 
 		assertEquals("everything", opDef.getCode());
@@ -167,7 +169,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -200,7 +202,7 @@ public class ServerConformanceProviderDstu2Test {
 		}
 
 		assertTrue(found);
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -220,7 +222,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -243,7 +245,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -256,7 +258,7 @@ public class ServerConformanceProviderDstu2Test {
 		assertThat(operationIdParts, containsInAnyOrder("Patient-i-someOp","Encounter-i-someOp","Patient-i-validate","Encounter-i-validate"));
 		
 		{
-			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient-i-someOp"));
+			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient-i-someOp"), createRequestDetails(rs));
 			validate(opDef);
 			
 			Set<String> types = toStrings(opDef.getType());
@@ -271,7 +273,7 @@ public class ServerConformanceProviderDstu2Test {
 			assertEquals("Patient", opDef.getParameter().get(1).getType());
 		}
 		{
-			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Encounter-i-someOp"));
+			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Encounter-i-someOp"), createRequestDetails(rs));
 			validate(opDef);
 
 			Set<String> types = toStrings(opDef.getType());
@@ -286,7 +288,7 @@ public class ServerConformanceProviderDstu2Test {
 			assertEquals("Encounter", opDef.getParameter().get(1).getType());
 		}
 		{
-			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient-i-validate"));
+			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient-i-validate"), createRequestDetails(rs));
 			validate(opDef);
 
 			Set<String> types = toStrings(opDef.getType());
@@ -311,7 +313,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info("AAAAAA" + conf);
@@ -328,18 +330,18 @@ public class ServerConformanceProviderDstu2Test {
 
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs) {
 			@Override
-			public Conformance getServerConformance(HttpServletRequest theRequest) {
-				return super.getServerConformance(theRequest);
+			public Conformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
+				return super.getServerConformance(theRequest, theRequestDetails);
 			}
 		};
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		Conformance sconf = sc.getServerConformance(createHttpServletRequest());
+		Conformance sconf = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		assertEquals("OperationDefinition/-is-plain", sconf.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/-is-plain"));
+		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/-is-plain"), createRequestDetails(rs));
 		validate(opDef);
 
 		assertEquals("plain", opDef.getCode());
@@ -366,8 +368,8 @@ public class ServerConformanceProviderDstu2Test {
 
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs) {
 			@Override
-			public Conformance getServerConformance(HttpServletRequest theRequest) {	 	 
-				Conformance conformance = super.getServerConformance(theRequest); 
+			public Conformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
+				Conformance conformance = super.getServerConformance(theRequest, theRequestDetails);
 				 ExtensionDt extensionDt = new ExtensionDt();
 				 ExtensionDt extensionDtToken = new ExtensionDt();
 				 ExtensionDt extensionDtAuthorize = new ExtensionDt();
@@ -392,7 +394,7 @@ public class ServerConformanceProviderDstu2Test {
 	
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -410,7 +412,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -440,7 +442,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -460,7 +462,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -496,7 +498,7 @@ public class ServerConformanceProviderDstu2Test {
 			}
 		}
 		assertTrue(found);
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -532,7 +534,7 @@ public class ServerConformanceProviderDstu2Test {
 			}
 		}
 		assertTrue(found);
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -566,7 +568,7 @@ public class ServerConformanceProviderDstu2Test {
 			}
 		}
 		assertTrue(found);
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -580,6 +582,45 @@ public class ServerConformanceProviderDstu2Test {
 	}
 
 	@Test
+	public void testSearchReferenceParameterWithExplicitChainsDocumentation() throws Exception {
+
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new SearchProviderWithExplicitChains());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		boolean found = false;
+		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
+		for (ResourceBinding resourceBinding : resourceBindings) {
+			if (resourceBinding.getResourceName().equals("Patient")) {
+				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
+				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
+				assertEquals("The organization at which this person is a patient", param.getDescription());
+				found = true;
+			}
+		}
+		assertTrue(found);
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		RestResource resource = findRestResource(conformance, "Patient");
+
+		assertEquals(1, resource.getSearchParam().size());
+		RestResourceSearchParam param = resource.getSearchParam().get(0);
+		assertEquals("organization", param.getName());
+		assertEquals("bar", param.getChain().get(0).getValue());
+		assertEquals("baz.bob", param.getChain().get(1).getValue());
+		assertEquals("foo", param.getChain().get(2).getValue());
+		assertEquals(3, param.getChain().size());
+	}
+
+	@Test
 	public void testSystemHistorySupported() throws Exception {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
@@ -590,7 +631,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -609,7 +650,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -628,7 +669,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(conformance);
@@ -851,6 +892,19 @@ public class ServerConformanceProviderDstu2Test {
 
 	}
 
+	public static class SearchProviderWithExplicitChains {
+
+		@Search(type = Patient.class)
+		public Patient findPatient1(
+			@Description(shortDefinition = "The organization at which this person is a patient")
+			@RequiredParam(name = "organization.foo")	ReferenceAndListParam theFoo,
+			@RequiredParam(name = "organization.bar")	ReferenceAndListParam theBar,
+			@RequiredParam(name = "organization.baz.bob") ReferenceAndListParam theBazbob) {
+			return null;
+		}
+
+	}
+
 	public static class SystemHistoryProvider {
 
 		@History
@@ -890,5 +944,12 @@ public class ServerConformanceProviderDstu2Test {
 		}
 
 	}
+
+	private RequestDetails createRequestDetails(RestfulServer theServer) {
+		ServletRequestDetails retVal = new ServletRequestDetails(null);
+		retVal.setServer(theServer);
+		return retVal;
+	}
+
 
 }

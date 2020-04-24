@@ -20,10 +20,10 @@ function addSearchParamRow() {
 		addSearchParamRow();
 	});
 	
-	var params = new Array();
+	var params = [];
 	conformance.rest.forEach(function(rest){
 		rest.resource.forEach(function(restResource){
-			if (restResource.type == resourceName) {
+			if (restResource.type === resourceName) {
 				if (restResource.searchParam) {
 					for (var i = 0; i < restResource.searchParam.length; i++) {
 						var searchParam = restResource.searchParam[i];
@@ -63,7 +63,7 @@ function updateSearchDateQualifier(qualifierBtn, qualifierInput, qualifier) {
 function addSearchControls(theConformance, theSearchParamType, theSearchParamName, theSearchParamChain, theSearchParamTarget, theContainerRowNum, theRowNum) {
 	
 	var addNameAndType = true;
-	if (theSearchParamType == 'id') {
+	if (theSearchParamType === 'id') {
 		$('#search-param-rowopts-' + theContainerRowNum).append(
 			$('<div />', { 'class': 'col-sm-3' }).append(
 		    	$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: 'id', type: 'text', 'class': 'form-control' })
@@ -71,37 +71,37 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 		);
 	} else if (theSearchParamType == 'token') {
 		
-		var tokenQualifiers = new Array();
-		tokenQualifiers.push(new Object());
+		var tokenQualifiers = [];
+		tokenQualifiers.push({});
 		tokenQualifiers[0].name='Matches';
 		tokenQualifiers[0].value='';
 	
-		tokenQualifiers.push(new Object());
+		tokenQualifiers.push({});
 		tokenQualifiers[1].name='Text';
 		tokenQualifiers[1].value=':text';
 		tokenQualifiers[1].description='The search parameter is processed as a string that searches text associated with the code/value.';
 		
-		tokenQualifiers.push(new Object());
+		tokenQualifiers.push({});
 		tokenQualifiers[2].name='Not';
 		tokenQualifiers[2].value=':not';
 		tokenQualifiers[2].description='Reverse the code matching described in the paragraph above. Note that this includes resources that have no value for the parameter.';
 		
-		tokenQualifiers.push(new Object());
+		tokenQualifiers.push({});
 		tokenQualifiers[3].name='Above';
 		tokenQualifiers[3].value=':above';
 		tokenQualifiers[3].description='The search parameter is a concept with the form [system]|[code], and the search parameter tests whether the coding in a resource subsumes the specified search code. For example, the search concept has an is-a relationship with the coding in the resource, and this includes the coding itself.';
 
-		tokenQualifiers.push(new Object());
+		tokenQualifiers.push({});
 		tokenQualifiers[4].name='Below';
 		tokenQualifiers[4].value=':below';
 		tokenQualifiers[4].description='The search parameter is a concept with the form [system]|[code], and the search parameter tests whether the coding in a resource is subsumed by the specified search code. For example, the coding in the resource has an is-a relationship with the search concept, and this includes the coding itself.';
 
-		tokenQualifiers.push(new Object());
+		tokenQualifiers.push({});
 		tokenQualifiers[5].name='In';
 		tokenQualifiers[5].value=':in';
 		tokenQualifiers[5].description='The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is in the specified value set. The reference may be literal (to an address where the value set can be found) or logical (a reference to ValueSet.url). If the server can treat the reference as a literal URL, it does, else it tries to match known logical ValueSet.url values.';
 
-		tokenQualifiers.push(new Object());
+		tokenQualifiers.push({});
 		tokenQualifiers[6].name='Not-in';
 		tokenQualifiers[6].value=':not-in';
 		tokenQualifiers[6].description='The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is not in the specified value set.';
@@ -117,8 +117,8 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 				tokenQualifierInput.val(value);
 				tokenQualifierLabel.text(name);
 				}
-		};
-		var tokenQualifierLabel = $('<span>' + tokenQualifiers[0].name + '</span>');
+      }
+      var tokenQualifierLabel = $('<span>' + tokenQualifiers[0].name + '</span>');
 		var tokenQualifierDropdown = $('<ul />', {'class':'dropdown-menu', role:'menu'});
 		for (var i = 0; i < tokenQualifiers.length; i++) {
 			var qualName = tokenQualifiers[i].name;
@@ -152,13 +152,13 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 		    )
 		);
 		
-	} else if (theSearchParamType == 'string') {
+	} else if (theSearchParamType === 'string') {
 		var placeholderText = 'value';
-		var qualifiers = new Array();
-		qualifiers.push(new Object());
+		var qualifiers = [];
+		qualifiers.push({});
 		qualifiers[0].name='Matches';
 		qualifiers[0].value='';
-		qualifiers.push(new Object());
+		qualifiers.push({});
 		qualifiers[1].name='Exactly';
 		qualifiers[1].value=':exact';
 		
@@ -166,7 +166,6 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 		$('#search-param-rowopts-' + theContainerRowNum).append(
 			qualifierInput
 		);
-	
 		
 		var matchesLabel = $('<span>' + qualifiers[0].name + '</span>');
 		var qualifierDropdown = $('<ul />', {'class':'dropdown-menu', role:'menu'});
@@ -176,9 +175,8 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 				qualifierInput.val(value);
 				matchesLabel.text(name);
 				}
-		};
-		
-		for (var i = 0; i < qualifiers.length; i++) {
+      }
+      for (var i = 0; i < qualifiers.length; i++) {
 			var nextLink = $('<a>' + qualifiers[i].name+'</a>');
 			var qualName = qualifiers[i].name;
 			var nextValue = qualifiers[i].value;
@@ -241,7 +239,7 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 		var select = $('<select/>', {/*style:'margin-left:30px;'*/});
 	
 		var newContainerRowNum = theContainerRowNum + "-0";
-		var newContainer = $('<div />', { id: 'search-param-rowopts-' + newContainerRowNum })
+		var newContainer = $('<div />', { id: 'search-param-rowopts-' + newContainerRowNum });
 	
 		$('#search-param-rowopts-' + theContainerRowNum).append(
 			$('<br clear="all" />'), 
@@ -255,14 +253,14 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 			newContainer
 		);
 	
-		var params = new Array();
+		var params = [];
 		{
-		var param = new Object();
+		var param = {};
 		param.type = 'id';
 		param.chain = '';
 		param.name = theSearchParamName;
 		param.documentation = 'The resource identity';
-		param.target = new Array();
+		param.target = [];
 		params[theSearchParamName] = param;
 		select.append(
 			$('<option />', { value: theSearchParamName }).text(param.name + ' - ' + param.documentation)														
@@ -294,13 +292,69 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 				}
 			}
 		}
-		
+
 		select.select2();
 		handleSearchParamTypeChange(select, params, newContainerRowNum, theRowNum);
 		select.change(function(){ handleSearchParamTypeChange(select, params, newContainerRowNum, theRowNum); });
 		addNameAndType = false;
-	}
-	
+
+   } else if (theSearchParamType == 'uri') {
+      var placeholderText = 'value';
+      var qualifiers = [];
+      qualifiers.push({});
+      qualifiers[0].name = 'Equals';
+      qualifiers[0].value = '';
+      qualifiers.push({});
+      qualifiers[1].name = 'Above';
+      qualifiers[1].value = ':above';
+      qualifiers.push({});
+      qualifiers[2].name = 'Below';
+      qualifiers[2].value = ':below';
+
+      var qualifierInput = $('<input />', {id: 'param.' + theRowNum + '.qualifier', type: 'hidden'});
+      $('#search-param-rowopts-' + theContainerRowNum).append(
+         qualifierInput
+      );
+
+
+      var matchesLabel = $('<span>' + qualifiers[0].name + '</span>');
+      var qualifierDropdown = $('<ul />', {'class': 'dropdown-menu', role: 'menu'});
+
+      function clickFunction(value, name) {
+         return function () {
+            qualifierInput.val(value);
+            matchesLabel.text(name);
+         }
+      }
+      for (var i = 0; i < qualifiers.length; i++) {
+         var nextLink = $('<a>' + qualifiers[i].name + '</a>');
+         var qualName = qualifiers[i].name;
+         var nextValue = qualifiers[i].value;
+         qualifierDropdown.append($('<li />').append(nextLink));
+         nextLink.click(clickFunction(nextValue, qualName));
+      }
+
+      $('#search-param-rowopts-' + theContainerRowNum).append(
+         $('<div />', {'class': 'col-sm-5 input-group'}).append(
+            $('<div />', {'class': 'input-group-btn'}).append(
+               $('<button />', {'class': 'btn btn-default dropdown-toggle', 'data-toggle': 'dropdown'}).append(
+                  matchesLabel,
+                  $('<span class="caret" style="margin-left: 5px;"></span>')
+               ),
+               qualifierDropdown
+            ),
+            $('<input />', {
+               id: 'param.' + theRowNum + '.0',
+               placeholder: placeholderText,
+               type: 'text',
+               'class': 'form-control'
+            })
+         )
+      );
+
+      addNameAndType = true;
+   }
+
 	if (addNameAndType) {
 		$('#search-param-rowopts-' + theContainerRowNum).append(
 			$('<input />', { id: 'param.' + theRowNum + '.name', type: 'hidden', value: theSearchParamName }),
@@ -314,12 +368,13 @@ function addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum,
 	var inputId0 = theRowNum + '.' + (theLower ? 0 : 2);  
 	var inputId1 = theRowNum + '.' + (theLower ? 1 : 3);  
 	
-	var qualifier = $('<input />', {type:'hidden', id:'param.'+inputId0, id:'param.'+inputId0});
-	
+	var qualifier = $('<input />', {type:'hidden', id:'param.'+inputId0});
+
+   var input;
 	if (/date$/.test(theSearchParamName)) {
-		var input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DD' });
+		input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DD' });
 	} else {
-		var input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DDTHH:mm:ss' });
+		input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DDTHH:mm:ss' });
 	}
 	var qualifierDiv = $('<div />');
 	
@@ -331,8 +386,8 @@ function addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum,
 		)
 	);
     input.datetimepicker({
-    	pickTime: false,
-    	showToday: true
+    	format: "YYYY-MM-DD",
+    	showTodayButton: true
     });
     // Set up the qualifier dropdown after we've initialized the datepicker, since it
     // overrides all addon buttons while it inits..
@@ -424,9 +479,9 @@ function addSearchControlQuantity(theSearchParamName, theContainerRowNum, theRow
 }
 
 function handleSearchParamTypeChange(select, params, theContainerRowNum, theParamRowNum) {
-	var oldVal = select.prevVal;
-	var newVal = select.val();
-	if (oldVal == newVal) {
+	let oldVal = select.prevVal;
+	let newVal = select.val();
+	if (oldVal == newVal || !(newVal)) {
 		return;
 	}
 	$('#search-param-rowopts-' + theContainerRowNum).empty();
@@ -448,10 +503,9 @@ function handleSearchParamTypeChange(select, params, theContainerRowNum, thePara
 function readFromEntriesTable(source, type, id, vid) {
 	var btn = $(source);
 	btn.button('loading');
-	var resId = source.resourceid;
 	btn.append($('<input />', { type: 'hidden', name: 'id', value: id }));
 	var resVid = source.resourcevid;
-	if (resVid != '') {
+	if (resVid !== '') {
 		btn.append($('<input />', { type: 'hidden', name: 'vid', value: vid }));
 	}
 	setResource(btn, type);
@@ -465,10 +519,9 @@ function readFromEntriesTable(source, type, id, vid) {
 function updateFromEntriesTable(source, type, id, vid) {
 	var btn = $(source);
 	btn.button('loading');
-	var resId = source.resourceid;
 	btn.append($('<input />', { type: 'hidden', name: 'updateId', value: id }));
 	var resVid = source.resourcevid;
-	if (resVid != '') {
+	if (resVid !== '') {
 		btn.append($('<input />', { type: 'hidden', name: 'updateVid', value: vid }));
 	}	
 	setResource(btn, type);
@@ -487,8 +540,8 @@ function updateURLParameter(url, param, paramVal){
     var temp = "";
     if (additionalURL) {
         tempArray = additionalURL.split("&");
-        for (i=0; i<tempArray.length; i++){
-            if(tempArray[i].split('=')[0] != param){
+        for (var i=0; i<tempArray.length; i++){
+            if(tempArray[i].split('=')[0] !== param){
                 newAdditionalURL += temp + tempArray[i];
                 temp = "&";
             }
@@ -501,8 +554,9 @@ function updateURLParameter(url, param, paramVal){
 
 
 function selectServer(serverId) {
-	$('#serverSelectorFhirIcon').removeClass();
-	$('#serverSelectorFhirIcon').addClass('fa fa-spinner fa-spin');
+   let $serverSelectorFhirIcon = $('#serverSelectorFhirIcon');
+   $serverSelectorFhirIcon.removeClass();
+	$serverSelectorFhirIcon.addClass('fa fa-spinner fa-spin');
 	$('#serverSelectorName').text("Loading...");
 	$('#serverId').val(serverId);
 	$("#outerForm").attr("action", "home").submit();
@@ -511,7 +565,6 @@ function selectServer(serverId) {
 function setResource(target, resourceName) {
 	var resource = $('#resource');
 	if (resourceName != null) {
-		var input = $('#resource');
 		if (resource.length) {
 			resource.val(resourceName);
 		} else {
@@ -527,7 +580,7 @@ function setResource(target, resourceName) {
 
 function updateSort(value) {
 	$('#sort_by').val(value);
-	if (value == '') {
+	if (value === '') {
 		$('#search_sort_button').text('Default Sort');				
 	} else {
 		$('#search_sort_button').text(value);
@@ -536,7 +589,7 @@ function updateSort(value) {
 
 function updateSortDirection(value) {
 	$('#sort_direction').val(value);
-	if (value == '') {
+	if (value === '') {
 		$('#search_sort_direction_button').text('Default');
 	} else {
 		$('#search_sort_direction_button').text(value);
@@ -547,4 +600,4 @@ $( document ).ready(function() {
 	if (conformance) {
 		addSearchParamRow();
 	}
-});	
+});

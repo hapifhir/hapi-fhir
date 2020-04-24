@@ -1,8 +1,29 @@
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+/*
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2020 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
+import ca.uhn.fhir.util.VersionIndependentConcept;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -13,64 +34,44 @@ import org.hibernate.search.annotations.*;
 import org.hl7.fhir.r4.model.Coding;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.persistence.Index;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-/*
- * #%L
- * HAPI FHIR JPA Server
- * %%
- * Copyright (C) 2014 - 2019 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+import static org.apache.commons.lang3.StringUtils.left;
+import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
 @Indexed(interceptor = DeferConceptIndexingInterceptor.class)
 @Table(name = "TRM_CONCEPT", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_CONCEPT_CS_CODE", columnNames = {"CODESYSTEM_PID", "CODE"})
+	@UniqueConstraint(name = "IDX_CONCEPT_CS_CODE", columnNames = {"CODESYSTEM_PID", "CODEVAL"})
 }, indexes = {
 	@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList = "INDEX_STATUS"),
 	@Index(name = "IDX_CONCEPT_UPDATED", columnList = "CONCEPT_UPDATED")
 })
 public class TermConcept implements Serializable {
-	public static final int CODE_LENGTH = 500;
-	protected static final int MAX_DESC_LENGTH = 400;
+	public static final int MAX_CODE_LENGTH = 500;
+	public static final int MAX_DESC_LENGTH = 400;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
-
 	private static final long serialVersionUID = 1L;
-
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myParent", cascade = {})
-	private Collection<TermConceptParentChildLink> myChildren;
+	private List<TermConceptParentChildLink> myChildren;
 
-	@Column(name = "CODE", length = CODE_LENGTH, nullable = false)
+	@Column(name = "CODEVAL", nullable = false, length = MAX_CODE_LENGTH)
 	@Fields({@Field(name = "myCode", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "exactAnalyzer")),})
 	private String myCode;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CONCEPT_UPDATED", nullable = true)
 	private Date myUpdated;
-	@ManyToOne()
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
 	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
 	@Fields({@Field(name = "myCodeSystemVersionPid")})
 	private long myCodeSystemVersionPid;
-	@Column(name = "DISPLAY", length = MAX_DESC_LENGTH, nullable = true)
+	@Column(name = "DISPLAY", nullable = true, length = MAX_DESC_LENGTH)
 	@Fields({
 		@Field(name = "myDisplay", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
 		@Field(name = "myDisplayEdgeNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteEdgeAnalyzer")),
@@ -78,11 +79,11 @@ public class TermConcept implements Serializable {
 		@Field(name = "myDisplayPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
 	})
 	private String myDisplay;
-	@OneToMany(mappedBy = "myConcept", orphanRemoval = false)
+	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
 	@Field(name = "PROPmyProperties", analyzer = @Analyzer(definition = "termConceptPropertyAnalyzer"))
 	@FieldBridge(impl = TermConceptPropertyFieldBridge.class)
 	private Collection<TermConceptProperty> myProperties;
-	@OneToMany(mappedBy = "myConcept", orphanRemoval = false)
+	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
 	private Collection<TermConceptDesignation> myDesignations;
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_PID", sequenceName = "SEQ_CONCEPT_PID")
@@ -96,7 +97,7 @@ public class TermConcept implements Serializable {
 	@Column(name = "PARENT_PIDS", nullable = true)
 	private String myParentPids;
 	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myChild")
-	private Collection<TermConceptParentChildLink> myParents;
+	private List<TermConceptParentChildLink> myParents;
 	@Column(name = "CODE_SEQUENCE", nullable = true)
 	private Integer mySequence;
 
@@ -109,7 +110,14 @@ public class TermConcept implements Serializable {
 		setCode(theCode);
 	}
 
-	public TermConcept addChild(TermConcept theChild, RelationshipTypeEnum theRelationshipType) {
+	public TermConcept addChild(RelationshipTypeEnum theRelationshipType) {
+		TermConcept child = new TermConcept();
+		child.setCodeSystemVersion(myCodeSystem);
+		addChild(child, theRelationshipType);
+		return child;
+	}
+
+	public TermConceptParentChildLink addChild(TermConcept theChild, RelationshipTypeEnum theRelationshipType) {
 		Validate.notNull(theRelationshipType, "theRelationshipType must not be null");
 		TermConceptParentChildLink link = new TermConceptParentChildLink();
 		link.setParent(this);
@@ -118,7 +126,7 @@ public class TermConcept implements Serializable {
 		getChildren().add(link);
 
 		theChild.getParents().add(link);
-		return this;
+		return link;
 	}
 
 	public void addChildren(List<TermConcept> theChildren, RelationshipTypeEnum theRelationshipType) {
@@ -176,7 +184,7 @@ public class TermConcept implements Serializable {
 		return b.isEquals();
 	}
 
-	public Collection<TermConceptParentChildLink> getChildren() {
+	public List<TermConceptParentChildLink> getChildren() {
 		if (myChildren == null) {
 			myChildren = new ArrayList<>();
 		}
@@ -187,20 +195,24 @@ public class TermConcept implements Serializable {
 		return myCode;
 	}
 
-	public void setCode(String theCode) {
-		ValidateUtil.isNotBlankOrThrowInvalidRequest(theCode, "Code must not be null or empty");
+	public TermConcept setCode(@Nonnull String theCode) {
+		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCode, MAX_CODE_LENGTH,
+			"Code exceeds maximum length (" + MAX_CODE_LENGTH + "): " + length(theCode));
 		myCode = theCode;
+		return this;
 	}
 
 	public TermCodeSystemVersion getCodeSystemVersion() {
 		return myCodeSystem;
 	}
 
-	public void setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+	public TermConcept setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
 		myCodeSystem = theCodeSystemVersion;
-		if (theCodeSystemVersion.getPid() != null) {
+		if (theCodeSystemVersion != null && theCodeSystemVersion.getPid() != null) {
 			myCodeSystemVersionPid = theCodeSystemVersion.getPid();
 		}
+		return this;
 	}
 
 	public List<Coding> getCodingProperties(String thePropertyName) {
@@ -231,10 +243,7 @@ public class TermConcept implements Serializable {
 	}
 
 	public TermConcept setDisplay(String theDisplay) {
-		myDisplay = theDisplay;
-		if (isNotBlank(theDisplay) && theDisplay.length() > MAX_DESC_LENGTH) {
-			myDisplay = myDisplay.substring(0, MAX_DESC_LENGTH);
-		}
+		myDisplay = left(theDisplay, MAX_DESC_LENGTH);
 		return this;
 	}
 
@@ -242,19 +251,25 @@ public class TermConcept implements Serializable {
 		return myId;
 	}
 
+	public TermConcept setId(Long theId) {
+		myId = theId;
+		return this;
+	}
+
 	public Long getIndexStatus() {
 		return myIndexStatus;
 	}
 
-	public void setIndexStatus(Long theIndexStatus) {
+	public TermConcept setIndexStatus(Long theIndexStatus) {
 		myIndexStatus = theIndexStatus;
+		return this;
 	}
 
 	public String getParentPidsAsString() {
 		return myParentPids;
 	}
 
-	public Collection<TermConceptParentChildLink> getParents() {
+	public List<TermConceptParentChildLink> getParents() {
 		if (myParents == null) {
 			myParents = new ArrayList<>();
 		}
@@ -272,8 +287,9 @@ public class TermConcept implements Serializable {
 		return mySequence;
 	}
 
-	public void setSequence(Integer theSequence) {
+	public TermConcept setSequence(Integer theSequence) {
 		mySequence = theSequence;
+		return this;
 	}
 
 	public List<String> getStringProperties(String thePropertyName) {
@@ -300,8 +316,9 @@ public class TermConcept implements Serializable {
 		return myUpdated;
 	}
 
-	public void setUpdated(Date theUpdated) {
+	public TermConcept setUpdated(Date theUpdated) {
 		myUpdated = theUpdated;
+		return this;
 	}
 
 	@Override
@@ -355,29 +372,48 @@ public class TermConcept implements Serializable {
 		myParentPids = b.toString();
 	}
 
-	public void setParentPids(String theParentPids) {
+	public TermConcept setParentPids(String theParentPids) {
 		myParentPids = theParentPids;
+		return this;
 	}
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("code", myCode).append("display", myDisplay).build();
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("code", myCode);
+		b.append("display", myDisplay);
+		if (mySequence != null) {
+			b.append("sequence", mySequence);
+		}
+		return b.build();
 	}
 
-	public List<IContextValidationSupport.BaseConceptProperty> toValidationProperties() {
-		List<IContextValidationSupport.BaseConceptProperty> retVal = new ArrayList<>();
+	public List<IValidationSupport.BaseConceptProperty> toValidationProperties() {
+		List<IValidationSupport.BaseConceptProperty> retVal = new ArrayList<>();
 		for (TermConceptProperty next : getProperties()) {
 			switch (next.getType()) {
 				case STRING:
-					retVal.add(new IContextValidationSupport.StringConceptProperty(next.getKey(), next.getValue()));
+					retVal.add(new IValidationSupport.StringConceptProperty(next.getKey(), next.getValue()));
 					break;
 				case CODING:
-					retVal.add(new IContextValidationSupport.CodingConceptProperty(next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay()));
+					retVal.add(new IValidationSupport.CodingConceptProperty(next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay()));
 					break;
 				default:
 					throw new IllegalStateException("Don't know how to handle " + next.getType());
 			}
 		}
 		return retVal;
+	}
+
+	/**
+	 * Returns a view of {@link #getChildren()} but containing the actual child codes
+	 */
+	public List<TermConcept> getChildCodes() {
+		return getChildren().stream().map(t -> t.getChild()).collect(Collectors.toList());
+	}
+
+
+	public VersionIndependentConcept toVersionIndependentConcept() {
+		return new VersionIndependentConcept(myCodeSystem.getCodeSystem().getCodeSystemUri(), myCode);
 	}
 }

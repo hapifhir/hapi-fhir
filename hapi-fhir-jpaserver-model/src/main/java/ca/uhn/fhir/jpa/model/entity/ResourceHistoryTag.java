@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,6 +41,9 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	@ManyToOne()
 	@JoinColumn(name="RES_VER_PID", referencedColumnName="PID", nullable=false, foreignKey=@ForeignKey(name="FK_HISTORYTAG_HISTORY"))
 	private ResourceHistoryTable myResourceHistory;
+
+	@Column(name="RES_VER_PID", insertable = false, updatable = false, nullable = false)
+	private Long myResourceHistoryPid;
 
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable=false)
 	private String myResourceType;
@@ -87,4 +90,7 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 		myResourceHistory = theResourceHistory;
 	}
 
+	public Long getId() {
+		return myId;
+	}
 }

@@ -3,7 +3,6 @@ package ca.uhn.fhir.jaxrs.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.client.JaxRsRestfulClientFactory;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
-import ca.uhn.fhir.jaxrs.server.test.RandomServerPortProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsConformanceRestProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPageProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProvider;
@@ -14,15 +13,13 @@ import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.api.SearchStyleEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -37,6 +34,7 @@ import org.mockito.Matchers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -45,6 +43,8 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
+
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AbstractJaxRsResourceProviderTest {
@@ -71,13 +71,20 @@ public class AbstractJaxRsResourceProviderTest {
 	}
 
 	@AfterClass
-	public static void afterClassClearContext() {
+	public static void afterClassClearContext() throws Exception {
+        JettyUtil.closeServer(jettyServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	private Patient createPatient(long id) {
 		Patient theResource = new Patient();
 		theResource.setId(new IdDt(id));
+		return theResource;
+	}
+
+	private Patient createPatient(long id, String version) {
+		Patient theResource = new Patient();
+		theResource.setId(new IdDt(id).withVersion(version));
 		return theResource;
 	}
 
@@ -157,7 +164,7 @@ public class AbstractJaxRsResourceProviderTest {
 	@Test
 	public void testDeletePatient() {
 		when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
-		final IBaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute();
+		final IBaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute().getOperationOutcome();
 		assertEquals("1", idCaptor.getValue().getIdPart());
 	}
 
@@ -339,12 +346,32 @@ public class AbstractJaxRsResourceProviderTest {
 
 	@Test
 	public void testVRead() {
-		when(mock.findHistory(idCaptor.capture())).thenReturn(createPatient(1));
+		when(mock.findVersion(idCaptor.capture())).thenReturn(createPatient(1));
 		final Patient patient = client.vread(Patient.class, "1", "2");
 		compareResultId(1, patient);
 		compareResultUrl("/Patient/1", patient);
 		assertEquals("1", idCaptor.getValue().getIdPart());
 		assertEquals("2", idCaptor.getValue().getVersionIdPart());
+	}
+
+	@Test
+	public void testInstanceHistory() {
+		when(mock.getHistoryForInstance(idCaptor.capture())).thenReturn(new SimpleBundleProvider(Collections.singletonList(createPatient(1, "1"))));
+		final Bundle bundle = client.history().onInstance(new IdDt("Patient", 1L)).returnBundle(Bundle.class).execute();
+		Patient patient = (Patient) bundle.getEntryFirstRep().getResource();
+		compareResultId(1, patient);
+		compareResultUrl("/Patient/1/_history/1", patient);
+		assertEquals("1", idCaptor.getValue().getIdPart());
+		assertNull(idCaptor.getValue().getVersionIdPart());
+	}
+
+	@Test
+	public void testTypeHistory() {
+		when(mock.getHistoryForType()).thenReturn(new SimpleBundleProvider(Collections.singletonList(createPatient(1, "1"))));
+		final Bundle bundle = client.history().onType(Patient.class).returnBundle(Bundle.class).execute();
+		Patient patient = (Patient) bundle.getEntryFirstRep().getResource();
+		compareResultId(1, patient);
+		compareResultUrl("/Patient/1/_history/1", patient);
 	}
 
 	@Test
@@ -392,11 +419,9 @@ public class AbstractJaxRsResourceProviderTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		ourPort = RandomServerPortProvider.findFreePort();
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		context.setContextPath("/");
-		System.out.println(ourPort);
-		jettyServer = new Server(ourPort);
+		jettyServer = new Server(0);
 		jettyServer.setHandler(context);
 		ServletHolder jerseyServlet = context.addServlet(org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.class, "/*");
 		jerseyServlet.setInitOrder(0);
@@ -410,7 +435,8 @@ public class AbstractJaxRsResourceProviderTest {
 						), ","));
 		//@formatter:on
 
-		jettyServer.start();
+		JettyUtil.startServer(jettyServer);
+        ourPort = JettyUtil.getPortForStartedServer(jettyServer);
 
 		ourCtx.setRestfulClientFactory(new JaxRsRestfulClientFactory(ourCtx));
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
@@ -419,15 +445,6 @@ public class AbstractJaxRsResourceProviderTest {
 		client = ourCtx.newRestfulGenericClient(serverBase);
 		client.setEncoding(EncodingEnum.JSON);
 		client.registerInterceptor(new LoggingInterceptor(true));
-	}
-
-	@AfterClass
-	public static void tearDownClass() {
-		try {
-			jettyServer.destroy();
-		} catch (Exception e) {
-
-		}
 	}
 
 }

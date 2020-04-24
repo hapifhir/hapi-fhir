@@ -21,8 +21,11 @@ package ca.uhn.fhir.tinder;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.tinder.GeneratorContext.ResourceSource;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
+import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
+import org.apache.maven.plugin.MojoFailureException;
 
 import java.io.IOException;
 import java.util.*;
@@ -33,7 +36,7 @@ public abstract class AbstractGenerator {
 
 	protected abstract void logInfo (String message);
 	
-	public void prepare (GeneratorContext context) throws ExecutionException, FailureException {
+	public void prepare (GeneratorContext context) throws FailureException, MojoFailureException {
 
 		/*
 		 * Deal with the FHIR spec version
@@ -45,6 +48,9 @@ public abstract class AbstractGenerator {
 		} else if ("dstu3".equals(context.getVersion())) {
 			fhirContext = FhirContext.forDstu3();
 			packageSuffix = ".dstu3";
+		} else if ("r4".equals(context.getVersion())) {
+			fhirContext = FhirContext.forR4();
+			packageSuffix = ".r4";
 		} else {
 			throw new FailureException("Unknown version configured: " + context.getVersion());
 		}
@@ -57,7 +63,7 @@ public abstract class AbstractGenerator {
 		List<String> excludeResources = context.getExcludeResources();
 		
 		if (includeResources == null || includeResources.isEmpty()) {
-			includeResources = new ArrayList<String>();
+			includeResources = new ArrayList<>();
 			
 			logInfo("No resource names supplied, going to use all resources from version: "+fhirContext.getVersion().getVersion());
 			
@@ -70,7 +76,7 @@ public abstract class AbstractGenerator {
 
 			logDebug("Property file contains: "+p);
 
-			TreeSet<String> keys = new TreeSet<String>();
+			TreeSet<String> keys = new TreeSet<>();
 			for(Object next : p.keySet()) {
 				keys.add((String) next);
 			}
@@ -105,79 +111,94 @@ public abstract class AbstractGenerator {
 		 */
 		ValueSetGenerator vsp = null;
 		DatatypeGeneratorUsingSpreadsheet dtp = null;
-		Map<String, String> datatypeLocalImports = new HashMap<String, String>();
+		Map<String, String> datatypeLocalImports = new HashMap<>();
 
-		vsp = new ValueSetGenerator(context.getVersion());
-		vsp.setResourceValueSetFiles(context.getValueSetFiles());
-		context.setValueSetGenerator(vsp);
-		try {
-			vsp.parse();
-		} catch (Exception e) {
-			throw new FailureException("Failed to load valuesets", e);
+		if (ResourceSource.SPREADSHEET.equals(context.getResourceSource())) {
+			vsp = new ValueSetGenerator(context.getVersion());
+			vsp.setResourceValueSetFiles(context.getValueSetFiles());
+			context.setValueSetGenerator(vsp);
+			try {
+				vsp.parse();
+			} catch (Exception e) {
+				throw new FailureException("Failed to load valuesets", e);
+			}
+	
+			/*
+			 * A few enums are not found by default because none of the generated classes
+			 * refer to them, but we still want them.
+			 */
+			vsp.getClassForValueSetIdAndMarkAsNeeded("NarrativeStatus");
+
+			logInfo("Loading Datatypes...");
+	
+			dtp = new DatatypeGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
+			context.setDatatypeGenerator(dtp);
+			try {
+				dtp.parse();
+				dtp.markResourcesForImports();
+			} catch (Exception e) {
+				throw new FailureException("Failed to load datatypes", e);
+			}
+			dtp.bindValueSets(vsp);
+	
+			datatypeLocalImports = dtp.getLocalImports();
 		}
-
-		/*
-		 * A few enums are not found by default because none of the generated classes
-		 * refer to them, but we still want them.
-		 */
-		vsp.getClassForValueSetIdAndMarkAsNeeded("NarrativeStatus");
-
-		logInfo("Loading Datatypes...");
-
-		dtp = new DatatypeGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
-		context.setDatatypeGenerator(dtp);
-		try {
-			dtp.parse();
-			dtp.markResourcesForImports();
-		} catch (Exception e) {
-			throw new FailureException("Failed to load datatypes", e);
-		}
-		dtp.bindValueSets(vsp);
-
-		datatypeLocalImports = dtp.getLocalImports();
 
 		/*
 		 * Load the requested resources
 		 */
-		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
-		context.setResourceGenerator(rp);
+		
 		logInfo("Loading Resources...");
 		try {
-			rp.setBaseResourceNames(includeResources);
-			rp.parse();
-			rp.markResourcesForImports();
+			switch (context.getResourceSource()) {
+				case SPREADSHEET: {
+					logInfo("... resource definitions from spreadsheets");
+					ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
+					context.setResourceGenerator(rp);
+
+					rp.setBaseResourceNames(includeResources);
+					rp.parse();
+
+					rp.markResourcesForImports();
+					rp.bindValueSets(vsp);
+
+					rp.getLocalImports().putAll(datatypeLocalImports);
+					datatypeLocalImports.putAll(rp.getLocalImports());
+					
+					rp.combineContentMaps(dtp);
+					dtp.combineContentMaps(rp);
+					break;
+				}
+				case MODEL: {
+					logInfo("... resource definitions from model structures");
+					ResourceGeneratorUsingModel rp = new ResourceGeneratorUsingModel(context.getVersion(), context.getBaseDir());
+					context.setResourceGenerator(rp);
+					
+					rp.setBaseResourceNames(includeResources);
+					rp.parse();
+					rp.markResourcesForImports();
+					break;
+				}
+			}
 		} catch (Exception e) {
 			throw new FailureException("Failed to load resources", e);
 		}
 
-		rp.bindValueSets(vsp);
-		rp.getLocalImports().putAll(datatypeLocalImports);
-		datatypeLocalImports.putAll(rp.getLocalImports());
-		rp.combineContentMaps(dtp);
-		dtp.combineContentMaps(rp);
-
 	}
 
-	public class FailureException extends Exception {
+	public static class FailureException extends Exception {
 
-		public FailureException(String message, Throwable cause) {
+		FailureException(String message, Throwable cause) {
 			super(message, cause);
 		}
-		public FailureException(Throwable cause) {
-			super(cause);
-		}
 
-		public FailureException(String message) {
+		FailureException(String message) {
 			super(message);
 		}
 
 	}
 
-	public class ExecutionException extends Exception {
-
-		public ExecutionException(String message, Throwable cause) {
-			super(message, cause);
-		}
+	public static class ExecutionException extends Exception {
 
 		public ExecutionException(String message) {
 			super(message);

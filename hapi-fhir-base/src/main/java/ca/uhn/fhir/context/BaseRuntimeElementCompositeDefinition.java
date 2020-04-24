@@ -9,14 +9,14 @@ import java.lang.reflect.Modifier;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -263,6 +263,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			int order = childAnnotation.order();
 			boolean childIsChoiceType = false;
 			boolean orderIsReplaceParent = false;
+			BaseRuntimeChildDefinition replacedParent = null;
 			
 			if (order == Child.REPLACE_PARENT) {
 				
@@ -274,7 +275,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 							if (nextDef.getExtensionUrl().equals(extensionAttr.url())) {
 								orderIsReplaceParent = true;
 								order = nextEntry.getKey();
-								orderMap.remove(nextEntry.getKey());
+								replacedParent = orderMap.remove(nextEntry.getKey());
 								elementNames.remove(elementName);
 								break;
 							}
@@ -293,6 +294,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 							orderIsReplaceParent = true;
 							order = nextEntry.getKey();
 							BaseRuntimeDeclaredChildDefinition existing = orderMap.remove(nextEntry.getKey());
+							replacedParent = existing;
 							elementNames.remove(elementName);
 							
 							/*
@@ -450,6 +452,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 				
 			}
 
+			def.setReplacedParentDefinition(replacedParent);
 			orderMap.put(order, def);
 			elementNames.add(elementName);
 		}

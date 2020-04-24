@@ -1,18 +1,22 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -26,26 +30,25 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.core.StringContains;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
-import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.PortUtil;
-import ca.uhn.fhir.util.TestUtil;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class LoggingInterceptorDstu2Test {
 
@@ -54,14 +57,12 @@ public class LoggingInterceptorDstu2Test {
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
-	private IServerInterceptor myInterceptor;
 	private static int ourDelayMs;
 	private static Exception ourThrowException;
 
 	@Before
 	public void before() {
-		myInterceptor = mock(IServerInterceptor.class);
-		servlet.setInterceptors(Collections.singletonList(myInterceptor));
+		servlet.getInterceptorService().unregisterAllInterceptors();
 		ourThrowException = null;
 		ourDelayMs=0;
 	}
@@ -75,7 +76,7 @@ public class LoggingInterceptorDstu2Test {
 		interceptor.setErrorMessageFormat("ERROR - ${requestVerb} ${requestUrl}");
 		assertEquals("ERROR - ${requestVerb} ${requestUrl}", interceptor.getErrorMessageFormat());
 
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+		servlet.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
@@ -93,7 +94,7 @@ public class LoggingInterceptorDstu2Test {
 	public void testMetadata() throws Exception {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+		servlet.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
@@ -114,7 +115,7 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName}");
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+		servlet.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
@@ -136,7 +137,7 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+		servlet.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
@@ -152,11 +153,31 @@ public class LoggingInterceptorDstu2Test {
 	}
 
 	@Test
+	public void testRequestId() throws Exception {
+
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		interceptor.setMessageFormat("${requestId}");
+		servlet.getInterceptorService().registerInterceptor(interceptor);
+
+		Logger logger = mock(Logger.class);
+		interceptor.setLogger(logger);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(logger, timeout(1000).times(1)).info(captor.capture());
+		assertEquals(Constants.REQUEST_ID_LENGTH, captor.getValue().length());
+	}
+
+	@Test
 	public void testRequestProcessingTime() throws Exception {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${processingTimeMillis}");
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+		servlet.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
@@ -178,7 +199,7 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${processingTimeMillis}");
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+		servlet.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
@@ -200,7 +221,7 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+		servlet.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
@@ -221,7 +242,7 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+		servlet.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
@@ -249,7 +270,7 @@ public class LoggingInterceptorDstu2Test {
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
 		interceptor.setErrorMessageFormat("ERROR - ${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+		servlet.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
@@ -278,7 +299,7 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName}");
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+		servlet.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
@@ -299,7 +320,7 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName}");
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+		servlet.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
@@ -319,7 +340,7 @@ public class LoggingInterceptorDstu2Test {
 	public void testRead() throws Exception {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+		servlet.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
@@ -340,7 +361,7 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${idOrResourceName} - ${requestParameters}");
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+		servlet.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
@@ -358,14 +379,13 @@ public class LoggingInterceptorDstu2Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 
 		ServletHandler proxyHandler = new ServletHandler();
 		servlet = new RestfulServer(ourCtx);
@@ -376,7 +396,8 @@ public class LoggingInterceptorDstu2Test {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

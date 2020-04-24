@@ -756,7 +756,6 @@ public class Dstu3XmlParserTest {
 
 		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<meta>",
-			"<meta>",
 			"<profile value=\"http://foo/Profile1\"/>",
 			"<profile value=\"http://foo/Profile2\"/>",
 			"<tag>",
@@ -769,7 +768,6 @@ public class Dstu3XmlParserTest {
 			"<code value=\"term2\"/>",
 			"<display value=\"label2\"/>",
 			"</tag>",
-			"</meta>",
 			"</meta>",
 			"<name>",
 			"<family value=\"FAMILY\"/>",
@@ -816,7 +814,6 @@ public class Dstu3XmlParserTest {
 
 		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<meta>",
-			"<meta>",
 			"<tag>",
 			"<system value=\"scheme1\"/>",
 			"<code value=\"term1\"/>",
@@ -827,7 +824,6 @@ public class Dstu3XmlParserTest {
 			"<code value=\"term2\"/>",
 			"<display value=\"label2\"/>",
 			"</tag>",
-			"</meta>",
 			"</meta>",
 			"<name>",
 			"<family value=\"FAMILY\"/>",
@@ -1938,7 +1934,6 @@ public class Dstu3XmlParserTest {
 			assertThat(out, containsString("name"));
 			assertThat(out, containsString("id"));
 			assertThat(out, not(containsString("address")));
-			assertThat(out, not(containsString("meta")));
 		}
 	}
 
@@ -1967,7 +1962,6 @@ public class Dstu3XmlParserTest {
 		{
 			IParser p = ourCtx.newXmlParser();
 			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name")));
-			p.setEncodeElementsAppliesToResourceTypes(new HashSet<String>(Arrays.asList("Patient")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -1979,7 +1973,6 @@ public class Dstu3XmlParserTest {
 		{
 			IParser p = ourCtx.newXmlParser();
 			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient")));
-			p.setEncodeElementsAppliesToResourceTypes(new HashSet<String>(Arrays.asList("Patient")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
