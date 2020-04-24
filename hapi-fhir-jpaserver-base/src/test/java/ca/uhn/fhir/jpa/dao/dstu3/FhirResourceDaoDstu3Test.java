@@ -57,6 +57,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	public final void after() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
+		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 
 	private void assertGone(IIdType theId) {
@@ -1368,6 +1369,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testHistoryOverMultiplePages() throws Exception {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
 		String methodName = "testHistoryOverMultiplePages";
 
 		Patient patient = new Patient();

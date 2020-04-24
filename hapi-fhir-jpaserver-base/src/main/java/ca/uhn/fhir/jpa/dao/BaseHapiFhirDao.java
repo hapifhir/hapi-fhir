@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -168,6 +169,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private SearchBuilderFactory mySearchBuilderFactory;
 	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	@Override
 	protected IInterceptorBroadcaster getInterceptorBroadcaster() {
@@ -202,6 +205,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				retVal.setResourceType(theEntity.getResourceType());
 				retVal.setForcedId(theId.getIdPart());
 				retVal.setResource(theEntity);
+				retVal.setPartitionId(theEntity.getPartitionId());
 				theEntity.setForcedId(retVal);
 			}
 		}
@@ -614,6 +618,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		}
 
+
 		return retVal;
 	}
 
@@ -675,6 +680,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 			}
 		}
+
 		return retVal;
 	}
 
@@ -1070,6 +1076,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				ResourceHistoryProvenanceEntity provenance = new ResourceHistoryProvenanceEntity();
 				provenance.setResourceHistoryTable(historyEntry);
 				provenance.setResourceTable(entity);
+				provenance.setPartitionId(entity.getPartitionId());
 				if (haveRequestId) {
 					provenance.setRequestId(left(requestId, Constants.REQUEST_ID_LENGTH));
 				}

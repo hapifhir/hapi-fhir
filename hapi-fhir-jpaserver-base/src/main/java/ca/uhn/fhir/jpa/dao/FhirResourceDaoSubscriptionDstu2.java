@@ -51,7 +51,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends BaseHapiFhirResourceDao<Su
 
 	@Override
 	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest) {
-		ResourceTable entity = readEntityLatestVersion(theId);
+		ResourceTable entity = readEntityLatestVersion(theId, theRequest);
 		SubscriptionTable table = mySubscriptionTableDao.findOneByResourcePid(entity.getId());
 		if (table == null) {
 			return null;

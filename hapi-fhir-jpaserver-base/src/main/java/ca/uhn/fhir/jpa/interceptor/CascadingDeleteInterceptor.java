@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.delete.DeleteConflictService.MAX_RETRY_ATTEMPTS;
@@ -73,17 +72,21 @@ public class CascadingDeleteInterceptor {
 
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
+	private final FhirContext myFhirContext;
 
 	/**
 	 * Constructor
 	 *
 	 * @param theDaoRegistry The DAO registry (must not be null)
 	 */
-	public CascadingDeleteInterceptor(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster) {
+	public CascadingDeleteInterceptor(@Nonnull FhirContext theFhirContext, @Nonnull DaoRegistry theDaoRegistry, @Nonnull IInterceptorBroadcaster theInterceptorBroadcaster) {
 		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
 		Validate.notNull(theInterceptorBroadcaster, "theInterceptorBroadcaster must not be null");
+		Validate.notNull(theFhirContext, "theFhirContext must not be null");
+
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		myFhirContext = theFhirContext;
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS)
@@ -93,15 +96,18 @@ public class CascadingDeleteInterceptor {
 		if (shouldCascade(theRequest) == DeleteCascadeModeEnum.NONE) {
 
 			// Add a message to the response
-			String message = theRequest.getFhirContext().getLocalizer().getMessage(CascadingDeleteInterceptor.class, "noParam");
-			theRequest.getUserData().put(CASCADED_DELETES_FAILED_KEY, message);
+			String message = myFhirContext.getLocalizer().getMessage(CascadingDeleteInterceptor.class, "noParam");
+			ourLog.trace(message);
+
+			if (theRequest != null) {
+				theRequest.getUserData().put(CASCADED_DELETES_FAILED_KEY, message);
+			}
 
 			return null;
 		}
 
 		List<String> cascadedDeletes = getCascadedDeletesMap(theRequest, true);
-		for (Iterator<DeleteConflict> iter = theConflictList.iterator(); iter.hasNext(); ) {
-			DeleteConflict next = iter.next();
+		for (DeleteConflict next : theConflictList) {
 			IdDt nextSource = next.getSourceId();
 			String nextSourceId = nextSource.toUnqualifiedVersionless().getValue();
 

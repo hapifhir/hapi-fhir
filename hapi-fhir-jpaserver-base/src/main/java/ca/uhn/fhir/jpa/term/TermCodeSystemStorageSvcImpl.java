@@ -106,7 +106,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Override
 	public ResourcePersistentId getValueSetResourcePid(IIdType theIdType) {
-		return myIdHelperService.resolveResourcePersistentIds(theIdType.getResourceType(), theIdType.getIdPart());
+		return myIdHelperService.resolveResourcePersistentIds(null, theIdType.getResourceType(), theIdType.getIdPart());
 	}
 
 	@Transactional
@@ -280,7 +280,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
 
 		IIdType csId = myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(theCodeSystemResource);
-		ResourcePersistentId codeSystemResourcePid = myIdHelperService.resolveResourcePersistentIds(csId.getResourceType(), csId.getIdPart());
+		ResourcePersistentId codeSystemResourcePid = myIdHelperService.resolveResourcePersistentIds(null, csId.getResourceType(), csId.getIdPart());
 		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid.getIdAsLong());
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
@@ -540,7 +540,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	private ResourcePersistentId getCodeSystemResourcePid(IIdType theIdType) {
-		return myIdHelperService.resolveResourcePersistentIds(theIdType.getResourceType(), theIdType.getIdPart());
+		return myIdHelperService.resolveResourcePersistentIds(null, theIdType.getResourceType(), theIdType.getIdPart());
 	}
 
 	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, int theTotalConcepts) {

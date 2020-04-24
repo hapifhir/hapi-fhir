@@ -519,7 +519,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 	@Test
 	public void testDeleteCascadeBlocked() {
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myDaoRegistry, myInterceptorRegistry);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirCtx, myDaoRegistry, myInterceptorRegistry);
 		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 		try {
 
@@ -563,7 +563,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 	@Test
 	public void testDeleteCascadeAllowed() {
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myDaoRegistry, myInterceptorRegistry);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirCtx, myDaoRegistry, myInterceptorRegistry);
 		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 		try {
 
@@ -602,7 +602,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 	@Test
 	public void testDeleteCascadeAllowed_ButNotOnTargetType() {
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myDaoRegistry, myInterceptorRegistry);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirCtx, myDaoRegistry, myInterceptorRegistry);
 		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 		try {
 

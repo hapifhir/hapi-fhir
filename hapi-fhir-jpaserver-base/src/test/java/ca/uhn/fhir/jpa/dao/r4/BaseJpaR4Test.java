@@ -19,9 +19,11 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -88,6 +90,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private static IValidationSupport ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
+	@Autowired
+	protected IPartitionLookupSvc myPartitionConfigSvc;
 	@Autowired
 	protected ITermReadSvc myHapiTerminologySvc;
 	@Autowired
@@ -172,6 +176,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDao<EpisodeOfCare> myEpisodeOfCareDao;
 	@Autowired
 	protected DaoConfig myDaoConfig;
+	@Autowired
+	protected PartitionSettings myPartitionSettings;
 	@Autowired
 	protected ModelConfig myModelConfig;
 	@Autowired
@@ -281,6 +287,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected ResourceProviderFactory myResourceProviders;
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
+	@Autowired
+	protected IResourceHistoryTagDao myResourceHistoryTagDao;
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired(required = false)
@@ -426,8 +434,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
 
-	@Before
-	public void beforePurgeDatabase() {
+	@After
+	public void afterPurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}
 

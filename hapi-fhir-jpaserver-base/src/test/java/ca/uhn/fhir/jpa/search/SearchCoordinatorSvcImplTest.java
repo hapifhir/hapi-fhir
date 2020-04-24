@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -84,6 +86,8 @@ public class SearchCoordinatorSvcImplTest {
 	private SearchBuilderFactory mySearchBuilderFactory;
 	@Mock
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+	@Mock
+	private IRequestPartitionHelperService myPartitionHelperSvc;
 
 	@After
 	public void after() {
@@ -107,6 +111,7 @@ public class SearchCoordinatorSvcImplTest {
 		mySvc.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
 		mySvc.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 		mySvc.setPersistedJpaBundleProviderFactoryForUnitTest(myPersistedJpaBundleProviderFactory);
+		mySvc.setRequestPartitionHelperService(myPartitionHelperSvc);
 
 		DaoConfig daoConfig = new DaoConfig();
 		mySvc.setDaoConfigForUnitTest(daoConfig);
@@ -156,7 +161,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<ResourcePersistentId> pids = createPidSequence(800);
 		IResultIterator iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
-		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(iter);
+		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
@@ -189,7 +194,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<ResourcePersistentId> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 1);
-		when(mySearchBuilder.createQuery(any(), any(), any())).thenReturn(iter);
+		when(mySearchBuilder.createQuery(any(), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		when(mySearchCacheSvc.save(any())).thenAnswer(t -> {
@@ -271,7 +276,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<ResourcePersistentId> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(iter);
+		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
@@ -295,7 +300,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<ResourcePersistentId> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 500);
-		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(iter);
+		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
@@ -340,7 +345,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<ResourcePersistentId> pids = createPidSequence(800);
 		IResultIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(iter);
+		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		when(mySearchCacheSvc.save(any())).thenAnswer(t ->{
 			ourLog.info("Saving search");
 			return t.getArgument( 0, Search.class);
@@ -388,7 +393,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<ResourcePersistentId> pids = createPidSequence(100);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(iter);
+		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
@@ -490,7 +495,7 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<ResourcePersistentId> pids = createPidSequence(800);
-		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(new ResultIterator(pids.iterator()));
+		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(new ResultIterator(pids.iterator()));
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
@@ -511,7 +516,7 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<ResourcePersistentId> pids = createPidSequence(800);
-		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class))).thenReturn(new ResultIterator(pids.iterator()));
+		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(new ResultIterator(pids.iterator()));
 
 		pids = createPidSequence(110);
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(eq(pids), any(Collection.class), any(List.class), anyBoolean(), nullable(RequestDetails.class));

@@ -695,7 +695,7 @@ public class FhirContext {
 	 * cases to contain methods for each of the RESTful operations you wish to implement (e.g. "read ImagingStudy",
 	 * "search Patient by identifier", etc.). This interface must extend {@link IRestfulClient} (or commonly its
 	 * sub-interface {@link IBasicClient}). See the <a
-	 * href="http://jamesagnew.github.io/hapi-fhir/doc_rest_client.html">RESTful Client</a> documentation for more
+	 * href="https://hapifhir.io/hapi-fhir/docs/client/introduction.html">RESTful Client</a> documentation for more
 	 * information on how to define this interface.
 	 *
 	 * <p>

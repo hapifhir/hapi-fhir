@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -75,11 +77,12 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	}
 	
 
-	public ResourceHistoryTag(ResourceHistoryTable theResourceHistoryTable, TagDefinition theTag) {
+	public ResourceHistoryTag(ResourceHistoryTable theResourceHistoryTable, TagDefinition theTag, RequestPartitionId theRequestPartitionId) {
 		setTag(theTag);
 		setResource(theResourceHistoryTable);
 		setResourceId(theResourceHistoryTable.getResourceId());
 		setResourceType(theResourceHistoryTable.getResourceType());
+		setPartitionId(theRequestPartitionId);
 	}
 
 	public ResourceHistoryTable getResourceHistory() {

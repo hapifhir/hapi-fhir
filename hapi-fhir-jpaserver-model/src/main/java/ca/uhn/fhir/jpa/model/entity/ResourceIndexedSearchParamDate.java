@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -77,7 +78,8 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamDate(String theResourceType, String theParamName, Date theLow, Date theHigh, String theOriginalValue) {
+	public ResourceIndexedSearchParamDate(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, Date theLow, Date theHigh, String theOriginalValue) {
+		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValueLow(theLow);
@@ -86,12 +88,21 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	}
 
 	@Override
+	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+		super.copyMutableValuesFrom(theSource);
+		ResourceIndexedSearchParamDate source = (ResourceIndexedSearchParamDate) theSource;
+		myValueHigh = source.myValueHigh;
+		myValueLow = source.myValueLow;
+		myHashIdentity = source.myHashIdentity;
+	}
+
+	@Override
 	@PrePersist
 	public void calculateHashes() {
-		if (myHashIdentity == null) {
+		if (myHashIdentity == null && getParamName() != null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
-			setHashIdentity(calculateHashIdentity(resourceType, paramName));
+			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 		}
 	}
 
@@ -183,12 +194,14 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("paramName", getParamName());
-		b.append("resourceId", getResource().getId()); // TODO: add a field so we don't need to resolve this
+		b.append("resourceId", getResourcePid());
 		b.append("valueLow", new InstantDt(getValueLow()));
 		b.append("valueHigh", new InstantDt(getValueHigh()));
+		b.append("missing", isMissing());
 		return b.build();
 	}
 
+	@SuppressWarnings("ConstantConditions")
 	@Override
 	public boolean matches(IQueryParameterType theParam) {
 		if (!(theParam instanceof DateParam)) {

@@ -33,7 +33,16 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 /**
  * This class is a tenant identification strategy which assumes that a single path
- * element will be present between the server base URL and the beginning
+ * element will be present between the server base URL and individual request.
+ * <p>
+ * For example,
+ * with this strategy enabled, given the following URL on a server with base URL <code>http://example.com/base</code>,
+ * the server will extract the <code>TENANT-A</code> portion of the URL and use it as the tenant identifier. The
+ * request will then proceed to read the resource with ID <code>Patient/123</code>.
+ * </p>
+ * <p>
+ * GET http://example.com/base/TENANT-A/Patient/123
+ * </p>
  */
 public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificationStrategy {
 

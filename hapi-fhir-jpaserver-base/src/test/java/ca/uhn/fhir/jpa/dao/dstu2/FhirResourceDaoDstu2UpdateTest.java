@@ -212,7 +212,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 			p2.setId(new IdDt("Patient/" + p1id.getIdPart()));
 			myOrganizationDao.update(p2, mySrd);
 			fail();
-		} catch (UnprocessableEntityException e) {
+		} catch (InvalidRequestException e) {
 			ourLog.error("Good", e);
 		}
 

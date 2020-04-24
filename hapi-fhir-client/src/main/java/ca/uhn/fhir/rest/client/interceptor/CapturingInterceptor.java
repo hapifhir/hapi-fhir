@@ -20,7 +20,9 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #L%
  */
 
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -35,7 +37,8 @@ import java.io.IOException;
  *
  * @see ThreadLocalCapturingInterceptor for an interceptor that uses a ThreadLocal in order to work in multithreaded environments
  */
-public class CapturingInterceptor implements IClientInterceptor {
+@Interceptor
+public class CapturingInterceptor {
 
 	private IHttpRequest myLastRequest;
 	private IHttpResponse myLastResponse;
@@ -56,12 +59,12 @@ public class CapturingInterceptor implements IClientInterceptor {
 		return myLastResponse;
 	}
 
-	@Override
+	@Hook(value = Pointcut.CLIENT_REQUEST, order = InterceptorOrders.CAPTURING_INTERCEPTOR_REQUEST)
 	public void interceptRequest(IHttpRequest theRequest) {
 		myLastRequest = theRequest;
 	}
 
-	@Override
+	@Hook(value = Pointcut.CLIENT_RESPONSE, order = InterceptorOrders.CAPTURING_INTERCEPTOR_RESPONSE)
 	public void interceptResponse(IHttpResponse theResponse) {
 		//Buffer the reponse to avoid errors when content has already been read and the entity is not repeatable
 		bufferResponse(theResponse);
