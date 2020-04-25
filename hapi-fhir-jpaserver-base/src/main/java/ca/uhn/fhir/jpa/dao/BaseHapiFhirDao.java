@@ -793,7 +793,11 @@ private RequestPartitionHelperService myRequestPartitionHelperService;
 			ResourceHistoryTable history = (ResourceHistoryTable) theEntity;
 			resourceBytes = history.getResource();
 			resourceEncoding = history.getEncoding();
-			myTagList = history.getTags();
+			if (history.isHasTags()) {
+				myTagList = history.getTags();
+			} else {
+				myTagList = Collections.emptyList();
+			}
 			version = history.getVersion();
 			if (history.getProvenance() != null) {
 				provenanceRequestId = history.getProvenance().getRequestId();
@@ -815,7 +819,11 @@ private RequestPartitionHelperService myRequestPartitionHelperService;
 			}
 			resourceBytes = history.getResource();
 			resourceEncoding = history.getEncoding();
-			myTagList = resource.getTags();
+			if (resource.isHasTags()) {
+				myTagList = resource.getTags();
+			} else {
+				myTagList = Collections.emptyList();
+			}
 			version = history.getVersion();
 			if (history.getProvenance() != null) {
 				provenanceRequestId = history.getProvenance().getRequestId();

@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -42,23 +43,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -84,7 +75,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @Service
 public class IdHelperService {
-	private static final Logger ourLog = LoggerFactory.getLogger(IdHelperService.class);
 
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
@@ -99,11 +89,13 @@ public class IdHelperService {
 
 	private Cache<String, Long> myPersistentIdCache;
 	private Cache<String, IResourceLookup> myResourceLookupCache;
+	private Cache<Long, Optional<String>> myForcedIdCache;
 
 	@PostConstruct
 	public void start() {
 		myPersistentIdCache = newCache();
 		myResourceLookupCache = newCache();
+		myForcedIdCache = newCache();
 	}
 
 
@@ -233,17 +225,20 @@ public class IdHelperService {
 	@Nonnull
 	public IIdType translatePidIdToForcedId(FhirContext theCtx, String theResourceType, ResourcePersistentId theId) {
 		IIdType retVal = theCtx.getVersion().newIdType();
-		retVal.setValue(translatePidIdToForcedId(theResourceType, theId));
+
+		Optional<String> forcedId = translatePidIdToForcedId(theId);
+		if (forcedId.isPresent()) {
+			retVal.setValue(theResourceType + '/' + forcedId);
+		} else {
+			retVal.setValue(theResourceType + '/' + theId.toString());
+		}
+
 		return retVal;
 	}
 
-	private String translatePidIdToForcedId(String theResourceType, ResourcePersistentId theId) {
-		ForcedId forcedId = myForcedIdDao.findByResourcePid(theId.getIdAsLong());
-		if (forcedId != null) {
-			return forcedId.getResourceType() + '/' + forcedId.getForcedId();
-		} else {
-			return theResourceType + '/' + theId.toString();
-		}
+
+	public Optional<String> translatePidIdToForcedId(ResourcePersistentId theId) {
+		return myForcedIdCache.get(theId.getIdAsLong(), pid -> myForcedIdDao.findByResourcePid(pid).map(t -> t.getForcedId()));
 	}
 
 	private ListMultimap<String, String> organizeIdsByResourceType(Collection<IIdType> theIds) {
@@ -379,6 +374,7 @@ public class IdHelperService {
 	public void clearCache() {
 		myPersistentIdCache.invalidateAll();
 		myResourceLookupCache.invalidateAll();
+		myForcedIdCache.invalidateAll();
 	}
 
 	private <T, V> @NonNull Cache<T, V> newCache() {
@@ -387,6 +383,36 @@ public class IdHelperService {
 			.maximumSize(10000)
 			.expireAfterWrite(10, TimeUnit.MINUTES)
 			.build();
+	}
+
+	public Map<Long, Optional<String>> translatePidsToForcedIds(Set<Long> thePids) {
+		Map<Long, Optional<String>> retVal = new HashMap<>(myForcedIdCache.getAllPresent(thePids));
+
+		List<Long> remainingPids = thePids
+			.stream()
+			.filter(t -> !retVal.containsKey(t))
+			.collect(Collectors.toList());
+
+		new QueryChunker<Long>().chunk(remainingPids, t->{
+			List<ForcedId> forcedIds = myForcedIdDao.findAllById(t);
+			for (ForcedId forcedId : forcedIds) {
+				Long nextResourcePid = forcedId.getResourceId();
+				Optional<String> nextForcedId = Optional.of(forcedId.getForcedId());
+				retVal.put(nextResourcePid, nextForcedId);
+				myForcedIdCache.put(nextResourcePid, nextForcedId);
+			}
+		});
+
+		remainingPids = thePids
+			.stream()
+			.filter(t -> !retVal.containsKey(t))
+			.collect(Collectors.toList());
+		for (Long nextResourcePid : remainingPids) {
+			retVal.put(nextResourcePid, Optional.empty());
+			myForcedIdCache.put(nextResourcePid, Optional.empty());
+		}
+
+		return retVal;
 	}
 
 	public static boolean isValidPid(IIdType theId) {

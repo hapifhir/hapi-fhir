@@ -56,6 +56,7 @@ import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -612,19 +613,10 @@ public class SearchBuilder implements ISearchBuilder {
 			theResourceListToPopulate.add(null);
 		}
 
-		/*
-		 * As always, Oracle can't handle things that other databases don't mind.. In this
-		 * case it doesn't like more than ~1000 IDs in a single load, so we break this up
-		 * if it's lots of IDs. I suppose maybe we should be doing this as a join anyhow
-		 * but this should work too. Sigh.
-		 */
 		List<ResourcePersistentId> pids = new ArrayList<>(thePids);
-		for (int i = 0; i < pids.size(); i += MAXIMUM_PAGE_SIZE) {
-			int to = i + MAXIMUM_PAGE_SIZE;
-			to = Math.min(to, pids.size());
-			List<ResourcePersistentId> pidsSubList = pids.subList(i, to);
-			doLoadPids(pidsSubList, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position, theDetails);
-		}
+		new QueryChunker<ResourcePersistentId>().chunk(pids, t->{
+			doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position, theDetails);
+		});
 
 	}
 

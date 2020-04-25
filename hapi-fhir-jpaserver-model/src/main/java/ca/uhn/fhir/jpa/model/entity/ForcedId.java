@@ -95,4 +95,7 @@ public class ForcedId extends BasePartitionable {
 		return myId;
 	}
 
+	public Long getResourceId() {
+		return myResourcePid;
+	}
 }

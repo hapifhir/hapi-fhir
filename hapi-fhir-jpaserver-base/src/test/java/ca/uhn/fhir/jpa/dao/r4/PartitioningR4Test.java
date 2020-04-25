@@ -21,7 +21,6 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -54,6 +53,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.matchesPattern;
@@ -1913,9 +1913,27 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, Matchers.contains(id.withVersion("2").getValue(), id.withVersion("1").getValue()));
 
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+
+		// Resolve resource
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertEquals(1, countMatches(sql, "AAAAA"));
+		ourLog.info("SQL:{}", sql);
+		assertEquals(0, countMatches(sql, "PARTITION_ID="));
+
+		// Fetch history resource
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		ourLog.info("SQL:{}", sql);
+		assertEquals(0, countMatches(sql, "PARTITION_ID"));
+
+		// Fetch history resource
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
+		ourLog.info("SQL:{}", sql);
+		assertEquals(0, countMatches(sql, "PARTITION_IDAA"));
+
+		// Fetch history resource
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(3).getSql(true, true);
+		ourLog.info("SQL:{}", sql);
+		assertEquals(0, countMatches(sql, "PARTITION_IDAA"));
 	}
 
 	@Test
@@ -1950,14 +1968,33 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		myPatientDao.update(p);
 
 		addReadDefaultPartition();
+		myCaptureQueriesListener.clear();
 		IBundleProvider results = myPatientDao.history(id, null, null, mySrd);
 		assertEquals(2, results.sizeNotNull());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, Matchers.contains(id.withVersion("2").getValue(), id.withVersion("1").getValue()));
-		
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+
+		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+
+		// Resolve resource
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertEquals(1, countMatches(sql, "AAAAA"));
+		ourLog.info("SQL:{}", sql);
+		assertEquals(0, countMatches(sql, "PARTITION_ID="));
+
+		// Fetch history resource
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		ourLog.info("SQL:{}", sql);
+		assertEquals(0, countMatches(sql, "PARTITION_ID"));
+
+		// Fetch history resource
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
+		ourLog.info("SQL:{}", sql);
+		assertEquals(0, countMatches(sql, "PARTITION_IDAA"));
+
+		// Fetch history resource
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(3).getSql(true, true);
+		ourLog.info("SQL:{}", sql);
+		assertEquals(0, countMatches(sql, "PARTITION_IDAA"));
 	}
 
 	@Test
@@ -1972,34 +2009,176 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		myPatientDao.update(p);
 
 		addReadAllPartitions();
+		myCaptureQueriesListener.clear();
 		IBundleProvider results = myPatientDao.history(id, null, null, mySrd);
 		assertEquals(2, results.sizeNotNull());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, Matchers.contains(id.withVersion("2").getValue(), id.withVersion("1").getValue()));
-
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertEquals(1, countMatches(sql, "AAAAA"));
 	}
 
 	@Test
 	public void testHistory_Server() {
+		addReadAllPartitions();
 		try {
-			mySystemDao.history(null, null, mySrd);
+			mySystemDao.history(null, null, mySrd).size();
 			fail();
-		} catch (MethodNotAllowedException e) {
+		} catch (InvalidRequestException e) {
 			assertEquals("Type- and Server- level history operation not supported on partitioned server", e.getMessage());
 		}
 	}
 
 	@Test
-	public void testHistory_Type() {
+	public void testHistory_Server_SpecificPartition() {
+		IIdType id1A = createPatient(1, withBirthdate("2020-01-01"));
+		sleepAtLeast(10);
+		IIdType id1B = createPatient(1, withBirthdate("2020-01-01"));
+		sleepAtLeast(10);
+		createPatient(2, withBirthdate("2020-01-01"));
+		sleepAtLeast(10);
+		createPatient(2, withBirthdate("2020-01-01"));
+
+		addReadPartition(1);
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = mySystemDao.history(null, null, mySrd);
+		assertEquals(2, results.sizeNotNull());
+		List<String> ids = toUnqualifiedIdValues(results);
+		assertThat(ids, Matchers.contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
+
+		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+
+		// Count
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		ourLog.info("SQL:{}", sql);
+		assertEquals(1, countMatches(sql, "count("));
+		assertEquals(1, countMatches(sql, "PARTITION_ID='1'"));
+
+		// Fetch history
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		ourLog.info("SQL:{}", sql);
+		assertEquals(1, countMatches(sql, "PARTITION_ID='1'"));
+
+		// Fetch history resource
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
+		ourLog.info("SQL:{}", sql);
+		assertEquals(0, countMatches(sql, "PARTITION_IDAA"));
+	}
+
+	@Test
+	public void testHistory_Server_DefaultPartition() {
+		IIdType id1A = createPatient(null, withBirthdate("2020-01-01"));
+		sleepAtLeast(10);
+		IIdType id1B = createPatient(null, withBirthdate("2020-01-01"));
+		sleepAtLeast(10);
+		createPatient(2, withBirthdate("2020-01-01"));
+		sleepAtLeast(10);
+		createPatient(2, withBirthdate("2020-01-01"));
+
+		addReadDefaultPartition();
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = mySystemDao.history(null, null, mySrd);
+		assertEquals(2, results.sizeNotNull());
+		List<String> ids = toUnqualifiedIdValues(results);
+		assertThat(ids, Matchers.contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
+
+		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+
+		// Count
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		ourLog.info("SQL:{}", sql);
+		assertEquals(1, countMatches(sql, "PARTITION_ID is null"));
+
+		// Fetch history
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		ourLog.info("SQL:{}", sql);
+		assertEquals(1, countMatches(sql, "PARTITION_ID is null"));
+
+		// Fetch history resource
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
+		ourLog.info("SQL:{}", sql);
+		assertEquals(0, countMatches(sql, "PARTITION_IDzzz"));
+	}
+
+	@Test
+	public void testHistory_Type_AllPartitions() {
+		addReadAllPartitions();
 		try {
-			myPatientDao.history(null, null, mySrd);
+			myPatientDao.history(null, null, mySrd).size();
 			fail();
-		} catch (MethodNotAllowedException e) {
+		} catch (InvalidRequestException e) {
 			assertEquals("Type- and Server- level history operation not supported on partitioned server", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testHistory_Type_SpecificPartition() {
+		IIdType id1A = createPatient(1, withBirthdate("2020-01-01"));
+		sleepAtLeast(10);
+		IIdType id1B = createPatient(1, withBirthdate("2020-01-01"));
+		sleepAtLeast(10);
+		createPatient(2, withBirthdate("2020-01-01"));
+		sleepAtLeast(10);
+		createPatient(2, withBirthdate("2020-01-01"));
+
+		addReadPartition(1);
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myPatientDao.history(null, null, mySrd);
+		assertEquals(2, results.sizeNotNull());
+		List<String> ids = toUnqualifiedIdValues(results);
+		assertThat(ids, Matchers.contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
+
+		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+
+		// Count
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		ourLog.info("SQL:{}", sql);
+		assertEquals(1, countMatches(sql, "count("));
+		assertEquals(1, countMatches(sql, "PARTITION_ID='1'"));
+
+		// Fetch history resources
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		ourLog.info("SQL:{}", sql);
+		assertEquals(1, countMatches(sql, "PARTITION_ID='1'"));
+
+		// Resolve forced ID
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
+		ourLog.info("SQL:{}", sql);
+		assertEquals(0, countMatches(sql, "PARTITION_ID='1'"));
+	}
+
+
+	@Test
+	public void testHistory_Type_DefaultPartition() {
+		IIdType id1A = createPatient(null, withBirthdate("2020-01-01"));
+		sleepAtLeast(10);
+		IIdType id1B = createPatient(null, withBirthdate("2020-01-01"));
+		sleepAtLeast(10);
+		createPatient(2, withBirthdate("2020-01-01"));
+		sleepAtLeast(10);
+		createPatient(2, withBirthdate("2020-01-01"));
+
+		addReadDefaultPartition();
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myPatientDao.history(null, null, mySrd);
+		assertEquals(2, results.sizeNotNull());
+		List<String> ids = toUnqualifiedIdValues(results);
+		assertThat(ids, Matchers.contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+
+		// Resolve resource
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		assertEquals(1, countMatches(sql, "PARTITION_ID is null"));
+		assertEquals(1, countMatches(sql, "PARTITION_ID"));
+
+		// Fetch history resource
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		assertEquals(1, countMatches(sql, "PARTITION_ID is null"));
+
+		// Resolve forced IDs
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
+		assertEquals(1, countMatches(sql, "forcedid0_.PID in"));
+		assertEquals(0, countMatches(sql, "PARTITION_ID is null"));
 	}
 
 	private void createUniqueCompositeSp() {

@@ -182,14 +182,19 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	@Override
 	public IdDt getIdDt() {
-		if (getResourceTable().getForcedId() == null) {
-			Long id = getResourceId();
-			return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		// Avoid a join query if possible
+		String resourceIdPart;
+		if (getTransientForcedId() != null) {
+			resourceIdPart = getTransientForcedId();
 		} else {
-			// Avoid a join query if possible
-			String forcedId = getTransientForcedId() != null ? getTransientForcedId() : getResourceTable().getForcedId().getForcedId();
-			return new IdDt(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			if (getResourceTable().getForcedId() == null) {
+				Long id = getResourceId();
+				resourceIdPart = id.toString();
+			} else {
+				resourceIdPart = getResourceTable().getForcedId().getForcedId();
+			}
 		}
+		return new IdDt(getResourceType() + '/' + resourceIdPart + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 	}
 
 	@Override

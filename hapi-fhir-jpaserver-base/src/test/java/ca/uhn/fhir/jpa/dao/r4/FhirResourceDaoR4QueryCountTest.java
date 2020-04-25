@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -244,6 +245,117 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 
+	}
+
+	@Test
+	public void testHistory_Server() {
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setId("A");
+			p.addIdentifier().setSystem("urn:system").setValue("1");
+			myPatientDao.update(p).getId().toUnqualified();
+
+			p = new Patient();
+			p.setId("B");
+			p.addIdentifier().setSystem("urn:system").setValue("2");
+			myPatientDao.update(p).getId().toUnqualified();
+
+			p = new Patient();
+			p.addIdentifier().setSystem("urn:system").setValue("2");
+			myPatientDao.create(p).getId().toUnqualified();
+		});
+
+		myCaptureQueriesListener.clear();
+		runInTransaction(() -> {
+			IBundleProvider history = mySystemDao.history(null, null, null);
+			assertEquals(3, history.getResources(0, 3).size());
+		});
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		// Perform count, Search history table, resolve forced IDs
+		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+		// Second time should leverage forced ID cache
+		myCaptureQueriesListener.clear();
+		runInTransaction(() -> {
+			IBundleProvider history = mySystemDao.history(null, null, null);
+			assertEquals(3, history.getResources(0, 3).size());
+		});
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		// Perform count, Search history table
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+
+	/**
+	 * This could definitely stand to be optimized some, since we load tags individually
+	 * for each resource
+	 */
+	@Test
+	public void testHistory_Server_WithTags() {
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.getMeta().addTag("system", "code1", "displaY1");
+			p.getMeta().addTag("system", "code2", "displaY2");
+			p.setId("A");
+			p.addIdentifier().setSystem("urn:system").setValue("1");
+			myPatientDao.update(p).getId().toUnqualified();
+
+			p = new Patient();
+			p.getMeta().addTag("system", "code1", "displaY1");
+			p.getMeta().addTag("system", "code2", "displaY2");
+			p.setId("B");
+			p.addIdentifier().setSystem("urn:system").setValue("2");
+			myPatientDao.update(p).getId().toUnqualified();
+
+			p = new Patient();
+			p.getMeta().addTag("system", "code1", "displaY1");
+			p.getMeta().addTag("system", "code2", "displaY2");
+			p.addIdentifier().setSystem("urn:system").setValue("2");
+			myPatientDao.create(p).getId().toUnqualified();
+		});
+
+		myCaptureQueriesListener.clear();
+		runInTransaction(() -> {
+			IBundleProvider history = mySystemDao.history(null, null, null);
+			assertEquals(3, history.getResources(0, 3).size());
+		});
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		// Perform count, Search history table, resolve forced IDs, load tags (x3)
+		assertEquals(6, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+		// Second time should leverage forced ID cache
+		myCaptureQueriesListener.clear();
+		runInTransaction(() -> {
+			IBundleProvider history = mySystemDao.history(null, null, null);
+			assertEquals(3, history.getResources(0, 3).size());
+		});
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		// Perform count, Search history table, load tags (x3)
+		assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
 

@@ -149,6 +149,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	 * Perform a history search
 	 */
 	private List<IBaseResource> doHistoryInTransaction(int theFromIndex, int theToIndex) {
+
 		HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
 
 		RequestPartitionId partitionId = getRequestPartitionId();
@@ -243,12 +244,11 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		}
 
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.HISTORY) {
-			if (mySearchEntity.getId() == null) {
+			if (mySearchEntity.getTotalCount() == null) {
 				new TransactionTemplate(myTxManager).executeWithoutResult(t->{
 					HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
 					Long count = historyBuilder.fetchCount(getRequestPartitionId());
 					mySearchEntity.setTotalCount(count.intValue());
-					mySearchEntity = mySearchCacheSvc.save(mySearchEntity);
 				});
 			}
 		}

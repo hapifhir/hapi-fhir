@@ -80,11 +80,6 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails) {
-		if (myPartitionSettings.isPartitioningEnabled()) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "noSystemOrTypeHistoryForPartitionAwareServer");
-			throw new MethodNotAllowedException(msg);
-		}
-
 		if (theRequestDetails != null) {
 			// Notify interceptors
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);

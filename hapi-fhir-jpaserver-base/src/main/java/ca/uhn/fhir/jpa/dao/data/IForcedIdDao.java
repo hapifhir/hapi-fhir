@@ -46,7 +46,7 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 	Optional<Long> findByPartitionIdAndTypeAndForcedId(@Param("partition_id") Integer thePartitionId, @Param("resource_type") String theResourceType, @Param("forced_id") String theForcedId);
 
 	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid = :resource_pid")
-	ForcedId findByResourcePid(@Param("resource_pid") Long theResourcePid);
+	Optional<ForcedId> findByResourcePid(@Param("resource_pid") Long theResourcePid);
 
 	@Modifying
 	@Query("DELETE FROM ForcedId t WHERE t.myId = :pid")
