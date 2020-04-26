@@ -374,7 +374,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			Date end = extractValueAsDate(myPeriodEndValueChild, theValue);
 
 			if (start != null || end != null) {
-				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(theResourceType, theSearchParam.getName(), start, end, startAsString);
+				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), start, end, startAsString);
 				theParams.add(myIndexedSearchParamDate);
 			}
 		}
@@ -408,7 +408,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			if (!dates.isEmpty()) {
-				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(theResourceType, theSearchParam.getName(), dates.first(), dates.last(), firstValue);
+				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), dates.first(), dates.last(), firstValue);
 				theParams.add(myIndexedSearchParamDate);
 			}
 		}

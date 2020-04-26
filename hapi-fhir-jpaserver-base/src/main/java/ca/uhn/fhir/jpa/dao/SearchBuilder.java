@@ -359,7 +359,7 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myMaxObservationsPerCode);
 				for (String lastnResourceId : lastnResourceIds) {
-					pids.add(myIdHelperService.resolveResourcePersistentIds(myResourceName, lastnResourceId));
+					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));
 				}
 			}
 			if (pids.isEmpty()) {

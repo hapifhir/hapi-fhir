@@ -180,10 +180,6 @@ public class ResourceLink extends BaseResourceIndex {
 		myTargetResourceUrl = theTargetResourceUrl.getValue();
 	}
 
-	public String getTargetResourceUrl() {
-		return myTargetResourceUrl;
-	}
-
 	public void setTargetResourceUrlCanonical(String theTargetResourceUrl) {
 		Validate.notBlank(theTargetResourceUrl);
 
