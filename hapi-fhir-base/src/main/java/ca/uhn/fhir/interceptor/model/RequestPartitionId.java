@@ -24,22 +24,20 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDate;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-
-public class RequestPartitionId {
+/**
+ * @since 5.0.0
+ */
+public class RequestPartitionId extends PersistedPartitionId {
 
 	private static final RequestPartitionId ALL_PARTITIONS = new RequestPartitionId();
-	private final Integer myPartitionId;
 	private final LocalDate myPartitionDate;
-	private final String myPartitionName;
 	private final boolean myAllPartitions;
 
 	/**
 	 * Constructor for a single partition
 	 */
 	private RequestPartitionId(@Nullable String thePartitionName, @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
-		myPartitionName = thePartitionName;
-		myPartitionId = thePartitionId;
+		super(thePartitionName, thePartitionId);
 		myPartitionDate = thePartitionDate;
 		myAllPartitions = false;
 	}
@@ -48,9 +46,8 @@ public class RequestPartitionId {
 	 * Constructor for all partitions
 	 */
 	private RequestPartitionId() {
-		myPartitionId = null;
+		super();
 		myPartitionDate = null;
-		myPartitionName = null;
 		myAllPartitions = true;
 	}
 
@@ -58,41 +55,9 @@ public class RequestPartitionId {
 		return myAllPartitions;
 	}
 
-	public String getPartitionName() {
-		return myPartitionName;
-	}
-
-	@Nullable
-	public Integer getPartitionId() {
-		return myPartitionId;
-	}
-
 	@Nullable
 	public LocalDate getPartitionDate() {
 		return myPartitionDate;
-	}
-
-	@Override
-	public String toString() {
-		return getPartitionIdStringOrNullString();
-	}
-
-	/**
-	 * Returns the partition ID (numeric) as a string, or the string "null"
-	 */
-	public String getPartitionIdStringOrNullString() {
-		return defaultIfNull(myPartitionId, "null").toString();
-	}
-
-	/**
-	 * Create a string representation suitable for use as a cache key. Null aware.
-	 */
-	public static String stringifyForKey(RequestPartitionId theRequestPartitionId) {
-		String retVal = "(null)";
-		if (theRequestPartitionId != null) {
-			retVal = theRequestPartitionId.getPartitionIdStringOrNullString();
-		}
-		return retVal;
 	}
 
 	@Nonnull

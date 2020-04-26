@@ -49,4 +49,6 @@ public interface IBaseResourceEntity {
 	long getVersion();
 
 	boolean isHasTags();
+
+	PartitionablePartitionId getPartitionId();
 }

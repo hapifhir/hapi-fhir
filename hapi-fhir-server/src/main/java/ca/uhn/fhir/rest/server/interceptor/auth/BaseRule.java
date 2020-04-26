@@ -95,7 +95,7 @@ abstract class BaseRule implements IAuthRule {
 		return Collections.unmodifiableList(myTesters);
 	}
 
-	public boolean isOtherTenant(RequestDetails theRequestDetails) {
+	public boolean isOtherTenant(RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource) {
 		boolean otherTenant = false;
 		if (getTenantApplicabilityChecker() != null) {
 			if (!getTenantApplicabilityChecker().applies(theRequestDetails)) {

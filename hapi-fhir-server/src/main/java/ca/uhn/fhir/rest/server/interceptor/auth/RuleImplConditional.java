@@ -42,6 +42,7 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 	@Override
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
 									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
+		assert !(theInputResource != null && theOutputResource != null);
 
 		if (isOtherTenant(theRequestDetails)) {
 			return null;

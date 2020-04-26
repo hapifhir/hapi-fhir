@@ -11,7 +11,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
@@ -27,6 +26,7 @@ import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperService;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
@@ -99,7 +100,6 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
@@ -168,13 +168,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
 	@Autowired
-	private HistoryBuilderFactory myHistoryBuilderFactory;
-	@Autowired
 	protected DeleteConflictService myDeleteConflictService;
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
+	protected DaoRegistry myDaoRegistry;
+	@Autowired
 	ExpungeService myExpungeService;
+	@Autowired
+	private HistoryBuilderFactory myHistoryBuilderFactory;
 	@Autowired
 	private DaoConfig myConfig;
 	@Autowired
@@ -183,8 +185,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private ISearchCacheSvc mySearchCacheSvc;
 	@Autowired
 	private ISearchParamPresenceSvc mySearchParamPresenceSvc;
-	@Autowired
-	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 	@Autowired
@@ -195,6 +195,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private ApplicationContext myApplicationContext;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+	@Autowired
+	private RequestPartitionHelperService myRequestPartitionHelperService;
+	@Autowired
+	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+	@Autowired
+	private IPartitionLookupSvc myPartitionLookupSvc;
 
 	@Override
 	protected IInterceptorBroadcaster getInterceptorBroadcaster() {
@@ -388,9 +394,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 	}
 
-@Autowired
-private RequestPartitionHelperService myRequestPartitionHelperService;
-
 	protected IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive) {
 
 		String resourceName = defaultIfBlank(theResourceType, null);
@@ -407,10 +410,6 @@ private RequestPartitionHelperService myRequestPartitionHelperService;
 
 		return myPersistedJpaBundleProviderFactory.newInstance(theRequest, search);
 	}
-
-	@Autowired
-	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
-
 
 	void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
 		String newVersion;
@@ -916,6 +915,17 @@ private RequestPartitionHelperService myRequestPartitionHelperService;
 
 			MetaUtil.setSource(myContext, retVal, sourceString);
 
+		}
+
+		// 7. Add partition information
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			PartitionablePartitionId partitionId = theEntity.getPartitionId();
+			if (partitionId != null && partitionId.getPartitionId() != null) {
+				PartitionEntity persistedPartition = myPartitionLookupSvc.getPartitionById(partitionId.getPartitionId());
+				retVal.setUserData(Constants.RESOURCE_PARTITION_ID, persistedPartition.toPersistedPartitionId());
+			} else {
+				retVal.setUserData(Constants.RESOURCE_PARTITION_ID, null);
+			}
 		}
 
 		return retVal;

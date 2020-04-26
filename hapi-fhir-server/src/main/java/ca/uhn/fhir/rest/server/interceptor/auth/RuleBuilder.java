@@ -102,7 +102,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 	}
 
 	public interface ITenantApplicabilityChecker {
-		boolean applies(RequestDetails theRequest);
+		boolean applies(RequestDetails theRequest, IBaseResource theResource);
 	}
 
 	private class RuleBuilderFinished implements IAuthRuleFinished, IAuthRuleBuilderRuleOpClassifierFinished, IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId {

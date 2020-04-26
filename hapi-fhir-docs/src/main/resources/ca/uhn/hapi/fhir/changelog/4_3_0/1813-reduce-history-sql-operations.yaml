@@ -1,6 +1,6 @@
 ---
 type: perf
-issue: 0000
+issue: 1813
 title: History operations in the JPA server have been significantly optimized to remove the number of SQL SELECT statements,
    and to completely eliminate any INSERT statements. This should have a positive effect on heavy users of history
    operations.
