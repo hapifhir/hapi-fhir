@@ -16,7 +16,7 @@ The [hapi-fhir-jpaserver-starter](https://github.com/hapifhir/hapi-fhir-jpaserve
 
 Because HAPI EMPI is implemented on the HAPI JPA Server, it uses the FHIR model to represent roles and links. The following illustration shows an example of how these links work.
 
-<a href="/docs/images/fhir_repository-empi-links.svg"><img  src="/docs/images/fhir_repository-empi-links.svg" alt="Subscription Overview" style="margin-left: 15px; margin-bottom: 15px; width: 500px;" /></a>
+<a href="/docs/images/empi-links.svg"><img src="/docs/images/empi-links.svg" alt="EMPI links" style="margin-left: 15px; margin-bottom: 15px; width: 500px;" /></a>
 
 There are several resources that are used:
 
@@ -132,16 +132,20 @@ See [java-string-similarity](https://github.com/tdebatty/java-string-similarity)
 
 * **eidSystem**: The external EID system that the HAPI EMPI system should expect to see on incoming Patient resources. Must be a valid URI.
 
-
-# HAPI FHIR EMPI Technical Details
+# HAPI EMPI Technical Details
 
 When EMPI is enabled, the HAPI FHIR JPA Server does the following things on startup:
 
+1. HAPI EMPI stores the extra link details in a table called `HFJ_EMPI_LINK`.
+1. Each record in an `HFJ_EMPI_LINK` table corresponds to a `link.target` entry on a Person resource.  HAPI EMPI uses the following convention for the Person.link.assurance level:
+    1. Level 1: not used
+    1. Level 2: POSSIBLE_MATCH
+    1. Level 3: AUTO MATCHED
+    1. Level 4: MANUAL MATCHED
 1. It enables the MESSAGE subscription type and starts up the internal subscription engine.
 1. It creates two MESSAGE subscriptions, called 'empi-patient' and 'empi-practitioner' that match all incoming Patient and Practitioner resources and send them to an internal queue called "empi".  The JPA Server listens to this queue and links incoming resources to Persons.
 1. It registers the `Patient/$match` operation.  See [$match](https://www.hl7.org/fhir/operation-patient-match.html) for a description of this operation.
 1. It registers a new dao interceptor that restricts access to EMPI managed Person records.
-
 
 # Querying The EMPI
 
