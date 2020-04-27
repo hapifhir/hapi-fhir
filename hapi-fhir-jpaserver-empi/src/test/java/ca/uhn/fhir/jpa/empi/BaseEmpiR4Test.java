@@ -7,21 +7,27 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
-import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
 import ca.uhn.fhir.jpa.empi.config.EmpiConsumerConfig;
 import ca.uhn.fhir.jpa.empi.config.EmpiSubmitterConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
-import ca.uhn.fhir.jpa.empi.matcher.*;
+import ca.uhn.fhir.jpa.empi.matcher.IsLinkedTo;
+import ca.uhn.fhir.jpa.empi.matcher.IsMatchedToAPerson;
+import ca.uhn.fhir.jpa.empi.matcher.IsPossibleDuplicateOf;
+import ca.uhn.fhir.jpa.empi.matcher.IsPossibleMatchWith;
+import ca.uhn.fhir.jpa.empi.matcher.IsSamePersonAs;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Person;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.After;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -70,10 +76,6 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected IEmpiSettings myEmpiConfig;
 	@Autowired
 	protected EmpiMatchLinkSvc myEmpiMatchLinkSvc;
-	@Autowired
-	protected SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired
-	private EmpiQueueConsumerLoader myEmpiQueueConsumerLoader;
 
 	@After
 	public void after() {
