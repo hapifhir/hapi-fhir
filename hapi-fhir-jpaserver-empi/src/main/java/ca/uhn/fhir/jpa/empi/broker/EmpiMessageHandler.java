@@ -76,7 +76,7 @@ public class EmpiMessageHandler implements MessageHandler {
 					break;
 				case UPDATE:
 					//FIXME EMPI implement updates.
-					//messages = handleUpdatePatientOrPractitioner(theMsg, transactionLogMessages);
+					transactionLogMessages = handleUpdatePatientOrPractitioner(theMsg, transactionLogMessages);
 					break;
 				case DELETE:
 				default:
@@ -100,6 +100,10 @@ public class EmpiMessageHandler implements MessageHandler {
 	}
 
 	private TransactionLogMessages handleCreatePatientOrPractitioner(ResourceModifiedMessage theMsg, TransactionLogMessages theTransactionLogMessages) {
+		return myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theMsg.getNewPayload(myFhirContext), theTransactionLogMessages);
+	}
+
+	private TransactionLogMessages handleUpdatePatientOrPractitioner(ResourceModifiedMessage theMsg, TransactionLogMessages theTransactionLogMessages) {
 		return myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theMsg.getNewPayload(myFhirContext), theTransactionLogMessages);
 	}
 }

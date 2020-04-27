@@ -39,6 +39,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
 import javax.transaction.Transactional;
+import java.util.Optional;
 
 /**
  * This class is in charge of managing EmpiLinks between Persons and target resources
@@ -64,6 +65,9 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		CanonicalIdentityAssuranceLevel assuranceLevel = AssuranceLevelUtil.getAssuranceLevel(theMatchResult, theLinkSource);
 		switch (theMatchResult) {
 			case MATCH:
+				deleteCurrentMatch(theResource);
+				myPersonHelper.addOrUpdateLink(thePerson, resourceId, assuranceLevel, theTransactionLogMessages);
+				break;
 			case POSSIBLE_MATCH:
 				myPersonHelper.addOrUpdateLink(thePerson, resourceId, assuranceLevel, theTransactionLogMessages);
 				break;
@@ -72,9 +76,15 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 			case POSSIBLE_DUPLICATE:
 				break;
 		}
-		DaoMethodOutcome daoMethodOutcome = myEmpiResourceDaoSvc.updatePerson(thePerson);
 		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theTransactionLogMessages);
 
+	}
+
+	private void deleteCurrentMatch(IBaseResource theResourceId) {
+		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTablePidHelper.getPidOrNull(theResourceId));
+		if(matchedLinkForTargetPid.isPresent()) {
+			myEmpiLinkDaoSvc.deleteLink(matchedLinkForTargetPid.get());
+		}
 	}
 
 	/**

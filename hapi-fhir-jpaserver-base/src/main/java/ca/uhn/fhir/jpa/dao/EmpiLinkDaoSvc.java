@@ -52,9 +52,9 @@ public class EmpiLinkDaoSvc {
 		Long resourcePid = myResourceTablePidHelper.getPidOrNull(theResource);
 
 		EmpiLink empiLink = getOrCreateEmpiLinkByPersonPidAndTargetPid(personPid, resourcePid);
-
 		empiLink.setLinkSource(theLinkSource);
 		empiLink.setMatchResult(theMatchResult);
+
 		String message = String.format("Creating EmpiLink from %s to %s -> %s", thePerson.getIdElement().toUnqualifiedVersionless(), theResource.getIdElement().toUnqualifiedVersionless(), theMatchResult);
 		TransactionLogMessages.addMessage(theTransactionLogMessages, message);
 		ourLog.debug(message);
@@ -130,5 +130,9 @@ public class EmpiLinkDaoSvc {
 		EmpiLink empiLink = new EmpiLink().setTargetPid(myResourceTablePidHelper.getPidOrNull(theBaseResource));
 		Example<EmpiLink> example = Example.of(empiLink);
 		return myEmpiLinkDao.findOne(example);
+	}
+
+	public void deleteLink(EmpiLink theEmpiLink) {
+    	myEmpiLinkDao.delete(theEmpiLink);
 	}
 }
