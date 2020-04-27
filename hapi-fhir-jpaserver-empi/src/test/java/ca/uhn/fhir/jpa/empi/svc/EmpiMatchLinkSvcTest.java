@@ -375,4 +375,19 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(linkFirstRep.getAssurance(), is(equalTo(Person.IdentityAssuranceLevel.LEVEL4)));
 	}
 
+	@Test
+	public void testPatientThatUndergoesSufficientChangeIsReassignedToNewPerson() {
+		Patient janePatient= createPatientAndUpdateLinks(buildJanePatient());
+		Person janePerson = getPersonFromTarget(janePatient);
+
+		//Change Jane's name to paul.
+		Patient patient1 = buildPaulPatient();
+		patient1.setId(janePatient.getId());
+		Patient janePaulPatient = updatePatientAndUpdateLinks(patient1);
+
+		assertThat(janePerson, is(not(samePersonAs(janePaulPatient))));
+	}
+	
+
+
 }
