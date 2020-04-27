@@ -219,6 +219,11 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, null);
 		return thePatient;
 	}
+	protected Patient updatePatientAndUpdateLinks(Patient thePatient1) {
+		thePatient1 = (Patient) myPatientDao.update(thePatient1).getResource();
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient1, null);
+		return thePatient1;
+	}
 
 	protected Practitioner createPractitionerAndUpdateLinks(Practitioner thePractitioner) {
 		thePractitioner.setActive(true);
