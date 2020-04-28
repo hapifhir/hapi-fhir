@@ -5,8 +5,13 @@ import org.junit.Test;
 
 import static ca.uhn.fhir.empi.api.EmpiLinkSourceEnum.AUTO;
 import static ca.uhn.fhir.empi.api.EmpiLinkSourceEnum.MANUAL;
-import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.*;
-import static ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel.*;
+import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.MATCH;
+import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.NO_MATCH;
+import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.POSSIBLE_DUPLICATE;
+import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.POSSIBLE_MATCH;
+import static ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel.LEVEL2;
+import static ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel.LEVEL3;
+import static ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel.LEVEL4;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNull.nullValue;

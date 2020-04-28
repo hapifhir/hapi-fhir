@@ -25,7 +25,11 @@ import ca.uhn.fhir.empi.rules.similarity.EmpiPersonNameMatchModeEnum;
 import ca.uhn.fhir.empi.rules.similarity.HapiStringSimilarity;
 import ca.uhn.fhir.empi.rules.similarity.IEmpiFieldSimilarity;
 import ca.uhn.fhir.empi.rules.similarity.NameSimilarity;
-import info.debatty.java.stringsimilarity.*;
+import info.debatty.java.stringsimilarity.Cosine;
+import info.debatty.java.stringsimilarity.Jaccard;
+import info.debatty.java.stringsimilarity.JaroWinkler;
+import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
+import info.debatty.java.stringsimilarity.SorensenDice;
 import org.hl7.fhir.instance.model.api.IBase;
 
 /**

@@ -12,7 +12,9 @@ import org.junit.Test;
 import java.util.Optional;
 
 import static ca.uhn.fhir.empi.api.Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 
