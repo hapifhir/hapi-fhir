@@ -33,10 +33,12 @@ public class NameUtil {
 	public static List<String> extractGivenNames(FhirContext theFhirContext, IBase theBase) {
 		switch(theFhirContext.getVersion().getVersion()) {
 			case R4:
-				HumanName humanName = (HumanName)theBase;
-				return humanName.getGiven().stream().map(PrimitiveType::getValueAsString).filter(s -> !StringUtils.isEmpty(s)).collect(Collectors.toList());
+				HumanName humanNameR4 = (HumanName)theBase;
+				return humanNameR4.getGiven().stream().map(PrimitiveType::getValueAsString).filter(s -> !StringUtils.isEmpty(s)).collect(Collectors.toList());
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.HumanName humanNameDSTU3 = (org.hl7.fhir.dstu3.model.HumanName) theBase;
+				return humanNameDSTU3.getGiven().stream().map(given -> given.toString()).filter(s -> !StringUtils.isEmpty(s)).collect(Collectors.toList());
 			default:
-				// FIXME EMPI moar versions
 				throw new UnsupportedOperationException("Version not supported: " + theFhirContext.getVersion().getVersion());
 
 		}
@@ -45,10 +47,12 @@ public class NameUtil {
 	public static String extractFamilyName(FhirContext theFhirContext, IBase theBase) {
 		switch(theFhirContext.getVersion().getVersion()) {
 			case R4:
-				HumanName humanName = (HumanName)theBase;
-				return humanName.getFamily();
+				HumanName humanNameR4 = (HumanName)theBase;
+				return humanNameR4.getFamily();
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.HumanName humanNameDSTU3 = (org.hl7.fhir.dstu3.model.HumanName)theBase;
+				return humanNameDSTU3.getFamily();
 			default:
-				// FIXME EMPI moar versions
 				throw new UnsupportedOperationException("Version not supported: " + theFhirContext.getVersion().getVersion());
 
 		}
