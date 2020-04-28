@@ -26,7 +26,6 @@ import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -223,7 +222,6 @@ public class PersonHelper {
 				personDSTU3.getMeta().addTag((org.hl7.fhir.dstu3.model.Coding)buildEmpiManagedTag());
 				copyEmpiTargetDataIntoPerson(theSourceResource, personDSTU3);
 			default:
-				// FIXME EMPI moar versions
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
 	}
@@ -323,28 +321,32 @@ public class PersonHelper {
 	 */
 	public IBaseResource updatePersonExternalEidFromEmpiTarget(IBaseResource thePerson, IBaseResource theEmpiTarget) {
 		//This handles overwriting an automatically assigned EID if a patient that links is coming in with an official EID.
-		Person person = ((Person)thePerson);
 		Optional<CanonicalEID> incomingTargetEid = myEIDHelper.getExternalEid(theEmpiTarget);
 		Optional<CanonicalEID> personOfficialEid = myEIDHelper.getExternalEid(thePerson);
 
-		switch (myFhirContext.getVersion().getVersion()) {
-			case R4:
-				if (incomingTargetEid.isPresent()) {
-					//The person has no EID. This should be impossible given that we auto-assign an EID at creation time.
-					if (!personOfficialEid.isPresent()) {
-						ourLog.debug("Incoming resource:{} with EID {} is applying this EID to its related Person, as this person does not yet have an external EID", theEmpiTarget.getIdElement().getValueAsString(), incomingTargetEid.get().getValue());
-						person.addIdentifier(incomingTargetEid.get().toR4());
-					} else if (personOfficialEid.isPresent() && myEIDHelper.eidsMatch(personOfficialEid.get(), incomingTargetEid.get())){
-						ourLog.debug("incoming resource:{} with EID {} does not need to overwrite person, as this EID is already present", theEmpiTarget.getIdElement().getValueAsString(), incomingTargetEid.get().getValue());
-					} else {
-						throw new IllegalArgumentException("This would create a duplicate person!");
-					}
-				}
-			default:
-				// FIXME EMPI moar versions
-				break;
+		if (incomingTargetEid.isPresent()) {
+			//The person has no EID. This should be impossible given that we auto-assign an EID at creation time.
+			if (!personOfficialEid.isPresent()) {
+				ourLog.debug("Incoming resource:{} with EID {} is applying this EID to its related Person, as this person does not yet have an external EID", theEmpiTarget.getIdElement().getValueAsString(), incomingTargetEid.get().getValue());
+				addCanonicalEidToPerson(thePerson, incomingTargetEid.get());
+			} else if (personOfficialEid.isPresent() && myEIDHelper.eidsMatch(personOfficialEid.get(), incomingTargetEid.get())){
+				ourLog.debug("incoming resource:{} with EID {} does not need to overwrite person, as this EID is already present", theEmpiTarget.getIdElement().getValueAsString(), incomingTargetEid.get().getValue());
+			} else {
+				throw new IllegalArgumentException("This would create a duplicate person!");
+			}
 		}
 		return thePerson;
+	}
+
+	private void addCanonicalEidToPerson(IBaseResource thePerson, CanonicalEID theIncomingTargetEid) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case R4:
+				((Person)thePerson).addIdentifier(theIncomingTargetEid.toR4());
+			case DSTU3:
+				((org.hl7.fhir.dstu3.model.Person)thePerson).addIdentifier(theIncomingTargetEid.toDSTU3());
+			default:
+				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+		}
 	}
 
 	/**
