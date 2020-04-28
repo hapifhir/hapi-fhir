@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
-import ca.uhn.fhir.empi.api.Constants;
+import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
@@ -27,7 +27,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -129,7 +134,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		Person person = getPersonFromEmpiLink(empiLink);
 		Identifier identifierFirstRep = person.getIdentifierFirstRep();
-		assertThat(identifierFirstRep.getSystem(), is(equalTo(Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
+		assertThat(identifierFirstRep.getSystem(), is(equalTo(EmpiConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
 		assertThat(identifierFirstRep.getValue(), not(blankOrNullString()));
 	}
 
@@ -177,7 +182,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		//The collision should have kept the old identifier
 		Identifier firstIdentifier = identifier.get(0);
-		assertThat(firstIdentifier.getSystem(), is(equalTo(Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
+		assertThat(firstIdentifier.getSystem(), is(equalTo(EmpiConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
 		assertThat(firstIdentifier.getValue(), is(equalTo(foundHapiEid)));
 
 		//The collision should have added a new identifier with the external system.
@@ -225,7 +230,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	public void testPatientWithNoEmpiTagIsNotMatched() {
 		// Patient with "no-empi" tag is not matched
 		Patient janePatient = buildJanePatient();
-		janePatient.getMeta().addTag(Constants.SYSTEM_EMPI_MANAGED, Constants.CODE_NO_EMPI_MANAGED, "Don't EMPI on me!");
+		janePatient.getMeta().addTag(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_NO_EMPI_MANAGED, "Don't EMPI on me!");
 		createPatientAndUpdateLinks(janePatient);
 		assertLinkCount(0);
 	}

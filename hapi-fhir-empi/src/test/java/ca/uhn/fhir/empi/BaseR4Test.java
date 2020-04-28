@@ -12,7 +12,7 @@ import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 
-public abstract class BaseTest {
+public abstract class BaseR4Test {
 	protected static final FhirContext ourFhirContext = FhirContext.forR4();
 	public static final String PATIENT_GIVEN = "patient-given";
 	public static final String PATIENT_LAST = "patient-last";

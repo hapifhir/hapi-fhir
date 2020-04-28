@@ -21,7 +21,7 @@ package ca.uhn.fhir.empi.util;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.api.Constants;
+import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
@@ -210,8 +210,8 @@ public final class PersonHelper {
 
 	private Coding buildEmpiManagedTag() {
 		Coding empiManagedCoding = new Coding();
-		empiManagedCoding.setSystem(Constants.SYSTEM_EMPI_MANAGED);
-		empiManagedCoding.setCode(Constants.CODE_HAPI_EMPI_MANAGED);
+		empiManagedCoding.setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED);
+		empiManagedCoding.setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
 		empiManagedCoding.setDisplay("This Person can only be modified by Smile CDR's EMPI system.");
 		return empiManagedCoding;
 	}

@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class PersonHelperTest {
+public class PersonHelperR4Test {
 	public static final FhirContext ourFhirContext = FhirContext.forR4();
 	public static final String PATIENT_1 = "Patient/1";
 	public static final String PATIENT_2 = "Patient/2";

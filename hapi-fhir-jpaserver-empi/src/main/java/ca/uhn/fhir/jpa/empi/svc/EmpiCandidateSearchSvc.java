@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.empi.api.Constants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
+import static ca.uhn.fhir.empi.api.EmpiConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Service

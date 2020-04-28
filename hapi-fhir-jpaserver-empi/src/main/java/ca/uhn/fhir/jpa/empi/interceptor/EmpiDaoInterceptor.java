@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.empi.interceptor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.api.Constants;
+import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
@@ -47,7 +47,7 @@ public class EmpiDaoInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualPersonManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-		// FIXME EMPI find a better way to identify EMPI calls
+		// TODO EMPI find a better way to identify EMPI calls
 		if (isInternalRequest(theRequestDetails)) {
 			return;
 		}
@@ -82,7 +82,7 @@ public class EmpiDaoInterceptor {
 	 * @return a boolean indicating whether or not EMPI manages this Person.
 	 */
 	private boolean isEmpiManaged(IBaseResource theBaseResource) {
-		return theBaseResource.getMeta().getTag(ca.uhn.fhir.empi.api.Constants.SYSTEM_EMPI_MANAGED, ca.uhn.fhir.empi.api.Constants.CODE_HAPI_EMPI_MANAGED) != null;
+		return theBaseResource.getMeta().getTag(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_HAPI_EMPI_MANAGED) != null;
 	}
 
 	/*
@@ -95,7 +95,7 @@ public class EmpiDaoInterceptor {
 
 	private void forbidIfEmpiManagedTagIsPresent(IBaseResource theResource) {
 		if (extractResourceType(theResource).equalsIgnoreCase("Person")) {
-			if (theResource.getMeta().getTag(ca.uhn.fhir.empi.api.Constants.SYSTEM_EMPI_MANAGED, Constants.CODE_HAPI_EMPI_MANAGED) != null) {
+			if (theResource.getMeta().getTag(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_HAPI_EMPI_MANAGED) != null) {
 				throwModificationBlockedByEmpi();
 			}
 		}
@@ -120,6 +120,6 @@ public class EmpiDaoInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE)
 	public void expungeAllMatchedEmpiLinks(AtomicInteger theCounter, IBaseResource theResource) {
-		// FIXME EMPI
+		// FIXME KHS
 	}
 }

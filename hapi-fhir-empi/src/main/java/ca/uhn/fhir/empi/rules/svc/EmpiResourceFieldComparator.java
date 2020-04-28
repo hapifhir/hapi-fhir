@@ -30,7 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
 
-import static ca.uhn.fhir.empi.api.Constants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
+import static ca.uhn.fhir.empi.api.EmpiConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 
 /**
  * This class is responsible for performing matching between raw-typed values of a left record and a right record.

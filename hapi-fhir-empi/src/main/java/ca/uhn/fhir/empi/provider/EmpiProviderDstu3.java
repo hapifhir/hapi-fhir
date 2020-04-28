@@ -34,7 +34,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.util.Collection;
 import java.util.UUID;
 
-// FIXME EMPI test
 public class EmpiProviderDstu3 {
 	private final IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
 

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.empi.rules.svc;
 
-import ca.uhn.fhir.empi.BaseTest;
+import ca.uhn.fhir.empi.BaseR4Test;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.rules.json.DistanceMetricEnum;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class CustomResourceComparatorTest extends BaseTest {
+public class CustomResourceComparatorR4Test extends BaseR4Test {
 
 	public static final String FIELD_EXACT_MATCH_NAME = DistanceMetricEnum.EXACT_NAME_ANY_ORDER.name();
 	private static Patient ourJohnHenry;

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.api;
+package ca.uhn.fhir.empi.rules.config;
 
 /*-
  * #%L
@@ -20,23 +20,25 @@ package ca.uhn.fhir.empi.api;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
+import org.springframework.stereotype.Service;
 
-public class MatchedTargetCandidate {
+import java.net.URI;
+import java.net.URISyntaxException;
 
-	private final IBaseResource myCandidate;
-	private final EmpiMatchResultEnum myMatchResult;
+@Service
+public class EmpiRuleValidator {
 
-	public MatchedTargetCandidate(IBaseResource theCandidate, EmpiMatchResultEnum theMatchResult) {
-		myCandidate = theCandidate;
-		myMatchResult = theMatchResult;
+	public void validate(EmpiRulesJson theEmpiRulesJson) {
+		validateSystemIsUri(theEmpiRulesJson);
 	}
 
-	public IBaseResource getCandidate() {
-		return myCandidate;
-	}
-
-	public EmpiMatchResultEnum getMatchResult() {
-		return myMatchResult;
+	private void validateSystemIsUri(EmpiRulesJson theEmpiRulesJson) {
+		try {
+			new URI(theEmpiRulesJson.getEnterpriseEIDSystem());
+		} catch (URISyntaxException e) {
+			throw new ConfigurationException("Enterprise Identifier System (eidSystem) must be a valid URI");
+		}
 	}
 }

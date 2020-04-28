@@ -1493,7 +1493,7 @@ public enum Pointcut {
 
 	/**
 	 * <b>EMPI Hook:</b>
-	 * Invoked whenever a persisted Patient/Practitioner/Person resource (a resource that has just been stored in the
+	 * Invoked whenever a persisted Patient/Practitioner resource (a resource that has just been stored in the
 	 * database via a create/update/patch/etc.) has been matched against related resources and EMPI links have been updated.
 	 * <p>
 	 * Hooks may accept the following parameters:

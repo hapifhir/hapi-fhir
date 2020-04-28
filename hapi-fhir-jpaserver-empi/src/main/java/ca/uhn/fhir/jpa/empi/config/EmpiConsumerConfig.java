@@ -23,10 +23,9 @@ package ca.uhn.fhir.jpa.empi.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
-import ca.uhn.fhir.empi.api.IEmpiRuleValidator;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.provider.EmpiProviderLoader;
-import ca.uhn.fhir.empi.rules.config.EmpiRuleValidatorImpl;
+import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
@@ -59,7 +58,7 @@ public class EmpiConsumerConfig {
 	@Autowired
     IEmpiSettings myEmpiProperties;
 	@Autowired
-	IEmpiRuleValidator myEmpiRuleValidator;
+	EmpiRuleValidator myEmpiRuleValidator;
 	@Autowired
 	EmpiProviderLoader myEmpiProviderLoader;
 	@Autowired
@@ -116,8 +115,8 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	IEmpiRuleValidator empiRuleValidator() {
-		return new EmpiRuleValidatorImpl();
+	EmpiRuleValidator empiRuleValidator() {
+		return new EmpiRuleValidator();
 	}
 
 	@Bean
