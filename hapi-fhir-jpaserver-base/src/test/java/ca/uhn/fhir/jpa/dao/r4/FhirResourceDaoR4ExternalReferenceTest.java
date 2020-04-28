@@ -18,7 +18,9 @@ import java.util.Set;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 

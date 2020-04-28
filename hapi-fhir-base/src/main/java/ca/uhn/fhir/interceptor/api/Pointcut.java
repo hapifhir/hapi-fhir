@@ -28,7 +28,11 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 import javax.annotation.Nonnull;
 import java.io.Writer;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Value for {@link Hook#value()}

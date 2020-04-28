@@ -24,6 +24,7 @@ import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.InstantType;
@@ -46,7 +47,7 @@ public class EmpiProviderR4 {
 		myEmpiMatchFinderSvc = theEmpiMatchFinderSvc;
 	}
 
-	@Operation(name="$match", type = Patient.class)
+	@Operation(name = ProviderConstants.EMPI_MATCH, type = Patient.class)
 	public Bundle match(@OperationParam(name="resource", min = 1, max = 1) Patient thePatient) {
 		if (thePatient == null) {
 			throw new InvalidRequestException("resource may not be null");

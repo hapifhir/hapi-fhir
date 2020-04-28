@@ -30,8 +30,14 @@ import static ca.uhn.fhir.empi.api.Constants.CODE_HAPI_EMPI_MANAGED;
 import static ca.uhn.fhir.empi.api.Constants.SYSTEM_EMPI_MANAGED;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
