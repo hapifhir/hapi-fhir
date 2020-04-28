@@ -65,8 +65,9 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		CanonicalIdentityAssuranceLevel assuranceLevel = AssuranceLevelUtil.getAssuranceLevel(theMatchResult, theLinkSource);
 		switch (theMatchResult) {
 			case MATCH:
-				deleteCurrentMatch(theResource);
+				//deleteCurrentMatch(theResource);
 				myPersonHelper.addOrUpdateLink(thePerson, resourceId, assuranceLevel, theTransactionLogMessages);
+				myEmpiResourceDaoSvc.updatePerson(thePerson);
 				break;
 			case POSSIBLE_MATCH:
 				myPersonHelper.addOrUpdateLink(thePerson, resourceId, assuranceLevel, theTransactionLogMessages);
@@ -76,6 +77,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 			case POSSIBLE_DUPLICATE:
 				break;
 		}
+		myEmpiResourceDaoSvc.updatePerson(thePerson);
 		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theTransactionLogMessages);
 
 	}
