@@ -1,39 +1,29 @@
 package ca.uhn.fhir.empi.svc;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
-import ca.uhn.fhir.empi.rules.config.EmpiSettingsImpl;
-import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.dstu3.model.Person;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Factory;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class PersonHelperR4Test {
-	public static final FhirContext ourFhirContext = FhirContext.forR4();
+public class PersonHelperDSTU3Test {
+	public static final FhirContext ourFhirContext = FhirContext.forDstu3();
 	public static final String PATIENT_1 = "Patient/1";
 	public static final String PATIENT_2 = "Patient/2";
 	public static final String PATIENT_BAD = "Patient/BAD";
-
 	public static final PersonHelper MY_PERSON_HELPER = new PersonHelper(ourFhirContext);
 
 	@Test
@@ -59,13 +49,14 @@ public class PersonHelperR4Test {
 			assertEquals(PATIENT_2, links.get(0).getValue());
 		}
 
+
 	}
 
 	@Test
 	public void testAddOrUpdateLinks() {
 		Person person = new Person();
 
-		//Link addition without assurance level should NOOP
+		//Links with no assurance level are rejected
 		{
 			MY_PERSON_HELPER.addOrUpdateLink(person, new IdDt(PATIENT_1), null, null);
 			assertThat(person.getLink().size(), is(equalTo(0)));

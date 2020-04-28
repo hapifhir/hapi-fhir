@@ -75,6 +75,4 @@ public class EIDHelperR4Test {
 		assertThat(internalEid.getValue().length(), is(equalTo(36)));
 		assertThat(internalEid.getUse(), is(nullValue()));
 	}
-
-
 }

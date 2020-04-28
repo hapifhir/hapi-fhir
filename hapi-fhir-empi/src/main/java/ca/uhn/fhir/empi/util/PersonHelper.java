@@ -26,6 +26,7 @@ import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -39,6 +40,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -47,7 +49,7 @@ import java.util.stream.Stream;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
-public final class PersonHelper {
+public class PersonHelper {
 	private static final Logger ourLog = getLogger(PersonHelper.class);
 
 	@Autowired
@@ -71,13 +73,18 @@ public final class PersonHelper {
 	public Stream<IIdType> getLinks(IBaseResource thePerson) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				Person person = (Person)thePerson;
-				return person.getLink().stream()
+				Person personR4 = (Person)thePerson;
+				return personR4.getLink().stream()
 					.map(Person.PersonLinkComponent::getTarget)
 					.map(IBaseReference::getReferenceElement)
 					.map(IIdType::toUnqualifiedVersionless);
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person)thePerson;
+				return personStu3.getLink().stream()
+					.map(org.hl7.fhir.dstu3.model.Person.PersonLinkComponent::getTarget)
+					.map(IBaseReference::getReferenceElement)
+					.map(IIdType::toUnqualifiedVersionless);
 			default:
-				// FIXME EMPI moar versions
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
 	}
@@ -102,10 +109,13 @@ public final class PersonHelper {
 	 * @param canonicalAssuranceLevel The level of certainty of this link.
 	 * @param theTransactionLogMessages
 	 */
-	public void addOrUpdateLink(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages) {
+	public void addOrUpdateLink(IBaseResource thePerson, IIdType theResourceId, @Nonnull CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				handleLinkUpdateR4(thePerson, theResourceId, canonicalAssuranceLevel, theTransactionLogMessages);
+				break;
+			case DSTU3:
+				handleLinkUpdateDSTU3(thePerson, theResourceId, canonicalAssuranceLevel, theTransactionLogMessages);
 				break;
 			default:
 				// FIXME EMPI moar versions
@@ -113,25 +123,56 @@ public final class PersonHelper {
 		}
 	}
 
+	private void handleLinkUpdateDSTU3(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel theCanonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages) {
+		if (theCanonicalAssuranceLevel == null) {
+			ourLog.info("Refusing to update or add a link without an Assurance Level.");
+			return;
+		}
+
+		org.hl7.fhir.dstu3.model.Person person = (org.hl7.fhir.dstu3.model.Person) thePerson;
+		if (!containsLinkTo(thePerson, theResourceId)) {
+			person.addLink().setTarget(new org.hl7.fhir.dstu3.model.Reference(theResourceId)).setAssurance(theCanonicalAssuranceLevel.toDstu3());
+			logLinkAddMessage(thePerson, theResourceId, theCanonicalAssuranceLevel, theTransactionLogMessages);
+		} else {
+			person.getLink().stream()
+				.filter(link -> link.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()))
+				.findFirst()
+				.ifPresent(link -> {
+					logLinkUpdateMessage(thePerson, theResourceId, theCanonicalAssuranceLevel, theTransactionLogMessages, link.getAssurance().toCode());
+					link.setAssurance(theCanonicalAssuranceLevel.toDstu3());
+				});
+		}
+	}
+
+	private void logLinkAddMessage(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel theCanonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages) {
+		TransactionLogMessages.addMessage(theTransactionLogMessages, ("Creating new link from " + (StringUtils.isBlank(thePerson.getIdElement().getValue()) ? "new Person" : thePerson.getIdElement().toUnqualifiedVersionless()) + " -> " + theResourceId.toUnqualifiedVersionless() + " with IdentityAssuranceLevel: " + theCanonicalAssuranceLevel.name()));
+	}
+
+	private void logLinkUpdateMessage(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages, String theOriginalAssuranceLevel) {
+		TransactionLogMessages.addMessage(theTransactionLogMessages, ("Updating link from " + thePerson.getIdElement().toUnqualifiedVersionless() + " -> " + theResourceId.toUnqualifiedVersionless() + ". Changing IdentityAssuranceLevel: " + theOriginalAssuranceLevel + " -> " + canonicalAssuranceLevel.name()));
+	}
+
 	private void handleLinkUpdateR4(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages) {
 		if (canonicalAssuranceLevel == null) {
+			ourLog.info("Refusing to update or add a link without an Assurance Level.");
 			return;
 		}
 
 		Person person = (Person) thePerson;
 		if (!containsLinkTo(thePerson, theResourceId)) {
 			person.addLink().setTarget(new Reference(theResourceId)).setAssurance(canonicalAssuranceLevel.toR4());
-			TransactionLogMessages.addMessage(theTransactionLogMessages, ("Creating new link from " + (StringUtils.isBlank(thePerson.getIdElement().getValue()) ? "new Person" : thePerson.getIdElement().toUnqualifiedVersionless()) + " -> " + theResourceId.toUnqualifiedVersionless() + " with IdentityAssuranceLevel: " + canonicalAssuranceLevel.name()));
+			logLinkAddMessage(thePerson, theResourceId, canonicalAssuranceLevel, theTransactionLogMessages);
 		} else {
 			person.getLink().stream()
 				.filter(link -> link.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()))
 				.findFirst()
 				.ifPresent(link -> {
-					TransactionLogMessages.addMessage(theTransactionLogMessages, ("Updating link from " + thePerson.getIdElement().toUnqualifiedVersionless() + " -> " + theResourceId.toUnqualifiedVersionless() + ". Changing IdentityAssuranceLevel: " + link.getAssurance().toCode() + " -> " + canonicalAssuranceLevel.name()));
+					logLinkUpdateMessage(thePerson, theResourceId, canonicalAssuranceLevel, theTransactionLogMessages, link.getAssurance().toCode());
 					link.setAssurance(canonicalAssuranceLevel.toR4());
 			});
 		}
 	}
+
 
 	/**
 	 * Removes a link from the given {@link IBaseResource} to the target {@link IIdType}.
@@ -150,8 +191,11 @@ public final class PersonHelper {
 				List<Person.PersonLinkComponent> links = person.getLink();
 				links.removeIf(component -> component.hasTarget() && component.getTarget().getReference().equals(theResourceId.getValue()));
 				break;
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Person personDstu3 = (org.hl7.fhir.dstu3.model.Person)thePerson;
+				personDstu3.getLink().removeIf(component -> component.hasTarget() && component.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()));
+				break;
 			default:
-				// FIXME EMPI moar versions
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
 	}
