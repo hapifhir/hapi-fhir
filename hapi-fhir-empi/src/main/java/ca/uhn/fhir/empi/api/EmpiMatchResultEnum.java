@@ -22,22 +22,22 @@ package ca.uhn.fhir.empi.api;
 
 public enum EmpiMatchResultEnum {
 	/**
-	 * Match weight fell below threshold for a match.
+	 * Manually confirmed to not be a match.
 	 */
 	NO_MATCH,
 
 	/**
-	 * Match weight fell below low threshold and high threshold.  Requires manual review.
+	 * Enough of a match to warrant manual review.
 	 */
 	POSSIBLE_MATCH,
 
 	/**
-	 * Match weight was above high threshold for a match
+	 * Strong enough match to consider matched.
 	 */
 	MATCH,
 
 	/**
-	 * Link that can exist between two PERSON objects indicating they may be duplicates.
+	 * Link between two Person resources indicating they may be duplicates.
 	 */
 	POSSIBLE_DUPLICATE
 

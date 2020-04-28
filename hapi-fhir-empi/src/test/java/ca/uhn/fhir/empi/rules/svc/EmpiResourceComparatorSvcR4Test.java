@@ -1,6 +1,6 @@
 package ca.uhn.fhir.empi.rules.svc;
 
-import ca.uhn.fhir.empi.BaseTest;
+import ca.uhn.fhir.empi.BaseR4Test;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class EmpiResourceComparatorSvcTest extends BaseTest {
+public class EmpiResourceComparatorSvcR4Test extends BaseR4Test {
 	private EmpiResourceComparatorSvc myEmpiResourceComparatorSvc;
 	public static final double NAME_DELTA = 0.0001;
 

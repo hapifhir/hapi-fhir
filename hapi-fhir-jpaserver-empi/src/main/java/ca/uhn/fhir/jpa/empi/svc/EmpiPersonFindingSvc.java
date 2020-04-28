@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
-import ca.uhn.fhir.empi.api.MatchedTargetCandidate;
+import ca.uhn.fhir.empi.api.MatchedTarget;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
@@ -107,13 +107,7 @@ public class EmpiPersonFindingSvc {
 		IBaseResource foundPerson = myEmpiResourceDaoSvc.searchPersonByEid(eidFromResource.get().getValue());
 			if (foundPerson != null) {
 				Long pidOrNull = myResourceTablePidHelper.getPidOrNull(foundPerson);
-
-				//We make a fake link here as there no link for this association yet.
-				//FIXME EMPI proobably have to re-model MatchedPersonCandidate?? I don't like making this fake thing to throw around.
-				EmpiLink fakeEmpiLink = new EmpiLink();
-				fakeEmpiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-				fakeEmpiLink.setPersonPid(pidOrNull);
-				MatchedPersonCandidate mpc = new MatchedPersonCandidate(new ResourcePersistentId(pidOrNull), fakeEmpiLink.getMatchResult());
+				MatchedPersonCandidate mpc = new MatchedPersonCandidate(new ResourcePersistentId(pidOrNull), EmpiMatchResultEnum.MATCH);
 				return Optional.of(Collections.singletonList(mpc));
 			}
 		}
@@ -165,19 +159,7 @@ public class EmpiPersonFindingSvc {
 		//OK, so we have not found any links in the EmpiLink table with us as a target. Next, let's find possible Patient/Practitioner
 		//matches by following EMPI rules.
 		List<Long> unmatchablePersonPids = getNoMatchPersonPids(theBaseResource);
-		List<MatchedTargetCandidate> matchedCandidates = myEmpiMatchFinderSvc.getMatchedTargetCandidates(myFhirContext.getResourceDefinition(theBaseResource).getName(), theBaseResource);
-
-		/** FIXME remove.
-		List<MatchedPersonCandidate> matchedPersons = matchedCandidates.stream()
-			.filter(mc -> mc.getMatchResult().equals(EmpiMatchResultEnum.MATCH) || mc.getMatchResult().equals(EmpiMatchResultEnum.POSSIBLE_MATCH))//FIXME EMPI GGG START HERE WE WANT TO INCLUDE POSSIBLE_MATCH HERE TOO!
-			.map(MatchedTargetCandidate::getCandidate)
-			.map(candidate -> myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTableHelper.getPidOrNull(candidate)))
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.filter(candidateLink -> !unmatchablePersonPids.contains(candidateLink.getPersonPid()))
-			.map(link -> new MatchedPersonCandidate(getResourcePersistentId(link.getPersonPid()), link.getMatchResult()))
-			.collect(Collectors.toList());
-*/
+		List<MatchedTarget> matchedCandidates = myEmpiMatchFinderSvc.getMatchedTargets(myFhirContext.getResourceDefinition(theBaseResource).getName(), theBaseResource);
 
 		//Convert all possible match targets to their equivalent Persons by looking up in the EmpiLink table,
 		//while ensuring that the matches aren't in our NO_MATCH list.
@@ -185,8 +167,8 @@ public class EmpiPersonFindingSvc {
 		// MatchedTargetCandidate -> Person -> EmpiLink -> MatchedPersonCandidate
 		List<MatchedPersonCandidate> matchedPersonCandidates = new ArrayList<>();
 		matchedCandidates = matchedCandidates.stream().filter(mc -> mc.getMatchResult().equals(EmpiMatchResultEnum.MATCH) || mc.getMatchResult().equals(EmpiMatchResultEnum.POSSIBLE_MATCH)).collect(Collectors.toList());
-		for (MatchedTargetCandidate match: matchedCandidates) {
-			Optional<EmpiLink> optMatchEmpiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTablePidHelper.getPidOrNull(match.getCandidate()));
+		for (MatchedTarget match: matchedCandidates) {
+			Optional<EmpiLink> optMatchEmpiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTablePidHelper.getPidOrNull(match.getTarget()));
 			if (!optMatchEmpiLink.isPresent()) {
 				continue;
 			}

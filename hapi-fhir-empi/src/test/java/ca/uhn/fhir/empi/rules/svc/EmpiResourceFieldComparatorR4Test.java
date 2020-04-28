@@ -1,6 +1,6 @@
 package ca.uhn.fhir.empi.rules.svc;
 
-import ca.uhn.fhir.empi.BaseTest;
+import ca.uhn.fhir.empi.BaseR4Test;
 import ca.uhn.fhir.empi.rules.json.DistanceMetricEnum;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -16,7 +16,7 @@ import static junit.framework.TestCase.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 
-public class EmpiResourceFieldComparatorTest extends BaseTest {
+public class EmpiResourceFieldComparatorR4Test extends BaseR4Test {
 	protected EmpiResourceFieldComparator myComparator;
 	private Patient myJohn;
 	private Patient myJohny;

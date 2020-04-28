@@ -1,7 +1,6 @@
 package ca.uhn.fhir.empi.rules.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.empi.api.IEmpiRuleValidator;
 import ca.uhn.fhir.empi.config.TestEmpiConfig;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import org.junit.Test;
@@ -13,8 +12,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 @ContextConfiguration(classes = {TestEmpiConfig.class})
-public class EmpiRuleValidatorImplTest {
-	private IEmpiRuleValidator myEmpiRuleValidator = new EmpiRuleValidatorImpl();
+public class EmpiRuleValidatorTest {
+	private EmpiRuleValidator myEmpiRuleValidator = new EmpiRuleValidator();
 
    @Test
    public void testValidate() {

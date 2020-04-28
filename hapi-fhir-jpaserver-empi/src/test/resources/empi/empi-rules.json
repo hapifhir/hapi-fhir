@@ -1,12 +1,12 @@
 {
-	"resourceSearchParams" : [ {
+	"candidateSearchParams" : [ {
 		"resourceType" : "Patient",
 		"searchParam" : "birthdate"
 	}, {
 		"resourceType" : "All",
 		"searchParam" : "identifier"
 	} ],
-	"filterSearchParams" : [ {
+	"candidateFilterSearchParams" : [ {
 		"resourceType" : "All",
 		"searchParam" : "active",
 		"fixedValue" : "true"

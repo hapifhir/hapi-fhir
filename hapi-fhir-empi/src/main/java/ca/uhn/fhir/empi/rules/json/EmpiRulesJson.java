@@ -32,9 +32,9 @@ import java.util.List;
 import java.util.Map;
 
 public class EmpiRulesJson implements IModelJson {
-	@JsonProperty("resourceSearchParams")
+	@JsonProperty("candidateSearchParams")
 	List<EmpiResourceSearchParamJson> myResourceSearchParams = new ArrayList<>();
-	@JsonProperty("filterSearchParams")
+	@JsonProperty("candidateFilterSearchParams")
 	List<EmpiFilterSearchParamJson> myFilterSearchParams = new ArrayList<>();
 	@JsonProperty("matchFields")
 	List<EmpiFieldMatchJson> myMatchFieldJsonList = new ArrayList<>();

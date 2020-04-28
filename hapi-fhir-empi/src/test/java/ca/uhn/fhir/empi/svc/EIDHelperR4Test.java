@@ -11,14 +11,14 @@ import org.junit.Test;
 
 import java.util.Optional;
 
-import static ca.uhn.fhir.empi.api.Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM;
+import static ca.uhn.fhir.empi.api.EmpiConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 
-public class EIDHelperTest {
+public class EIDHelperR4Test {
 
 	private static final FhirContext myFhirContext = FhirContext.forR4();
 	private static final String EXTERNAL_ID_SYSTEM_FOR_TEST = "http://testsystem.io/naming-system/empi";

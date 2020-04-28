@@ -142,7 +142,7 @@ public class CanonicalEID {
 		} else if (collect.size() == 1) {
 			return Optional.of(collect.get(0));
 		} else {
-			//FIXME EMPI think about what this should throw.
+			//FIXME EMPI allow multiple EIDs
 			throw new InvalidRequestException("This resource has 2 EIDs with the same system!");
 		}
 	}

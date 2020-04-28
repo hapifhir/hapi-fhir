@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.empi.broker;
  * #L%
  */
 
-import ca.uhn.fhir.empi.api.Constants;
+import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -51,7 +51,7 @@ public class EmpiSubscriptionLoader {
 		retval.setReason("EMPI");
 		retval.setStatus(Subscription.SubscriptionStatus.REQUESTED);
 		retval.setCriteria(theCriteria);
-		retval.getMeta().addTag().setSystem(ca.uhn.fhir.empi.api.Constants.SYSTEM_EMPI_MANAGED).setCode(Constants.CODE_HAPI_EMPI_MANAGED);
+		retval.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
 		Subscription.SubscriptionChannelComponent channel = retval.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
 		channel.setEndpoint("jms:queue:" + myChannelNamer.getChannelName(IEmpiSettings.EMPI_CHANNEL_NAME));

@@ -26,8 +26,8 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
 
-import static ca.uhn.fhir.empi.api.Constants.CODE_HAPI_EMPI_MANAGED;
-import static ca.uhn.fhir.empi.api.Constants.SYSTEM_EMPI_MANAGED;
+import static ca.uhn.fhir.empi.api.EmpiConstants.CODE_HAPI_EMPI_MANAGED;
+import static ca.uhn.fhir.empi.api.EmpiConstants.SYSTEM_EMPI_MANAGED;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.containsString;

@@ -21,7 +21,7 @@ package ca.uhn.fhir.empi.util;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.api.Constants;
+import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -45,7 +45,7 @@ public final class EIDHelper {
 
 	public CanonicalEID createHapiEid() {
 		return new CanonicalEID(
-			Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM,
+			EmpiConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM,
 			UUID.randomUUID().toString(),
 			null
 		);
@@ -72,7 +72,7 @@ public final class EIDHelper {
 	 * @return An optional {@link CanonicalEID} representing the internal EID. Absent if the EID is not present.
 	 */
 	public Optional<CanonicalEID> getHapiEid(IBaseResource theResource) {
-		return CanonicalEID.extractFromResource(myFhirContext, Constants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, theResource);
+		return CanonicalEID.extractFromResource(myFhirContext, EmpiConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, theResource);
 	}
 
 	/**

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.empi.rules.json;
 
-import ca.uhn.fhir.empi.BaseTest;
+import ca.uhn.fhir.empi.BaseR4Test;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.util.JsonUtil;
 import junit.framework.TestCase;
@@ -14,8 +14,8 @@ import java.io.IOException;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 
-public class EmpiRulesJsonTest extends BaseTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(EmpiRulesJsonTest.class);
+public class EmpiRulesJsonR4Test extends BaseR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(EmpiRulesJsonR4Test.class);
 	private EmpiRulesJson myRules;
 
 	@Before
