@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.util;
+package ca.uhn.fhir.rest.server.provider;
 
 /*-
  * #%L
@@ -48,4 +48,5 @@ public class ProviderConstants {
 	public static final String PARTITION_MANAGEMENT_PARTITION_NAME = "name";
 	public static final String PARTITION_MANAGEMENT_PARTITION_DESC = "description";
 
+	public static final String EMPI_MATCH = "$match";
 }
