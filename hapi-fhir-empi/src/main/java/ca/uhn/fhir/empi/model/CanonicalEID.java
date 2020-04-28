@@ -112,7 +112,7 @@ public class CanonicalEID {
 
 	@Override
 	public String toString() {
-		return "SystemAgnosticEID{" +
+		return "CanonicalEID{" +
 			"mySystem='" + mySystem + '\'' +
 			", myUse='" + myUse + '\'' +
 			", myValue='" + myValue + '\'' +

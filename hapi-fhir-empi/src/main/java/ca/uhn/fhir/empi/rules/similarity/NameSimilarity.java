@@ -29,6 +29,9 @@ import org.hl7.fhir.instance.model.api.IBase;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Similarity measure for two IBase name fields
+ */
 public class NameSimilarity implements IEmpiFieldSimilarity {
 	private final EmpiPersonNameMatchModeEnum myMatchMode;
 

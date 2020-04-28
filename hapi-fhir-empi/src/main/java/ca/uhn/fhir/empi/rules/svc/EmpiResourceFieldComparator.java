@@ -22,7 +22,6 @@ package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
-import ca.uhn.fhir.empi.rules.json.IEmpiMatcher;
 import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -35,7 +34,7 @@ import static ca.uhn.fhir.empi.api.EmpiConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 /**
  * This class is responsible for performing matching between raw-typed values of a left record and a right record.
  */
-public class EmpiResourceFieldComparator implements IEmpiMatcher<IBaseResource> {
+public class EmpiResourceFieldComparator {
 	private final FhirContext myFhirContext;
 	private final EmpiFieldMatchJson myEmpiFieldMatchJson;
 	private final String myResourceType;
@@ -59,7 +58,6 @@ public class EmpiResourceFieldComparator implements IEmpiMatcher<IBaseResource> 
 	 * @return A boolean indicating whether they match.
 	 */
 	@SuppressWarnings("rawtypes")
-	@Override
 	public boolean match(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		validate(theLeftResource);
 		validate(theRightResource);

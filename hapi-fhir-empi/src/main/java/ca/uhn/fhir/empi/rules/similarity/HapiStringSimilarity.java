@@ -25,6 +25,9 @@ import info.debatty.java.stringsimilarity.interfaces.NormalizedStringSimilarity;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+/**
+ * Similarity measure for two IBase fields whose similarity can be measured by their String representations.
+ */
 public class HapiStringSimilarity implements IEmpiFieldSimilarity {
 	private final NormalizedStringSimilarity myStringSimilarity;
 
@@ -34,8 +37,8 @@ public class HapiStringSimilarity implements IEmpiFieldSimilarity {
 
 	public double similarity(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
-			IPrimitiveType<?> leftString = (IPrimitiveType) theLeftBase;
-			IPrimitiveType<?> rightString = (IPrimitiveType) theRightBase;
+			IPrimitiveType<?> leftString = (IPrimitiveType<?>) theLeftBase;
+			IPrimitiveType<?> rightString = (IPrimitiveType<?>) theRightBase;
 			return myStringSimilarity.similarity(leftString.getValueAsString(), rightString.getValueAsString());
 		}
 		return 0.0;
