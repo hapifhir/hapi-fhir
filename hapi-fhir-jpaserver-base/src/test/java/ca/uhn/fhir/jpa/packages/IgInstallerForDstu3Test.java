@@ -18,19 +18,42 @@ public class IgInstallerForDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void TestLoadIgFromUrl() throws IOException {
-		NpmPackage ig = igInstaller.loadIgFromURL("https://docs.ehealth.sundhed.dk/latest/ig/package.tgz");
+		NpmPackage ig = igInstaller.loadIg("https://docs.ehealth.sundhed.dk/latest/ig/package.tgz");
 	}
 
 	@Test
 	public void TestLoadIgWithDependentPackagesFromUrl() throws IOException {
-		NpmPackage ig = igInstaller.loadIgFromURL("https://build.fhir.org/ig/hl7dk/dk-medcom/package.tgz");
-		int x = 42;
+		NpmPackage ig = igInstaller.loadIg("https://build.fhir.org/ig/hl7dk/dk-medcom/package.tgz");
+	}
+
+	@Test
+	public void TestFetchDependenciesForIG() throws IOException {
+		NpmPackage ig = igInstaller.loadIg("https://build.fhir.org/ig/hl7dk/dk-medcom/package.tgz");
+		igInstaller.fetchAndInstallDependencies(ig);
 	}
 
 	@Test
 	public void TestGetStructureDefinitionsFromPackage() throws IOException {
-		NpmPackage ig = igInstaller.loadIgFromURL("https://docs.ehealth.sundhed.dk/latest/ig/package.tgz");
-		Collection<StructureDefinition> sds = igInstaller.getStructureDefinitions(ig);
+		NpmPackage ig = igInstaller.loadIg("https://docs.ehealth.sundhed.dk/latest/ig/package.tgz");
+		Collection<StructureDefinition> sds = igInstaller.fetchResourcesOfType(StructureDefinition.class, ig);
 		assertFalse(sds.isEmpty());
+	}
+
+	@Test
+	public void TestGenerateSnapshots() throws IOException {
+		NpmPackage ig = igInstaller.loadIg("dk.ehealth.sundhed.fhir.ig.core", "dev");
+		igInstaller.generateSnapshots(ig);
+	}
+
+	@Test
+	public void TestInstallPackage() throws IOException {
+		NpmPackage ig = igInstaller.loadIg("https://docs.ehealth.sundhed.dk/latest/ig/package.tgz");
+		igInstaller.install(ig);
+	}
+
+	@Test
+	public void TestLoadIGFromSimplifier() throws IOException {
+		NpmPackage ig = igInstaller.loadIg("nictiz.fhir.nl.stu3.eoverdracht", "0.1.0-beta1");
+		igInstaller.install(ig);
 	}
 }
