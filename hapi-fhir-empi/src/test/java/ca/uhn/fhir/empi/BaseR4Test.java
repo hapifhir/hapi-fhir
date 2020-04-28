@@ -74,7 +74,6 @@ public abstract class BaseR4Test {
 		retval.addMatchField(lastNameMatchField);
 		retval.putMatchResult(myBothNameFields, EmpiMatchResultEnum.MATCH);
 		retval.putMatchResult(PATIENT_GIVEN, EmpiMatchResultEnum.POSSIBLE_MATCH);
-
 		return retval;
 	}
 

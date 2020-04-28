@@ -45,7 +45,7 @@ public class EmpiProviderLoader {
 				myResourceProviderFactory.addSupplier(() -> new EmpiProviderR4(myEmpiMatchFinderSvc));
 				break;
 			default:
-				throw new ConfigurationException("LiveBundle not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+				throw new ConfigurationException("EMPI not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
 	}
 }

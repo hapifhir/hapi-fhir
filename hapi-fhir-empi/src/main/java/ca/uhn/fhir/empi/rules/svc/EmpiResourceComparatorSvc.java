@@ -36,7 +36,7 @@ import java.util.List;
 
 /**
  * The EmpiResourceComparator is in charge of performing actual comparisons between left and right records.
- * It does so by comparing individual comparators, and returning a weight based on the combination of
+ * It does so by calling individual comparators, and returning a vector based on the combination of
  * field comparators that matched.
  */
 

@@ -44,15 +44,15 @@ public class EmpiRulesJsonR4Test extends BaseR4Test {
 
 	@Test
 	public void getVector() {
-		VectorWeightMap vectorWeightMap = myRules.getVectorWeightMap();
-		assertEquals(1, vectorWeightMap.getVector(PATIENT_GIVEN));
-		assertEquals(2, vectorWeightMap.getVector(PATIENT_LAST));
-		assertEquals(3, vectorWeightMap.getVector(String.join(",", PATIENT_GIVEN, PATIENT_LAST)));
-		assertEquals(3, vectorWeightMap.getVector(String.join(", ", PATIENT_GIVEN, PATIENT_LAST)));
-		assertEquals(3, vectorWeightMap.getVector(String.join(",  ", PATIENT_GIVEN, PATIENT_LAST)));
-		assertEquals(3, vectorWeightMap.getVector(String.join(", \n ", PATIENT_GIVEN, PATIENT_LAST)));
+		VectorMatchResultMap vectorMatchResultMap = myRules.getVectorMatchResultMapForUnitTest();
+		assertEquals(1, vectorMatchResultMap.getVector(PATIENT_GIVEN));
+		assertEquals(2, vectorMatchResultMap.getVector(PATIENT_LAST));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(",", PATIENT_GIVEN, PATIENT_LAST)));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(", ", PATIENT_GIVEN, PATIENT_LAST)));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(",  ", PATIENT_GIVEN, PATIENT_LAST)));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(", \n ", PATIENT_GIVEN, PATIENT_LAST)));
 		try {
-			vectorWeightMap.getVector("bad");
+			vectorMatchResultMap.getVector("bad");
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("There is no matchField with name bad", e.getMessage());

@@ -26,11 +26,11 @@ import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
-public class VectorWeightMap {
+public class VectorMatchResultMap {
 	private final EmpiRulesJson myEmpiRulesJson;
 	private Map<Long, EmpiMatchResultEnum> myMap = new HashMap<>();
 
-	VectorWeightMap(EmpiRulesJson theEmpiRulesJson) {
+	VectorMatchResultMap(EmpiRulesJson theEmpiRulesJson) {
 		myEmpiRulesJson = theEmpiRulesJson;
 		//no reason to hold the entire empirulesjson here
 		initMap();
@@ -46,7 +46,7 @@ public class VectorWeightMap {
 		return myMap.get(theMatchVector);
 	}
 
-	public void put(String theFieldMatchNames, EmpiMatchResultEnum theMatchResult) {
+	private void put(String theFieldMatchNames, EmpiMatchResultEnum theMatchResult) {
 		long vector = getVector(theFieldMatchNames);
 		myMap.put(vector, theMatchResult);
 	}
