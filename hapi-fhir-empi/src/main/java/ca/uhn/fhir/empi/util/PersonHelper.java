@@ -28,6 +28,7 @@ import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -118,7 +119,6 @@ public class PersonHelper {
 				handleLinkUpdateDSTU3(thePerson, theResourceId, canonicalAssuranceLevel, theTransactionLogMessages);
 				break;
 			default:
-				// FIXME EMPI moar versions
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
 	}
@@ -209,14 +209,19 @@ public class PersonHelper {
 	 */
 	public IBaseResource createPersonFromEmpiTarget(IBaseResource theSourceResource) {
 		String eidSystem = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
+		CanonicalEID eidToApply = myEIDHelper.getExternalEid(theSourceResource).orElse(myEIDHelper.createHapiEid());
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person person = new Person();
-				CanonicalEID eidToApply = myEIDHelper.getExternalEid(theSourceResource).orElse(myEIDHelper.createHapiEid());
 				person.addIdentifier(eidToApply.toR4());
-				person.getMeta().addTag(buildEmpiManagedTag());
+				person.getMeta().addTag((Coding)buildEmpiManagedTag());
 				copyEmpiTargetDataIntoPerson(theSourceResource, person);
 				return person;
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Person personDSTU3 = new org.hl7.fhir.dstu3.model.Person();
+				personDSTU3.addIdentifier(eidToApply.toDSTU3());
+				personDSTU3.getMeta().addTag((org.hl7.fhir.dstu3.model.Coding)buildEmpiManagedTag());
+				copyEmpiTargetDataIntoPerson(theSourceResource, personDSTU3);
 			default:
 				// FIXME EMPI moar versions
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
@@ -229,35 +234,82 @@ public class PersonHelper {
 	 * @param theBaseResource The incoming {@link Patient} or {@link Practitioner} who's data we want to copy into Person.
 	 * @param thePerson The incoming {@link Person} who needs to have their data updated.
 	 */
-	private void copyEmpiTargetDataIntoPerson(IBaseResource theBaseResource, Person thePerson) {
+	private void copyEmpiTargetDataIntoPerson(IBaseResource theBaseResource,  IBaseResource thePerson) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case R4:
+				copyR4TargetInformation(theBaseResource, thePerson);
+				break;
+			case DSTU3:
+				copyDSTU3TargetInformation(theBaseResource, thePerson);
+		}
+	}
+	private void copyR4TargetInformation(IBaseResource theBaseResource, IBaseResource thePerson) {
+		Person person = (Person) thePerson;
 		switch (myFhirContext.getResourceDefinition(theBaseResource).getName()) {
 			case "Patient":
 				Patient patient = (Patient)theBaseResource;
-				thePerson.setName(patient.getName());
-				thePerson.setAddress(patient.getAddress());
-				thePerson.setTelecom(patient.getTelecom());
-				thePerson.setBirthDate(patient.getBirthDate());
-				thePerson.setGender(patient.getGender());
-				thePerson.setPhoto(patient.getPhotoFirstRep());
+				person.setName(patient.getName());
+				person.setAddress(patient.getAddress());
+				person.setTelecom(patient.getTelecom());
+				person.setBirthDate(patient.getBirthDate());
+				person.setGender(patient.getGender());
+				person.setPhoto(patient.getPhotoFirstRep());
 				break;
 			case "Practitioner":
 				Practitioner practitioner = (Practitioner)theBaseResource;
-				thePerson.setName(practitioner.getName());
-				thePerson.setAddress(practitioner.getAddress());
-				thePerson.setTelecom(practitioner.getTelecom());
-				thePerson.setBirthDate(practitioner.getBirthDate());
-				thePerson.setGender(practitioner.getGender());
-				thePerson.setPhoto(practitioner.getPhotoFirstRep());
+				person.setName(practitioner.getName());
+				person.setAddress(practitioner.getAddress());
+				person.setTelecom(practitioner.getTelecom());
+				person.setBirthDate(practitioner.getBirthDate());
+				person.setGender(practitioner.getGender());
+				person.setPhoto(practitioner.getPhotoFirstRep());
 				break;
 		}
 	}
+	private void copyDSTU3TargetInformation(IBaseResource theBaseResource, IBaseResource thePerson) {
+		org.hl7.fhir.dstu3.model.Person person = (org.hl7.fhir.dstu3.model.Person)thePerson;
+		switch (myFhirContext.getResourceDefinition(theBaseResource).getName()) {
+			case "Patient":
+				org.hl7.fhir.dstu3.model.Patient patient = (org.hl7.fhir.dstu3.model.Patient)theBaseResource;
+				person.setName(patient.getName());
+				person.setAddress(patient.getAddress());
+				person.setTelecom(patient.getTelecom());
+				person.setBirthDate(patient.getBirthDate());
+				person.setGender(patient.getGender());
+				person.setPhoto(patient.getPhotoFirstRep());
+				break;
+			case "Practitioner":
+				org.hl7.fhir.dstu3.model.Practitioner practitioner = (org.hl7.fhir.dstu3.model.Practitioner)theBaseResource;
+				person.setName(practitioner.getName());
+				person.setAddress(practitioner.getAddress());
+				person.setTelecom(practitioner.getTelecom());
+				person.setBirthDate(practitioner.getBirthDate());
+				person.setGender(practitioner.getGender());
+				person.setPhoto(practitioner.getPhotoFirstRep());
+				break;
+			default:
+				throw new UnsupportedOperationException("EMPI targets are limited to Practitioner/Patient. This is a : " + myFhirContext.getResourceDefinition(theBaseResource).getName());
+		}
+	}
 
-	private Coding buildEmpiManagedTag() {
-		Coding empiManagedCoding = new Coding();
-		empiManagedCoding.setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED);
-		empiManagedCoding.setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
-		empiManagedCoding.setDisplay("This Person can only be modified by Smile CDR's EMPI system.");
-		return empiManagedCoding;
+	private IBaseCoding buildEmpiManagedTag() {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case R4:
+				Coding empiManagedCoding = new Coding();
+				empiManagedCoding.setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED);
+				empiManagedCoding.setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
+				empiManagedCoding.setDisplay(EmpiConstants.DISPLAY_HAPI_EMPI_MANAGED);
+				return empiManagedCoding;
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Coding empiManagedCodingDstu3 = new org.hl7.fhir.dstu3.model.Coding();
+				empiManagedCodingDstu3.setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED);
+				empiManagedCodingDstu3.setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
+				empiManagedCodingDstu3.setDisplay(EmpiConstants.DISPLAY_HAPI_EMPI_MANAGED);
+				return empiManagedCodingDstu3;
+			default:
+				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+
+		}
 	}
 
 	/**
