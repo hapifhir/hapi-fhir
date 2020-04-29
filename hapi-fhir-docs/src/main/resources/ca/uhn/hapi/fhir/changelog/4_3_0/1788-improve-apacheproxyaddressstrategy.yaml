@@ -1,0 +1,6 @@
+---
+type: add
+issue: 1788
+title: "The ApacheProxyAddressStrategy has been improved to add support for additional proxy headers inclusing
+   `X-Forwarded-Host`, `X-Forwarded-Proto`, `X-Forwarded-Port`, and `X-Forwarded-Prefix`. Thanks to Thomas Papke
+   for the pull request!"
