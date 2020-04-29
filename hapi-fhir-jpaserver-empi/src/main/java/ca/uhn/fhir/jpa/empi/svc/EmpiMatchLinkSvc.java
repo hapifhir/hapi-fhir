@@ -139,8 +139,8 @@ public class EmpiMatchLinkSvc {
 	}
 
 	private void handleExternalEidAddition(IBaseResource thePerson, IBaseResource theResource) {
-		Optional<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theResource);
-		if (eidFromResource.isPresent()) {
+		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theResource);
+		if (!eidFromResource.isEmpty()) {
 			myPersonHelper.updatePersonExternalEidFromEmpiTarget(thePerson, theResource);
 		}
 	}

@@ -36,14 +36,15 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Identifier;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -208,17 +209,21 @@ public class PersonHelper {
 	 */
 	public IBaseResource createPersonFromEmpiTarget(IBaseResource theSourceResource) {
 		String eidSystem = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
-		CanonicalEID eidToApply = myEIDHelper.getExternalEid(theSourceResource).orElse(myEIDHelper.createHapiEid());
+		List<CanonicalEID> eidsToApply = myEIDHelper.getExternalEid(theSourceResource);
+
+		if (eidsToApply.isEmpty()) {
+			eidsToApply.add(myEIDHelper.createHapiEid());
+		}
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				Person person = new Person();
-				person.addIdentifier(eidToApply.toR4());
-				person.getMeta().addTag((Coding)buildEmpiManagedTag());
-				copyEmpiTargetDataIntoPerson(theSourceResource, person);
-				return person;
+				Person personR4 = new Person();
+				eidsToApply.forEach(eid -> personR4.addIdentifier(eid.toR4()));
+				personR4.getMeta().addTag((Coding)buildEmpiManagedTag());
+				copyEmpiTargetDataIntoPerson(theSourceResource, personR4);
+				return personR4;
 			case DSTU3:
 				org.hl7.fhir.dstu3.model.Person personDSTU3 = new org.hl7.fhir.dstu3.model.Person();
-				personDSTU3.addIdentifier(eidToApply.toDSTU3());
+				eidsToApply.forEach(eid -> personDSTU3.addIdentifier(eid.toDSTU3()));
 				personDSTU3.getMeta().addTag((org.hl7.fhir.dstu3.model.Coding)buildEmpiManagedTag());
 				copyEmpiTargetDataIntoPerson(theSourceResource, personDSTU3);
 			default:
@@ -321,16 +326,19 @@ public class PersonHelper {
 	 */
 	public IBaseResource updatePersonExternalEidFromEmpiTarget(IBaseResource thePerson, IBaseResource theEmpiTarget) {
 		//This handles overwriting an automatically assigned EID if a patient that links is coming in with an official EID.
-		Optional<CanonicalEID> incomingTargetEid = myEIDHelper.getExternalEid(theEmpiTarget);
-		Optional<CanonicalEID> personOfficialEid = myEIDHelper.getExternalEid(thePerson);
+		List<CanonicalEID> incomingTargetEid = myEIDHelper.getExternalEid(theEmpiTarget);
+		List<CanonicalEID> personOfficialEid = myEIDHelper.getExternalEid(thePerson);
 
-		if (incomingTargetEid.isPresent()) {
+		if (!incomingTargetEid.isEmpty()) {
 			//The person has no EID. This should be impossible given that we auto-assign an EID at creation time.
-			if (!personOfficialEid.isPresent()) {
-				ourLog.debug("Incoming resource:{} with EID {} is applying this EID to its related Person, as this person does not yet have an external EID", theEmpiTarget.getIdElement().getValueAsString(), incomingTargetEid.get().getValue());
-				addCanonicalEidToPerson(thePerson, incomingTargetEid.get());
-			} else if (personOfficialEid.isPresent() && myEIDHelper.eidsMatch(personOfficialEid.get(), incomingTargetEid.get())){
-				ourLog.debug("incoming resource:{} with EID {} does not need to overwrite person, as this EID is already present", theEmpiTarget.getIdElement().getValueAsString(), incomingTargetEid.get().getValue());
+			if (personOfficialEid.isEmpty()) {
+				ourLog.debug("Incoming resource:{} with EID {} is applying this EID to its related Person, as this person does not yet have an external EID", theEmpiTarget.getIdElement().getValueAsString(), incomingTargetEid.stream().map(eid -> eid.toString()).collect(Collectors.joining(",")));
+				addCanonicalEidsToPersonIfAbsent(thePerson, incomingTargetEid);
+			} else if (!personOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(personOfficialEid, incomingTargetEid)){
+				//FIXME GGG handle multiple new EIDs. What are the rules here?
+				ourLog.debug("incoming resource:{} with EIDs {} does not need to overwrite person, as this EID is already present",
+					theEmpiTarget.getIdElement().getValueAsString(),
+					incomingTargetEid.stream().map(eid -> eid.toString()).collect(Collectors.joining(",")));
 			} else {
 				throw new IllegalArgumentException("This would create a duplicate person!");
 			}
@@ -338,29 +346,54 @@ public class PersonHelper {
 		return thePerson;
 	}
 
-	private void addCanonicalEidToPerson(IBaseResource thePerson, CanonicalEID theIncomingTargetEid) {
+	private void addCanonicalEidsToPersonIfAbsent(IBaseResource thePerson, List<CanonicalEID> theIncomingTargetEid) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				((Person)thePerson).addIdentifier(theIncomingTargetEid.toR4());
+				theIncomingTargetEid.forEach(eid -> addIdentifierIfAbsent((Person)thePerson, eid.toR4()));
+				break;
 			case DSTU3:
-				((org.hl7.fhir.dstu3.model.Person)thePerson).addIdentifier(theIncomingTargetEid.toDSTU3());
+				theIncomingTargetEid.forEach(eid -> addIdentifierIfAbsent((org.hl7.fhir.dstu3.model.Person)thePerson, eid.toDSTU3()));
+				break;
 			default:
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
 	}
 
 	/**
+	 * To avoid adding duplicate
+	 * @param thePerson
+	 * @param theIdentifier
+	 */
+	private void addIdentifierIfAbsent(org.hl7.fhir.dstu3.model.Person thePerson, org.hl7.fhir.dstu3.model.Identifier theIdentifier) {
+		Optional<org.hl7.fhir.dstu3.model.Identifier> first = thePerson.getIdentifier().stream().filter(identifier -> identifier.getSystem().equals(theIdentifier.getSystem())).filter(identifier -> identifier.getValue().equals(theIdentifier.getValue())).findFirst();
+		if (first.isPresent()) {
+			return;
+		} else {
+			thePerson.addIdentifier(theIdentifier);
+		}
+	}
+
+	private void addIdentifierIfAbsent(Person thePerson, Identifier theIdentifier) {
+		Optional<Identifier> first = thePerson.getIdentifier().stream().filter(identifier -> identifier.getSystem().equals(theIdentifier.getSystem())).filter(identifier -> identifier.getValue().equals(theIdentifier.getValue())).findFirst();
+		if (first.isPresent()) {
+			return;
+		} else {
+			thePerson.addIdentifier(theIdentifier);
+		}
+	}
+
+	/**
 	 * An incoming resource is a potential duplicate if it matches a Patient that has a Person with an official EID, but
-	 * the incoming resource also has an EID.
+	 * the incoming resource also has an EID that does not match.
 	 *
 	 * @param theExistingPerson
 	 * @param theComparingPerson
 	 * @return
 	 */
 	public boolean isPotentialDuplicate(IBaseResource theExistingPerson, IBaseResource theComparingPerson) {
-		Optional<CanonicalEID> firstEid = myEIDHelper.getExternalEid(theExistingPerson);
-		Optional<CanonicalEID> secondEid = myEIDHelper.getExternalEid(theComparingPerson);
-		return firstEid.isPresent() && secondEid.isPresent() && !Objects.equals(firstEid.get().getValue(), secondEid.get().getValue());
+		List<CanonicalEID> firstEids = myEIDHelper.getExternalEid(theExistingPerson);
+		List<CanonicalEID> secondEids = myEIDHelper.getExternalEid(theComparingPerson);
+		return !firstEids.isEmpty() && !secondEids.isEmpty() && !myEIDHelper.eidMatchExists(firstEids, secondEids);
 	}
 
 

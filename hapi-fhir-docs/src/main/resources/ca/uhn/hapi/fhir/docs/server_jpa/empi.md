@@ -139,14 +139,15 @@ the incoming Patient or Practitioner had no EID assigned, an internal EID will b
 by the install. 
 
 The following are rules about EID merging based on matches for new or modified Patient Data. 
-1. A Person will always have at most one Internal EID. 
-1. An Incoming Patient is permitted to have 0..* External EIDs of the same system. 
+1. A Person may have 0..1 Internal EIDs. 
+2. A Person may have 0..* External EIDs. 
+1. An incoming Patient/Practitioner is permitted to have 0..* External EIDs.
 1. If a Patient/Practitioner with no External EID is created, and has no matches, a Person will be created, and given an Internal EID. 
 1. If a Patient/Practitioner with no External EID is created, and matches an existing Patient/Practitioner, the EIDs will not be modified on the Person.
 1. If a Patient/Practitioner with an External EID is created, and has no matches, a Person will be created, and the Patient/Practitioner's External EIDs will be applied to it. 
 1. If a Patient/Practitioner with an External EID is created, and matches an existing Patient/Practitioner, there are two possibilities:
-    1. If the Person has >=1 External EIDs, and there is a match between the incoming Patient/Practitioner's EIDs and the Person's, the set of EIDs is unioned and applied to the Person.
-    1. If the Person has 0 External EIDs, the Patient/Practitioner's EIDs will be applied to the Person
+    1. If the Person has >=1 External EIDs, and there is a match between the incoming Patient/Practitioner's EIDs and the Person's, the resulting set of EIDs is the union of the original Person's External EIDs, and the incoming Patient/Practitioner's External EIDs. //FIXME EMPI is this the case? ask duncan
+    1. If the Person has 0 External EIDs, the Patient/Practitioner's EIDs will be applied to the Person.
     
     
 # HAPI EMPI Technical Details

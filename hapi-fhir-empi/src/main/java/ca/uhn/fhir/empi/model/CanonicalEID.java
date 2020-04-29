@@ -22,14 +22,12 @@ package ca.uhn.fhir.empi.model;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CanonicalEID {
@@ -119,6 +117,7 @@ public class CanonicalEID {
 			'}';
 	}
 
+
 	/**
 	 * A Factory method to generate a {@link CanonicalEID} object from an incoming resource.
 	 *
@@ -128,22 +127,13 @@ public class CanonicalEID {
 	 *
 	 * @return an optional {@link CanonicalEID} object, representing a resource identifier that matched the given eidSystem.
 	 */
-	public static Optional<CanonicalEID> extractFromResource(FhirContext theFhirContext, String theEidSystem, IBaseResource theBaseResource) {
+	public static List<CanonicalEID> extractFromResource(FhirContext theFhirContext, String theEidSystem, IBaseResource theBaseResource) {
 		IFhirPath fhirPath = theFhirContext.newFhirPath();
 		String eidPath = buildEidFhirPath(theFhirContext, theEidSystem, theBaseResource);
 		List<IBase> evaluate = fhirPath.evaluate(theBaseResource, eidPath, IBase.class);
 
-		List<CanonicalEID> collect = evaluate.stream()
+		return evaluate.stream()
 			.map(ibase -> new CanonicalEID(fhirPath, ibase))
 			.collect(Collectors.toList());
-
-		if (collect.isEmpty()) {
-			return Optional.empty();
-		} else if (collect.size() == 1) {
-			return Optional.of(collect.get(0));
-		} else {
-			//FIXME EMPI allow multiple EIDs
-			throw new InvalidRequestException("This resource has 2 EIDs with the same system!");
-		}
 	}
 }

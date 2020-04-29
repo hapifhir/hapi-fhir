@@ -122,10 +122,10 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(empiLink.isPresent(), is(true));
 
 		Person person = getPersonFromEmpiLink(empiLink.get());
-		Optional<CanonicalEID> externalEid = myEidHelper.getExternalEid(person);
+		List<CanonicalEID> externalEid = myEidHelper.getExternalEid(person);
 
-		assertThat(externalEid.get().getSystem(), is(equalTo(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())));
-		assertThat(externalEid.get().getValue(), is(equalTo(sampleEID)));
+		assertThat(externalEid.get(0).getSystem(), is(equalTo(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())));
+		assertThat(externalEid.get(0).getValue(), is(equalTo(sampleEID)));
 	}
 
 	@Test
@@ -167,8 +167,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 
 		Person janePerson = getPersonFromTarget(patient);
-		Optional<CanonicalEID> hapiEid = myEidHelper.getHapiEid(janePerson);
-		String foundHapiEid = hapiEid.get().getValue();
+		List<CanonicalEID> hapiEid = myEidHelper.getHapiEid(janePerson);
+		String foundHapiEid = hapiEid.get(0).getValue();
 
 		Patient janePatient= addExternalEID(buildJanePatient(), "12345");
 		createPatientAndUpdateLinks(janePatient);
@@ -197,6 +197,23 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		createPatientAndUpdateLinks(patient1);
 
 		Patient patient2 = addExternalEID(buildPaulPatient(), "uniqueid");
+		createPatientAndUpdateLinks(patient2);
+
+		assertThat(patient1, is(samePersonAs(patient2)));
+	}
+	@Test
+	public void testHavingMultipleEIDsOnIncomingPatientMatchesCorrectly() {
+
+		Patient patient1 = buildJanePatient();
+		addExternalEID(patient1, "id_1");
+		addExternalEID(patient1, "id_2");
+		addExternalEID(patient1, "id_3");
+		addExternalEID(patient1, "id_4");
+		createPatientAndUpdateLinks(patient1);
+
+		Patient patient2 = buildPaulPatient();
+		addExternalEID(patient2, "id_5");
+		addExternalEID(patient2, "id_1");
 		createPatientAndUpdateLinks(patient2);
 
 		assertThat(patient1, is(samePersonAs(patient2)));
@@ -382,6 +399,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	@Ignore
+	//FIXME EMPI uncomment this test when we decide on functionaliy.
 	public void testPatientThatUndergoesSufficientChangeIsReassignedToNewPerson() {
 		Patient janePatient= createPatientAndUpdateLinks(buildJanePatient());
 		Person janePerson = getPersonFromTarget(janePatient);

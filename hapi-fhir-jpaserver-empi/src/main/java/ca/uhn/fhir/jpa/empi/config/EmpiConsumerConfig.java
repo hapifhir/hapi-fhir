@@ -56,7 +56,7 @@ public class EmpiConsumerConfig {
 	public static final String EMPI_CONSUMER_COUNT_DEFAULT = "5";
 
 	@Autowired
-    IEmpiSettings myEmpiProperties;
+	IEmpiSettings myEmpiProperties;
 	@Autowired
 	EmpiRuleValidator myEmpiRuleValidator;
 	@Autowired
