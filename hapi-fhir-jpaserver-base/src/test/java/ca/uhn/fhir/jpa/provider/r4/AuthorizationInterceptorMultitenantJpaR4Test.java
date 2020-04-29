@@ -47,12 +47,12 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 
 	@Test
 	public void testCreateInTenant_Blocked() {
+		createPatient(withTenant(TENANT_A), withActiveTrue());
+		IIdType idB = createPatient(withTenant(TENANT_B), withActiveFalse());
+
 		enableAuthorizationInterceptor(() -> new RuleBuilder()
 			.allow().create().allResources().withAnyId().forTenantIds(TENANT_A)
 			.build());
-
-		createPatient(withTenant(TENANT_A), withActiveTrue());
-		IIdType idB = createPatient(withTenant(TENANT_B), withActiveFalse());
 
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		try {
