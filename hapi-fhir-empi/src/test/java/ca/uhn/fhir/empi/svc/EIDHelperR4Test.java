@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.Optional;
 
 import static ca.uhn.fhir.empi.api.EmpiConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM;
@@ -42,12 +43,12 @@ public class EIDHelperR4Test {
 			.setValue("simpletest")
 			.setUse(Identifier.IdentifierUse.SECONDARY);
 
-		Optional<CanonicalEID> externalEid = EID_HELPER.getHapiEid(patient);
+		List<CanonicalEID> externalEid = EID_HELPER.getHapiEid(patient);
 
-		assertThat(externalEid.isPresent(), is(true));
-		assertThat(externalEid.get().getValue(), is(equalTo("simpletest")));
-		assertThat(externalEid.get().getSystem(), is(equalTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
-		assertThat(externalEid.get().getUse(), is(equalTo("secondary")));
+		assertThat(externalEid.isEmpty(), is(false));
+		assertThat(externalEid.get(0).getValue(), is(equalTo("simpletest")));
+		assertThat(externalEid.get(0).getSystem(), is(equalTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
+		assertThat(externalEid.get(0).getUse(), is(equalTo("secondary")));
 	}
 
 	@Test
@@ -59,11 +60,11 @@ public class EIDHelperR4Test {
 			.setSystem(EXTERNAL_ID_SYSTEM_FOR_TEST)
 			.setValue(uniqueID);
 
-		Optional<CanonicalEID> externalEid = EID_HELPER.getExternalEid(patient);
+		List<CanonicalEID> externalEid = EID_HELPER.getExternalEid(patient);
 
-		assertThat(externalEid.isPresent(), is(true));
-		assertThat(externalEid.get().getValue(), is(equalTo(uniqueID)));
-		assertThat(externalEid.get().getSystem(), is(equalTo(EXTERNAL_ID_SYSTEM_FOR_TEST)));
+		assertThat(externalEid.isEmpty(), is(false));
+		assertThat(externalEid.get(0).getValue(), is(equalTo(uniqueID)));
+		assertThat(externalEid.get(0).getSystem(), is(equalTo(EXTERNAL_ID_SYSTEM_FOR_TEST)));
 	}
 
 	@Test

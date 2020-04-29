@@ -28,9 +28,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public final class EIDHelper {
@@ -59,7 +62,7 @@ public final class EIDHelper {
 	 *
 	 * @return An optional {@link CanonicalEID} representing the external EID. Absent if the EID is not present.
 	 */
-	public Optional<CanonicalEID> getExternalEid(IBaseResource theResource) {
+	public List<CanonicalEID> getExternalEid(IBaseResource theResource) {
 		return CanonicalEID.extractFromResource(myFhirContext, myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem(), theResource);
 	}
 
@@ -71,20 +74,24 @@ public final class EIDHelper {
 	 *
 	 * @return An optional {@link CanonicalEID} representing the internal EID. Absent if the EID is not present.
 	 */
-	public Optional<CanonicalEID> getHapiEid(IBaseResource theResource) {
+	public List<CanonicalEID> getHapiEid(IBaseResource theResource) {
 		return CanonicalEID.extractFromResource(myFhirContext, EmpiConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, theResource);
 	}
 
 	/**
-	 * Determines whether two {@link CanonicalEID} have the same system and value.
+	 * Determines whether two lists of {@link CanonicalEID} have any intersection. Two resources are considered a match if
+	 * a single {@link CanonicalEID} matches between the two collections.
 	 *
-	 * @param theFirstEid the first EID
-	 * @param theSecondEid the second EID
+	 * @param theFirstResourceEids the first EID
+	 * @param theSecondResourceEids the second EID
 	 *
-	 * @return a boolean indicating whether they are the same.
+	 * @return a boolean indicating whether there is a match between these two identifier sets.
 	 */
-	public boolean eidsMatch(CanonicalEID theFirstEid, CanonicalEID theSecondEid) {
-		return Objects.equals(theFirstEid.getValue(), theSecondEid.getValue()) && Objects.equals(theFirstEid.getSystem(), theSecondEid.getSystem());
+	public boolean eidMatchExists(List<CanonicalEID> theFirstResourceEids, List<CanonicalEID> theSecondResourceEids) {
+		return !Collections.disjoint(
+			theFirstResourceEids.stream().map(CanonicalEID::getValue).collect(Collectors.toList()),
+			theSecondResourceEids.stream().map(CanonicalEID::getValue).collect(Collectors.toList())
+			);
 	}
 
 

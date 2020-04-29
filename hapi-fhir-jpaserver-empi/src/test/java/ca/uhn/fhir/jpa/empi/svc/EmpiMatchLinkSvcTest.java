@@ -201,6 +201,23 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		assertThat(patient1, is(samePersonAs(patient2)));
 	}
+	@Test
+	public void testHavingMultipleEIDsOnIncomingPatientMatchesCorrectly() {
+
+		Patient patient1 = buildJanePatient();
+		addExternalEID(patient1, "id_1");
+		addExternalEID(patient1, "id_2");
+		addExternalEID(patient1, "id_3");
+		addExternalEID(patient1, "id_4");
+		createPatientAndUpdateLinks(patient1);
+
+		Patient patient2 = buildPaulPatient();
+		addExternalEID(patient2, "id_5");
+		addExternalEID(patient2, "id_1");
+		createPatientAndUpdateLinks(patient2);
+
+		assertThat(patient1, is(samePersonAs(patient2)));
+	}
 
 	@Test
 	public void testDuplicatePersonLinkIsCreatedWhenAnIncomingPatientArrivesWithEIDThatMatchesAnotherEIDPatient() {
@@ -382,6 +399,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	@Ignore
+	//FIXME EMPI uncomment this test when we decide on functionaliy.
 	public void testPatientThatUndergoesSufficientChangeIsReassignedToNewPerson() {
 		Patient janePatient= createPatientAndUpdateLinks(buildJanePatient());
 		Person janePerson = getPersonFromTarget(janePatient);
