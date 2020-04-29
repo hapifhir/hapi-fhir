@@ -122,10 +122,10 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(empiLink.isPresent(), is(true));
 
 		Person person = getPersonFromEmpiLink(empiLink.get());
-		Optional<CanonicalEID> externalEid = myEidHelper.getExternalEid(person);
+		List<CanonicalEID> externalEid = myEidHelper.getExternalEid(person);
 
-		assertThat(externalEid.get().getSystem(), is(equalTo(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())));
-		assertThat(externalEid.get().getValue(), is(equalTo(sampleEID)));
+		assertThat(externalEid.get(0).getSystem(), is(equalTo(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())));
+		assertThat(externalEid.get(0).getValue(), is(equalTo(sampleEID)));
 	}
 
 	@Test
@@ -167,8 +167,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 
 		Person janePerson = getPersonFromTarget(patient);
-		Optional<CanonicalEID> hapiEid = myEidHelper.getHapiEid(janePerson);
-		String foundHapiEid = hapiEid.get().getValue();
+		List<CanonicalEID> hapiEid = myEidHelper.getHapiEid(janePerson);
+		String foundHapiEid = hapiEid.get(0).getValue();
 
 		Patient janePatient= addExternalEID(buildJanePatient(), "12345");
 		createPatientAndUpdateLinks(janePatient);

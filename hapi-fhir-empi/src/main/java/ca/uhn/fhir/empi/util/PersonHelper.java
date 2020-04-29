@@ -347,12 +347,13 @@ public class PersonHelper {
 	}
 
 	private void addCanonicalEidsToPersonIfAbsent(IBaseResource thePerson, List<CanonicalEID> theIncomingTargetEid) {
-		//FIXME GGG look at this.
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				theIncomingTargetEid.forEach(eid -> addIdentifierIfAbsent((Person)thePerson, eid.toR4()));
+				break;
 			case DSTU3:
 				theIncomingTargetEid.forEach(eid -> addIdentifierIfAbsent((org.hl7.fhir.dstu3.model.Person)thePerson, eid.toDSTU3()));
+				break;
 			default:
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
@@ -390,10 +391,9 @@ public class PersonHelper {
 	 * @return
 	 */
 	public boolean isPotentialDuplicate(IBaseResource theExistingPerson, IBaseResource theComparingPerson) {
-		//FIXME GGG start here.
 		List<CanonicalEID> firstEids = myEIDHelper.getExternalEid(theExistingPerson);
 		List<CanonicalEID> secondEids = myEIDHelper.getExternalEid(theComparingPerson);
-		return !firstEids.isEmpty() && !secondEids.isEmpty() && myEIDHelper.eidMatchExists(firstEids, secondEids);
+		return !firstEids.isEmpty() && !secondEids.isEmpty() && !myEIDHelper.eidMatchExists(firstEids, secondEids);
 	}
 
 

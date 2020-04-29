@@ -88,9 +88,13 @@ public final class EIDHelper {
 	 * @return a boolean indicating whether there is a match between these two identifier sets.
 	 */
 	public boolean eidMatchExists(List<CanonicalEID> theFirstResourceEids, List<CanonicalEID> theSecondResourceEids) {
+		System.out.println("WOAH");
+
+		List<String> collect = theFirstResourceEids.stream().map(CanonicalEID::getValue).collect(Collectors.toList());
+		List<String> collect1 = theSecondResourceEids.stream().map(CanonicalEID::getValue).collect(Collectors.toList());
 		return !Collections.disjoint(
-			theFirstResourceEids.stream().map(CanonicalEID::getValue).collect(Collectors.toList()),
-			theSecondResourceEids.stream().map(CanonicalEID::getValue).collect(Collectors.toList())
+			collect,
+			collect1
 			);
 	}
 

@@ -97,18 +97,19 @@ public class EmpiPersonFindingSvc {
 		if (matchedPersonCandidates.isPresent()) {
 			return matchedPersonCandidates.get();
 		}
-
 		return Collections.emptyList();
 	}
 
 	private Optional<List<MatchedPersonCandidate>> attemptToFindPersonCandidateFromIncomingEID(IBaseResource theBaseResource) {
-		Optional<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theBaseResource);
-		if (eidFromResource.isPresent()) {
-		IBaseResource foundPerson = myEmpiResourceDaoSvc.searchPersonByEid(eidFromResource.get().getValue());
-			if (foundPerson != null) {
-				Long pidOrNull = myResourceTablePidHelper.getPidOrNull(foundPerson);
-				MatchedPersonCandidate mpc = new MatchedPersonCandidate(new ResourcePersistentId(pidOrNull), EmpiMatchResultEnum.MATCH);
-				return Optional.of(Collections.singletonList(mpc));
+		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theBaseResource);
+		if (!eidFromResource.isEmpty()) {
+			for (CanonicalEID  eid: eidFromResource) {
+				IBaseResource foundPerson = myEmpiResourceDaoSvc.searchPersonByEid(eid.getValue());
+				if (foundPerson != null) {
+					Long pidOrNull = myResourceTablePidHelper.getPidOrNull(foundPerson);
+					MatchedPersonCandidate mpc = new MatchedPersonCandidate(new ResourcePersistentId(pidOrNull), EmpiMatchResultEnum.MATCH);
+					return Optional.of(Collections.singletonList(mpc));
+				}
 			}
 		}
 		return Optional.empty();
