@@ -37,11 +37,10 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
-public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask<BaseColumnCalculatorTask> {
+public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 
 	protected static final Logger ourLog = LoggerFactory.getLogger(BaseColumnCalculatorTask.class);
 	private int myBatchSize = 10000;
-	private Map<String, Function<MandatoryKeyMap<String, Object>, Object>> myCalculators = new HashMap<>();
 	private ThreadPoolExecutor myExecutor;
 
 	public void setBatchSize(int theBatchSize) {
@@ -189,12 +188,6 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask<BaseC
 			logInfo(ourLog, "Updated {} rows on {} in {}", theRows.size(), getTableName(), sw.toString());
 		};
 		return myExecutor.submit(task);
-	}
-
-	public BaseColumnCalculatorTask addCalculator(String theColumnName, Function<MandatoryKeyMap<String, Object>, Object> theConsumer) {
-		Validate.isTrue(myCalculators.containsKey(theColumnName) == false);
-		myCalculators.put(theColumnName, theConsumer);
-		return this;
 	}
 
 	private class MyRowCallbackHandler implements RowCallbackHandler {
