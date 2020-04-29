@@ -132,6 +132,23 @@ See [java-string-similarity](https://github.com/tdebatty/java-string-similarity)
 
 * **eidSystem**: The external EID system that the HAPI EMPI system should expect to see on incoming Patient resources. Must be a valid URI.
 
+# Enterprise Identifiers
+An Enterprise Identifier(EID) is a unique identifier that can be attached to Patients or Practitioners. Each implementation is expected to use exactly one EID system for incoming resources, 
+defined in the mentioned `empi-rules.json` file. If a Patient or Practitioner with a valid EID is added to the system, that EID will be copied over to the Person that was matched. In the case that 
+the incoming Patient or Practitioner had no EID assigned, an internal EID will be created for it. There are thus two classes of EID. Internal EIDs, created by HAPI-EMPI, and External EIDs, provided 
+by the install. 
+
+The following are rules about EID merging based on matches for new or modified Patient Data. 
+1. A Person will always have at most one Internal EID. 
+1. An Incoming Patient is permitted to have 0..* External EIDs of the same system. 
+1. If a Patient/Practitioner with no External EID is created, and has no matches, a Person will be created, and given an Internal EID. 
+1. If a Patient/Practitioner with no External EID is created, and matches an existing Patient/Practitioner, the EIDs will not be modified on the Person.
+1. If a Patient/Practitioner with an External EID is created, and has no matches, a Person will be created, and the Patient/Practitioner's External EIDs will be applied to it. 
+1. If a Patient/Practitioner with an External EID is created, and matches an existing Patient/Practitioner, there are two possibilities:
+    1. If the Person has >=1 External EIDs, and there is a match between the incoming Patient/Practitioner's EIDs and the Person's, the set of EIDs is unioned and applied to the Person.
+    1. If the Person has 0 External EIDs, the Patient/Practitioner's EIDs will be applied to the Person
+    
+    
 # HAPI EMPI Technical Details
 
 When EMPI is enabled, the HAPI FHIR JPA Server does the following things on startup:
